@@ -1,0 +1,319 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="../src/core.js"></script>
+    <script type="text/javascript" src="../src/math.js"></script>
+    <script type="text/javascript" src="../src/scene.js"></script>
+    <script type="text/javascript" src="../src/renderer.js"></script>
+    <script type="text/javascript" src="../src/shader.js"></script>
+    <script type="text/javascript">
+        var engine;
+        var meshRenderer;
+
+        var log = function (output) {
+            var element = document.getElementById("output");
+            element.innerHTML = element.innerHTML+output+"<br>";
+        };
+
+        var clearLog = function(){
+            var element = document.getElementById("output");
+            element.innerHTML = "";
+        }
+
+        function setMesh(meshFactoryFunc,subdivisions){
+            clearLog();
+            meshRenderer.mesh = meshFactoryFunc(engine,subdivisions);
+        }
+
+        function setMaterial(vertexShaderId, fragmentShaderId){
+            clearLog();
+            var vs = document.getElementById(vertexShaderId).value;
+            var fs = document.getElementById(fragmentShaderId).value;
+            var shader = new KICK.material.Shader(engine);
+            shader.initShader(vs,fs,log);
+            var missingAttributes = meshRenderer.mesh.verify(shader);
+            if (missingAttributes){
+                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                return;
+            }
+
+            meshRenderer.material = new KICK.material.Material({
+                name:"Some material",
+                shader:shader
+            });
+        }
+
+        function recalculateNormals(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateNormals();
+            mesh.updateData();
+        }
+
+        function recalculateTangents(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateTangents();
+            mesh.updateData();
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas');
+            var gameEngine = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0.5,1,1,1]
+            });
+            gameEngine.addComponent(camera);
+
+            var gameObject = engine.activeScene.createGameObject();
+            meshRenderer = new KICK.scene.MeshRenderer();
+            setMesh(KICK.scene.MeshFactory.createPlane);
+            setMaterial('vertexShaderUV','fragmentShader');
+            gameObject.addComponent(meshRenderer);
+        }
+
+        function refreshData(){
+            example.innerHTML = "";
+            YUI().use("datatable-base", function(Y) {
+                var mesh = meshRenderer.mesh,
+                        vertex = mesh.vertex,
+                        indices = mesh.indices,
+                        vertexRowLength = 1;
+                function showVertexAttributes(){
+                    function addData(dColumns,dColumnSize){
+                        var cols = ["Vertexid"],
+                                data = [],
+                                dt,
+                                i,
+                                j;
+                        for (j=0;j<dColumns.length;j++){
+                            for (i=0;i<dColumnSize[j];i++){
+                                var s = i==3?"W":String.fromCharCode("X".charCodeAt(0)+i);
+                                cols.push(dColumns[j]+" "+s);
+                            }
+                        }
+                        for (i=0;i<vertex.length/3;i++){
+                            var row = {
+                                "Vertexid":i
+                            };
+                            var columnIndex = 1;
+                            for (var c=1;c<=dColumnSize.length;c++){
+                                var length = dColumnSize[c-1];
+                                var bufferdata = mesh[dColumns[c-1]];
+                                for ( j=0;j<length;j++){
+                                    row[cols[columnIndex]] = bufferdata[i*length+j];
+                                    columnIndex++;
+                                }
+                            }
+                            data.push(row);
+                        }
+                        dt = new Y.DataTable.Base({
+                            columnset: cols,
+                            recordset: data,
+                            summary: "",
+                            caption: "Mesh data"
+                        }).render("#example");
+                    }
+
+                    var dataColumns = [];
+                    var dataColumnSize = [];
+                    function addDataRow(name,size){
+                        dataColumns.push(name);
+                        dataColumnSize.push(size);
+                        vertexRowLength += size;
+                    }
+                    if (mesh.vertex){
+                        addDataRow("vertex",3);
+                    }
+                    if (mesh.normal){
+                        addDataRow("normal",3);
+                    }
+                    if (mesh.uv1){
+                        addDataRow("uv1",2);
+                    }
+                    if (mesh.uv2){
+                        addDataRow("uv2",2);
+                    }
+                    if (mesh.tangent){
+                        addDataRow("tangent",4);
+                    }
+                    if (mesh.color){
+                        addDataRow("color",4);
+                    }
+                    addData(dataColumns,dataColumnSize);
+                }
+                function showInterleavedData(){
+                    
+                    var cols = ["Index"],
+                            data = [],
+                            i,j,
+                            iBean = mesh.createInterleavedData(),
+                            description = iBean.description,
+                            interleavedData = iBean.data;
+                    for (j=0;j<vertexRowLength-1;j++){
+                        cols.push("Data"+(j+1));
+                    }
+                    for (j=0;j<vertex.length/3;j++){
+                        var obj = {
+                            "Index":j
+                        };
+                        for (i=0;i<vertexRowLength-1;i++){
+                            obj["Data"+(i+1)] = interleavedData[j*(vertexRowLength-1)+i];
+                        }
+                        data.push(obj);
+                    }
+                    var dt = new Y.DataTable.Base({
+                            columnset: cols,
+                            recordset: data,
+                            summary: "",
+                            caption: "Mesh data "+JSON.stringify(description)
+                        }).render("#example");
+
+                }
+                function showVertexIndices(){
+
+                    var cols = ["Index","TriangleV1","TriangleV2","TriangleV3"],
+                            data = [],
+                            i,j;
+                    for (j=0;j<indices.length/3;j++){
+                        data.push({
+                            "Index":j,
+                            "TriangleV1" : indices[j*3+0],
+                            "TriangleV2" : indices[j*3+1],
+                            "TriangleV3" : indices[j*3+2]
+                        });
+                    }
+                    var dt = new Y.DataTable.Base({
+                            columnset: cols,
+                            recordset: data,
+                            summary: "",
+                            caption: "Mesh data"
+                        }).render("#example");
+
+                }
+
+                showVertexAttributes();
+                showInterleavedData();
+                showVertexIndices();
+
+            });
+        }
+    </script>
+</head>
+<body onload="initKick();">
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example shows how vertex attributes can be visualized.
+  <br>
+  <b>Mesh</b><br>
+  [<a href="#" onclick="setMesh(KICK.scene.MeshFactory.createPlane);">Plane</a>]
+  [<a href="#" onclick="setMesh(KICK.scene.MeshFactory.createTriangle);">Triangle</a>]
+  [<a href="#" onclick="setMesh(KICK.scene.MeshFactory.createCube,0.5);">Cube</a>]
+  [<a href="#" onclick="setMesh(KICK.scene.MeshFactory.createIcosphere,0);">Icosphere - 0</a>]
+  [<a href="#" onclick="setMesh(KICK.scene.MeshFactory.createIcosphere,1);">Icosphere - 1</a>]
+  [<a href="#" onclick="setMesh(KICK.scene.MeshFactory.createIcosphere,2);">Icosphere - 2</a>]
+  <br>
+  <h2>Shaders</h2>
+  [<a href="#" onclick="setMaterial('vertexShaderUV','fragmentShader');">UV1</a>]
+  [<a href="#" onclick="setMaterial('vertexShaderUV2','fragmentShader');">UV2</a>]
+  [<a href="#" onclick="setMaterial('vertexShaderNormal','fragmentShader');">Normal</a>]
+  [<a href="#" onclick="setMaterial('vertexShaderTangent','fragmentShader');">Tangent</a>]
+  [<a href="#" onclick="setMaterial('vertexShaderColor','fragmentShader');">Color</a>]
+  [<a href="#" onclick="setMaterial('vertexShaderBlack','fragmentShader');">Black</a>]
+  <br>
+  <h2>Recalculate</h2>
+  [<a href="#" onclick="recalculateNormals();">Normals</a>]
+  [<a href="#" onclick="recalculateTangents();">Tangents</a>]<br>
+  <h2>Output</h2>
+  <div id="output" style="color: red;">
+  </div>
+  <h2>Show data</h2>
+  [<a href="#" onclick="refreshData();">Refresh</a>]
+  <div id="example" class="yui3-skin-sam"></div>
+
+  <div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShaderUV">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    vColor = vec3(uv1.x,uv1.y,0);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="vertexShaderUV2">
+attribute vec3 vertex;
+attribute vec2 uv2;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    vColor = vec3(uv2.x,uv2.y,0);
+}
+  </textarea>
+
+  <textarea style="width:500px;height:150px;" id="vertexShaderNormal">
+attribute vec3 vertex;
+attribute vec3 normal;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    vColor = normal*0.5+vec3(.5,.5,.5);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="vertexShaderTangent">
+attribute vec3 vertex;
+attribute vec4 tangent;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    vColor = tangent.xyz*0.5+vec3(.5,.5,.5);
+}
+  </textarea><textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec4 color;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    vColor = color.xyz;
+}
+  </textarea>
+    <textarea style="width:500px;height:150px;" id="vertexShaderBlack">
+attribute vec3 vertex;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    vColor = vec3(0,0,0);
+}
+  </textarea>
+
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+</div>
+  <br/>
+</body>
+</html>

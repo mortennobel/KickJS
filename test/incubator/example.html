@@ -1,0 +1,53 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+    <script type="text/javascript" src="../../src/core.js"></script>
+    <script type="text/javascript" src="../../src/math.js"></script>
+    <script type="text/javascript" src="../../src/scene.js"></script>
+    <script type="text/javascript" src="../../src/renderer.js"></script>
+    <script type="text/javascript">
+        var engine;
+        function add() {
+            var gameObject = engine.activeScene.createGameObject();
+            gameObject.Add
+            
+        }
+
+        function debug() {
+            engine.activeScene.debug();
+        }
+
+        function remove() {
+            if (engine.activeScene.getNumberOfGameObjects()>0) {
+                var gameObject = engine.activeScene.getGameObject(0);
+                gameObject.destroy();
+            }
+        }
+
+        function time() {
+            console.log("Time "+engine.time.time+" Delta time: "+engine.time.deltaTime+" Frame count: "+engine.time.frameCount+" TimeSinceStart: "+engine.time.getTimeSinceStart()+" fps: "+engine.time.getAvarageFramesPerSecond());
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('lesson01-canvas');
+            var gameEngine = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0.5,1,1,1]
+            });
+            gameEngine.addComponent(camera);
+        }
+    </script>
+</head>
+<body onload="initKick();">
+  <canvas id="lesson01-canvas" style="border: none;" width="300" height="300"></canvas>
+
+  <a href="#" onclick="add();">Add</a>
+  <a href="#" onclick="remove();">Remove</a>
+  <a href="#" onclick="debug();">Debug</a>
+  <a href="#" onclick="time();">Time</a>
+  <br/>
+</body>
+</html>

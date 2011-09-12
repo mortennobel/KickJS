@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<body>
+<div style="width: 100px; height: 100px;background-color: #9acd32;border-color: gray; border-style: solid;" id="animated-element">
+    Hello world
+</div>
+<script type="text/javascript" src="../../src/core.js"></script>
+<script type="text/javascript">
+    var animatedElement = document.getElementById( "animated-element" ),
+          animationStartTime;
+
+    // Refresh the animation frame-make big border
+    function refreshAnimation(time)
+    {
+        animatedElement.style.borderWidth = ( (time - animationStartTime) /1000 /*let's make it slow*/) %10 /*up to 10px*/ + "px";
+        requestAnimFrame(refreshAnimation, animatedElement);
+    }
+
+    // initialize the animation - get the timer started.
+    function doAnimation(time)
+    {
+        animationStartTime = Date.now();
+        requestAnimFrame( refreshAnimation, animatedElement );
+    }
+
+    doAnimation(); // Run the animation!
+</script>
+</body>
+</html>

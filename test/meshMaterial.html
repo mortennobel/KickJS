@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script type="text/javascript" src="../src/core.js"></script>
+    <script type="text/javascript" src="../src/math.js"></script>
+    <script type="text/javascript" src="../src/scene.js"></script>
+    <script type="text/javascript" src="../src/renderer.js"></script>
+    <script type="text/javascript" src="../src/shader.js"></script>
+    <script type="text/javascript">
+        var engine;
+        var meshRenderer;
+
+        var materials = [];
+
+        var log = function (output) {
+            var element = document.getElementById("output");
+            element.innerHTML = element.innerHTML+output+"<br>";
+        };
+
+        var clearLog = function(){
+            var element = document.getElementById("output");
+            element.innerHTML = "";
+        }
+
+        function setMesh(meshFactoryFunc){
+            clearLog();
+            meshRenderer.mesh = meshFactoryFunc(engine);
+        }
+
+        function initMaterials(vertexShaderId, fragmentShaderId){
+            clearLog();
+            var vs = document.getElementById(vertexShaderId).value;
+            var fs = document.getElementById(fragmentShaderId).value;
+            var shader = new KICK.material.Shader(engine);
+            shader.initShader(vs,fs,log);
+            var missingAttributes = meshRenderer.mesh.verify(shader);
+            if (missingAttributes){
+                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                return;
+            }
+            for (var i=0;i<3;i++){
+                var material = new KICK.material.Material({
+                    name:"Some material "+i,
+                    shader:shader,
+                    uniforms: {
+                        uColor: {
+                            value: [i==0?1:0,i==1?1:0,i==2?1:0],
+                            type: KICK.core.Constants.FLOAT_VEC3
+                        }
+                    }
+                });
+                materials.push(material);
+            }
+            meshRenderer.material = materials[0];
+        }
+
+        function recalculateNormals(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateNormals();
+            mesh.updateData();
+        }
+
+        function recalculateTangents(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateTangents();
+            mesh.updateData();
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas');
+            var gameEngine = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0.5,1,1,1]
+            });
+            gameEngine.addComponent(camera);
+
+            var gameObject = engine.activeScene.createGameObject();
+            meshRenderer = new KICK.scene.MeshRenderer();
+            setMesh(KICK.scene.MeshFactory.createPlane);
+            initMaterials('vertexShader','fragmentShader');
+            gameObject.addComponent(meshRenderer);
+        }
+
+        function setMaterial(index){
+            meshRenderer.material = materials[index];
+        }
+    </script>
+</head>
+<body onload="initKick();">
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example shows how vertex attributes can be visualized.
+  <br>
+  <b>Material</b><br>
+  [<a href="#" onclick="setMaterial(0);return false;">Material 1</a>]
+  [<a href="#" onclick="setMaterial(1);return false;">Material 2</a>]
+  [<a href="#" onclick="setMaterial(2);return false;">Material 3</a>]
+  <br>
+  <h2>Output</h2>
+  <div id="output" style="color: red;">
+  </div>
+  <h2>Show data</h2>
+  <div style="display:none;">
+    <textarea style="width:500px;height:150px;" id="vertexShader">
+attribute vec3 vertex;
+
+uniform vec3 uColor;
+varying vec3 color;
+
+void main(void) {
+    gl_Position = vec4(vertex, 1.0);
+    color = uColor;
+}
+  </textarea>
+
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 color;
+void main(void)
+{
+    gl_FragColor = vec4(color.x, color.y, color.z, 1.0);
+}
+  </textarea>
+</div>
+  <br/>
+</body>
+</html>
