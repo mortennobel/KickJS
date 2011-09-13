@@ -7,7 +7,7 @@ a:link { color: #003399; }
 a:visited { color: #003399;}
 
 #doc3 #hd { margin-bottom:1em; position: relative; zoom: 1; }
-#doc3 #hd h1 { color: #545454; font-size: 170%; padding: 0px 0 8px 150px; background: url(yui.png) 15px 9px no-repeat; height: 60px; font-weight: bold; }
+#doc3 #hd h1 { color: #545454; font-size: 170%; padding: 10px 0 0px 85px; background: url(KickstartEngineLogo.png) 15px 9px no-repeat; height: 75px; font-weight: bold; }
 #doc3 #hd h1 a { position: relative; top: 14px; }
 #doc3 #hd a { text-decoration: none; color: black; }
 #doc3 #hd h3 {
