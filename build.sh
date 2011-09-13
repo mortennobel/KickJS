@@ -5,11 +5,10 @@ yuidoc_home=$1
 #Location of project
 project=$2
 
-#Location of YUICompressor
-yuiCompress=$3
-
 #Location of Google Clojure Compiler
-googleClojure=$4
+googleClojure=$3
+
+version=0_1_0
 
 # The location of the files to parse.  Parses subdirectories, but will fail if
 # there are duplicate file names in these directories.  You can specify multiple
@@ -29,7 +28,7 @@ generator_out=$project/API/generator
 template=$project/build-asset/doc-template
 
 # The version of your project to display within the documentation.
-version=0.0.1
+version=0.1.0
 
 # The version of YUI the project is using.  This effects the output for
 # YUI configuration attributes.  This should start with '2' or '3'.
@@ -37,6 +36,11 @@ yuiversion=3
 
 projecturl=http://www.kickstartengine.com/
 projectname="Kickstart Engine"
+
+#####
+# Clean up
+rm -rf $parser_out
+rm -rf $generator_out
 
 ##############################################################################
 # add -s to the end of the line to show items marked private
@@ -46,9 +50,9 @@ $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $templ
 ##############################################################################
 # create minified versions of js files
 mkdir $project/build
-echo java -jar $yuiCompress -v --type js -o $project/build/kick-min.js $project/src/*.js
-java -jar $yuiCompress -v --type js -o $project/build/kick-min.js $project/src/*.js
 
-echo java -jar $googleClojure --js_output_file "$project/build/kick-clojure-min.js" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --language_in ECMASCRIPT5_STRICT
-java -jar $googleClojure --js_output_file "$project/build/kick-clojure-min.js" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --language_in ECMASCRIPT5_STRICT
+echo java -jar $googleClojure --js_output_file "$project/build/kick-clojure-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --language_in ECMASCRIPT5_STRICT
+java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --language_in ECMASCRIPT5_STRICT
 
+cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/kick-min-$version.js"
+rm "$project/build/kick-min.js.tmp"

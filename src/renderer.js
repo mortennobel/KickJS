@@ -47,7 +47,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     var renderer = KICK.namespace("KICK.renderer"),
         core = KICK.namespace("KICK.core"),
-        scene = KICK.namespace("KICK.scene");
+        scene = KICK.namespace("KICK.scene"),
+        math = KICK.namespace("KICK.math"),
+        mat4 = math.mat4;
 
     /**
      * Defines interface for render classes.
@@ -99,6 +101,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     renderer.ForwardRenderer = function () {
         var renderableComponents = [],
             cameras = [],
+            projectionMatrix = mat4.create(),
+            modelViewMatrix = mat4.create(),
+            modelViewProjectionMatrix = mat4.create(),
             gl;
 
         this.init = function (glContext) {
@@ -106,11 +111,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         }
 
         this.render = function () {
-            var i,j;
+            var i,j,
+                renderable;
             for (i=cameras.length-1; i >= 0; i--) {
-                cameras[i].setupCamera();
+                cameras[i].setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
                 for (j=renderableComponents.length-1; j >= 0; j--) {
-                    renderableComponents[j].render();
+                    renderable = renderableComponents[j];
+//                    if (renderable instanceof KICK.scene.MeshRenderer){
+
+//                    } else {
+                        renderable.render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+//                    }
                 }
             }
             gl.flush();
@@ -124,9 +135,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
                 if (typeof(component.render) === "function") {
                     renderableComponents.push(component);
-                }
-                if (typeof(component.initGL) === "function") {
-                    component.initGL(gl);
                 }
             }
         };

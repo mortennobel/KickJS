@@ -44,7 +44,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 (function () {
     "use strict"; // force strict ECMAScript 5
-    var material = KICK.namespace("KICK.material");
+    var material = KICK.namespace("KICK.material"),
+        math = KICK.namespace("KICK.math");
 
     /**
      * Renders a Mesh
@@ -311,6 +312,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.verifyUniforms();
     };
 
+    /**
+     * The method replaces any invalid uniform (Array) with a wrapped one (Float32Array or Int32Array)
+     * @method verifyUniforms
+     */
     material.Material.prototype.verifyUniforms = function(){
         var uniform,
             uniforms = this.uniforms,
@@ -328,8 +333,39 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         }
     };
 
-    material.Material.prototype.bindUniform = function(uniforms){
-        var shader = this.shader,
+    /**
+     * Binds the uniforms to the current shader.
+     * The uniforms is expected to be in a valid format
+     * @method bindMatrices
+     * @param {Object}
+     */
+    material.Shader.prototype.bindMatrices = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform){
+        var mv = this.lookupUniform["mv"],
+            proj = this.lookupUniform["proj"],
+            mvProj = this.lookupUniform["mvProj"],
+            gl = this.gl,
+            globalTransform;
+        if (proj){
+            gl.uniformMatrix4fv(proj.location,false,projectionMatrix);
+        }
+        if (mv){
+            globalTransform = transform.getGlobalMatrix();
+            gl.uniformMatrix4fv(mv.location,false,math.mat4.multiply(modelViewMatrix,globalTransform,math.mat4.create()));
+        }
+        if (mvProj){
+            globalTransform = globalTransform || transform.getGlobalMatrix();
+            gl.uniformMatrix4fv(mvProj.location,false,math.mat4.multiply(modelViewProjectionMatrix,globalTransform,math.mat4.create()));
+        }
+    };
+
+    /**
+     * Binds the uniforms to the current shader.
+     * The uniforms is expected to be in a valid format
+     * @method bindUniform
+     * @param {Object}
+     */
+    material.Shader.prototype.bindUniform = function(uniforms){
+        var shader = this,
             gl = shader.gl,
             uniformName,
             shaderUniform,
@@ -346,13 +382,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gl.uniform1fv(location,value);
                 break;
                 case 35674: // FLOAT_MAT2
-                    gl.uniformMatrix2fv(location,value);
+                    gl.uniformMatrix2fv(location,false,value);
                 break;
                 case 35675: // FLOAT_MAT3
-                    gl.uniformMatrix3fv(location,value);
+                    gl.uniformMatrix3fv(location,false,value);
                 break;
                 case 35676: // FLOAT_MAT4
-                    gl.uniformMatrix4fv(location,value);
+                    gl.uniformMatrix4fv(location,false,value);
                 break;
                 case 35664: // FLOAT_VEC2
                     gl.uniform2fv(location,value);

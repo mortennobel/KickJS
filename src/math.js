@@ -26,6 +26,7 @@
  * glMatrix.js - High performance matrix and vector operations for WebGL
  * version 0.9.6
  *
+ *
  * Copyright (c) 2011 Brandon Jones
  *
  * This software is provided 'as-is', without any express or implied
@@ -116,6 +117,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * vec3 - 3 Dimensional Vector
+     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class vec3
      * @namespace KICK.math
      */
@@ -450,6 +452,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * vec4 - 4 Dimensional Vector
      * Note: To perform vec3 functions on vec4, simply call the vec3 functions
+     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class vec4
      * @namespace KICK.math
      */
@@ -653,6 +656,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * mat3 - 3x3 Matrix
+     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class mat3
      * @namespace KICK.math
      */
@@ -803,6 +807,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * mat4 - 4x4 Matrix
+     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class mat4
      * @namespace KICK.math
      */
@@ -1664,6 +1669,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * quat4 - Quaternions
+     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class quat4
      * @namespace KICK.math
      */

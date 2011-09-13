@@ -77,7 +77,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @type KICK.core.Engine
          * @public
          */
-        Object.defineProperty(this, "engine ", {
+        Object.defineProperty(this, "engine", {
             value:scene.engine
         });
 
@@ -158,11 +158,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
 
     /**
-     * @method initGL
-     * @param {WebGL-Context} gl
-     */
-
-    /**
      * Abstract method called when a component is removed from scene. May be undefined.
      * @method deactivated
      */
@@ -171,6 +166,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Abstract method called every rendering. May be undefined.
      * @method render
+     * @param (KICK.math.mat4) projectionMatrix
+     * @param {KICK.math.mat4} modelViewMatrix
+     * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
      */
 
     /**
@@ -200,10 +198,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.scene.GameObject} gameObject
      */
     scene.Transform = function (gameObject) {
-        var globalMatrix,
-            localMatrix,
-            localMatrixInverse,
-            globalMatrixInverse;
+        var globalMatrix = null,
+            localMatrix = null,
+            localMatrixInverse = null,
+            globalMatrixInverse = null,
+            thisObj = this;
 
         this.gameObject = gameObject;
         /**
@@ -240,7 +239,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @type KICK.scene.Transform
          * @public
          */
-        this.parentTransform = undefined;
+        this.parentTransform = null;
 
         /**
          * @method calculateGlobalMatrix
@@ -248,10 +247,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         var calculateGlobalMatrix = function () {
             globalMatrix = mat4.create();
-            mat4.set(this.getLocalMatrix(), globalMatrix);
+            mat4.set(thisObj.getLocalMatrix(), globalMatrix);
 
-            var transformIterator = this.parentTransform;
-            while (typeof(transformIterator) !== "undefined") {
+            var transformIterator = thisObj.parentTransform;
+            while (transformIterator !== null) {
                 mat4.multiply(globalMatrix, transformIterator.getLocalMatrix(),globalMatrix);
                 transformIterator  = transformIterator.parentTransform;
             }
@@ -263,9 +262,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         var calculateGlobalMatrixInverse = function () {
             globalMatrixInverse = mat4.create();
-            mat4.set(this.getLocalMatrixInverse(), globalMatrixInverse);
-            var transformIterator = this.parentTransform;
-            while (typeof(transformIterator) !== "undefined") {
+            mat4.set(thisObj.getLocalMatrixInverse(), globalMatrixInverse);
+            var transformIterator = thisObj.parentTransform;
+            while (transformIterator !== null) {
                 mat4.multiply(globalMatrixInverse,transformIterator.getLocalMatrixInverse(),globalMatrixInverse);
                 transformIterator  = transformIterator.parentTransform;
             }
@@ -289,7 +288,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {mat4} local transformation
          */
         this.getLocalMatrix = function () {
-            if (typeof(localMatrix) === "undefined") {
+            if (localMatrix === null) {
                 localMatrix = mat4.create();
                 mat4.identity(localMatrix);
                 mat4.rotateX(localMatrix, this.localRotation[0]*degreeToRadian);
@@ -307,7 +306,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {mat4} inverse of local transformation
          */
         this.getLocalMatrixInverse = function () {
-            if (typeof(localMatrixInverse) === "undefined") {
+            if (localMatrixInverse === null) {
                 localMatrixInverse = mat4.create();
                 mat4.identity(localMatrixInverse);
                 if (this.localRotation[0] !== 0.0) {
@@ -330,7 +329,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {mat4} global transform
          */
         this.getGlobalMatrix = function () {
-            if (typeof(globalMatrix) === "undefined") {
+            if (globalMatrix === null) {
                 calculateGlobalMatrix();
             }
             return globalMatrix;
@@ -341,7 +340,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {mat4} inverse global transform
          */
         this.getGlobalMatrixInverse = function () {
-            if (typeof(globalMatrixInverse) == "undefined") {
+            if (globalMatrixInverse === null) {
                 calculateGlobalMatrixInverse();
             }
             return globalMatrixInverse;
@@ -364,10 +363,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method markUpdated
          */
         this.markUpdated = function () {
-            globalMatrix = undefined;
-            localMatrix = undefined;
-            localMatrixInverse = undefined;
-            globalMatrixInverse = undefined;
+            globalMatrix = null;
+            localMatrix = null;
+            localMatrixInverse = null;
+            globalMatrixInverse = null;
 
             for (var i=this.children.length-1;i>=0;i--) {
                 this.children[i].markUpdated();
@@ -607,57 +606,64 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.Camera = function (config) {
         var gl,
-            thisObj = this;
-        var isNumber = function (o) {
-            return typeof (o) === "number";
-        };
+            thisObj = this,
+            transform,
+            isNumber = function (o) {
+                return typeof (o) === "number";
+            },
+            isBoolean = function(o){
+                return typeof (o) === "boolean";
+            },
+            setupViewport = function () {
+                gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+            },
+            setupClear = function () {
+                if (!thisObj._currentClearFlags) {
+                    // I use '+' instead of '|' since it tends to perform better in JS
+                    // and it should give the same result when the bit-fields are different (power of two)
+                    thisObj._currentClearFlags = (thisObj.clearFlagColor ? gl.COLOR_BUFFER_BIT : 0) + (thisObj.clearFlagDepth ? gl.DEPTH_BUFFER_BIT : 0);
+                }
+                gl.clear(thisObj._currentClearFlags);
+            },
+            setupClearColor = function () {
+                if (gl.currentClearColor !== thisObj.clearColor) {
+                    gl.currentClearColor = thisObj.clearColor;
+                    var color = thisObj.clearColor;
+                    gl.clearColor(color[0], color[1], color[2], color[3]);
+                }
+            };
 
-        this.initGL = function (glContext) {
-            gl = glContext;
-        }
-
-        var setupViewport = function () {
-            gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        }
-
-        var setupClear = function () {
-            if (!thisObj._currentClearFlags) {
-                // I use '+' instead of '|' since it tends to perform better in JS
-                // and it should give the same result when the bit-fields are different (power of two)
-                thisObj._currentClearFlags = (thisObj.clearFlagColor ? gl.COLOR_BUFFER_BIT : 0) + (thisObj.clearFlagDepth ? gl.DEPTH_BUFFER_BIT : 0);
-            }
-            gl.clear(thisObj._currentClearFlags);
-        };
-
-        var setupClearColor = function () {
-            if (gl.currentClearColor !== thisObj.clearColor) {
-                gl.currentClearColor = thisObj.clearColor;
-                var color = thisObj.clearColor;
-                gl.clearColor(color[0], color[1], color[2], color[3]);
-            }
+        this.activated = function(){
+            var gameObject = this.gameObject;
+            transform = gameObject.transform;
+            gl = gameObject.engine.gl;
         };
 
         /**
          * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
          * @method setupCamera
-         * @param {WebGLContext} gl WebGL context
+         * @param {KICK.math.mat4} projectionMatrix Projection of the camera
+         * @param {KICK.math.mat4} modelViewMatrix Modelview of the camera (the inverse global transform matrix of the camera)
+         * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
          */
-        this.setupCamera = function () {
+        this.setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
             setupViewport();
             setupClearColor();
             setupClear();
 
             if (this.cameraTypePerspective) {
                 mat4.perspective(this.fieldOfView, gl.viewportWidth / gl.viewportHeight,
-                    this.near, this.far, gl.projectionMatrix);
+                    this.near, this.far, projectionMatrix);
             } else {
                 mat4.ortho(this.left, this.right, this.bottom, this.top,
-                    this.near, this.far, gl.projectionMatrix);
+                    this.near, this.far, projectionMatrix);
             }
-            /*
-        var globalMatrixInv = this.gameObject.transform.getGlobalMatrixInverse();
-        mat4.set(globalMatrixInv, gl.modelViewMatrix);
-        */
+
+            // todo - this allocates a new mat4 - remove this
+            var globalMatrixInv = transform.getGlobalMatrixInverse();
+            mat4.set(globalMatrixInv, modelViewMatrix);
+
+            mat4.multiply(modelViewMatrix,projectionMatrix,modelViewProjectionMatrix);
         };
 
         /**
@@ -683,7 +689,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @property cameraTypePerspective
          * @type Boolean
          */
-        this.cameraTypePerspective = config.cameraType ? config.cameraType : true;
+        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraType : true;
         /**
          * Only used when orthogonal camera type (!cameraTypePerspective)
          * @property left
@@ -770,25 +776,49 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Renders a Mesh
+     * Renders a Mesh.
+     * To create custom renderable objects you should not inherit from this class, but simple create a component with a
+     * render() method.
      * @class MeshRenderer
      * @namespace KICK.scene
      * @extends KICK.scene.Component
+     * @final
      */
     scene.MeshRenderer = function () {
+        var transform;
+
+        this.activated = function(){
+            transform = this.gameObject.transform;
+        };
+        
         /**
          * @property shader
          * @type KICK.material.Material
          */
         this.material = undefined;
-        this.render = function () {
+
+        /**
+         * This method may not be called (the renderer could make the same calls)
+         * @method render
+         * @param (KICK.math.mat4) projectionMatrix
+         * @param {KICK.math.mat4} modelViewMatrix
+         * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
+         */
+        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
             var mesh = this.mesh,
                 material = this.material,
-                shader = material.shader;
+                shader = material.shader,
+                globalTransform = transform.getGlobalMatrix ( );
             mesh.bind(shader);
-            material.bindUniform(material.uniforms);
+            shader.bindUniform(material.uniforms);
+            shader.bindMatrices(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform);
             mesh.render();
         };
+
+        /**
+         * @property mesh
+         * @type KICK.scene.Mesh
+         */
         this.mesh = undefined;
     };
 
@@ -805,7 +835,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             vertexAttributeNames = [],
             buffers = [],
             description,
-            vertexAttrLength;
+            vertexAttrLength,
+            matrixTemp = mat4.create();
         if (!config) {
             config = {
                 name:"Mesh"
