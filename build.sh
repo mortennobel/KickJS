@@ -51,8 +51,8 @@ $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $templ
 # create minified versions of js files
 mkdir $project/build
 
-echo java -jar $googleClojure --js_output_file "$project/build/kick-clojure-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --language_in ECMASCRIPT5_STRICT
-java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --language_in ECMASCRIPT5_STRICT
+echo java -jar $googleClojure --js_output_file "$project/build/kick-clojure-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --language_in ECMASCRIPT5_STRICT
+java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --language_in ECMASCRIPT5_STRICT
 
 cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/kick-min-$version.js"
 rm "$project/build/kick-min.js.tmp"
