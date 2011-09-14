@@ -213,7 +213,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 globalMatrixInverse = null;
 
                 for (var i=thisObj.children.length-1;i>=0;i--) {
-                    thisObj.children[i].markUpdated();
+                    thisObj.children[i]._markUpdated();
                 }
             };
 
@@ -224,7 +224,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method markUpdated
          * @private
          */
-        this.markUpdated = markUpdated;
+        this._markUpdated = markUpdated;
 
         // inherit description from GameObject
         Object.defineProperty(this,"gameObject",{
