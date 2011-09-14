@@ -67,11 +67,12 @@
         function addRotatorComponent(gameObject){
             var time = engine.time,
                     transform = gameObject.transform,
-                    rotationSpeed = 0.05;
+                    rotationSpeed = 0.05,
+                    rotation = transform.localRotation;
             gameObject.addComponent({
                 update: function(){
-                    transform.localRotation[1] += time.deltaTime*rotationSpeed;
-                    transform.markUpdated();
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotation = rotation;
                 }
             });
         }

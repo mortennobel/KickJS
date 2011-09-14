@@ -200,32 +200,83 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     scene.Transform = function (gameObject) {
         var globalMatrix = null,
             localMatrix = null,
+            localTranslation = vec3.create([0,0,0]),
+            localRotation = vec3.create([0,0,0]),
+            localScaling = vec3.create([1,1,1]),
             localMatrixInverse = null,
             globalMatrixInverse = null,
-            thisObj = this;
+            thisObj = this,
+            markUpdated = function () {
+                globalMatrix = null;
+                localMatrix = null;
+                localMatrixInverse = null;
+                globalMatrixInverse = null;
 
-        this.gameObject = gameObject;
+                for (var i=thisObj.children.length-1;i>=0;i--) {
+                    thisObj.children[i].markUpdated();
+                }
+            };
+
         /**
-         * Local translation
+         * Mark the transform updated.
+         * This will mark the transform updated (meaning the local transform must be recomputed based on
+         * translation, rotation, scale)
+         * @method markUpdated
+         * @private
+         */
+        this.markUpdated = markUpdated;
+
+        // inherit description from GameObject
+        Object.defineProperty(this,"gameObject",{
+            value: gameObject
+        });
+
+        /**
+         * Local translation. 
          * @property localTranslation
          * @type KICK.math.vec3
          * @public
          */
-        this.localTranslation = vec3.create([0,0,0]);
+        Object.defineProperty(this,"localTranslation",{
+            get: function(){
+                return vec3.create(localTranslation);
+            },
+            set: function(newValue){
+                vec3.set(newValue,localTranslation);
+                markUpdated();
+            }
+        });
         /**
-         * Local rotation in euler angles
+         * Local rotation in euler angles.
          * @property localRotation
          * @type KICK.math.vec3
          * @public
          */
-        this.localRotation = vec3.create([0,0,0]);
+        Object.defineProperty(this,"localRotation",{
+            get: function(){
+                return vec3.create(localRotation);
+            },
+            set: function(newValue){
+                vec3.set(newValue,localRotation);
+                markUpdated();
+            }
+        });
         /**
          * Local scale
          * @property localScaling
          * @type KICK.math.vec3
          * @public
          */
-        this.localScaling = vec3.create([1,1,1]);
+        Object.defineProperty(this,"localScaling",{
+            get: function(){
+                return vec3.create(localScaling);
+            },
+            set: function(newValue){
+                vec3.set(newValue,localScaling);
+                markUpdated();
+            }
+        });
+
         /**
          * Array of children
          * @property children
@@ -356,21 +407,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             // remove transforms
             globalRotationMatrix[12] = globalRotationMatrix[13] = globalRotationMatrix[14] = 0;
             return globalRotationMatrix;
-        };
-
-        /**
-         * This method must be called after the transform has been updated
-         * @method markUpdated
-         */
-        this.markUpdated = function () {
-            globalMatrix = null;
-            localMatrix = null;
-            localMatrixInverse = null;
-            globalMatrixInverse = null;
-
-            for (var i=this.children.length-1;i>=0;i--) {
-                this.children[i].markUpdated();
-            }
         };
     };
 
