@@ -64,19 +64,49 @@
             mesh.updateData();
         }
 
+        function addRotatorComponent(gameObject){
+            var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = 0.001,
+                    translation = transform.localTranslation,
+                    rotVec = transform.localRotation,
+                    radius = 5,
+                    radianToDegree = KICK.math.Mathf.RADIAN_TO_DEGREE,
+                    res = document.getElementById("res");
+            gameObject.addComponent({
+                update: function(){
+                    var timeTotal = time.time,
+                            rot = timeTotal*rotationSpeed;
+                    translation[0] = Math.sin(rot)*radius;
+                    translation[1] = Math.sin(rot*3);
+                    translation[2] = Math.cos(rot)*radius;
+                    rotVec[1] = rot*radianToDegree;
+                    transform.localTranslation = translation;
+
+                    //new Date().getMilliseconds();
+                    transform.localRotation = rotVec;
+                    res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
+                }
+            });
+        }
+
         function initKick() {
             engine = new KICK.core.Engine('canvas');
-            var gameEngine = engine.activeScene.createGameObject();
+            var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
-                clearColor: [0.5,1,1,1]
+                clearColor: [0,0,0,1],
+                fieldOfView:60
             });
-            gameEngine.addComponent(camera);
+            cameraObject.addComponent(camera);
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
             setMesh(KICK.scene.MeshFactory.createCube, 0.5);
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
+
+            addRotatorComponent(cameraObject);
+
         }
 
     </script>
@@ -91,6 +121,9 @@
   </div>
   <h2>Show data</h2>
   [<a href="#" onclick="refreshData();">Refresh</a>]
+  <textarea style="width: 500px;height:100px" id="res">
+
+  </textarea>
   <div id="example" class="yui3-skin-sam"></div>
 
   <div style="display:none;">
@@ -98,10 +131,12 @@
 attribute vec3 vertex;
 attribute vec4 color;
 
+uniform mat4 mvProj;
+
 varying vec3 vColor;
 
 void main(void) {
-    gl_Position = vec4(vertex, 1.0);
+    gl_Position = mvProj * vec4(vertex, 1.0);
     vColor = color.xyz;
 }
   </textarea>

@@ -65,86 +65,101 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             canvas = document.getElementById(id),
             webGlContextNames = ["experimental-webgl","webgl"],
             thisObj = this,
-            activeRenderer;
+            activeRenderer,
+            lastTime = new Date().getTime(),
+            deltaTime = 0,
+            timeObj = new core.Time(),
+            timeSinceStart = 0,
+            frameCount = 0,
+            activeScene = new scene.Scene(this);
         /**
          * @property running
          * @type Boolean
          */
         this.running = true;
-        /**
-         * The WebGL context (readonly)
-         * @property gl
-         * @type WebGLContext
-         */
-        Object.defineProperty(this, "gl", {
-            get: function () {return gl;}
-        });
-        /**
-         * The canvas element (readonly)
-         * @property canvas
-         * @type HTML-Element
-         */
-        Object.defineProperty(this, "canvas", {
-            value: canvas
-        });
-        /**
-         * @property activeScene
-         * @type KICK.scene.Scene
-         */
-        this.activeScene = new scene.Scene(this);
-        /**
-         * The renderer
-         * @property renderer
-         * @type KICK.renderer.Renderer
-         */
-        Object.defineProperty(this, "renderer", {
-            get: function () {
-                return activeRenderer;
+
+        Object.defineProperties(this,{
+            /**
+             * The WebGL context (readonly)
+             * @property gl
+             * @type WebGLContext
+             */
+            gl: {
+                get: function () {return gl;}
             },
-            set: function (val) {
-                if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
-                    this.activeScene.removeComponentListener(activeRenderer);
+            /**
+             * The canvas element (readonly)
+             * @property canvas
+             * @type HTML-Element
+             */
+            canvas:{
+                value: canvas
+            },
+            /**
+             * @property activeScene
+             * @type KICK.scene.Scene
+             */
+            activeScene:{
+                get: function(){ return activeScene},
+                set: function(value){activeScene = value;}
+            },
+            /**
+             * The renderer
+             * @property renderer
+             * @type KICK.renderer.Renderer
+             */
+            renderer:{
+                get: function () {
+                    return activeRenderer;
+                },
+                set: function (val) {
+                    if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
+                        this.activeScene.removeComponentListener(activeRenderer);
+                    }
+                    activeRenderer = val;
+                    if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
+                        this.activeScene.addComponentListener(activeRenderer);
+                    }
+                    activeRenderer.init(gl);
                 }
-                activeRenderer = val;
-                if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
-                    this.activeScene.addComponentListener(activeRenderer);
-                }
-                activeRenderer.init(gl);
+            },
+            /**
+             * Time object of the engine. Is updated every frame
+             * @property time
+             * @type KICK.core.Time
+             */
+            time:{
+                value:timeObj
+            },
+            /**
+             * Configuration of the engine
+             * @property config
+             * @type KICK.core.Config
+             */
+            config: {
+                value: new core.Config(config || {})
             }
         });
-
+        
         /**
-         * Time object of the engine. Is updated every frame
-         * @property time
-         * @type KICK.core.Time
+         * @method _gameLoop
+         * @param {Number} time current time in millis
+         * @private
          */
-        Object.defineProperty(this, "time", {
-            value: new core.Time()
-        });
-
-        /**
-         * Configuration of the engine
-         * @property config
-         * @type KICK.core.Config
-         */
-        Object.defineProperty(this, "config", {
-            value: new core.Config(config || {})
-        });
-
-        /**
-         * @method gameLoop
-         * @param time
-         */
-        this.gameLoop = function (time) {
-            this.time.deltaTime = time-this.time.time;
-            this.time.time = time;
-            this.time.frameCount += 1;
+        this._gameLoop = function (time) {
             this.activeScene.update();
             this.renderer.render();
+            deltaTime = time-lastTime;
+
+            lastTime = time;
+
+            timeSinceStart += deltaTime;
+
+            frameCount += 1;
 
             if (this.running) {
                 var wrapperFunctionToMethodOnObject = function (time_) {
-                    thisObj.gameLoop(time_);
+                    thisObj._gameLoop(time_);
                 };
                 requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
             }
@@ -189,7 +204,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             gl.viewportHeight = canvas.height;
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            thisObj.gameLoop(thisObj.startTime);
+            Object.defineProperties(timeObj,{
+                time:{
+                    get: function(){return timeSinceStart;}
+                },
+                deltaTime:{
+                    get: function(){return deltaTime;}
+                },
+                frameCount:{
+                    get: function(){return frameCount;}
+                },
+                avarageFramesPerSecond:{
+                    get: function(){
+                        return frameCount/(timeSinceStart*0.001);
+                    }
+                }
+            });
+            Object.freeze(timeObj);
+
+            timeSinceStart = 0;
+            frameCount = 0;
+
+            thisObj._gameLoop(lastTime);
         }());
     };
 
@@ -210,52 +246,31 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * _
+     * A global timer object
      * @class Time
      * @namespace KICK.core
-     * @constructor
      */
     core.Time = function(){
-        return {
-            /**
-             * @property startTime
-             * @type {Date}
-             */
-            startTime: Date.now(),
-            /**
-             * Current time
-             * @property time
-             * @type {Date}
-             */
-            time: this.startTime,
-            /**
-             * Millis between this frame and last frame
-             * @property deltaTime
-             * @type {Number}
-             */
-            deltaTime: 0,
-            /**
-             * Number of frames since start
-             * @property frameCount
-             * @type {Number}
-             */
-            frameCount: 0,
-            /**
-             * @method getTimeSinceStart
-             * @return {Number} time since start
-             */
-
-            getTimeSinceStart: function () {
-                return this.time-this.startTime;
-            },
-            /**
-             * @method getAvarageFramesPerSecond
-             * @return fps since start
-             */
-            getAvarageFramesPerSecond: function () {
-                return this.frameCount/(this.getTimeSinceStart()*0.001);
-            }
-        };
+        /**
+         * Time since start in millis
+         * @property time
+         * @type Number
+         */
+        /**
+         * Millis between this frame and last frame
+         * @property deltaTime
+         * @type Number
+         */
+        /**
+         * Number of frames since start
+         * @property frameCount
+         * @type Number
+         */
+        /**
+         * fps since start
+         * @property avarageFramesPerSecond
+         * @type Number
+         */
     };
 
     /**

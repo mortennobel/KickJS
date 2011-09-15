@@ -198,33 +198,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.scene.GameObject} gameObject
      */
     scene.Transform = function (gameObject) {
-        var globalMatrix = null,
-            localMatrix = null,
+        var localMatrix = mat4.identity(mat4.create()),
+            globalMatrix = mat4.identity(mat4.create()),
+            localMatrixInverse = mat4.identity(mat4.create()),
+            globalMatrixInverse = mat4.identity(mat4.create()),
             localTranslation = vec3.create([0,0,0]),
             localRotation = vec3.create([0,0,0]),
-            localScaling = vec3.create([1,1,1]),
-            localMatrixInverse = null,
-            globalMatrixInverse = null,
+            localScale = vec3.create([1,1,1]),
+            // the dirty parameter let the
+            LOCAL = 0,
+            LOCAL_INV = 1,
+            GLOBAL = 2,
+            GLOBAL_INV = 3,
+            dirty = new Int8Array(4), // local,localInverse,global,globalInverse
+            children = [],
+            parentTransform = null,
             thisObj = this,
-            markUpdated = function () {
-                globalMatrix = null;
-                localMatrix = null;
-                localMatrixInverse = null;
-                globalMatrixInverse = null;
-
-                for (var i=thisObj.children.length-1;i>=0;i--) {
-                    thisObj.children[i]._markUpdated();
+            markGlobalDirty = function () {
+                var i;
+                dirty[GLOBAL] = 1;
+                dirty[GLOBAL_INV] = 1;
+                for (i=children.length-1;i>=0;i--) {
+                    children[i]._markUpdated();
                 }
+            },
+            markLocalDirty = function(){
+                dirty[LOCAL] = 1;
+                dirty[LOCAL_INV] = 1;
+                markGlobalDirty();
             };
 
-        /**
-         * Mark the transform updated.
-         * This will mark the transform updated (meaning the local transform must be recomputed based on
-         * translation, rotation, scale)
-         * @method markUpdated
-         * @private
-         */
-        this._markUpdated = markUpdated;
 
         // inherit description from GameObject
         Object.defineProperty(this,"gameObject",{
@@ -243,7 +246,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             set: function(newValue){
                 vec3.set(newValue,localTranslation);
-                markUpdated();
+                markLocalDirty();
             }
         });
         /**
@@ -258,68 +261,45 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             set: function(newValue){
                 vec3.set(newValue,localRotation);
-                markUpdated();
+                markLocalDirty();
             }
         });
         /**
          * Local scale
-         * @property localScaling
+         * @property localScale
          * @type KICK.math.vec3
          * @public
          */
-        Object.defineProperty(this,"localScaling",{
+        Object.defineProperty(this,"localScale",{
             get: function(){
-                return vec3.create(localScaling);
+                return vec3.create(localScale);
             },
             set: function(newValue){
-                vec3.set(newValue,localScaling);
-                markUpdated();
+                vec3.set(newValue,localScale);
+                markLocalDirty();
             }
         });
 
         /**
-         * Array of children
+         * Array of children. The children should not be modified directly. Instead use the setParent method
          * @property children
-         * @type KICK.scene.Transform
+         * @type Array
          * @public
          */
-        this.children = [];
+        Object.defineProperty(this,"children",{
+            value: children
+        });
+        
         /**
-         *  array of children
+         * Parent transform. Initial null. The property is readonly and can only be changed through the setParent method
          * @property parentTransform
          * @type KICK.scene.Transform
          * @public
+         * @final
          */
-        this.parentTransform = null;
-
-        /**
-         * @method calculateGlobalMatrix
-         * @private
-         */
-        var calculateGlobalMatrix = function () {
-            globalMatrix = mat4.create();
-            mat4.set(thisObj.getLocalMatrix(), globalMatrix);
-
-            var transformIterator = thisObj.parentTransform;
-            while (transformIterator !== null) {
-                mat4.multiply(globalMatrix, transformIterator.getLocalMatrix(),globalMatrix);
-                transformIterator  = transformIterator.parentTransform;
-            }
-        };
-
-        /**
-         * @method calculateGlobalMatrixInverse
-         * @private
-         */
-        var calculateGlobalMatrixInverse = function () {
-            globalMatrixInverse = mat4.create();
-            mat4.set(thisObj.getLocalMatrixInverse(), globalMatrixInverse);
-            var transformIterator = thisObj.parentTransform;
-            while (transformIterator !== null) {
-                mat4.multiply(globalMatrixInverse,transformIterator.getLocalMatrixInverse(),globalMatrixInverse);
-                transformIterator  = transformIterator.parentTransform;
-            }
-        };
+        Object.defineProperty(this,"parentTransform",{
+            value: parentTransform
+        });
 
         /**
          * Set the parent to the object and register this to the parents child objects
@@ -330,35 +310,47 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             if (newParent === this) {
                 throw new Error('Cannot assign parent to self');
             }
-            this.parentTransform = newParent;
-            newParent.children.push(this);
+            if (newParent === null){
+                parentTransform = null;
+                core.Util.removeElementFromArray(newParent.children,this);
+            } else {
+                parentTransform = newParent;
+                newParent.children.push(this);
+            }
+            markGlobalDirty();
         };
 
         /**
+         * Return the local transformation matrix
          * @method getLocalMatrix
          * @return {mat4} local transformation
          */
-        this.getLocalMatrix = function () {
-            if (localMatrix === null) {
-                localMatrix = mat4.create();
+        this.getLocalMatrix = function (dest) {
+            if (dirty[LOCAL]) {
                 mat4.identity(localMatrix);
-                mat4.rotateX(localMatrix, this.localRotation[0]*degreeToRadian);
-                mat4.rotateY(localMatrix, this.localRotation[1]*degreeToRadian);
-                mat4.rotateZ(localMatrix, this.localRotation[2]*degreeToRadian);
                 mat4.translate(localMatrix, this.localTranslation);
-                mat4.scale(localMatrix, this.localScaling);
+                if (this.localRotation !== 0){
+                    mat4.rotateX(localMatrix, this.localRotation[0]*degreeToRadian);
+                }
+                if (this.localRotation[1] !== 0){
+                    mat4.rotateY(localMatrix, this.localRotation[1]*degreeToRadian);
+                }
+                if (this.localRotation[2] !== 0){
+                    mat4.rotateZ(localMatrix, this.localRotation[2]*degreeToRadian);
+                }
+                mat4.scale(localMatrix, this.localScale);
+                dirty[LOCAL] = 0;
             }
             return localMatrix;
         };
 
         /**
-         * Note this ignores scale
-         * @method getLocalMatrixInverse
+         * Return the local inverse of rotate translate
+         * @method getLocalTRInverse
          * @return {mat4} inverse of local transformation
          */
-        this.getLocalMatrixInverse = function () {
-            if (localMatrixInverse === null) {
-                localMatrixInverse = mat4.create();
+        this.getLocalTRInverse = function () {
+            if (dirty[LOCAL_INV]) {
                 mat4.identity(localMatrixInverse);
                 if (this.localRotation[0] !== 0.0) {
                     mat4.rotateX(localMatrixInverse, -this.localRotation[0]*degreeToRadian);
@@ -371,6 +363,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
                 mat4.translate(localMatrixInverse, [-this.localTranslation[0],-this.localTranslation[1],-this.localTranslation[2]]);
                 // ignores scale, since it should currently not be used
+                dirty[LOCAL_INV] = 0;
             }
             return localMatrixInverse;
         };
@@ -380,34 +373,46 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {mat4} global transform
          */
         this.getGlobalMatrix = function () {
-            if (globalMatrix === null) {
-                calculateGlobalMatrix();
+            if (dirty[GLOBAL]) {
+                mat4.set(thisObj.getLocalMatrix(), globalMatrix);
+
+                var transformIterator = thisObj.parentTransform;
+                while (transformIterator !== null) {
+                    mat4.multiply(globalMatrix, transformIterator.getLocalMatrix(),globalMatrix);
+                    transformIterator  = transformIterator.parentTransform;
+                }
+                dirty[GLOBAL] = 0;
             }
             return globalMatrix;
         };
 
         /**
+         * Return the inverse of global rotate translate transform
          * @method getGlobalMatrixInverse
          * @return {mat4} inverse global transform
          */
-        this.getGlobalMatrixInverse = function () {
-            if (globalMatrixInverse === null) {
-                calculateGlobalMatrixInverse();
+        this.getGlobalTRInverse = function () {
+            if (dirty[GLOBAL_INV]) {
+                globalMatrixInverse = mat4.create();
+                mat4.set(thisObj.getLocalTRInverse(), globalMatrixInverse);
+                var transformIterator = thisObj.parentTransform;
+                while (transformIterator !== null) {
+                    mat4.multiply(globalMatrixInverse,transformIterator.getLocalTRInverse(),globalMatrixInverse);
+                    transformIterator  = transformIterator.parentTransform;
+                }
+                dirty[GLOBAL_INV] = 0;
             }
             return globalMatrixInverse;
         };
 
         /**
-         * @method getGlobalRotationMatrix
-         * @return {mat4} inverse
+         * Mark the global transform updated.
+         * This will mark the transform updated (meaning the global transform must be recomputed based on
+         * translation, rotation, scale)
+         * @method markGlobalDirty
+         * @private
          */
-        this.getGlobalRotationMatrix = function () {
-            var globalRotationMatrix = mat4.create();
-            mat4.set(this.getGlobalMatrix(), globalRotationMatrix);
-            // remove transforms
-            globalRotationMatrix[12] = globalRotationMatrix[13] = globalRotationMatrix[14] = 0;
-            return globalRotationMatrix;
-        };
+        this._markGlobalDirty = markGlobalDirty;
     };
 
     /**
@@ -696,10 +701,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             // todo - this allocates a new mat4 - remove this
-            var globalMatrixInv = transform.getGlobalMatrixInverse();
+            var globalMatrixInv = transform.getGlobalTRInverse();
             mat4.set(globalMatrixInv, modelViewMatrix);
 
-            mat4.multiply(modelViewMatrix,projectionMatrix,modelViewProjectionMatrix);
+            mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
         };
 
         /**
@@ -781,8 +786,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.clearDepth = clearDepth;
         delete this._currentClearFlags;
     };
-
-
 
     /**
      * Specifies the interface for a component listener.

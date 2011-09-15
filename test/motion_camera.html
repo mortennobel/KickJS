@@ -64,36 +64,51 @@
             mesh.updateData();
         }
 
-        function addRotatorComponent(gameObject){
-            var time = engine.time,
-                    transform = gameObject.transform,
-                    rotationSpeed = 0.05,
-                    rotation = transform.localRotation;
+        function addRotatorComponent(gameObject,id){
+            var locx = document.getElementById(id+'locx'),
+                locy = document.getElementById(id+'locy'),
+                locz = document.getElementById(id+'locz'),
+                rotx = document.getElementById(id+'rotx'),
+                roty = document.getElementById(id+'roty'),
+                rotz = document.getElementById(id+'rotz'),
+                scax = document.getElementById(id+'scax'),
+                scay = document.getElementById(id+'scay'),
+                scaz = document.getElementById(id+'scaz'),
+                mat = document.getElementById(id+'mat'),
+                matinv = document.getElementById(id+'matinv'),
+                transform = gameObject.transform;
             gameObject.addComponent({
                 update: function(){
-                    rotation[1] += time.deltaTime*rotationSpeed;
-                    transform.localRotation = rotation;
+                    
+                    //console.log(translate[0],translate[1]);
+                    //transform.localRotation = rotation;
+                    //transform.localTranslation = translate;
+                    transform.localTranslation = [locx.value,locy.value,locz.value];
+                    transform.localRotation = [rotx.value,roty.value,rotz.value];
+                    if (scax){
+                        transform.localScale = [scax.value,scay.value,scaz.value];
+                    }
+                    mat.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix());
+                    matinv.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalTRInverse());
                 }
             });
         }
 
         function initKick() {
             engine = new KICK.core.Engine('canvas');
-            var cameraObject = engine.activeScene.createGameObject();
+            var cameraGameObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1],
-                cameraTypePerspective: false,
-                near:-1,
-                far:1
+                clearColor: [0,0,0,1]
             });
-            cameraObject.addComponent(camera);
+            cameraGameObject.addComponent(camera);
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
             setMesh(KICK.scene.MeshFactory.createCube, 0.5);
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
-            addRotatorComponent(gameObject);
+            addRotatorComponent(cameraGameObject,"");
+            addRotatorComponent(gameObject,"cube_");
         }
 
     </script>
@@ -106,8 +121,27 @@
   <h2>Output</h2>
   <div id="output" style="color: red;">
   </div>
-  <h2>Show data</h2>
-  [<a href="#" onclick="refreshData();">Refresh</a>]
+  <h2>Camera position</h2>
+  Location <input id="locx" value="0"><input id="locy" value="0"><input id="locz" value="10"><br>
+  Rotation <input id="rotx" value="0"><input id="roty" value="0"><input id="rotz" value="0"><br>
+    Matrix (read only) [Global and global inverse]:<br>
+  <textarea style="width:100px;height:60px" id="mat" readonly="readonly">
+
+</textarea>
+  <textarea style="width:100px;height:60px" id="matinv" readonly="readonly">
+
+</textarea>
+  <h2>Cube position</h2>
+  Location <input id="cube_locx" value="0"><input id="cube_locy" value="0"><input id="cube_locz" value="0"><br>
+  Rotation <input id="cube_rotx" value="0"><input id="cube_roty" value="0"><input id="cube_rotz" value="0"><br>
+  Scale <input id="cube_scax" value="1"><input id="cube_scay" value="1"><input id="cube_scaz" value="1"><br>
+    Matrix (read only) [Global and global inverse]:<br>
+  <textarea style="width:100px;height:60px" id="cube_mat" readonly="readonly">
+
+</textarea>
+  <textarea style="width:100px;height:60px" id="cube_matinv" readonly="readonly">
+
+</textarea>
   <div id="example" class="yui3-skin-sam"></div>
 
   <div style="display:none;">

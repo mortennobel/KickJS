@@ -1668,6 +1668,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Returns a string representation of a mat4 printed as a 4x4 matrix (on 4 lines)
+     * @method strPretty
+     * @param {KICK.math.mat4} mat mat4 to represent as a string
+     * @return {String} string representation of mat
+     */
+    mat4.strPretty = function(mat) {
+        return '[' + mat[0] + ', ' + mat[4] + ', ' + mat[8] + ', ' + mat[12] + '\n' +
+            ', '+ mat[1] + ', ' + mat[5] + ', ' + mat[9] + ', ' + mat[13] +'\n' +
+            ', '+ mat[2] + ', ' + mat[6] + ', ' + mat[10] + ', ' + mat[14] +'\n' +
+            ', '+ mat[3] + ', ' + mat[7] + ', ' + mat[11] + ', ' + mat[15] + ']';
+    };
+
+    /**
      * quat4 - Quaternions
      * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class quat4

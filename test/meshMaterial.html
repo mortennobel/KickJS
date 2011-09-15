@@ -76,11 +76,11 @@
 
         function initKick() {
             engine = new KICK.core.Engine('canvas');
-            var gameEngine = engine.activeScene.createGameObject();
+            var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0.5,1,1,1]
             });
-            gameEngine.addComponent(camera);
+            cameraObject.addComponent(camera);
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
