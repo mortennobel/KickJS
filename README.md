@@ -8,7 +8,7 @@ A WebGL game engine for modern web-browsers.
 ## Documentation
 
 Available here:
-http://kickstartengine.appspot.com/api/
+http://www.kickstartengine.com/api/
 
 ## Installation
 
