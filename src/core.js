@@ -237,12 +237,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Config} config defines one or more properties
      */
     core.Config = function(config){
-        /**
-         * Number of bytes the vertex data should be aligned with. Default value is 4.
-         * @property alignedVertexDataByte
-         * @type {Date}
-         */
-        this.alignedVertexDataByte = config.alignedVertexDataByte || 4;
     };
 
     /**
