@@ -202,7 +202,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             globalMatrix = mat4.identity(mat4.create()),
             localMatrixInverse = mat4.identity(mat4.create()),
             globalMatrixInverse = mat4.identity(mat4.create()),
-            localTranslation = vec3.create([0,0,0]),
+            localPosition = vec3.create([0,0,0]),
             localRotation = vec3.create([0,0,0]),
             localScale = vec3.create([1,1,1]),
             // the dirty parameter let the
@@ -228,77 +228,75 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 markGlobalDirty();
             };
 
-
-        // inherit description from GameObject
-        Object.defineProperty(this,"gameObject",{
-            value: gameObject
-        });
-
-        /**
-         * Local translation. 
-         * @property localTranslation
-         * @type KICK.math.vec3
-         * @public
-         */
-        Object.defineProperty(this,"localTranslation",{
-            get: function(){
-                return vec3.create(localTranslation);
+        Object.defineProperties(this,{
+            // inherit description from GameObject
+            gameObject:{
+                value: gameObject
             },
-            set: function(newValue){
-                vec3.set(newValue,localTranslation);
-                markLocalDirty();
-            }
-        });
-        /**
-         * Local rotation in euler angles.
-         * @property localRotation
-         * @type KICK.math.vec3
-         * @public
-         */
-        Object.defineProperty(this,"localRotation",{
-            get: function(){
-                return vec3.create(localRotation);
+            /**
+             * Local translation.
+             * @property localPosition
+             * @type KICK.math.vec3
+             * @public
+             */
+            localPosition:{
+                get: function(){
+                    return vec3.create(localPosition);
+                },
+                set: function(newValue){
+                    vec3.set(newValue,localPosition);
+                    markLocalDirty();
+                }
             },
-            set: function(newValue){
-                vec3.set(newValue,localRotation);
-                markLocalDirty();
-            }
-        });
-        /**
-         * Local scale
-         * @property localScale
-         * @type KICK.math.vec3
-         * @public
-         */
-        Object.defineProperty(this,"localScale",{
-            get: function(){
-                return vec3.create(localScale);
+            /**
+             * Local rotation in euler angles.
+             * @property localRotationEuler
+             * @type KICK.math.vec3
+             * @public
+             */
+            localRotationEuler: {
+                get: function(){
+                    return vec3.create(localRotation);
+                },
+                set: function(newValue){
+                    vec3.set(newValue,localRotation);
+                    markLocalDirty();
+                }
             },
-            set: function(newValue){
-                vec3.set(newValue,localScale);
-                markLocalDirty();
+            /**
+             * Local scale
+             * @property localScale
+             * @type KICK.math.vec3
+             * @public
+             */
+            localScale: {
+                get: function(){
+                    return vec3.create(localScale);
+                },
+                set: function(newValue){
+                    vec3.set(newValue,localScale);
+                    markLocalDirty();
+                }
+            },
+            /**
+             * Array of children. The children should not be modified directly. Instead use the setParent method
+             * @property children
+             * @type Array
+             * @public
+             */
+            children:{
+                value: children
+            },
+            /**
+             * Parent transform. Initial null. The property is readonly and can only be changed through the setParent method
+             * @property parentTransform
+             * @type KICK.scene.Transform
+             * @public
+             * @final
+             */
+            parentTransform:{
+                value: parentTransform
             }
-        });
-
-        /**
-         * Array of children. The children should not be modified directly. Instead use the setParent method
-         * @property children
-         * @type Array
-         * @public
-         */
-        Object.defineProperty(this,"children",{
-            value: children
-        });
-        
-        /**
-         * Parent transform. Initial null. The property is readonly and can only be changed through the setParent method
-         * @property parentTransform
-         * @type KICK.scene.Transform
-         * @public
-         * @final
-         */
-        Object.defineProperty(this,"parentTransform",{
-            value: parentTransform
         });
 
         /**
@@ -328,16 +326,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.getLocalMatrix = function (dest) {
             if (dirty[LOCAL]) {
                 mat4.identity(localMatrix);
-                mat4.translate(localMatrix, this.localTranslation);
-                if (this.localRotation !== 0){
-                    mat4.rotateX(localMatrix, this.localRotation[0]*degreeToRadian);
-                }
-                if (this.localRotation[1] !== 0){
-                    mat4.rotateY(localMatrix, this.localRotation[1]*degreeToRadian);
-                }
-                if (this.localRotation[2] !== 0){
-                    mat4.rotateZ(localMatrix, this.localRotation[2]*degreeToRadian);
-                }
+                mat4.translate(localMatrix, this.localPosition);
+                //mat4.rotateEuler(localMatrix,this.localRotationEuler);
+                mat4.multiply(localMatrix,KICK.math.quat4.toMat4(KICK.math.quat4.setEuler(this.localRotationEuler)));
                 mat4.scale(localMatrix, this.localScale);
                 dirty[LOCAL] = 0;
             }
@@ -352,16 +343,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.getLocalTRInverse = function () {
             if (dirty[LOCAL_INV]) {
                 mat4.identity(localMatrixInverse);
-                if (this.localRotation[0] !== 0.0) {
-                    mat4.rotateX(localMatrixInverse, -this.localRotation[0]*degreeToRadian);
+                if (this.localRotationEuler[0] !== 0.0) {
+                    mat4.rotateX(localMatrixInverse, -this.localRotationEuler[0]*degreeToRadian);
                 }
-                if (this.localRotation[1] !== 0.0) {
-                    mat4.rotateY(localMatrixInverse, -this.localRotation[1]*degreeToRadian);
+                if (this.localRotationEuler[1] !== 0.0) {
+                    mat4.rotateY(localMatrixInverse, -this.localRotationEuler[1]*degreeToRadian);
                 }
-                if (this.localRotation[2] !== 0.0 ) {
-                    mat4.rotateZ(localMatrixInverse, -this.localRotation[2]*degreeToRadian);
+                if (this.localRotationEuler[2] !== 0.0 ) {
+                    mat4.rotateZ(localMatrixInverse, -this.localRotationEuler[2]*degreeToRadian);
                 }
-                mat4.translate(localMatrixInverse, [-this.localTranslation[0],-this.localTranslation[1],-this.localTranslation[2]]);
+                mat4.translate(localMatrixInverse, [-this.localPosition[0],-this.localPosition[1],-this.localPosition[2]]);
                 // ignores scale, since it should currently not be used
                 dirty[LOCAL_INV] = 0;
             }
@@ -393,7 +384,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.getGlobalTRInverse = function () {
             if (dirty[GLOBAL_INV]) {
-                globalMatrixInverse = mat4.create();
                 mat4.set(thisObj.getLocalTRInverse(), globalMatrixInverse);
                 var transformIterator = thisObj.parentTransform;
                 while (transformIterator !== null) {
@@ -432,73 +422,71 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
-            i;
-
-        /**
-         * Compares two objects based on scriptPriority
-         * @method sortByScriptPriority
-         * @param a
-         * @param b
-         * @private
-         */
-        var sortByScriptPriority = function (a,b) {
-            return a.scriptPriority-b.scriptPriority;
-        };
-
-        /**
-         * Handle insertions and removal of gameobjects and components. This is done in a separate step to avoid problems
-         * with missed updates (or multiple updates) due to modifying the array while iterating it.
-         * @method cleanupGameObjects
-         * @private
-         */
-        var cleanupGameObjects = function () {
-            var i,
-                component;
-            if (gameObjectsNew.length > 0) {
-                gameObjects = gameObjects.concat(gameObjectsNew);
-                gameObjectsNew.length = 0;
-            }
-            if (gameObjectsDelete.length > 0) {
-                core.Util.removeElementsFromArray(gameObjects,gameObjectsDelete);
-                gameObjectsDelete.length = 0;
-            }
-            if (componentsNew.length > 0) {
-                for (i = componentsNew.length-1; i >= 0; i--) {
-                    component = componentsNew[i];
-                    if (typeof(component.activated) === "function") {
-                        component.activated();
-                    }
-                    if (typeof(component.update) === "function") {
-                        core.Util.insertSorted(component,updateableComponents,sortByScriptPriority);
-                    }
-                    if (typeof(component.lateUpdate) === "function") {
-                        core.Util.insertSorted(component,lateUpdateableComponents,sortByScriptPriority);
-                    }
+            i,
+            /**
+             * Compares two objects based on scriptPriority
+             * @method sortByScriptPriority
+             * @param a
+             * @param b
+             * @private
+             */
+                sortByScriptPriority = function (a,b) {
+                return a.scriptPriority-b.scriptPriority;
+            },
+            /**
+             * Handle insertions and removal of gameobjects and components. This is done in a separate step to avoid problems
+             * with missed updates (or multiple updates) due to modifying the array while iterating it.
+             * @method cleanupGameObjects
+             * @private
+             */
+                cleanupGameObjects = function () {
+                var i,
+                    component;
+                if (gameObjectsNew.length > 0) {
+                    gameObjects = gameObjects.concat(gameObjectsNew);
+                    gameObjectsNew.length = 0;
                 }
-                for (i=componentListenes.length-1; i >= 0; i--) {
-                    componentListenes[i].componentsAdded(componentsNew);
+                if (gameObjectsDelete.length > 0) {
+                    core.Util.removeElementsFromArray(gameObjects,gameObjectsDelete);
+                    gameObjectsDelete.length = 0;
                 }
-                componentsNew.length = 0;
-            }
-            if (componentsDelete.length > 0) {
-                for (i = componentsDelete.length-1; i >= 0; i--) {
-                    component = componentsDelete[i];
-                    if (typeof(component.deactivated) === "function") {
-                        component.deactivated();
+                if (componentsNew.length > 0) {
+                    for (i = componentsNew.length-1; i >= 0; i--) {
+                        component = componentsNew[i];
+                        if (typeof(component.activated) === "function") {
+                            component.activated();
+                        }
+                        if (typeof(component.update) === "function") {
+                            core.Util.insertSorted(component,updateableComponents,sortByScriptPriority);
+                        }
+                        if (typeof(component.lateUpdate) === "function") {
+                            core.Util.insertSorted(component,lateUpdateableComponents,sortByScriptPriority);
+                        }
                     }
-                    if (typeof(component.update) === "function") {
-                        core.Util.removeElementFromArray(updateableComponents,component);
+                    for (i=componentListenes.length-1; i >= 0; i--) {
+                        componentListenes[i].componentsAdded(componentsNew);
                     }
-                    if (typeof(component.lateUpdate) === "function") {
-                        core.Util.removeElementFromArray(lateUpdateableComponents,component);
-                    }
+                    componentsNew.length = 0;
                 }
-                for (i=componentListenes.length-1; i >= 0; i--) {
-                    componentListenes[i].componentsRemoved(componentsDelete);
+                if (componentsDelete.length > 0) {
+                    for (i = componentsDelete.length-1; i >= 0; i--) {
+                        component = componentsDelete[i];
+                        if (typeof(component.deactivated) === "function") {
+                            component.deactivated();
+                        }
+                        if (typeof(component.update) === "function") {
+                            core.Util.removeElementFromArray(updateableComponents,component);
+                        }
+                        if (typeof(component.lateUpdate) === "function") {
+                            core.Util.removeElementFromArray(lateUpdateableComponents,component);
+                        }
+                    }
+                    for (i=componentListenes.length-1; i >= 0; i--) {
+                        componentListenes[i].componentsRemoved(componentsDelete);
+                    }
+                    componentsDelete.length = 0;
                 }
-                componentsDelete.length = 0;
-            }
-        };
+            };
 
         /**
          * Add a component listener to the scene. A component listener should contain two functions:
