@@ -78,6 +78,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        DEGREE_TO_RADIAN = 0.01745329251994,
+        RADIAN_TO_DEGREE = 57.2957795130824,
         glMatrixArrayType;
 
     /**
@@ -92,14 +94,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @type {Number}
          * @static
          */
-        DEGREE_TO_RADIAN: 0.01745329251994,
+        DEGREE_TO_RADIAN: DEGREE_TO_RADIAN,
         /**
          * Radian to degree constant
          * @property RADIAN_TO_DEGREE
          * @type {Number}
          * @static
          */
-        RADIAN_TO_DEGREE: 57.2957795130824
+        RADIAN_TO_DEGREE: RADIAN_TO_DEGREE
     };
 
     Object.freeze(math.Mathf);
@@ -1283,6 +1285,35 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Rotates a matrix by three rotations given in eulers angles
+     * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
+     * @method rotateEuler
+     * @param {KICK.math.mat4} mat mat4 to rotate
+     * @param {KICK.math.vec3} angle angle (in degrees) to rotate
+     * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+     * @return {KICK.math.mat4} dest if specified, mat otherwise
+     */
+    mat4.rotateEuler = function(mat, euler, dest) {
+        var degreeToRadian = math.Mathf.DEGREE_TO_RADIAN;
+        if (dest) {
+            mat4.set(mat,dest);
+            mat = dest;
+        }
+
+        // todo: Optimized code!!!
+        if (euler[2] !== 0){
+            mat4.rotateZ(mat, euler[2]*degreeToRadian);
+        }
+        if (euler[1] !== 0){
+            mat4.rotateY(mat, euler[1]*degreeToRadian);
+        }
+        if (euler[0] !== 0){
+            mat4.rotateX(mat, euler[0]*degreeToRadian);
+        }
+        return mat;
+    };
+
+    /**
      * Rotates a matrix by the given angle around the specified axis
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
      * @method rotate
@@ -1857,7 +1888,108 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         dest[2] = iz*qw + iw*-qz + ix*-qy - iy*-qx;
 
         return dest;
+    };
+
+    /**
+     * Set the identity to the quaternion (0,0,0,1)
+     * @method identity
+     * @param {KICK.math.quat4} quat Optional, quat4 to set the identity to
+     * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     */
+    quat4.identity = function(dest){
+        if(!dest) { dest = quat4.create(); }
+        dest[0] = 0;
+        dest[1] = 0;
+        dest[2] = 0;
+        dest[3] = 1;
+        return dest;
+    };
+
+    /**
+     * Calculates a rotation represented in eulers angles
+     * @method toEuler
+     * @param {KICK.math.quat4} quat quat4 to create matrix from
+     * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
+     * @return {KICK.math.vec3} dest if specified, a new vec3 otherwise
+     */
+    quat4.toEuler = function(quat, dest) {
+        var q0 = quat[0], q1 = quat[1], q2 = quat[2], q3 = quat[3];
+
+        if(!dest) { dest = vec3.create(); }
+
+        dest[0] = Math.atan2(2*(q0*q1+q2+q3),1-2*(q1*q1+q2*q2));
+        dest[1] = Math.asin(2*(q0*q2-q3*q1));
+        dest[2] = Math.atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3));
+
+        return dest;
+    };
+
+    /**
+     * Set the rotation based on eulers angles.
+     * @method angleAxis
+     * @param {Number} angle rotation angle in degrees
+     * @param {KICK.math.vec3} vec normalized axis
+     * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
+     * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     */
+    quat4.angleAxis = function(angle,vec, dest) {
+        var angleRadiansHalf = DEGREE_TO_RADIAN*0.5*angle,
+            s = Math.sin(angleRadiansHalf);
+        if(!dest) { dest = quat4.create(); }
+
+        dest[3] = Math.cos(angleRadiansHalf);
+        dest[2] = vec[2]*s;
+        dest[1] = vec[1]*s;
+        dest[0] = vec[0]*s;
+
+        return dest;
+    };
+
+    /**
+     * Set the rotation based on eulers angles.
+     * @method setEuler
+     * @param {KICK.math.vec3} vec vec3 eulers angles (degrees)
+     * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
+     * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     */
+    quat4.setEuler = function(vec, dest) {
+        var axisX = quat4.angleAxis(vec[0],[1,0,0]),
+            axisY = quat4.angleAxis(vec[1],[0,1,0]),
+            axisZ = quat4.angleAxis(vec[2],[0,0,1]);
+        if(!dest) {
+            dest = quat4.create();
+        }
+
+        // todo optimize this method. It shold basically inline all three multiplications like the code below
+        quat4.multiply(axisZ,axisY,dest);
+        quat4.multiply(dest,axisX,dest);
+        return dest;
+        /*
+        var DEGREE_TO_RADIAN_HALF = DEGREE_TO_RADIAN*0.5,
+            xHalf = vec[0]*(DEGREE_TO_RADIAN_HALF),
+            yHalf = vec[1]*(DEGREE_TO_RADIAN_HALF),
+            zHalf = vec[2]*(-DEGREE_TO_RADIAN_HALF);
+        if(!dest) { dest = quat4.create(); }
+
+        if (xHalf===0 && yHalf===0 && zHalf===0){
+            return quat4.identity(dest);
+        }
+
+        var cosxHalf = Math.cos(xHalf),
+            cosyHalf = Math.cos(yHalf),
+            coszHalf = Math.cos(zHalf),
+            sinxHalf = Math.sin(xHalf),
+            sinyHalf = Math.sin(yHalf),
+            sinzHalf = Math.sin(zHalf);
+
+        dest[0] = cosxHalf*cosyHalf*coszHalf + sinxHalf*sinyHalf*sinzHalf;
+        dest[1] = sinxHalf*cosyHalf*coszHalf - cosxHalf*sinyHalf*sinzHalf;
+        dest[2] = cosxHalf*sinyHalf*coszHalf + sinxHalf*cosyHalf*sinzHalf;
+        dest[3] = cosxHalf*cosyHalf*sinzHalf - sinxHalf*sinyHalf*coszHalf;
+
+        return dest;*/
     }
+
 
     /**
      * Calculates a 3x3 matrix from the given quat4
@@ -1869,35 +2001,31 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     quat4.toMat3 = function(quat, dest) {
         if(!dest) { dest = mat3.create(); }
 
-        var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
+        var x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+            x2 = 2*x,
+            y2 = 2*y,
+            z2 = 2*z,
+            yy = y2*y,
+            zz = z2*z,
+            xy = x2*y,
+            wz = z2*w,
+            xz = x2*z,
+            wy = y2*w,
+            xx = x2*x,
+            yz = y2*z,
+            wx = x2*w;
 
-        var x2 = x + x;
-        var y2 = y + y;
-        var z2 = z + z;
+        dest[0] = 1 - yy - zz;
+        dest[1] = xy + wz;
+        dest[2] = xz - wy;
 
-        var xx = x*x2;
-        var xy = x*y2;
-        var xz = x*z2;
+        dest[3] = xy - wz;
+        dest[4] = 1 - xx - zz;
+        dest[5] = yz + wx;
 
-        var yy = y*y2;
-        var yz = y*z2;
-        var zz = z*z2;
-
-        var wx = w*x2;
-        var wy = w*y2;
-        var wz = w*z2;
-
-        dest[0] = 1 - (yy + zz);
-        dest[1] = xy - wz;
-        dest[2] = xz + wy;
-
-        dest[3] = xy + wz;
-        dest[4] = 1 - (xx + zz);
-        dest[5] = yz - wx;
-
-        dest[6] = xz - wy;
-        dest[7] = yz + wx;
-        dest[8] = 1 - (xx + yy);
+        dest[6] = xz + wy;
+        dest[7] = yz - wx;
+        dest[8] = 1 - xx - yy;
 
         return dest;
     }
@@ -1912,37 +2040,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     quat4.toMat4 = function(quat, dest) {
         if(!dest) { dest = mat4.create(); }
 
-        var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
+        var x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+            x2 = 2*x,
+            y2 = 2*y,
+            z2 = 2*z,
+            yy = y2*y,
+            zz = z2*z,
+            xy = x2*y,
+            wz = z2*w,
+            xz = x2*z,
+            wy = y2*w,
+            xx = x2*x,
+            yz = y2*z,
+            wx = x2*w;
 
-        var x2 = x + x;
-        var y2 = y + y;
-        var z2 = z + z;
-
-        var xx = x*x2;
-        var xy = x*y2;
-        var xz = x*z2;
-
-        var yy = y*y2;
-        var yz = y*z2;
-        var zz = z*z2;
-
-        var wx = w*x2;
-        var wy = w*y2;
-        var wz = w*z2;
-
-        dest[0] = 1 - (yy + zz);
-        dest[1] = xy - wz;
-        dest[2] = xz + wy;
+        dest[0] = 1 - yy - zz;
+        dest[1] = xy + wz;
+        dest[2] = xz - wy;
         dest[3] = 0;
 
-        dest[4] = xy + wz;
-        dest[5] = 1 - (xx + zz);
-        dest[6] = yz - wx;
+        dest[4] = xy - wz;
+        dest[5] = 1 - xx - zz;
+        dest[6] = yz + wx;
         dest[7] = 0;
 
-        dest[8] = xz - wy;
-        dest[9] = yz + wx;
-        dest[10] = 1 - (xx + yy);
+        dest[8] = xz + wy;
+        dest[9] = yz - wx;
+        dest[10] = 1 - xx - yy;
         dest[11] = 0;
 
         dest[12] = 0;
@@ -1997,7 +2121,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         dest[3] = (quat[3]*ratioA + quat2[3]*ratioB);
 
         return dest;
-    }
+    };
 
     /**
      * Returns a string representation of a quaternion
