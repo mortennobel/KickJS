@@ -12,6 +12,10 @@
         <link rel="stylesheet" href="/vendor/prettify/prettify-min.css">
         <link rel="stylesheet" href="/css/docs-min.css">
 <script src="../../src/math.js"></script>
+    <!-- allows to use random seed -->
+       <script type="text/javascript" src="http://davidbau.com/encode/seedrandom.js"></script>
+
+
 <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
 </head>
 <body class="yui3-skin-sam">
@@ -41,6 +45,7 @@
     <div id="testLogger"></div>
 
 <script>
+Math.seedrandom("hello");
 YUI().use('node', 'console', 'test', function (Y) {
 
     Y.namespace("KICK.math");
@@ -156,9 +161,92 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.areEqual(ref.mem[5],v[1][1],"Memory location");
             Assert.areEqual(4,v[1].length,"Content");
             Assert.areEqual(0,v[1][3],"Zero'ed");
-        }
+        },
+        testQuad4SetEuler: function(){
+            var Assert = Y.Assert;
+            var quat4 = KICK.math.quat4.create();
+            for (var i=0;i<1000;i++){
+                var euler = KICK.math.vec3.create();
+                if (i<3){
+                    euler[i] = 90; // test 90 degree rotation
+                } else {
+                    euler = [Math.random()*720-360,Math.random()*720-360,Math.random()*720-360];
+                }
+                KICK.math.quat4.setEuler(euler,quat4);
+                var mat = KICK.math.mat4.create();
+                KICK.math.mat4.identity(mat);
+                KICK.math.mat4.rotateEuler(mat,euler);
+                var point = [Math.random()*720-360,Math.random()*720-360,Math.random()*720-360];
 
+                var matrixPoint = KICK.math.vec3.create();
+                var quatPoint = KICK.math.vec3.create();
+                KICK.math.mat4.multiplyVec3(mat,point,matrixPoint);
+                KICK.math.quat4.multiplyVec3(quat4,point,quatPoint);
+                var msg = "matrixPoint:\n"+KICK.math.vec3.str(matrixPoint)+
+                        "\nquatPoint:\n"+KICK.math.vec3.str(quatPoint);
+                Assert.compareVec(matrixPoint,quatPoint,msg);
+            }
+        },
+        testQuad4SetEulerToMatrix: function(){
+            var Assert = Y.Assert;
+            var quat4 = KICK.math.quat4.create();
+            for (var i=0;i<1000;i++){
+                var euler = KICK.math.vec3.create();
+                if (i<3){
+                    euler[i] = 90; // test 90 degree rotation
+                } else {
+                    euler = [Math.random()*720-360,Math.random()*720-360,Math.random()*720-360];
+                }
+                KICK.math.quat4.setEuler(euler,quat4);
+                var quatMat = KICK.math.quat4.toMat4(quat4);
+                var mat = KICK.math.mat4.create();
+                KICK.math.mat4.identity(mat);
+                KICK.math.mat4.rotateEuler(mat,euler);
+
+                var msg = "quat euler to matrix:\n"+KICK.math.mat4.strPretty(quatMat)+
+                        "\nmat euler:\n"+KICK.math.mat4.strPretty(mat);
+                Assert.compareVec(quatMat,mat,msg);
+            }
+        },
+
+        testQuad4AngleAxis: function(){
+            var Assert = Y.Assert;
+            var quat4 = KICK.math.quat4.create();
+
+            var rotationAxis = [[1,0,0],[0,1,0],[0,0,1]];
+            var rotationAxisMatFunc = [KICK.math.mat4.rotateX,KICK.math.mat4.rotateY,KICK.math.mat4.rotateZ];
+            for (var i=0;i<3;i++){
+                var angle = 12.145;
+                KICK.math.quat4.angleAxis(angle,rotationAxis[i],quat4);
+                var mat = KICK.math.mat4.create();
+                KICK.math.mat4.identity(mat);
+                rotationAxisMatFunc[i](mat,angle*KICK.math.Mathf.DEGREE_TO_RADIAN);
+
+                var point = KICK.math.vec3.create([12.451,123.5,.9]);
+
+                var matrixPoint = KICK.math.vec3.create();
+                var quatPoint = KICK.math.vec3.create();
+                KICK.math.mat4.multiplyVec3(mat,point,matrixPoint);
+                KICK.math.quat4.multiplyVec3(quat4,point,quatPoint);
+
+                var msg = "matrixPoint:\n"+KICK.math.vec3.str(matrixPoint)+
+                        "\nquatPoint:\n"+KICK.math.vec3.str(quatPoint)+
+                        "\nAxis: "+i;
+                Assert.compareVec(matrixPoint,quatPoint,msg);
+            }
+        }
     });
+
+    /// extend Asset to compare float values
+    Y.Assert.compareVec = function(f1,f2,message){
+        for (var i=0;i<f1.length;i++){
+            Y.Assert.compareFloat(f1[i],f2[i],message);
+        }
+    };
+    Y.Assert.compareFloat = function(f1,f2,message){
+        var epsilon = 0.001;
+        return Y.Assert.isTrue(Math.abs(f1-f2)<epsilon,message);
+    };
 
     var ExampleSuite = new Y.Test.Suite("Example Suite");
     ExampleSuite.add(Y.KICK.math.vec3Test);
@@ -166,7 +254,9 @@ YUI().use('node', 'console', 'test', function (Y) {
     //create the console
     var r = new Y.Console({
         newestOnTop : false,
-        style: 'block' // to anchor in the example content
+        style: 'block', // to anchor in the example content,
+        width: 600,
+        height: 600
     });
 
     r.render('#testLogger');

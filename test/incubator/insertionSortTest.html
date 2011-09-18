@@ -3,35 +3,147 @@
 <html>
 <head>
     <title></title>
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Maven+Pro:400,700">
+
+            <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+            <link rel="stylesheet" href="/combo/css?main-min.css">
+
+        <link rel="stylesheet" href="/vendor/prettify/prettify-min.css">
+        <link rel="stylesheet" href="/css/docs-min.css">
+<script src="../../src/math.js"></script>
+<script src="../../src/core.js"></script>
+<script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
 </head>
-<script type="text/javascript" src="../../src/core.js"></script>
-<script type="text/javascript" src="../../src/math.js"></script>
-<body>
-<script type="text/javascript">
-    var i;
-    var sortFunction = function (a,b) {
-        return a-b;
-    };
-    var shuffle = function (o) {
-        for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
-        return o;
-    }
-    var array = [-1,3,2,4,99,-12,23,33,11,-6,10];
-    shuffle(array);
-    var sortedArray = [];
-    document.write("Sorting the array: "+JSON.stringify(array)+"<br>");
-    for (i=0;i<array.length;i++) {
-        KICK.core.Util.insertSorted(array[i],sortedArray,sortFunction);
-        document.write("Array is now"+JSON.stringify(sortedArray)+"<br>");
-    }
-    document.write("using default sortFunction");
-    sortedArray = [];
-    for (i=0;i<array.length;i++) {
-        KICK.core.Util.insertSorted(array[i],sortedArray);
-        document.write("Array is now"+JSON.stringify(sortedArray)+"<br>");
+<body class="yui3-skin-sam">
+<style scoped>
+    #testLogger {
+        margin-bottom: 1em;
     }
 
+    #testLogger .yui3-console .yui3-console-title {
+        border: 0 none;
+        color: #000;
+        font-size: 13px;
+        font-weight: bold;
+        margin: 0;
+        text-transform: none;
+    }
+    #testLogger .yui3-console .yui3-console-entry-meta {
+        margin: 0;
+    }
+
+    .yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
+        background: #070;
+        color: #fff;
+    }
+    </style>
+
+    <div id="testLogger"></div>
+
+<script>
+YUI().use('node', 'console', 'test', function (Y) {
+
+    Y.namespace("KICK.math");
+
+    Y.KICK.math.vec3Test = new Y.Test.Case({
+
+        //name of the test case - if not provided, one is auto-generated
+        name : "vec3test",
+
+        //---------------------------------------------------------------------
+        // setUp and tearDown methods - optional
+        //---------------------------------------------------------------------
+
+        /*
+         * Sets up data that is needed by each test.
+         */
+        setUp : function () {
+        },
+
+        /*
+         * Cleans up everything that was created by setUp().
+         */
+        tearDown : function () {
+        },
+
+        //---------------------------------------------------------------------
+        // Test methods - names must begin with "test"
+        //---------------------------------------------------------------------
+
+        testInsertionSort : function () {
+            var Assert = Y.Assert;
+            var i;
+            var sortFunction = function (a,b) {
+                return a-b;
+            };
+            var shuffle = function (o) {
+                for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+                return o;
+            }
+            var array = [-1,3,2,4,99,-12,23,33,11,-6,10];
+            shuffle(array);
+            var sortedArray = [];
+            for (i=0;i<array.length;i++) {
+                KICK.core.Util.insertSorted(array[i],sortedArray,sortFunction);
+            }
+            for (i=1;i<array.length;i++){
+                Assert.isTrue(sortedArray[i-1]<sortedArray[i],JSON.stringify(sortedArray));
+            }
+
+        },
+        testInsertionSortDefaultSortFunc  : function () {
+            var Assert = Y.Assert;
+            var i;
+            var shuffle = function (o) {
+                for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+                return o;
+            }
+            var array = [-1,3,2,4,99,-12,23,33,11,-6,10];
+            shuffle(array);
+            var sortedArray = [];
+            for (i=0;i<array.length;i++) {
+                KICK.core.Util.insertSorted(array[i],sortedArray);
+            }
+            for (i=1;i<array.length;i++){
+                Assert.isTrue(sortedArray[i-1]<sortedArray[i],JSON.stringify(sortedArray));
+            }
+        }
+    });
+
+    /// extend Asset to compare float values
+    Y.Assert.compareVec = function(f1,f2,message){
+        for (var i=0;i<f1.length;i++){
+            Y.Assert.compareFloat(f1[i],f2[i],message);
+        }
+    };
+    Y.Assert.compareFloat = function(f1,f2,message){
+        var epsilon = 0.001;
+        return Y.Assert.isTrue(Math.abs(f1-f2)<epsilon,message);
+    };
+
+    var ExampleSuite = new Y.Test.Suite("Sort test");
+    ExampleSuite.add(Y.KICK.math.vec3Test);
+
+    //create the console
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block', // to anchor in the example content,
+        width: 600,
+        height: 600
+    });
+
+    r.render('#testLogger');
+
+    Y.Test.Runner.add(ExampleSuite);
+
+    //run the tests
+    Y.Test.Runner.run();
+
+});
 </script>
+
+</div>
 
 </body>
 </html>

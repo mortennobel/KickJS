@@ -83,8 +83,8 @@
                     //console.log(translate[0],translate[1]);
                     //transform.localRotation = rotation;
                     //transform.localTranslation = translate;
-                    transform.localTranslation = [locx.value,locy.value,locz.value];
-                    transform.localRotation = [rotx.value,roty.value,rotz.value];
+                    transform.localPosition = [locx.value,locy.value,locz.value];
+                    transform.localRotationEuler = [rotx.value,roty.value,rotz.value];
                     if (scax){
                         transform.localScale = [scax.value,scay.value,scaz.value];
                     }
@@ -110,6 +110,34 @@
             addRotatorComponent(cameraGameObject,"");
             addRotatorComponent(gameObject,"cube_");
         }
+
+        var mouseDown = null;
+        var direction = 0;
+
+        function increateElementValue(){
+            if (mouseDown){
+                mouseDown.value = (0.1*direction)+new Number(mouseDown.value);
+                setTimeout(increateElementValue,100);
+            }
+        }
+
+        function registerListener(id){
+            var elem = document.getElementById(id);
+            elem.onmousedown = function(e){
+                mouseDown = elem;
+                direction = e.button===0?1:-1;
+                increateElementValue();
+
+            };
+        }
+
+        function registerListeners(id){
+            registerListener(id+"x");
+            registerListener(id+"y");
+            registerListener(id+"z");
+        }
+
+
 
     </script>
 </head>
@@ -170,5 +198,15 @@ void main(void)
   </textarea>
 </div>
   <br/>
+<script type="text/javascript">
+     registerListeners("loc");
+        registerListeners("rot");
+        registerListeners("cube_loc");
+        registerListeners("cube_rot");
+        registerListeners("cube_sca");
+        document.onmouseup = function(){
+            mouseDown = null;
+        };
+</script>
 </body>
 </html>

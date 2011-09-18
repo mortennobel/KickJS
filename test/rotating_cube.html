@@ -68,11 +68,11 @@
             var time = engine.time,
                     transform = gameObject.transform,
                     rotationSpeed = 0.05,
-                    rotation = transform.localRotation;
+                    rotation = transform.localRotationEuler;
             gameObject.addComponent({
                 update: function(){
                     rotation[1] += time.deltaTime*rotationSpeed;
-                    transform.localRotation = rotation;
+                    transform.localRotationEuler = rotation;
                 }
             });
         }

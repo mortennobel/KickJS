@@ -13,9 +13,12 @@
     <script type="text/javascript" src="../src/renderer.js"></script>
     <script type="text/javascript" src="../src/shader.js"></script>
     <script type="text/javascript" src="../src/meshfactory.js"></script>
+    <!-- allows to use random seed -->
+    <script type="text/javascript" src="http://davidbau.com/encode/seedrandom.js"></script>
     <script type="text/javascript">
         var engine;
         var meshRenderer;
+        Math.seedrandom("hello");
         
         var log = function (output) {
             var element = document.getElementById("output");
@@ -64,51 +67,33 @@
             mesh.updateData();
         }
 
-        function addRotatorComponent(gameObject){
-            var time = engine.time,
-                    transform = gameObject.transform,
-                    rotationSpeed = 0.001,
-                    translation = transform.localPosition,
-                    rotVec = transform.localRotationEuler,
-                    radius = 5,
-                    radianToDegree = KICK.math.Mathf.RADIAN_TO_DEGREE,
-                    res = document.getElementById("res");
-            gameObject.addComponent({
-                update: function(){
-                    var timeTotal = time.time,
-                            rot = timeTotal*rotationSpeed;
-                    translation[0] = Math.sin(rot)*radius;
-                    translation[1] = Math.sin(rot*3);
-                    translation[2] = Math.cos(rot)*radius;
-                    rotVec[1] = rot*radianToDegree;
-                    transform.localPosition = translation;
-
-                    //new Date().getMilliseconds();
-                    transform.localRotationEuler = rotVec;
-                    res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
-                }
-            });
+        function addObject(pos){
+            var gameObject = engine.activeScene.createGameObject(),
+                    transform = gameObject.transform;
+            meshRenderer = new KICK.scene.MeshRenderer();
+            setMesh(KICK.scene.MeshFactory.createCube, 0.5);
+            setMaterial('vertexShaderColor','fragmentShader');
+            gameObject.addComponent(meshRenderer);
+            transform.localScale = [0.8*Math.random(),0.8*Math.random(),0.8*Math.random()];
+            transform.localRotationEuler = [360*Math.random(),360*Math.random(),360*Math.random()];
+            transform.localPosition = pos;
         }
 
         function initKick() {
             engine = new KICK.core.Engine('canvas');
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1],
-                fieldOfView:60
+                clearColor: [0,0,0,1]
             });
+            cameraObject.transform.localPosition = [0,0,10];
             cameraObject.addComponent(camera);
 
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createCube, 0.5);
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-
-            addRotatorComponent(cameraObject);
-
+            for (var i=-1;i<=1;i+=0.1){
+                for (var j=-1;j<=1;j+=0.1){
+                    addObject([i*10,j*10,0]);
+                }
+            }
         }
-
 
     </script>
 </head>
@@ -122,9 +107,6 @@
   </div>
   <h2>Show data</h2>
   [<a href="#" onclick="refreshData();">Refresh</a>]
-  <textarea style="width: 500px;height:100px" id="res">
-
-  </textarea>
   <div id="example" class="yui3-skin-sam"></div>
 
   <div style="display:none;">
