@@ -334,26 +334,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.getLocalMatrix = function (dest) {
             if (dirty[LOCAL]) {
-                mat4.identity(localMatrix);
-                mat4.translate(localMatrix, this.localPosition);
-                mat4.multiply(localMatrix,KICK.math.quat4.toMat4(localRotationQuat));
-                mat4.scale(localMatrix, this.localScale);
+                mat4.setTRS(localPosition,localRotationQuat,localScale,localMatrix);
                 dirty[LOCAL] = 0;
             }
             return localMatrix;
         };
 
         /**
-         * Return the local inverse of rotate translate
+         * Return the local inverse of translate rotate scale
          * @method getLocalTRInverse
          * @return {mat4} inverse of local transformation
          */
         this.getLocalTRInverse = function () {
             if (dirty[LOCAL_INV]) {
-                mat4.identity(localMatrixInverse);
-                KICK.math.quat4.toMat4(KICK.math.quat4.inverse(localRotationQuat),localMatrixInverse);
-                mat4.translate(localMatrixInverse, [-this.localPosition[0],-this.localPosition[1],-this.localPosition[2]]);
-                // ignores scale, since it should currently not be used
+                mat4.setTRSInverse(localPosition,localRotationQuat,localScale,localMatrix);
                 dirty[LOCAL_INV] = 0;
             }
             return localMatrixInverse;

@@ -875,6 +875,42 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Set translate, rotate, scale
+     * @method setTRS
+     * @param {KICK.math.vec3} translate
+     * @param {KICK.math.quat4} rotateQuat
+     * @param {KICK.math.vec3} scale
+     * @param {KICK.math.mat4} dest Optinal
+     * @return {KICK.math.mat4} dest if specified mat4 otherwise
+     */
+    mat4.setTRS = function(translate, rotateQuat, scale, dest){
+        if(!dest) { dest = mat4.create(); }
+        // todo: optimize this code
+        mat4.identity(dest);
+        mat4.translate(dest, translate);
+        mat4.multiply(dest,quat4.toMat4(rotateQuat));
+        mat4.scale(dest, scale);
+    }
+
+    /**
+     * Set the inverse of translate, rotate, scale
+     * @method setTRSInverse
+     * @param {KICK.math.vec3} translate
+     * @param {KICK.math.quat4} rotateQuat
+     * @param {KICK.math.vec3} scale
+     * @param {KICK.math.mat4} dest Optinal
+     * @return {KICK.math.mat4} dest if specified mat4 otherwise
+     */
+    mat4.setTRSInverse = function(translate, rotateQuat, scale, dest){
+        if(!dest) { dest = mat4.create(); }
+        // todo: optimize this code
+        mat4.identity(dest);
+        mat4.scale(dest, [-scale[0],-scale[1],-scale[2]]);
+        mat4.multiply(dest,quat4.toMat4(quat4.inverse(rotateQuat)));
+        mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
+    }
+
+    /**
      * Sets a mat4 to an identity matrix
      * @method identity
      * @param {KICK.math.mat4} dest mat4 to set
