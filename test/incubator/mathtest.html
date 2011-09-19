@@ -234,6 +234,14 @@ YUI().use('node', 'console', 'test', function (Y) {
                         "\nAxis: "+i;
                 Assert.compareVec(matrixPoint,quatPoint,msg);
             }
+        },
+        testQuad4Euler: function(){
+            var Assert = Y.Assert;
+            var quat = KICK.math.quat4.create([0,0,0,1]);
+            var vec = KICK.math.vec3.create([0,0,0]);
+
+            KICK.math.quat4.toEuler(quat,vec);
+            r.log("Default rotation: "+KICK.math.vec3.str(vec));
         }
     });
 

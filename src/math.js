@@ -1913,13 +1913,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, a new vec3 otherwise
      */
     quat4.toEuler = function(quat, dest) {
-        var q0 = quat[0], q1 = quat[1], q2 = quat[2], q3 = quat[3];
+        var x = quat[0], y = quat[1], z = quat[2],w = quat[3],
+            yy = y*y;
 
         if(!dest) { dest = vec3.create(); }
 
-        dest[0] = Math.atan2(2*(q0*q1+q2+q3),1-2*(q1*q1+q2*q2));
-        dest[1] = Math.asin(2*(q0*q2-q3*q1));
-        dest[2] = Math.atan2(2*(q0*q3+q1*q2),1-2*(q2*q2+q3*q3));
+        dest[0] = Math.atan2(2*(w*x+y*z),1-2*(x*x+yy))*RADIAN_TO_DEGREE;
+        dest[1] = Math.asin(2*(w*y-z*x))*RADIAN_TO_DEGREE;
+        dest[2] = Math.atan2(2*(w*z+x*y),1-2*(yy+z*z))*RADIAN_TO_DEGREE;
 
         return dest;
     };

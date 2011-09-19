@@ -94,6 +94,8 @@
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);
+            log("Camera: "+KICK.math.vec3.str(cameraObject.transform.localRotationEuler));
+            log("GameObject: "+KICK.math.vec3.str(gameObject.transform.localRotationEuler));
         }
 
     </script>

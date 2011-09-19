@@ -49,6 +49,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         core = KICK.namespace("KICK.core"),
         math = KICK.namespace("KICK.math"),
         vec3 = KICK.namespace("KICK.math.vec3"),
+        quat4 = KICK.namespace("KICK.math.quat4"),
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         degreeToRadian = math.Mathf.DEGREE_TO_RADIAN;
@@ -65,7 +66,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Reference to the containing scene
          * @property scene
          * @type KICK.scene.Scene
-         * @public
          */
         Object.defineProperty(this, "scene", {
             value:scene
@@ -75,7 +75,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Reference to the engine
          * @property engine
          * @type KICK.core.Engine
-         * @public
          */
         Object.defineProperty(this, "engine", {
             value:scene.engine
@@ -85,7 +84,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Reference to the transform
          * @property transform
          * @type KICK.scene.Transform
-         * @public
          */
         this.transform = new KICK.scene.Transform(this);
         this._components = [];
@@ -203,7 +201,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             localMatrixInverse = mat4.identity(mat4.create()),
             globalMatrixInverse = mat4.identity(mat4.create()),
             localPosition = vec3.create([0,0,0]),
-            localRotation = vec3.create([0,0,0]),
+            localRotationQuat = quat4.create([0,0,0,1]),
             localScale = vec3.create([1,1,1]),
             // the dirty parameter let the
             LOCAL = 0,
@@ -237,7 +235,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Local translation.
              * @property localPosition
              * @type KICK.math.vec3
-             * @public
              */
             localPosition:{
                 get: function(){
@@ -252,14 +249,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Local rotation in euler angles.
              * @property localRotationEuler
              * @type KICK.math.vec3
-             * @public
              */
             localRotationEuler: {
                 get: function(){
-                    return vec3.create(localRotation);
+                    var vec = vec3.create();
+                    quat4.toEuler(localRotationQuat,vec);
+                    return vec;
                 },
                 set: function(newValue){
-                    vec3.set(newValue,localRotation);
+                    quat4.setEuler(newValue,localRotationQuat);
+                    markLocalDirty();
+                }
+            },
+            /**
+             * Local rotation in quaternion.
+             * @property localRotation
+             * @type KICK.math.quat4
+             */
+            localRotation: {
+                get: function(){
+                    return localRotationQuat;
+                },
+                set: function(newValue){
+                    quat4.set(newValue,localRotationQuat);
                     markLocalDirty();
                 }
             },
@@ -267,7 +279,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Local scale
              * @property localScale
              * @type KICK.math.vec3
-             * @public
              */
             localScale: {
                 get: function(){
@@ -282,7 +293,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Array of children. The children should not be modified directly. Instead use the setParent method
              * @property children
              * @type Array
-             * @public
              */
             children:{
                 value: children
@@ -291,7 +301,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Parent transform. Initial null. The property is readonly and can only be changed through the setParent method
              * @property parentTransform
              * @type KICK.scene.Transform
-             * @public
              * @final
              */
             parentTransform:{
@@ -327,8 +336,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             if (dirty[LOCAL]) {
                 mat4.identity(localMatrix);
                 mat4.translate(localMatrix, this.localPosition);
-                //mat4.rotateEuler(localMatrix,this.localRotationEuler);
-                mat4.multiply(localMatrix,KICK.math.quat4.toMat4(KICK.math.quat4.setEuler(this.localRotationEuler)));
+                mat4.multiply(localMatrix,KICK.math.quat4.toMat4(localRotationQuat));
                 mat4.scale(localMatrix, this.localScale);
                 dirty[LOCAL] = 0;
             }
@@ -343,15 +351,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.getLocalTRInverse = function () {
             if (dirty[LOCAL_INV]) {
                 mat4.identity(localMatrixInverse);
-                if (this.localRotationEuler[0] !== 0.0) {
-                    mat4.rotateX(localMatrixInverse, -this.localRotationEuler[0]*degreeToRadian);
-                }
-                if (this.localRotationEuler[1] !== 0.0) {
-                    mat4.rotateY(localMatrixInverse, -this.localRotationEuler[1]*degreeToRadian);
-                }
-                if (this.localRotationEuler[2] !== 0.0 ) {
-                    mat4.rotateZ(localMatrixInverse, -this.localRotationEuler[2]*degreeToRadian);
-                }
+                KICK.math.quat4.toMat4(KICK.math.quat4.inverse(localRotationQuat),localMatrixInverse);
                 mat4.translate(localMatrixInverse, [-this.localPosition[0],-this.localPosition[1],-this.localPosition[2]]);
                 // ignores scale, since it should currently not be used
                 dirty[LOCAL_INV] = 0;
@@ -537,7 +537,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Reference to the engine
          * @property engine
          * @type KICK.core.Engine
-         * @public
          */
         Object.defineProperty(this,"engine",{
             value:engine
