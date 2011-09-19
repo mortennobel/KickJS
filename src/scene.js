@@ -217,7 +217,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 dirty[GLOBAL] = 1;
                 dirty[GLOBAL_INV] = 1;
                 for (i=children.length-1;i>=0;i--) {
-                    children[i]._markUpdated();
+                    children[i]._markGlobalDirty();
                 }
             },
             markLocalDirty = function(){
@@ -304,7 +304,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * @final
              */
             parentTransform:{
-                value: parentTransform
+                get: function(){return parentTransform;}
             }
         });
 

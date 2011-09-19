@@ -15,8 +15,10 @@
     <script type="text/javascript" src="../src/meshfactory.js"></script>
     <script type="text/javascript">
         var engine;
-        var meshRenderer;
-        
+
+        var mesh;
+        var material;
+
         var log = function (output) {
             var element = document.getElementById("output");
             element.innerHTML = element.innerHTML+output+"<br>";
@@ -27,41 +29,16 @@
             element.innerHTML = "";
         }
 
-        function setMesh(meshFactoryFunc,subdivisions){
-            clearLog();
-            meshRenderer.mesh = meshFactoryFunc(engine,subdivisions);
-        }
-
-        function setMaterial(vertexShaderId, fragmentShaderId){
+        function createMaterial(vertexShaderId, fragmentShaderId){
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
             shader.initShader(vs,fs,log);
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                return;
-            }
-
-            meshRenderer.material = new KICK.material.Material({
+            return new KICK.material.Material({
                 name:"Some material",
                 shader:shader
             });
-        }
-
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
         }
 
         function addRotatorComponent(gameObject){
@@ -77,6 +54,23 @@
             });
         }
 
+        function addCube(parent){
+            var gameObject = engine.activeScene.createGameObject();
+            var meshRenderer = new KICK.scene.MeshRenderer();
+            meshRenderer.mesh = mesh;
+            meshRenderer.material = material;
+            gameObject.addComponent(meshRenderer);
+            addRotatorComponent(gameObject);
+            if (parent){
+                gameObject.transform.setParent(parent);
+                gameObject.transform.localPosition = [0,1.2,0];
+            } else {
+                gameObject.transform.localPosition = [0,-5,0];
+            }
+
+            return gameObject.transform;
+        }
+
         function initKick() {
             engine = new KICK.core.Engine('canvas');
             var cameraObject = engine.activeScene.createGameObject();
@@ -84,16 +78,22 @@
                 clearColor: [0,0,0,1],
                 cameraTypePerspective: false,
                 near:-1,
-                far:1
+                far:1,
+                bottom:-10,
+                top:10,
+                left:-10,
+                right:10
             });
             cameraObject.addComponent(camera);
 
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createCube, 0.5);
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-            addRotatorComponent(gameObject);
+            mesh = KICK.scene.MeshFactory.createCube(engine,0.5);
+            material = createMaterial('vertexShaderColor','fragmentShader');
+
+            var transform = null;
+            for (var i=0;i<5;i++){
+                transform = addCube(transform);
+            }
+
         }
 
     </script>
