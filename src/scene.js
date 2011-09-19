@@ -200,7 +200,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             globalMatrix = mat4.identity(mat4.create()),
             localMatrixInverse = mat4.identity(mat4.create()),
             globalMatrixInverse = mat4.identity(mat4.create()),
+            globalPosition = vec3.create([0,0,0]),
             localPosition = vec3.create([0,0,0]),
+            globalRotationQuat = quat4.create([0,0,0,1]),
             localRotationQuat = quat4.create([0,0,0,1]),
             localScale = vec3.create([1,1,1]),
             // the dirty parameter let the
@@ -208,7 +210,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             LOCAL_INV = 1,
             GLOBAL = 2,
             GLOBAL_INV = 3,
-            dirty = new Int8Array(4), // local,localInverse,global,globalInverse
+            GLOBAL_POSITION = 4,
+            GLOBAL_ROTATION = 5,
+            dirty = new Int8Array(6), // local,localInverse,global,globalInverse
             children = [],
             parentTransform = null,
             thisObj = this,
@@ -216,6 +220,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 var i;
                 dirty[GLOBAL] = 1;
                 dirty[GLOBAL_INV] = 1;
+                dirty[GLOBAL_POSITION] = 1;
+                dirty[GLOBAL_ROTATION] = 1;
                 for (i=children.length-1;i>=0;i--) {
                     children[i]._markGlobalDirty();
                 }
@@ -232,7 +238,39 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value: gameObject
             },
             /**
-             * Local translation.
+             * Global position.
+             * @property position
+             * @type KICK.math.vec3
+             */
+            position:{
+                get: function(){
+                    // if no parent - use local position
+                    if (parentTransform==null){
+                        return vec3.create(localPosition);
+                    }
+                    if (dirty[GLOBAL_POSITION]){
+                        mat4.multiplyVec3(this.getGlobalMatrix(),[0,0,0],globalPosition);
+                        dirty[GLOBAL_POSITION] = 0;
+                    }
+                    return vec3.create(globalPosition);
+                },
+                set:function(newValue){
+                    var currentPosition;
+                    if (parentTransform==null){
+                        this.localPosition = newValue;
+                        return;
+                    }
+                    currentPosition = this.position;
+                    vec3.set(newValue,localPosition);
+                    this.localPosition = [
+                        localPosition[0]+currentPosition[0]-newValue[0],
+                        localPosition[1]+currentPosition[1]-newValue[1],
+                        localPosition[2]+currentPosition[2]-newValue[2]
+                    ];
+                }
+            },
+            /**
+             * Local position.
              * @property localPosition
              * @type KICK.math.vec3
              */
@@ -259,6 +297,56 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(newValue){
                     quat4.setEuler(newValue,localRotationQuat);
                     markLocalDirty();
+                }
+            },
+            /**
+             * Global rotation in euler angles.
+             * @property localRotationEuler
+             * @type KICK.math.vec3
+             */
+            rotationEuler: {
+                get: function(){
+                    var vec = vec3.create();
+                    quat4.toEuler(this.rotation,vec);
+                    return vec;
+                },
+                set: function(newValue){
+                    var tmp = quat4.create();
+                    quat4.setEuler(newValue,tmp);
+                    this.rotation = tmp;
+                }
+            },
+
+            /**
+             * Global rotation in quaternion.
+             * @property rotation
+             * @type KICK.math.quat4
+             */
+            rotation:{
+                get: function(){
+                    var parentIterator = null;
+                    if (parentTransform==null){
+                        return vec3.create(localRotationQuat);
+                    }
+                    if (dirty[GLOBAL_ROTATION]){
+                        quat4.set(localRotationQuat,globalRotationQuat);
+                        parentIterator = this.parent;
+                        while (parentIterator != null){
+                            quat4.multiply(parentIterator.localRotation,globalRotationQuat,globalRotationQuat);
+                            parentIterator = parentIterator.parent;
+                        }
+                        dirty[GLOBAL_ROTATION] = false;
+                    }
+                    return globalRotationQuat;
+                },
+                set: function(newValue){
+                    if (parentTransform==null){
+                        this.localRotation = newValue;
+                        return;
+                    }
+                    var rotationDifference = quat4.create();
+                    quat4.difference(newValue,this.rotation,rotationDifference);
+                    this.localRotation = quat4.multiply(localRotationQuat,rotationDifference);
                 }
             },
             /**

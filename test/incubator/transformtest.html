@@ -88,7 +88,47 @@ YUI().use('node', 'console', 'test', function (Y) {
             var globalMatrix =transform2.getGlobalMatrix();
             var res = KICK.math.mat4.multiplyVec3(globalMatrix,[0,0,0]);
             Assert.compareVec([0,25,0],res,"Expected result [0,25,0] but was "+KICK.math.vec3.str(res))
+        },
+        testTransformGlobalPosition: function () {
+            var Assert = Y.Assert;
+            var transform1 = new KICK.scene.Transform();
+            var transform2 = new KICK.scene.Transform();
+            transform1.localPosition = [0,10,0];
+            transform2.localPosition = [0,15,0];
+            transform2.parent = transform1;
+
+            Assert.compareVec([0,25,0],transform2.position,"Expected result [0,25,0] but was "+KICK.math.vec3.str(transform2.position));
+            transform1.localPosition = [0,-10,0];
+            Assert.compareVec([0,5,0],transform2.position,"Expected result [0,5,0] but was "+KICK.math.vec3.str(transform2.position)+
+            "\ntransform1.localPosition: "+KICK.math.vec3.str(transform1.localPosition)+
+            "\ntransform2.localPosition: "+KICK.math.vec3.str(transform2.localPosition)+
+            "\ntransform1.getGlobalMatrix: \n"+KICK.math.mat4.strPretty(transform1.getGlobalMatrix())+
+            "\ntransform2.getGlobalMatrix: \n"+KICK.math.mat4.strPretty(transform2.getGlobalMatrix())
+            );
+        },
+        testTransformGlobalRotation: function () {
+            var Assert = Y.Assert;
+            var transform1 = new KICK.scene.Transform();
+            var transform2 = new KICK.scene.Transform();
+            transform1.localRotationEuler = [0,10,0];
+            transform2.localRotationEuler = [0,15,0];
+            transform2.parent = transform1;
+
+            var resultEuler = [0,25,0];
+            var resultQuaternion = KICK.math.quat4.setEuler(resultEuler);
+
+            Assert.compareVec(resultQuaternion,transform2.rotation,"Expected result "+KICK.math.vec4.str(resultQuaternion)+" but was "+KICK.math.vec4.str(transform2.rotation));
+            Assert.compareVec(resultEuler,transform2.rotationEuler,"Expected result "+KICK.math.vec3.str(resultEuler)+" but was "+KICK.math.vec3.str(transform2.rotationEuler));
+            /*transform1.localPosition = [0,-10,0];
+            Assert.compareVec([0,5,0],transform2.position,"Expected result [0,5,0] but was "+KICK.math.vec3.str(transform2.position)+
+            "\ntransform1.localPosition: "+KICK.math.vec3.str(transform1.localPosition)+
+            "\ntransform2.localPosition: "+KICK.math.vec3.str(transform2.localPosition)+
+            "\ntransform1.getGlobalMatrix: \n"+KICK.math.mat4.strPretty(transform1.getGlobalMatrix())+
+            "\ntransform2.getGlobalMatrix: \n"+KICK.math.mat4.strPretty(transform2.getGlobalMatrix())
+            );*/
         }
+
+
     });
 
     /// extend Asset to compare float values

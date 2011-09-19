@@ -19,6 +19,7 @@
 <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
 </head>
 <body class="yui3-skin-sam">
+<h1>Math test</h1>
 <style scoped>
     #testLogger {
         margin-bottom: 1em;
@@ -241,12 +242,28 @@ YUI().use('node', 'console', 'test', function (Y) {
             var vec = KICK.math.vec3.create([0,0,0]);
 
             KICK.math.quat4.toEuler(quat,vec);
-            r.log("Default rotation: "+KICK.math.vec3.str(vec));
+            Assert.compareVec([0,0,0],vec);
+        },
+        testQuad4Difference: function(){
+            var Assert = Y.Assert;
+            var quat1 = KICK.math.quat4.create([0,0,0,1]);
+            var quat2 = KICK.math.quat4.create([0,0,0,1]);
+
+            KICK.math.quat4.setEuler([15,0,0],quat1);
+            KICK.math.quat4.setEuler([-25,0,0],quat2);
+            var res = KICK.math.quat4.difference(quat1,quat2);
+            var resEuler = KICK.math.quat4.toEuler(res);
+            Assert.compareVec([-40,0,0],resEuler);
         }
     });
 
     /// extend Asset to compare float values
     Y.Assert.compareVec = function(f1,f2,message){
+        if (!message){
+            if (f1.length==3){
+                message = "Expected "+KICK.math.vec3.str(f1)+" Actual "+KICK.math.vec3.str(f2);
+            }
+        }
         for (var i=0;i<f1.length;i++){
             Y.Assert.compareFloat(f1[i],f2[i],message);
         }

@@ -2161,6 +2161,31 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Return rotation that goes from quat to quat2.
+     * It is the same as: quat4.multiply(quat4.inverse(quat),quat2,dest);
+     * @method {KICK.math.quat4} difference
+     * @param {KICK.math.quat4} quat from rotation
+     * @param {KICK.math.quat4} quat2 to rotation
+     * @param {KICK.math.quat4} dest Optional
+     * @return {KICK.math.quat4} dest if specified, quat otherwise
+     */
+    quat4.difference = function(quat, quat2, dest) {
+        if(!dest) { dest = quat; }
+
+        var qax = -quat[0], qay = -quat[1], qaz = -quat[2], qaw = quat[3];
+        var qbx = quat2[0], qby = quat2[1], qbz = quat2[2], qbw = quat2[3];
+
+        dest[0] = qax*qbw + qaw*qbx + qay*qbz - qaz*qby;
+        dest[1] = qay*qbw + qaw*qby + qaz*qbx - qax*qbz;
+        dest[2] = qaz*qbw + qaw*qbz + qax*qby - qay*qbx;
+        dest[3] = qaw*qbw - qax*qbx - qay*qby - qaz*qbz;
+
+        return dest;
+    };
+
+
+
+    /**
      * Returns a string representation of a quaternion
      * @method str
      * @param {KICK.math.quat4} quat quat4 to represent as a string
