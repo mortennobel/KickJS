@@ -290,7 +290,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
-             * Array of children. The children should not be modified directly. Instead use the setParent method
+             * Array of children. The children should not be modified directly. Instead use the parent property
              * @property children
              * @type Array
              */
@@ -298,34 +298,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value: children
             },
             /**
-             * Parent transform. Initial null. The property is readonly and can only be changed through the setParent method
-             * @property parentTransform
+             * Parent transform. Initial null.
+             * @property parent
              * @type KICK.scene.Transform
-             * @final
              */
-            parentTransform:{
-                get: function(){return parentTransform;}
+            parent:{
+                get: function(){
+                    return parentTransform;
+                },
+                set: function(newParent){
+                    if (newParent === this) {
+                        throw new Error('Cannot assign parent to self');
+                    }
+                    if (newParent === null){
+                        parentTransform = null;
+                        core.Util.removeElementFromArray(newParent.children,this);
+                    } else {
+                        parentTransform = newParent;
+                        newParent.children.push(this);
+                    }
+                    markGlobalDirty();
+                }
             }
         });
-
-        /**
-         * Set the parent to the object and register this to the parents child objects
-         * @method setParent
-         * @param newParent
-         */
-        this.setParent = function (newParent) {
-            if (newParent === this) {
-                throw new Error('Cannot assign parent to self');
-            }
-            if (newParent === null){
-                parentTransform = null;
-                core.Util.removeElementFromArray(newParent.children,this);
-            } else {
-                parentTransform = newParent;
-                newParent.children.push(this);
-            }
-            markGlobalDirty();
-        };
 
         /**
          * Return the local transformation matrix
@@ -361,10 +356,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             if (dirty[GLOBAL]) {
                 mat4.set(thisObj.getLocalMatrix(), globalMatrix);
 
-                var transformIterator = thisObj.parentTransform;
+                var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
                     mat4.multiply(globalMatrix, transformIterator.getLocalMatrix(),globalMatrix);
-                    transformIterator  = transformIterator.parentTransform;
+                    transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL] = 0;
             }
@@ -379,10 +374,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.getGlobalTRInverse = function () {
             if (dirty[GLOBAL_INV]) {
                 mat4.set(thisObj.getLocalTRInverse(), globalMatrixInverse);
-                var transformIterator = thisObj.parentTransform;
+                var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
                     mat4.multiply(globalMatrixInverse,transformIterator.getLocalTRInverse(),globalMatrixInverse);
-                    transformIterator  = transformIterator.parentTransform;
+                    transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL_INV] = 0;
             }

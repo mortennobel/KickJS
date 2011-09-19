@@ -62,7 +62,7 @@
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);
             if (parent){
-                gameObject.transform.setParent(parent);
+                gameObject.transform.parent = parent;
                 gameObject.transform.localPosition = [0,1.2,0];
             } else {
                 gameObject.transform.localPosition = [0,-5,0];

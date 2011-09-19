@@ -84,7 +84,7 @@ YUI().use('node', 'console', 'test', function (Y) {
             var transform2 = new KICK.scene.Transform();
             transform1.localPosition = [0,10,0];
             transform2.localPosition = [0,15,0];
-            transform2.setParent(transform1);
+            transform2.parent = transform1;
             var globalMatrix =transform2.getGlobalMatrix();
             var res = KICK.math.mat4.multiplyVec3(globalMatrix,[0,0,0]);
             Assert.compareVec([0,25,0],res,"Expected result [0,25,0] but was "+KICK.math.vec3.str(res))
