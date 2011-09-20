@@ -105,7 +105,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             component.scriptPriority = 0;
         }
         if (component instanceof scene.Camera) {
-            this.scene.addCamera(component);
+            this.scene._addCamera(component);
         }
         component.gameObject = this;
         this._components.push(component);
@@ -301,7 +301,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * Global rotation in euler angles.
-             * @property localRotationEuler
+             * @property rotationEuler
              * @type KICK.math.vec3
              */
             rotationEuler: {
@@ -413,9 +413,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         /**
          * Return the local transformation matrix
          * @method getLocalMatrix
-         * @return {mat4} local transformation
+         * @return {KICK.math.mat4} local transformation
          */
-        this.getLocalMatrix = function (dest) {
+        this.getLocalMatrix = function () {
             if (dirty[LOCAL]) {
                 mat4.setTRS(localPosition,localRotationQuat,localScale,localMatrix);
                 dirty[LOCAL] = 0;
@@ -425,10 +425,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         /**
          * Return the local inverse of translate rotate scale
-         * @method getLocalTRInverse
-         * @return {mat4} inverse of local transformation
+         * @method getLocalTRSInverse
+         * @return {KICK.math.mat4} inverse of local transformation
          */
-        this.getLocalTRInverse = function () {
+        this.getLocalTRSInverse = function () {
             if (dirty[LOCAL_INV]) {
                 mat4.setTRSInverse(localPosition,localRotationQuat,localScale,localMatrix);
                 dirty[LOCAL_INV] = 0;
@@ -438,7 +438,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         /**
          * @method getGlobalMatrix
-         * @return {mat4} global transform
+         * @return {KICK.math.mat4} global transform
          */
         this.getGlobalMatrix = function () {
             if (dirty[GLOBAL]) {
@@ -456,15 +456,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         /**
          * Return the inverse of global rotate translate transform
-         * @method getGlobalMatrixInverse
-         * @return {mat4} inverse global transform
+         * @method getGlobalTRSInverse
+         * @return {KICK.math.mat4} inverse global transform
          */
-        this.getGlobalTRInverse = function () {
+        this.getGlobalTRSInverse = function () {
             if (dirty[GLOBAL_INV]) {
-                mat4.set(thisObj.getLocalTRInverse(), globalMatrixInverse);
+                mat4.set(thisObj.getLocalTRSInverse(), globalMatrixInverse);
                 var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
-                    mat4.multiply(globalMatrixInverse,transformIterator.getLocalTRInverse(),globalMatrixInverse);
+                    mat4.multiply(globalMatrixInverse,transformIterator.getLocalTRSInverse(),globalMatrixInverse);
                     transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL_INV] = 0;
@@ -503,11 +503,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             /**
              * Compares two objects based on scriptPriority
              * @method sortByScriptPriority
-             * @param a
-             * @param b
+             * @param {KICK.scene.Component} a
+             * @param {KICK.scene.Component} b
+             * @return {Number} order of a,b
              * @private
              */
-                sortByScriptPriority = function (a,b) {
+            sortByScriptPriority = function (a,b) {
                 return a.scriptPriority-b.scriptPriority;
             },
             /**
@@ -516,7 +517,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * @method cleanupGameObjects
              * @private
              */
-                cleanupGameObjects = function () {
+            cleanupGameObjects = function () {
                 var i,
                     component;
                 if (gameObjectsNew.length > 0) {
@@ -570,7 +571,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * {componentsAdded(components) and componentsRemoved(components)}.
          * Throws an exception if the two required functions does not exist.
          * @method addComponentListener
-         * @param componentListener
+         * @param {KICK.scene.ComponentChangedListener} componentListener
          */
         this.addComponentListener = function (componentListener) {
             if (!scene.ComponentChangedListener.isComponentListener(componentListener) ) {
@@ -584,7 +585,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentListenes.push(componentListener);
         }
 
-
+        /**
+         * Removes a component change listener from the scene
+         * @method removeComponentListener
+         * @param {KICK.scene.ComponentChangedListener} componentListener
+         */
         this.removeComponentListener = function (componentListener) {
             core.Util.removeElementFromArray(componentListenes,componentListener);
         }
@@ -685,7 +690,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             cleanupGameObjects();
         };
 
-        this.addCamera = function (camera) {
+        /**
+         * @method _addCamera
+         * @param camera
+         * @private
+         */
+        this._addCamera = function (camera) {
             cameras.push(camera);
         }
 
@@ -738,6 +748,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             };
 
+        /**
+         * Handles the camera setup (get fast reference to transform and glcontext)
+         * @method activated
+         */
         this.activated = function(){
             var gameObject = this.gameObject;
             transform = gameObject.transform;
@@ -765,7 +779,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             // todo - this allocates a new mat4 - remove this
-            var globalMatrixInv = transform.getGlobalTRInverse();
+            var globalMatrixInv = transform.getGlobalTRSInverse();
             mat4.set(globalMatrixInv, modelViewMatrix);
 
             mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
@@ -854,6 +868,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Specifies the interface for a component listener.
      * Note that object only need to implement the methods componentsAdded and componentsRemoved.
+     * However the class does exist and has the static method isComponentListener
      * @class ComponentChangedListener
      * @namespace KICK.scene
      */
@@ -890,6 +905,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     scene.MeshRenderer = function () {
         var transform;
 
+        /**
+         * @method activated
+         */
         this.activated = function(){
             transform = this.gameObject.transform;
         };
@@ -910,8 +928,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
             var mesh = this.mesh,
                 material = this.material,
-                shader = material.shader,
-                globalTransform = transform.getGlobalMatrix ( );
+                shader = material.shader;
             mesh.bind(shader);
             shader.bindUniform(material.uniforms);
             shader.bindMatrices(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform);
@@ -1093,6 +1110,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * Renders the current mesh
          * @method render
          */
         this.render = function () {
@@ -1100,6 +1118,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         }
 
         /**
+         * Copy data to the vertex buffer object (VBO)
          * @method updateData
          */
         this.updateData = function () {
@@ -1153,6 +1172,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Recalculate the vertex normals based on the triangle normals
      * @method recalculateNormals
      */
     scene.Mesh.prototype.recalculateNormals = function(){
@@ -1272,5 +1292,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
             tangent[a][3] = (vec3.dot(vec3.cross(n, t,vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
         }
+    };
+
+    /**
+     * A light object
+     * @class Light
+     * @namespace KICK.scene
+     * @extends KICK.scene.Component
+     * @final
+     */
+    scene.Light = function (engine,config) {
+        
     };
  })();

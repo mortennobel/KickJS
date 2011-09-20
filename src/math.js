@@ -80,7 +80,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         quat4 = KICK.namespace("KICK.math.quat4"),
         DEGREE_TO_RADIAN = 0.01745329251994,
         RADIAN_TO_DEGREE = 57.2957795130824,
-        glMatrixArrayType;
+        Float32Array;
 
     /**
      * Math class for miscellaneous functions and constants. The class is static
@@ -108,15 +108,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     // glMatrix start
 
-    // Fallback for systems that don't support WebGL
-    if(typeof Float32Array != 'undefined') {
-        glMatrixArrayType = Float32Array;
-    } else if(typeof WebGLFloatArray != 'undefined') {
-        glMatrixArrayType = WebGLFloatArray; // This is officially deprecated and should disappear in future revisions.
-    } else {
-        glMatrixArrayType = Array;
-    }
-
     /**
      * vec3 - 3 Dimensional Vector
      * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
@@ -126,7 +117,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     math.vec3 = vec3;
 
     /**
-     *
+     * See KICK.math.vec4.wrapArray
+     * @method wrapArray
      * @param {Array} array
      * @return {Array} of vec3
      */
@@ -143,16 +135,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 
     /**
-     * Create a continuous array in memory mapped to vec3.
-     *
-     * Example
+     * Create a continuous array in memory mapped to vec3. <br>
+     * <br>
+     * Example<br>
+     * <pre class="brush: js">
      * var ref = {};
      * var v = KICK.math.vec3.array(2,ref);
      * v[1][1] = 1;
      * ref.mem[4] == v[1][1];
-     * Will be layed out like this:
-     *
+     * </pre>
+     * Will be layed out like this: <br>
+     * <br>
+     * <pre class="brush: js">
      * [vec3][vec3) = [0][1][2][3][4][5]
+     * </pre>
      *
      * @method array
      * @param {Number} count Number of vec 3 to be layed out in memory
@@ -160,7 +156,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {KICK.math.vec3} New vec3
      */
     vec3.array = function(count,ref){
-        var memory = new glMatrixArrayType(count*3);
+        var memory = new Float32Array(count*3);
         if (ref){
             ref.mem = memory;
         }
@@ -175,7 +171,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {KICK.math.vec3} New vec3
      */
     vec3.create = function(vec) {
-        var dest = new glMatrixArrayType(3);
+        var dest = new Float32Array(3);
 
         if(vec) {
             dest[0] = vec[0];
@@ -452,14 +448,35 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /////////////////////////////////////////
     /**
-     * vec4 - 4 Dimensional Vector
-     * Note: To perform vec3 functions on vec4, simply call the vec3 functions
+     * vec4 - 4 Dimensional Vector<br>
+     * Note: To perform vec3 functions on vec4, simply call the vec3 functions<br>
      * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class vec4
      * @namespace KICK.math
      */
     math.vec4 = vec4;
 
+    /**
+     * Wraps a Float32Array with multiple vec4 arrays. For instance if you have colors defined in a single
+     * Float32Array, but need to do vector operations on the elements of the array, instead of copying data out of the
+     * Float32Array, wrapArray will give you access to the same data.
+     * <br>
+     * Example:<br>
+     * <pre class="brush: js">
+     * function avarageColor(float32arrayColor){
+     *     var sum = vec4.create(),
+     *         wrappedArray = vec4.wrapArray(float32arrayColor),
+     *         weigth = 1.0/wrappedArray;
+     *     for (var i=0;i  &lt; wrappedArray.length;i++){
+     *         vec4.add(sum,wrappedArray[i]);
+     *     }
+     *     return vec4.multiply(sum,[weigth,weigth,weigth,weigth]);
+     * }
+     * </pre>
+     * @method wrapArray
+     * @param {Float32Array} array
+     * @return {Array[KICK.math.vec4]} 
+     */
     vec4.wrapArray = function(array){
         var count = array.length/4,
             i,
@@ -475,21 +492,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Create a continuous array in memory mapped to vec4.
      *
      * Example
+     * <pre class="brush: js">
      * var ref = {};
      * var v = KICK.math.vec4.array(2,ref);
      * v[1][1] = 1;
      * ref.mem[5] == v[1][1];
+     * </pre>
      * Will be layed out like this:
-     *
+     * <pre class="brush: js">
      * [vec4][vec4] = [0][1][2][3][4][5][6][7]
-     *
+     * </pre>
      * @method array
      * @param {Number} count Number of vec 3 to be layed out in memory
      * @param {Object} ref Optional, if set a memory reference is set to ref.mem
      * @return {KICK.math.vec3} New vec3
      */
     vec4.array = function(count,ref){
-        var memory = new glMatrixArrayType(count*4);
+        var memory = new Float32Array(count*4);
         if (ref){
             ref.mem = memory;
         }
@@ -497,14 +516,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Creates a new instance of a vec4 using the default array type
+     * Creates a new instance of a vec4 using the default array type<br>
      * Any javascript array containing at least 4 numeric elements can serve as a vec4
      * @method create
      * @param {Array} vec Optional, vec4 containing values to initialize with
      * @return {KICK.math.vec4} New vec4
      */
     vec4.create = function(vec) {
-        var dest = new glMatrixArrayType(4);
+        var dest = new Float32Array(4);
 
         if(vec) {
             dest[0] = vec[0];
@@ -665,14 +684,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     math.mat3 = mat3;
 
     /**
-     * Creates a new instance of a mat3 using the default array type
+     * Creates a new instance of a mat3 using the default array type<br>
      * Any javascript array containing at least 9 numeric elements can serve as a mat3
      * @method create
      * @param {Array} mat Optional, mat3 containing values to initialize with
      * @return {KICK.math.mat3} New mat3
      */
     mat3.create = function(mat) {
-        var dest = new glMatrixArrayType(9);
+        var dest = new Float32Array(9);
 
         if(mat) {
             dest[0] = mat[0];
@@ -808,7 +827,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * mat4 - 4x4 Matrix
+     * mat4 - 4x4 Matrix<br>
      * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class mat4
      * @namespace KICK.math
@@ -816,14 +835,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     math.mat4 = mat4;
 
     /**
-     * Creates a new instance of a mat4 using the default array type
+     * Creates a new instance of a mat4 using the default array type<br>
      * Any javascript array containing at least 16 numeric elements can serve as a mat4
      * @method create
      * @param {Array} mat Optional, mat4 containing values to initialize with
      * @return {KICK.math.mat4} New mat4
      */
     mat4.create = function(mat) {
-        var dest = new glMatrixArrayType(16);
+        var dest = new Float32Array(16);
 
         if(mat) {
             dest[0] = mat[0];
@@ -1111,7 +1130,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Calculates the inverse of the upper 3x3 elements of a mat4 and copies the result into a mat3
+     * Calculates the inverse of the upper 3x3 elements of a mat4 and copies the result into a mat3<br>
      * The resulting matrix is useful for calculating transformed normals
      * @method toInverseMat3
      * @param {KICK.math.mat4} mat mat4 containing values to invert and copy
@@ -1190,7 +1209,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Transforms a vec3 with the given matrix
+     * Transforms a vec3 with the given matrix<br>
      * 4th vector component is implicitly '1'
      * @method multiplyVec3
      * @param {KICK.math.mat4} mat mat4 to transform the vector with
@@ -1321,7 +1340,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Rotates a matrix by three rotations given in eulers angles
+     * Rotates a matrix by three rotations given in eulers angles<br>
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
      * @method rotateEuler
      * @param {KICK.math.mat4} mat mat4 to rotate
@@ -1350,8 +1369,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Rotates a matrix by the given angle around the specified axis
-     * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
+     * Rotates a matrix by the given angle around the specified axis<br>
+     * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for
+     * performance
      * @method rotate
      * @param {KICK.math.mat4} mat mat4 to rotate
      * @param {Number} angle angle (in radians) to rotate
@@ -1756,14 +1776,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     math.quat4 = quat4;
 
     /**
-     * Creates a new instance of a quat4 using the default array type
+     * Creates a new instance of a quat4 using the default array type<br>
      * Any javascript array containing at least 4 numeric elements can serve as a quat4
      * @method create
      * @param {Array} quat Optional, quat4 containing values to initialize with
      * @return {KICK.math.quat4} New quat4
      */
     quat4.create = function(quat) {
-        var dest = new glMatrixArrayType(4);
+        var dest = new Float32Array(4);
 
         if(quat) {
             dest[0] = quat[0];
@@ -1792,8 +1812,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Calculates the W component of a quat4 from the X, Y, and Z components.
-     * Assumes that quaternion is 1 unit in length.
+     * Calculates the W component of a quat4 from the X, Y, and Z components.<br>
+     * Assumes that quaternion is 1 unit in length.<br>
      * Any existing W component will be ignored.
      * @method calculateW
      * @param {KICK.math.quat4} quat quat4 to calculate W component of
@@ -1848,7 +1868,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     }
 
     /**
-     * Generates a unit quaternion of the same direction as the provided quat4
+     * Generates a unit quaternion of the same direction as the provided quat4<br>
      * If quaternion length is 0, returns [0, 0, 0, 0]
      * @method normalize
      * @param {KICK.math.quat4} quat quat4 to normalize
@@ -2161,7 +2181,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Return rotation that goes from quat to quat2.
+     * Return rotation that goes from quat to quat2.<br>
      * It is the same as: quat4.multiply(quat4.inverse(quat),quat2,dest);
      * @method {KICK.math.quat4} difference
      * @param {KICK.math.quat4} quat from rotation

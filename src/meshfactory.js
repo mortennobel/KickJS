@@ -73,6 +73,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @param {Number} subdivisions Optional, Number of subdivisions in sphere. Default value is 2
      * @param {Number} radius Optional, 1 is default
+     * @return {KICK.scene.Mesh} Icopphere
      */
     scene.MeshFactory.createIcosphere = function (engine,subdivisions,radius) {
         var vertex = [],
@@ -189,6 +190,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @method createPlane
      * @static
      * @param {KICK.core.Engine} engine
+     * @return {KICK.scene.Mesh} plane mesh
      */
     scene.MeshFactory.createPlane = function (engine) {
         var config = {
@@ -223,6 +225,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @static
      * @param {KICK.core.Engine} engine
      * @param {Number} length Optional, default value is 1.0
+     * @return {KICK.scene.Mesh} cube mesh
      */
     scene.MeshFactory.createCube = function (engine,length) {
         if (!length){

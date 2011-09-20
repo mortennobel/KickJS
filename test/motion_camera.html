@@ -89,7 +89,7 @@
                         transform.localScale = [scax.value,scay.value,scaz.value];
                     }
                     mat.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix());
-                    matinv.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalTRInverse());
+                    matinv.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalTRSInverse());
                 }
             });
         }

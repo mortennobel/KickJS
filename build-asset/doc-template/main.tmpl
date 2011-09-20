@@ -8,6 +8,13 @@
 	<link rel="stylesheet" type="text/css" href="assets/reset-fonts-grids-min.css#if $timestamp#?stamp=$timestamp#end if#" />
 	<link rel="stylesheet" type="text/css" href="assets/api.css#if $timestamp#?stamp=$timestamp#end if#" />
 
+    <!-- syntaxhighlighter_3.0.83 -->
+    <script type="text/javascript" src="assets/syntaxhighlighter_3.0.83/shCore.js"></script>
+    <script type="text/javascript" src="assets/syntaxhighlighter_3.0.83/shBrushJScript.js"></script>
+    <link href="assets/syntaxhighlighter_3.0.83/shCore.css" rel="stylesheet" type="text/css" />
+    <link href="assets/syntaxhighlighter_3.0.83/shThemeDefault.css" rel="stylesheet" type="text/css" />
+
+
     <script type="text/javascript" src="assets/api-js#if $timestamp#?stamp=$timestamp#end if#"></script>
     <script type="text/javascript" src="assets/ac-js#if $timestamp#?stamp=$timestamp#end if#"></script>
 </head>
@@ -680,6 +687,7 @@
     #end if 
 
     var ALL_YUI_PROPS = $allprops;
+    SyntaxHighlighter.all();
 </script>
 #if $ydn
 <!-- Yahoo! Web Analytics - All rights reserved -->
