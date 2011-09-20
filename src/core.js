@@ -143,7 +143,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         
         /**
          * @method _gameLoop
-         * @param {Number} time current time in millis
+         * @param {Number} time current time in milliseconds
          * @private
          */
         this._gameLoop = function (time) {
@@ -230,7 +230,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * _
+     * The global configuration of the engine. Cannot be changed during runtime.
      * @class Config
      * @namespace KICK.core
      * @constructor
@@ -333,8 +333,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         /**
          * Returns a-b
          * @method numberSortFunction
-         * @param a
-         * @param b
+         * @param {Number} a
+         * @param {Number} b
+         * @return {Number} a-b
          */
         numberSortFunction : function (a,b) {
             return a-b;
