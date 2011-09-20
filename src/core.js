@@ -170,6 +170,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         (function init() {
+            var c = KICK.core.Constants;
             for (var i = webGlContextNames.length-1; i >= 0; i--) {
                 try {
                     gl = canvas.getContext(webGlContextNames[i]);
@@ -198,10 +199,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 false);
 
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.enable(gl.DEPTH_TEST);
+            gl.enable(c.GL_DEPTH_TEST);
             gl.viewportWidth = canvas.width;
             gl.viewportHeight = canvas.height;
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+            gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
             Object.defineProperties(timeObj,{
                 time:{

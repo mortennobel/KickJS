@@ -104,17 +104,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         var compileShader = function (str, isFragmentShader, errorLog) {
-            var shader;
+            var shader,
+                c = KICK.core.Constants;
             if (isFragmentShader) {
-                shader = gl.createShader(gl.FRAGMENT_SHADER);
+                shader = gl.createShader(c.GL_FRAGMENT_SHADER);
             } else {
-                shader = gl.createShader(gl.VERTEX_SHADER);
+                shader = gl.createShader(c.GL_VERTEX_SHADER);
             }
 
             gl.shaderSource(shader, str);
             gl.compileShader(shader);
 
-            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            if (!gl.getShaderParameter(shader, c.GL_COMPILE_STATUS)) {
                 var infoLog =gl.getShaderInfoLog(shader);
                 if (errorLog) {
                     errorLog(infoLog);
@@ -134,7 +135,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.initShader = function (vertexShaderSrc,fragmentShaderSrc, errorLog) {
             var fragmentShader = compileShader(fragmentShaderSrc, true, errorLog),
                 vertexShader = compileShader(vertexShaderSrc, false, errorLog),
-                i;
+                i,
+                c = KICK.core.Constants;
 
             shaderProgramId = gl.createProgram();
 
@@ -148,13 +150,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             gl.attachShader(shaderProgramId, fragmentShader);
             gl.linkProgram(shaderProgramId);
 
-            if (!gl.getProgramParameter(shaderProgramId, gl.LINK_STATUS)) {
+            if (!gl.getProgramParameter(shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
                 return;
             }
 
             gl.useProgram(shaderProgramId);
-            var activeUniforms = gl.getProgramParameter( shaderProgramId, gl.ACTIVE_UNIFORMS);
+            var activeUniforms = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             /**
              * Array of Object with size,type, name and index properties
              * @property activeUniforms
@@ -178,7 +180,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 this.lookupUniform[uniform.name] = this.activeUniforms[i];
             }
 
-            var activeAttributes = gl.getProgramParameter( shaderProgramId, gl.ACTIVE_ATTRIBUTES);
+            var activeAttributes = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
             /**
              * Array of JSON data with size,type and name
              * @property activeAttributes
@@ -200,25 +202,26 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
                 this.lookupAttribute[attribute.name] = i;
             }
-            this.activeAttributesMaxLength = gl.getProgramParameter( shaderProgramId, gl.ACTIVE_ATTRIBUTE_MAX_LENGTH);
-            this.activeUniformsMaxLength = gl.getProgramParameter( shaderProgramId, gl.ACTIVE_UNIFORM_MAX_LENGTH);
+            this.activeAttributesMaxLength = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
+            this.activeUniformsMaxLength = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
         };
 
         var updateCullFace = function () {
-            var s = material.Shader;
-            var shaderFaceCulling = thisObj.faceCulling;
-            var currentFaceCulling = gl.faceCulling;
+            var s = material.Shader,
+                shaderFaceCulling = thisObj.faceCulling,
+                currentFaceCulling = gl.faceCulling,
+                c = KICK.core.Constants;
             if (currentFaceCulling !== shaderFaceCulling) {
                 if (shaderFaceCulling === s.NONE) {
-                    gl.disable( gl.CULL_FACE );
+                    gl.disable( c.GL_CULL_FACE );
                 } else {
                     if (!currentFaceCulling || currentFaceCulling === s.NONE) {
-                        gl.enable( gl.CULL_FACE );
+                        gl.enable( c.GL_CULL_FACE );
                     }
                     if (shaderFaceCulling === s.FRONT) {
-                        gl.cullFace( gl.FRONT );
+                        gl.cullFace( c.GL_FRONT );
                     } else {
-                        gl.cullFace( gl.BACK );
+                        gl.cullFace( c.GL_BACK );
                     }
                 }
                 gl.faceCulling = shaderFaceCulling;
@@ -226,25 +229,26 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         var updateDepthBuffer = function () {
-            var s = material.Shader;
+            var s = material.Shader,
+                c = KICK.core.Constants;
             var zTest = thisObj.zTest;
             if (gl.zTest != zTest) {
                 if (zTest === s.Z_TEST_NEVER) {
-                    gl.depthFunc(gl.NEVER);
+                    gl.depthFunc(c.GL_NEVER);
                 } else if (zTest === s.Z_TEST_EQUAL) {
-                    gl.depthFunc(gl.EQUAL);
+                    gl.depthFunc(c.GL_EQUAL);
                 } else if (zTest === s.Z_TEST_LEQUAL) {
-                    gl.depthFunc(gl.LEQUAL);
+                    gl.depthFunc(c.GL_LEQUAL);
                 } else if (zTest === s.Z_TEST_GREATER) {
-                    gl.depthFunc(gl.GREATER);
+                    gl.depthFunc(c.GL_GREATER);
                 } else if (zTest === s.Z_TEST_NOTEQUAL) {
-                    gl.depthFunc(gl.NOTEQUAL);
+                    gl.depthFunc(c.GL_NOTEQUAL);
                 } else if (zTest === s.Z_TEST_GEQUAL) {
-                    gl.depthFunc(gl.GEQUAL);
+                    gl.depthFunc(c.GL_GEQUAL);
                 } else if (zTest === s.Z_TEST_ALWAYS) {
-                    gl.depthFunc(gl.ALWAYS);
+                    gl.depthFunc(c.GL_ALWAYS);
                 } else {
-                    gl.depthFunc(gl.LESS);
+                    gl.depthFunc(c.GL_LESS);
                 }
                 gl.zTest = zTest;
             }
@@ -320,11 +324,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var uniform,
             uniforms = this.uniforms,
             type,
-            gl = KICK.core.Constants;
+            c = KICK.core.Constants;
         for (uniform in uniforms){
             if (typeof uniforms[uniform].value === "object"){
                 type = uniforms[uniform].type;
-                if (type === gl.INT || type===gl.INT_VEC2 || type===gl.INT_VEC3 || type===gl.INT_VEC4){
+                if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
                     uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
                 } else {
                     uniforms[uniform].value = new Float32Array(uniforms[uniform].value);
@@ -371,44 +375,45 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             shaderUniform,
             uniform,
             value,
-            location;
+            location,
+            c = KICK.core.Constants;
         for (uniformName in uniforms){
             shaderUniform = shader.lookupUniform[uniformName];
             uniform = uniforms[uniformName];
             location = shaderUniform.location;
             value = uniform.value;
             switch (shaderUniform.type){
-                case 5126: // FLOAT
+                case c.GL_FLOAT:
                     gl.uniform1fv(location,value);
                 break;
-                case 35674: // FLOAT_MAT2
+                case c.GL_FLOAT_MAT2:
                     gl.uniformMatrix2fv(location,false,value);
                 break;
-                case 35675: // FLOAT_MAT3
+                case c.GL_FLOAT_MAT3:
                     gl.uniformMatrix3fv(location,false,value);
                 break;
-                case 35676: // FLOAT_MAT4
+                case c.GL_FLOAT_MAT4:
                     gl.uniformMatrix4fv(location,false,value);
                 break;
-                case 35664: // FLOAT_VEC2
+                case c.GL_FLOAT_VEC2:
                     gl.uniform2fv(location,value);
                 break;
-                case 35665: // FLOAT_VEC3
+                case c.GL_FLOAT_VEC3:
                     gl.uniform3fv(location,value);
                 break;
-                case 35666: // FLOAT_VEC4
+                case c.GL_FLOAT_VEC4:
                     gl.uniform4fv(location,value);
                 break;
-                case 5124: // INT
+                case c.GL_INT:
                     gl.uniform1fv(location,value);
                 break;
-                case 35667: // INT_VEC2
+                case c.GL_INT_VEC2:
                     gl.uniform2fv(location,value);
                 break;
-                case 35668: // INT_VEC3
+                case c.GL_INT_VEC3:
                     gl.uniform3fv(location,value);
                 break;
-                case 35669: // INT_VEC4
+                case c.GL_INT_VEC4:
                     gl.uniform4fv(location,value);
                 break;
                 default:

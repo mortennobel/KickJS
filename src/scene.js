@@ -723,6 +723,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var gl,
             thisObj = this,
             transform,
+            c = KICK.core.Constants,
             isNumber = function (o) {
                 return typeof (o) === "number";
             },
@@ -736,7 +737,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (!thisObj._currentClearFlags) {
                     // I use '+' instead of '|' since it tends to perform better in JS
                     // and it should give the same result when the bit-fields are different (power of two)
-                    thisObj._currentClearFlags = (thisObj.clearFlagColor ? gl.COLOR_BUFFER_BIT : 0) + (thisObj.clearFlagDepth ? gl.DEPTH_BUFFER_BIT : 0);
+                    thisObj._currentClearFlags = (thisObj.clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) + (thisObj.clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
                 }
                 gl.clear(thisObj._currentClearFlags);
             },
@@ -1026,7 +1027,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             pointer: length*4,
                             size: size,
                             normalized: false,
-                            type: gl.FLOAT
+                            type: KICK.core.Constants.GL_FLOAT
                         };
                         length += size;
                     }
@@ -1092,9 +1093,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {KICK.material.Shader} shader
          */
         this.bind = function (shader) {
+            var c = KICK.core.Constants;
             shader.bind();
             
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshVertexAttBuffer);
+            gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
 
             for (var descName in meshVertexAttBufferDescription) {
                 if (shader.lookupAttribute[descName] !== undefined) {
@@ -1106,7 +1108,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             }
 
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+            gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
         };
 
         /**
@@ -1114,7 +1116,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method render
          */
         this.render = function () {
-            gl.drawElements(gl.TRIANGLES, meshVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+            var c = KICK.core.Constants;
+            gl.drawElements(c.GL_TRIANGLES, meshVertexIndexBuffer.numItems, c.GL_UNSIGNED_SHORT, 0);
         }
 
         /**
@@ -1125,7 +1128,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             var names = ["vertex", "normal", "tangent","uv1","uv2","color"],
                 dataLengths = [3,3,3,2,2,4],
                 i, buffer, dataLength,
-                interleavedData = this.createInterleavedData();
+                interleavedData = this.createInterleavedData(),
+                c = KICK.core.Constants;
             meshVertexAttBufferDescription = interleavedData.description;
             vertexAttrLength = interleavedData.vertexAttrLength;
             // delete current buffers
@@ -1148,8 +1152,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (data) {
                     buffer = gl.createBuffer();
                     dataLength = dataLengths[i];
-                    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-                    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+                    gl.bindBuffer(c.GL_ARRAY_BUFFER, buffer);
+                    gl.bufferData(c.GL_ARRAY_BUFFER, data, c.GL_STATIC_DRAW);
                     buffer.itemSize = dataLength;
                     buffer.numItems = data.length / dataLength;
                     buffers.push(buffer);
@@ -1158,12 +1162,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             meshVertexAttBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, meshVertexAttBuffer);
-            gl.bufferData(gl.ARRAY_BUFFER, interleavedData.data, gl.STATIC_DRAW);
+            gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
+            gl.bufferData(c.GL_ARRAY_BUFFER, interleavedData.data, c.GL_STATIC_DRAW);
 
             meshVertexIndexBuffer = gl.createBuffer();
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indices, gl.STATIC_DRAW);
+            gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+            gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, this.indices, c.GL_STATIC_DRAW);
             meshVertexIndexBuffer.itemSize = 1;
             meshVertexIndexBuffer.numItems = this.indices.length;
         };
