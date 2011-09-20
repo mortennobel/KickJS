@@ -1394,7 +1394,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     return scriptPriority;
                 },
                 set:function(value){
-                    this.scriptPriority = value;
+                    scriptPriority = value;
                 }
             }
         });
