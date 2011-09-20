@@ -376,7 +376,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             /**
              * Array of children. The children should not be modified directly. Instead use the parent property
              * @property children
-             * @type Array
+             * @type Array[KICK.scene.Transform]
              */
             children:{
                 value: children
@@ -489,13 +489,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var gameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
-            cameras = [],
             updateableComponents= [],
             lateUpdateableComponents = [],
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
-            lights = [],
             i,
             /**
              * Compares two objects based on scriptPriority
@@ -528,12 +526,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (componentsNew.length > 0) {
                     for (i = componentsNew.length-1; i >= 0; i--) {
                         component = componentsNew[i];
-                        if (component instanceof scene.Light){
-                            lights.push(component);
-                        }
-                        if (component instanceof scene.Camera) {
-                            cameras.push(component);
-                        }
                         if (typeof(component.activated) === "function") {
                             component.activated();
                         }
@@ -552,12 +544,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (componentsDelete.length > 0) {
                     for (i = componentsDelete.length-1; i >= 0; i--) {
                         component = componentsDelete[i];
-                        if (component instanceof scene.Light){
-                            core.Util.removeElementFromArray(lights,component);
-                        }
-                        if (component instanceof scene.Camera) {
-                            core.Util.removeElementFromArray(cameras,component);
-                        }
                         if (typeof(component.deactivated) === "function") {
                             component.deactivated();
                         }
@@ -622,7 +608,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.removeComponent = function (component) {
             componentsDelete.push(component);
-        }
+        };
 
         /**
          * Reference to the engine
@@ -700,14 +686,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * Prints scene properties to the console
          * @method debug
          */
         this.debug = function () {
             console.log("gameObjects "+gameObjects.length,gameObjects,
                 "gameObjectsNew "+gameObjectsNew.length,gameObjectsNew,
-                "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete,
-                "cameras "+cameras.length,cameras,
-                "lights "+lights.length,lights
+                "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete
             );
         };
     };
@@ -838,7 +823,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         /**
          * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
          * @property clearColor
-         * @type Array
+         * @type KICK.math.vec4
          */
         this.clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
         /**
@@ -1063,7 +1048,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
          * @method verify
          * @param {KICK.material.Shader} shader
-         * @return {Array} list of missing vertex attributes in mesh or null if no missing attributes
+         * @return {Array[String]} list of missing vertex attributes in mesh or null if no missing attributes
          */
         this.verify = function (shader){
             var missingVertexAttributes = [],
