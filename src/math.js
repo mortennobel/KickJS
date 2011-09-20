@@ -79,8 +79,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
         DEGREE_TO_RADIAN = 0.01745329251994,
-        RADIAN_TO_DEGREE = 57.2957795130824,
-        Float32Array;
+        RADIAN_TO_DEGREE = 57.2957795130824;
 
     /**
      * Math class for miscellaneous functions and constants. The class is static
