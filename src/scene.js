@@ -103,9 +103,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (!component.scriptPriority) {
             component.scriptPriority = 0;
         }
-        if (component instanceof scene.Camera) {
-            this.scene._addCamera(component);
-        }
         component.gameObject = this;
         this._components.push(component);
         this.scene.addComponent(component);
@@ -531,6 +528,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (componentsNew.length > 0) {
                     for (i = componentsNew.length-1; i >= 0; i--) {
                         component = componentsNew[i];
+                        if (component instanceof scene.Light){
+                            lights.push(component);
+                        }
+                        if (component instanceof scene.Camera) {
+                            cameras.push(component);
+                        }
                         if (typeof(component.activated) === "function") {
                             component.activated();
                         }
@@ -549,6 +552,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (componentsDelete.length > 0) {
                     for (i = componentsDelete.length-1; i >= 0; i--) {
                         component = componentsDelete[i];
+                        if (component instanceof scene.Light){
+                            core.Util.removeElementFromArray(lights,component);
+                        }
+                        if (component instanceof scene.Camera) {
+                            core.Util.removeElementFromArray(cameras,component);
+                        }
                         if (typeof(component.deactivated) === "function") {
                             component.deactivated();
                         }
@@ -691,22 +700,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
-         * @method _addCamera
-         * @param camera
-         * @private
-         */
-        this._addCamera = function (camera) {
-            cameras.push(camera);
-        }
-
-        /**
          * @method debug
          */
         this.debug = function () {
             console.log("gameObjects "+gameObjects.length,gameObjects,
                 "gameObjectsNew "+gameObjectsNew.length,gameObjectsNew,
                 "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete,
-                "cameras "+cameras.length,cameras
+                "cameras "+cameras.length,cameras,
+                "lights "+lights.length,lights
             );
         };
     };
