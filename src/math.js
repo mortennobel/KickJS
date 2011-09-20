@@ -908,6 +908,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         mat4.translate(dest, translate);
         mat4.multiply(dest,quat4.toMat4(rotateQuat));
         mat4.scale(dest, scale);
+        return dest;
     }
 
     /**
@@ -923,9 +924,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if(!dest) { dest = mat4.create(); }
         // todo: optimize this code
         mat4.identity(dest);
-        mat4.scale(dest, [-scale[0],-scale[1],-scale[2]]);
+        mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
         mat4.multiply(dest,quat4.toMat4(quat4.inverse(rotateQuat)));
         mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
+        return dest;
     }
 
     /**
@@ -2157,8 +2159,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             return dest;
         }
 
-        var halfTheta = Math.acos(cosHalfTheta);
-        var sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta*cosHalfTheta);
+        var halfTheta = Math.acos(cosHalfTheta),
+            sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta*cosHalfTheta);
 
         if (Math.abs(sinHalfTheta) < 0.001){
             dest[0] = (quat[0]*0.5 + quat2[0]*0.5);
@@ -2168,8 +2170,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             return dest;
         }
 
-        var ratioA = Math.sin((1 - slerp)*halfTheta) / sinHalfTheta;
-        var ratioB = Math.sin(slerp*halfTheta) / sinHalfTheta;
+        var ratioA = Math.sin((1 - slerp)*halfTheta) / sinHalfTheta,
+            ratioB = Math.sin(slerp*halfTheta) / sinHalfTheta;
 
         dest[0] = (quat[0]*ratioA + quat2[0]*ratioB);
         dest[1] = (quat[1]*ratioA + quat2[1]*ratioB);
@@ -2191,8 +2193,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     quat4.difference = function(quat, quat2, dest) {
         if(!dest) { dest = quat; }
 
-        var qax = -quat[0], qay = -quat[1], qaz = -quat[2], qaw = quat[3];
-        var qbx = quat2[0], qby = quat2[1], qbz = quat2[2], qbw = quat2[3];
+        var qax = -quat[0], qay = -quat[1], qaz = -quat[2], qaw = quat[3],
+            qbx = quat2[0], qby = quat2[1], qbz = quat2[2], qbw = quat2[3];
 
         dest[0] = qax*qbw + qaw*qbx + qay*qbz - qaz*qby;
         dest[1] = qay*qbw + qaw*qby + qaz*qbx - qax*qbz;

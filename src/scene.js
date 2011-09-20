@@ -430,7 +430,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.getLocalTRSInverse = function () {
             if (dirty[LOCAL_INV]) {
-                mat4.setTRSInverse(localPosition,localRotationQuat,localScale,localMatrix);
+                mat4.setTRSInverse(localPosition,localRotationQuat,localScale,localMatrixInverse);
                 dirty[LOCAL_INV] = 0;
             }
             return localMatrixInverse;
@@ -1295,13 +1295,132 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * A light object
+     * A light object.<br>
+     * Note that each scene can only have one ambient light and one directional light.
      * @class Light
      * @namespace KICK.scene
      * @extends KICK.scene.Component
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config
      * @final
      */
     scene.Light = function (engine,config) {
-        
+        var color = vec4.create([1.0,1.0,1.0,1.0]),
+            type,
+            intensity,
+            colorIntensity = vec4.create(),
+            updateIntensity = function(){
+                vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
+                colorIntensity[3] = color[3];
+            },
+            gameObject,
+            scriptPriority;
+        config = config || {};
+        if (config.color){
+            vec4.set(config.color,color);
+        }
+        intensity = config.intensity || 1;
+        updateIntensity();
+        type = config.type || scene.Light.TYPE_DIRECTIONAL;
+        Object.defineProperties(this,{
+            /**
+             * Color intensity of the light (RGBA)
+             * @property color
+             * @type KICK.math.vec4
+             */
+            color: {
+                get: function(){
+                    return vec4.create(color);
+                },
+                set: function(value){
+                    vec4.set(value,color);
+                    updateIntensity();
+                }
+            },
+            /**
+             * Color type. Must be either:<br>
+             * KICK.scene.Light.TYPE_AMBIENT,
+             * KICK.scene.Light.TYPE_DIRECTIONAL,
+             * KICK.scene.Light.TYPE_DIRECTIONAL <br>
+             * Note that this value is readonly. To change it create a new Light component and replace the current light
+             * component of its gameObject
+             * @property type
+             * @type Enum
+             * @final
+             */
+            type: {
+                get: function(){
+                    return type;
+                }
+            },
+            /**
+             * Light intensity (a multiplier to color)
+             * @property intensity
+             * @type Number
+             */
+            intensity: {
+                get: function(){
+                    return intensity;
+                },
+                set: function(value){
+                    intensity = value;
+                    updateIntensity();
+                }
+            },
+            /**
+             * color RGB multiplied with intensity (plus color A).<br>
+             * This property exposes a internal value. This value should not be modified.
+             * Instead use the intensity and color property.
+             * @property colorIntensity
+             * @type KICK.math.vec4
+             * @final
+             */
+            colorIntensity: {
+                value:colorIntensity
+            },
+            // inherited interface from component
+            gameObject:{
+                get:function(){
+                    return gameObject;
+                },
+                set:function(value){
+                    gameObject = value;
+                }
+            },
+            // inherited interface from component
+            scriptPriority:{
+                get:function(){
+                    return scriptPriority;
+                },
+                set:function(value){
+                    this.scriptPriority = value;
+                }
+            }
+        });
     };
+    /**
+     * Used to define ambient color in the scene (indirect lightening)
+     * @property TYPE_AMBIENT
+     * @type Number
+     * @final
+     */
+    scene.Light.TYPE_AMBIENT = 0;
+    /**
+     * Used to define directional light in the scene (such as sunlight)
+     * @property TYPE_DIRECTIONAL
+     * @type Number
+     * @final
+     */
+    scene.Light.TYPE_DIRECTIONAL = 1;
+    /**
+     * Used to define point light in the scene
+     * @property TYPE_POINT
+     * @type Number
+     * @final
+     */
+    scene.Light.TYPE_POINT = 2;
+
+    Object.freeze(scene.Light);
+
  })();
