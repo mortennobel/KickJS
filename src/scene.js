@@ -51,8 +51,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         vec3 = KICK.namespace("KICK.math.vec3"),
         quat4 = KICK.namespace("KICK.math.quat4"),
         vec4 = KICK.namespace("KICK.math.vec4"),
-        mat4 = KICK.namespace("KICK.math.mat4"),
-        degreeToRadian = math.Mathf.DEGREE_TO_RADIAN;
+        mat4 = KICK.namespace("KICK.math.mat4");
     
     /**
      * Live objects in the scene
@@ -499,6 +498,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
+            lights = [],
             i,
             /**
              * Compares two objects based on scriptPriority

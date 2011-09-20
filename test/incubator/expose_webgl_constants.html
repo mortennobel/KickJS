@@ -32,7 +32,7 @@
         }
 
         function initKick() {
-            engine = new KICK.core.Engine('lesson01-canvas');
+            engine = new KICK.core.Engine('canvas');
             var gameEngine = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0.5,1,1,1]
@@ -44,18 +44,19 @@
                 if (typeof gl[g] !== "function" && g.charCodeAt(0)<"a".charCodeAt(0)){
                     document.write("/**<br>");
                     document.write(" * Value "+gl[g]+"<br>");
-                    document.write(" * @property "+g+"<br>");
+                    document.write(" * @property GL_"+g+"<br>");
                     document.write(" * @type Number<br>");
                     document.write(" * @static<br>");
                     document.write(" * @final<br>");
                     document.write(" */<br>");
+                    document.write("GL_"+g+": { value: "+gl[g]+"},<br>");
                 }
             }
         }
     </script>
 </head>
 <body onload="initKick();">
-  <canvas id="lesson01-canvas" style="border: none;" width="300" height="300"></canvas>
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
 
   <a href="#" onclick="add();">Add</a>
   <a href="#" onclick="remove();">Remove</a>

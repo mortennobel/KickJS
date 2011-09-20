@@ -126,6 +126,19 @@ YUI().use('node', 'console', 'test', function (Y) {
             "\ntransform1.getGlobalMatrix: \n"+KICK.math.mat4.strPretty(transform1.getGlobalMatrix())+
             "\ntransform2.getGlobalMatrix: \n"+KICK.math.mat4.strPretty(transform2.getGlobalMatrix())
             );*/
+        },
+        testGlobalInverse : function(){
+            var Assert = Y.Assert;
+            var transform1 = new KICK.scene.Transform();
+            var transform2 = new KICK.scene.Transform();
+            transform1.localPosition = [0,10,0];
+            transform2.localPosition = [0,-10,0];
+            var globalMatrix = transform1.getGlobalMatrix();
+            var globalMatrixInverse = transform2.getGlobalTRSInverse();
+
+            var str = "Expected result \n"+KICK.math.mat4.strPretty(globalMatrix)+" but was \n"+KICK.math.mat4.strPretty(globalMatrixInverse);
+            Assert.compareVec(globalMatrix,globalMatrixInverse,str);
+
         }
 
 

@@ -77,33 +77,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
-        quat4 = KICK.namespace("KICK.math.quat4"),
-        DEGREE_TO_RADIAN = 0.01745329251994,
-        RADIAN_TO_DEGREE = 57.2957795130824;
+        quat4 = KICK.namespace("KICK.math.quat4");
 
-    /**
-     * Math class for miscellaneous functions and constants. The class is static
-     * @class Mathf
-     * @namespace KICK.math
-     */
-    math.Mathf = {
-        /**
-         * Degree to radian constant
-         * @property DEGREE_TO_RADIAN
-         * @type {Number}
-         * @static
-         */
-        DEGREE_TO_RADIAN: DEGREE_TO_RADIAN,
-        /**
-         * Radian to degree constant
-         * @property RADIAN_TO_DEGREE
-         * @type {Number}
-         * @static
-         */
-        RADIAN_TO_DEGREE: RADIAN_TO_DEGREE
-    };
-
-    Object.freeze(math.Mathf);
 
     // glMatrix start
 
@@ -1350,7 +1325,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateEuler = function(mat, euler, dest) {
-        var degreeToRadian = math.Mathf.DEGREE_TO_RADIAN;
+        var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN;
         if (dest) {
             mat4.set(mat,dest);
             mat = dest;
@@ -1971,13 +1946,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     quat4.toEuler = function(quat, dest) {
         var x = quat[0], y = quat[1], z = quat[2],w = quat[3],
-            yy = y*y;
+            yy = y*y,
+            radianToDegree = KICK.core.Constants._RADIAN_TO_DEGREE;
 
         if(!dest) { dest = vec3.create(); }
 
-        dest[0] = Math.atan2(2*(w*x+y*z),1-2*(x*x+yy))*RADIAN_TO_DEGREE;
-        dest[1] = Math.asin(2*(w*y-z*x))*RADIAN_TO_DEGREE;
-        dest[2] = Math.atan2(2*(w*z+x*y),1-2*(yy+z*z))*RADIAN_TO_DEGREE;
+        dest[0] = Math.atan2(2*(w*x+y*z),1-2*(x*x+yy))*radianToDegree;
+        dest[1] = Math.asin(2*(w*y-z*x))*radianToDegree;
+        dest[2] = Math.atan2(2*(w*z+x*y),1-2*(yy+z*z))*radianToDegree;
 
         return dest;
     };
@@ -1991,7 +1967,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
     quat4.angleAxis = function(angle,vec, dest) {
-        var angleRadiansHalf = DEGREE_TO_RADIAN*0.5*angle,
+        var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN,
+            angleRadiansHalf = degreeToRadian*0.5*angle,
             s = Math.sin(angleRadiansHalf);
         if(!dest) { dest = quat4.create(); }
 

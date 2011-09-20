@@ -188,7 +188,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     message: "Cannot create gl-context"
                 };
             }
-            core.Constants = gl;
             thisObj.renderer = new renderer.ForwardRenderer();
 
             canvas.addEventListener("resize",
