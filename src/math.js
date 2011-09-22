@@ -93,8 +93,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * See KICK.math.vec4.wrapArray
      * @method wrapArray
-     * @param {Array} array
-     * @return {Array} of vec3
+     * @param {Float32Array} array
+     * @return {Array[KICK.math.vec3]} of vec3
      */
     vec3.wrapArray = function(array){
         var i,
@@ -141,7 +141,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Creates a new instance of a vec3 using the default array type
      * Any javascript array containing at least 3 numeric elements can serve as a vec3
      * @method create
-     * @param {Array} vec Optional, vec3 containing values to initialize with
+     * @param {Array[Number]} vec Optional, vec3 containing values to initialize with
      * @return {KICK.math.vec3} New vec3
      */
     vec3.create = function(vec) {
@@ -493,7 +493,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Creates a new instance of a vec4 using the default array type<br>
      * Any javascript array containing at least 4 numeric elements can serve as a vec4
      * @method create
-     * @param {Array} vec Optional, vec4 containing values to initialize with
+     * @param {Array[Number]} vec Optional, vec4 containing values to initialize with
      * @return {KICK.math.vec4} New vec4
      */
     vec4.create = function(vec) {
@@ -661,7 +661,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Creates a new instance of a mat3 using the default array type<br>
      * Any javascript array containing at least 9 numeric elements can serve as a mat3
      * @method create
-     * @param {Array} mat Optional, mat3 containing values to initialize with
+     * @param {Array[Number]} mat Optional, mat3 containing values to initialize with
      * @return {KICK.math.mat3} New mat3
      */
     mat3.create = function(mat) {
@@ -812,7 +812,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Creates a new instance of a mat4 using the default array type<br>
      * Any javascript array containing at least 16 numeric elements can serve as a mat4
      * @method create
-     * @param {Array} mat Optional, mat4 containing values to initialize with
+     * @param {Array[Number]} mat Optional, mat4 containing values to initialize with
      * @return {KICK.math.mat4} New mat4
      */
     mat4.create = function(mat) {
@@ -1755,7 +1755,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Creates a new instance of a quat4 using the default array type<br>
      * Any javascript array containing at least 4 numeric elements can serve as a quat4
      * @method create
-     * @param {Array} quat Optional, quat4 containing values to initialize with
+     * @param {Array[Number]} quat Optional, quat4 containing values to initialize with
      * @return {KICK.math.quat4} New quat4
      */
     quat4.create = function(quat) {

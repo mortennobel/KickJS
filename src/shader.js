@@ -184,7 +184,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             /**
              * Array of JSON data with size,type and name
              * @property activeAttributes
-             * @type Array
+             * @type Array[Object]
              */
             this.activeAttributes = new Array(activeAttributes);
             /**

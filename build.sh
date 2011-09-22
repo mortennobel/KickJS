@@ -8,6 +8,9 @@ project=$2
 #Location of Google Clojure Compiler
 googleClojure=$3
 
+#Location of Node.js
+nodejs=$4
+
 version=0_1_0
 
 # The location of the files to parse.  Parses subdirectories, but will fail if
@@ -48,11 +51,24 @@ echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $
 $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 
 ##############################################################################
-# create minified versions of js files
+# run preprocessor
 mkdir $project/build
+mkdir $project/build/pre
+$nodejs $project/preprocessor/preprocessor $project/src/math.js $project/build/pre/math.js
+$nodejs $project/preprocessor/preprocessor $project/src/core.js $project/build/pre/core.js
+$nodejs $project/preprocessor/preprocessor $project/src/scene.js $project/build/pre/scene.js
+$nodejs $project/preprocessor/preprocessor $project/src/renderer.js $project/build/pre/renderer.js
+$nodejs $project/preprocessor/preprocessor $project/src/shader.js $project/build/pre/shader.js
+$nodejs $project/preprocessor/preprocessor $project/src/meshfactory.js $project/build/pre/meshfactory.js
+cp $project/src/constants.js $project/build/pre/constants.js
 
-echo java -jar $googleClojure --js_output_file "$project/build/kick-clojure-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --language_in ECMASCRIPT5_STRICT
-java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --language_in ECMASCRIPT5_STRICT
+##############################################################################
+# create minified versions of js files
+
+echo java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --js $project/build/pre/constants.js --language_in ECMASCRIPT5_STRICT
+java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --js $project/build/pre/constants.js --language_in ECMASCRIPT5_STRICT
+
+rm -rf $project/build/pre
 
 cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/kick-min-$version.js"
 rm "$project/build/kick-min.js.tmp"

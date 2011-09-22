@@ -59,7 +59,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     /**
      * @method init
-     * @param {WebGL-Context}gl
+     * @param {KICK.core.Engine}engine
      */
     /**
      * Called each frame to render the components
@@ -87,7 +87,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     renderer.NullRenderer = function () {};
 
     renderer.NullRenderer.prototype.render = function () {};
-    renderer.NullRenderer.prototype.init = function (gl) {};
+    renderer.NullRenderer.prototype.init = function (engine) {};
     renderer.NullRenderer.prototype.addRenderableComponent = function () {};
     renderer.NullRenderer.prototype.removeRenderableComponent = function () {};
 
@@ -104,10 +104,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
             modelViewProjectionMatrix = mat4.create(),
-            gl;
+            gl,
+            lights = [],
+            maxNumberOfLights;
 
-        this.init = function (glContext) {
-            gl = glContext;
+        this.init = function (engine) {
+            gl = engine.gl;
+            maxNumberOfLights = engine.config.maxNumerOfLights;
         }
 
         this.render = function () {
@@ -117,11 +120,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 cameras[i].setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
                 for (j=renderableComponents.length-1; j >= 0; j--) {
                     renderable = renderableComponents[j];
-//                    if (renderable instanceof KICK.scene.MeshRenderer){
-
-//                    } else {
                         renderable.render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
-//                    }
                 }
             }
             gl.flush();
@@ -133,9 +132,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (component instanceof scene.Camera) {
                     cameras.push(component);
                 }
+                if (component instanceof scene.Light){
+                    lights.push(component);
+                }
                 if (typeof(component.render) === "function") {
                     renderableComponents.push(component);
                 }
+
             }
         };
 
@@ -144,6 +147,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 var component = components[i];
                 if (component instanceof scene.Camera) {
                     core.Util.removeElementFromArray(cameras,component);
+                }
+                if (component instanceof scene.Light){
+                    core.Util.removeElementFromArray(lights,component);
                 }
                 if (typeof(component.render) === "function") {
                     core.Util.removeElementFromArray(renderableComponents,component);

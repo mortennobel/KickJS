@@ -51,8 +51,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         vec3 = KICK.namespace("KICK.math.vec3"),
         quat4 = KICK.namespace("KICK.math.quat4"),
         vec4 = KICK.namespace("KICK.math.vec4"),
-        mat4 = KICK.namespace("KICK.math.mat4");
-    
+        mat4 = KICK.namespace("KICK.math.mat4"),
+        DEBUG = KICK.core.Constants._DEBUG,
+        ASSERT = KICK.core.Constants._ASSERT;
+
     /**
      * Live objects in the scene
      * @class GameObject
@@ -1413,4 +1415,70 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     Object.freeze(scene.Light);
 
+     /**
+     * Datastructure used pass light information
+     * @class SceneLights
+     * @namespace KICK.scene
+     */
+    scene.SceneLights = function(){
+        var ambientLight = null,
+            directionalLight = null,
+            otherLights = [];
+        Object.defineProperties(this,{
+            /**
+             * The ambient light in the scene.
+             * @property ambientLight
+             * @type KICK.scene.Light
+             */
+            ambientLight: {
+                get:function (){
+                    return ambientLight;
+                },
+                set:function(value){
+                    if (ASSERT){
+                        if (value && ambientLight){
+                            throw Error("Cannot have multiple ambient lights in the scene");
+                        }
+                    }
+                    if (DEBUG){
+                        if (value && ambientLight){
+                            console.log("Cannot have multiple ambient lights in the scene");
+                        }
+                    }
+                    ambientLight = value;
+                }
+            },
+            /**
+             * The directional light in the scene.
+             * @property directionalLight
+             * @type KICK.scene.Light
+             */
+            directionalLight:{
+                get: function(){
+                    return directionalLight;
+                },
+                set: function(value){
+                    if (ASSERT){
+                        if (value && ambientLight){
+                            throw Error("Cannot have multiple directional lights in the scene");
+                        }
+                    }
+                    if (DEBUG){
+                        if (value && ambientLight){
+                            console.log("Cannot have multiple directional lights in the scene");
+                        }
+                    }
+                    directionalLight = value;
+                }
+            },
+            /**
+             * The point  light sources in the scene.
+             * @property otherLights
+             * @type Array[KICK.scene.Light]
+             */
+            otherLights:{
+                value:otherLights
+            }
+        });
+    };
  })();

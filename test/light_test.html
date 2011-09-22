@@ -74,6 +74,9 @@
                 update: function(){
                     rotation[1] += time.deltaTime*rotationSpeed;
                     transform.localRotationEuler = rotation;
+                    if (time.frameCount==2){
+                        engine.activeScene.debug();
+                    }
                 }
             });
         }
@@ -99,6 +102,7 @@
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);
+
         }
 
     </script>

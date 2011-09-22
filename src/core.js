@@ -120,7 +120,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
                         this.activeScene.addComponentListener(activeRenderer);
                     }
-                    activeRenderer.init(gl);
+                    activeRenderer.init(thisObj);
                 }
             },
             /**
@@ -204,6 +204,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             gl.viewportHeight = canvas.height;
             gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
+            // API documentation of Time is found in KICK.core.Time
             Object.defineProperties(timeObj,{
                 time:{
                     get: function(){return timeSinceStart;}
@@ -237,6 +238,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Config} config defines one or more properties
      */
     core.Config = function(config){
+         /**
+         * Maximum number of lights in scene
+         * @property maxNumerOfLights
+         * @type Number
+         */
+        this.maxNumerOfLights = config.maxNumerOfLights ? config.maxNumerOfLights : 1;
     };
 
     /**
