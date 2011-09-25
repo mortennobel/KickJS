@@ -14,9 +14,17 @@ function replaceConstants(obj, sourcecode){
             } while (oldString !== input);
             return input;
         };
+    var names = [];
     for (var name in obj){
-
-        var re = new RegExp("[\\w.\\.]*"+name);
+        names.push(name);
+    }
+    // sort names by length (longest first)
+    names.sort(function(a,b){
+        return b.length-a.length;
+    });
+    for (var i=0;i<names.length;i++){
+        var name = names[i];
+        var re = new RegExp("[\\w.\\._]*"+name);
         sourcecode = replaceAll(sourcecode,re,obj[name]);
     }
     return sourcecode;
