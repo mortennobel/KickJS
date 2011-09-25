@@ -57,7 +57,88 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     material.Shader = function (engine) {
         var gl = engine.gl,
             shaderProgramId = -1,
-            thisObj = this;
+            thisObj = this,
+            /**
+             * @method compileShader
+             * @param {String} str
+             * @param {Boolean} isFragmentShader
+             * @param {Function} errorLog
+             * @private
+             */
+            compileShader = function (str, isFragmentShader, errorLog) {
+                var shader,
+                    c = KICK.core.Constants;
+                if (isFragmentShader) {
+                    shader = gl.createShader(c.GL_FRAGMENT_SHADER);
+                } else {
+                    shader = gl.createShader(c.GL_VERTEX_SHADER);
+                }
+
+                gl.shaderSource(shader, str);
+                gl.compileShader(shader);
+
+                if (!gl.getShaderParameter(shader, c.GL_COMPILE_STATUS)) {
+                    var infoLog =gl.getShaderInfoLog(shader);
+                    if (typeof errorLog === "function") {
+                        errorLog(infoLog);
+                    }
+                    return null;
+                }
+
+                return shader;
+            },
+            updateCullFace = function () {
+                var s = material.Shader,
+                    shaderFaceCulling = thisObj.faceCulling,
+                    currentFaceCulling = gl.faceCulling,
+                    c = KICK.core.Constants;
+                if (currentFaceCulling !== shaderFaceCulling) {
+                    if (shaderFaceCulling === s.NONE) {
+                        gl.disable( c.GL_CULL_FACE );
+                    } else {
+                        if (!currentFaceCulling || currentFaceCulling === s.NONE) {
+                            gl.enable( c.GL_CULL_FACE );
+                        }
+                        if (shaderFaceCulling === s.FRONT) {
+                            gl.cullFace( c.GL_FRONT );
+                        } else {
+                            gl.cullFace( c.GL_BACK );
+                        }
+                    }
+                    gl.faceCulling = shaderFaceCulling;
+                }
+            },
+            updateDepthBuffer = function () {
+                var s = material.Shader,
+                    c = KICK.core.Constants;
+                var zTest = thisObj.zTest;
+                if (gl.zTest != zTest) {
+                    if (zTest === s.Z_TEST_NEVER) {
+                        gl.depthFunc(c.GL_NEVER);
+                    } else if (zTest === s.Z_TEST_EQUAL) {
+                        gl.depthFunc(c.GL_EQUAL);
+                    } else if (zTest === s.Z_TEST_LEQUAL) {
+                        gl.depthFunc(c.GL_LEQUAL);
+                    } else if (zTest === s.Z_TEST_GREATER) {
+                        gl.depthFunc(c.GL_GREATER);
+                    } else if (zTest === s.Z_TEST_NOTEQUAL) {
+                        gl.depthFunc(c.GL_NOTEQUAL);
+                    } else if (zTest === s.Z_TEST_GEQUAL) {
+                        gl.depthFunc(c.GL_GEQUAL);
+                    } else if (zTest === s.Z_TEST_ALWAYS) {
+                        gl.depthFunc(c.GL_ALWAYS);
+                    } else {
+                        gl.depthFunc(c.GL_LESS);
+                    }
+                    gl.zTest = zTest;
+                }
+            },
+            updateBlending = function () {
+                if (!window.updateBlending){
+                    console.log("Implement update blending");
+                    window.updateBlending = true;
+                }
+            };
 
         /**
          * Get the gl context of the shader
@@ -97,46 +178,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.zTest =  material.Shader.Z_TEST_LESS;
 
         /**
-         * @method compileShader
-         * @param {String} str
-         * @param {Boolean} isFragmentShader
-         * @param {Function} errorLog
-         * @private
-         */
-        var compileShader = function (str, isFragmentShader, errorLog) {
-            var shader,
-                c = KICK.core.Constants;
-            if (isFragmentShader) {
-                shader = gl.createShader(c.GL_FRAGMENT_SHADER);
-            } else {
-                shader = gl.createShader(c.GL_VERTEX_SHADER);
-            }
-
-            gl.shaderSource(shader, str);
-            gl.compileShader(shader);
-
-            if (!gl.getShaderParameter(shader, c.GL_COMPILE_STATUS)) {
-                var infoLog =gl.getShaderInfoLog(shader);
-                if (errorLog) {
-                    errorLog(infoLog);
-                }
-                return null;
-            }
-
-            return shader;
-        };
-
-        /**
          * @method initShader
          * @param {String} vertexShaderSrc
          * @param {String} fragmentShaderSrc
          * @param {Function} errorLog Optional function that will be invoked in case of error
+         * @return {Boolean} shader created successfully
          */
         this.initShader = function (vertexShaderSrc,fragmentShaderSrc, errorLog) {
             var fragmentShader = compileShader(fragmentShaderSrc, true, errorLog),
                 vertexShader = compileShader(vertexShaderSrc, false, errorLog),
                 i,
-                c = KICK.core.Constants;
+                c = KICK.core.Constants,
+                activeUniforms,
+                activeAttributes,
+                attribute;
 
             shaderProgramId = gl.createProgram();
 
@@ -152,11 +207,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
             if (!gl.getProgramParameter(shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
-                return;
+                return false;
             }
 
             gl.useProgram(shaderProgramId);
-            var activeUniforms = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORMS);
+            activeUniforms = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             /**
              * Array of Object with size,type, name and index properties
              * @property activeUniforms
@@ -180,7 +235,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 this.lookupUniform[uniform.name] = this.activeUniforms[i];
             }
 
-            var activeAttributes = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
+            activeAttributes = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
             /**
              * Array of JSON data with size,type and name
              * @property activeAttributes
@@ -194,7 +249,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             this.lookupAttribute = {};
             for (i=0;i<activeAttributes;i++) {
-                var attribute = gl.getActiveAttrib(shaderProgramId,i);
+                attribute = gl.getActiveAttrib(shaderProgramId,i);
                 this.activeAttributes[i] = {
                     size: attribute.size,
                     type: attribute.type,
@@ -204,61 +259,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             this.activeAttributesMaxLength = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
             this.activeUniformsMaxLength = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
-        };
-
-        var updateCullFace = function () {
-            var s = material.Shader,
-                shaderFaceCulling = thisObj.faceCulling,
-                currentFaceCulling = gl.faceCulling,
-                c = KICK.core.Constants;
-            if (currentFaceCulling !== shaderFaceCulling) {
-                if (shaderFaceCulling === s.NONE) {
-                    gl.disable( c.GL_CULL_FACE );
-                } else {
-                    if (!currentFaceCulling || currentFaceCulling === s.NONE) {
-                        gl.enable( c.GL_CULL_FACE );
-                    }
-                    if (shaderFaceCulling === s.FRONT) {
-                        gl.cullFace( c.GL_FRONT );
-                    } else {
-                        gl.cullFace( c.GL_BACK );
-                    }
-                }
-                gl.faceCulling = shaderFaceCulling;
-            }
-        };
-
-        var updateDepthBuffer = function () {
-            var s = material.Shader,
-                c = KICK.core.Constants;
-            var zTest = thisObj.zTest;
-            if (gl.zTest != zTest) {
-                if (zTest === s.Z_TEST_NEVER) {
-                    gl.depthFunc(c.GL_NEVER);
-                } else if (zTest === s.Z_TEST_EQUAL) {
-                    gl.depthFunc(c.GL_EQUAL);
-                } else if (zTest === s.Z_TEST_LEQUAL) {
-                    gl.depthFunc(c.GL_LEQUAL);
-                } else if (zTest === s.Z_TEST_GREATER) {
-                    gl.depthFunc(c.GL_GREATER);
-                } else if (zTest === s.Z_TEST_NOTEQUAL) {
-                    gl.depthFunc(c.GL_NOTEQUAL);
-                } else if (zTest === s.Z_TEST_GEQUAL) {
-                    gl.depthFunc(c.GL_GEQUAL);
-                } else if (zTest === s.Z_TEST_ALWAYS) {
-                    gl.depthFunc(c.GL_ALWAYS);
-                } else {
-                    gl.depthFunc(c.GL_LESS);
-                }
-                gl.zTest = zTest;
-            }
-        };
-
-        var updateBlending = function () {
-            if (!window.updateBlending){
-                console.log("Implement update blending");
-                window.updateBlending = true;
-            }
+            return true;
         };
 
         // todo: refactor this
@@ -344,9 +345,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Object}
      */
     material.Shader.prototype.bindMatrices = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform){
-        var mv = this.lookupUniform["mv"],
-            proj = this.lookupUniform["proj"],
-            mvProj = this.lookupUniform["mvProj"],
+        var mv = this.lookupUniform["_mv"],
+            proj = this.lookupUniform["_proj"],
+            mvProj = this.lookupUniform["_mvProj"],
             gl = this.gl,
             globalTransform;
         if (proj){

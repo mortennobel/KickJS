@@ -116,12 +116,12 @@
 attribute vec3 vertex;
 attribute vec4 color;
 
-uniform mat4 mvProj;
+uniform mat4 _mvProj;
 
 varying vec3 vColor;
 
 void main(void) {
-    gl_Position = mvProj * vec4(vertex, 1.0);
+    gl_Position = _mvProj * vec4(vertex, 1.0);
     vColor = color.xyz;
 }
   </textarea>

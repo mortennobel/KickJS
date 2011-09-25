@@ -9,6 +9,12 @@
    x.y.GL_CONTEXT_LOST_WEBGL = 123;
    GL_CONTEXT_LOST_WEBGL;
 
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.enable(c.GL_DEPTH_TEST);
+    gl.viewportWidth = canvas.width;
+    gl.viewportHeight = canvas.height;
+    gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
+
 }
 </textarea>
 <h1>Output</h1>
