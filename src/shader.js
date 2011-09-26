@@ -45,7 +45,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 (function () {
     "use strict"; // force strict ECMAScript 5
     var material = KICK.namespace("KICK.material"),
-        math = KICK.namespace("KICK.math");
+        math = KICK.namespace("KICK.math"),
+        core = KICK.namespace("KICK.core");
 
     /**
      * Renders a Mesh
@@ -56,8 +57,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     material.Shader = function (engine) {
         var gl = engine.gl,
-            shaderProgramId = -1,
             thisObj = this,
+            _shaderProgramId = -1,
+            _faceCulling = core.Constants.GL_BACK,
+            _zTest = core.Constants.GL_LESS,
             /**
              * @method compileShader
              * @param {String} str
@@ -88,22 +91,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return shader;
             },
             updateCullFace = function () {
-                var s = material.Shader,
-                    shaderFaceCulling = thisObj.faceCulling,
+                var shaderFaceCulling = thisObj.faceCulling,
                     currentFaceCulling = gl.faceCulling,
                     c = KICK.core.Constants;
                 if (currentFaceCulling !== shaderFaceCulling) {
-                    if (shaderFaceCulling === s.NONE) {
+                    if (shaderFaceCulling === core.Constants.GL_NONE) {
                         gl.disable( c.GL_CULL_FACE );
                     } else {
-                        if (!currentFaceCulling || currentFaceCulling === s.NONE) {
+                        if (!currentFaceCulling || currentFaceCulling === core.Constants.GL_NONE) {
                             gl.enable( c.GL_CULL_FACE );
                         }
-                        if (shaderFaceCulling === s.FRONT) {
-                            gl.cullFace( c.GL_FRONT );
-                        } else {
-                            gl.cullFace( c.GL_BACK );
-                        }
+                        gl.cullFace( shaderFaceCulling );
                     }
                     gl.faceCulling = shaderFaceCulling;
                 }
@@ -113,23 +111,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     c = KICK.core.Constants;
                 var zTest = thisObj.zTest;
                 if (gl.zTest != zTest) {
-                    if (zTest === s.Z_TEST_NEVER) {
-                        gl.depthFunc(c.GL_NEVER);
-                    } else if (zTest === s.Z_TEST_EQUAL) {
-                        gl.depthFunc(c.GL_EQUAL);
-                    } else if (zTest === s.Z_TEST_LEQUAL) {
-                        gl.depthFunc(c.GL_LEQUAL);
-                    } else if (zTest === s.Z_TEST_GREATER) {
-                        gl.depthFunc(c.GL_GREATER);
-                    } else if (zTest === s.Z_TEST_NOTEQUAL) {
-                        gl.depthFunc(c.GL_NOTEQUAL);
-                    } else if (zTest === s.Z_TEST_GEQUAL) {
-                        gl.depthFunc(c.GL_GEQUAL);
-                    } else if (zTest === s.Z_TEST_ALWAYS) {
-                        gl.depthFunc(c.GL_ALWAYS);
-                    } else {
-                        gl.depthFunc(c.GL_LESS);
-                    }
+                    gl.depthFunc(zTest);
                     gl.zTest = zTest;
                 }
             },
@@ -140,42 +122,74 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             };
 
-        /**
-         * Get the gl context of the shader
-         * @property gl
-         * @type Object
-         */
-        Object.defineProperty(this, "gl",{
-            value:gl
+
+        Object.defineProperties(this,{
+            /**
+             * Get the gl context of the shader
+             * @property gl
+             * @type Object
+             */
+            gl:{
+                value:gl
+            },
+            /**
+             * @property shaderProgramId
+             * @type ShaderProgram
+             */
+            shaderProgramId:{
+                get: function(){ return _shaderProgramId;}
+            },
+            /**
+             * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default), KICK.core.Constants.GL_FRONT_AND_BACK, KICK.core.Constants.NONE
+             * @property faceCulling
+             * @type Object
+             */
+            faceCulling: {
+                get: function(){ return _faceCulling; },
+                set: function(newValue){
+                    if (KICK.core.Constants._ASSERT){
+                        if (newValue !== core.Constants.GL_FRONT &&
+                            newValue !== core.Constants.GL_FRONT_AND_BACK &&
+                            newValue !== core.Constants.GL_BACK &&
+                            newValue !== core.Constants.GL_NONE ){
+                            throw new Error("Shader.faceCulling must be KICK.material.Shader.FRONT, KICK.material.Shader.BACK (default), KICK.material.Shader.NONE");
+                        }
+                    }
+                    _faceCulling = newValue;
+                }
+            },
+            /**
+             * The depth test function. Must be one of
+             * KICK.core.Constants.GL_NEVER,
+             * KICK.core.Constants.GL_LESS,
+             * KICK.core.Constants.GL_EQUAL,
+             * KICK.core.Constants.GL_LEQUAL,
+             * KICK.core.Constants.GL_GREATER,
+             * KICK.core.Constants.GL_NOTEQUAL,
+             * KICK.core.Constants.GL_GEQUAL,
+             * KICK.core.Constants.GL_ALWAYS
+             * @property zTest
+             * @type Object
+             */
+            zTest:{
+                get: function(){ return _zTest; },
+                set: function(newValue){
+                    if (KICK.core.Constants._ASSERT){
+                        if (newValue !== core.Constants.GL_NEVER &&
+                            newValue !== core.Constants.GL_LESS &&
+                            newValue !== core.Constants.GL_EQUAL &&
+                            newValue !== core.Constants.GL_LEQUAL &&
+                            newValue !== core.Constants.GL_GREATER &&
+                            newValue !== core.Constants.GL_NOTEQUAL &&
+                            newValue !== core.Constants.GL_GEQUAL &&
+                            newValue !== core.Constants.GL_ALWAYS){
+                            throw new Error("Shader.zTest must be KICK.core.Constants.GL_NEVER, KICK.core.Constants.GL_LESS,KICK.core.Constants.GL_EQUAL,KICK.core.Constants.GL_LEQUAL,KICK.core.Constants.GL_GREATER,KICK.core.Constants.GL_NOTEQUAL,KICK.core.Constants.GL_GEQUAL, or KICK.core.Constants.GL_ALWAYS");
+                        }
+                    }
+                    _zTest = newValue;
+                }
+            }
         });
-
-        /**
-         * @property shaderProgramId
-         * @type ShaderProgram
-         */
-        this.shaderProgramId = -1;
-
-        /**
-         * Must be set to KICK.material.Shader.FRONT, KICK.material.Shader.BACK (default), KICK.material.Shader.NONE
-         * @property faceCulling
-         * @type Object
-         */
-        this.faceCulling = material.Shader.BACK;
-
-        /**
-         * The depth test function. Must be one of
-         * KICK.material.Shader.Z_TEST_NEVER
-         * KICK.material.Shader.Z_TEST_LESS (default)
-         * KICK.material.Shader.Z_TEST_EQUAL
-         * KICK.material.Shader.Z_TEST_LEQUAL
-         * KICK.material.Shader.Z_TEST_GREATER
-         * KICK.material.Shader.Z_TEST_NOTEQUAL
-         * KICK.material.Shader.Z_TEST_GEQUAL
-         * KICK.material.Shader.Z_TEST_ALWAYS
-         * @property zTest
-         * @type Object
-         */
-        this.zTest =  material.Shader.Z_TEST_LESS;
 
         /**
          * @method initShader
@@ -193,25 +207,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 activeAttributes,
                 attribute;
 
-            shaderProgramId = gl.createProgram();
+            _shaderProgramId = gl.createProgram();
 
             if (!errorLog) {
                 errorLog = console.log;
             }
 
-            this.shaderProgramId = shaderProgramId;
+            gl.attachShader(_shaderProgramId, vertexShader);
+            gl.attachShader(_shaderProgramId, fragmentShader);
+            gl.linkProgram(_shaderProgramId);
 
-            gl.attachShader(shaderProgramId, vertexShader);
-            gl.attachShader(shaderProgramId, fragmentShader);
-            gl.linkProgram(shaderProgramId);
-
-            if (!gl.getProgramParameter(shaderProgramId, c.GL_LINK_STATUS)) {
+            if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
                 return false;
             }
 
-            gl.useProgram(shaderProgramId);
-            activeUniforms = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORMS);
+            gl.useProgram(_shaderProgramId);
+            activeUniforms = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             /**
              * Array of Object with size,type, name and index properties
              * @property activeUniforms
@@ -225,17 +237,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             this.lookupUniform = {};
             for (i=0;i<activeUniforms;i++) {
-                var uniform = gl.getActiveUniform(shaderProgramId,i);
+                var uniform = gl.getActiveUniform(_shaderProgramId,i);
                 this.activeUniforms[i] = {
                     size: uniform.size,
                     type: uniform.type,
                     name: uniform.name,
-                    location: gl.getUniformLocation(shaderProgramId,uniform.name)
+                    location: gl.getUniformLocation(_shaderProgramId,uniform.name)
                 };
                 this.lookupUniform[uniform.name] = this.activeUniforms[i];
             }
 
-            activeAttributes = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
+            activeAttributes = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
             /**
              * Array of JSON data with size,type and name
              * @property activeAttributes
@@ -249,7 +261,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             this.lookupAttribute = {};
             for (i=0;i<activeAttributes;i++) {
-                attribute = gl.getActiveAttrib(shaderProgramId,i);
+                attribute = gl.getActiveAttrib(_shaderProgramId,i);
                 this.activeAttributes[i] = {
                     size: attribute.size,
                     type: attribute.type,
@@ -257,32 +269,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
                 this.lookupAttribute[attribute.name] = i;
             }
-            this.activeAttributesMaxLength = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
-            this.activeUniformsMaxLength = gl.getProgramParameter( shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
+            this.activeAttributesMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
+            this.activeUniformsMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
             return true;
         };
 
         // todo: refactor this
         this.bind = function () {
-            gl.useProgram(shaderProgramId);
+            gl.useProgram(_shaderProgramId);
             updateCullFace();
             updateDepthBuffer();
             updateBlending();
         }
     };
 
-    material.Shader.NONE = 0;
-    material.Shader.BACK = 1;
-    material.Shader.FRONT = 2;
-
-    material.Shader.Z_TEST_NEVER = 0;
-    material.Shader.Z_TEST_LESS = 1;
-    material.Shader.Z_TEST_EQUAL = 2;
-    material.Shader.Z_TEST_LEQUAL = 3;
-    material.Shader.Z_TEST_GREATER = 4;
-    material.Shader.Z_TEST_NOTEQUAL = 5;
-    material.Shader.Z_TEST_GEQUAL = 6;
-    material.Shader.Z_TEST_ALWAYS = 7;
 
     /**
      * Material configuration
@@ -341,15 +341,70 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Binds the uniforms to the current shader.
      * The uniforms is expected to be in a valid format
-     * @method bindMatrices
-     * @param {Object}
+     * @method bindUniform
+     * @param {Object} uniforms
+     * @param {KICK.math.mat4} projectionMatrix
+     * @param {KICK.math.mat4} modelViewMatrix
+     * @param {KICK.math.mat4} modelViewProjectionMatrix
+     * @param {KICK.math.mat4) transform
      */
-    material.Shader.prototype.bindMatrices = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform){
-        var mv = this.lookupUniform["_mv"],
+    material.Shader.prototype.bindUniform = function(uniforms, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform){
+        var shader = this,
+            gl = shader.gl,
+            uniformName,
+            shaderUniform,
+            uniform,
+            value,
+            location,
+            mv = this.lookupUniform["_mv"],
             proj = this.lookupUniform["_proj"],
             mvProj = this.lookupUniform["_mvProj"],
-            gl = this.gl,
-            globalTransform;
+            globalTransform,
+            c = KICK.core.Constants;
+        for (uniformName in uniforms){
+            shaderUniform = shader.lookupUniform[uniformName];
+            uniform = uniforms[uniformName];
+            location = shaderUniform.location;
+            value = uniform.value;
+            switch (shaderUniform.type){
+                case c.GL_FLOAT:
+                    gl.uniform1fv(location,value);
+                    break;
+                case c.GL_FLOAT_MAT2:
+                    gl.uniformMatrix2fv(location,false,value);
+                    break;
+                case c.GL_FLOAT_MAT3:
+                    gl.uniformMatrix3fv(location,false,value);
+                    break;
+                case c.GL_FLOAT_MAT4:
+                    gl.uniformMatrix4fv(location,false,value);
+                    break;
+                case c.GL_FLOAT_VEC2:
+                    gl.uniform2fv(location,value);
+                    break;
+                case c.GL_FLOAT_VEC3:
+                    gl.uniform3fv(location,value);
+                    break;
+                case c.GL_FLOAT_VEC4:
+                    gl.uniform4fv(location,value);
+                    break;
+                case c.GL_INT:
+                    gl.uniform1fv(location,value);
+                    break;
+                case c.GL_INT_VEC2:
+                    gl.uniform2fv(location,value);
+                    break;
+                case c.GL_INT_VEC3:
+                    gl.uniform3fv(location,value);
+                    break;
+                case c.GL_INT_VEC4:
+                    gl.uniform4fv(location,value);
+                    break;
+                default:
+                    console.log("Warn cannot find type "+shaderUniform.type);
+                    break;
+            }
+        }
         if (proj){
             gl.uniformMatrix4fv(proj.location,false,projectionMatrix);
         }
@@ -360,67 +415,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
             gl.uniformMatrix4fv(mvProj.location,false,math.mat4.multiply(modelViewProjectionMatrix,globalTransform,math.mat4.create()));
-        }
-    };
-
-    /**
-     * Binds the uniforms to the current shader.
-     * The uniforms is expected to be in a valid format
-     * @method bindUniform
-     * @param {Object}
-     */
-    material.Shader.prototype.bindUniform = function(uniforms){
-        var shader = this,
-            gl = shader.gl,
-            uniformName,
-            shaderUniform,
-            uniform,
-            value,
-            location,
-            c = KICK.core.Constants;
-        for (uniformName in uniforms){
-            shaderUniform = shader.lookupUniform[uniformName];
-            uniform = uniforms[uniformName];
-            location = shaderUniform.location;
-            value = uniform.value;
-            switch (shaderUniform.type){
-                case c.GL_FLOAT:
-                    gl.uniform1fv(location,value);
-                break;
-                case c.GL_FLOAT_MAT2:
-                    gl.uniformMatrix2fv(location,false,value);
-                break;
-                case c.GL_FLOAT_MAT3:
-                    gl.uniformMatrix3fv(location,false,value);
-                break;
-                case c.GL_FLOAT_MAT4:
-                    gl.uniformMatrix4fv(location,false,value);
-                break;
-                case c.GL_FLOAT_VEC2:
-                    gl.uniform2fv(location,value);
-                break;
-                case c.GL_FLOAT_VEC3:
-                    gl.uniform3fv(location,value);
-                break;
-                case c.GL_FLOAT_VEC4:
-                    gl.uniform4fv(location,value);
-                break;
-                case c.GL_INT:
-                    gl.uniform1fv(location,value);
-                break;
-                case c.GL_INT_VEC2:
-                    gl.uniform2fv(location,value);
-                break;
-                case c.GL_INT_VEC3:
-                    gl.uniform3fv(location,value);
-                break;
-                case c.GL_INT_VEC4:
-                    gl.uniform4fv(location,value);
-                break;
-                default:
-                    console.log("Warn cannot find type "+shaderUniform.type);
-                break;
-            }
         }
     };
 })();

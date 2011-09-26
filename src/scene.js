@@ -919,8 +919,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 material = this.material,
                 shader = material.shader;
             mesh.bind(shader);
-            shader.bindUniform(material.uniforms);
-            shader.bindMatrices(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform);
+            shader.bindUniform(material.uniforms,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform);
             mesh.render();
         };
 
