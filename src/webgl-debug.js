@@ -136,7 +136,7 @@ function checkInit() {
  */
 function mightBeEnum(value) {
   checkInit();
-  return (glEnums[value] !== undefined);
+  return (typeof(glEnums[value]) !== 'undefined');
 }
 
 /**
@@ -151,7 +151,7 @@ function mightBeEnum(value) {
 function glEnumToString(value) {
   checkInit();
   var name = glEnums[value];
-  return (name !== undefined) ? name :
+  return (typeof(name) !== 'undefined') ? name :
       ("*UNKNOWN WebGL ENUM (0x" + value.toString(16) + ")");
 }
 
@@ -165,7 +165,7 @@ function glEnumToString(value) {
  */
 function glFunctionArgToString(functionName, argumentIndex, value) {
   var funcInfo = glValidEnumContexts[functionName];
-  if (funcInfo !== undefined) {
+  if (typeof(funcInfo) !== 'undefined') {
     if (funcInfo[argumentIndex]) {
       return glEnumToString(value);
     }

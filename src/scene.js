@@ -1087,7 +1087,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
 
             for (var descName in meshVertexAttBufferDescription) {
-                if (shader.lookupAttribute[descName] !== undefined) {
+                if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
                     var desc = meshVertexAttBufferDescription[descName];
                     var attributeIndex = shader.lookupAttribute[descName];
                     gl.enableVertexAttribArray(attributeIndex);

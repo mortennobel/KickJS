@@ -2,7 +2,7 @@ var engine,
     meshRenderer,
     vs,
     fs,
-    hasShaderError = false,
+    previousShaderError = false,
     isRotating = true,
     light,
     ambientLight,
@@ -67,7 +67,7 @@ function initKick() {
 
     var gameObject = engine.activeScene.createGameObject();
     meshRenderer = new KICK.scene.MeshRenderer();
-    setMesh(KICK.scene.MeshFactory.createIcosphere, 2.0);
+    setMesh(KICK.scene.MeshFactory.createIcosphere, 2);
     setMaterial();
     gameObject.addComponent(meshRenderer);
     addRotatorComponent(gameObject);
@@ -90,21 +90,25 @@ function updateShader(){
     var shader = new KICK.material.Shader(engine);
     var res = shader.initShader(vs,fs,window.log.log);
     if (!res){
-        hasShaderError = true;
+        previousShaderError = true;
+        console.log(KICK.material.Shader.getPrecompiledSource(vs));
+        console.log(KICK.material.Shader.getPrecompiledSource(fs));
         document.body.style.backgroundColor = 'pink';
         return;
     }
     var missingAttributes = meshRenderer.mesh.verify(shader);
     if (missingAttributes){
         window.log.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-        hasShaderError = true;
+        console.log(KICK.material.Shader.getPrecompiledSource(vs));
+        console.log(KICK.material.Shader.getPrecompiledSource(fs));
+        previousShaderError = true;
         document.body.style.backgroundColor = 'pink';
         return;
     }
-    if (hasShaderError){
+    if (previousShaderError){
         window.log.log("Shader compiled ok");
         document.body.style.backgroundColor = 'white';
-        hasShaderError = false;
+        previousShaderError = false;
     }
     meshRenderer.material = new KICK.material.Material({
         name:"Some material",
@@ -261,7 +265,7 @@ YUI().use('tabview','console', function(Y) {
             }
 
             var lightpos = document.getElementById('lightpos');
-            for (var i=0;i<lightpos.children.length;i++){
+            for (var i=0;lightpos  && i<lightpos.children.length;i++){
                 lightpos.children[i].position = i;
                 lightpos.children[i].addEventListener('change',updateLightPosition,false);
                 lightpos.children[i].addEventListener('click',updateLightPosition,false);
