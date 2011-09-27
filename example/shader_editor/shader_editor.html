@@ -157,33 +157,31 @@ The following is used to provide default shader values
 -->
 <div style="display:none;">
   <textarea style="width:500px;height:150px;" id="vertexShader">
-      attribute vec3 vertex;
-      attribute vec3 normal;
+attribute vec3 vertex;
+attribute vec3 normal;
 
-      uniform mat4 _mvProj;
-      uniform mat3 _norm;
+uniform mat4 _mvProj;
+uniform mat3 _norm;
 
-      varying vec3 vColor;
+varying vec3 vColor;
 
-      #include <light>
+#include <light>
 
-      // constants
-      vec3 materialColor = vec3(1.0,0.7,0.8);
-      vec3 specularColor = vec3(1.0,1.0,1.0);
+// constants
+vec3 materialColor = vec3(1.0,0.7,0.8);
+vec3 specularColor = vec3(1.0,1.0,1.0);
 
-      void main(void) {
-          // compute position
-          gl_Position = _mvProj * vec4(vertex, 1.0);
+void main(void) {
+  // compute position
+  gl_Position = _mvProj * vec4(vertex, 1.0);
 
-          // compute light info
-          vec3 n = normalize(_norm * normal);
-          vec3 diffuse;
-          float specular;
-          getDirectionalLight(n, _dLight, 50.0,  diffuse,  specular);
-          vColor = max(diffuse,_ambient.xyz)*materialColor+specular*specularColor;
-      }
-
-  </textarea>
+  // compute light info
+  vec3 n = normalize(_norm * normal);
+  vec3 diffuse;
+  float specular;
+  getDirectionalLight(n, _dLight, 50.0,  diffuse,  specular);
+  vColor = max(diffuse,_ambient.xyz)*materialColor+specular*specularColor;
+}  </textarea>
   <textarea style="width:500px;height:150px;" id="fragmentShader">
 #ifdef GL_ES
 precision highp float;
