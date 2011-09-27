@@ -11,6 +11,8 @@ var engine,
 function logFn(output) {
     if (window.log){
         window.log.log(output);
+    } else {
+        console.log(output);
     }
 }
 
@@ -25,7 +27,7 @@ function setMaterial(){
     var res = shader.initShader(vs,fs,logFn);
     var missingAttributes = meshRenderer.mesh.verify(shader);
     if (missingAttributes){
-        log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+        logFn("Missing attributes in mesh "+JSON.stringify(missingAttributes))
         return;
     }
 
@@ -53,35 +55,39 @@ function addRotatorComponent(gameObject){
 }
 
 function initKick() {
-    engine = new KICK.core.Engine('canvas',{
-        enableDebugContext: true
-    });
-    var cameraObject = engine.activeScene.createGameObject();
-    var camera = new KICK.scene.Camera({
-        clearColor: [0,0,0,1],
-        cameraTypePerspective: false,
-        near:-1,
-        far:1
-    });
-    cameraObject.addComponent(camera);
+    try{
+        engine = new KICK.core.Engine('canvas',{
+            enableDebugContext: true
+        });
+        var cameraObject = engine.activeScene.createGameObject();
+        var camera = new KICK.scene.Camera({
+            clearColor: [0,0,0,1],
+            cameraTypePerspective: false,
+            near:-1,
+            far:1
+        });
+        cameraObject.addComponent(camera);
 
-    var gameObject = engine.activeScene.createGameObject();
-    meshRenderer = new KICK.scene.MeshRenderer();
-    setMesh(KICK.scene.MeshFactory.createIcosphere, 2);
-    setMaterial();
-    gameObject.addComponent(meshRenderer);
-    addRotatorComponent(gameObject);
+        var gameObject = engine.activeScene.createGameObject();
+        meshRenderer = new KICK.scene.MeshRenderer();
+        setMesh(KICK.scene.MeshFactory.createIcosphere, 2);
+        setMaterial();
+        gameObject.addComponent(meshRenderer);
+        addRotatorComponent(gameObject);
 
-    var ambientlightGameObject = engine.activeScene.createGameObject();
-    ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
-    ambientLight.color = [0.1,0.1,0.1,1];
-    ambientlightGameObject.addComponent(ambientLight);
+        var ambientlightGameObject = engine.activeScene.createGameObject();
+        ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
+        ambientLight.color = [0.1,0.1,0.1,1];
+        ambientlightGameObject.addComponent(ambientLight);
 
-    var lightGameObject = engine.activeScene.createGameObject();
-    light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
-    lightGameObject.addComponent(light);
-    lightTransform = lightGameObject.transform;
+        var lightGameObject = engine.activeScene.createGameObject();
+        light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
+        lightGameObject.addComponent(light);
+        lightTransform = lightGameObject.transform;
 
+    }catch (e){
+        alert("Error init Kickstart Engine"+e);
+    }
     setTimeout(shaderChangeListener,2000); 
 }
 

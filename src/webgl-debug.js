@@ -4,7 +4,8 @@
 
 // Various functions for helping debug WebGL apps.
 
-WebGLDebugUtils = function() {
+
+var WebGLDebugUtils = function() {
 
 /**
  * Wrapped logging function.
@@ -94,7 +95,7 @@ var glValidEnumContexts = {
   // Culling
 
   'cullFace': { 0:true },
-  'frontFace': { 0:true },
+  'frontFace': { 0:true }
 };
 
 /**
