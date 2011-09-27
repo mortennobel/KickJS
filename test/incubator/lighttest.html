@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Maven+Pro:400,700">-->
+
+            <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+            <link rel="stylesheet" href="/combo/css?main-min.css">
+
+        <link rel="stylesheet" href="/vendor/prettify/prettify-min.css">
+        <link rel="stylesheet" href="/css/docs-min.css">
+<script src="../../src/constants.js"></script>
+<script src="../../src/math.js"></script>
+<script src="../../src/core.js"></script>
+<script src="../../src/scene.js"></script>
+    <!-- allows to use random seed -->
+       <!--<script type="text/javascript" src="http://davidbau.com/encode/seedrandom.js"></script>-->
+
+
+<script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+<h1>Math test</h1>
+<style scoped>
+    #testLogger {
+        margin-bottom: 1em;
+    }
+
+    #testLogger .yui3-console .yui3-console-title {
+        border: 0 none;
+        color: #000;
+        font-size: 13px;
+        font-weight: bold;
+        margin: 0;
+        text-transform: none;
+    }
+    #testLogger .yui3-console .yui3-console-entry-meta {
+        margin: 0;
+    }
+
+    .yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
+        background: #070;
+        color: #fff;
+    }
+    </style>
+
+    <div id="testLogger"></div>
+
+<script>
+YUI().use('node', 'console', 'test', function (Y) {
+
+    Y.namespace("KICK.math");
+
+    Y.KICK.math.vec3Test = new Y.Test.Case({
+
+        //name of the test case - if not provided, one is auto-generated
+        name : "vec3test",
+
+        //---------------------------------------------------------------------
+        // setUp and tearDown methods - optional
+        //---------------------------------------------------------------------
+
+        /*
+         * Sets up data that is needed by each test.
+         */
+        setUp : function () {
+        },
+
+        /*
+         * Cleans up everything that was created by setUp().
+         */
+        tearDown : function () {
+        },
+
+        //---------------------------------------------------------------------
+        // Test methods - names must begin with "test"
+        //---------------------------------------------------------------------
+
+        testRecomputeDirectionalLight: function () {
+            var Assert = Y.Assert;
+
+            var ref = {};
+
+            var light = new KICK.scene.Light({type : KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
+            var gameObjectStub = {};
+            var lightTransform = new KICK.scene.Transform(gameObjectStub);
+            gameObjectStub.transform = lightTransform;
+            light.gameObject = gameObjectStub;
+
+            var sceneLights = new KICK.scene.SceneLights();
+            sceneLights.directionalLight = light;
+            var modelViewMatrix = KICK.math.mat4.create();
+            KICK.math.mat4.identity(modelViewMatrix);
+            sceneLights.recomputeDirectionalLight(modelViewMatrix);
+            var lightDir = sceneLights.directionalLightDirection;
+            Assert.compareVec([0,0,1],lightDir);
+
+            // rotate the camera downwards
+            lightTransform.rotationEuler = [-90,0,0];
+            sceneLights.recomputeDirectionalLight(modelViewMatrix);
+            lightDir = sceneLights.directionalLightDirection;
+            Assert.compareVec([0,1,0],lightDir);
+
+            var directionalHalfVector = sceneLights.directionalHalfVector;
+            window.logger.log(KICK.math.vec3.str(directionalHalfVector));
+        }
+    });
+
+    /// extend Asset to compare float values
+    Y.Assert.compareVec = function(f1,f2,message){
+        if (!message){
+            if (f1.length==3){
+                message = "Expected "+KICK.math.vec3.str(f1)+" Actual "+KICK.math.vec3.str(f2);
+            }
+        }
+        for (var i=0;i<f1.length;i++){
+            Y.Assert.compareFloat(f1[i],f2[i],message);
+        }
+    };
+    Y.Assert.compareFloat = function(f1,f2,message){
+        var epsilon = 0.001;
+        return Y.Assert.isTrue(Math.abs(f1-f2)<epsilon,message);
+    };
+
+    var ExampleSuite = new Y.Test.Suite("Example Suite");
+    ExampleSuite.add(Y.KICK.math.vec3Test);
+
+    //create the console
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block', // to anchor in the example content,
+        width: 600,
+        height: 600
+    });
+
+    r.render('#testLogger');
+
+    window.logger = r;
+
+    Y.Test.Runner.add(ExampleSuite);
+
+    //run the tests
+    Y.Test.Runner.run();
+
+});
+</script>
+
+</div>
+
+</body>
+</html>

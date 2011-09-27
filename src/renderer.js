@@ -106,7 +106,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             modelViewProjectionMatrix = mat4.create(),
             gl,
             lights = [],
-            maxNumberOfLights;
+            maxNumberOfLights,
+            sceneLightObj = new KICK.scene.SceneLights(),
+            addLight = function(light){
+                lights.push(light);
+                if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
+                    sceneLightObj.ambientLight = light;
+                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
+                    sceneLightObj.directionalLight = light;
+                } else {
+                    sceneLightObj.otherLights.push(light);
+                }
+            },
+            removeLight = function(light){
+                core.Util.removeElementFromArray(lights,light);
+                if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
+                    sceneLightObj.ambientLight = null;
+                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
+                    sceneLightObj.directionalLight = null;
+                } else {
+                    core.Util.removeElementFromArray(sceneLightObj.otherLights,light);
+                }
+            };
 
         this.init = function (engine) {
             gl = engine.gl;
@@ -114,13 +135,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         }
 
         this.render = function () {
-            var i,j,
-                renderable;
+            var i,j, camera;
             for (i=cameras.length-1; i >= 0; i--) {
-                cameras[i].setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+                camera = cameras[i];
+                camera.setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+                sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
                 for (j=renderableComponents.length-1; j >= 0; j--) {
-                    renderable = renderableComponents[j];
-                        renderable.render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+                    renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
                 }
             }
             gl.flush();
@@ -133,7 +154,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     cameras.push(component);
                 }
                 if (component instanceof scene.Light){
-                    lights.push(component);
+                    addLight(component);
                 }
                 if (typeof(component.render) === "function") {
                     renderableComponents.push(component);
@@ -149,7 +170,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     core.Util.removeElementFromArray(cameras,component);
                 }
                 if (component instanceof scene.Light){
-                    core.Util.removeElementFromArray(lights,component);
+                    removeLight(component);
                 }
                 if (typeof(component.render) === "function") {
                     core.Util.removeElementFromArray(renderableComponents,component);

@@ -324,7 +324,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 get: function(){
                     var parentIterator = null;
                     if (parentTransform==null){
-                        return vec3.create(localRotationQuat);
+                        return vec4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]){
                         quat4.set(localRotationQuat,globalRotationQuat);
@@ -913,13 +913,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param (KICK.math.mat4) projectionMatrix
          * @param {KICK.math.mat4} modelViewMatrix
          * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
+         * @param {KICK.scene.SceneLights} sceneLights
          */
-        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
+        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights) {
             var mesh = this.mesh,
                 material = this.material,
                 shader = material.shader;
             mesh.bind(shader);
-            shader.bindUniform(material.uniforms,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform);
+            shader.bindUniform(material.uniforms,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
             mesh.render();
         };
 
@@ -1292,48 +1293,56 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.scene
      * @extends KICK.scene.Component
      * @constructor
-     * @param {KICK.core.Engine} engine
      * @param {Object} config
      * @final
      */
-    scene.Light = function (engine,config) {
-        var color = vec4.create([1.0,1.0,1.0,1.0]),
+    scene.Light = function (config) {
+        var color = vec3.create([1.0,1.0,1.0]),
             type,
             intensity,
-            colorIntensity = vec4.create(),
+            colorIntensity = vec3.create(),
             updateIntensity = function(){
                 vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
-                colorIntensity[3] = color[3];
             },
             gameObject,
             scriptPriority;
         config = config || {};
         if (config.color){
-            vec4.set(config.color,color);
+            vec3.set(config.color,color);
         }
         intensity = config.intensity || 1;
         updateIntensity();
-        type = config.type || scene.Light.TYPE_DIRECTIONAL;
+        if (ASSERT){
+            if (config.type){
+                if (config.type !== core.Constants._LIGHT_TYPE_POINT &&
+                    config.type !== core.Constants._LIGHT_TYPE_DIRECTIONAL &&
+                    config.type !== core.Constants._LIGHT_TYPE_AMBIENT){
+                    throw new Error("Light type must be KICK.core.Constants._LIGHT_TYPE_POINT, " +
+                        "KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL or KICK.core.Constants._LIGHT_TYPE_AMBIENT");
+                }
+            }
+        }
+        type = config.type ||  core.Constants._LIGHT_TYPE_POINT;
         Object.defineProperties(this,{
             /**
              * Color intensity of the light (RGBA)
              * @property color
-             * @type KICK.math.vec4
+             * @type KICK.math.vec3
              */
             color: {
                 get: function(){
-                    return vec4.create(color);
+                    return vec3.create(color);
                 },
                 set: function(value){
-                    vec4.set(value,color);
+                    vec3.set(value,color);
                     updateIntensity();
                 }
             },
             /**
              * Color type. Must be either:<br>
-             * KICK.scene.Light.TYPE_AMBIENT,
-             * KICK.scene.Light.TYPE_DIRECTIONAL,
-             * KICK.scene.Light.TYPE_DIRECTIONAL <br>
+             * KICK.core.Constants._LIGHT_TYPE_AMBIENT,
+             * KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+             * KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL <br>
              * Note that this value is readonly. To change it create a new Light component and replace the current light
              * component of its gameObject
              * @property type
@@ -1364,7 +1373,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * This property exposes a internal value. This value should not be modified.
              * Instead use the intensity and color property.
              * @property colorIntensity
-             * @type KICK.math.vec4
+             * @type KICK.math.vec3
              * @final
              */
             colorIntensity: {
@@ -1390,28 +1399,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
         });
     };
-    /**
-     * Used to define ambient color in the scene (indirect lightening)
-     * @property TYPE_AMBIENT
-     * @type Number
-     * @final
-     */
-    scene.Light.TYPE_AMBIENT = 0;
-    /**
-     * Used to define directional light in the scene (such as sunlight)
-     * @property TYPE_DIRECTIONAL
-     * @type Number
-     * @final
-     */
-    scene.Light.TYPE_DIRECTIONAL = 1;
-    /**
-     * Used to define point light in the scene
-     * @property TYPE_POINT
-     * @type Number
-     * @final
-     */
-    scene.Light.TYPE_POINT = 2;
-
     Object.freeze(scene.Light);
 
      /**
@@ -1422,6 +1409,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     scene.SceneLights = function(){
         var ambientLight = null,
             directionalLight = null,
+            directionalHalfVector = vec3.create(),
+            directionalLightDirection = vec3.create(),
+            directionalLightTransform = null,
             otherLights = [];
         Object.defineProperties(this,{
             /**
@@ -1439,11 +1429,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             throw Error("Cannot have multiple ambient lights in the scene");
                         }
                     }
-                    if (DEBUG){
-                        if (value && ambientLight){
-                            console.log("Cannot have multiple ambient lights in the scene");
-                        }
-                    }
                     ambientLight = value;
                 }
             },
@@ -1458,17 +1443,34 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 },
                 set: function(value){
                     if (ASSERT){
-                        if (value && ambientLight){
+                        if (value && directionalLight){
                             throw Error("Cannot have multiple directional lights in the scene");
                         }
                     }
-                    if (DEBUG){
-                        if (value && ambientLight){
-                            console.log("Cannot have multiple directional lights in the scene");
-                        }
-                    }
                     directionalLight = value;
+                    if (value !== null){
+                        directionalLightTransform = directionalLight.gameObject.transform;
+                    } else {
+                        directionalLightTransform = null;
+                    }
                 }
+            },
+            /**
+             * The half vector of the directional light source  (calculated in recomputeDirectionalLight())
+             * @property directionalHalfVector
+             * @type KICK.math.vec3
+             */
+            directionalHalfVector:{
+                value:directionalHalfVector
+            },
+            /**
+             * Normalized light direction (calculated in recomputeDirectionalLight()) <br>
+             * Note the light direction if from the surface towards the light
+             * @property directionalLightDirection
+             * @type KICK.math.vec3
+             */
+            directionalLightDirection:{
+                value:directionalLightDirection
             },
             /**
              * The point  light sources in the scene.
@@ -1479,5 +1481,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value:otherLights
             }
         });
+        /**
+         * @method recomputeDirectionalLight
+         * @param {KICK.math.mat4} modelViewMatrix
+         */
+        this.recomputeDirectionalLight = function(modelViewMatrix){
+            if (directionalLight !== null){
+                // compute light direction (note direction from surface towards camera)
+                vec3.set([0,0,1],directionalLightDirection);
+                quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
+
+                // transform to eye space
+                mat4.multiplyVec3(modelViewMatrix,directionalLightDirection);
+
+                // compute eye direction
+                var eyeDirection = directionalHalfVector; // use directionalHalfVector as temp
+                vec3.set([0,0,-1],eyeDirection);
+                // transform to eye space
+                mat4.multiplyVec3(modelViewMatrix,eyeDirection);
+
+                // compute half vector
+                vec3.add(eyeDirection, directionalLightDirection, directionalHalfVector);
+                if (vec3.lengthSqr(directionalHalfVector)<0.001){ // if looking towards the light
+                    vec3.set([0,0,1],directionalHalfVector);
+                } else {
+                    vec3.normalize(directionalHalfVector);
+                }
+            }
+        };
     };
  })();

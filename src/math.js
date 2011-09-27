@@ -19,9 +19,10 @@
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-/*!
+ *
+ * This math library is a part of Kickstart Engine, but has no dependency to the rest of the project except for the
+ * KICK.core.Constants (in constants.js)
+ *
  * KICK.math is based on
  * glMatrix.js - High performance matrix and vector operations for WebGL
  * version 0.9.6
@@ -420,6 +421,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         return '[' + vec[0] + ', ' + vec[1] + ', ' + vec[2] + ']';
     };
 
+
     /////////////////////////////////////////
     /**
      * vec4 - 4 Dimensional Vector<br>
@@ -798,6 +800,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         return '[' + mat[0] + ', ' + mat[1] + ', ' + mat[2] +
             ', ' + mat[3] + ', '+ mat[4] + ', ' + mat[5] +
             ', ' + mat[6] + ', ' + mat[7] + ', '+ mat[8] + ']';
+    };
+
+    /**
+     * Returns a string representation of a mat3 printed as a 4x4 matrix (on 3 lines)
+     * @method strPretty
+     * @param {KICK.math.mat3} mat mat3 to represent as a string
+     * @return {String} string representation of mat
+     */
+    mat3.strPretty = function(mat) {
+        return '[' + mat[0] + ', ' + mat[3] + ', ' + mat[6] + '\n' +
+            ', ' + mat[1] + ', '+ mat[4] + ', ' + mat[7] + '\n' +
+            ', ' + mat[2] + ', ' + mat[5] + ', '+ mat[8] + ']';
     };
 
     /**

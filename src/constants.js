@@ -108,6 +108,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         _RADIAN_TO_DEGREE : {value: 57.2957795130824,enumerable:true},
         /**
+         * Used to define ambient color in the scene (indirect lightening)
+         * @property _LIGHT_TYPE_AMBIENT
+         * @type Number
+         * @final
+         */
+        _LIGHT_TYPE_AMBIENT :{value: 1,enumerable:true},
+        /**
+         * Used to define directional light in the scene (such as sunlight)
+         * @property LIGHT_TYPE_DIRECTIONAL
+         * @type Number
+         * @final
+         */
+        _LIGHT_TYPE_DIRECTIONAL:{value: 2,enumerable:true},
+        /**
+         * Used to define point light in the scene
+         * @property TYPE_POINT
+         * @type Number
+         * @final
+         */
+        _LIGHT_TYPE_POINT:{value: 3,enumerable:true},
+
+        /**
          * Value 256
          * @property GL_DEPTH_BUFFER_BIT
          * @type Number

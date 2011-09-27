@@ -66,12 +66,14 @@ cp $project/src/constants.js $project/build/pre/constants.js
 ##############################################################################
 # create minified versions of js files
 
-echo java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/src/math.js --js $project/src/core.js --js $project/src/scene.js --js $project/src/renderer.js --js $project/src/shader.js --js $project/src/meshfactory.js --language_in ECMASCRIPT5_STRICT
-java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/scene.js --js $project/build/pre/renderer.js --js $project/build/pre/shader.js --js $project/build/pre/meshfactory.js --language_in ECMASCRIPT5_STRICT
+echo "Running Google Clojure compiler"
+java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/webgl-debug.js --js $project/build/pre/constants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/scene.js --js $project/build/pre/renderer.js --js $project/build/pre/shader.js --js $project/build/pre/meshfactory.js --language_in ECMASCRIPT5_STRICT
 # build kick-uncompressed.js
-cat $project/build/pre/constants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/scene.js $project/build/pre/renderer.js $project/build/pre/shader.js $project/build/pre/meshfactory.js > $project/build/kick-uncompressed-$version.js
+cat "$project/license.txt" $project/src/webgl-debug.js $project/build/pre/constants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/scene.js $project/build/pre/renderer.js $project/build/pre/shader.js $project/build/pre/meshfactory.js > $project/build/kick-uncompressed-$version.js
 
+echo "Adding license info compiler"
 cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/kick-min-$version.js"
 rm "$project/build/kick-min.js.tmp"
 
 cp "$project/build/kick-min-$version.js" ""$project/example/shader_editor/kick/kick-min-$version.js""
+cp "$project/build/kick-uncompressed-$version.js" ""$project/example/shader_editor/kick/kick-uncompressed-$version.js""

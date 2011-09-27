@@ -189,6 +189,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     message: "Cannot create gl-context"
                 };
             }
+            if (thisObj.enableDebugContext){
+                gl = WebGLDebugUtils.makeDebugContext(gl);
+            }
+
             thisObj.renderer = new renderer.ForwardRenderer();
 
             canvas.addEventListener("resize",
@@ -239,11 +243,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     core.Config = function(config){
          /**
-         * Maximum number of lights in scene
+         * Maximum number of lights in scene. Default value is 1
          * @property maxNumerOfLights
          * @type Number
          */
         this.maxNumerOfLights = config.maxNumerOfLights ? config.maxNumerOfLights : 1;
+
+        /**
+         * Checks for WebGL errors after each webgl function is called.
+         * Should only be used for debugging.
+         * Default value is false.
+         * @property enableDebugContext
+         * @type Boolean
+         */
+        this.enableDebugContext = typeof(config.enableDebugContext) === 'boolean' ? config.enableDebugContext  : false;
     };
 
     /**

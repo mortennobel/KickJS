@@ -46,6 +46,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
     var material = KICK.namespace("KICK.material"),
         math = KICK.namespace("KICK.math"),
+        mat3 = math.mat3,
+        mat4 = math.mat4,
         core = KICK.namespace("KICK.core");
 
     /**
@@ -61,14 +63,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _shaderProgramId = -1,
             _faceCulling = core.Constants.GL_BACK,
             _zTest = core.Constants.GL_LESS,
-            /**
-             * @method compileShader
-             * @param {String} str
+            LIGHT_INCLUDE =
+                "struct DirectionalLight {\n"+
+                    "   vec3 lDir;\n"+
+                    "   vec3 colInt;\n"+
+                    "   vec3 halfV;\n"+
+                    "};\n"+
+                    "// assumes that normal is normalized\n"+
+                    "void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n"+
+                    "    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n"+
+                    "	float specularContribution = max(dot(normal, dLight.halfV), 0.0);\n"+
+                    "    specular =  pow(specularContribution, specularExponent);\n"+
+                    "	diffuse = (dLight.colInt * diffuseContribution);\n"+
+                    "}\n"+
+                    "uniform DirectionalLight _dLight;\n" +
+                    "uniform vec3 _ambient;\n"+
+                    "//", // ends with comment out to remove any words after the include tag
+// ## Light end",
+        /**
+         * @method compileShader
+         * @param {String} str
              * @param {Boolean} isFragmentShader
              * @param {Function} errorLog
              * @private
              */
             compileShader = function (str, isFragmentShader, errorLog) {
+                str = str.replace(/^#include <light>/m,LIGHT_INCLUDE);
+
                 var shader,
                     c = KICK.core.Constants;
                 if (isFragmentShader) {
@@ -131,6 +152,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             gl:{
                 value:gl
+            },
+            /**
+             * A reference to the engine object
+             * @property engine
+             * @type KICK.core.Engine
+             */
+            engine:{
+                value:engine
             },
             /**
              * @property shaderProgramId
@@ -269,8 +298,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
                 this.lookupAttribute[attribute.name] = i;
             }
-            this.activeAttributesMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
-            this.activeUniformsMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
+//            this.activeAttributesMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
+//            this.activeUniformsMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
             return true;
         };
 
@@ -342,15 +371,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Binds the uniforms to the current shader.
      * The uniforms is expected to be in a valid format
      * @method bindUniform
-     * @param {Object} uniforms
+     * @param {Object} materialUniforms
      * @param {KICK.math.mat4} projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {KICK.math.mat4} modelViewProjectionMatrix
      * @param {KICK.math.mat4) transform
+     * @param {KICK.scene.SceneLights} sceneLights
      */
-    material.Shader.prototype.bindUniform = function(uniforms, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform){
-        var shader = this,
-            gl = shader.gl,
+    material.Shader.prototype.bindUniform = function(materialUniforms, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
+        // todo optimize this code
+        var gl = this.gl,
+            timeObj,
             uniformName,
             shaderUniform,
             uniform,
@@ -359,11 +390,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             mv = this.lookupUniform["_mv"],
             proj = this.lookupUniform["_proj"],
             mvProj = this.lookupUniform["_mvProj"],
+            norm = this.lookupUniform["_norm"],
+            lightUniform,
+            time = this.lookupUniform["_time"],
+            ambientLight = sceneLights.ambientLight,
+            directionalLight = sceneLights.directionalLight,
+            otherLights = sceneLights.otherLights,
             globalTransform,
-            c = KICK.core.Constants;
-        for (uniformName in uniforms){
-            shaderUniform = shader.lookupUniform[uniformName];
-            uniform = uniforms[uniformName];
+            c = KICK.core.Constants,
+            i;
+        for (uniformName in materialUniforms){
+            shaderUniform = this.lookupUniform[uniformName];
+            uniform = materialUniforms[uniformName];
             location = shaderUniform.location;
             value = uniform.value;
             switch (shaderUniform.type){
@@ -408,13 +446,47 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (proj){
             gl.uniformMatrix4fv(proj.location,false,projectionMatrix);
         }
-        if (mv){
+        if (mv || norm){
+            // todo optimize
             globalTransform = transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mv.location,false,math.mat4.multiply(modelViewMatrix,globalTransform,math.mat4.create()));
+            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,mat4.create());
+            if (mv){
+                gl.uniformMatrix4fv(mv.location,false,finalModelView);
+            }
+            if (norm){
+                // note this can be simplified to
+                // var normalMatrix = math.mat4.toMat3(finalModelView);
+                // if the modelViewMatrix is orthogonale (non-uniform scale is not applied)
+                var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
+                gl.uniformMatrix3fv(norm.location,false,normalMatrix);
+            }
         }
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,math.mat4.multiply(modelViewProjectionMatrix,globalTransform,math.mat4.create()));
+            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,mat4.create())); // todo remove new mat4 here (make local variable?)
+        }
+        if (ambientLight !== null){
+            lightUniform =  this.lookupUniform["_ambient"];
+            if (lightUniform){
+                gl.uniform3fv(lightUniform.location, ambientLight.colorIntensity);
+            }
+        }
+        if (directionalLight !== null){
+            lightUniform =  this.lookupUniform["_dLight.colInt"];
+            if (lightUniform){
+                gl.uniform3fv(lightUniform.location, directionalLight.colorIntensity);
+                lightUniform =  this.lookupUniform["_dLight.lDir"];
+                gl.uniform3fv(lightUniform.location, sceneLights.directionalLightDirection);
+                lightUniform =  this.lookupUniform["_dLight.halfV"];
+                gl.uniform3fv(lightUniform.location, sceneLights.directionalHalfVector);
+            }
+        }
+        for (i=otherLights.length-1;i >= 0;i--){
+            // todo
+        }
+        if (time){
+            timeObj = this.engine.time;
+            gl.uniform1f(time.location, timeObj.time);
         }
     };
 })();

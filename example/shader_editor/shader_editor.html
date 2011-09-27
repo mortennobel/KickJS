@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+<head>
+
+<meta charset=UTF-8”>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace/mode-glsl_es.js" type="text/javascript" charset="utf-8"></script>
+
+     <style>
+        #glslEditor {
+            position: absolute;
+            width: 800px;
+            height: 400px;
+        }
+         #glslEditorInfo{
+            position: absolute;
+            left: 830px;
+            height: 400px;
+         }
+    </style>
+
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>
+    <script type="text/javascript" src="shader_editor.js"></script>
+</head>
+<body class="yui3-skin-sam">
+<header>
+    <h1>Shader editor</h1>
+</header>
+<article>
+    <h1>Preview</h1>
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+</article>
+<article>
+    <div id="editorSection">
+    <ul>
+        <li><a href="#vs">Vertex shader</a></li>
+        <li><a href="#fs">Fragment shader</a></li>
+        <li><a href="#uniforms">Textures</a></li>
+        <li><a href="#textures">Uniforms</a></li>
+        <li><a href="#settings">Settings</a></li>
+    </ul>
+    <div>
+        <div id="vs" class="sourceEditorPanel">
+        </div>
+        <div id="fs"  class="sourceEditorPanel">
+        </div>
+        <div id="textures"  class="sourceEditorPanel">
+            <b style="color: red;">Textures not implemented yet</b>
+        </div>
+        <div id="uniforms"  class="sourceEditorPanel">
+            <b style="color: red;">Uniforms not implemented yet</b>
+        </div>
+        <div id="settings"  class="sourceEditorPanel">
+            <h3>Type of mesh</h3>
+            <div id="meshsetting">
+            <input type="radio" name="mesh-settings" value="cube">Cube</option>
+            <input type="radio" name="mesh-settings" value="icosphere" checked>Icosphere</option>
+            <input type="radio" name="mesh-settings" value="plane">Plane</option>
+            </div>
+            <!--<h3>Rotate camera</h3>
+            <div id="rotatecam">
+            <input type="radio" name="camera-rotate-settings" value="off">Off</option>
+            <input type="radio" name="camera-rotate-settings" value="on" checked>On</option>
+            </div> -->
+            <h3>Rotate mesh</h3>
+            <div id="rotatemesh">
+                <input type="radio" name="mesh-rotate-settings" value="off">Off</option>
+                <input type="radio" name="mesh-rotate-settings" value="on" checked>On</option>
+            </div>
+            <h3>Light</h3>
+            <div id="lighttype">
+                <!-- <input type="radio" name="lighttype" value="pointlight">Point light</option> -->
+                <input type="radio" name="lighttype" value="directionalLight" checked>Directional light</option>
+            </div><br>
+            Position:<br>
+            <div id="lightpos">
+                <input type="number" name="lightx" value="1" step=0.1>
+                <input type="number" name="lighty" value="1" step=0.1>
+                <input type="number" name="lightz" value="1" step=0.1><br>
+            </div>
+            Rotation (<b title="default pointing towards negative z">Euler</b>):<br>
+            <div id="lightrot">
+                <input type="number" id="light_rot_x" value="0" step=5>
+                <input type="number" id="light_rot_y" value="0" step=5>
+                <input type="number" id="light_rot_z" value="0" step=5><br>
+            </div>
+            Color:<br>
+            <div id="lightcolor">
+                <input type="number" id="light_col_r" value="1" step=0.1>
+                <input type="number" id="light_col_g" value="1" step=0.1>
+                <input type="number" id="light_col_b" value="1" step=0.1><br>
+            </div>
+            Intensity:<br>
+            <input type="number" id="lightintensity" value="1" step=0.1>
+            <h3>Ambient light (RGB)</h3>
+            <div id="ambientLight">
+                <input type="number" name="ambientLight_r" value="0.1" step=0.1>
+                <input type="number" name="ambientLight_g" value="0.1" step=0.1>
+                <input type="number" name="ambientLight_b" value="0.1" step=0.1><br>
+            </div>
+
+            <h3>Reset</h3>
+            <button id="resetShader">Reset shader to default value</button>
+        </div>
+    </div>
+</div>
+<div id="glslEditorPanel">
+ <div id="glslEditor"></div>
+ <div id="glslEditorInfo">
+     <h3>Predefined attributes</h3>
+      vec3 vertex: Vertex position in local space<br>
+      vec3 color: Color information (if available)<br>
+      vec2 uv1: Texture UV mapping 1<br>
+      vec2 uv2: Texture UV mapping 2<br>
+      vec3 normal: Vertex normals<br>
+      vec4 tangent: Tangent (currently broken)<br>
+     <h3>Predefined uniforms</h3>
+     mat4 _mvProj: Model view projection matrix<br>
+     mat4 _mv: Model view matrix<br>
+     mat3 _norm: Normal matrix<br>
+     mat4 _proj: Projection matrix<br>
+     float _time: total time<br>
+     vec3 _ambient: Ambient light<br>
+     vec3 _dLight.lDir: Directional light direction<br>
+     vec3 _dLight.colInt: Color intensity<br>
+     vec3 _dLight.halfV: half vector<br>
+     #include &lt;light&gt;: Include light :
+     <div style="background-color: #d3d3d3;">
+         struct DirectionalLight {<br>
+   &nbsp;&nbsp;&nbsp;vec3 lDir;<br>
+   &nbsp;&nbsp;vec3 colInt;<br>
+   &nbsp;&nbsp;vec3 halfV;<br>
+};<br>
+         void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular);<br>
+         uniform DirectionalLight _dLight;<br>
+         uniform vec3 _ambient;
+     </div>
+
+
+ </div>
+</div>
+</article>
+<article>
+    <div id="logger"></div>
+</article>
+<!--
+The following is used to provide default shader values
+-->
+<div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShader">
+      attribute vec3 vertex;
+      attribute vec3 normal;
+
+      uniform mat4 _mvProj;
+      uniform mat3 _norm;
+
+      varying vec3 vColor;
+
+      #include <light>
+
+      // constants
+      vec3 materialColor = vec3(1.0,0.7,0.8);
+      vec3 specularColor = vec3(1.0,1.0,1.0);
+
+      void main(void) {
+          // compute position
+          gl_Position = _mvProj * vec4(vertex, 1.0);
+
+          // compute light info
+          vec3 n = normalize(_norm * normal);
+          vec3 diffuse;
+          float specular;
+          getDirectionalLight(n, _dLight, 50.0,  diffuse,  specular);
+          vColor = max(diffuse,_ambient.xyz)*materialColor+specular*specularColor;
+      }
+
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+</div>
+  <br/>
+</body>
+</html>
