@@ -66,17 +66,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             webGlContextNames = ["experimental-webgl","webgl"],
             thisObj = this,
             activeRenderer,
-            lastTime = new Date().getTime(),
+            lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
             deltaTime = 0,
             timeObj = new core.Time(),
             timeSinceStart = 0,
             frameCount = 0,
-            activeScene = new scene.Scene(this);
-        /**
-         * @property running
-         * @type Boolean
-         */
-        this.running = true;
+            activeScene = new scene.Scene(this),
+            animationFrameObj = null,
+            wrapperFunctionToMethodOnObject = function (time_) {
+                thisObj._gameLoop(time_);
+            };
 
         Object.defineProperties(this,{
             /**
@@ -140,7 +139,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value: new core.Config(config || {})
             }
         });
-        
+
+        /**
+         * Stop the game loop. Ignores if game engine is already paused
+         * @method pause
+         */
+        this.pause = function(){
+            if (animationFrameObj !== null){
+                cancelRequestAnimFrame(animationFrameObj);
+                animationFrameObj = null;
+            }
+        };
+
+        /**
+         * Resume the game loop. Ignored if the game engine is already running.
+         * @method resume
+         */
+        this.resume = function(){
+            if (animationFrameObj === null){
+                lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
+                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+            }
+        };
+
         /**
          * @method _gameLoop
          * @param {Number} time current time in milliseconds
@@ -150,19 +171,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             this.activeScene.update();
             this.renderer.render();
             deltaTime = time-lastTime;
-
             lastTime = time;
-
             timeSinceStart += deltaTime;
-
             frameCount += 1;
-
-            if (this.running) {
-                var wrapperFunctionToMethodOnObject = function (time_) {
-                    thisObj._gameLoop(time_);
-                };
-                requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
-            }
+            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
         };
 
         /**
@@ -386,10 +398,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 window.msRequestAnimationFrame     ||
                 function (/* function */ callback, /* DOMElement */ element) {
                     var fps60 = 16.7;
-                    window.setTimeout(callback, fps60);
+                    return window.setTimeout(callback, fps60);
                 };
         })();
+
+        window.cancelRequestAnimFrame = ( function() {
+            return window.cancelAnimationFrame          ||
+                window.webkitCancelRequestAnimationFrame    ||
+                window.mozCancelRequestAnimationFrame       ||
+                window.oCancelRequestAnimationFrame     ||
+                window.msCancelRequestAnimationFrame        ||
+                clearTimeout
+        } )();
     }
+
 
 
 // workaround for undefined consoles
