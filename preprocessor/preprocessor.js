@@ -1,4 +1,4 @@
-var constants = require("../src/constants"),
+var constants = require("../src/js/constants"),
     replaceConstants = require("./replaceConstants"),
     fs = require('fs');
 

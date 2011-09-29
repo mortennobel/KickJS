@@ -16,8 +16,7 @@ version=0_1_0
 # The location of the files to parse.  Parses subdirectories, but will fail if
 # there are duplicate file names in these directories.  You can specify multiple
 # source trees:
-#     parser_in="%HOME/www/yui/src %HOME/www/event/src"
-parser_in=$project/src
+parser_in=$project/src/js
 
 # The location to output the parser data.  This output is a file containing a 
 # json string, and copies of the parsed files.
@@ -41,39 +40,42 @@ projecturl=http://www.kickstartengine.com/
 projectname="Kickstart Engine"
 
 #####
-# Clean up
+echo "Clean"
 rm -rf $parser_out
 rm -rf $generator_out
 
 ##############################################################################
-# add -s to the end of the line to show items marked private
+echo "Generating documentation (YUI Doc)"
 echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 
 ##############################################################################
-# run preprocessor
+echo "Running Precompiler"
 mkdir $project/build
 rm -rf $project/build/pre
 mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/math.js $project/build/pre/math.js
-$nodejs $project/preprocessor/preprocessor $project/src/core.js $project/build/pre/core.js
-$nodejs $project/preprocessor/preprocessor $project/src/scene.js $project/build/pre/scene.js
-$nodejs $project/preprocessor/preprocessor $project/src/renderer.js $project/build/pre/renderer.js
-$nodejs $project/preprocessor/preprocessor $project/src/shader.js $project/build/pre/shader.js
-$nodejs $project/preprocessor/preprocessor $project/src/meshfactory.js $project/build/pre/meshfactory.js
-cp $project/src/constants.js $project/build/pre/constants.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/math.js $project/build/pre/math.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/build/pre/core.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/renderer.js $project/build/pre/renderer.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/shader.js $project/build/pre/shader.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js
+cp $project/src/js/constants.js $project/build/pre/constants.js
 
 ##############################################################################
-# create minified versions of js files
-
 echo "Running Google Clojure compiler"
-java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/src/webgl-debug.js --js $project/build/pre/constants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/scene.js --js $project/build/pre/renderer.js --js $project/build/pre/shader.js --js $project/build/pre/meshfactory.js --language_in ECMASCRIPT5_STRICT
-# build kick-uncompressed.js
-cat "$project/license.txt" $project/src/webgl-debug.js $project/build/pre/constants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/scene.js $project/build/pre/renderer.js $project/build/pre/shader.js $project/build/pre/meshfactory.js > $project/build/kick-uncompressed-$version.js
+java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/scene.js --js $project/build/pre/renderer.js --js $project/build/pre/shader.js --js $project/build/pre/meshfactory.js --language_in ECMASCRIPT5_STRICT
 
+##############################################################################
+echo "Creating kick-uncompressed.js"
+cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/scene.js $project/build/pre/renderer.js $project/build/pre/shader.js $project/build/pre/meshfactory.js > $project/build/kick-uncompressed-$version.js
+
+##############################################################################
 echo "Adding license info compiler"
 cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/kick-min-$version.js"
 rm "$project/build/kick-min.js.tmp"
 
+##############################################################################
+echo "Copy kickjs to editor"
 cp "$project/build/kick-min-$version.js" ""$project/example/shader_editor/kick/kick-min-$version.js""
 cp "$project/build/kick-uncompressed-$version.js" ""$project/example/shader_editor/kick/kick-uncompressed-$version.js""

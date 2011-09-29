@@ -189,8 +189,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     message: "Cannot create gl-context"
                 };
             }
-            if (thisObj.enableDebugContext){
-                gl = WebGLDebugUtils.makeDebugContext(gl);
+            if (thisObj.config.enableDebugContext){
+                if (window["WebGLDebugUtils"]){
+                    gl = WebGLDebugUtils.makeDebugContext(gl);
+                } else {
+                    console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
+                }
             }
 
             thisObj.renderer = new renderer.ForwardRenderer();

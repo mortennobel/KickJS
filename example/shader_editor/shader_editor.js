@@ -86,7 +86,7 @@ function initKick() {
         lightTransform = lightGameObject.transform;
 
     }catch (e){
-        alert("Error init Kickstart Engine"+e);
+         alert("Error init Kickstart Engine"+e);
     }
     setTimeout(shaderChangeListener,2000); 
 }
