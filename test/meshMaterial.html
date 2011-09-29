@@ -11,11 +11,12 @@
     <script type="text/javascript" src="../src/js/math.js"></script>
     <script type="text/javascript" src="../src/js/scene.js"></script>
     <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/shader.js"></script>
+    <script type="text/javascript" src="../src/js/material.js"></script>
     <script type="text/javascript" src="../src/js/meshfactory.js"></script>
     <script type="text/javascript">
         var engine;
         var meshRenderer;
+        var lastSelectedMaterial = null;
 
         var materials = [];
 
@@ -90,8 +91,17 @@
             gameObject.addComponent(meshRenderer);
         }
 
-        function setMaterial(index){
+        function setMaterial(index, element){
+            if (lastSelectedMaterial){
+                lastSelectedMaterial.style.backgroundColor = '';
+            }
+            element.style.backgroundColor = "lightGray";
+            lastSelectedMaterial = element;
             meshRenderer.material = materials[index];
+        }
+
+        function setColor(color){
+            meshRenderer.material.uniforms.uColor.value = new Float32Array(color);
         }
     </script>
 </head>
@@ -100,9 +110,13 @@
   This example shows how vertex attributes can be visualized.
   <br>
   <b>Material</b><br>
-  [<a href="#" onclick="setMaterial(0);return false;">Material 1</a>]
-  [<a href="#" onclick="setMaterial(1);return false;">Material 2</a>]
-  [<a href="#" onclick="setMaterial(2);return false;">Material 3</a>]
+  [<a href="#" onclick="setMaterial(0,this);return false;">Material 1</a>]
+  [<a href="#" onclick="setMaterial(1,this);return false;">Material 2</a>]
+  [<a href="#" onclick="setMaterial(2,this);return false;">Material 3</a>]<br>
+  <b>Set color of current material</b><br>
+  [<a href="#" onclick="setColor([1,0,0]);return false;">Red</a>]
+  [<a href="#" onclick="setColor([0,1,0]);return false;">Green</a>]
+  [<a href="#" onclick="setColor([0,0,1]);return false;">Blue</a>]
   <br>
   <h2>Output</h2>
   <div id="output" style="color: red;">
