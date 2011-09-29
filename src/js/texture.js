@@ -66,10 +66,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
-         * 
+         * Set texture image based on a image object
          * @method setImage
-         * @param {Image} imageObj
-         * @param {String} dataURI
+         * @param {Image} imageObj image object to import
+         * @param {String} dataURI String representing the image
          */
         this.setImage = function(imageObj, dataURI){
             _dataURI = dataURI;
@@ -237,7 +237,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(value){
                     if (constants._ASSERT){
                         if (typeof value !== 'boolean'){
-                            throw new Error("Texture.autoScaleImage should be a boolean");
+                            throw new Error("Texture.autoScaleImage was not be a boolean");
                         }
                     }
                     _autoScaleImage = value;
@@ -256,10 +256,48 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(value){
                     if (constants._ASSERT){
                         if (typeof value !== 'boolean'){
-                            throw new Error("Texture.generateMipmaps should be a boolean");
+                            throw new Error("Texture.generateMipmaps was not a boolean");
                         }
                     }
                     _generateMipmaps = value;
+                }
+            },
+            /**
+             * When importing image flip the Y direction of the image
+             * (Default true)
+             * @property flipY
+             * @type Boolean
+             */
+            flipY:{
+                get: function(){
+                    return _flipY;
+                },
+                set: function(value){
+                    if (constants._ASSERT){
+                        if (typeof value !== 'boolean'){
+                            throw new Error("Texture.flipY was not a boolean");
+                        }
+                    }
+                    _flipY = value;
+                }
+            },
+            /**
+             * Import image as premultiplied alpha
+             * (Default false)
+             * @property asPreMultipliedAlpha
+             * @type Boolean
+             */
+            asPreMultipliedAlpha:{
+                get: function(){
+                    return _asPreMultipliedAlpha;
+                },
+                set: function(value){
+                    if (constants._ASSERT){
+                        if (typeof value !== 'boolean'){
+                            throw new Error("Texture.asPreMultipliedAlpha was not a boolean");
+                        }
+                    }
+                    _asPreMultipliedAlpha = value;
                 }
             }
         });
