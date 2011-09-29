@@ -51,9 +51,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         core = KICK.namespace("KICK.core");
 
     /**
-     * Renders a Mesh
+     * GLSL Shader object
      * @class Shader
-     * @namespace KICK.scene
+     * @namespace KICK.material
      * @constructor
      * @param {KICK.core.Engine} engine
      */
@@ -63,11 +63,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _shaderProgramId = -1,
             _faceCulling = core.Constants.GL_BACK,
             _zTest = core.Constants.GL_LESS,
-
-// ## Light end",
-        /**
-         * @method compileShader
-         * @param {String} str
+            /**
+             * Invoke shader compilation
+             * @method compileShader
+             * @param {String} str
              * @param {Boolean} isFragmentShader
              * @param {Function} errorLog
              * @private
@@ -300,7 +299,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Material configuration
      * @class Material
-     * @namespace KICK.scene
+     * @namespace KICK.material
      * @constructor
      */
     material.Material = function (config) {
@@ -352,7 +351,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     *
+     * @method getPrecompiledSource
      * @param {String} sourcecode
      * @return {String} sourcecode after precompiler
      */

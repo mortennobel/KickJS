@@ -56,7 +56,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         ASSERT = KICK.core.Constants._ASSERT;
 
     /**
-     * Live objects in the scene
+     * Game objects. (Always attached to a given scene)
      * @class GameObject
      * @namespace KICK.scene
      * @constructor
@@ -855,8 +855,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Specifies the interface for a component listener.
-     * Note that object only need to implement the methods componentsAdded and componentsRemoved.
+     * Specifies the interface for a component listener.<br>
+     * Note that object only need to implement the methods componentsAdded and componentsRemoved.<br>
      * However the class does exist and has the static method isComponentListener
      * @class ComponentChangedListener
      * @namespace KICK.scene

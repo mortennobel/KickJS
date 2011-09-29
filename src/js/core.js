@@ -53,7 +53,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         renderer = KICK.namespace("KICK.renderer");
 
     /**
-     * description The kickstart game engine
+     * Game engine object
      * @class Engine
      * @namespace KICK.core
      * @constructor
@@ -304,7 +304,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Utility class for miscellaneous functions. The class is static
+     * Utility class for miscellaneous functions. The class is static and is shared between multiple instances.
      * @class Util
      * @namespace KICK.core
      */
