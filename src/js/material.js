@@ -297,60 +297,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 
     /**
-     * Material configuration
-     * @class Material
-     * @namespace KICK.material
-     * @constructor
-     */
-    material.Material = function (config) {
-        if (!config) {
-            config = {};
-        }
-        /**
-         * @property name
-         * @type String
-         */
-        this.name = config.name?config.name:"Material";
-        /**
-         * @property shader
-         * @type KICK.material.Shader
-         */
-        this.shader = config.shader?config.shader:undefined;
-
-        /**
-         * Object with of uniforms.
-         * The object has a number of named properties one for each uniform. The uniform object contains value and type.
-         * The value is always an array
-         * @property uniforms
-         * @type Object
-         */
-        this.uniforms = config.uniforms?config.uniforms:{};
-
-        this.verifyUniforms();
-    };
-
-    /**
-     * The method replaces any invalid uniform (Array) with a wrapped one (Float32Array or Int32Array)
-     * @method verifyUniforms
-     */
-    material.Material.prototype.verifyUniforms = function(){
-        var uniform,
-            uniforms = this.uniforms,
-            type,
-            c = KICK.core.Constants;
-        for (uniform in uniforms){
-            if (typeof uniforms[uniform].value === "object"){
-                type = uniforms[uniform].type;
-                if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
-                    uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
-                } else {
-                    uniforms[uniform].value = new Float32Array(uniforms[uniform].value);
-                }
-            }
-        }
-    };
-
-    /**
      * @method getPrecompiledSource
      * @param {String} sourcecode
      * @return {String} sourcecode after precompiler
@@ -380,16 +326,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * Binds the uniforms to the current shader.
      * The uniforms is expected to be in a valid format
      * @method bindUniform
-     * @param {Object} materialUniforms
+     * @param {KICK.material.Material} material
      * @param {KICK.math.mat4} projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {KICK.math.mat4} modelViewProjectionMatrix
      * @param {KICK.math.mat4) transform
      * @param {KICK.scene.SceneLights} sceneLights
      */
-    material.Shader.prototype.bindUniform = function(materialUniforms, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
+    material.Shader.prototype.bindUniform = function(material, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
         // todo optimize this code
         var gl = this.gl,
+            materialUniforms = material.uniforms,
             timeObj,
             uniformName,
             shaderUniform,
@@ -407,7 +354,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             otherLights = sceneLights.otherLights,
             globalTransform,
             c = KICK.core.Constants,
-            i;
+            i,
+            currentTexture = 0;
+
         for (uniformName in materialUniforms){
             shaderUniform = this.lookupUniform[uniformName];
             uniform = materialUniforms[uniformName];
@@ -436,16 +385,25 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gl.uniform4fv(location,value);
                     break;
                 case c.GL_INT:
-                    gl.uniform1fv(location,value);
+                    gl.uniform1iv(location,value);
                     break;
                 case c.GL_INT_VEC2:
-                    gl.uniform2fv(location,value);
+                    gl.uniform2iv(location,value);
                     break;
                 case c.GL_INT_VEC3:
-                    gl.uniform3fv(location,value);
+                    gl.uniform3iv(location,value);
                     break;
                 case c.GL_INT_VEC4:
-                    gl.uniform4fv(location,value);
+                    gl.uniform4iv(location,value);
+                    break;
+                case c.GL_SAMPLER_CUBE:
+                    // todo implement
+                    throw new Error("Not implemented");
+                    break;
+                case c.GL_SAMPLER_2D:
+                    value.bind(currentTexture);
+                    gl.uniform1i(location,currentTexture);
+                    currentTexture ++;
                     break;
                 default:
                     console.log("Warn cannot find type "+shaderUniform.type);
@@ -497,6 +455,85 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (time){
             timeObj = this.engine.time;
             gl.uniform1f(time.location, timeObj.time);
+        }
+    };
+
+
+    /**
+     * Material configuration
+     * @class Material
+     * @namespace KICK.material
+     * @constructor
+     */
+    material.Material = function (config) {
+        var _config = config || {},
+            _name = config.name || "Material",
+            _shader = config.shader,
+            _uniforms = config.uniforms,
+            thisObj = this;
+        Object.defineProperties(this,{
+             /**
+              * @property name
+              * @type String
+              */
+            name:{
+                value:_name,
+                writable:true
+            },
+            /**
+             * @property shader
+             * @type KICK.material.Shader
+             */
+            shader:{
+                value:_shader,
+                writable:true
+            },
+            /**
+             * Object with of uniforms.
+             * The object has a number of named properties one for each uniform. The uniform object contains value and type.
+             * The value is always an array
+             * @property uniforms
+             * @type Object
+             */
+            uniforms:{
+                value:_uniforms,
+                writeable:true
+            }
+        });
+
+        /**
+         * Binds textures and uniforms
+         * @method bind
+         */
+        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
+            // todo
+            _shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
+        };
+
+        (function init(){
+            material.Material.verifyUniforms(_uniforms);
+        })();
+    };
+
+    /**
+     * The method replaces any invalid uniform (Array) with a wrapped one (Float32Array or Int32Array)
+     * @method verifyUniforms
+     * @param {Object} uniforms
+     * @static
+     */
+    material.Material.verifyUniforms = function(uniforms){
+        var uniform,
+            type,
+            c = KICK.core.Constants;
+        for (uniform in uniforms){
+            if (typeof uniforms[uniform].value === "object"){
+                type = uniforms[uniform].type;
+                if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
+                    uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
+                } else if (type !== c.GL_SAMPLER_2D && type !==c.GL_SAMPLER_CUBE ){
+                    uniforms[uniform].value = new Float32Array(uniforms[uniform].value);
+                }
+            }
         }
     };
 })();

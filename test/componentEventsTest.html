@@ -3,6 +3,7 @@
 <html>
 <head>
     <title></title>
+    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
     <script type="text/javascript" src="../src/js/constants.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
     <script type="text/javascript" src="../src/js/math.js"></script>
@@ -95,7 +96,9 @@
         }
 
         function initKick() {
-            engine = new KICK.core.Engine('canvas');
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0.5,1,1,1]

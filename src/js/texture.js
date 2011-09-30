@@ -36,6 +36,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     texture.Texture = function (engine, config) {
         var gl = engine.gl,
             constants = core.Constants,
+            texture0 = constants.GL_TEXTURE0,
             thisConfig = config || {},
             textureId = gl.createTexture(),
             _wrapS = thisConfig.wrapS ||  constants.GL_REPEAT,
@@ -46,7 +47,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _autoScaleImage = typeof (thisConfig.autoScaleImage) === 'boolean'? thisConfig.autoScaleImage : true,
             _dataURI = null,
             _flipY = true,
-            _asPreMultipliedAlpha = false,
+            _intformat = constants.GL_RGBA,
+            activeTexture,
             isPowerOfTwo = function (x) {
                 return (x & (x - 1)) == 0;
             },
@@ -57,12 +59,24 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
                 return x + 1;
             };
+        (function init(){
+            // create active texture component on glContext
+            if (!gl.activeTexture){
+                gl.activeTexture = {};
+            }
+            activeTexture = gl.activeTexture;
+        })();
+
         /**
          * Bind the current texture
          * @method bind
          */
-        this.bind = function(){
-            gl.bindTexture(constants.GL_TEXTURE_2D, textureId);
+        this.bind = function(textureSlot){
+            if (activeTexture[textureSlot] !== this){
+                gl.activeTexture(texture0+textureSlot);
+                gl.bindTexture(constants.GL_TEXTURE_2D, textureId);
+                activeTexture[textureSlot] = this;
+            }
         };
 
         /**
@@ -73,21 +87,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.setImage = function(imageObj, dataURI){
             _dataURI = dataURI;
-            if (_autoScaleImage){
-                if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
-                    // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
-                    var canvas = document.createElement("canvas");
-                    canvas.width = nextHighestPowerOfTwo(imageObj.width);
-                    canvas.height = nextHighestPowerOfTwo(imageObj.height);
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(imageObj,
-                        0, 0, imageObj.width, imageObj.height,
-                        0, 0, canvas.width, canvas.height);
-                    imageObj = canvas;
-                }
+
+            if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
+                // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
+                var canvas = document.createElement("canvas");
+                canvas.width = nextHighestPowerOfTwo(imageObj.width);
+                canvas.height = nextHighestPowerOfTwo(imageObj.height);
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(imageObj,
+                    0, 0, imageObj.width, imageObj.height,
+                    0, 0, canvas.width, canvas.height);
+                imageObj = canvas;
             }
-            this.bind();
-            gl.texImage2D(constants.GL_TEXTURE_2D, 0, imageObj, _flipY, _asPreMultipliedAlpha);
+
+            this.bind(0);
+            if (_flipY){
+                gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, true);
+            } else {
+                gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, false);
+            }
+            gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
+            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intformat, _intformat, constants.GL_UNSIGNED_BYTE, imageObj);
+   
             if (_generateMipmaps){
                 gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
@@ -96,31 +117,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         /**
          * Set a image using a raw bytearray in a specified format
          * @method setImageData
-         * @param {Object} intformat GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA
          * @param {Number} width image width in pixels
          * @param {Number} height image height in pixels
          * @param {Number} border image border in pixels
-         * @param {Object} format GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA
          * @param {Object} type GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5
          * @param {Array} pixels array of pixels
          * @param {String} dataURI String representing the image
          */
-        this.setImageData = function(intformat, width, height, border, format, type, pixels, dataURI){
+        this.setImageData = function(width, height, border, type, pixels, dataURI){
             if (constants._ASSERT){
-                if (intformat !== constants.GL_ALPHA &&
-                    intformat !== constants.GL_RGB  &&
-                    intformat !== constants.GL_RGBA &&
-                    intformat !== constants.GL_LUMINANCE &&
-                    intformat !== constants.GL_LUMINANCE_ALPHA){
-                    throw new Error("Texture.setImageData (intformat) should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
-                }
-                if (format !== constants.GL_ALPHA &&
-                    format !== constants.GL_RGB  &&
-                    format !== constants.GL_RGBA &&
-                    format !== constants.GL_LUMINANCE &&
-                    format !== constants.GL_LUMINANCE_ALPHA){
-                    throw new Error("Texture.setImageData (format) should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
-                }
                 if (type !== constants.GL_UNSIGNED_BYTE &&
                     type !== constants.GL_UNSIGNED_SHORT_4_4_4_4  &&
                     type !== constants.GL_UNSIGNED_SHORT_5_5_5_1 &&
@@ -130,12 +135,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             _dataURI = dataURI;
 
-            this.bind();
+            this.bind(0);
             gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
-            gl.texImage2D(constants.GL_TEXTURE_2D, 0, intformat, width, height, border, format, type, pixels);
+            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intformat, width, height, border, _intformat, type, pixels);
             if (_generateMipmaps){
-                gl.generateMipmap(gl.TEXTURE_2D);
+                gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
+        };
+
+        this.setTemporaryTexture = function(){
+            var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,
+                                             0,   0,   0,
+                                             0,   0,   0,
+                                             255, 255, 255]),
+                oldIntFormat = _intformat;
+            _intformat = constants.GL_RGB;
+            this.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,blackWhiteCheckerboard, "tempTexture");
+            _intformat = oldIntFormat;
         };
 
         Object.defineProperties(this,{
@@ -282,22 +298,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
-             * Import image as premultiplied alpha
-             * (Default false)
-             * @property asPreMultipliedAlpha
-             * @type Boolean
+             * Specifies the internal format of the image (format on GPU)<br>
+             * Default is GL_RGBA<br>
+             * Must be one of the following:
+             * GL_ALPHA,
+             * GL_RGB,
+             * GL_RGBA,
+             * GL_LUMINANCE,
+             * GL_LUMINANCE_ALPHA
              */
-            asPreMultipliedAlpha:{
-                get: function(){
-                    return _asPreMultipliedAlpha;
+            internalFormal:{
+                get:function(){
+                    return _intformat;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
-                        if (typeof value !== 'boolean'){
-                            throw new Error("Texture.asPreMultipliedAlpha was not a boolean");
-                        }
+                set:function(value){
+                    if (value !== constants.GL_ALPHA &&
+                        value !== constants.GL_RGB  &&
+                        value !== constants.GL_RGBA &&
+                        value !== constants.GL_LUMINANCE &&
+                        value !== constants.GL_LUMINANCE_ALPHA){
+                        throw new Error("Texture.internalFormal should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
                     }
-                    _asPreMultipliedAlpha = value;
+                    _intformat = value;
                 }
             }
         });

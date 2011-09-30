@@ -93,7 +93,9 @@
         }
 
         function initKick() {
-            engine = new KICK.core.Engine('canvas');
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],
