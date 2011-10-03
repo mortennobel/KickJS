@@ -49,8 +49,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var core = KICK.namespace("KICK.core");
 
     /**
-     * This class contains references to WebGL constants.
-     * Constants will be replace with actual values to increase performance when the file is compile by the postprocessor.
+     * This class contains references to WebGL constants.<br>
+     * Constants will be replace with actual values to increase performance and size when the file is processed by the preprocessor.<br>
+     * Note that I have intentionally named the WebGL constants with a prefix 'GL_'. This allows use of normal WebGL
+     * constants that will not be replaced by the preprocessor.
      * @class Constants
      * @namespace KICK.core
      */
