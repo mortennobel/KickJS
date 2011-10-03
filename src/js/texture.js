@@ -45,9 +45,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _magFilter = thisConfig.magFilter || constants.GL_LINEAR,
             _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
             _autoScaleImage = typeof (thisConfig.autoScaleImage) === 'boolean'? thisConfig.autoScaleImage : true,
-            _dataURI = null,
-            _flipY = true,
-            _intformat = constants.GL_RGBA,
+            _dataURI = thisConfig.dataURI || null,
+            _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
+            _intformat = thisConfig.intformat || constants.GL_RGBA,
             activeTexture,
             isPowerOfTwo = function (x) {
                 return (x & (x - 1)) == 0;
@@ -155,6 +155,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * Identifier of the texture
+             * @property dataURI
+             * @type String
+             */
+            dataURI:{
+                get:function(){
+                    return _dataURI;
+                }
+            },
             /**
              * Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
              * Default: GL_REPEAT
@@ -323,5 +333,26 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             }
         });
+
+        /**
+         * Serializes the data into a JSON object (that can be used as a config parameter in the constructor)<br>
+         * Note that the texture data is not serialized in the json format. <br>
+         * This means that either setImage() or setImageData() must be called before the texture can be bound<br>
+         * @method toJSON
+         * @return {Object} config element
+         */
+        this.toJSON = function(){
+            return {
+                wrapS:_wrapS,
+                wrapT:_wrapT,
+                minFilter:_minFilter,
+                magFilter:_magFilter,
+                generateMipmaps:_generateMipmaps,
+                autoScaleImage:_autoScaleImage,
+                dataURI:_dataURI,
+                flipY:_flipY,
+                internalFormal:_intformat
+            };
+        }
     };
 })();
