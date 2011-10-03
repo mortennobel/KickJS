@@ -29,6 +29,7 @@
     <script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>
     <!--<script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>-->
     <script type="text/javascript" src="shader_editor.js"></script>
+    <script type="text/javascript" src="shader_editor_ui.js"></script>
 </head>
 <body class="yui3-skin-sam">
 <header>
@@ -36,6 +37,8 @@
 </header>
 <article>
     <h1>Preview</h1>
+    <button id="resetShader">New</button>
+    <button id="savebutton">Save local</button><br>
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
 </article>
 <article>
@@ -50,11 +53,62 @@
     <div>
         <div id="vs" class="sourceEditorPanel">
         </div>
-        <div id="fs"  class="sourceEditorPanel">
+        <div id="fs" class="sourceEditorPanel">
         </div>
-        <div id="textures"  class="sourceEditorPanel">
-            <b style="color: red;">Textures not implemented yet</b>
+        <div id="textures" class="sourceEditorPanel">
+            <h3>Current textures</h3>
+            <select multiple=true style="width:300px;height:100px;vertical-align:top;" id="currentTextures">
+            </select>
+            <button id="addTextureButton">+</button>
+            <button id="removeTextureButton">-</button>
+
+            <div id="textureDetails" style="width:300px;display: none;">
+                <h3>Texture detail</h3>
+                Texture source: [<a href="#" onclick="document.getElementById('tnote').style.display = 'block';return false;">Note</a>]<br>
+                <span style="font-size: smaller; display: none;" id="tnote">Due to browser security cross site images is not allowed. A workaround it to <a href="http://www.greywyvern.com/code/php/binary2base64" target="_blank">Base64 encode</a> the images</span>
+                <input type="text" id="textureSrc" style="width:300px;"><br>
+                Texture format:
+                <select id="textureFormat" style="float:right;">
+                    <option value="Alpha">Alpha</option>
+                    <option value="RGB">RGB</option>
+                    <option value="RGBA">RGBA</option>
+                    <option value="Luminance">Luminance</option>
+                    <option value="Luminance alpha">Luminance alpha</option>
+                </select><br style="clear: both;">
+                Mip mapping: <span style="float:right;"><input type="checkbox" id="mipMapping"/>&nbsp;<label for="mipMapping" >Enabled</label></span><br style="clear: both;">
+                Autoscale image: <span style="float:right;"><input type="checkbox" id="autoScaleImage"/>&nbsp;<label for="autoScaleImage" >Enabled</label></span><br style="clear: both;">
+                Texture mode:
+                <select id="textureMode" style="float:right;">
+                    <option value="Repeat">Repeat</option>
+                    <option value="Clamp">Clamp</option>
+                </select><br style="clear: both;">
+                Flip Y: <span style="float:right;"><input type="checkbox" id="flipY"/>&nbsp;<label for="flipY" >Enabled</label></span><br>
+                Minification filter:
+                <select id="minFilter" style="float:right;">
+                    <option value="Nearest">Nearest</option>
+                    <option value="Linear">Linear</option>
+                    <option value="Nearest mipmap nearest">Nearest mipmap nearest</option>
+                    <option value="Linear mipmap nearest">Linear mipmap nearest</option>
+                    <option value="Nearest mipmap linear">Nearest mipmap linear</option>
+                    <option value="Linear mipmap linear">Linear mipmap linear</option>
+                </select><br style="clear: both;">
+                Magnification filter:
+                <select id="magFilter" style="float:right;">
+                    <option value="Nearest">Nearest</option>
+                    <option value="Linear">Linear</option>
+                </select><br style="clear: both;">
+                <br>
+                <button id="updateTexture">Update</button>
+                <br>
+            </div>
+            <div id="texturePreview" style="width:300px;display: none;">
+                <h2>Preview</h2>
+                <div id="texturePreviewPanel" style="width: 300px;height:200px;overflow: scroll;">
+                <img id="texturePreviewImg" src="">
+                </div>
+            </div>
         </div>
+
         <div id="uniforms"  class="sourceEditorPanel">
             <b style="color: red;">Uniforms not implemented yet</b>
         </div>
@@ -109,9 +163,6 @@
                 <input type="number" name="ambientLight_g" value="0.1" step=0.1>
                 <input type="number" name="ambientLight_b" value="0.1" step=0.1><br>
             </div>
-
-            <h3>Reset</h3>
-            <button id="resetShader">Reset shader to default value</button>
         </div>
     </div>
 </div>
@@ -196,5 +247,18 @@ void main(void)
   </textarea>
 </div>
   <br/>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-26042605-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </body>
 </html>
