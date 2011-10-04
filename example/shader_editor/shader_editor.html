@@ -26,8 +26,8 @@
 
     <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui.js"></script>
     <script type="text/javascript" src="webgl-debug.js"></script>
-    <script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>
-    <!--<script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>-->
+    <!--<script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>-->
+    <script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
 </head>
@@ -108,9 +108,34 @@
                 </div>
             </div>
         </div>
-
         <div id="uniforms"  class="sourceEditorPanel">
-            <b style="color: red;">Uniforms not implemented yet</b>
+            <h3>Current uniforms</h3>
+            <select multiple=true style="width:300px;height:100px;vertical-align:top;" id="currentUniforms">
+            </select>
+            <div id="uniformDetail">
+                <h4>Uniform details:</h4>
+                Name:<br>
+                <input type="text" id="uniformName" readonly=readonly><br>
+                Type:<br>
+                <input type="text" id="uniformType" readonly=readonly><br>
+                Size:<br>
+                <input type="text" id="uniformSize" readonly=readonly title="Length of uniform array or 1 if not array"><br>
+                Value:<br>
+                <div id="uniform_group_autobound">
+                Auto bound by game engine<br>
+                </div>
+                <div id="uniform_group_number">
+                    <input id="uniform_0" style="width: 75px;"><input id="uniform_4" style="width: 75px;"><input id="uniform_8" style="width: 75px;"><input id="uniform_12" style="width: 75px;"><br>
+                    <input id="uniform_1" style="width: 75px;"><input id="uniform_5" style="width: 75px;"><input id="uniform_9" style="width: 75px;"><input id="uniform_13" style="width: 75px;"><br>
+                    <input id="uniform_2" style="width: 75px;"><input id="uniform_6" style="width: 75px;"><input id="uniform_10" style="width: 75px;"><input id="uniform_14" style="width: 75px;"><br>
+                    <input id="uniform_3" style="width: 75px;"><input id="uniform_7" style="width: 75px;"><input id="uniform_11" style="width: 75px;"><input id="uniform_15" style="width: 75px;"><br>
+                    <button id="uniform_number_update">Update</button>
+                </div>
+                <div id="uniform_group_sampler">
+                    <select id="uniform_sampler"></select><br>
+                    <button id="uniform_sampler_update">Update</button>
+                </div>
+            </div>
         </div>
         <div id="settings"  class="sourceEditorPanel">
             <h3>Type of mesh</h3>
@@ -186,19 +211,20 @@
      vec3 _dLight.lDir: Directional light direction<br>
      vec3 _dLight.colInt: Color intensity<br>
      vec3 _dLight.halfV: half vector<br>
-     #include &lt;light&gt;: Include light :
+     #pragma include "filename": Include of predefined file
      <div style="background-color: #d3d3d3;">
+         <h4>light.glsl</h4>
+         <div>
          struct DirectionalLight {<br>
    &nbsp;&nbsp;&nbsp;vec3 lDir;<br>
-   &nbsp;&nbsp;vec3 colInt;<br>
-   &nbsp;&nbsp;vec3 halfV;<br>
+   &nbsp;&nbsp;&nbsp;vec3 colInt;<br>
+   &nbsp;&nbsp;&nbsp;vec3 halfV;<br>
 };<br>
          void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular);<br>
          uniform DirectionalLight _dLight;<br>
          uniform vec3 _ambient;
+             </div>
      </div>
-
-
  </div>
 </div>
 </article>
@@ -218,7 +244,7 @@ uniform mat3 _norm;
 
 varying vec3 vColor;
 
-#include <light>
+#pragma include "light.glsl"
 
 // constants
 vec3 materialColor = vec3(1.0,0.7,0.8);
