@@ -902,7 +902,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
         
         /**
-         * @property shader
+         * @property material
          * @type KICK.material.Material
          */
         this.material = undefined;
