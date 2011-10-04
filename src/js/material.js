@@ -74,7 +74,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             compileShader = function (str, isFragmentShader, errorLog) {
                 var shader,
                     c = KICK.core.Constants;
-                str = thisObj.getPrecompiledSource(str);
+                str = material.Shader.getPrecompiledSource(str);
                 if (isFragmentShader) {
                     shader = gl.createShader(c.GL_FRAGMENT_SHADER);
                 } else {
@@ -300,8 +300,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @method getPrecompiledSource
      * @param {String} sourcecode
      * @return {String} sourcecode after precompiler
+     * @static
      */
-    material.Shader.prototype.getPrecompiledSource = function(sourcecode){
+    material.Shader.getPrecompiledSource = function(sourcecode){
         var  LIGHT_INCLUDE =
                 "\n"+
                 "struct DirectionalLight {\n"+
@@ -319,7 +320,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     "uniform DirectionalLight _dLight;\n" +
                     "uniform vec3 _ambient;\n"+
                     "//"; // ends with comment out to remove any words after the include tag
-        return sourcecode.replace(/#include <light>/m,LIGHT_INCLUDE);
+        sourcecode = sourcecode.replace(/#pragma include "light.glsl"/m,LIGHT_INCLUDE);
+        return sourcecode.replace(/#pragma include 'light.glsl'/m,LIGHT_INCLUDE);
     }
 
     /**
@@ -469,7 +471,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var _config = config || {},
             _name = config.name || "Material",
             _shader = config.shader,
-            _uniforms = config.uniforms,
+            _uniforms = config.uniforms || [],
             thisObj = this;
         Object.defineProperties(this,{
              /**
