@@ -45,6 +45,11 @@ rm -rf $parser_out
 rm -rf $generator_out
 
 ##############################################################################
+echo "Include GLSL files as constants"
+$nodejs $project/preprocessor/include_glsl_files $project/src/glsl/ $project/src/js/glslconstants.js
+
+
+##############################################################################
 echo "Generating documentation (YUI Doc)"
 echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
@@ -62,14 +67,15 @@ $nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/
 $nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js
 $nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js
 cp $project/src/js/constants.js $project/build/pre/constants.js
+cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 
 ##############################################################################
 echo "Running Google Clojure compiler"
-java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/renderer.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --language_in ECMASCRIPT5_STRICT
+java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/glslconstants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/renderer.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --language_in ECMASCRIPT5_STRICT
 
 ##############################################################################
 echo "Creating kick-uncompressed.js"
-cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/renderer.js $project/build/pre/material.js $project/build/pre/meshfactory.js > $project/build/kick-uncompressed-$version.js
+cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/renderer.js $project/build/pre/material.js $project/build/pre/meshfactory.js > $project/build/kick-uncompressed-$version.js
 
 ##############################################################################
 echo "Adding license info compiler"

@@ -9,6 +9,7 @@
     <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
     <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
     <script type="text/javascript" src="../src/js/constants.js"></script>
+    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
     <script type="text/javascript" src="../src/js/math.js"></script>
     <script type="text/javascript" src="../src/js/scene.js"></script>
@@ -36,7 +37,7 @@
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
-            shader.initShader(vs,fs,log);
+            shader.updateShader(vs,fs,log);
             return new KICK.material.Material({
                 name:"Some material",
                 shader:shader

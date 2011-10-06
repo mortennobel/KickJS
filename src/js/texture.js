@@ -32,9 +32,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.texture
      * @constructor
      * @param {KICK.core.Engine} engine
+     * @param {Object} config Optional
+     * @param {Object} uidMapping Optional Maps from old uid to new uid
      */
-    texture.Texture = function (engine, config) {
+    texture.Texture = function (engine, config, uidMapping) {
         var gl = engine.gl,
+            _uid = engine.createUID(), // note uid is always
             constants = core.Constants,
             texture0 = constants.GL_TEXTURE0,
             thisConfig = config || {},
@@ -59,6 +62,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
                 return x + 1;
             };
+
+        if (uidMapping && thisConfig.uid){
+            uidMapping[thisConfig.uid] = _uid;
+        }
+
         (function init(){
             // create active texture component on glContext
             if (!gl.activeTexture){
@@ -155,6 +163,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * Unique identifier of the texture
+             * @property uid
+             * @type {Number}
+             */
+            uid:{
+                value:_uid
+            },
             /**
              * Identifier of the texture
              * @property dataURI
@@ -343,6 +359,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid:_uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,

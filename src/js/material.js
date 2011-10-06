@@ -56,22 +56,30 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.material
      * @constructor
      * @param {KICK.core.Engine} engine
+     * @param {Object} config
+     * @param {Object} uidMapping Optional Maps from old uid to new uid
      */
-    material.Shader = function (engine) {
+    material.Shader = function (engine, config, uidMapping) {
+        //todo add support for polygon offset
         var gl = engine.gl,
             thisObj = this,
+            thisConfig = config || {},
+            _uid = engine.createUID(),
             _shaderProgramId = -1,
-            _faceCulling = core.Constants.GL_BACK,
-            _zTest = core.Constants.GL_LESS,
+            _faceCulling = thisConfig.faceCulling || core.Constants.GL_BACK,
+            _zTest = thisConfig.zTest || core.Constants.GL_LESS,
+            glslConstants = material.GLSLConstants,
+            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["default_vs.glsl"],
+            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["default_fs.glsl"],
+            _errorLog = thisConfig.errorLog,
             /**
              * Invoke shader compilation
              * @method compileShader
              * @param {String} str
              * @param {Boolean} isFragmentShader
-             * @param {Function} errorLog
              * @private
              */
-            compileShader = function (str, isFragmentShader, errorLog) {
+            compileShader = function (str, isFragmentShader) {
                 var shader,
                     c = KICK.core.Constants;
                 str = material.Shader.getPrecompiledSource(str);
@@ -86,8 +94,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
                 if (!gl.getShaderParameter(shader, c.GL_COMPILE_STATUS)) {
                     var infoLog =gl.getShaderInfoLog(shader);
-                    if (typeof errorLog === "function") {
-                        errorLog(infoLog);
+                    if (typeof _errorLog === "function") {
+                        _errorLog(infoLog);
                     }
                     return null;
                 }
@@ -126,8 +134,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             };
 
+        if (uidMapping && thisConfig.uid){
+            uidMapping[thisConfig.uid] = _uid;
+        }
 
         Object.defineProperties(this,{
+            /**
+             * Unique identifier of the shader
+             * @property uid
+             * @type {Number}
+             */
+            uid:{
+                value:_uid
+            },
             /**
              * Get the gl context of the shader
              * @property gl
@@ -135,6 +154,24 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             gl:{
                 value:gl
+            },
+            /**
+             * Function that will be invoked in case of error
+             * @property errorLog
+             * @type Function
+             */
+            errorLog:{
+                get:function(){
+                    return _errorLog;
+                },
+                set: function(value){
+                    if (KICK.core.Constants._ASSERT){
+                        if ( value && typeof value !== 'function'){
+                            throw new Error("Shader.errorLog should be a function (or null)");
+                        }
+                    }
+                    _errorLog = value;
+                }
             },
             /**
              * A reference to the engine object
@@ -207,28 +244,32 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method initShader
          * @param {String} vertexShaderSrc
          * @param {String} fragmentShaderSrc
-         * @param {Function} errorLog Optional function that will be invoked in case of error
          * @return {Boolean} shader created successfully
          */
-        this.initShader = function (vertexShaderSrc,fragmentShaderSrc, errorLog) {
-            var fragmentShader = compileShader(fragmentShaderSrc, true, errorLog),
+        this.updateShader = function (vertexShaderSrc,fragmentShaderSrc) {
+            var errorLog = _errorLog || console.log,
+                fragmentShader = compileShader(fragmentShaderSrc, true, errorLog),
                 vertexShader = compileShader(vertexShaderSrc, false, errorLog),
+                compileError = fragmentShader === null || vertexShader === null,
                 i,
                 c = KICK.core.Constants,
                 activeUniforms,
                 activeAttributes,
                 attribute;
-
-            _shaderProgramId = gl.createProgram();
-
-            if (!errorLog) {
-                errorLog = console.log;
+            if (compileError){
+                fragmentShader = compileShader(glslConstants["default_fs.glsl"], true, errorLog);
+                vertexShader = compileShader(glslConstants["default_vs.glsl"], false, errorLog);
             }
+
+            // thisObj.destroy();
+            _shaderProgramId = gl.createProgram();
 
             gl.attachShader(_shaderProgramId, vertexShader);
             gl.attachShader(_shaderProgramId, fragmentShader);
             gl.linkProgram(_shaderProgramId);
-
+            // remove reference to shader code
+            //gl.deleteShader(vertexShader);
+            //gl.deleteShader(fragmentShader);
             if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
                 return false;
@@ -281,18 +322,52 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
                 this.lookupAttribute[attribute.name] = i;
             }
-//            this.activeAttributesMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTE_MAX_LENGTH);
-//            this.activeUniformsMaxLength = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORM_MAX_LENGTH);
+
+            _vertexShaderSrc = vertexShaderSrc;
+            _fragmentShaderSrc = fragmentShaderSrc;
+            
             return true;
         };
 
+        /**
+         * Destroy shader object
+         */
+        this.destroy = function(){
+            if (_shaderProgramId!=-1){
+                gl.deleteProgram(_shaderProgramId);
+                _shaderProgramId = -1;
+            }
+        };
+
+        /**
+         * @method bind
+         */
         // todo: refactor this
         this.bind = function () {
             gl.useProgram(_shaderProgramId);
             updateCullFace();
             updateDepthBuffer();
             updateBlending();
-        }
+        };
+
+        /**
+         * Serializes the data into a JSON object (that can be used as a config parameter in the constructor)<br>
+         * Note errorLog are not serialized
+         * @method toJSON
+         * @return {Object} config element
+         */
+        this.toJSON = function(){
+            return {
+                faceCulling:_faceCulling,
+                zTest:_zTest,
+                vertexShaderSrc:_vertexShaderSrc,
+                fragmentShaderSrc:_fragmentShaderSrc
+            };
+        };
+
+        (function init(){
+            thisObj.updateShader(_vertexShaderSrc,_fragmentShaderSrc);
+        })();
     };
 
 
@@ -303,26 +378,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @static
      */
     material.Shader.getPrecompiledSource = function(sourcecode){
-        var  LIGHT_INCLUDE =
-                "\n"+
-                "struct DirectionalLight {\n"+
-                    "   vec3 lDir;\n"+
-                    "   vec3 colInt;\n"+
-                    "   vec3 halfV;\n"+
-                    "};\n"+
-                    "// assumes that normal is normalized\n"+
-                    "void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n"+
-                    "    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n"+
-                    "	float specularContribution = max(dot(normal, dLight.halfV), 0.0);\n"+
-                    "    specular =  pow(specularContribution, specularExponent);\n"+
-                    "	diffuse = (dLight.colInt * diffuseContribution);\n"+
-                    "}\n"+
-                    "uniform DirectionalLight _dLight;\n" +
-                    "uniform vec3 _ambient;\n"+
-                    "//"; // ends with comment out to remove any words after the include tag
-        sourcecode = sourcecode.replace(/#pragma include "light.glsl"/m,LIGHT_INCLUDE);
-        return sourcecode.replace(/#pragma include 'light.glsl'/m,LIGHT_INCLUDE);
-    }
+        // todo optimize with regular expression search
+        for (var name in material.GLSLConstants){
+            if (typeof (name) === "string"){
+                var source = material.GLSLConstants[name];
+                sourcecode = sourcecode.replace("#pragma include \""+name+"\"",source);
+                sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
+            }
+        }
+        return sourcecode;
+    };
 
     /**
      * Binds the uniforms to the current shader.
@@ -468,10 +533,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @constructor
      */
     material.Material = function (config) {
-        var _config = config || {},
-            _name = config.name || "Material",
-            _shader = config.shader,
-            _uniforms = config.uniforms || [],
+        var configObj = config || {},
+            _name = configObj.name || "Material",
+            _shader = configObj.shader,
+            _uniforms = configObj.uniforms || {},
             thisObj = this;
         Object.defineProperties(this,{
              /**
@@ -512,6 +577,42 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 
+        /**
+         * Returns a JSON representation of the material<br>
+         * @method toJSON
+         * @return {string}
+         */
+        this.toJSON = function(){
+            var filteredUniforms = {};
+            for (var name in _uniforms){
+                if (typeof name === 'string'){
+                    var uniform = _uniforms[name],
+                        value = uniform.value;
+                    if (value instanceof Float32Array || value instanceof Int32Array)
+                    {
+                        value = core.Util.typedArrayToArray(value);
+                    } else {
+                        if (KICK.core.Constants._ASSERT){
+                            if (!value instanceof KICK.texture.Texture){
+                                throw new Error("Unknown uniform value type. Expected Texture");
+                            }
+                        }
+                        value = value.uid;
+                    }
+
+                    filteredUniforms[name] = {
+                        type: uniform.type,
+                        value:value
+                    };
+                }
+            }
+            return {
+                name:_name,
+                shader: _shader?_shader.uid:0,
+                uniforms: filteredUniforms
+            };
+        };
+
         (function init(){
             material.Material.verifyUniforms(_uniforms);
         })();
@@ -528,7 +629,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             type,
             c = KICK.core.Constants;
         for (uniform in uniforms){
-            if (typeof uniforms[uniform].value === "object"){
+            if (Array.isArray(uniforms[uniform].value) || typeof uniforms[uniform].value === 'number'){
                 type = uniforms[uniform].type;
                 if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
                     uniforms[uniform].value = new Int32Array(uniforms[uniform].value);

@@ -129,6 +129,7 @@ YUI().use('node', 'console', 'test', function (Y) {
         // Test methods - names must begin with "test"
         //---------------------------------------------------------------------
 
+
         testTestUnoptimized : function () {
             var n = 10000,
                     SIZE=32,
@@ -156,6 +157,7 @@ YUI().use('node', 'console', 'test', function (Y) {
             }
             console.log(mm[0*SIZE+0], mm[2*SIZE+3], mm[3*SIZE+2], mm[4*SIZE+4]);
         }
+
     });
 
     var ExampleSuite = new Y.Test.Suite("Example Suite");

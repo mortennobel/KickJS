@@ -222,7 +222,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 KICK.math.quat4.angleAxis(angle,rotationAxis[i],quat4);
                 var mat = KICK.math.mat4.create();
                 KICK.math.mat4.identity(mat);
-                rotationAxisMatFunc[i](mat,angle*KICK.core.CONSTANT_COLOR._DEGREE_TO_RADIAN);
+                rotationAxisMatFunc[i](mat,angle*KICK.core.Constants._DEGREE_TO_RADIAN);
 
                 var point = KICK.math.vec3.create([12.451,123.5,.9]);
 

@@ -75,7 +75,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             animationFrameObj = null,
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
-            };
+            },
+            uniqIdCounter = 1;
 
         Object.defineProperties(this,{
             /**
@@ -175,6 +176,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             timeSinceStart += deltaTime;
             frameCount += 1;
             animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+        };
+
+        /**
+         * Creates a uniq id
+         * @method createUID
+         * @return {Number} uniq id
+         */
+        this.createUID = function(){
+            return uniqIdCounter++;
         };
 
         /**
@@ -309,6 +319,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        /**
+         * Converts a typed array to a number array
+         * @method typedArrayToArray
+         * @static
+         * @param {TypedArray} typedArray
+         * @return {Array[Number]}
+         */
+        typedArrayToArray: function(typedArray){
+            var length = typedArray.length,
+                res = new Array(length);
+            for (var i=0;i<length;i++){
+                res[i] = typedArray[i];
+            }
+            return res;
+        },
+
         /**
          * Remove one element from an array - either the first instance or all instances
          * @method removeElementFromArray
