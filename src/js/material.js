@@ -547,6 +547,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         return sourcecode;
     };
 
+    Object.freeze(material.Shader);
+
     /**
      * Binds the uniforms to the current shader.
      * The uniforms is expected to be in a valid format
@@ -635,8 +637,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         console.log("Warn cannot find type "+shaderUniform.type);
                         break;
                 }
-            } else if (KICK.core.Constants._DEBUG){
-                console.log("Material has uniform "+uniformName+" but shader has not.");
             }
         }
         if (proj){
