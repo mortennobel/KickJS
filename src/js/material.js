@@ -68,10 +68,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _shaderProgramId = -1,
             _faceCulling = thisConfig.faceCulling || core.Constants.GL_BACK,
             _zTest = thisConfig.zTest || core.Constants.GL_LESS,
+            _blend = thisConfig.blend || false,
+            _blendSFactor = thisConfig.blendSFactor || core.Constants.GL_SRC_ALPHA,
+            _blendDFactor = thisConfig.blendDFactor || core.Constants.GL_ONE_MINUS_SRC_ALPHA,
+            blendKey,
             glslConstants = material.GLSLConstants,
             _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["default_vs.glsl"],
             _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["default_fs.glsl"],
             _errorLog = thisConfig.errorLog,
+            /**
+             * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
+             * The key is used to fast determine if the blend settings needs to be updated
+             * @method getBlendKey
+             */
+            updateBlendKey = function(){
+                blendKey = (_blendSFactor + _blendDFactor*10000)*(_blend?-1:1);
+            },
             /**
              * Invoke shader compilation
              * @method compileShader
@@ -119,8 +131,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             updateDepthBuffer = function () {
-                var s = material.Shader,
-                    c = KICK.core.Constants;
                 var zTest = thisObj.zTest;
                 if (gl.zTest != zTest) {
                     gl.depthFunc(zTest);
@@ -128,15 +138,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             updateBlending = function () {
-                if (!window.updateBlending){
-                    console.log("Implement update blending");
-                    window.updateBlending = true;
+                if (gl.blendKey !== blendKey){
+                    if (_blend){
+                        gl.enable(KICK.core.Constants.GL_BLEND);
+                    } else {
+                        gl.disable(KICK.core.Constants.GL_BLEND);
+                    }
+                    gl.blendFunc(_blendSFactor,_blendDFactor);
                 }
             };
-
-        if (uidMapping && thisConfig.uid){
-            uidMapping[thisConfig.uid] = _uid;
-        }
 
         Object.defineProperties(this,{
             /**
@@ -156,6 +166,32 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value:gl
             },
             /**
+             * @property vertexShaderSrc
+             * @type string
+             */
+            vertexShaderSrc:{
+                get:function(){ return _vertexShaderSrc; },
+                set:function(value){
+                    if (typeof value !== "string"){
+                        KICK.core.Util.fail("Shader.vertexShaderSrc must be a string");
+                    }
+                    _vertexShaderSrc = value;
+                }
+            },
+            /**
+             * @property fragmentShaderSrc
+             * @type string
+             */
+            fragmentShaderSrc:{
+                get:function(){ return _fragmentShaderSrc; },
+                set:function(value){
+                    if (typeof value !== "string"){
+                        KICK.core.Util.fail("Shader.fragmentShaderSrc must be a string");
+                    }
+                    _fragmentShaderSrc = value;
+                }
+            },
+            /**
              * Function that will be invoked in case of error
              * @property errorLog
              * @type Function
@@ -167,7 +203,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(value){
                     if (KICK.core.Constants._ASSERT){
                         if ( value && typeof value !== 'function'){
-                            throw new Error("Shader.errorLog should be a function (or null)");
+                            KICK.core.Util.fail("Shader.errorLog should be a function (or null)");
                         }
                     }
                     _errorLog = value;
@@ -189,7 +225,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 get: function(){ return _shaderProgramId;}
             },
             /**
-             * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default), KICK.core.Constants.GL_FRONT_AND_BACK, KICK.core.Constants.NONE
+             * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default),
+             * KICK.core.Constants.GL_FRONT_AND_BACK, KICK.core.Constants.NONE
              * @property faceCulling
              * @type Object
              */
@@ -201,7 +238,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             newValue !== core.Constants.GL_FRONT_AND_BACK &&
                             newValue !== core.Constants.GL_BACK &&
                             newValue !== core.Constants.GL_NONE ){
-                            throw new Error("Shader.faceCulling must be KICK.material.Shader.FRONT, KICK.material.Shader.BACK (default), KICK.material.Shader.NONE");
+                            KICK.core.Util.fail("Shader.faceCulling must be KICK.material.Shader.FRONT, " +
+                                "KICK.material.Shader.BACK (default), KICK.material.Shader.NONE");
                         }
                     }
                     _faceCulling = newValue;
@@ -232,24 +270,133 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             newValue !== core.Constants.GL_NOTEQUAL &&
                             newValue !== core.Constants.GL_GEQUAL &&
                             newValue !== core.Constants.GL_ALWAYS){
-                            throw new Error("Shader.zTest must be KICK.core.Constants.GL_NEVER, KICK.core.Constants.GL_LESS,KICK.core.Constants.GL_EQUAL,KICK.core.Constants.GL_LEQUAL,KICK.core.Constants.GL_GREATER,KICK.core.Constants.GL_NOTEQUAL,KICK.core.Constants.GL_GEQUAL, or KICK.core.Constants.GL_ALWAYS");
+                            KICK.core.Util.fail("Shader.zTest must be KICK.core.Constants.GL_NEVER, " +
+                                "KICK.core.Constants.GL_LESS,KICK.core.Constants.GL_EQUAL,KICK.core.Constants.GL_LEQUAL," +
+                                "KICK.core.Constants.GL_GREATER,KICK.core.Constants.GL_NOTEQUAL,KICK.core.Constants.GL_GEQUAL, " +
+                                "or KICK.core.Constants.GL_ALWAYS");
                         }
                     }
                     _zTest = newValue;
+                }
+            },
+            /**
+             * Enables/disables blending (default is false).<br>
+             * "In RGBA mode, pixels can be drawn using a function that blends the incoming (source) RGBA values with the
+             * RGBA values that are already in the frame buffer (the destination values)"
+             * (From <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">www.Opengl.org</a>)
+             * @property blend
+             * @type Boolean
+             */
+            blend:{
+                get: function(){ return _blend; },
+                set: function(value){
+                    if (KICK.core.Constants._ASSERT){
+                        if (typeof value !== 'boolean'){
+                            KICK.core.Util.fail("Shader.blend must be a boolean");
+                        }
+                    }
+                    _blend = value;
+                    updateBlendKey();
+                }
+            },
+            /**
+             * Specifies the blend s-factor<br>
+             * Initial value GL_SRC_ALPHA
+             * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+             * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+             * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+             * GL_SRC_ALPHA_SATURATE.<br>
+             * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+             * @property blendSFactor
+             * @type {Number}
+             */
+            blendSFactor:{
+                get: function(){ return _blendSFactor;},
+                set: function(value) {
+                    if (KICK.core.Constants._ASSERT){
+                        var c = KICK.core.Constants;
+                        if (value !== c.GL_ZERO &&
+                            value !== c.GL_ONE &&
+                            value !== c.GL_SRC_COLOR &&
+                            value !== c.GL_ONE_MINUS_SRC_COLOR &&
+                            value !== c.GL_DST_COLOR &&
+                            value !== c.GL_ONE_MINUS_DST_COLOR &&
+                            value !== c.GL_SRC_ALPHA &&
+                            value !== c.GL_GL_ONE_MINUS_SRC_ALPHA &&
+                            value !== c.GL_DST_ALPHA &&
+                            value !== c.GL_ONE_MINUS_DST_ALPHA &&
+                            value !== c.GL_CONSTANT_COLOR &&
+                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR,
+                            value !== c.GL_CONSTANT_ALPHA &&
+                            value !== c.GL_ONE_MINUS_CONSTANT_ALPHA &&
+                            value !== c.GL_SRC_ALPHA_SATURATE){
+                            KICK.core.Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
+                                "GL_SRC_ALPHA_SATURATE.");
+                        }
+                    }
+                    _blendSFactor = value;
+                    updateBlendKey();
+                }
+            },
+            /**
+             * Specifies the blend d-factor<br>
+             * Initial value GL_SRC_ALPHA
+             * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+             * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+             * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+             * GL_ONE_MINUS_SRC_ALPHA.<br>
+             * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+             * @property blendSFactor
+             * @type {Number}
+             */
+            blendDFactor:{
+                get: function(){ return _blendDFactor; },
+                set: function(value){
+                    if (KICK.core.Constants._ASSERT){
+                        var c = KICK.core.Constants;
+                        if (value !== c.GL_ZERO &&
+                            value !== c.GL_ONE &&
+                            value !== c.GL_SRC_COLOR &&
+                            value !== c.GL_ONE_MINUS_SRC_COLOR &&
+                            value !== c.GL_DST_COLOR &&
+                            value !== c.GL_ONE_MINUS_DST_COLOR &&
+                            value !== c.GL_SRC_ALPHA &&
+                            value !== c.GL_GL_ONE_MINUS_SRC_ALPHA &&
+                            value !== c.GL_DST_ALPHA &&
+                            value !== c.GL_ONE_MINUS_DST_ALPHA &&
+                            value !== c.GL_CONSTANT_COLOR &&
+                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR,
+                            value !== c.GL_CONSTANT_ALPHA &&
+                            value !== c.GL_ONE_MINUS_CONSTANT_ALPHA){
+                            KICK.core.Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
+                        }
+                    }
+                    _blendDFactor = value;
+                    updateBlendKey();
                 }
             }
         });
 
         /**
-         * @method initShader
-         * @param {String} vertexShaderSrc
-         * @param {String} fragmentShaderSrc
+         * @method updateShader
          * @return {Boolean} shader created successfully
          */
-        this.updateShader = function (vertexShaderSrc,fragmentShaderSrc) {
+        this.updateShader = function () {
+            if (KICK.core.Constants._ASSERT){
+                if (arguments.length >0){
+                    debugger;
+                    KICK.core.Util.fail("Shader.updateShader does not take any parameters");
+                }
+            }
             var errorLog = _errorLog || console.log,
-                fragmentShader = compileShader(fragmentShaderSrc, true, errorLog),
-                vertexShader = compileShader(vertexShaderSrc, false, errorLog),
+                vertexShader = compileShader(_vertexShaderSrc, false, errorLog),
+                fragmentShader = compileShader(_fragmentShaderSrc, true, errorLog),
                 compileError = fragmentShader === null || vertexShader === null,
                 i,
                 c = KICK.core.Constants,
@@ -257,17 +404,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 activeAttributes,
                 attribute;
             if (compileError){
-                fragmentShader = compileShader(glslConstants["default_fs.glsl"], true, errorLog);
                 vertexShader = compileShader(glslConstants["default_vs.glsl"], false, errorLog);
+                fragmentShader = compileShader(glslConstants["default_fs.glsl"], true, errorLog);
             }
 
-            // thisObj.destroy();
+            //thisObj.destroy();
             _shaderProgramId = gl.createProgram();
 
             gl.attachShader(_shaderProgramId, vertexShader);
             gl.attachShader(_shaderProgramId, fragmentShader);
             gl.linkProgram(_shaderProgramId);
-            // remove reference to shader code
+            // remove reference to shader code (no longer needed, since code is compiled to shader)
             //gl.deleteShader(vertexShader);
             //gl.deleteShader(fragmentShader);
             if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
@@ -323,20 +470,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 this.lookupAttribute[attribute.name] = i;
             }
 
-            _vertexShaderSrc = vertexShaderSrc;
-            _fragmentShaderSrc = fragmentShaderSrc;
-            
-            return true;
+            return !compileError;
         };
 
         /**
-         * Destroy shader object
+         * Deletes the shader program from memory.
+         * A destroyed shader can be used again if update shader is called
+         * @method destroy
          */
         this.destroy = function(){
-            if (_shaderProgramId!=-1){
+            if (_shaderProgramId!==-1){
                 gl.deleteProgram(_shaderProgramId);
                 _shaderProgramId = -1;
             }
+        };
+
+        /**
+         * Return true if the shader compiled successfully and is not destroyed
+         * @method isValid
+         * @return {Boolean} is shader valid
+         */
+        this.isValid = function(){
+            return _shaderProgramId!==-1;
         };
 
         /**
@@ -344,6 +499,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         // todo: refactor this
         this.bind = function () {
+            if (KICK.core.Constants._ASSERT){
+                if (!(this.isValid)){
+                    KICK.core.Util.fail("Cannot bind a shader that is not valid");
+                }
+            }
             gl.useProgram(_shaderProgramId);
             updateCullFace();
             updateDepthBuffer();
@@ -366,7 +526,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         (function init(){
-            thisObj.updateShader(_vertexShaderSrc,_fragmentShaderSrc);
+            if (uidMapping && thisConfig.uid){
+                uidMapping[thisConfig.uid] = _uid;
+            }
+            updateBlendKey();
+            thisObj.updateShader();
         })();
     };
 
@@ -426,55 +590,59 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         for (uniformName in materialUniforms){
             shaderUniform = this.lookupUniform[uniformName];
-            uniform = materialUniforms[uniformName];
-            location = shaderUniform.location;
-            value = uniform.value;
-            switch (shaderUniform.type){
-                case c.GL_FLOAT:
-                    gl.uniform1fv(location,value);
-                    break;
-                case c.GL_FLOAT_MAT2:
-                    gl.uniformMatrix2fv(location,false,value);
-                    break;
-                case c.GL_FLOAT_MAT3:
-                    gl.uniformMatrix3fv(location,false,value);
-                    break;
-                case c.GL_FLOAT_MAT4:
-                    gl.uniformMatrix4fv(location,false,value);
-                    break;
-                case c.GL_FLOAT_VEC2:
-                    gl.uniform2fv(location,value);
-                    break;
-                case c.GL_FLOAT_VEC3:
-                    gl.uniform3fv(location,value);
-                    break;
-                case c.GL_FLOAT_VEC4:
-                    gl.uniform4fv(location,value);
-                    break;
-                case c.GL_INT:
-                    gl.uniform1iv(location,value);
-                    break;
-                case c.GL_INT_VEC2:
-                    gl.uniform2iv(location,value);
-                    break;
-                case c.GL_INT_VEC3:
-                    gl.uniform3iv(location,value);
-                    break;
-                case c.GL_INT_VEC4:
-                    gl.uniform4iv(location,value);
-                    break;
-                case c.GL_SAMPLER_CUBE:
-                    // todo implement
-                    throw new Error("Not implemented");
-                    break;
-                case c.GL_SAMPLER_2D:
-                    value.bind(currentTexture);
-                    gl.uniform1i(location,currentTexture);
-                    currentTexture ++;
-                    break;
-                default:
-                    console.log("Warn cannot find type "+shaderUniform.type);
-                    break;
+            if (shaderUniform){ // if shader has a uniform with uniformName
+                uniform = materialUniforms[uniformName];
+                location = shaderUniform.location;
+                value = uniform.value;
+                switch (shaderUniform.type){
+                    case c.GL_FLOAT:
+                        gl.uniform1fv(location,value);
+                        break;
+                    case c.GL_FLOAT_MAT2:
+                        gl.uniformMatrix2fv(location,false,value);
+                        break;
+                    case c.GL_FLOAT_MAT3:
+                        gl.uniformMatrix3fv(location,false,value);
+                        break;
+                    case c.GL_FLOAT_MAT4:
+                        gl.uniformMatrix4fv(location,false,value);
+                        break;
+                    case c.GL_FLOAT_VEC2:
+                        gl.uniform2fv(location,value);
+                        break;
+                    case c.GL_FLOAT_VEC3:
+                        gl.uniform3fv(location,value);
+                        break;
+                    case c.GL_FLOAT_VEC4:
+                        gl.uniform4fv(location,value);
+                        break;
+                    case c.GL_INT:
+                        gl.uniform1iv(location,value);
+                        break;
+                    case c.GL_INT_VEC2:
+                        gl.uniform2iv(location,value);
+                        break;
+                    case c.GL_INT_VEC3:
+                        gl.uniform3iv(location,value);
+                        break;
+                    case c.GL_INT_VEC4:
+                        gl.uniform4iv(location,value);
+                        break;
+                    case c.GL_SAMPLER_CUBE:
+                        // todo implement
+                        KICK.core.Util.fail("Not implemented");
+                        break;
+                    case c.GL_SAMPLER_2D:
+                        value.bind(currentTexture);
+                        gl.uniform1i(location,currentTexture);
+                        currentTexture ++;
+                        break;
+                    default:
+                        console.log("Warn cannot find type "+shaderUniform.type);
+                        break;
+                }
+            } else if (KICK.core.Constants._DEBUG){
+                console.log("Material has uniform "+uniformName+" but shader has not.");
             }
         }
         if (proj){
@@ -594,7 +762,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     } else {
                         if (KICK.core.Constants._ASSERT){
                             if (!value instanceof KICK.texture.Texture){
-                                throw new Error("Unknown uniform value type. Expected Texture");
+                                KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                             }
                         }
                         value = value.uid;
@@ -633,7 +801,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 type = uniforms[uniform].type;
                 if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
                     uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
-                } else if (type !== c.GL_SAMPLER_2D && type !==c.GL_SAMPLER_CUBE ){
+                } else if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
+                    if (c._ASSERT){
+                        if (typeof uniforms[uniform].value !== KICK.texture.Texture){
+                            KICK.core.Util.fail("Uniform value should be a texture object but was "+uniforms[uniform].value);
+                        }
+                    }
+                } else {
                     uniforms[uniform].value = new Float32Array(uniforms[uniform].value);
                 }
             }
