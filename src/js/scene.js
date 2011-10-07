@@ -138,7 +138,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
-         * Example usage;<br>
+         * Example usage:<br>
          * <pre class="brush: js">
          * var meshRenderer = someGameObject.getComponentOfType(KICK.scene.MeshRenderer);
          * var material = meshRenderer.material;
