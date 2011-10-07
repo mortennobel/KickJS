@@ -9,7 +9,17 @@
             var vsNew = window.vertexShaderSession.getValue();
             var fsNew = window.fragmentShaderSession.getValue();
             if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc){
+                if (window.log){
+                    window.log.log("Updating shader "+(vsNew !== shader.vertexShaderSrc)+" "+(fsNew !== shader.fragmentShaderSrc));
+                }
                 shaderEditor.updateShader(vsNew,fsNew);
+                if (window.log){
+                    if (vsNew !== shader.vertexShaderSrc){
+                        console.log(vsNew);
+                        console.log(shader.vertexShaderSrc);
+                    }
+                    debugger;
+                }
             }
         }
     }

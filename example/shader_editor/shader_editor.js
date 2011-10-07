@@ -7,6 +7,7 @@ window.shaderEditor = new (function(){
         _light,
         _ambientLight,
         _lightTransform,
+        shader = null,
         thisObj = this;
 
     this.textures = [];
@@ -53,10 +54,9 @@ window.shaderEditor = new (function(){
     };
 
     var loadMaterial = function (shaderData){
-        var shader = new KICK.material.Shader(_engine,shaderData.shader),
-            textures = shaderData.textureData,
+        var textures = shaderData.textureData,
             materialUniforms = shaderData.material.uniforms;
-        
+        shader = new KICK.material.Shader(_engine,shaderData.shader);
         var missingAttributes = _meshRenderer.mesh.verify(shader);
         if (missingAttributes){
             createNewMaterial();
@@ -92,10 +92,11 @@ window.shaderEditor = new (function(){
     var createNewMaterial = function (){
         var vs = document.getElementById('vertexShader').value;
         var fs = document.getElementById('fragmentShader').value;
-        var shader = new KICK.material.Shader(_engine);
-        shader.vertexShaderSrc = vs;
-        shader.fragmentShaderSrc = fs;
-        shader.errorLog = logFn;
+        shader = new KICK.material.Shader(_engine,{
+            vertexShaderSrc : vs,
+            fragmentShaderSrc : fs,
+            errorLog : logFn
+        });
         var res = shader.updateShader();
 
         var missingAttributes = _meshRenderer.mesh.verify(shader);
@@ -169,7 +170,6 @@ window.shaderEditor = new (function(){
 
 
     this.updateShader = function(vs,fs){
-        var shader = new KICK.material.Shader(_engine);
         shader.vertexShaderSrc = vs;
         shader.fragmentShaderSrc = fs;
         shader.errorLog = logFn;
@@ -195,9 +195,5 @@ window.shaderEditor = new (function(){
             document.body.style.backgroundColor = 'white';
             previousShaderError = false;
         }
-        var currentMaterialConfig = _meshRenderer.material.toJSON();
-        currentMaterialConfig.shader = shader;
-
-        _meshRenderer.material = new KICK.material.Material(currentMaterialConfig);
     }
 })();
