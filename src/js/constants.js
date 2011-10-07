@@ -50,7 +50,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * This class contains references to WebGL constants.<br>
-     * Constants will be replace with actual values to increase performance and size when the file is processed by the preprocessor.<br>
+     * Constants will be replace with actual values to increase performance when the file is compile by the postprocessor.<br>
      * Note that I have intentionally named the WebGL constants with a prefix 'GL_'. This allows use of normal WebGL
      * constants that will not be replaced by the preprocessor.
      * @class Constants
@@ -67,7 +67,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * var constants = KICK.core.Constants;
          * if (constants._ASSERT){
          *     if (!Number.isNumber(x)){
-         *         throw new Error("x should be a number");
+         *         KICK.core.Util.fail("x should be a number");
          *     }
          * }
          * </pre>
