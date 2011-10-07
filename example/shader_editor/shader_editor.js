@@ -41,8 +41,11 @@ window.shaderEditor = new (function(){
         }
     );
 
-    var logFn = function(output) {
+    var logFn = function(output,clear) {
         if (window.log){
+            if (clear){
+                window.log.clearConsole();
+            }
             window.log.log(output);
         } else {
             console.log(output);
@@ -191,7 +194,7 @@ window.shaderEditor = new (function(){
             return;
         }
         if (previousShaderError){
-            logFn("Shader compiled ok");
+            logFn("Shader compiled ok",true);
             document.body.style.backgroundColor = 'white';
             previousShaderError = false;
         }
