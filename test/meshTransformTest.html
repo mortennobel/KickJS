@@ -37,7 +37,10 @@
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
-            shader.updateShader(vs,fs,log);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.updateShader();
             return new KICK.material.Material({
                 name:"Some material",
                 shader:shader

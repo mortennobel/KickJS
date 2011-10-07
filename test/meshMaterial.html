@@ -41,7 +41,10 @@
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
-            shader.updateShader(vs,fs,log);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.updateShader();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
@@ -106,6 +109,18 @@
         function setColor(color){
             meshRenderer.material.uniforms.uColor.value = new Float32Array(color);
         }
+
+        function useNormalShader(){
+            var shader = meshRenderer.material.shader;
+            shader.fragmentShaderSrc = document.getElementById("fragmentShader").value;
+            shader.updateShader();
+        }
+
+        function useAlternativeShader(){
+            var shader = meshRenderer.material.shader;
+            shader.fragmentShaderSrc = document.getElementById("fragmentShaderAlt").value;
+            shader.updateShader();
+        }
     </script>
 </head>
 <body onload="initKick();">
@@ -121,6 +136,9 @@
   [<a href="#" onclick="setColor([0,1,0]);return false;">Green</a>]
   [<a href="#" onclick="setColor([0,0,1]);return false;">Blue</a>]
   <br>
+  <b>Test recompile shader</b><br>
+  [<a href="#" onclick="useNormalShader();return false;">Use normal shader</a>]
+  [<a href="#" onclick="useAlternativeShader();return false;">Use bright shader</a>]
   <h2>Output</h2>
   <div id="output" style="color: red;">
   </div>
@@ -146,6 +164,17 @@ varying vec3 color;
 void main(void)
 {
     gl_FragColor = vec4(color.x, color.y, color.z, 1.0);
+}
+  </textarea>
+
+  <textarea style="width:500px;height:150px;" id="fragmentShaderAlt">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 color;
+void main(void)
+{
+    gl_FragColor = vec4(color.x+0.5, color.y+0.5, color.z+0.5, 1.0);
 }
   </textarea>
 </div>

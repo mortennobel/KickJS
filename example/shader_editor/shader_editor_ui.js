@@ -2,21 +2,16 @@
 (function(){
     "use strict";
     var shaderEditor = window.shaderEditor;
-    function doShaderChangeListener(){
-        if (window.vertexShaderSession && window.fragmentShaderSession){
-            var vsNew = window.vertexShaderSession.getValue();
-            var fsNew = window.fragmentShaderSession.getValue();
-            if (vsNew !== shaderEditor.vs || fsNew !== shaderEditor.fs){
-                shaderEditor.vs = vsNew;
-                shaderEditor.fs = fsNew;
-                shaderEditor.updateShader();
-            }
-        }
-    }
 
     function shaderChangeListener(){
-        doShaderChangeListener();
-        setTimeout(shaderChangeListener,2000);
+        if (window.vertexShaderSession && window.fragmentShaderSession){
+            var shader = shaderEditor.meshRenderer.material.shader;
+            var vsNew = window.vertexShaderSession.getValue();
+            var fsNew = window.fragmentShaderSession.getValue();
+            if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc){
+                shaderEditor.updateShader(vsNew,fsNew);
+            }
+        }
     }
 
     function resetShader(){
@@ -30,7 +25,7 @@
             document.getElementById('texturePreview').style.display = 'none';
             window.vertexShaderSession.setValue(document.getElementById("vertexShader").backup);
             window.fragmentShaderSession.setValue(document.getElementById("fragmentShader").backup);
-            doShaderChangeListener();
+            shaderChangeListener();
         }
     }
 
@@ -99,27 +94,22 @@
     }
 
     function getTextureData(){
-        return JSON.stringify(shaderEditor.textures);
+        return shaderEditor.textures;
     }
 
-    function setTextureData(textureData){
-        var texturesParsed = JSON.parse(textureData),
-            currentTextures = document.getElementById('currentTextures');
-        for (var i=0;i<texturesParsed.length;i++){
-            (function scope(){
-                var texture = new KICK.texture.Texture(shaderEditor.engine,texturesParsed[i]),
-                    imageSrc = texture.dataURI,
-                    image = new Image(),
-                    newOption = document.createElement('option');
-                newOption.text = imageSrc.length<40?imageSrc:imageSrc.substr(0,40)+'...';
-                newOption.value = currentTextures.options.length;
-                currentTextures.add(newOption,null);
-                shaderEditor.textures.push(texture);
-                image.onload = function() {
-                    texture.setImage(image, imageSrc);
-                };
-                image.src = imageSrc;
-            })();
+    function refreshTextures(){
+        var currentTextures = document.getElementById('currentTextures'),
+            textures = window.shaderEditor.textures;
+        // remove all elements from texture list
+        while (currentTextures.options.length>0){
+            currentTextures.remove(0);
+        }
+        for (var i=0;i<textures.length;i++){
+            var imageSrc = textures[i].dataURI,
+                newOption = document.createElement('option');
+            newOption.text = imageSrc.length<40?imageSrc:imageSrc.substr(0,40)+'...';
+            newOption.value = currentTextures.options.length;
+            currentTextures.add(newOption,null);
         }
     }
 
@@ -160,7 +150,7 @@
             newOption = document.createElement('option');
         newOption.text = "New texture #"+currentTextures.options.length;
         newOption.value = currentTextures.options.length;
-        currentTextures.add(newOption);
+        currentTextures.add(newOption,null);
         currentTextures.selectedIndex = currentTextures.options.length-1;
         shaderEditor.textures.push(t);
         invokeClickEvent(currentTextures);
@@ -248,33 +238,15 @@
         // take backup of vertexShader and fragmentShader
         document.getElementById("vertexShader").backup = document.getElementById("vertexShader").value;
         document.getElementById("fragmentShader").backup = document.getElementById("fragmentShader").value;
-        var shader = localStorage.getItem("shader");
-        if (shader){
-            shader = JSON.parse(shader);
-            if (shader.shader){
+        var shaderStr = localStorage.getItem("shader");
+        if (shaderStr){
+            var shader = JSON.parse(shaderStr);
+            window.shader = shader;
+            if (shader){
                 document.getElementById("vertexShader").value = shader.shader.vertexShaderSrc;
                 document.getElementById("fragmentShader").value = shader.shader.fragmentShaderSrc;
             }
-        }
-    }
-
-    function tryLoadConfigFromLocalStorage(){
-        try{
-            var shader = localStorage.getItem("shader");
-            if (shader){
-                shader = JSON.parse(shader);
-                if (shader.material){
-                    shader.material.shader = shaderEditor.meshRenderer.material.shader;
-                    // todo - add remapping of textures
-                    shaderEditor.meshRenderer.material = new KICK.material.Material(shader.material);
-                }
-                setSettingsData(shader.settingsData);
-                if (shader.textureData){
-                    setTextureData(shader.textureData);
-                }
-            }
-        } catch (e){
-            console.log(e);
+            setSettingsData(shader.settingsData);
         }
     }
 
@@ -653,6 +625,10 @@
                     var UndoManager = window.require("ace/undomanager").UndoManager;
                     window.aceeditor.getSession().setUndoManager(new UndoManager());
                 break;
+                case 2:
+                    refreshTextures();
+                    document.getElementById('glslEditorPanel').style.display = "none";
+                break;
                 case 3:
                     refreshUniforms();
                     document.getElementById('glslEditorPanel').style.display = "none";
@@ -766,14 +742,12 @@
             document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
             document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
 
-            tryLoadConfigFromLocalStorage();
-
             document.getElementById('currentUniforms').addEventListener('click', uniformSelected, false);
             document.getElementById('uniform_sampler_update').addEventListener('click', updateUniformSampler, false);
             document.getElementById('uniform_number_update').addEventListener('click', updateUniformNumber, false);
 
             // start shader listener
-            setTimeout(shaderChangeListener,2000);
+            setInterval(shaderChangeListener,2000);
         })();
     });
 })();

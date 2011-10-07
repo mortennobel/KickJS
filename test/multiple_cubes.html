@@ -43,7 +43,10 @@
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
-            shader.updateShader(vs,fs,log);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.updateShader();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 log("Missing attributes in mesh "+JSON.stringify(missingAttributes));

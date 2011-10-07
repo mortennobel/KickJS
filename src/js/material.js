@@ -388,12 +388,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {Boolean} shader created successfully
          */
         this.updateShader = function () {
-            if (KICK.core.Constants._ASSERT){
-                if (arguments.length >0){
-                    debugger;
-                    KICK.core.Util.fail("Shader.updateShader does not take any parameters");
-                }
-            }
             var errorLog = _errorLog || console.log,
                 vertexShader = compileShader(_vertexShaderSrc, false, errorLog),
                 fragmentShader = compileShader(_fragmentShaderSrc, true, errorLog),

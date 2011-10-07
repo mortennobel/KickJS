@@ -41,7 +41,10 @@
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
-            shader.updateShader(vs,fs,log);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.updateShader();
             var material = new KICK.material.Material({
                 name:"Some material",
                 shader:shader
@@ -52,8 +55,20 @@
             log("Mesh created");
         }
 
+        function recompileShader(){
+            if (gameObjects.length==0){
+                return;
+            }
+            var lastGameObject = gameObjects[gameObjects.length-1];
+            var meshRenderer = lastGameObject.getComponentOfType(KICK.scene.MeshRenderer);
+            var shader = meshRenderer.material.shader;
+            shader.fragmentShaderSrc = document.getElementById("fragmentShaderGreen").value;
+            shader.updateShader();
+        }
+
         function runTestTriangle() {
             runTest('vertexShader','fragmentShader',KICK.scene.MeshFactory.createTriangle);
+
         }
 
         function runTestPlane() {
@@ -76,7 +91,9 @@
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
   This is a simple test of how to use the MeshRenderer class with a simple shader to disiplay content.<br>
 
-  [<a href="#" onclick="runTestTriangle();">Run test triangle</a>] [<a href="#" onclick="runTestPlane();">Run test plane</a>] [<a href="#" onclick="destroyGameObjects();">Clear</a>]
+  [<a href="#" onclick="runTestTriangle();">Run test triangle</a>] [<a href="#" onclick="runTestPlane();">Run test plane</a>]
+  [<a href="#" onclick="recompileShader()">Recompile shader to green</a> ]
+  [<a href="#" onclick="destroyGameObjects();">Clear</a>]
   <h2>Output</h2>
   <div id="output">
   </div>
@@ -100,10 +117,15 @@ void main(void)
   <textarea style="width:500px;height:150px;display: none;" id="fragmentShaderBlue">
 void main(void)
 {
+    gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;display: none;" id="fragmentShaderGreen">
+void main(void)
+{
     gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
 }
   </textarea>
-
   <br/>
 </body>
 </html>

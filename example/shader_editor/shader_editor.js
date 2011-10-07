@@ -9,15 +9,13 @@ window.shaderEditor = new (function(){
         _lightTransform,
         thisObj = this;
 
-    this.vs = "";
-    this.fs = "";
     this.textures = [];
     this.isRotating = true;
 
     Object.defineProperties(this,
         {
             engine:{
-                value:_engine
+                get:function(){ return _engine; }
             },
             meshRenderer: {
                 get:function(){
@@ -54,11 +52,51 @@ window.shaderEditor = new (function(){
         _meshRenderer.mesh = meshFactoryFunc(_engine,subdivisions);
     };
 
-    var setMaterial = function (){
-        thisObj.vs = document.getElementById('vertexShader').value;
-        thisObj.fs = document.getElementById('fragmentShader').value;
+    var loadMaterial = function (shaderData){
+        var shader = new KICK.material.Shader(_engine,shaderData.shader),
+            textures = shaderData.textureData,
+            materialUniforms = shaderData.material.uniforms;
+        
+        var missingAttributes = _meshRenderer.mesh.verify(shader);
+        if (missingAttributes){
+            createNewMaterial();
+            return;
+        }
+        var textureMapping = {};
+        for (var i=0;i<textures.length;i++){
+            (function newScope(){
+                var textureConf = textures[i],
+                    t = new KICK.texture.Texture(_engine,textureConf);
+                textureMapping[textureConf.uid] = t;
+                var img = new Image();
+                img.onLoad = function(){
+                    t.setImage(img,textureConf.dataURI);
+                };
+                img.src = textureConf.dataURI;
+                thisObj.textures.push(t);
+            })();
+        }
+
+        for (var name in materialUniforms){
+            var uniform = materialUniforms[name],
+                type = uniform.type;
+            if (type === KICK.core.Constants.GL_SAMPLER_2D || type === KICK.core.Constants.GL_SAMPLER_CUBE){
+                uniform.value = textureMapping[uniform.value];
+            }
+        }
+
+        shaderData.material.shader = shader;
+        _meshRenderer.material = new KICK.material.Material(shaderData.material);
+    };
+
+    var createNewMaterial = function (){
+        var vs = document.getElementById('vertexShader').value;
+        var fs = document.getElementById('fragmentShader').value;
         var shader = new KICK.material.Shader(_engine);
-        var res = shader.updateShader(thisObj.vs,thisObj.fs);
+        shader.vertexShaderSrc = vs;
+        shader.fragmentShaderSrc = fs;
+        shader.errorLog = logFn;
+        var res = shader.updateShader();
 
         var missingAttributes = _meshRenderer.mesh.verify(shader);
         if (missingAttributes){
@@ -70,7 +108,7 @@ window.shaderEditor = new (function(){
             name:"Some material",
             shader:shader
         });
-    }
+    };
 
     var addRotatorComponent = function (gameObject){
         var time = _engine.time,
@@ -106,7 +144,12 @@ window.shaderEditor = new (function(){
             var gameObject = _engine.activeScene.createGameObject();
             _meshRenderer = new KICK.scene.MeshRenderer();
             thisObj.setMesh(KICK.scene.MeshFactory.createIcosphere, 2);
-            setMaterial();
+            if (window.shader){
+                // load saved content
+                loadMaterial(window.shader);
+            } else {
+                createNewMaterial();
+            }
             gameObject.addComponent(_meshRenderer);
             addRotatorComponent(gameObject);
 
@@ -119,20 +162,22 @@ window.shaderEditor = new (function(){
             _light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
             lightGameObject.addComponent(_light);
             _lightTransform = lightGameObject.transform;
-
-        }catch (e){
+        } catch (e) {
              alert("Error init Kickstart Engine"+e);
         }
     };
 
 
-    this.updateShader = function(){
+    this.updateShader = function(vs,fs){
         var shader = new KICK.material.Shader(_engine);
-        var res = shader.updateShader(thisObj.vs,thisObj.fs);
+        shader.vertexShaderSrc = vs;
+        shader.fragmentShaderSrc = fs;
+        shader.errorLog = logFn;
+        var res = shader.updateShader();
         function onError(){
             previousShaderError = true;
-            console.log(KICK.material.Shader.getPrecompiledSource(thisObj.vs));
-            console.log(KICK.material.Shader.getPrecompiledSource(thisObj.fs));
+            console.log(KICK.material.Shader.getPrecompiledSource(vs));
+            console.log(KICK.material.Shader.getPrecompiledSource(fs));
             document.body.style.backgroundColor = 'pink';
         }
         if (!res){
@@ -141,17 +186,18 @@ window.shaderEditor = new (function(){
         }
         var missingAttributes = _meshRenderer.mesh.verify(shader);
         if (missingAttributes){
-            window.log.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+            logFn("Missing attributes in mesh "+JSON.stringify(missingAttributes));
             onError();
             return;
         }
         if (previousShaderError){
-            window.log.log("Shader compiled ok");
+            logFn("Shader compiled ok");
             document.body.style.backgroundColor = 'white';
             previousShaderError = false;
         }
         var currentMaterialConfig = _meshRenderer.material.toJSON();
         currentMaterialConfig.shader = shader;
+
         _meshRenderer.material = new KICK.material.Material(currentMaterialConfig);
     }
 })();
