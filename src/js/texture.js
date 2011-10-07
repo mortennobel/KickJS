@@ -138,7 +138,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     type !== constants.GL_UNSIGNED_SHORT_4_4_4_4  &&
                     type !== constants.GL_UNSIGNED_SHORT_5_5_5_1 &&
                     type !== constants.GL_UNSIGNED_SHORT_5_6_5 ){
-                    throw new Error("Texture.setImageData (type) should be either GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5");
+                    KICK.core.Util.fail("Texture.setImageData (type) should be either GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5");
                 }
             }
             _dataURI = dataURI;
@@ -195,7 +195,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (constants._ASSERT){
                         if (value !== constants.GL_CLAMP_TO_EDGE &&
                             value !== constants.GL_REPEAT){
-                            throw new Error("Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
+                            KICK.core.Util.fail("Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
                         }
                     }
                     _wrapS = value;
@@ -215,7 +215,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (constants._ASSERT){
                         if (value !== constants.GL_CLAMP_TO_EDGE &&
                             value !== constants.GL_REPEAT){
-                            throw new Error("Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
+                            KICK.core.Util.fail("Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
                         }
                     }
                     return _wrapT;
@@ -240,7 +240,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             value !== constants.GL_LINEAR_MIPMAP_NEAREST &&
                             value !== constants.GL_NEAREST_MIPMAP_LINEAR &&
                             value !== constants.GL_LINEAR_MIPMAP_LINEAR){
-                            throw new Error("Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR");
+                            KICK.core.Util.fail("Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR");
                         }
                     }
                     _minFilter = value;
@@ -260,7 +260,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (constants._ASSERT){
                         if (value !== constants.GL_NEAREST &&
                             value !== constants.GL_LINEAR){
-                            throw new Error("Texture.magFilter should be either GL_NEAREST or GL_LINEAR");
+                            KICK.core.Util.fail("Texture.magFilter should be either GL_NEAREST or GL_LINEAR");
                         }
                     }
                     _magFilter = value;
@@ -279,7 +279,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(value){
                     if (constants._ASSERT){
                         if (typeof value !== 'boolean'){
-                            throw new Error("Texture.autoScaleImage was not be a boolean");
+                            KICK.core.Util.fail("Texture.autoScaleImage was not be a boolean");
                         }
                     }
                     _autoScaleImage = value;
@@ -298,7 +298,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(value){
                     if (constants._ASSERT){
                         if (typeof value !== 'boolean'){
-                            throw new Error("Texture.generateMipmaps was not a boolean");
+                            KICK.core.Util.fail("Texture.generateMipmaps was not a boolean");
                         }
                     }
                     _generateMipmaps = value;
@@ -317,7 +317,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 set: function(value){
                     if (constants._ASSERT){
                         if (typeof value !== 'boolean'){
-                            throw new Error("Texture.flipY was not a boolean");
+                            KICK.core.Util.fail("Texture.flipY was not a boolean");
                         }
                     }
                     _flipY = value;
@@ -343,7 +343,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         value !== constants.GL_RGBA &&
                         value !== constants.GL_LUMINANCE &&
                         value !== constants.GL_LUMINANCE_ALPHA){
-                        throw new Error("Texture.internalFormal should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
+                        KICK.core.Util.fail("Texture.internalFormal should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
                     }
                     _intformat = value;
                 }
