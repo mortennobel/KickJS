@@ -63,76 +63,103 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param scene {KICK.scene.Scene}
      */
     scene.GameObject = function (scene) {
-        /**
-         * Reference to the containing scene
-         * @property scene
-         * @type KICK.scene.Scene
-         */
-        Object.defineProperty(this, "scene", {
-            value:scene
-        });
+        var _components = [];
+        Object.defineProperties(this,
+            {
+                /**
+                 * Reference to the containing scene
+                 * @property scene
+                 * @type KICK.scene.Scene
+                 */
+                scene:{
+                    value:scene
+                },
+                /**
+                 * Reference to the engine
+                 * @property engine
+                 * @type KICK.core.Engine
+                 */
+                engine:{
+                    value:scene.engine
+                },
+                /**
+                 * Reference to the transform
+                 * @property transform
+                 * @type KICK.scene.Transform
+                 */
+                transform:{
+                    value:new KICK.scene.Transform(this)
+                }
+            }
+        );
 
         /**
-         * Reference to the engine
-         * @property engine
-         * @type KICK.core.Engine
+         * Add the component to a gameObject and set the gameObject field on the component
+         * @method addComponent
+         * @param {KICK.scene.Component} component
          */
-        Object.defineProperty(this, "engine", {
-            value:scene.engine
-        });
+        this.addComponent = function (component) {
+            if (component.gameObject) {
+                throw {
+                    name: "Error",
+                    message: "Component "+component+" already added to gameObject "+component.gameObject
+                };
+            }
+            if (!component.scriptPriority) {
+                component.scriptPriority = 0;
+            }
+            component.gameObject = this;
+            _components.push(component);
+            this.scene.addComponent(component);
+        };
 
         /**
-         * Reference to the transform
-         * @property transform
-         * @type KICK.scene.Transform
+         * Remove the component from a gameObject and clear the gameObject field on the component
+         * @method removeComponent
+         * @param {KICK.scene.Component} component
          */
-        this.transform = new KICK.scene.Transform(this);
-        this._components = [];
-    };
+        this.removeComponent =  function (component) {
+            delete component.gameObject;
+            core.Util.removeElementFromArray(_components,component);
+            this.scene.removeComponent(component);
+        };
 
-    /**
-     * Add the component to a gameObject and set the gameObject field on the component
-     * @method addComponent
-     * @param {KICK.scene.Component} component
-     */
-    scene.GameObject.prototype.addComponent = function (component) {
-        if (component.gameObject) {
-            throw {
-                name: "Error",
-                message: "Component "+component+" already added to gameObject "+component.gameObject
-            };
-        }
-        if (!component.scriptPriority) {
-            component.scriptPriority = 0;
-        }
-        component.gameObject = this;
-        this._components.push(component);
-        this.scene.addComponent(component);
-    };
-
-    /**
-     * Remove the component from a gameObject and clear the gameObject field on the component
-     * @method removeComponent
-     * @param {KICK.scene.Component} component
-     */
-    scene.GameObject.prototype.removeComponent = function (component) {
-        delete component.gameObject;
-        core.Util.removeElementFromArray(this._components,component);
-        this.scene.removeComponent(component);
-    };
-
-    /**
-     * Destroys game object after next frame.
-     * Removes all components instantly.
-     * @method destroy
-     */
-    scene.GameObject.prototype.destroy = function () {
-        var components = this._components,
-            i;
-        for (i=0; i < components.length; i++) {
-            this.removeComponent(components[i]);
-        }
-        this.scene.destroyObject(this);
+        /**
+         * Destroys game object after next frame.
+         * Removes all components instantly.
+         * @method destroy
+         */
+        this.destroy = function () {
+            var i;
+            for (i=0; i < _components.length; i++) {
+                this.removeComponent(_components[i]);
+            }
+            this.scene.destroyObject(this);
+        };
+        /**
+         * Get the first component of a specified type. Internally uses instanceof.<br>
+         * Example usage;<br>
+         * <pre class="brush: js">
+         * var meshRenderer = someGameObject.getComponentOfType(KICK.scene.MeshRenderer);
+         * var material = meshRenderer.material;
+         * </pre>
+         * @method getComponentOfType
+         * @param {Object} type the constructor of the wanted component
+         */
+        this.getComponentOfType = function (type) {
+            var component,
+                i;
+            for (i=_components.length-1;i>=0;i--){
+                component = _components[i];
+                if (component instanceof type){
+                    return component;
+                }
+            }
+            if (type === scene.Transform){
+                return this.transform;
+            }
+            return null;
+        };
     };
 
     /**
@@ -394,7 +421,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 },
                 set: function(newParent){
                     if (newParent === this) {
-                        throw new Error('Cannot assign parent to self');
+                        KICK.core.Util.fail('Cannot assign parent to self');
                     }
                     if (newParent === null){
                         parentTransform = null;
@@ -1317,7 +1344,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (config.type !== core.Constants._LIGHT_TYPE_POINT &&
                     config.type !== core.Constants._LIGHT_TYPE_DIRECTIONAL &&
                     config.type !== core.Constants._LIGHT_TYPE_AMBIENT){
-                    throw new Error("Light type must be KICK.core.Constants._LIGHT_TYPE_POINT, " +
+                    KICK.core.Util.fail("Light type must be KICK.core.Constants._LIGHT_TYPE_POINT, " +
                         "KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL or KICK.core.Constants._LIGHT_TYPE_AMBIENT");
                 }
             }
