@@ -320,6 +320,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     core.Util = {
         /**
+         * Invokes debugger and throws an error
+         * @method fail
+         * @static
+         */
+        fail:function(message){
+            debugger;
+            console.error(message);
+        },
+        /**
          * Converts a typed array to a number array
          * @method typedArrayToArray
          * @static
