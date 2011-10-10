@@ -52,8 +52,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         quat4 = KICK.namespace("KICK.math.quat4"),
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat4 = KICK.namespace("KICK.math.mat4"),
-        DEBUG = KICK.core.Constants._DEBUG,
-        ASSERT = KICK.core.Constants._ASSERT;
+        constants = KICK.core.Constants,
+        DEBUG = constants._DEBUG,
+        ASSERT = constants._ASSERT;
 
     /**
      * Game objects. (Always attached to a given scene)
@@ -1019,6 +1020,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @type Uint16Array
          */
         this.indices = config.indices?new Uint16Array(config.indices):null;
+        /**
+         * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, or GL_TRIANGLE_STRIP
+         * @property meshType
+         * @type Number
+         */
+        this.meshType = config.meshType?config.meshType:constants.GL_TRIANGLES;
 
         /**
          * @method createInterleavedData
@@ -1108,10 +1115,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {KICK.material.Shader} shader
          */
         this.bind = function (shader) {
-            var c = KICK.core.Constants;
             shader.bind();
             
-            gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
+            gl.bindBuffer(constants.GL_ARRAY_BUFFER, meshVertexAttBuffer);
 
             for (var descName in meshVertexAttBufferDescription) {
                 if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
@@ -1122,8 +1128,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                        desc.type, false, vertexAttrLength, desc.pointer);
                 }
             }
-
-            gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+            gl.bindBuffer(constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
         };
 
         /**
@@ -1132,8 +1137,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.render = function () {
             var c = KICK.core.Constants;
-            gl.drawElements(c.GL_TRIANGLES, meshVertexIndexBuffer.numItems, c.GL_UNSIGNED_SHORT, 0);
-        }
+            gl.drawElements(this.meshType, meshVertexIndexBuffer.numItems, c.GL_UNSIGNED_SHORT, 0);
+        };
 
         /**
          * Copy data to the vertex buffer object (VBO)
@@ -1246,7 +1251,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             tangent = this.tangent,
             tan1 = vec3.array(vertexCount),
             tan2 = vec3.array(vertexCount),
-            a;
+            a,
+            tmp = vec3.create(),
+            tmp2 = vec3.create();
 
         for (a = 0; a < triangleCount; a++)
         {
@@ -1303,9 +1310,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
             // Gram-Schmidt orthogonalize
             // tangent[a] = (t - n * Dot(n, t)).Normalize();
-            var tmn = vec3.subtract(t,n,vec3.create());
-            var d = vec3.dot(n,t,vec3.create());
-            vec3.set(vec3.normalize(vec3.multiply(tmn,d)),tangent[a]);
+            vec3.subtract(t,n,tmp);
+            vec3.dot(n,t,tmp2);
+            vec3.set(vec3.normalize(vec3.multiply(tmp,tmp2)),tangent[a]);
 
             // Calculate handedness
             // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
