@@ -24,10 +24,10 @@
  * KICK.core.Constants (in constants.js)
  *
  * KICK.math is based on
- * glMatrix.js - High performance matrix and vector operations for WebGL
- * version 0.9.6
+ * glMatrix.js - version 0.9.6 - High performance matrix and vector operations for WebGL
+ * But is extended in several ways
  *
- *
+ * glMatrix.js
  * Copyright (c) 2011 Brandon Jones
  *
  * This software is provided 'as-is', without any express or implied
@@ -74,18 +74,161 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var math = KICK.namespace("KICK.math"),
+        vec2 = KICK.namespace("KICK.math.vec2"),
         vec3 = KICK.namespace("KICK.math.vec3"),
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
-        quat4 = KICK.namespace("KICK.math.quat4");
+        quat4 = KICK.namespace("KICK.math.quat4"),
+        wrapArray = function(array, length){
+            var i,
+                index=0,
+                count = array.length/length,
+                res = new Array(count);
+            for (i=0;i<count;i++,index += length){
+                res[i] = array.subarray(index,index+length);
+            }
+            return res;
+        };
 
+
+    /**
+     * vec2 - 2 dimensional vector
+     */
+    math.vec2 = vec2;
+
+    /**
+     * See KICK.math.vec4.wrapArray
+     * @method wrapArray
+     * @param {Float32Array} array
+     * @return {Array[KICK.math.vec2]} of vec2
+     */
+    vec2.wrapArray = function(array){
+        return wrapArray(array,2);
+    };
+
+
+    /**
+     * Create a continuous array in memory mapped to vec2. <br>
+     * @method array
+     * @param {Number} count Number of vec 2 to be layed out in memory
+     * @param {Object} ref Optional, if set a memory reference is set to ref.mem
+     * @return {KICK.math.vec2} New vec2
+     */
+    vec2.array = function(count,ref){
+        var memory = new Float32Array(count*2);
+        if (ref){
+            ref.mem = memory;
+        }
+        return vec2.wrapArray(memory);
+    };
+
+    /**
+     * Creates a new instance of a vec2 using the default array type
+     * Any javascript array containing at least 2 numeric elements can serve as a vec2
+     * @method create
+     * @param {Array[Number]} vec Optional, vec2 containing values to initialize with
+     * @return {KICK.math.vec2} New vec2
+     */
+    vec2.create = function(vec) {
+        var dest = new Float32Array(2);
+
+        if(vec) {
+            dest[0] = vec[0];
+            dest[1] = vec[1];
+        }
+
+        return dest;
+    };
+
+    /**
+     * Copies the values of one vec2 to another
+     * @method set
+     * @param {KICK.math.vec2} vec vec2 containing values to copy
+     * @param {KICK.math.vec2} dest vec2 receiving copied values
+     * @return {KICK.math.vec2} dest
+     */
+    vec2.set = function(vec, dest) {
+        dest[0] = vec[0];
+        dest[1] = vec[1];
+
+        return dest;
+    };
+
+    /**
+     * Performs a vector addition
+     * @method add
+     * @param {KICK.math.vec2} vec  first operand
+     * @param {KICK.math.vec2} vec2  second operand
+     * @param {KICK.math.vec2} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+     * @return {KICK.math.vec2} dest if specified, vec otherwise
+     */
+    vec2.add = function(vec, vec2, dest) {
+        if(!dest || vec == dest) {
+            vec[0] += vec2[0];
+            vec[1] += vec2[1];
+            return vec;
+        }
+
+        dest[0] = vec[0] + vec2[0];
+        dest[1] = vec[1] + vec2[1];
+        return dest;
+    };
+
+    /**
+     * Performs a vector subtraction
+     * @method subtract
+     * @param {KICK.math.vec2} vec first operand
+     * @param {KICK.math.vec2} vec2 second operand
+     * @param {KICK.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
+     * @return {KICK.math.vec2} dest if specified, vec otherwise
+     */
+    vec2.subtract = function(vec, vec2, dest) {
+        if(!dest || vec == dest) {
+            vec[0] -= vec2[0];
+            vec[1] -= vec2[1];
+            return vec;
+        }
+
+        dest[0] = vec[0] - vec2[0];
+        dest[1] = vec[1] - vec2[1];
+        return dest;
+    };
+
+    /**
+     * Generates a unit vector of the same direction as the provided vec2
+     * If vector length is 0, returns [0, 0]
+     * @method normalize
+     * @param {KICK.math.vec2} vec vec3 to normalize
+     * @param {KICK.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
+     * @return {KICK.math.vec2} dest if specified, vec otherwise
+     */
+    vec2.normalize = function(vec, dest) {
+        if(!dest) { dest = vec; }
+
+        var x = vec[0], y = vec[1];
+        var len = Math.sqrt(x*x + y*y);
+
+        if (!len) {
+            dest[0] = 0;
+            dest[1] = 0;
+            return dest;
+        } else if (len == 1) {
+            dest[0] = x;
+            dest[1] = y;
+            return dest;
+        }
+
+        len = 1 / len;
+        dest[0] = x*len;
+        dest[1] = y*len;
+        return dest;
+    };
 
     // glMatrix start
 
     /**
      * vec3 - 3 Dimensional Vector
-     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class vec3
      * @namespace KICK.math
      */
@@ -98,16 +241,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {Array[KICK.math.vec3]} of vec3
      */
     vec3.wrapArray = function(array){
-        var i,
-            index=0,
-            count = array.length/3,
-            res = new Array(count);
-        for (i=0;i<count;i++,index += 3){
-            res[i] = array.subarray(index,index+3);
-        }
-        return res;
-    }
-
+        return wrapArray(array,3);
+    };
 
     /**
      * Create a continuous array in memory mapped to vec3. <br>
@@ -409,7 +544,57 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         dest[2] = vec[2] + lerp * (vec2[2] - vec[2]);
 
         return dest;
-    }
+    };
+
+    /**
+     * Converts the spherical coordinates (in radians) to carterian coordinates.<br>
+     * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
+     * @method sphericalToCarterian
+     * @param {KICK.math.vec3} spherical spherical coordinates
+     * @param {KICK.math.vec3} cartesian optionally if not specified a new vec3 is returned
+     * @return {KICK.math.vec3} position in cartesian angles
+     */
+    vec3.sphericalToCarterian = function(spherical, cartesian){
+        var radius = spherical[0],
+            polar = -spherical[1],
+            elevation = spherical[2],
+            a = radius * Math.cos(elevation);
+        if (!cartesian){
+            cartesian = vec3.create();
+        }
+        cartesian[0] = a * Math.cos(polar);
+        cartesian[1] = radius * Math.sin(elevation);
+        cartesian[2] = a * Math.sin(polar);
+        return cartesian;
+    };
+
+    /**
+     * Converts from cartesian coordinates to spherical coordinates (in radians)<br>
+     * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
+     * @method cartesianToSpherical
+     * @param {KICK.math.vec3} cartesian
+     * @param {KICK.math.vec3} spherical Optional
+     * @return {KICK.math.vec3}
+     */
+    vec3.cartesianToSpherical = function(cartesian, spherical){
+        var x = cartesian[0],
+            y = cartesian[1],
+            z = cartesian[2],
+            sphericalX;
+        if (x == 0)
+            x = KICK.core.Constants._EPSILON;
+        if (!spherical){
+            spherical = vec3.create();
+        }
+
+        spherical[0] = sphericalX = Math.sqrt(x*x+y*y+z*z);
+        spherical[1] = -Math.atan(z/x);
+        if (x < 0){
+            spherical[1] += Math.PI;
+        }
+        spherical[2] = Math.asin(y/sphericalX);
+        return spherical;
+    };
 
     /**
      * Returns a string representation of a vector
@@ -426,7 +611,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * vec4 - 4 Dimensional Vector<br>
      * Note: To perform vec3 functions on vec4, simply call the vec3 functions<br>
-     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class vec4
      * @namespace KICK.math
      */
@@ -454,14 +638,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {Array[KICK.math.vec4]} 
      */
     vec4.wrapArray = function(array){
-        var count = array.length/4,
-            i,
-            index=0,
-            res = new Array(count);
-        for (i=0;i<count;i++,index += 4){
-            res[i] = array.subarray(index,index+4);
-        }
-        return res;
+        return wrapArray(array,4);
     };
 
     /**
@@ -653,7 +830,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * mat3 - 3x3 Matrix
-     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class mat3
      * @namespace KICK.math
      */
@@ -816,7 +992,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * mat4 - 4x4 Matrix<br>
-     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class mat4
      * @namespace KICK.math
      */
@@ -1798,7 +1973,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * quat4 - Quaternions
-     * Based on glMatrix.js Copyright (c) 2011 Brandon Jones
      * @class quat4
      * @namespace KICK.math
      */
