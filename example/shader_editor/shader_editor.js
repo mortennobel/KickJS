@@ -132,7 +132,7 @@ window.shaderEditor = new (function(){
 
             var gameObject = _engine.activeScene.createGameObject();
             _meshRenderer = new KICK.scene.MeshRenderer();
-            thisObj.setMesh(KICK.scene.MeshFactory.createIcosphere, 2);
+            thisObj.setMesh(KICK.scene.MeshFactory.createUVSphere, 2);
             if (window.shader){
                 // load saved content
                 loadMaterial(window.shader);

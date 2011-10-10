@@ -25,7 +25,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     var scene = KICK.namespace("KICK.scene"),
         math = KICK.namespace("KICK.math"),
-        vec3 = math.vec3;
+        vec3 = math.vec3,
+        vec2 = math.vec2,
+        constants = KICK.core.Constants;
 
     /**
      * Class responsible for creating Mesh objects
@@ -66,126 +68,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Creates a Ocosphere with center in the origin. The Icosphere is UV mapped using spheremapping.
-     * The mesh objects has also UVs and normals attributes.
-     * @method createIcosphere
-     * @static
-     * @param {KICK.core.Engine} engine
-     * @param {Number} subdivisions Optional, Number of subdivisions in sphere. Default value is 2
-     * @param {Number} radius Optional, 1 is default
-     * @return {KICK.scene.Mesh} Icopphere
-     */
-    scene.MeshFactory.createIcosphere = function (engine,subdivisions,radius) {
-        var vertex = [],
-            uv1 = [],
-            normal = [],
-            indices = [],
-            X = .525731112119133606,
-            Z = .850650808352039932,
-            vec3c = math.vec3.create,
-            i = 0;
-        var vdata = [[-X, 0.0, Z], [X, 0.0, Z], [-X, 0.0, -Z], [X, 0.0, -Z],
-            [0.0, Z, X], [0.0, Z, -X], [0.0, -Z, X], [0.0, -Z, -X],
-            [Z, X, 0.0], [-Z, X, 0.0], [Z, -X, 0.0], [-Z, -X, 0.0]
-        ];
-        var tindices = [
-            [0,4,1],  [0,9,4],  [9,5,4], [4,5,8], [4,8,1],
-            [8,10,1], [8,3,10], [5,3,8], [5,2,3], [2,7,3],
-            [7,10,3], [7,6,10], [7,11,6], [11,0,6], [0,1,6],
-            [6,1,10], [9,0,11], [9,11,2], [9,2,5], [7,2,11]];
-
-        // http://www.mvps.org/directx/articles/spheremap.htm
-        function sphereMapping(a){
-            return [
-                Math.asin(a[0])/Math.PI+0.5,
-                Math.asin(a[1])/Math.PI+0.5
-            ];
-        }
-
-        function indexOf(array,data){
-            for (var i=array.length-1;i>=0;i--){
-                if (array[i][0] === data[0] &&
-                    array[i][1] === data[1] &&
-                    array[i][2] === data[2]){
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        function addtri(n){
-            var indexOfN = indexOf(normal,n);
-            if (indexOfN !== -1){
-                indices.push(indexOfN);
-            } else {
-                indices.push(normal.length);
-
-                normal.push(n);
-                vertex.push(vec3.scale(n,radius,vec3c()));
-                uv1.push(sphereMapping(n));
-            }
-        }
-
-        // based on the code in the OpenGL red book (chapter 2, the example at the end)
-        function drawtri(a, b, c, div){
-            var divMinusOne = div-1;
-            if (div<=0) {
-                addtri(a);
-                addtri(c);
-                addtri(b);
-            } else {
-                var ab = vec3c(),
-                    ac = vec3c(),
-                    bc = vec3c();
-                for (var i=0;i<3;i++) {
-                    ab=vec3.scale(vec3.add(a,b,vec3c()),0.5);
-                    ac=vec3.scale(vec3.add(a,c,vec3c()),0.5);
-                    bc=vec3.scale(vec3.add(b,c,vec3c()),0.5);
-                }
-                ab = vec3.normalize(ab);
-                ac = vec3.normalize(ac);
-                bc = vec3.normalize(bc);
-                drawtri(a, ab, ac, divMinusOne);
-                drawtri(b, bc, ab, divMinusOne);
-                drawtri(c, ac, bc, divMinusOne);
-                drawtri(ab, bc, ac, divMinusOne);
-            }
-        }
-        if (typeof subdivisions !== "number"){
-            subdivisions = 2;
-        }
-        if (typeof radius !== "number"){
-            radius = 1;
-        }
-
-        for (i=0;i<tindices.length;i++) {
-            drawtri(vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], subdivisions);
-        }
-
-        var allVertices = [];
-        var allUv1 = [];
-        var allNormals = [];
-        for (i=0;i<normal.length;i++){
-            for (var j=0;j<3;j++){
-                allVertices.push(vertex[i][j]);
-                allNormals.push(normal[i][j]);
-                if (j<2){
-                    allUv1.push(uv1[i][j]);
-                }
-            }
-        }
-
-        var config = {
-            name: "Icosphere",
-            vertex: allVertices,
-            uv1: allUv1,
-            normal: allNormals,
-            indices:indices
-        };
-        return new scene.Mesh(engine,config);
-    };
-
-    /**
      * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
      * @method createPlane
      * @static
@@ -217,6 +99,88 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             indices: [0,1,2,2,1,3]
         };
         return new scene.Mesh(engine,config);
+    };
+
+    /**
+     * Create a UV sphere
+     * @method createUVSphere
+     * @static
+     * @param {KICK.core.Engine} engine
+     * @param {Number} slices
+     * @param {Number} stacks
+     * @param {Number} radius
+     * @return {KICK.scene.Mesh} uv-sphere mesh
+     */
+    scene.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
+        if (!slices || slices < 3){
+            slices = 20;
+        }
+        if (!stacks || stacks < 2){
+            stacks = 10;
+        }
+        if (!radius){
+            radius = 1;
+        }
+        var vertexCount =
+            stacks*(slices+1)*2+
+            2*(stacks-1), // degenerate vertex info
+            normalsMemory = {},
+            normals = vec3.array(vertexCount,normalsMemory),
+            verticesMemory = {},
+            vertices = vec3.array(vertexCount,verticesMemory),
+            uvsMemory = {},
+            uvs = vec2.array(vertexCount,uvsMemory),
+            indices = [],
+            piDivStacks = Math.PI/stacks,
+            PIDiv2 = Math.PI/2,
+            PI2 = Math.PI*2;
+
+        var index = 0;
+
+        for (var j = 0; j < stacks; j++) {
+            var latitude1 = piDivStacks * j - PIDiv2;
+            var latitude2 = piDivStacks * (j+1) - PIDiv2;
+            var sinLat1 = Math.sin(latitude1);
+            var cosLat1 = Math.cos(latitude1);
+            var sinLat2 = Math.sin(latitude2);
+            var cosLat2 = Math.cos(latitude2);
+            for (var i = 0; i <= slices; i++) {
+                var longitude = (PI2/slices) * i;
+                var sinLong = Math.sin(longitude);
+                var cosLong = Math.cos(longitude);
+                var x1 = cosLong * cosLat1;
+                var y1 = sinLat1;
+                var z1 = sinLong * cosLat1;
+                var x2 = cosLong * cosLat2;
+                var y2 = sinLat2;
+                var z2 = sinLong * cosLat2;
+                vec3.set([x1,y1,z1],normals[index]);
+                vec2.set([1-i/slices, j/stacks ],uvs[index]);
+                vec3.set([radius*x1,radius*y1,radius*z1],vertices[index]);
+                indices.push(index);
+                if (j>0 && i==0){
+                    indices.push(index); // make degenerate
+                }
+                index++;
+
+                vec3.set([x2,y2,z2],normals[index]);
+                vec2.set([ 1-i /slices, (j+1)/stacks],uvs[index]);
+                vec3.set([radius*x2,radius*y2,radius*z2],vertices[index]);
+                indices.push(index);
+                if (i==slices && j<stacks-1){
+                    indices.push(index); // make degenerate
+                }
+                index++;
+            }
+        }
+        return new scene.Mesh(engine, {
+            name: "UVSphere",
+            vertex: verticesMemory.mem,
+            uv1: uvsMemory.mem,
+            normal: normalsMemory.mem,
+            indices: indices,
+            meshType: constants.GL_TRIANGLE_STRIP
+        });
     };
 
     /**
@@ -268,28 +232,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             ],
             uv1: [
                 1,1,
-                1,1,
-                1,0,
-                1,0,                    // v0-v1-v2-v3
-                1,1,
-                1,0,
+                0,1,
                 0,0,
-                0,1,              // v0-v3-v4-v5
+                1,0,                    // v0-v1-v2-v3
+                0,1,
+                0,0,
+                1,0,
+                1,1,              // v0-v3-v4-v5
+                1,0,
                 1,1,
                 0,1,
-                0,1,
-                1,1,              // v0-v5-v6-v1
+                0,0,              // v0-v5-v6-v1 (top)
                 1,1,
                 0,1,
                 0,0,
                 1,0,              // v1-v6-v7-v2
+                1,1,
+                0,1,
                 0,0,
+                1,0,              // v7-v4-v3-v2 (bottom)
                 0,0,
                 1,0,
-                1,0,              // v7-v4-v3-v2
-                0,0,
-                0,0,
-                0,1,
+                1,1,
                 0,1             // v4-v7-v6-v5
             ],
             normal: [
@@ -344,7 +308,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 0,1,0,1,
                 0,1,1,1             // v4-v7-v6-v5
             ],
-            indices: [0,1,2,
+            indices: [
+                0,1,2,
                 0,2,3,
                 4,5,6,
                 4,6,7,

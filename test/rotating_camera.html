@@ -116,7 +116,9 @@
             addRotatorComponent(cameraObject);
         }
 
-
+        function UVSphere(){
+            setMesh(KICK.scene.MeshFactory.createUVSphere, 2);
+        }
     </script>
 </head>
 <body onload="initKick();">
@@ -129,15 +131,15 @@
   </div>
   <h2>Show data</h2>
   [<a href="#" onclick="refreshData();">Refresh</a>]
+  [<a href="#" onclick="UVSphere();">UVSphere</a>]<br>
   <textarea style="width: 500px;height:100px" id="res">
-
   </textarea>
   <div id="example" class="yui3-skin-sam"></div>
 
   <div style="display:none;">
   <textarea style="width:500px;height:150px;" id="vertexShaderColor">
 attribute vec3 vertex;
-attribute vec4 color;
+attribute vec2 uv1;
 
 uniform mat4 _mvProj;
 
@@ -145,7 +147,7 @@ varying vec3 vColor;
 
 void main(void) {
     gl_Position = _mvProj * vec4(vertex, 1.0);
-    vColor = color.xyz;
+    vColor = vec3(uv1.x,uv1.y,0.0);
 }
   </textarea>
   <textarea style="width:500px;height:150px;" id="fragmentShader">

@@ -724,7 +724,7 @@
                             meshFactoryFunc = KICK.scene.MeshFactory.createCube;
                         break;
                         case 1:
-                            meshFactoryFunc = KICK.scene.MeshFactory.createIcosphere;
+                            meshFactoryFunc = KICK.scene.MeshFactory.createUVSphere;
                             size = 2; // subdivisions
                         break;
                         default:
