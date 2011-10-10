@@ -110,6 +110,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         _RADIAN_TO_DEGREE : {value: 57.2957795130824,enumerable:true},
         /**
+         * Value 0.00001
+         * @property _EPSILON
+         * @type Number
+         * @static
+         * @final
+         */
+        _EPSILON : {value:0.00001,enumerable:true},
+        /**
          * Used to define ambient color in the scene (indirect lightening)
          * @property _LIGHT_TYPE_AMBIENT
          * @type Number
