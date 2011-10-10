@@ -120,7 +120,8 @@
             lightpos: getChildrenValueVector('lightpos'),
             lightrot: getChildrenValueVector('lightrot'),
             lightcolor: getChildrenValueVector('lightcolor'),
-            lightintensity: document.getElementById('lightintensity').value
+            lightAmbient: getChildrenValueVector('ambientLight'),
+            lightintensity: Number(document.getElementById('lightintensity').value)
         };
     }
 
@@ -626,6 +627,11 @@
         }
     }
 
+    function updateSettings(){
+        var data = getSettingsData();
+        window.shaderEditor.updateSettings(data);
+    }
+
     if (document.location.search.indexOf("fullscreen=true") !== -1){
         window.onload = initFullscreen;
     } else {
@@ -716,29 +722,9 @@
                             }
                         }
                     };
-                function changeMeshfunction(e){
-                    var meshFactoryFunc;
-                    var size = 0.5;
-                    switch(this.meshid){
-                        case 0:
-                            meshFactoryFunc = KICK.scene.MeshFactory.createCube;
-                        break;
-                        case 1:
-                            meshFactoryFunc = KICK.scene.MeshFactory.createUVSphere;
-                            size = 2; // subdivisions
-                        break;
-                        default:
-                            meshFactoryFunc = KICK.scene.MeshFactory.createPlane;
-                        break;
-                    }
-                    shaderEditor.setMesh(meshFactoryFunc,size);
-                }
-                addChildListeners(meshsetting,changeMeshfunction,'click',"meshid");
-
-                function onRotateMesh(e){
-                    shaderEditor.isRotating = this.isOn;
-                }
-                addChildListeners(rotatemesh,onRotateMesh,'click',"isOn");
+                
+                addChildListeners(meshsetting,updateSettings,'click',"meshid");
+                addChildListeners(rotatemesh,updateSettings,'click',"isOn");
                 resetShaderBut.addEventListener('click',resetShader,false);
 
                 (function addLightListeners(){
@@ -746,46 +732,19 @@
                         lightrot = document.getElementById('lightrot'),
                         lightcolor = document.getElementById('lightcolor'),
                         lightintensity = document.getElementById('lightintensity');
-                    function updateLightPosition(e){
-                        var position = shaderEditor.lightTransform.position;
-                        position[this.position] = this.value;
-                        shaderEditor.lightTransform.position = position;
-                    }
-                    addChildListeners(lightpos,updateLightPosition,['click','change'],"position");
 
-                    function updateLightRotation(e){
-                        var x = document.getElementById('light_rot_x').value;
-                        var y = document.getElementById('light_rot_y').value;
-                        var z = document.getElementById('light_rot_z').value;
-                        shaderEditor.lightTransform.rotationEuler = [x,y,z];
-                    }
-                    addChildListeners(lightrot,updateLightRotation,['click','change'],"position");
+                    addChildListeners(lightpos,updateSettings,['click','change'],"position");
+                    addChildListeners(lightrot,updateSettings,['click','change'],"position");
+                    addChildListeners(lightcolor,updateSettings,['click','change'],"position");
 
-                    function updateLightColor(e){
-                        var lightColor = shaderEditor.light.color;
-                        lightColor[this.position] = this.value;
-                        shaderEditor.light.color= lightColor;
-                    }
-                    addChildListeners(lightcolor,updateLightColor,['click','change'],"position");
-
-                    function updateColorIntensity(e){
-                        shaderEditor.light.intensity = this.value;
-                    }
-
-                    lightintensity.addEventListener('change',updateColorIntensity,false);
-                    lightintensity.addEventListener('click',updateColorIntensity,false);
+                    lightintensity.addEventListener('change',updateSettings,false);
+                    lightintensity.addEventListener('click',updateSettings,false);
                 })();
 
 
                 (function addAmbientListener(){
                     var am = document.getElementById('ambientLight');
-                    function updateAmbient(e){
-                        var color = shaderEditor.ambientLight.color;
-                        color[this.position] = this.value;
-                        shaderEditor.ambientLight.color = color;
-                    }
-
-                    addChildListeners(am,updateAmbient,['click','change'],"position");
+                    addChildListeners(am,updateSettings,['click','change'],"position");
                 })();
 
                 addGLConstantToSelect('textureFormat',[c.GL_ALPHA,c.GL_RGB,c.GL_RGBA,c.GL_LUMINANCE,c.GL_LUMINANCE_ALPHA]);

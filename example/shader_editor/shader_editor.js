@@ -8,10 +8,15 @@ window.shaderEditor = new (function(){
         _ambientLight,
         _lightTransform,
         shader = null,
-        thisObj = this;
+        thisObj = this,
+        isRotating = true,
+        meshsetting,
+        setMesh = function (meshFactoryFunc,size){
+            _meshRenderer.mesh = meshFactoryFunc(_engine,size);
+        };
 
     this.textures = [];
-    this.isRotating = true;
+
 
     Object.defineProperties(this,
         {
@@ -22,24 +27,32 @@ window.shaderEditor = new (function(){
                 get:function(){
                     return _meshRenderer;
                 }
-            },
-            lightTransform:{
-                get:function(){
-                    return _lightTransform;
-                }
-            },
-            light:{
-                get:function(){
-                    return _light;
-                }
-            },
-            ambientLight:{
-                get:function(){
-                    return _ambientLight;
-                }
             }
         }
     );
+
+    this.updateSettings = function(settings){
+        _ambientLight.color = settings.lightAmbient;
+        _light.intensity = settings.lightintensity;
+        _light.color = settings.lightcolor;
+        _lightTransform.rotationEuler = settings.lightrot;
+        _lightTransform.position = settings.lightpos;
+        isRotating = settings.rotatemesh==="on";
+        if (meshsetting !== settings.meshsetting){
+            meshsetting = settings.meshsetting;
+            switch (meshsetting){
+                case "cube":
+                    setMesh(KICK.scene.MeshFactory.createCube,0.5);
+                break;
+                case "sphere":
+                    setMesh(KICK.scene.MeshFactory.createUVSphere);
+                break;
+                default:
+                    setMesh(KICK.scene.MeshFactory.createPlane);
+                break;
+            }
+        }
+    };
 
     var logFn = function(output,clear) {
         if (window.log){
@@ -50,10 +63,6 @@ window.shaderEditor = new (function(){
         } else {
             console.log(output);
         }
-    };
-
-    this.setMesh = function (meshFactoryFunc,subdivisions){
-        _meshRenderer.mesh = meshFactoryFunc(_engine,subdivisions);
     };
 
     var loadMaterial = function (shaderData){
@@ -104,7 +113,7 @@ window.shaderEditor = new (function(){
                 rotation = transform.localRotationEuler;
         gameObject.addComponent({
             update: function(){
-                if (thisObj.isRotating){
+                if (isRotating){
                     rotation[1] += time.deltaTime*rotationSpeed;
                     transform.localRotationEuler = rotation;
                 } else {
@@ -132,11 +141,12 @@ window.shaderEditor = new (function(){
 
             var gameObject = _engine.activeScene.createGameObject();
             _meshRenderer = new KICK.scene.MeshRenderer();
-            thisObj.setMesh(KICK.scene.MeshFactory.createUVSphere, 2);
+            setMesh(KICK.scene.MeshFactory.createPlane);
             if (window.shader){
                 // load saved content
                 loadMaterial(window.shader);
             }
+
             gameObject.addComponent(_meshRenderer);
             addRotatorComponent(gameObject);
 
@@ -149,8 +159,11 @@ window.shaderEditor = new (function(){
             _light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
             lightGameObject.addComponent(_light);
             _lightTransform = lightGameObject.transform;
+
+            this.updateSettings(window.shader.settingsData);
         } catch (e) {
-             alert("Error init Kickstart Engine"+e);
+            debugger;
+            logFn(e);
         }
     };
 
