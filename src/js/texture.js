@@ -97,15 +97,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _dataURI = dataURI;
 
             if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
-                // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
-                var canvas = document.createElement("canvas");
-                canvas.width = nextHighestPowerOfTwo(imageObj.width);
-                canvas.height = nextHighestPowerOfTwo(imageObj.height);
-                var ctx = canvas.getContext("2d");
-                ctx.drawImage(imageObj,
-                    0, 0, imageObj.width, imageObj.height,
-                    0, 0, canvas.width, canvas.height);
-                imageObj = canvas;
+                var width = nextHighestPowerOfTwo(imageObj.width),
+                    height = nextHighestPowerOfTwo(imageObj.height);
+                imageObj = core.Util.scaleImage(imageObj,width,height)
             }
 
             this.bind(0);

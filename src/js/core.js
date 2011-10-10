@@ -188,6 +188,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * This method should be invoked when the canvas is resized.<br>
+         * This will change the viewport size of the WebGL context.<br>
+         * Instead of calling this method explicit, the configuration parameter
+         * checkCanvasResizeInterval can also be set to support automatically checks
+         * @method canvasResized
+         */
+        this.canvasResized = function(){
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+        };
+
+        /**
          * @method init
          * @private
          */
@@ -195,7 +207,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             var c = KICK.core.Constants;
             for (var i = webGlContextNames.length-1; i >= 0; i--) {
                 try {
-                    gl = canvas.getContext(webGlContextNames[i]);
+                    gl = canvas.getContext(webGlContextNames[i],{
+                        preserveDrawingBuffer: thisObj.config.preserveDrawingBuffer
+                    });
                     if (gl) {
                         break;
                     }
@@ -211,6 +225,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     message: "Cannot create gl-context"
                 };
             }
+
             if (thisObj.config.enableDebugContext){
                 if (window["WebGLDebugUtils"]){
                     gl = WebGLDebugUtils.makeDebugContext(gl);
@@ -219,19 +234,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             }
 
-            thisObj.renderer = new renderer.ForwardRenderer();
+            thisObj.canvasResized();
+            if (thisObj.config.checkCanvasResizeInterval){
+                setInterval(function(){
+                    if( canvas.height !== gl.viewportWidth || canvas.width !== gl.viewportHeight ){
+                        thisObj.canvasResized();
+                    }
+                }, thisObj.config.checkCanvasResizeInterval);
+            }
 
-            canvas.addEventListener("resize",
-                function () {
-                    gl.viewportWidth = canvas.width;
-                    gl.viewportHeight = canvas.height;
-                },
-                false);
+            thisObj.renderer = new renderer.ForwardRenderer();
 
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             gl.enable(c.GL_DEPTH_TEST);
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
             gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
             // API documentation of Time is found in KICK.core.Time
@@ -283,6 +298,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @type Boolean
          */
         this.enableDebugContext = typeof(config.enableDebugContext) === 'boolean' ? config.enableDebugContext  : false;
+
+        /**
+         * Allows grabbing the content of the canvas using canvasObj.toDataURL(...).<br>
+         * Note that this has a performance penalty when enabled.<br>
+         * Default value is false
+         * @property enableDebugContext
+         * @type Boolean
+         */
+        this.preserveDrawingBuffer = config.preserveDrawingBuffer || false;
+
+        /**
+         * Polling of canvas resize. Default is 0 (meaning not polling)
+         * @property checkCanvasResizeInterval
+         * @type Number
+         */
+        this.checkCanvasResizeInterval = config.checkCanvasResizeInterval || 0;
     };
 
     /**
@@ -319,6 +350,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+
+        /**
+         * Scales the image by drawing the image on a canvas object.
+         * @method scaleImage
+         * @param {Image} imageObj
+         * @param {Number} newWidth
+         * @param {Number} newHeight
+         * @return {Canvas} return a Canvas object (acts as a image)
+         */
+        scaleImage: function(imageObj, newWidth, newHeight){
+            // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
+            var canvas = document.createElement("canvas");
+            canvas.width = newWidth;
+            canvas.height = newHeight;
+            var ctx = canvas.getContext("2d");
+            ctx.drawImage(imageObj,
+                0, 0, imageObj.width, imageObj.height,
+                0, 0, canvas.width, canvas.height);
+            return canvas;
+        },
+
         /**
          * Invokes debugger and throws an error
          * @method fail
