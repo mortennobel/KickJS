@@ -62,7 +62,7 @@ window.shaderEditor = new (function(){
         shader = new KICK.material.Shader(_engine,shaderData.shader);
         var missingAttributes = _meshRenderer.mesh.verify(shader);
         if (missingAttributes){
-            createNewMaterial();
+            logFn("Missing mesh vertex attributes.");
             return;
         }
         var textureMapping = {};
@@ -72,8 +72,11 @@ window.shaderEditor = new (function(){
                     t = new KICK.texture.Texture(_engine,textureConf);
                 textureMapping[textureConf.uid] = t;
                 var img = new Image();
-                img.onLoad = function(){
+                img.onload = function(){
                     t.setImage(img,textureConf.dataURI);
+                };
+                img.onerror = function(){
+                    logFn("Error loading texture "+textureConf.dataURI.substring(0,100));
                 };
                 img.src = textureConf.dataURI;
                 thisObj.textures.push(t);
@@ -92,27 +95,7 @@ window.shaderEditor = new (function(){
         _meshRenderer.material = new KICK.material.Material(shaderData.material);
     };
 
-    var createNewMaterial = function (){
-        var vs = document.getElementById('vertexShader').value;
-        var fs = document.getElementById('fragmentShader').value;
-        shader = new KICK.material.Shader(_engine,{
-            vertexShaderSrc : vs,
-            fragmentShaderSrc : fs,
-            errorLog : logFn
-        });
-        var res = shader.updateShader();
 
-        var missingAttributes = _meshRenderer.mesh.verify(shader);
-        if (missingAttributes){
-            logFn("Missing attributes in mesh "+JSON.stringify(missingAttributes))
-            return;
-        }
-
-        _meshRenderer.material = new KICK.material.Material({
-            name:"Some material",
-            shader:shader
-        });
-    };
 
     var addRotatorComponent = function (gameObject){
         var time = _engine.time,
@@ -134,7 +117,9 @@ window.shaderEditor = new (function(){
     this.initKick = function() {
         try{
             _engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
+                enableDebugContext: true,
+                preserveDrawingBuffer:true,
+                checkCanvasResizeInterval:0
             });
             var cameraObject = _engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
@@ -151,8 +136,6 @@ window.shaderEditor = new (function(){
             if (window.shader){
                 // load saved content
                 loadMaterial(window.shader);
-            } else {
-                createNewMaterial();
             }
             gameObject.addComponent(_meshRenderer);
             addRotatorComponent(gameObject);

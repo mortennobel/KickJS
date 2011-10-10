@@ -28,6 +28,7 @@
     <script type="text/javascript" src="webgl-debug.js"></script>
     <!--<script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>-->
     <script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>
+    <script type="text/javascript" src="shader_editor_default.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
 </head>
@@ -39,6 +40,8 @@
     <h1>Preview</h1>
     <button id="resetShader">New</button>
     <button id="savebutton">Save local</button><br>
+    <button id="imagebutton" onclick="document.location = KICK.core.Util.scaleImage(document.getElementById('canvas'),50,50).toDataURL('image/jpeg',0.8);">getImage</button><br>
+    <button id="fullscreen">Full screen</button><br>
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
 </article>
 <article>
