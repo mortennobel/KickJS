@@ -75,6 +75,7 @@ window.shaderEditor = new (function(){
             return;
         }
         var textureMapping = {};
+        thisObj.textures = [];
         for (var i=0;i<textures.length;i++){
             (function newScope(){
                 var textureConf = textures[i],
@@ -104,7 +105,7 @@ window.shaderEditor = new (function(){
         _meshRenderer.material = new KICK.material.Material(shaderData.material);
     };
 
-
+    this.loadMaterial = loadMaterial; // expose
 
     var addRotatorComponent = function (gameObject){
         var time = _engine.time,
@@ -122,6 +123,10 @@ window.shaderEditor = new (function(){
             }
         });
     };
+
+    this.canvasResized = function(){
+        _engine.canvasResized();
+    }
 
     this.initKick = function() {
         try{
@@ -159,14 +164,11 @@ window.shaderEditor = new (function(){
             _light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
             lightGameObject.addComponent(_light);
             _lightTransform = lightGameObject.transform;
-
-            this.updateSettings(window.shader.settingsData);
         } catch (e) {
             debugger;
             logFn(e);
         }
     };
-
 
     this.updateShader = function(vs,fs){
         shader.vertexShaderSrc = vs;

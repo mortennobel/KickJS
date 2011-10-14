@@ -2,16 +2,15 @@
 <html>
 <head>
 
-<meta charset=UTF-8”>
-    <title></title>
+    <meta charset=UTF-8”>
+    <title>Kick.js | Shader Editor</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssbase/base-min.css">
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/mode-glsl_es.js" type="text/javascript" charset="utf-8"></script>
 
-     <style>
+    <style>
         #glslEditor {
             position: absolute;
             width: 800px;
@@ -22,29 +21,77 @@
             left: 830px;
             height: 400px;
          }
+
+        #desc {
+            margin-bottom:20px;
+            border-bottom:1px dotted #333;
+        }
+        #desc span {
+            background:#a3350d;
+            padding:2px;
+            color:#f27243;
+        }
+
+        .yui3-panel {
+            outline:none;
+
+        }
+
+        .yui3-panel-content .yui3-widget-hd {
+            font-weight:bold;
+        }
+
+        .yui3-panel-content .yui3-widget-bd {
+            padding:15px;
+        }
+        .yui3-panel-content label {
+            margin-right:30px;
+        }
+        .yui3-panel-content fieldset {
+            border:none;
+            padding:0;
+        }
+        .yui3-panel-content input[type="text"] {
+            border:none;
+            border:1px solid #ccc;
+            padding: 3px 7px;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            font-size:100%;
+            width:200px;
+        }
     </style>
 
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui.js"></script>
-    <script type="text/javascript" src="webgl-debug.js"></script>
-    <!--<script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>-->
+    <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
+    <!--<script type="text/javascript" src="webgl-debug.js"></script>-->
+    <script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>
     <script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>
     <script type="text/javascript" src="shader_editor_default.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
 </head>
 <body class="yui3-skin-sam">
-<header>
-    <h1>Shader editor</h1>
+<header id="ahead">
+    <h1 id="header">Kick.js | Shader editor</h1>
 </header>
-<article>
+<article id="menuAndContent">
+    <div id="menu">
+        <div id="username"></div>
+        <button id="resetShader">New</button>
+        <button id="LoadButton">Load</button>
+        <button id="SaveButton">Save</button>
+        &nbsp;|&nbsp;
+        <button id="ShareButton">Share</button>
+        <button id="fullscreen">Full screen</button>
+        &nbsp;|&nbsp;
+        <button id="LogoutButton" style="display: none;">Logout</button>
+        <button id="LoginButton"  style="display: none;">Login</button>
+    </div>
     <h1>Preview</h1>
-    <button id="resetShader">New</button>
-    <button id="savebutton">Save local</button><br>
-    <button id="imagebutton" onclick="document.location = KICK.core.Util.scaleImage(document.getElementById('canvas'),50,50).toDataURL('image/jpeg',0.8);">getImage</button><br>
-    <button id="fullscreen">Full screen</button><br>
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
 </article>
-<article>
+<article id="mainEditor">
     <div id="editorSection">
     <ul>
         <li><a href="#vs">Vertex shader</a></li>
@@ -52,6 +99,7 @@
         <li><a href="#uniforms">Textures</a></li>
         <li><a href="#textures">Uniforms</a></li>
         <li><a href="#settings">Settings</a></li>
+        <li><a href="#about">About</a></li>
     </ul>
     <div>
         <div id="vs" class="sourceEditorPanel">
@@ -192,6 +240,12 @@
                 <input type="number" name="ambientLight_b" value="0.1" step=0.1><br>
             </div>
         </div>
+        <div id="about"  class="sourceEditorPanel">
+            Shader name:<br>
+            <input id="shadername" maxlength="75"><br>
+            About:<br>
+            <textarea id="shaderAbout" style="width:500px;height:200px;"></textarea>
+        </div>
     </div>
 </div>
 <div id="glslEditorPanel">
@@ -231,51 +285,13 @@
  </div>
 </div>
 </article>
-<article>
+<article id="alogger">
     <div id="logger"></div>
 </article>
-<!--
-The following is used to provide default shader values
--->
-<div style="display:none;">
-  <textarea style="width:500px;height:150px;" id="vertexShader">
-attribute vec3 vertex;
-attribute vec3 normal;
-
-uniform mat4 _mvProj;
-uniform mat3 _norm;
-
-varying vec3 vColor;
-
-#pragma include "light.glsl"
-
-// constants
-vec3 materialColor = vec3(1.0,0.7,0.8);
-vec3 specularColor = vec3(1.0,1.0,1.0);
-
-void main(void) {
-  // compute position
-  gl_Position = _mvProj * vec4(vertex, 1.0);
-
-  // compute light info
-  vec3 n = normalize(_norm * normal);
-  vec3 diffuse;
-  float specular;
-  getDirectionalLight(n, _dLight, 50.0,  diffuse,  specular);
-  vColor = max(diffuse,_ambient.xyz)*materialColor+specular*specularColor;
-}  </textarea>
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 vColor;
-void main(void)
-{
-    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
-}
-  </textarea>
-</div>
   <br/>
+<div id="panelContent"></div>
+<div id="nestedPanel"></div>
+
 <script type="text/javascript">
 
   var _gaq = _gaq || [];

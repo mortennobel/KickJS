@@ -2,31 +2,51 @@
 (function(){
     "use strict";
     var shaderEditor = window.shaderEditor;
+    var username,logoutURL,loginURL;
+    var shaderid = "";
+    var shortUrl = "";
 
-    function shaderChangeListener(){
+    function shaderChangeListener(force){
         if (window.vertexShaderSession && window.fragmentShaderSession){
-            var shader = shaderEditor.meshRenderer.material.shader;
-            var vsNew = window.vertexShaderSession.getValue();
-            var fsNew = window.fragmentShaderSession.getValue();
-            if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc){
-                shaderEditor.updateShader(vsNew,fsNew);
+            var meshRenderer = shaderEditor.meshRenderer;
+            if (meshRenderer){
+                var shader = meshRenderer.material.shader;
+                var vsNew = window.vertexShaderSession.getValue();
+                var fsNew = window.fragmentShaderSession.getValue();
+                if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
+                    shaderEditor.updateShader(vsNew,fsNew);
+                    saveLocally();
+                }
             }
         }
     }
 
-    function resetShader(){
-        if (confirm("Create a new shader?")){
-            shaderEditor.textures = [];
-            var currentTextures = document.getElementById('currentTextures');
-            while (currentTextures.options.length>0){
-                currentTextures.remove(0);
-            }
-            document.getElementById('textureDetails').style.display = 'none';
-            document.getElementById('texturePreview').style.display = 'none';
-            window.vertexShaderSession.setValue(document.getElementById("vertexShader").backup);
-            window.fragmentShaderSession.setValue(document.getElementById("fragmentShader").backup);
-            shaderChangeListener();
+    function setShader(shader){
+        window.shader = shader;
+        var currentTextures = document.getElementById('currentTextures');
+        while (currentTextures.options.length>0){
+            currentTextures.remove(0);
         }
+        document.getElementById('textureDetails').style.display = 'none';
+        document.getElementById('texturePreview').style.display = 'none';
+        window.vertexShaderSession.setValue(shader.shader.vertexShaderSrc);
+        window.fragmentShaderSession.setValue(shader.shader.fragmentShaderSrc);
+        shaderEditor.loadMaterial(shader);
+        setSettingsData(shader.settingsData);
+        updateSettings();
+        document.getElementById('shadername').value = shader.name || "Unnamed shader";
+        document.getElementById('shaderAbout').value = shader.about;
+        updateShaderName();
+        shaderChangeListener(true);
+    }
+
+    function resetShader(){
+        if (window.YUIConfirm("New shader","Create a new shader?",null,function(){
+            var shader = JSON.parse(window.defaultMaterial);
+            setShader(shader);
+            shaderid = "";
+            shortUrl = "";
+        }));
     }
 
     function getChildrenValueVector(elementName){
@@ -51,18 +71,9 @@
             childElem =elem.children[i];
             if (childElem.nodeName === 'INPUT'){
                 childElem.value = vector[count++];
-                invokeClickEvent(childElem);
             }
         }
     }
-
-    function invokeClickEvent(elem){
-        var evt = document.createEvent("MouseEvents");
-        evt.initMouseEvent("click", true, true, window,
-        0, 0, 0, 0, 0, false, false, false, false, 0, null);
-        elem.dispatchEvent(evt);
-    }
-
 
     function getRadioValue(elementName){
         var elem = document.getElementById(elementName),
@@ -86,9 +97,6 @@
             var childElem =elem.children[i];
             if (childElem.nodeName === 'INPUT'){
                 childElem.checked = childElem.value === value;
-                if (childElem.checked){
-                    invokeClickEvent(childElem);
-                }
             }
         }
     }
@@ -133,7 +141,6 @@
         setChildrenValueVector('lightrot',settingsData.lightrot);
         setChildrenValueVector('lightcolor',settingsData.lightcolor);
         lightintensity.value = settingsData.lightintensity;
-        invokeClickEvent(lightintensity);
     }
 
     function getData(){
@@ -141,7 +148,9 @@
             shader: shaderEditor.meshRenderer.material.shader.toJSON(),
             material: shaderEditor.meshRenderer.material.toJSON(),
             textureData: getTextureData(),
-            settingsData: getSettingsData()
+            settingsData: getSettingsData(),
+            name: document.getElementById('shadername').value,
+            about: document.getElementById('shaderAbout').value
         };
     }
 
@@ -154,7 +163,6 @@
         currentTextures.add(newOption,null);
         currentTextures.selectedIndex = currentTextures.options.length-1;
         shaderEditor.textures.push(t);
-        invokeClickEvent(currentTextures);
     }
 
     function removeTexture(){
@@ -217,58 +225,33 @@
         }
     }
 
-    function trySave(){
-        var thisObj = this,
-            innerHtml = this.innerHTML;
-        if (this.isSaving) {
-            return;
-        }
-        this.isSaving = true;
-        this.innerHTML = 'Saving ...';
+    function saveLocally(){
         var jsonData = getData();
         localStorage.setItem("shader",JSON.stringify(jsonData));
-        this.innerHTML = 'Save ok';
-
-        setTimeout(function(){
-            thisObj.innerHTML=innerHtml;
-            thisObj.isSaving = false;
-        },3000);
     }
 
-    function tryLoadShaderFromLocalStorage(){
+    /**
+     * Loads a shader (if not found - use the default material).
+     * This will replace the global window.shader - but not change UI or update shader
+     */
+    function loadLocally(){
         try{
-            // take backup of vertexShader and fragmentShader
-            var vs =document.getElementById("vertexShader"),
-                fs =document.getElementById("fragmentShader");
-            if (vs && fs){
-                vs.backup = document.getElementById("vertexShader").value;
-                fs.backup = document.getElementById("fragmentShader").value;
-            }
-            var shaderData = window.defaultMaterial;
-            window.shader = window.defaultMaterial;
+            var shaderData = JSON.parse(window.defaultMaterial);
+            window.shader = shaderData;
 
             var shaderStr = localStorage.getItem("shader");
             if (shaderStr){
                 var shaderDataTmp = JSON.parse(shaderStr);
                 if (shaderDataTmp){
-                    window.shader = shader;
+                    window.shader = shaderData;
                     shaderData = shaderDataTmp;
                 }
             }
-            if (vs && fs){
-                vs.value = shaderData.shader.vertexShaderSrc;
-                fs.value = shaderData.shader.fragmentShaderSrc;
-                setSettingsData(shaderData.settingsData);
-            }
         } catch (e){
             console.log(e);
-            window.shader = window.defaultMaterial;
-             if (vs && fs){
-                vs.value = shaderData.shader.vertexShaderSrc;
-                fs.value = shaderData.shader.fragmentShaderSrc;
-                setSettingsData(shaderData.settingsData);
-            }
+            window.shader = JSON.parse(window.defaultMaterial);
         }
+        return window.shader;
     }
 
     /**
@@ -592,39 +575,215 @@
         }
     }
 
-    function initFullscreen(){
-        tryLoadShaderFromLocalStorage();
-
-        while (document.body.children.length>0){
-            document.body.removeChild(document.body.children[0]);
+    function toogleFullscreen(){
+        var i, child;
+        var menuAndContent = document.getElementById("menuAndContent");
+        if (window.isHidden){
+            document.getElementById("ahead").style.display = "block";
+            for (i=menuAndContent.childElementCount-1;i>=0;i--){
+                child = menuAndContent.children[i];
+                if (child.nodeName !== "CANVAS"){
+                    child.style.display = child.style.initialDisplay;
+                } else {
+                    child.width = 300;
+                    child.height = 300;
+                }
+            }
+            document.getElementById("mainEditor").style.display = "block";
+            document.getElementById("alogger").style.display = "block";
+        } else {
+            for (i=menuAndContent.childElementCount-1;i>=0;i--){
+                child = menuAndContent.children[i];
+                if (child.nodeName !== "CANVAS"){
+                    child.style.initialDisplay = child.style.display;
+                    child.style.display = "none";
+                } else {
+                    child.width = document.width;
+                    child.height = document.height;
+                }
+            }
+            document.getElementById("ahead").style.display = "none";
+            document.getElementById("mainEditor").style.display = "none";
+            document.getElementById("alogger").style.display = "none";
         }
-        document.body.style.margin = '0';
-        var newCanvas = window.document.createElement('canvas');
-        newCanvas.style.border = "none";
-        newCanvas.width = document.width;
-        newCanvas.height = document.height;
-        newCanvas.id = "canvas";
-        document.body.appendChild(newCanvas);
-        document.body.onclick = toogleFullscreen;
-        shaderEditor.initKick();
-        window.isFullscreen = true;
+        window.isHidden = !window.isHidden;
+        shaderEditor.canvasResized();
     }
 
-    function toogleFullscreen(){
-        var href = document.location.href;
-        if (window.isFullscreen){
-            document.location.href = href.replace("fullscreen=true","fullscreen=false");
-        } else {
-            if (href.indexOf("fullscreen=false")>-1){
-                document.location.href = href.replace("fullscreen=false","fullscreen=true");
-            } else {
-                if (href.indexOf('?')>0){
-                    document.location.href = href+"&fullscreen=true";
+    function onLogoutButton(){
+        document.location = logoutURL;
+    }
+
+    function onLoginButton(){
+        saveLocally();
+        document.location = loginURL;
+    }
+
+    function loadShaderFromServer(id){
+        var oReq = new XMLHttpRequest();
+        function handler()
+        {
+            if (oReq.readyState == 4 /* complete */) {
+                if (oReq.status == 200) {
+                    var obj = JSON.parse(oReq.responseText);
+                    shaderid = id;
+                    shortUrl = obj.shortUrl;
+                    setShader(JSON.parse(obj.data));
                 } else {
-                    document.location.href = href+"?fullscreen=true";
+                    console.log("loadShaderFromServer status "+oReq.status);
                 }
             }
         }
+
+        oReq.open("GET", "/example/shader_editor/GetShader?id="+id+"&ts="+new Date().getTime(), true);
+        oReq.onreadystatechange = handler;
+        oReq.send();
+    }
+
+    function loadShaderSync(id){
+        var oReq = new XMLHttpRequest();
+        var result = null;
+        function handler()
+        {
+            if (oReq.readyState == 4 /* complete */) {
+                if (oReq.status == 200) {
+                    result = JSON.parse(oReq.responseText);
+                    shaderid = id;
+                    shortUrl = result.shortUrl;
+                } else {
+                    console.log("loadShaderFromServer status "+oReq.status);
+                }
+            }
+        }
+
+        oReq.open("GET", "/example/shader_editor/GetShader?id="+id+"&ts="+new Date().getTime(), false);
+        oReq.onreadystatechange = handler;
+        oReq.send();
+        return result;
+    }
+
+    function onLoadButton(){
+        if (!username){
+            window.YUIMessage("Login needed", "To load a shader you need to login first.");
+            return;
+        }
+        if (this.isLoading){
+            return;
+        }
+        this.isLoading = true;
+        var thisObj = this;
+        var oReq = new XMLHttpRequest();
+        function handler()
+        {
+            if (oReq.readyState == 4 /* complete */) {
+                delete thisObj.isLoading;
+                if (oReq.status == 200) {
+                    var obj = JSON.parse(oReq.responseText);
+                    var shaderList = obj.shaderList;
+                    if (shaderList && shaderList.length){
+                        window.YUILoad(shaderList);
+                    } else {
+                        window.YUIMessage("Load", "Nothing to load.");
+                    }
+
+                } else {
+                    console.log("Request returned "+oReq.status);
+                }
+            }
+        }
+
+        oReq.open("GET", "/example/shader_editor/GetShader?ts="+new Date().getTime(), true);
+        oReq.onreadystatechange = handler;
+        oReq.send();
+    }
+
+    function onSaveButton(){
+        if (!username){
+            window.YUIMessage("Login needed", "To save a shader you need to login first.");
+            return;
+        }
+
+        var name = document.getElementById("shadername").value;
+        if (name.trim().length == 0){
+            YUIMessage("Shader name not valid", "Change name in the 'about'-tab");
+            return;
+        }
+        
+        var saveButton = document.getElementById('SaveButton');
+        saveButton.innerHTML = "Saving ...";
+        function resetSave(){
+            saveButton.innerHTML = "Save";
+        }
+
+        var about = document.getElementById("shaderAbout").value;
+        var jsonData = getData();
+        
+        var obj = {
+            id:shaderid,
+            name:name,
+            about:about,
+            owner:username,
+            data:JSON.stringify(jsonData)
+        };
+        var objStr = JSON.stringify(obj);
+        var oReq = new XMLHttpRequest();
+
+        function handler()
+        {
+            if (oReq.readyState == 4 /* complete */) {
+                if (oReq.status == 200) {
+                    var obj = JSON.parse(oReq.responseText);
+                    shaderid = obj.id;
+                    shortUrl = obj.shortUrl;
+                    console.log(obj.message);
+                    saveButton.innerHTML = obj.message;
+                } else {
+                    saveButton.innerHTML = "Save error";
+                }
+                setTimeout(resetSave,3000);
+            }
+        }
+        oReq.open("POST", "/example/shader_editor/UpdateShader", true);
+        oReq.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+        oReq.onreadystatechange = handler;
+        oReq.send(objStr);
+    }
+
+    function onShareButton(){
+        if (!username){
+            window.YUIMessage("Login needed", "To share a shader you need to login and save the shader.");
+            return;
+        }
+        if (shortUrl ==null || shortUrl.length==0){
+            window.YUIMessage("Error", "Shader needs to be saved first");
+            return;
+        }
+        var div = document.createElement("div");
+        var input = document.createElement("input");
+        input.style.width="205px";
+        input.style.font = "120% arial,helvetica,clean";
+        input.type="text";
+        input.value = shortUrl;
+        div.appendChild(document.createTextNode("Short url:"));
+        div.appendChild(document.createElement("br"));
+        div.appendChild(input);
+        div.appendChild(document.createElement("br"));
+        var stats = document.createElement("a");
+        stats.href = shortUrl+".info";
+        stats.target = "_new";
+        var statsText = document.createTextNode("See stats");
+        stats.appendChild(statsText);
+        div.appendChild(stats);
+
+        YUIMessage("This shader can be accessed by anyone at:",div);
+        input.focus();
+        input.select();
+//        function setSelection(){
+//            input.selectionStart = 0;
+//            input.selectionEnd = location.length;
+//        }
+//        setTimeout(setSelection,300);
+
     }
 
     function updateSettings(){
@@ -632,142 +791,322 @@
         window.shaderEditor.updateSettings(data);
     }
 
-    if (document.location.search.indexOf("fullscreen=true") !== -1){
-        window.onload = initFullscreen;
-    } else {
-        window.YUI().use('tabview','console', function(Y) {
-
-            var c = KICK.core.Constants;
-            var tabview = new Y.TabView({
-                srcNode: '#editorSection'
-            });
-
-            tabview.render();
-            window.tabview = tabview;
-
-            //create the console
-            var r = new Y.Console({
-                newestOnTop : false,
-                //style: 'block',
-                width: 600,
-                height: 200,
-                consoleLimit:10
-            });
-
-            r.render('#logger');
-            window.log = r;
-            tryLoadShaderFromLocalStorage();
-            shaderEditor.initKick();
-
-            var initEditor = function(id){
-                var editor = window.ace.edit(id);
-                editor.setTheme("ace/theme/twilight");
-                var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
-                var EditSession = window.require('ace/edit_session').EditSession;
-                window.vertexShaderSession = new EditSession( document.getElementById("vertexShader").value );
-                window.vertexShaderSession.setMode(new GLSL_ES_Mode());
-                editor.setSession(window.vertexShaderSession);
-                window.fragmentShaderSession = new EditSession( document.getElementById("fragmentShader").value );
-                window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
-                return editor;
-            };
-            window.aceeditor = initEditor('glslEditor');
-
-            tabview.on("selectionChange", function(e){
-                switch (e.newVal.get('index')){
-                    case 0:
-                        document.getElementById('glslEditorPanel').style.display = "block";
-                        window.aceeditor.setSession(window.vertexShaderSession);
-                            // clear undo manager
-                        var UndoManager = window.require("ace/undomanager").UndoManager;
-                        window.aceeditor.getSession().setUndoManager(new UndoManager());
-                    break;
-                    case 1:
-                        document.getElementById('glslEditorPanel').style.display = "block";
-                        window.aceeditor.setSession(window.fragmentShaderSession);
-                            // clear undo manager
-                        var UndoManager = window.require("ace/undomanager").UndoManager;
-                        window.aceeditor.getSession().setUndoManager(new UndoManager());
-                    break;
-                    case 2:
-                        refreshTextures();
-                        document.getElementById('glslEditorPanel').style.display = "none";
-                    break;
-                    case 3:
-                        refreshUniforms();
-                        document.getElementById('glslEditorPanel').style.display = "none";
-                    break;
-                    default:
-                        document.getElementById('glslEditorPanel').style.display = "none";
-                    break;
-                }
-            });
-
-            (function setupSettings(){
-                var meshsetting = document.getElementById('meshsetting'),
-                    rotatemesh = document.getElementById('rotatemesh'),
-                    resetShaderBut = document.getElementById('resetShader'),
-                    addChildListeners = function (component, listener, listenerNames,tag){
-                        var i;
-                        for (i=0;i<component.children.length;i++){
-                            if (Array.isArray(listenerNames)){
-                                for (var j=0;j<listenerNames.length;j++){
-                                    component.children[i].addEventListener(listenerNames[j],listener,false);
-                                }
-                            } else {
-                                component.children[i].addEventListener(listenerNames,listener,false);
-                            }
-                            if (tag){
-                                component.children[i][tag] = i;
-                            }
-                        }
-                    };
-                
-                addChildListeners(meshsetting,updateSettings,'click',"meshid");
-                addChildListeners(rotatemesh,updateSettings,'click',"isOn");
-                resetShaderBut.addEventListener('click',resetShader,false);
-
-                (function addLightListeners(){
-                    var lightpos = document.getElementById('lightpos'),
-                        lightrot = document.getElementById('lightrot'),
-                        lightcolor = document.getElementById('lightcolor'),
-                        lightintensity = document.getElementById('lightintensity');
-
-                    addChildListeners(lightpos,updateSettings,['click','change'],"position");
-                    addChildListeners(lightrot,updateSettings,['click','change'],"position");
-                    addChildListeners(lightcolor,updateSettings,['click','change'],"position");
-
-                    lightintensity.addEventListener('change',updateSettings,false);
-                    lightintensity.addEventListener('click',updateSettings,false);
-                })();
-
-
-                (function addAmbientListener(){
-                    var am = document.getElementById('ambientLight');
-                    addChildListeners(am,updateSettings,['click','change'],"position");
-                })();
-
-                addGLConstantToSelect('textureFormat',[c.GL_ALPHA,c.GL_RGB,c.GL_RGBA,c.GL_LUMINANCE,c.GL_LUMINANCE_ALPHA]);
-                addGLConstantToSelect('textureMode',[c.GL_REPEAT,c.GL_CLAMP_TO_EDGE]);
-                addGLConstantToSelect('minFilter',[c.GL_NEAREST,c.GL_LINEAR,c.GL_NEAREST_MIPMAP_NEAREST,c.GL_LINEAR_MIPMAP_NEAREST,c.GL_NEAREST_MIPMAP_LINEAR,c.GL_LINEAR_MIPMAP_LINEAR]);
-                addGLConstantToSelect('magFilter',[c.GL_NEAREST,c.GL_LINEAR]);
-
-                document.getElementById('savebutton').addEventListener('click', trySave,false);
-                document.getElementById('fullscreen').addEventListener('click', toogleFullscreen,false);
-
-
-                document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
-                document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
-                document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
-                document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
-
-                document.getElementById('currentUniforms').addEventListener('click', uniformSelected, false);
-                document.getElementById('uniform_sampler_update').addEventListener('click', updateUniformSampler, false);
-                document.getElementById('uniform_number_update').addEventListener('click', updateUniformNumber, false);
-
-                // start shader listener
-                setInterval(shaderChangeListener,2000);
-            })();
-        });
+    function updateShaderName(){
+        var val = document.getElementById('shadername').value;
+        var title = "Kick.js | Shader editor | "+val;
+        document.getElementById('header').innerHTML = title.escapeHTML();
+        document.title = title;
     }
+
+    window.YUI().use('tabview','console', "panel", "datatable-base", "dd-plugin",function(Y) {
+        var c = KICK.core.Constants;
+        var tabview = new Y.TabView({
+            srcNode: '#editorSection'
+        });
+
+        tabview.render();
+        window.tabview = tabview;
+
+        //create the console
+        var r = new Y.Console({
+            newestOnTop : false,
+            //style: 'block',
+            width: 600,
+            height: 200,
+            consoleLimit:10
+        });
+
+        r.render('#logger');
+        window.log = r;
+        var idParameter = document.location.hash.length>1;
+        var shader = null;
+        if (idParameter){
+            idParameter = document.location.hash.substring(1);
+            document.location.hash = "";
+            var result = loadShaderSync(idParameter);
+            shader = JSON.parse(result.data);
+        }
+        if (shader==null){
+            shader = loadLocally();
+        }
+
+        shaderEditor.initKick();
+
+        var initEditor = function(id){
+            var editor = window.ace.edit(id);
+            editor.setTheme("ace/theme/twilight");
+            var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
+            var EditSession = window.require('ace/edit_session').EditSession;
+            window.vertexShaderSession = new EditSession( shader.shader.vertexShaderSrc );
+            window.vertexShaderSession.setMode(new GLSL_ES_Mode());
+            editor.setSession(window.vertexShaderSession);
+            window.fragmentShaderSession = new EditSession( shader.shader.fragmentShaderSrc);
+            window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
+            return editor;
+        };
+        window.aceeditor = initEditor('glslEditor');
+
+        tabview.on("selectionChange", function(e){
+            switch (e.newVal.get('index')){
+                case 0:
+                    document.getElementById('glslEditorPanel').style.display = "block";
+                    window.aceeditor.setSession(window.vertexShaderSession);
+                        // clear undo manager
+                    var UndoManager = window.require("ace/undomanager").UndoManager;
+                    window.aceeditor.getSession().setUndoManager(new UndoManager());
+                break;
+                case 1:
+                    document.getElementById('glslEditorPanel').style.display = "block";
+                    window.aceeditor.setSession(window.fragmentShaderSession);
+                        // clear undo manager
+                    var UndoManager = window.require("ace/undomanager").UndoManager;
+                    window.aceeditor.getSession().setUndoManager(new UndoManager());
+                break;
+                case 2:
+                    refreshTextures();
+                    document.getElementById('glslEditorPanel').style.display = "none";
+                break;
+                case 3:
+                    refreshUniforms();
+                    document.getElementById('glslEditorPanel').style.display = "none";
+                break;
+                default:
+                    document.getElementById('glslEditorPanel').style.display = "none";
+                break;
+            }
+        });
+
+        window.YUIMessage = function (headerTxt,bodyTxt){
+            var nestedPanel = new Y.Panel({
+                headerContent: headerTxt,
+                bodyContent:bodyTxt,
+                zIndex: 5, //We set a z-index higher than the parent's z-index
+                centered:true,
+                width:250,
+                modal:true,
+
+                buttons: [
+                    {
+                        value: "Close",
+                        action  : function(e) {
+                            e.preventDefault();
+                            nestedPanel.hide();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    }
+                ]
+            });
+
+            nestedPanel.render('#nestedPanel');
+        };
+
+        window.YUILoad = function(elements){
+            var bodyContent = document.createElement("select");
+            bodyContent.style.width = "225px";
+            bodyContent.style.height = "200px";
+            bodyContent.style.font = "120% arial,helvetica,clean";
+            bodyContent.multiple = true;
+            for (var i=0;i<elements.length;i++){
+                var elem = elements[i];
+                var option = document.createElement("option");
+                option.value = elem.id;
+                option.innerHTML = elem.name;
+                bodyContent.appendChild(option);
+            }
+            var panel = new Y.Panel({
+                srcNode: "#panelContent",
+                width: 250,
+                centered: true,
+                visible: true,
+                modal:true,
+                zIndex:5,
+                headerContent: "Load shader",
+                bodyContent: bodyContent,
+                buttons:[
+                    {
+                        value: "Cancel",
+                        action: function(e) {
+                            e.preventDefault();
+                            panel.hide();
+                            panel.destroy();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    },
+                    {
+                        value: "Load",
+                        action: function(e) {
+                            e.preventDefault();
+                            panel.hide();
+                            var selectedIndex = bodyContent.selectedIndex;
+                            if (selectedIndex >-1){
+                                var id = bodyContent.options[selectedIndex].value;
+                                loadShaderFromServer(id);
+                            }
+                            panel.destroy();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    }
+                ]
+            });
+
+            panel.render();
+        };
+
+        window.YUIConfirm = function (headerTxt,bodyTxt,onCancel,onOK){
+            var nestedPanel = new Y.Panel({
+                headerContent: headerTxt,
+                bodyContent:bodyTxt,
+                zIndex: 5, //We set a z-index higher than the parent's z-index
+                centered:true,
+                width:250,
+                modal:true,
+
+                buttons: [
+                    {
+                        value: "Cancel",
+                        action  : function(e) {
+                            e.preventDefault();
+                            nestedPanel.hide();
+                            if (onCancel){
+                                onCancel();
+                            }
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    },
+                    {
+                        value: "OK",
+                        action  : function(e) {
+                            e.preventDefault();
+                            nestedPanel.hide();
+                            if (onOK){
+                                onOK();
+                            }
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    }
+
+                ]
+            });
+
+            nestedPanel.render('#nestedPanel');
+        };
+
+        (function setupSettings(){
+            var meshsetting = document.getElementById('meshsetting'),
+                rotatemesh = document.getElementById('rotatemesh'),
+                resetShaderBut = document.getElementById('resetShader'),
+                addChildListeners = function (component, listener, listenerNames,tag){
+                    var i;
+                    for (i=0;i<component.children.length;i++){
+                        if (Array.isArray(listenerNames)){
+                            for (var j=0;j<listenerNames.length;j++){
+                                component.children[i].addEventListener(listenerNames[j],listener,false);
+                            }
+                        } else {
+                            component.children[i].addEventListener(listenerNames,listener,false);
+                        }
+                        if (tag){
+                            component.children[i][tag] = i;
+                        }
+                    }
+                };
+
+            addChildListeners(meshsetting,updateSettings,'click',"meshid");
+            addChildListeners(rotatemesh,updateSettings,'click',"isOn");
+            resetShaderBut.addEventListener('click',resetShader,false);
+
+            (function addLightListeners(){
+                var lightpos = document.getElementById('lightpos'),
+                    lightrot = document.getElementById('lightrot'),
+                    lightcolor = document.getElementById('lightcolor'),
+                    lightintensity = document.getElementById('lightintensity');
+
+                addChildListeners(lightpos,updateSettings,['click','change'],"position");
+                addChildListeners(lightrot,updateSettings,['click','change'],"position");
+                addChildListeners(lightcolor,updateSettings,['click','change'],"position");
+
+                lightintensity.addEventListener('change',updateSettings,false);
+                lightintensity.addEventListener('click',updateSettings,false);
+            })();
+
+
+            (function addAmbientListener(){
+                var am = document.getElementById('ambientLight');
+                addChildListeners(am,updateSettings,['click','change'],"position");
+            })();
+
+            addGLConstantToSelect('textureFormat',[c.GL_ALPHA,c.GL_RGB,c.GL_RGBA,c.GL_LUMINANCE,c.GL_LUMINANCE_ALPHA]);
+            addGLConstantToSelect('textureMode',[c.GL_REPEAT,c.GL_CLAMP_TO_EDGE]);
+            addGLConstantToSelect('minFilter',[c.GL_NEAREST,c.GL_LINEAR,c.GL_NEAREST_MIPMAP_NEAREST,c.GL_LINEAR_MIPMAP_NEAREST,c.GL_NEAREST_MIPMAP_LINEAR,c.GL_LINEAR_MIPMAP_LINEAR]);
+            addGLConstantToSelect('magFilter',[c.GL_NEAREST,c.GL_LINEAR]);
+
+            document.getElementById('fullscreen').addEventListener('click', toogleFullscreen,false);
+            document.getElementById('LogoutButton').addEventListener('click', onLogoutButton,false);
+            document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
+            document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
+            document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
+            document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
+
+            document.getElementById('canvas').addEventListener('click', toogleFullscreen,false);
+
+
+            document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
+            document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
+            document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
+            document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
+
+            document.getElementById('currentUniforms').addEventListener('click', uniformSelected, false);
+            document.getElementById('uniform_sampler_update').addEventListener('click', updateUniformSampler, false);
+            document.getElementById('uniform_number_update').addEventListener('click', updateUniformNumber, false);
+            document.getElementById('shadername').addEventListener('change', updateShaderName, false);
+
+            // start shader listener
+            setInterval(shaderChangeListener,2000);
+        })();
+
+        function loginInfo(){
+            var oReq = new XMLHttpRequest();
+
+            function handler()
+            {
+                if (oReq.readyState == 4 /* complete */) {
+                    if (oReq.status == 200) {
+                        var obj = JSON.parse(oReq.responseText);
+                        if (obj.logoutURL){
+                            logoutURL = obj.logoutURL;
+                            username = obj.username;
+                            document.getElementById('LogoutButton').style.display = "inline";
+                            document.getElementById('username').style.display = "block";
+                            document.getElementById('username').innerHTML = "Logged in as "+username;
+                            document.getElementById('LoginButton').style.display = "none";
+                        } else {
+                            loginURL = obj.loginURL;
+                            document.getElementById('LogoutButton').style.display = "none";
+                            document.getElementById('username').style.display = "none";
+                            document.getElementById('username').innerHTML = "";
+                            document.getElementById('LoginButton').style.display = "inline";
+                        }
+                    }
+                }
+            }
+            oReq.open("GET", "/LoginInfo?ts="+new Date().getTime()+"&url="+document.location.href, true);
+            oReq.onreadystatechange = handler;
+            oReq.send();
+        }
+        setShader( shader );
+        loginInfo();
+        setInterval(loginInfo,1000*60*30); // check for logout every 30 min
+    });
 })();
+
+// add trim function to string
+String.prototype.trim=function(){return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');};
+
+String.prototype.escapeHTML = function () {
+        return(
+            this.replace(/&/g,'&amp;').
+                replace(/>/g,'&gt;').
+                replace(/</g,'&lt;').
+                replace(/"/g,'&quot;')
+        );
+    };
