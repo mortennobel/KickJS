@@ -17,6 +17,19 @@
 
     <script type="text/javascript" src="assets/api-js#if $timestamp#?stamp=$timestamp#end if#"></script>
     <script type="text/javascript" src="assets/ac-js#if $timestamp#?stamp=$timestamp#end if#"></script>
+    <script type="text/javascript">
+
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-26354413-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+
+    </script>
 </head>
 
 <body id="yahoo-com">
@@ -688,17 +701,6 @@
 
     var ALL_YUI_PROPS = $allprops;
     SyntaxHighlighter.all();
-    // Google analytics tracker start
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-26042605-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-    // google analytics tracker end
 </script>
 #if $ydn
 <!-- Yahoo! Web Analytics - All rights reserved -->

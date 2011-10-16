@@ -36,8 +36,8 @@ version=0.1.0
 # YUI configuration attributes.  This should start with '2' or '3'.
 yuiversion=3
 
-projecturl=http://www.kickstartengine.com/
-projectname="Kickstart Engine"
+projecturl=http://www.kickjs.org/
+projectname="KickJS"
 
 #####
 echo "Clean"
@@ -84,5 +84,6 @@ rm "$project/build/kick-min.js.tmp"
 
 ##############################################################################
 echo "Copy kickjs to editor"
+mkdir "$project/example/shader_editor/kick/"
 cp "$project/build/kick-min-$version.js" ""$project/example/shader_editor/kick/kick-min-$version.js""
 cp "$project/build/kick-uncompressed-$version.js" ""$project/example/shader_editor/kick/kick-uncompressed-$version.js""
