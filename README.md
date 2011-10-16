@@ -1,4 +1,4 @@
-Kickstart Engine
+KickJS
 ====================================
 
 ## Description
@@ -8,7 +8,7 @@ A WebGL game engine for modern web-browsers.
 ## Documentation
 
 Available here:
-http://www.kickstartengine.com/api/
+http://www.kickjs.org/api/
 
 ## Installation
 
