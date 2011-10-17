@@ -554,8 +554,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gameObjectsDelete.length = 0;
                 }
                 if (componentsNew.length > 0) {
-                    for (i = componentsNew.length-1; i >= 0; i--) {
-                        component = componentsNew[i];
+                    var componentsNewCopy = componentsNew;
+                    componentsNew = [];
+                    for (i = componentsNewCopy.length-1; i >= 0; i--) {
+                        component = componentsNewCopy[i];
                         if (typeof(component.activated) === "function") {
                             component.activated();
                         }
@@ -567,13 +569,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         }
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
-                        componentListenes[i].componentsAdded(componentsNew);
+                        componentListenes[i].componentsAdded(componentsNewCopy);
                     }
-                    componentsNew.length = 0;
                 }
                 if (componentsDelete.length > 0) {
-                    for (i = componentsDelete.length-1; i >= 0; i--) {
-                        component = componentsDelete[i];
+                    var componentsDeleteCopy = componentsDelete;
+                    componentsDelete = [];
+                    for (i = componentsDeleteCopy.length-1; i >= 0; i--) {
+                        component = componentsDeleteCopy[i];
                         if (typeof(component.deactivated) === "function") {
                             component.deactivated();
                         }
@@ -585,9 +588,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         }
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
-                        componentListenes[i].componentsRemoved(componentsDelete);
+                        componentListenes[i].componentsRemoved(componentsDeleteCopy);
                     }
-                    componentsDelete.length = 0;
                 }
             };
 
@@ -915,6 +917,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * To create custom renderable objects you should not inherit from this class, but simple create a component with a
      * render() method.
      * @class MeshRenderer
+     * @constructor
      * @namespace KICK.scene
      * @extends KICK.scene.Component
      * @final
