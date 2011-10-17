@@ -50,7 +50,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     var core = KICK.namespace("KICK.core"),
         scene = KICK.namespace("KICK.scene"),
-        renderer = KICK.namespace("KICK.renderer");
+        renderer = KICK.namespace("KICK.renderer"),
+        ASSERT = constants._ASSERT;
 
     /**
      * Game engine object
@@ -71,6 +72,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             timeObj = new core.Time(),
             timeSinceStart = 0,
             frameCount = 0,
+            frameListeners = [],
+            keyInput = null,
             activeScene = new scene.Scene(this),
             animationFrameObj = null,
             wrapperFunctionToMethodOnObject = function (time_) {
@@ -102,6 +105,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             activeScene:{
                 get: function(){ return activeScene},
                 set: function(value){activeScene = value;}
+            },
+            /**
+             * Returns a keyInput object. This object is used to detect key input.
+             * @property keyInput
+             * @type KICK.core.Input
+             */
+            keyInput:{
+                get: function(){
+                    if (!keyInput){
+                        keyInput = new core.KeyInput();
+                        this.addFrameListener(keyInput);
+                    }
+                    return keyInput;
+                }
             },
             /**
              * The renderer
@@ -171,12 +188,40 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this._gameLoop = function (time) {
             this.activeScene.update();
             this.renderer.render();
+            for (var i=frameListeners.length-1;i>=0;i--){
+                frameListeners[i].frameUpdated();
+            }
             deltaTime = time-lastTime;
             lastTime = time;
             timeSinceStart += deltaTime;
             frameCount += 1;
             animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
         };
+
+        /**
+         * Add a framelistener. Frame listeners are invoked last thing in update loop.<br>
+         * Frame listener object must define the method frameUpdated()
+         * @method addFrameListener
+         * @param {Object} frameListener
+         */
+        this.addFrameListener = function(frameListener){
+            if (ASSERT){
+                if (typeof frameListener.frameUpdated !== "function"){
+                    KICK.core.Util.fail("frameListener must define the method frameUpdated");
+                }
+            }
+            frameListeners.push(frameListener);
+        };
+
+        /**
+         * @method removeFrameListener
+         * @param {Object} frameListener
+         * @return {boolean} element removed
+         */
+        this.removeFrameListener = function(frameListener){
+            return core.Util.removeElementFromArray(frameListener);
+        };
+
 
         /**
          * Creates a uniq id
@@ -345,6 +390,102 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Key Input manager.<br>
+     * This class encapsulate keyboard input and makes it easy to
+     * test for key input.<br>
+     * Example code:
+     * <pre class="brush: js">
+     * function KeyTestComponent(engine){
+     * &nbsp;var keyInput;
+     * &nbsp;// registers listener (invoked when component is registered)
+     * &nbsp;this.activated = function (){
+     * &nbsp;&nbsp;keyInput = engine.keyInput;
+     * &nbsp;};
+     * &nbsp;this.update = function(){
+     * &nbsp;&nbsp;var keyCodeForA = 65;
+     * &nbsp;&nbsp;if (keyInput.isKeyDown(keyCodeForA)){
+     * &nbsp;&nbsp;&nbsp;console.log("A key is down");
+     * &nbsp;&nbsp;}
+     * &nbsp;&nbsp;if (keyInput.isKey(keyCodeForA)){
+     * &nbsp;&nbsp;&nbsp;console.log("A key is being held down");
+     * &nbsp;&nbsp;}
+     * &nbsp;&nbsp;if (keyInput.isKeyUp(keyCodeForA)){
+     * &nbsp;&nbsp;&nbsp;console.log("A key is up");
+     * &nbsp;&nbsp;}
+     * &nbsp;};
+     * }
+     * </pre>
+     * <br>
+     * Pressing the 'a' key should result in one frame with 'A key is down',
+     * multiple frames with 'A key is being held down' and finally one frame
+     * with 'A key is up'
+     * @class KeyInput
+     * @namespace KICK.core
+     */
+    core.KeyInput = function(){
+        var keyDown = [],
+            keyUp = [],
+            key = [],
+            removeElementFromArray = core.Util.removeElementFromArray,
+            contains = core.Util.contains,
+            keyDownHandler = function(e){
+                var keyCode = e.keyCode;
+                if (!contains(key,keyCode)){
+                    keyDown.push(keyCode);
+                    key.push(keyCode);
+                }
+            },
+            keyUpHandler = function(e){
+                var keyCode = e.keyCode;
+                keyUp.push(keyCode);
+                removeElementFromArray(key,keyCode);
+            };
+
+        /**
+         * @method isKeyDown
+         * @param {Number} keyCode
+         * @return {boolean} true if key is pressed down in this frame
+         */
+        this.isKeyDown = function(keyCode){
+            return contains(keyDown,keyCode);
+        };
+
+        /**
+         * @method isKeyUp
+         * @param {Number} keyCode
+         * @return {boolean} true if key is release in this frame
+         */
+        this.isKeyUp = function(keyCode){
+            return contains(keyUp,keyCode);
+        };
+
+        /**
+         *
+         * @method isKey
+         * @param {Number} keyCode
+         * @return {boolean} true if key is down
+         */
+        this.isKey = function(keyCode){
+            return contains(key,keyCode);
+        };
+
+        /**
+         * This method clears key up and key downs each frame (leaving key unmodified)
+         * @method update
+         * @private
+         */
+        this.frameUpdated = function(){
+            keyDown.length = 0;
+            keyUp.length = 0;
+        };
+
+        (function init(){
+            document.addEventListener( "keydown", keyDownHandler, false);
+            document.addEventListener( "keyup", keyUpHandler, false);
+        })();
+    };
+
+    /**
      * Utility class for miscellaneous functions. The class is static and is shared between multiple instances.
      * @class Util
      * @namespace KICK.core
@@ -400,19 +541,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Remove one element from an array - either the first instance or all instances
          * @method removeElementFromArray
          * @static
-         * @param array {Array}
-         * @param removeValue {Object} value to be deleted
-         * @param deleteAll {boolean} deletaAll objects (or exit function after first deletion)
+         * @param {Array} array
+         * @param {Object} removeValue value to be deleted
+         * @param {boolean} deleteAll  deletaAll objects (or exit function after first deletion)
+         * @return {boolean} elementRemoved
          */
         removeElementFromArray: function (array, removeValue, deleteAll) {
+            var elementRemoved = false;
             for(var i=array.length-1; i>=0; i--) {
                 if(array[i] === removeValue) {
+                    elementRemoved = true;
                     array.splice(i, 1);
                     if (!deleteAll) {
                         break;
                     }
                 }
             }
+            return elementRemoved;
         },
 
         /**
@@ -462,6 +607,21 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         numberSortFunction : function (a,b) {
             return a-b;
+        },
+        /**
+         * Loops through array and return true if any array element strict equals the element.
+         * This uses the === to compare the two elements.
+         * @param {Array} array
+         * @param {Object} element
+         * @return {boolean} array contains element
+         */
+        contains : function(array,element){
+            for (var i=array.length-1;i>=0;i--){
+                if (array[i]===element){
+                    return true;
+                }
+            }
+            return false;
         }
     };
 
