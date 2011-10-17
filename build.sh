@@ -85,5 +85,11 @@ rm "$project/build/kick-min.js.tmp"
 ##############################################################################
 echo "Copy kickjs to editor"
 mkdir "$project/example/shader_editor/kick/"
-cp "$project/build/kick-min-$version.js" ""$project/example/shader_editor/kick/kick-min-$version.js""
-cp "$project/build/kick-uncompressed-$version.js" ""$project/example/shader_editor/kick/kick-uncompressed-$version.js""
+cp "$project/build/kick-min-$version.js" "$project/example/shader_editor/kick/kick-min-$version.js"
+cp "$project/build/kick-uncompressed-$version.js" "$project/example/shader_editor/kick/kick-uncompressed-$version.js"
+cp "$project/src/js-dependencies/webgl-debug.js" "$project/example/shader_editor/kick/webgl-debug.js"
+
+mkdir "$project/example/snake/kick/"
+cp "$project/build/kick-min-$version.js" "$project/example/snake/kick/kick-min-$version.js"
+cp "$project/build/kick-uncompressed-$version.js" "$project/example/snake/kick/kick-uncompressed-$version.js"
+cp "$project/src/js-dependencies/webgl-debug.js" ""$project/example/snake/kick/webgl-debug.js""
