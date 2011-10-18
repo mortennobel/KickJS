@@ -768,22 +768,21 @@
         div.appendChild(document.createElement("br"));
         div.appendChild(input);
         div.appendChild(document.createElement("br"));
-        var stats = document.createElement("a");
-        stats.href = shortUrl+".info";
-        stats.target = "_new";
+        var bottomText = document.createElement("a");
+        bottomText.href = shortUrl+".info";
+        bottomText.target = "_new";
+
         var statsText = document.createTextNode("See stats");
-        stats.appendChild(statsText);
-        div.appendChild(stats);
+        bottomText.appendChild(statsText);
+        div.appendChild(bottomText);
+        div.appendChild(document.createElement("br"));
+        var tweet = document.createTextNode("For tweeting use #KickjsShader");
+        div.appendChild(tweet);
+
 
         YUIMessage("This shader can be accessed by anyone at:",div);
         input.focus();
         input.select();
-//        function setSelection(){
-//            input.selectionStart = 0;
-//            input.selectionEnd = location.length;
-//        }
-//        setTimeout(setSelection,300);
-
     }
 
     function updateSettings(){
