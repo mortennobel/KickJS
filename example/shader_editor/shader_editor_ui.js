@@ -13,7 +13,7 @@
                 var shader = meshRenderer.material.shader;
                 var vsNew = window.vertexShaderSession.getValue();
                 var fsNew = window.fragmentShaderSession.getValue();
-                if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
+                if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
                     shaderEditor.updateShader(vsNew,fsNew);
                     saveLocally();
                 }
@@ -34,7 +34,7 @@
         shaderEditor.loadMaterial(shader);
         setSettingsData(shader.settingsData);
         updateSettings();
-        document.getElementById('shadername').value = shader.name || "Unnamed shader";
+        document.getElementById('shadername').value = shader.name || "Unnamed shader";
         document.getElementById('shaderAbout').value = shader.about;
         updateShaderName();
         shaderChangeListener(true);
