@@ -24,6 +24,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var scene = KICK.namespace("KICK.scene"),
+        mesh = KICK.namespace("KICK.mesh"),
         math = KICK.namespace("KICK.math"),
         vec3 = math.vec3,
         vec2 = math.vec2,
@@ -64,7 +65,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             ],
             indices: [0,1,2]
         };
-        return new scene.Mesh(engine,config);
+        return new mesh.Mesh(engine,config);
     };
 
     /**
@@ -72,7 +73,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @method createPlane
      * @static
      * @param {KICK.core.Engine} engine
-     * @return {KICK.scene.Mesh} plane mesh
+     * @return {KICK.mesh.Mesh} plane mesh
      */
     scene.MeshFactory.createPlane = function (engine) {
         var config = {
@@ -98,7 +99,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             ],
             indices: [0,1,2,2,1,3]
         };
-        return new scene.Mesh(engine,config);
+        return new mesh.Mesh(engine,config);
     };
 
     /**
@@ -109,7 +110,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Number} slices
      * @param {Number} stacks
      * @param {Number} radius
-     * @return {KICK.scene.Mesh} uv-sphere mesh
+     * @return {KICK.mesh.Mesh} uv-sphere mesh
      */
     scene.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
         if (!slices || slices < 3){
@@ -173,7 +174,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 index++;
             }
         }
-        return new scene.Mesh(engine, {
+        return new mesh.Mesh(engine, {
             name: "UVSphere",
             vertex: verticesMemory.mem,
             uv1: uvsMemory.mem,
@@ -189,7 +190,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @static
      * @param {KICK.core.Engine} engine
      * @param {Number} length Optional, default value is 1.0
-     * @return {KICK.scene.Mesh} cube mesh
+     * @return {KICK.mesh.Mesh} cube mesh
      */
     scene.MeshFactory.createCube = function (engine,length) {
         if (!length){
@@ -322,6 +323,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 20,21,22,
                 20,22,23]
         };
-        return new scene.Mesh(engine,config);
+        return new mesh.Mesh(engine,config);
     };
 })();

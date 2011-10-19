@@ -49,6 +49,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var core = KICK.namespace("KICK.core"),
+        constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
         renderer = KICK.namespace("KICK.renderer"),
         ASSERT = constants._ASSERT;

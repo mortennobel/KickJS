@@ -2,29 +2,7 @@ window.onload = function(){
     "use strict";
     var vec3 = KICK.math.vec3;
 
-    function KeyTestComponent(engine){
-        var keyInput;
-        // registers listener (invoked when component is registered)
-        this.activated = function (){
-            keyInput = engine.keyInput;
-        };
-        //
-        this.update = function(){
-            var keyCodeForA = 65;
-            if (keyInput.isKeyDown(keyCodeForA)){
-                console.log("A key is down");
-            }
-            if (keyInput.isKey(keyCodeForA)){
-                console.log("A key is being held down");
-            }
-            if (keyInput.isKeyUp(keyCodeForA)){
-                console.log("A key is up");
-            }
-        };
-    }
-
-
-    function SnakeComponent(engine){
+    function SnakeComponent(engine,keyLeft,keyRight){
         var meshRenderer,
             material,
             shader,
@@ -88,17 +66,41 @@ window.onload = function(){
             if (time.frameCount%30==0){
                 move();
             }
-            if (input.isKeyDown(65)){
+            if (input.isKeyDown(keyLeft)){
                 rotateLeft();
             }
-            else if (input.isKeyDown(90)){
+            else if (input.isKeyDown(keyRight)){
                 rotateRight();
             }
         };
     }
 
-    function Level(){
-        
+    function SnakeLevelComponent(engine){
+        var meshRenderer,
+            shader,
+            material;
+        this.activated = function (){
+            meshRenderer = new KICK.scene.MeshRenderer();
+            this.gameObject.addComponent(meshRenderer);
+
+            shader = new KICK.material.Shader(this.gameObject.engine);
+
+            material = new KICK.material.Material({
+                shader:shader,
+                name:"Snake material"
+            });
+
+            meshRenderer.material = material;
+            var mesh = KICK.scene.MeshFactory.createCube(engine,0.5);
+            delete mesh.color;
+            var matrix = KICK.math.mat4.create();
+            for (var i=0;i<100;i++){
+                matrix = KICK.math.mat4.identity(matrix);
+                matrix = KICK.math.mat4.translate(matrix,[i,0,0]);
+                mesh = mesh.combine(mesh,matrix);
+            }
+            meshRenderer.mesh = mesh;
+        };
     }
 
     var engine;
@@ -106,19 +108,25 @@ window.onload = function(){
         engine = new KICK.core.Engine('canvas',{
             enableDebugContext: true
         });
-        var cameraObject = engine.activeScene.createGameObject();
+        var activeScene = engine.activeScene;
+        var cameraObject = activeScene.createGameObject();
         var camera = new KICK.scene.Camera({
             clearColor: [124/255,163/255,137/255,1]
         });
         cameraObject.addComponent(camera);
 
         var cameraTransform = cameraObject.transform;
-        cameraTransform.localPosition = [0,10,0];
+        cameraTransform.localPosition = [0,20,0];
         cameraTransform.localRotationEuler = [-90,0,0];
 
-        var snakeGameObject = engine.activeScene.createGameObject();
-        snakeGameObject.addComponent(new SnakeComponent(engine));
-        snakeGameObject.addComponent(new KeyTestComponent(engine));
+        var levelGameObject = activeScene.createGameObject();
+        var levelComponent = new SnakeLevelComponent(engine);
+        levelGameObject.addComponent(levelComponent);
+
+        var snakeGameObject = activeScene.createGameObject();
+        var keyCodeA = 65;
+        var keyCodeZ = 90;
+        snakeGameObject.addComponent(new SnakeComponent(engine,keyCodeA,keyCodeZ));
 
     }
     initKick();
