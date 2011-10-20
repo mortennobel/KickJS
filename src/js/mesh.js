@@ -523,10 +523,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Recalculates the tangents.
-     * Algorithm is based on
-     *   Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”.
-     *   Terathon Software 3D Graphics Library, 2001.
+     * Recalculates the tangents.<br>
+     * Algorithm is based on<br>
+     *   Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”.<br>
+     *   Terathon Software 3D Graphics Library, 2001.<br>
      *   http://www.terathon.com/code/tangent.html
      * @method recalculateTangents
      */
@@ -610,7 +610,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Mesh object that can be bound.
+     * A Mesh object allows you to bind and render a MeshData object
      * @class Mesh
      * @namespace KICK.mesh
      * @constructor
@@ -681,6 +681,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
+             * Setting this property to something will update the data in WebGL. Note that
+             * changing a MeshData object will not itself update anything.
              * @property meshData
              * @type KICK.mesh.MeshData
              */
