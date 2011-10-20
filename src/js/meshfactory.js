@@ -40,6 +40,34 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * Creates a triangle in the XY plane
+     * @method createTriangleData
+     * @static
+     * @return {KICK.core.MeshData} triangle mesh
+     */
+    scene.MeshFactory.createTriangleData = function () {
+        return new mesh.MeshData( {
+            name: "Triangle",
+            vertex: [
+                0,1,0,
+                -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
+                0.866025403784439,-0.5,0
+            ],
+            uv1: [
+                0,1,
+                -0.866025403784439,-0.5,
+                0.866025403784439,-0.5
+            ],
+            normal: [
+                0,0,1,
+                0,0,1,
+                0,0,1
+            ],
+            indices: [0,1,2]
+        });
+    }
+
+    /**
+     * Creates a triangle in the XY plane
      * @method createTriangle
      * @static
      * @param {KICK.core.Engine} engine
@@ -49,41 +77,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var config = {
                 name: "Triangle"
             },
-            meshData = {
-                name: "Triangle",
-                vertex: [
-                    0,1,0,
-                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                    0.866025403784439,-0.5,0
-                ],
-                uv1: [
-                    0,1,
-                    -0.866025403784439,-0.5,
-                    0.866025403784439,-0.5
-                ],
-                normal: [
-                    0,0,1,
-                    0,0,1,
-                    0,0,1
-                ],
-                indices: [0,1,2]
-            },
-            meshDataObj = new mesh.MeshData(meshData);
+            meshDataObj = scene.MeshFactory.createTriangleData();
         return new mesh.Mesh(engine,config, meshDataObj);
     };
 
     /**
      * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
-     * @method createPlane
+     * @method createPlaneData
      * @static
-     * @param {KICK.core.Engine} engine
-     * @return {KICK.mesh.Mesh} plane mesh
+     * @return {KICK.mesh.MeshData} plane mesh
      */
-    scene.MeshFactory.createPlane = function (engine) {
-        var config = {
-            name: "Plane"
-        };
-        var meshConfig = {
+    scene.MeshFactory.createPlaneData = function () {
+        return new mesh.MeshData({
             name: "Plane",
             vertex: [
                 1,-1,0,
@@ -105,22 +110,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 0,0,1
             ],
             indices: [0,1,2,2,1,3]
-        };
-        var meshDataObject = new mesh.MeshData(meshConfig);
-        return new mesh.Mesh(engine,config,meshDataObject);
+        });
     };
 
     /**
-     * Create a UV sphere
-     * @method createUVSphere
+     * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
+     * @method createPlane
      * @static
      * @param {KICK.core.Engine} engine
+     * @return {KICK.mesh.Mesh} plane mesh
+     */
+    scene.MeshFactory.createPlane = function (engine) {
+        var config = {
+              name: "Plane"
+            },
+            meshDataObject = scene.MeshFactory.createPlaneData();
+        return new mesh.Mesh(engine,config,meshDataObject);
+    };
+
+
+
+    /**
+     * Create a UV sphere
+     * @method createUVSphereData
+     * @static
      * @param {Number} slices
      * @param {Number} stacks
      * @param {Number} radius
-     * @return {KICK.mesh.Mesh} uv-sphere mesh
+     * @return {KICK.mesh.MeshData} uv-sphere mesh
      */
-    scene.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
+    scene.MeshFactory.createUVSphereData = function(slices, stacks, radius){
         if (!slices || slices < 3){
             slices = 20;
         }
@@ -190,23 +209,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             indices: indices,
             meshType: constants.GL_TRIANGLE_STRIP
         };
-        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.MeshData(meshDataConf);
+    };
+
+    /**
+     * Create a UV sphere
+     * @method createUVSphere
+     * @static
+     * @param {KICK.core.Engine} engine
+     * @param {Number} slices
+     * @param {Number} stacks
+     * @param {Number} radius
+     * @return {KICK.mesh.Mesh} uv-sphere mesh
+     */
+    scene.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
+        var meshDataObj = scene.MeshFactory.createUVSphereData(slices, stacks, radius);
         return new mesh.Mesh(engine, {name: "UVSphere"},meshDataObj);
     };
 
     /**
      * Create a code of size length. The cube has colors, normals and UVs.
-     * @method createCube
+     * @method createCubeData
      * @static
-     * @param {KICK.core.Engine} engine
      * @param {Number} length Optional, default value is 1.0
      * @return {KICK.mesh.Mesh} cube mesh
      */
-    scene.MeshFactory.createCube = function (engine,length) {
+    scene.MeshFactory.createCubeData = function (length) {
         if (!length){
             length = 1;
         }
-        var config = {name:"Cube"};
+
         //    v6----- v5
         //   /|      /|
         //  v1------v0|
@@ -334,7 +366,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 20,21,22,
                 20,22,23]
         };
-        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.MeshData(meshDataConf);
+    };
+
+    /**
+     * Create a code of size length. The cube has colors, normals and UVs.
+     * @method createCube
+     * @static
+     * @param {KICK.core.Engine} engine
+     * @param {Number} length Optional, default value is 1.0
+     * @return {KICK.mesh.Mesh} cube mesh
+     */
+    scene.MeshFactory.createCube = function (engine,length) {
+        var config = {
+            name:"Cube"
+        };
+        var meshDataObj = scene.MeshFactory.createCubeData(length);
         return new mesh.Mesh(engine,config,meshDataObj);
     };
 })();
