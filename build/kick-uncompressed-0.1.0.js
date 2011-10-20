@@ -5094,6 +5094,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var core = KICK.namespace("KICK.core"),
+        constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
         renderer = KICK.namespace("KICK.renderer"),
         ASSERT = true;
@@ -5772,194 +5773,335 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         mat4 = KICK.namespace("KICK.math.mat4"),
         constants = KICK.core.Constants,
         DEBUG = true,
-        ASSERT = true;
-
+        ASSERT = true,
+        fail = KICK.core.Util.fail;
 
     /**
-     * Mesh data
-     * @class Mesh
+     * Mesh data class.
+     * Allows for modifying mesh object easily.
+     * This is a pure data class with no WebGL dependency
+     * @class MeshData
      * @namespace KICK.mesh
+     * @parameter {Object} config
+     * @constructor
      */
-    mesh.Mesh = function (engine,config) {
-        var gl = engine.gl,
-            meshVertexAttBuffer,
-            meshVertexAttBufferDescription,
-            meshVertexIndexBuffer,
-            vertexAttributeNames = [],
-            buffers = [],
-            c = KICK.core.Constants,
-            vertexAttrLength,
+    mesh.MeshData = function(config){
+        var data = {},
             thisObj = this,
-             /**
+            _indices,
+            _interleavedArray,
+            _interleavedArrayFormat,
+            _vertexAttrLength,
+            _meshType,
+            _name,
+            clearInterleavedData = function(){
+                _interleavedArray = null;
+                _interleavedArrayFormat = null;
+                _vertexAttrLength = null;
+            },
+            /**
+             * @method createGetterSetter
+             * @private
+             * @param {Number} type 5126 or 5124
+             * @param {string} name
+             */
+            createGetterSetter = function(type,name){
+                if (type === 5126 || type===5124){
+                    var typedArrayType = (type === 5126)? Float32Array:Int32Array;
+                    return {
+                        get:function(){
+                            return data[name];
+                        },
+                        set:function(newValue){
+                            if (newValue && !(newValue instanceof typedArrayType)){
+                                newValue = new typedArrayType(newValue);
+                            }
+                            data[name] = newValue;
+                            clearInterleavedData();
+                        }
+                    };
+                } else if (ASSERT){
+                    fail("Unexpected type");
+                }
+            },
+            /**
              * @method createInterleavedData
              * @private
              */
              createInterleavedData = function () {
                  var lengthOfVertexAttributes = [],
                      names = [],
+                     types = [],
                      length = 0,
+                     vertexAttributes = [],
                      data,
                      i,
-                     vertexLen = thisObj.vertex.length,
-                     index = 0,
+                     vertex = thisObj.vertex,
+                     vertexLen = vertex ?  vertex.length/3 : 0,
                      description = {},
-                     addAttributes = function (name,size){
-                         if (thisObj[name]){
+                     addAttributes = function (name,size,type){
+                         var array = thisObj[name];
+
+                         if (array){
                              lengthOfVertexAttributes.push(size);
                              names.push(name);
+                             types.push(type);
+                             vertexAttributes.push(array);
                              description[name] = {
                                  pointer: length*4,
                                  size: size,
                                  normalized: false,
-                                 type: 5126
+                                 type: type
                              };
                              length += size;
                          }
                      };
 
-                 addAttributes("vertex",3);
-                 addAttributes("normal",3);
-                 addAttributes("uv1",2);
-                 addAttributes("uv2",2);
-                 addAttributes("tangent",4);
-                 addAttributes("color",4);
+                 addAttributes("vertex",3,5126);
+                 addAttributes("normal",3,5126);
+                 addAttributes("uv1",2,5126);
+                 addAttributes("uv2",2,5126);
+                 addAttributes("tangent",4,5126);
+                 addAttributes("color",4,5126);
+                 addAttributes("int1",1,5124);
+                 addAttributes("int2",2,5124);
+                 addAttributes("int3",3,5124);
+                 addAttributes("int4",4,5124);
 
-                 data = new Float32Array(length*vertexLen);
+                 var dataArrayBuffer = new ArrayBuffer(length*vertexLen*4);
                  for (i=0;i<vertexLen;i++){
+                     var vertexOffset = i*length*4;
                      for (var j=0;j<names.length;j++){
-                         var dataSrc = thisObj[names[j]];
+                         if (types[j] === 5126){
+                            data = new Float32Array(dataArrayBuffer,vertexOffset);
+                         } else {
+                             data = new Int32Array(dataArrayBuffer,vertexOffset);
+                         }
+                         var dataSrc = vertexAttributes[j];
                          var dataSrcLen = lengthOfVertexAttributes[j];
                          for (var k=0;k<dataSrcLen;k++){
-                             data[index++] = dataSrc[i*dataSrcLen+k];
+                             data[k] = dataSrc[i*dataSrcLen+k];
+                             vertexOffset += 4;
                          }
                      }
                  }
 
-                 return {
-                     vertexAttrLength:length*4,
-                     description:description,
-                     data:data
-                 };
+                 _interleavedArray = dataArrayBuffer;
+                 _interleavedArrayFormat = description;
+                 _vertexAttrLength = length*4;
              };
-        if (!config) {
-            config = {
-                name:"Mesh"
-            };
-        }
-        if (true){
-            if (config.vertex.length > 65535){
-                KICK.core.Util.fail("Mesh overflow");
-            }
-        }
 
-        /**
-         * @property name
-         * @type String
-         */
-        this.name = config.name?config.name:"Mesh";
-        /**
-         * @property vertex
-         * @type Float32Array
-         */
-        this.vertex = config.vertex?new Float32Array(config.vertex):null;
-        /**
-         * @property normal
-         * @type Float32Array
-         */
-        this.normal = config.normal?new Float32Array(config.normal):null;
-        /**
-         * @property uv1
-         * @type Float32Array
-         */
-        this.uv1 = config.uv1?new Float32Array(config.uv1):null;
-        /**
-         * @property uv2
-         * @type Float32Array
-         */
-        this.uv2 = config.uv2?new Float32Array(config.uv2):null;
-        /**
-         * A tangent is represented as vec4
-         * @property tangent
-         * @type Float32Array
-         */
-        this.tangent = config.tangent?new Float32Array(config.tangent):null;
-        /**
-         * @property color (RGBA)
-         * @type Float32Array
-         */
-        this.color = config.color?new Float32Array(config.color):null;
-        /**
-         * @property indices
-         * @type Uint16Array
-         */
-        this.indices = config.indices?new Uint16Array(config.indices):null;
-        /**
-         * Must be 4,6, or 5
-         * @property meshType
-         * @type Number
-         */
-        this.meshType = config.meshType?config.meshType:4;
-
-
-
-        /**
-         * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
-         * @method verify
-         * @param {KICK.material.Shader} shader
-         * @return {Array[String]} list of missing vertex attributes in mesh or null if no missing attributes
-         */
-        this.verify = function (shader){
-            var missingVertexAttributes = [],
-                found;
-            for (var att in shader.lookupAttribute){
-                if (typeof (att) === "string"){
-                    found = false;
-                    for (var i=0;i<vertexAttributeNames.length;i++){
-                        if (vertexAttributeNames[i] === att){
-                            found = true;
-                            break;
+        Object.defineProperties(this,{
+            /**
+             * @property name
+             * @type string
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                    _name = newValue;
+                }
+            },
+            /**
+             * @property interleavedArray
+             * @type Float32Array
+             */
+            interleavedArray:{
+                get:function(){
+                    if (_interleavedArray === null && thisObj.vertex){
+                        createInterleavedData();
+                    }
+                    return _interleavedArray;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (newValue && !(newValue instanceof ArrayBuffer)){
+                            fail("MeshData.interleavedArray must be an ArrayBuffer");
                         }
                     }
-                    if (!found){
-                        missingVertexAttributes.push(att);
+                    if (!newValue){
+                        clearInterleavedData();
+                    } else {
+                        _interleavedArray = newValue;
                     }
                 }
-            }
-            if (missingVertexAttributes.length===0){
-                return null;
-            }
-            return missingVertexAttributes;
-        };
-
-        /**
-         * Bind the vertex attributes of the mesh to the shader
-         * @method bind
-         * @param {KICK.material.Shader} shader
-         */
-        this.bind = function (shader) {
-            shader.bind();
-
-            gl.bindBuffer(34962, meshVertexAttBuffer);
-
-            for (var descName in meshVertexAttBufferDescription) {
-                if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
-                    var desc = meshVertexAttBufferDescription[descName];
-                    var attributeIndex = shader.lookupAttribute[descName];
-                    gl.enableVertexAttribArray(attributeIndex);
-                    gl.vertexAttribPointer(attributeIndex, desc.size,
-                       desc.type, false, vertexAttrLength, desc.pointer);
+            },
+            /**
+             * Describes the interleaved array format.<br>
+             * The description is an object with a number of properties.<br>
+             * Each property name corresponds to the name of the vertex attribute.<br>
+             * Each property has the format <br>
+             * <pre class="brush: js">
+             * {
+             * &nbsp;pointer: 0, // {Number}
+             * &nbsp;size: 0, //{Number} number of elements
+             * &nbsp;normalized: 0, // {Boolean} should be normalized or not
+             * &nbsp;type: 0 // {5126 or 5124}
+             * }
+             * </pre>
+             * <br>
+             * Example:<br>
+             * <pre class="brush: js">
+             * var vertexOffset = meshData.interleavedArrayFormat["vertex"].pointer;
+             * </pre>
+             * @property description
+             * @type Object
+             */
+            interleavedArrayFormat:{
+                get:function(){
+                    if (_interleavedArray === null && thisObj.vertex){
+                        createInterleavedData();
+                    }
+                    return _interleavedArrayFormat;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (newValue !== null){
+                            for (var n in newValue){
+                                var object = newValue[n];
+                                if (typeof (object) === "object" ){
+                                    if (typeof(object.pointer) !== "number" ||
+                                        typeof(object.size) !== "number" ||
+                                        typeof(object.normalized) !== "boolean" ||
+                                        typeof(object.type) !== "number"){
+                                        fail("Invalid object signature - expected {pointer:,size:,normalized:,type:}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (!newValue){
+                        clearInterleavedData();
+                    } else {
+                        _interleavedArrayFormat = newValue;
+                    }
+                }
+            },
+            /**
+             * The length of vertexAttributes for one vertex in bytes
+             * @property vertexAttrLength
+             * @type Number
+             */
+            vertexAttrLength:{
+                get:function(){
+                    if (_interleavedArray === null && thisObj.vertex){
+                        createInterleavedData();
+                    }
+                    return _vertexAttrLength;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (typeof newValue !== "number" || newValue <0){
+                            fail("Invalid MeshData.vertexAttrLength - expected a real number");
+                        }
+                    }
+                    if (!newValue){
+                        clearInterleavedData();
+                    } else {
+                        _vertexAttrLength = newValue;
+                    }
+                }
+            },
+            /**
+             * Vertex (vec3)
+             * @property vertex
+             * @type Array[Number]
+             */
+            vertex:createGetterSetter(5126, "vertex"),
+            /**
+             * Normal (vec3)
+             * @property normal
+             * @type Array[Number]
+             */
+            normal:createGetterSetter(5126, "normal"),
+            /**
+             * UV1 (vec2)
+             * @property uv1
+             * @type Array[Number]
+             */
+            uv1:createGetterSetter(5126, "uv1"),
+            /**
+             * UV2 (vec2)
+             * @property uv2
+             * @type Array[Number]
+             */
+            uv2:createGetterSetter(5126, "uv2"),
+            /**
+             * Tangent (vec4)
+             * @property tangent
+             * @type Array[Number]
+             */
+            tangent:createGetterSetter(5126, "tangent"),
+            /**
+             * Color (vec4)
+             * @property color
+             * @type Array[Number]
+             */
+            color:createGetterSetter(5126, "color"),
+            /**
+             * Integer attribute (two Int32)
+             * @property int1
+             * @type Array[Number]
+             */
+            int1:createGetterSetter(5124, "int1"),
+            /**
+             * Integer attribute (two Int32)
+             * @property int2
+             * @type Array[Number]
+             */
+            int2:createGetterSetter(5124, "int2"),
+            /**
+             * Integer attribute (two Int32)
+             * @property int3
+             * @type Array[Number]
+             */
+            int3:createGetterSetter(5124, "int3"),
+            /**
+             * Integer attribute (two Int32)
+             * @property int4
+             * @type Array[Number]
+             */
+            int4:createGetterSetter(5124, "int4"),
+            /**
+             * indices (integer)
+             * @property indices
+             * @type Array[Number]
+             */
+            indices:{
+                get:function(){
+                    return _indices;
+                },
+                set:function(newValue){
+                    if (newValue && !(newValue instanceof Uint16Array)){
+                        newValue = new Uint16Array(newValue);
+                    }
+                    _indices = newValue;
+                    clearInterleavedData();
+                }
+            },
+            /**
+             * Must be 4,6, or 5
+             * @property meshType
+             * @type Number
+             */
+            meshType:{
+                get:function(){
+                    return _meshType;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (newValue != 4 &&
+                            newValue != 6 &&
+                            newValue != 5){
+                            fail("MeshData.meshType must be 4, 6 or 5");
+                        }
+                    }
+                    _meshType = newValue;
                 }
             }
-            gl.bindBuffer(34963, meshVertexIndexBuffer);
-        };
-
-        /**
-         * Renders the current mesh
-         * @method render
-         */
-        this.render = function () {
-            gl.drawElements(this.meshType, meshVertexIndexBuffer.numItems, 5123, 0);
-        };
+        });
 
         /**
          * Combine two meshes and returns the combined mesh as a new Mesh object.<br>
@@ -5967,27 +6109,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * both mesh objects are transferred<br>
          * Triangle fans cannot be combined
          * @method combine
-         * @param {KICK.scene.Mesh} secondMesh
+         * @param {KICK.mesh.MeshData} secondMesh
          * @param {KICK.math.mat4} transform Optional transformation matrix
-         * @return {KICK.scene.Mesh} mesh object or null if incompatible objects
+         * @return {KICK.mesh.MeshData} mesh object or null if incompatible objects
          */
         this.combine = function(secondMesh, transform){
-            if (this.meshType !== secondMesh.meshType || this.meshType == 6){
-                if (true){
-                    if (this.meshType !== secondMesh.meshType){
-                        KICK.core.Util.fail("Mesh.combine does not support different meshTypes");
+            if (thisObj.meshType !== secondMesh.meshType || thisObj.meshType == 6){
+                if (ASSERT){
+                    if (thisObj.meshType !== secondMesh.meshType){
+                        fail("Mesh.combine does not support different meshTypes");
                     } else {
-                        KICK.core.Util.fail("Mesh.combine does not support triangle fans");
+                        fail("Mesh.combine does not support triangle fans");
                     }
                     return null;
                 }
                 return null;
             }
-            var dataNames = ["vertex","normal","uv1","uv2","tangent","color","indices"];
+            var dataNames = ["vertex","normal","uv1","uv2","tangent","color","int1","int2","int3","int4","indices"];
 
             for (var i=dataNames.length-1;i>=0;i--){
                 var name = dataNames[i];
-                if (!this[name] || !secondMesh[name]){
+                if (!thisObj[name] || !secondMesh[name]){
                     dataNames.splice(i,1); // remove dataName from array
                 }
             }
@@ -6025,81 +6167,46 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             };
 
             var newConfig = {
-                meshType:this.meshType,
-                name:this.name+"-"+secondMesh.name
+                meshType:thisObj.meshType
             };
 
-            appendObject(newConfig,this,null,0);
-            appendObject(newConfig,secondMesh,transform,this.indices.length);
+            appendObject(newConfig,thisObj,null,0);
+            appendObject(newConfig,secondMesh,transform,thisObj.indices.length);
 
-            if (this.meshType === 5){
+            if (thisObj.meshType === 5){
                 // create two degenerate triangles to connect the two triangle strips
-                newConfig.indices.splice(this.indices,0,this.indices,this.indices+1);
+                newConfig.indices.splice(thisObj.indices,0,thisObj.indices,thisObj.indices+1);
             }
 
-            return new mesh.Mesh(engine,newConfig);
+            return new mesh.MeshData(newConfig);
         };
 
-        /**
-         * Copy data to the vertex buffer object (VBO)
-         * @method updateData
-         */
-        this.updateData = function () {
-            var names = ["vertex", "normal", "tangent","uv1","uv2","color"],
-                dataLengths = [3,3,3,2,2,4],
-                i, buffer, dataLength,
-                interleavedData = createInterleavedData(),
-                c = KICK.core.Constants;
-            meshVertexAttBufferDescription = interleavedData.description;
-            vertexAttrLength = interleavedData.vertexAttrLength;
-            // delete current buffers
-            for (i=buffers.length-1; i >= 0; i--) {
-                gl.deleteBuffer(buffers[i]);
-            }
-            if (typeof meshVertexIndexBuffer === "number"){
-                gl.deleteBuffer(meshVertexIndexBuffer);
-            }
-            if (typeof meshVertexAttBuffer === "number"){
-                gl.deleteBuffer(meshVertexAttBuffer);
-            }
+        if (!config){
+            config = {};
+        }
 
-            vertexAttributeNames = [];
-            buffers = [];
+        thisObj.name = config.name;
+        thisObj.vertex = config.vertex;
+        thisObj.normal = config.normal;
+        thisObj.uv1 = config.uv1;
+        thisObj.uv2 = config.uv2;
+        thisObj.tangent = config.tangent;
+        thisObj.color = config.color;
+        thisObj.int1 = config.int1;
+        thisObj.int2 = config.int2;
+        thisObj.int3 = config.int3;
+        thisObj.int4 = config.int4;
+        thisObj.indices = config.indices;
+        thisObj.meshType = config.meshType || 4;
 
-            for (i=names.length-1; i >= 0; i--) {
-                var name = names[i],
-                    data = this[name];
-                if (data) {
-                    buffer = gl.createBuffer();
-                    dataLength = dataLengths[i];
-                    gl.bindBuffer(34962, buffer);
-                    gl.bufferData(34962, data, 35044);
-                    buffer.itemSize = dataLength;
-                    buffer.numItems = data.length / dataLength;
-                    buffers.push(buffer);
-                    vertexAttributeNames.push(name);
-                }
-            }
-
-            meshVertexAttBuffer = gl.createBuffer();
-            gl.bindBuffer(34962, meshVertexAttBuffer);
-            gl.bufferData(34962, interleavedData.data, 35044);
-
-            meshVertexIndexBuffer = gl.createBuffer();
-            gl.bindBuffer(34963, meshVertexIndexBuffer);
-            gl.bufferData(34963, this.indices, 35044);
-            meshVertexIndexBuffer.itemSize = 1;
-            meshVertexIndexBuffer.numItems = this.indices.length;
-        };
-
-        this.updateData(); // always update data on load
+        thisObj.interleavedArray = config.interleavedArray;
     };
 
     /**
      * Recalculate the vertex normals based on the triangle normals
      * @method recalculateNormals
      */
-    mesh.Mesh.prototype.recalculateNormals = function(){
+    mesh.MeshData.prototype.recalculateNormals = function(){
         var vertexCount = this.vertex.length/3,
             triangleCount = this.indices.length/3,
             triangles = this.indices,
@@ -6141,7 +6248,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      *   http://www.terathon.com/code/tangent.html
      * @method recalculateTangents
      */
-    mesh.Mesh.prototype.recalculateTangents = function(){
+    mesh.MeshData.prototype.recalculateTangents = function(){
         var vertex = vec3.wrapArray(this.vertex),
             vertexCount = vertex.length,
             normal = vec3.wrapArray(this.normal),
@@ -6218,6 +6325,154 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
             tangent[a][3] = (vec3.dot(vec3.cross(n, t,vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
         }
+    };
+
+    /**
+     * Mesh object that can be bound.
+     * @class Mesh
+     * @namespace KICK.mesh
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config
+     * @param {MeshData} data
+     */
+    mesh.Mesh = function (engine,config,meshData) {
+        var gl = engine.gl,
+            meshVertexAttBuffer,
+            interleavedArrayFormat,
+            meshVertexIndexBuffer,
+            _name,
+            _meshData,
+            c = KICK.core.Constants,
+            vertexAttrLength,
+            meshType,
+            meshElements,
+            /**
+             * Copy data to the vertex buffer object (VBO)
+             * @method updateData
+             * @private
+             */
+            updateData = function () {
+                var indices = _meshData.indices;
+                // delete current buffers
+                if (typeof meshVertexIndexBuffer === "number"){
+                    gl.deleteBuffer(meshVertexIndexBuffer);
+                }
+                if (typeof meshVertexAttBuffer === "number"){
+                    gl.deleteBuffer(meshVertexAttBuffer);
+                }
+
+                interleavedArrayFormat = _meshData.interleavedArrayFormat;
+                vertexAttrLength = _meshData.vertexAttrLength;
+                meshType = _meshData.meshType;
+                meshElements = indices.length;
+
+
+                meshVertexAttBuffer = gl.createBuffer();
+                console.log("Fill data in "+meshVertexAttBuffer+ " length of data "+_meshData.interleavedArray.byteLength);
+                gl.bindBuffer(34962, meshVertexAttBuffer);
+                gl.bufferData(34962, _meshData.interleavedArray, 35044);
+
+                meshVertexIndexBuffer = gl.createBuffer();
+                console.log("Fill data in "+meshVertexIndexBuffer+ " length of data "+indices.length);
+                gl.bindBuffer(34963, meshVertexIndexBuffer);
+                gl.bufferData(34963, indices, 35044);
+            };
+
+        if (ASSERT){
+            if (!(meshData instanceof mesh.MeshData)){
+                fail("meshData constructor parameter must be defined");
+            }
+        }
+
+        Object.defineProperties(this,{
+            /**
+             * @property name
+             * @type String
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                    _name = newValue || "Mesh";
+                }
+            },
+            /**
+             * @property meshData
+             * @type KICK.mesh.MeshData
+             */
+            meshData:{
+                get:function(){
+                    return _meshData;
+                },
+                set:function(newValue){
+                    _meshData = newValue;
+                    updateData();
+                }
+            }
+        });
+
+
+        if (!config) {
+            config = {};
+        }
+
+        this.name = config.name;
+        this.meshData = meshData;
+        
+        /**
+         * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
+         * @method verify
+         * @param {KICK.material.Shader} shader
+         * @return {Array[String]} list of missing vertex attributes in mesh or null if no missing attributes
+         */
+        this.verify = function (shader){
+            var missingVertexAttributes = [],
+                found;
+            for (var attName in shader.lookupAttribute){
+                if (typeof (attName) === "string"){
+                    found = interleavedArrayFormat[attName];
+                    if (!found){
+                        missingVertexAttributes.push(attName);
+                    }
+                }
+            }
+            if (missingVertexAttributes.length === 0){
+                return null;
+            }
+            return null;
+        };
+
+        /**
+         * Bind the vertex attributes of the mesh to the shader
+         * @method bind
+         * @param {KICK.material.Shader} shader
+         */
+        this.bind = function (shader) {
+            shader.bind();
+
+            gl.bindBuffer(34962, meshVertexAttBuffer);
+
+            for (var descName in interleavedArrayFormat) {
+                if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
+                    var desc = interleavedArrayFormat[descName];
+                    var attributeIndex = shader.lookupAttribute[descName];
+                    gl.enableVertexAttribArray(attributeIndex);
+                    gl.vertexAttribPointer(attributeIndex, desc.size,
+                       desc.type, false, vertexAttrLength, desc.pointer);
+                }
+            }
+            gl.bindBuffer(34963, meshVertexIndexBuffer);
+        };
+
+        /**
+         * Renders the current mesh
+         * @method render
+         */
+        this.render = function () {
+            gl.drawElements(meshType, meshElements, 5123, 0);
+        };
     };
 })();/*!
  * New BSD License
@@ -8814,25 +9069,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.MeshFactory.createTriangle = function (engine) {
         var config = {
-            name: "Triangle",
-            vertex: [
-                0,1,0,
-                -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                0.866025403784439,-0.5,0
-            ],
-            uv1: [
-                0,1,
-                -0.866025403784439,-0.5,
-                0.866025403784439,-0.5
-            ],
-            normal: [
-                0,0,1,
-                0,0,1,
-                0,0,1
-            ],
-            indices: [0,1,2]
-        };
-        return new mesh.Mesh(engine,config);
+                name: "Triangle"
+            },
+            meshData = {
+                name: "Triangle",
+                vertex: [
+                    0,1,0,
+                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
+                    0.866025403784439,-0.5,0
+                ],
+                uv1: [
+                    0,1,
+                    -0.866025403784439,-0.5,
+                    0.866025403784439,-0.5
+                ],
+                normal: [
+                    0,0,1,
+                    0,0,1,
+                    0,0,1
+                ],
+                indices: [0,1,2]
+            },
+            meshDataObj = new mesh.MeshData(meshData);
+        return new mesh.Mesh(engine,config, meshDataObj);
     };
 
     /**
@@ -8844,6 +9103,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.MeshFactory.createPlane = function (engine) {
         var config = {
+            name: "Plane"
+        };
+        var meshConfig = {
             name: "Plane",
             vertex: [
                 1,-1,0,
@@ -8866,7 +9128,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             ],
             indices: [0,1,2,2,1,3]
         };
-        return new mesh.Mesh(engine,config);
+        var meshDataObject = new mesh.MeshData(meshConfig);
+        return new mesh.Mesh(engine,config,meshDataObject);
     };
 
     /**
@@ -8941,14 +9204,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 index++;
             }
         }
-        return new mesh.Mesh(engine, {
+        var meshDataConf = {
             name: "UVSphere",
             vertex: verticesMemory.mem,
             uv1: uvsMemory.mem,
             normal: normalsMemory.mem,
             indices: indices,
             meshType: 5
-        });
+        };
+        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.Mesh(engine, {name: "UVSphere"},meshDataObj);
     };
 
     /**
@@ -8963,6 +9228,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (!length){
             length = 1;
         }
+        var config = {name:"Cube"};
         //    v6----- v5
         //   /|      /|
         //  v1------v0|
@@ -8970,7 +9236,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         //  | |v7---|-|v4
         //  |/      |/
         //  v2------v3
-        var config = {
+        var meshDataConf = {
             name: "Cube",
             vertex: [
                length,length,length,
@@ -9090,6 +9356,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 20,21,22,
                 20,22,23]
         };
-        return new mesh.Mesh(engine,config);
+        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.Mesh(engine,config,meshDataObj);
     };
 })();

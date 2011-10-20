@@ -47,25 +47,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.MeshFactory.createTriangle = function (engine) {
         var config = {
-            name: "Triangle",
-            vertex: [
-                0,1,0,
-                -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                0.866025403784439,-0.5,0
-            ],
-            uv1: [
-                0,1,
-                -0.866025403784439,-0.5,
-                0.866025403784439,-0.5
-            ],
-            normal: [
-                0,0,1,
-                0,0,1,
-                0,0,1
-            ],
-            indices: [0,1,2]
-        };
-        return new mesh.Mesh(engine,config);
+                name: "Triangle"
+            },
+            meshData = {
+                name: "Triangle",
+                vertex: [
+                    0,1,0,
+                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
+                    0.866025403784439,-0.5,0
+                ],
+                uv1: [
+                    0,1,
+                    -0.866025403784439,-0.5,
+                    0.866025403784439,-0.5
+                ],
+                normal: [
+                    0,0,1,
+                    0,0,1,
+                    0,0,1
+                ],
+                indices: [0,1,2]
+            },
+            meshDataObj = new mesh.MeshData(meshData);
+        return new mesh.Mesh(engine,config, meshDataObj);
     };
 
     /**
@@ -77,6 +81,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.MeshFactory.createPlane = function (engine) {
         var config = {
+            name: "Plane"
+        };
+        var meshConfig = {
             name: "Plane",
             vertex: [
                 1,-1,0,
@@ -99,7 +106,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             ],
             indices: [0,1,2,2,1,3]
         };
-        return new mesh.Mesh(engine,config);
+        var meshDataObject = new mesh.MeshData(meshConfig);
+        return new mesh.Mesh(engine,config,meshDataObject);
     };
 
     /**
@@ -174,14 +182,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 index++;
             }
         }
-        return new mesh.Mesh(engine, {
+        var meshDataConf = {
             name: "UVSphere",
             vertex: verticesMemory.mem,
             uv1: uvsMemory.mem,
             normal: normalsMemory.mem,
             indices: indices,
             meshType: constants.GL_TRIANGLE_STRIP
-        });
+        };
+        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.Mesh(engine, {name: "UVSphere"},meshDataObj);
     };
 
     /**
@@ -196,6 +206,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (!length){
             length = 1;
         }
+        var config = {name:"Cube"};
         //    v6----- v5
         //   /|      /|
         //  v1------v0|
@@ -203,7 +214,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         //  | |v7---|-|v4
         //  |/      |/
         //  v2------v3
-        var config = {
+        var meshDataConf = {
             name: "Cube",
             vertex: [
                length,length,length,
@@ -323,6 +334,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 20,21,22,
                 20,22,23]
         };
-        return new mesh.Mesh(engine,config);
+        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.Mesh(engine,config,meshDataObj);
     };
 })();
