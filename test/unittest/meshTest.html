@@ -82,13 +82,7 @@ YUI().use('node', 'console', 'test', function (Y) {
         testRecalculateNormals: function () {
             var Assert = Y.Assert;
 
-            var engineStub = {
-                fail:function(msg){
-                    debugger;
-                    Assert.fail(msg);
-                }
-            };
-            var meshData = new KICK.mesh.MeshData(engineStub);
+            var meshData = new KICK.mesh.MeshData();
             meshData.vertex = [0,0,0,
                                1,0,0,
                                0,0,-1];
@@ -100,13 +94,7 @@ YUI().use('node', 'console', 'test', function (Y) {
         testInterleavedArray: function () {
             var Assert = Y.Assert;
 
-            var engineStub = {
-                fail:function(msg){
-                    debugger;
-                    Assert.fail(msg);
-                }
-            };
-            var meshData = new KICK.mesh.MeshData(engineStub);
+            var meshData = new KICK.mesh.MeshData();
             meshData.vertex = [0,0,0,
                                1,0,0,
                                0,0,-1];
@@ -132,15 +120,9 @@ YUI().use('node', 'console', 'test', function (Y) {
         },
         // test that ints in interleaved arrays
         testInt32: function () {
-           var Assert = Y.Assert;
+            var Assert = Y.Assert;
 
-            var engineStub = {
-                fail:function(msg){
-                    debugger;
-                    Assert.fail(msg);
-                }
-            };
-            var meshData = new KICK.mesh.MeshData(engineStub);
+            var meshData = new KICK.mesh.MeshData();
             meshData.vertex = [0,0,0,
                                1,0,0,
                                0,0,-1];
@@ -164,22 +146,16 @@ YUI().use('node', 'console', 'test', function (Y) {
         },
         // test that ints in interleaved arrays
         testInt32Combine: function () {
-           var Assert = Y.Assert;
+            var Assert = Y.Assert;
 
-            var engineStub = {
-                fail:function(msg){
-                    debugger;
-                    Assert.fail(msg);
-                }
-            };
-            var meshData1 = new KICK.mesh.MeshData(engineStub);
+            var meshData1 = new KICK.mesh.MeshData();
             meshData1.vertex = [0,0,0,
                                1,0,0,
                                0,0,-1];
             meshData1.int1 = [1,2,-3];
             meshData1.indices = [0,1,2];
 
-            var meshData2 = new KICK.mesh.MeshData(engineStub);
+            var meshData2 = new KICK.mesh.MeshData();
             meshData2.vertex = [0,2,0,
                                1,2,0,
                                0,2,-1];
@@ -203,8 +179,58 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.compareFloat(vertexAttrLength, (3+1)*4);
             var length = interleavedBytes.byteLength;
             Assert.compareFloat(length, (meshData1.vertex.length+meshData1.int1.length)*4*2,"data length");
-        }
+        },
+        // Test that a mesh can be transformed using the function MeshData.transform
+        testMeshDataTransform: function () {
+           var Assert = Y.Assert;
 
+            var meshData1 = new KICK.mesh.MeshData();
+            meshData1.vertex = [0,0,0,
+                               1,0,0,
+                               0,0,-1];
+            meshData1.int1 = [1,2,-3];
+            meshData1.indices = [0,1,2];
+
+            var mat = KICK.math.mat4.create();
+            KICK.math.mat4.identity(mat);
+            var translateVector = [1,2,3];
+            KICK.math.mat4.translate(mat, translateVector);
+            var meshData2 = meshData1.transform(mat);
+
+            for (var i=0;i<3;i++){
+                var index = i*3;
+                for (var j=0;j<3;j++){
+                    Y.Assert.compareFloat(meshData1.vertex[index+j]+translateVector[j],meshData2.vertex[index+j]);
+                }
+            }
+        },
+        // Test that mesh attributes can be extracted from a compact representation
+        // of interleavedArray and description
+        testMeshVertexFromInterleavedArray: function () {
+           var Assert = Y.Assert;
+
+            var meshData1 = new KICK.mesh.MeshData();
+            meshData1.vertex = [0,0,0,
+                               1,0,0,
+                               0,0,-1];
+            meshData1.int1 = [1,2,-3];
+            meshData1.indices = [0,1,2];
+
+            var config = {
+                interleavedArray: meshData1.interleavedArray,
+                vertexAttrLength: meshData1.vertexAttrLength,
+                interleavedArrayFormat: meshData1.interleavedArrayFormat,
+                indices: meshData1.indices
+            };
+
+            var meshData2 = new KICK.mesh.MeshData(config);
+
+            var mesh2Vertex = meshData2.vertex;
+            var mesh2int1 = meshData2.int1;
+            Y.Assert.isTrue(mesh2Vertex, "mesh2Vertex must be defined");
+            Y.Assert.isTrue(mesh2int1, "mesh2int1 must be defined");
+            Y.Assert.compareFloat(mesh2Vertex.length,meshData1.vertex.length,message);
+        }
     });
 
     /// extend Asset to compare float values

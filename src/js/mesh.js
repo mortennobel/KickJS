@@ -95,7 +95,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             return data[name];
                         },
                         set:function(newValue){
-                            if (newValue && !(newValue instanceof typedArrayType)){
+                            if (newValue){
                                 newValue = new typedArrayType(newValue);
                             }
                             data[name] = newValue;
@@ -386,6 +386,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         });
 
         /**
+         * Creates a copy of the mesh and transform the vertex positions of the MeshData with a mat4.
+         * Note that normals are not modified - so they may need to renormalized.
+         * @param {KICK.math.mat4} transformMatrix
+         * @return {KICK.mesh.MeshData} transformed mesh
+         */
+        this.transform = function(transformMatrix){
+            var copy = new mesh.MeshData(this);
+            var wrappedVec3Array = vec3.wrapArray(copy.vertex);
+            for (var j=wrappedVec3Array.length-1;j>=0;j--){
+                mat4.multiplyVec3(transformMatrix,wrappedVec3Array[j]);
+            }
+            return copy;
+        };
+        /**
          * Combine two meshes and returns the combined mesh as a new Mesh object.<br>
          * The two meshes must have the same meshType. Only vertex attributes existing in
          * both mesh objects are transferred<br>
@@ -416,35 +430,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             }
 
-            var appendObject = function(config, source, trans,indexOffset){
-                for (var i=dataNames.length-1;i>=0;i--){
-                    var name = dataNames[i];
+            var appendObject = function(config, source, indexOffset){
+                var i,j,name,data,len;
+                for (i=dataNames.length-1;i>=0;i--){
+                    name = dataNames[i];
                     if (!config[name]){ // if undefined
                         config[name] = KICK.core.Util.typedArrayToArray(source[name]);
                     } else {
-                        var data = source[name];
-                        if (trans && name === "vertex"){
-                            // todo handle vertex normals as well
-                            data = new Float32Array(data);
-                            var wrappedVec3Array = vec3.wrapArray(data);
-                            for (var j=wrappedVec3Array.length-1;j>=0;j--){
-                                mat4.multiplyVec3(trans,wrappedVec3Array[j]);
-                            }
-                        }
+                        data = source[name];
                         if (indexOffset && name === "indices"){
                             // take a copy
                             data = new Uint16Array(data);
                             // add offset to copy
-                            var len = data.length;
-                            for (var j=0;j<len;j++){
+                            len = data.length;
+                            for (j=0;j<len;j++){
                                 data[j] += indexOffset;
                             }
                         }
-                        for (var j=0;j<data.length;j++){
+                        for (j=0;j<data.length;j++){
                             config[name].push(data[j]);
                         }
                     }
-
                 }
             };
 
@@ -452,8 +458,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 meshType:thisObj.meshType
             };
 
-            appendObject(newConfig,thisObj,null,0);
-            appendObject(newConfig,secondMesh,transform,thisObj.indices.length);
+            if (transform){
+                secondMesh = secondMesh.transform(transform);
+            }
+
+            appendObject(newConfig,thisObj,0);
+            appendObject(newConfig,secondMesh,thisObj.indices.length);
 
             if (thisObj.meshType === constants.GL_TRIANGLE_STRIP){
                 // create two degenerate triangles to connect the two triangle strips
