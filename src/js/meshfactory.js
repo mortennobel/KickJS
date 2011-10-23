@@ -23,8 +23,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 (function () {
     "use strict"; // force strict ECMAScript 5
 
-    var scene = KICK.namespace("KICK.scene"),
-        mesh = KICK.namespace("KICK.mesh"),
+    var mesh = KICK.namespace("KICK.mesh"),
         math = KICK.namespace("KICK.math"),
         vec3 = math.vec3,
         vec2 = math.vec2,
@@ -33,10 +32,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Class responsible for creating Mesh objects
      * @class MeshFactory
-     * @namespace KICK.scene
+     * @namespace KICK.mesh
      * @static
      */
-    scene.MeshFactory = {};
+    mesh.MeshFactory = {};
 
     /**
      * Creates a triangle in the XY plane
@@ -44,7 +43,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @static
      * @return {KICK.core.MeshData} triangle mesh
      */
-    scene.MeshFactory.createTriangleData = function () {
+    mesh.MeshFactory.createTriangleData = function () {
         return new mesh.MeshData( {
             name: "Triangle",
             vertex: [
@@ -73,11 +72,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @return {KICK.core.Mesh} triangle mesh
      */
-    scene.MeshFactory.createTriangle = function (engine) {
+    mesh.MeshFactory.createTriangle = function (engine) {
         var config = {
                 name: "Triangle"
             },
-            meshDataObj = scene.MeshFactory.createTriangleData();
+            meshDataObj = mesh.MeshFactory.createTriangleData();
         return new mesh.Mesh(engine,config, meshDataObj);
     };
 
@@ -87,7 +86,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @static
      * @return {KICK.mesh.MeshData} plane mesh
      */
-    scene.MeshFactory.createPlaneData = function () {
+    mesh.MeshFactory.createPlaneData = function () {
         return new mesh.MeshData({
             name: "Plane",
             vertex: [
@@ -120,11 +119,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @return {KICK.mesh.Mesh} plane mesh
      */
-    scene.MeshFactory.createPlane = function (engine) {
+    mesh.MeshFactory.createPlane = function (engine) {
         var config = {
               name: "Plane"
             },
-            meshDataObject = scene.MeshFactory.createPlaneData();
+            meshDataObject = mesh.MeshFactory.createPlaneData();
         return new mesh.Mesh(engine,config,meshDataObject);
     };
 
@@ -139,7 +138,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Number} radius
      * @return {KICK.mesh.MeshData} uv-sphere mesh
      */
-    scene.MeshFactory.createUVSphereData = function(slices, stacks, radius){
+    mesh.MeshFactory.createUVSphereData = function(slices, stacks, radius){
         if (!slices || slices < 3){
             slices = 20;
         }
@@ -222,8 +221,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Number} radius
      * @return {KICK.mesh.Mesh} uv-sphere mesh
      */
-    scene.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
-        var meshDataObj = scene.MeshFactory.createUVSphereData(slices, stacks, radius);
+    mesh.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
+        var meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
         return new mesh.Mesh(engine, {name: "UVSphere"},meshDataObj);
     };
 
@@ -234,7 +233,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Number} length Optional, default value is 1.0
      * @return {KICK.mesh.Mesh} cube mesh
      */
-    scene.MeshFactory.createCubeData = function (length) {
+    mesh.MeshFactory.createCubeData = function (length) {
         if (!length){
             length = 1;
         }
@@ -377,11 +376,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Number} length Optional, default value is 1.0
      * @return {KICK.mesh.Mesh} cube mesh
      */
-    scene.MeshFactory.createCube = function (engine,length) {
+    mesh.MeshFactory.createCube = function (engine,length) {
         var config = {
             name:"Cube"
         };
-        var meshDataObj = scene.MeshFactory.createCubeData(length);
+        var meshDataObj = mesh.MeshFactory.createCubeData(length);
         return new mesh.Mesh(engine,config,meshDataObj);
     };
 })();

@@ -99,7 +99,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createCube, 0.5);
+            setMesh(KICK.mesh.MeshFactory.createCube, 0.5);
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);

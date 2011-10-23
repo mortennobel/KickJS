@@ -110,7 +110,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createCube, 0.5);
+            setMesh(KICK.mesh.MeshFactory.createCube, 0.5);
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
 
@@ -118,7 +118,7 @@
         }
 
         function UVSphere(){
-            setMesh(KICK.scene.MeshFactory.createUVSphere, 2);
+            setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
         }
     </script>
 </head>

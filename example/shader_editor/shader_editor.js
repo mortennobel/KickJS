@@ -42,13 +42,13 @@ window.shaderEditor = new (function(){
             meshsetting = settings.meshsetting;
             switch (meshsetting){
                 case "cube":
-                    setMesh(KICK.scene.MeshFactory.createCube,0.5);
+                    setMesh(KICK.mesh.MeshFactory.createCube,0.5);
                 break;
                 case "sphere":
-                    setMesh(KICK.scene.MeshFactory.createUVSphere);
+                    setMesh(KICK.mesh.MeshFactory.createUVSphere);
                 break;
                 default:
-                    setMesh(KICK.scene.MeshFactory.createPlane);
+                    setMesh(KICK.mesh.MeshFactory.createPlane);
                 break;
             }
         }
@@ -146,7 +146,7 @@ window.shaderEditor = new (function(){
 
             var gameObject = _engine.activeScene.createGameObject();
             _meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createPlane);
+            setMesh(KICK.mesh.MeshFactory.createPlane);
             if (window.shader){
                 // load saved content
                 loadMaterial(window.shader);

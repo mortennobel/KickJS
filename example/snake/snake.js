@@ -59,7 +59,7 @@ window.onload = function(){
             });
 
             meshRenderer.material = material;
-            meshRenderer.mesh = KICK.scene.MeshFactory.createCube(engine,0.5);
+            meshRenderer.mesh = KICK.mesh.MeshFactory.createCube(engine,0.5);
         };
 
         this.update = function(){
@@ -91,15 +91,24 @@ window.onload = function(){
             });
 
             meshRenderer.material = material;
-            var mesh = KICK.scene.MeshFactory.createCube(engine,0.5);
-            delete mesh.color;
+
+            var meshCube = KICK.mesh.MeshFactory.createUVSphereData(0.5);
+            var meshData = new KICK.mesh.MeshData({
+                meshType:meshCube.meshType,
+                vertex:[],
+                indices:[]
+            });
+            meshData.color = null;
             var matrix = KICK.math.mat4.create();
-            for (var i=0;i<100;i++){
+            for (var i=0;i<10;i++){
                 matrix = KICK.math.mat4.identity(matrix);
                 matrix = KICK.math.mat4.translate(matrix,[i,0,0]);
-                mesh = mesh.combine(mesh,matrix);
+                meshData = meshData.combine(meshCube,matrix);
+                if (meshData === null){
+                    KICK.core.Util.fail("combine returned null");
+                }
             }
-            meshRenderer.mesh = mesh;
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level"},meshData);
         };
     }
 

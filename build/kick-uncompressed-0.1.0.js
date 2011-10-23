@@ -5799,6 +5799,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 _interleavedArrayFormat = null;
                 _vertexAttrLength = null;
             },
+            isVertexDataInitialized = function(){
+                return data.vertex;
+            },
+            isInterleavedDataInitialized = function(){
+                return _interleavedArray;
+            },
+            createVertexDataFromInterleavedData = function(){
+                var vertexLength = _interleavedArray.byteLength / (_vertexAttrLength),
+                    i,j,
+                    attributeName,
+                    attributeConfig,
+                    offset = 0,
+                    floatView;
+                data = {};
+                for (i=0;i<vertexLength;i++){
+                    for (attributeName in _interleavedArrayFormat){
+                        attributeConfig = _interleavedArrayFormat[attributeName];
+                        var arrayType = attributeConfig.type === 5126?Float32Array:Int32Array;
+                        if (i===0){
+                            data[attributeName] = new arrayType(vertexLength*attributeConfig.size);
+                        }
+
+                        floatView = new arrayType(_interleavedArray,offset+attributeConfig.pointer);
+                        for (j=0;j<attributeConfig.size;j++){
+                            data[attributeName][i*attributeConfig.size+j] = floatView[j];
+                        }
+                    }
+                    offset += _vertexAttrLength;
+                }
+            },
             /**
              * @method createGetterSetter
              * @private
@@ -5810,10 +5840,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     var typedArrayType = (type === 5126)? Float32Array:Int32Array;
                     return {
                         get:function(){
+                            if (!isVertexDataInitialized() && isInterleavedDataInitialized()){
+                                createVertexDataFromInterleavedData();
+                            }
                             return data[name];
                         },
                         set:function(newValue){
-                            if (newValue && !(newValue instanceof typedArrayType)){
+                            if (newValue){
                                 newValue = new typedArrayType(newValue);
                             }
                             data[name] = newValue;
@@ -5868,6 +5901,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                  addAttributes("int3",3,5124);
                  addAttributes("int4",4,5124);
 
+                 // copy data into array
                  var dataArrayBuffer = new ArrayBuffer(length*vertexLen*4);
                  for (i=0;i<vertexLen;i++){
                      var vertexOffset = i*length*4;
@@ -5885,11 +5919,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                          }
                      }
                  }
-
                  _interleavedArray = dataArrayBuffer;
                  _interleavedArrayFormat = description;
                  _vertexAttrLength = length*4;
-             };
+            };
 
         Object.defineProperties(this,{
             /**
@@ -5910,7 +5943,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             interleavedArray:{
                 get:function(){
-                    if (_interleavedArray === null && thisObj.vertex){
+                    if ((!isInterleavedDataInitialized()) && isVertexDataInitialized()){
                         createInterleavedData();
                     }
                     return _interleavedArray;
@@ -5951,7 +5984,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             interleavedArrayFormat:{
                 get:function(){
-                    if (_interleavedArray === null && thisObj.vertex){
+                    if ((!isInterleavedDataInitialized()) && isVertexDataInitialized()){
                         createInterleavedData();
                     }
                     return _interleavedArrayFormat;
@@ -5986,7 +6019,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             vertexAttrLength:{
                 get:function(){
-                    if (_interleavedArray === null && thisObj.vertex){
+                    if ((!isInterleavedDataInitialized()) && isVertexDataInitialized()){
                         createInterleavedData();
                     }
                     return _vertexAttrLength;
@@ -6077,8 +6110,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (newValue && !(newValue instanceof Uint16Array)){
                         newValue = new Uint16Array(newValue);
                     }
+                    if (_indices && isVertexDataInitialized()){
+                        clearInterleavedData();
+                    }
                     _indices = newValue;
-                    clearInterleavedData();
                 }
             },
             /**
@@ -6103,6 +6138,49 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
         });
 
+        /**
+         * @method isValid
+         * @return {Boolean} if mesh is considered valid
+         */
+        this.isValid = function(){
+            if (!isVertexDataInitialized() && isInterleavedDataInitialized()){
+                createVertexDataFromInterleavedData();
+            }
+            var vertexCount = data.vertex.length/3;
+            for (var i=_indices.length-1;i>=0;i--){
+                if (_indices[i]<0 || _indices[i] >= vertexCount){
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        /**
+         * @method isVertexDataInitialized
+         * @return {Boolean} return true if vertex data is initialized
+         */
+        this.isVertexDataInitialized = isVertexDataInitialized;
+
+        /**
+         * @method isInterleavedDataInitialized
+         * @return {Boolean} return true if interleaved data is initialized
+         */
+        this.isInterleavedDataInitialized = isInterleavedDataInitialized;
+
+        /**
+         * Creates a copy of the mesh and transform the vertex positions of the MeshData with a mat4.
+         * Note that normals are not modified - so they may need to renormalized.
+         * @param {KICK.math.mat4} transformMatrix
+         * @return {KICK.mesh.MeshData} transformed mesh
+         */
+        this.transform = function(transformMatrix){
+            var copy = new mesh.MeshData(this);
+            var wrappedVec3Array = vec3.wrapArray(copy.vertex);
+            for (var j=wrappedVec3Array.length-1;j>=0;j--){
+                mat4.multiplyVec3(transformMatrix,wrappedVec3Array[j]);
+            }
+            return copy;
+        };
         /**
          * Combine two meshes and returns the combined mesh as a new Mesh object.<br>
          * The two meshes must have the same meshType. Only vertex attributes existing in
@@ -6134,35 +6212,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             }
 
-            var appendObject = function(config, source, trans,indexOffset){
-                for (var i=dataNames.length-1;i>=0;i--){
-                    var name = dataNames[i];
+            var appendObject = function(config, source, indexOffset){
+                var i,j,name,data,len;
+                for (i=dataNames.length-1;i>=0;i--){
+                    name = dataNames[i];
                     if (!config[name]){ // if undefined
                         config[name] = KICK.core.Util.typedArrayToArray(source[name]);
                     } else {
-                        var data = source[name];
-                        if (trans && name === "vertex"){
-                            // todo handle vertex normals as well
-                            data = new Float32Array(data);
-                            var wrappedVec3Array = vec3.wrapArray(data);
-                            for (var j=wrappedVec3Array.length-1;j>=0;j--){
-                                mat4.multiplyVec3(trans,wrappedVec3Array[j]);
-                            }
-                        }
+                        data = source[name];
                         if (indexOffset && name === "indices"){
                             // take a copy
                             data = new Uint16Array(data);
                             // add offset to copy
-                            var len = data.length;
-                            for (var j=0;j<len;j++){
+                            len = data.length;
+                            for (j=0;j<len;j++){
                                 data[j] += indexOffset;
                             }
                         }
-                        for (var j=0;j<data.length;j++){
+                        for (j=0;j<data.length;j++){
                             config[name].push(data[j]);
                         }
                     }
-
                 }
             };
 
@@ -6170,12 +6240,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 meshType:thisObj.meshType
             };
 
-            appendObject(newConfig,thisObj,null,0);
-            appendObject(newConfig,secondMesh,transform,thisObj.indices.length);
+            if (transform){
+                secondMesh = secondMesh.transform(transform);
+            }
+
+            appendObject(newConfig,thisObj,0);
+            appendObject(newConfig,secondMesh,thisObj.indices.length);
 
             if (thisObj.meshType === 5){
                 // create two degenerate triangles to connect the two triangle strips
-                newConfig.indices.splice(thisObj.indices,0,thisObj.indices,thisObj.indices+1);
+                newConfig.indices.splice(thisObj.indices,0,newConfig.indices[thisObj.indices.length],newConfig.indices[thisObj.indices.length+1]);
             }
 
             return new mesh.MeshData(newConfig);
@@ -6185,21 +6259,46 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             config = {};
         }
 
+        var copyVertexData = function(){
+            thisObj.vertex = config.vertex ? new Float32Array(config.vertex):null;
+            thisObj.normal = config.normal? new Float32Array(config.normal):null;
+            thisObj.uv1 = config.uv1? new Float32Array(config.uv1):null;
+            thisObj.uv2 = config.uv2? new Float32Array(config.uv2):null;
+            thisObj.tangent = config.tangent? new Float32Array(config.tangent):null;
+            thisObj.color = config.color? new Float32Array(config.color):null;
+            thisObj.int1 = config.int1? new Int32Array(config.int1):null;
+            thisObj.int2 = config.int2? new Int32Array(config.int2):null;
+            thisObj.int3 = config.int3? new Int32Array(config.int3):null;
+            thisObj.int4 = config.int4? new Int32Array(config.int4):null;
+        };
+
+        var copyInterleavedData = function(){
+            thisObj.interleavedArray = config.interleavedArray;
+            thisObj.interleavedArrayFormat = config.interleavedArrayFormat;
+            thisObj.vertexAttrLength = config.vertexAttrLength;;
+        }
+
+        if (config instanceof mesh.MeshData){
+            if (config.isVertexDataInitialized()){
+                copyVertexData();
+            } else {
+                if (ASSERT){
+                    if (!config.isInterleavedDataInitialized()){
+                        KICK.core.Util.fail("Either vertex or interleaved data should be initialized");
+                    }
+                }
+                copyInterleavedData();
+            }
+        } else {
+            if (config.vertex){
+                copyVertexData();
+            } else if (config.interleavedArray) {
+                copyInterleavedData();
+            }
+        }
         thisObj.name = config.name;
-        thisObj.vertex = config.vertex;
-        thisObj.normal = config.normal;
-        thisObj.uv1 = config.uv1;
-        thisObj.uv2 = config.uv2;
-        thisObj.tangent = config.tangent;
-        thisObj.color = config.color;
-        thisObj.int1 = config.int1;
-        thisObj.int2 = config.int2;
-        thisObj.int3 = config.int3;
-        thisObj.int4 = config.int4;
         thisObj.indices = config.indices;
         thisObj.meshType = config.meshType || 4;
-
-        thisObj.interleavedArray = config.interleavedArray;
     };
 
     /**
@@ -6241,10 +6340,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Recalculates the tangents.
-     * Algorithm is based on
-     *   Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”.
-     *   Terathon Software 3D Graphics Library, 2001.
+     * Recalculates the tangents.<br>
+     * Algorithm is based on<br>
+     *   Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”.<br>
+     *   Terathon Software 3D Graphics Library, 2001.<br>
      *   http://www.terathon.com/code/tangent.html
      * @method recalculateTangents
      */
@@ -6328,7 +6427,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Mesh object that can be bound.
+     * A Mesh object allows you to bind and render a MeshData object
      * @class Mesh
      * @namespace KICK.mesh
      * @constructor
@@ -6399,6 +6498,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
+             * Setting this property to something will update the data in WebGL. Note that
+             * changing a MeshData object will not itself update anything.
              * @property meshData
              * @type KICK.mesh.MeshData
              */
@@ -9045,8 +9146,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 (function () {
     "use strict"; // force strict ECMAScript 5
 
-    var scene = KICK.namespace("KICK.scene"),
-        mesh = KICK.namespace("KICK.mesh"),
+    var mesh = KICK.namespace("KICK.mesh"),
         math = KICK.namespace("KICK.math"),
         vec3 = math.vec3,
         vec2 = math.vec2,
@@ -9055,10 +9155,38 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Class responsible for creating Mesh objects
      * @class MeshFactory
-     * @namespace KICK.scene
+     * @namespace KICK.mesh
      * @static
      */
-    scene.MeshFactory = {};
+    mesh.MeshFactory = {};
+
+    /**
+     * Creates a triangle in the XY plane
+     * @method createTriangleData
+     * @static
+     * @return {KICK.core.MeshData} triangle mesh
+     */
+    mesh.MeshFactory.createTriangleData = function () {
+        return new mesh.MeshData( {
+            name: "Triangle",
+            vertex: [
+                0,1,0,
+                -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
+                0.866025403784439,-0.5,0
+            ],
+            uv1: [
+                0,1,
+                -0.866025403784439,-0.5,
+                0.866025403784439,-0.5
+            ],
+            normal: [
+                0,0,1,
+                0,0,1,
+                0,0,1
+            ],
+            indices: [0,1,2]
+        });
+    }
 
     /**
      * Creates a triangle in the XY plane
@@ -9067,45 +9195,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @return {KICK.core.Mesh} triangle mesh
      */
-    scene.MeshFactory.createTriangle = function (engine) {
+    mesh.MeshFactory.createTriangle = function (engine) {
         var config = {
                 name: "Triangle"
             },
-            meshData = {
-                name: "Triangle",
-                vertex: [
-                    0,1,0,
-                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                    0.866025403784439,-0.5,0
-                ],
-                uv1: [
-                    0,1,
-                    -0.866025403784439,-0.5,
-                    0.866025403784439,-0.5
-                ],
-                normal: [
-                    0,0,1,
-                    0,0,1,
-                    0,0,1
-                ],
-                indices: [0,1,2]
-            },
-            meshDataObj = new mesh.MeshData(meshData);
+            meshDataObj = mesh.MeshFactory.createTriangleData();
         return new mesh.Mesh(engine,config, meshDataObj);
     };
 
     /**
      * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
-     * @method createPlane
+     * @method createPlaneData
      * @static
-     * @param {KICK.core.Engine} engine
-     * @return {KICK.mesh.Mesh} plane mesh
+     * @return {KICK.mesh.MeshData} plane mesh
      */
-    scene.MeshFactory.createPlane = function (engine) {
-        var config = {
-            name: "Plane"
-        };
-        var meshConfig = {
+    mesh.MeshFactory.createPlaneData = function () {
+        return new mesh.MeshData({
             name: "Plane",
             vertex: [
                 1,-1,0,
@@ -9127,22 +9232,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 0,0,1
             ],
             indices: [0,1,2,2,1,3]
-        };
-        var meshDataObject = new mesh.MeshData(meshConfig);
-        return new mesh.Mesh(engine,config,meshDataObject);
+        });
     };
 
     /**
-     * Create a UV sphere
-     * @method createUVSphere
+     * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
+     * @method createPlane
      * @static
      * @param {KICK.core.Engine} engine
+     * @return {KICK.mesh.Mesh} plane mesh
+     */
+    mesh.MeshFactory.createPlane = function (engine) {
+        var config = {
+              name: "Plane"
+            },
+            meshDataObject = mesh.MeshFactory.createPlaneData();
+        return new mesh.Mesh(engine,config,meshDataObject);
+    };
+
+
+
+    /**
+     * Create a UV sphere
+     * @method createUVSphereData
+     * @static
      * @param {Number} slices
      * @param {Number} stacks
      * @param {Number} radius
-     * @return {KICK.mesh.Mesh} uv-sphere mesh
+     * @return {KICK.mesh.MeshData} uv-sphere mesh
      */
-    scene.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
+    mesh.MeshFactory.createUVSphereData = function(slices, stacks, radius){
         if (!slices || slices < 3){
             slices = 20;
         }
@@ -9212,23 +9331,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             indices: indices,
             meshType: 5
         };
-        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.MeshData(meshDataConf);
+    };
+
+    /**
+     * Create a UV sphere
+     * @method createUVSphere
+     * @static
+     * @param {KICK.core.Engine} engine
+     * @param {Number} slices
+     * @param {Number} stacks
+     * @param {Number} radius
+     * @return {KICK.mesh.Mesh} uv-sphere mesh
+     */
+    mesh.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
+        var meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
         return new mesh.Mesh(engine, {name: "UVSphere"},meshDataObj);
     };
 
     /**
      * Create a code of size length. The cube has colors, normals and UVs.
-     * @method createCube
+     * @method createCubeData
      * @static
-     * @param {KICK.core.Engine} engine
      * @param {Number} length Optional, default value is 1.0
      * @return {KICK.mesh.Mesh} cube mesh
      */
-    scene.MeshFactory.createCube = function (engine,length) {
+    mesh.MeshFactory.createCubeData = function (length) {
         if (!length){
             length = 1;
         }
-        var config = {name:"Cube"};
+
         //    v6----- v5
         //   /|      /|
         //  v1------v0|
@@ -9356,7 +9488,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 20,21,22,
                 20,22,23]
         };
-        var meshDataObj = new mesh.MeshData(meshDataConf);
+        return new mesh.MeshData(meshDataConf);
+    };
+
+    /**
+     * Create a code of size length. The cube has colors, normals and UVs.
+     * @method createCube
+     * @static
+     * @param {KICK.core.Engine} engine
+     * @param {Number} length Optional, default value is 1.0
+     * @return {KICK.mesh.Mesh} cube mesh
+     */
+    mesh.MeshFactory.createCube = function (engine,length) {
+        var config = {
+            name:"Cube"
+        };
+        var meshDataObj = mesh.MeshFactory.createCubeData(length);
         return new mesh.Mesh(engine,config,meshDataObj);
     };
 })();

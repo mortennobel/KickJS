@@ -99,7 +99,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createPlane);
+            setMesh(KICK.mesh.MeshFactory.createPlane);
             initMaterials('vertexShader','fragmentShader');
             gameObject.addComponent(meshRenderer);
         }

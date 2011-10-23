@@ -15,6 +15,7 @@
 <script src="../../src/js/math.js"></script>
 <script src="../../src/js/core.js"></script>
 <script src="../../src/js/Mesh.js"></script>
+<script src="../../src/js/MeshFactory.js"></script>
 <script src="../../src/js/scene.js"></script>
     <!-- allows to use random seed -->
        <!--<script type="text/javascript" src="http://davidbau.com/encode/seedrandom.js"></script>-->
@@ -226,10 +227,33 @@ YUI().use('node', 'console', 'test', function (Y) {
             var meshData2 = new KICK.mesh.MeshData(config);
 
             var mesh2Vertex = meshData2.vertex;
+            Y.Assert.compareFloat(mesh2Vertex.length,meshData1.vertex.length);
+            for (var i = 0;i<mesh2Vertex.length;i++){
+                Y.Assert.compareFloat(mesh2Vertex[i],meshData1.vertex[i]);
+            }
             var mesh2int1 = meshData2.int1;
-            Y.Assert.isTrue(mesh2Vertex, "mesh2Vertex must be defined");
-            Y.Assert.isTrue(mesh2int1, "mesh2int1 must be defined");
-            Y.Assert.compareFloat(mesh2Vertex.length,meshData1.vertex.length,message);
+            for (var i = 0;i<mesh2int1.length;i++){
+                Y.Assert.compareFloat(mesh2int1[i],meshData1.int1[i]);
+            }
+        },
+        // test that two cube can be combined
+        testCubeCombine: function () {
+            var Assert = Y.Assert;
+
+            var meshData1 = KICK.mesh.MeshFactory.createCubeData(0.5);
+            var meshData2 = KICK.mesh.MeshFactory.createCubeData(0.5);
+
+            var matrix = KICK.math.mat4.create();
+            KICK.math.mat4.identity(matrix);
+
+            var meshData3 = meshData1.combine(meshData2,matrix);
+
+            Assert.isTrue(meshData3 !== null);
+            Assert.isTrue(meshData3.vertex !== null,"vertex should be defined");
+            Assert.compareFloat(meshData3.vertex.length, meshData1.vertex.length*2,"vertex");
+            Assert.compareFloat(meshData3.color.length, meshData1.color.length*2,"vertex");
+            Assert.compareFloat(meshData3.indices.length, meshData1.indices.length*2,"indices");
+            Assert.isTrue(meshData3.isValid());
         }
     });
 

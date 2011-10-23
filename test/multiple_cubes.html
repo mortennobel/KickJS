@@ -78,7 +78,7 @@
             var gameObject = engine.activeScene.createGameObject(),
                     transform = gameObject.transform;
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.scene.MeshFactory.createCube, 0.5);
+            setMesh(KICK.mesh.MeshFactory.createCube, 0.5);
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             transform.localScale = [0.8*Math.random(),0.8*Math.random(),0.8*Math.random()];
