@@ -431,6 +431,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             var vertexCount = data.vertex.length/3;
             for (var i=_indices.length-1;i>=0;i--){
                 if (_indices[i]<0 || _indices[i] >= vertexCount){
+                    debugger;
                     return false;
                 }
             }
@@ -527,7 +528,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             appendObject(newConfig,thisObj,0);
-            appendObject(newConfig,secondMesh,thisObj.indices.length);
+            appendObject(newConfig,secondMesh,this.vertex.length/3);
 
             if (thisObj.meshType === constants.GL_TRIANGLE_STRIP){
                 // create two degenerate triangles to connect the two triangle strips
