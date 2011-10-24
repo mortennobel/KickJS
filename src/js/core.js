@@ -73,6 +73,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             timeObj = new core.Time(),
             timeSinceStart = 0,
             frameCount = 0,
+            contextListeners = [],
             frameListeners = [],
             keyInput = null,
             activeScene = new scene.Scene(this),
@@ -156,15 +157,26 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             config: {
                 value: new core.Config(config || {})
+            },
+            /**
+             * @property isPaused
+             * @type boolean
+             */
+            isPaused:{
+                get:function(){
+                    return animationFrameObj === null;
+                }
             }
         });
+
+
 
         /**
          * Stop the game loop. Ignores if game engine is already paused
          * @method pause
          */
         this.pause = function(){
-            if (animationFrameObj !== null){
+            if (!thisObj.isPaused){
                 cancelRequestAnimFrame(animationFrameObj);
                 animationFrameObj = null;
             }
@@ -175,7 +187,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method resume
          */
         this.resume = function(){
-            if (animationFrameObj === null){
+            if (thisObj.isPaused){
                 lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
                 animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
             }
@@ -220,7 +232,25 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {boolean} element removed
          */
         this.removeFrameListener = function(frameListener){
-            return core.Util.removeElementFromArray(frameListener);
+            return core.Util.removeElementFromArray(frameListeners,frameListener);
+        };
+
+        /**
+         * @method addContextListener
+         * @param {Object} contextLostListener implements contextLost() and contextRestored(gl)
+         */
+        this.addContextListener = function(contextLostListener){
+            if (ASSERT){
+                if ((typeof contextLostListener.contextLost !== "function") ||
+                    (typeof contextLostListener.contextRestored !== "function")){
+                    KICK.core.Util.fail("contextLostListener must define the functions contextLost() and contextRestored(gl)");
+                }
+            }
+            contextListeners.push(contextLostListener);
+        };
+
+        this.removeContextListener = function(contextLostListener){
+            return core.Util.removeElementFromArray(contextListeners,contextLostListener);
         };
 
 
@@ -250,36 +280,61 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         (function init() {
-            var c = KICK.core.Constants;
-            for (var i = webGlContextNames.length-1; i >= 0; i--) {
-                try {
-                    gl = canvas.getContext(webGlContextNames[i],{
-                        preserveDrawingBuffer: thisObj.config.preserveDrawingBuffer
-                    });
-                    if (gl) {
-                        break;
+            var c = KICK.core.Constants,
+                i,
+                wasPaused,
+                initGL = function(){
+                    for (i = webGlContextNames.length-1; i >= 0; i--) {
+                        try {
+                            gl = canvas.getContext(webGlContextNames[i],{
+                                preserveDrawingBuffer: thisObj.config.preserveDrawingBuffer
+                            });
+                            if (gl) {
+                                break;
+                            }
+                        } catch (e) {
+                            // ignore
+                            alert(e);
+                        }
                     }
-                } catch (e) {
-                    // ignore
-                    alert(e);
-                }
-            }
 
-            if (!gl) {
-                throw {
-                    name: "Error",
-                    message: "Cannot create gl-context"
+                    if (!gl) {
+                        throw {
+                            name: "Error",
+                            message: "Cannot create gl-context"
+                        };
+                    }
+
+                    if (thisObj.config.enableDebugContext){
+                        if (window["WebGLDebugUtils"]){
+                            gl = WebGLDebugUtils.makeDebugContext(gl);
+                        } else {
+                            console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
+                        }
+                    }
                 };
-            }
+            initGL();
 
-            if (thisObj.config.enableDebugContext){
-                if (window["WebGLDebugUtils"]){
-                    gl = WebGLDebugUtils.makeDebugContext(gl);
-                } else {
-                    console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
+            canvas.addEventListener("webglcontextlost", function(event) {
+                wasPaused = thisObj.isPaused;
+                thisObj.pause();
+                for (i=0;i<contextListeners.length;i++){
+                    contextListeners[i].contextLost();
                 }
-            }
-
+                event.preventDefault();
+            }, false);
+            canvas.addEventListener("webglcontextrestored", function(event) {
+                initGL();
+                for (i=0;i<contextListeners.length;i++){
+                    contextListeners[i].contextRestored(gl);
+                }
+                // restart rendering loop
+                if (!wasPaused){
+                    thisObj.resume();
+                }
+                event.preventDefault();
+            }, false);
+            
             thisObj.canvasResized();
             if (thisObj.config.checkCanvasResizeInterval){
                 setInterval(function(){
@@ -290,10 +345,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             thisObj.renderer = new renderer.ForwardRenderer();
-
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.enable(c.GL_DEPTH_TEST);
-            gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
             // API documentation of Time is found in KICK.core.Time
             Object.defineProperties(timeObj,{
