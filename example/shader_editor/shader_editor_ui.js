@@ -591,6 +591,7 @@
             }
             document.getElementById("mainEditor").style.display = "block";
             document.getElementById("alogger").style.display = "block";
+            document.body.style.overflow = '';
         } else {
             for (i=menuAndContent.childElementCount-1;i>=0;i--){
                 child = menuAndContent.children[i];
@@ -598,13 +599,14 @@
                     child.style.initialDisplay = child.style.display;
                     child.style.display = "none";
                 } else {
-                    child.width = document.width;
-                    child.height = document.height;
+                    child.width = window.innerWidth;
+                    child.height = window.innerHeight;
                 }
             }
             document.getElementById("ahead").style.display = "none";
             document.getElementById("mainEditor").style.display = "none";
             document.getElementById("alogger").style.display = "none";
+            document.body.style.overflow = 'hidden';
         }
         window.isHidden = !window.isHidden;
         shaderEditor.canvasResized();
