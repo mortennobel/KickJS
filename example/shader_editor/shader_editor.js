@@ -88,7 +88,7 @@ window.shaderEditor = new (function(){
                 img.onerror = function(){
                     logFn("Error loading texture "+textureConf.dataURI.substring(0,100));
                 };
-                img.src = textureConf.dataURI;
+                img.src = thisObj.getWrappedImageSource(textureConf.dataURI);
                 thisObj.textures.push(t);
             })();
         }
@@ -103,6 +103,15 @@ window.shaderEditor = new (function(){
 
         shaderData.material.shader = shader;
         _meshRenderer.material = new KICK.material.Material(shaderData.material);
+    };
+
+    //
+    this.getWrappedImageSource = function(imgSrc){
+        if (imgSrc.indexOf("http")===0 && imgSrc.indexOf(location.origin+"/")===-1){
+            return location.origin+"/images/imageProxy?url="+encodeURIComponent(imgSrc);
+        } else {
+            return imgSrc;
+        }
     };
 
     this.loadMaterial = loadMaterial; // expose

@@ -65,8 +65,8 @@
 
     <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
     <!--<script type="text/javascript" src="kick/webgl-debug.js"></script>-->
-    <!--<script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>-->
-    <script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>
+    <script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>
+    <!--<script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>-->
     <script type="text/javascript" src="shader_editor_default.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
@@ -97,14 +97,14 @@
         <button id="LoadButton">Load</button>
         <button id="SaveButton">Save</button>
         &nbsp;|&nbsp;
-        <button id="ShareButton">Share</button>
+        <button id="ShareButton" title="Get the public url for this shader">Share</button>
         <button id="fullscreen">Full screen</button>
         &nbsp;|&nbsp;
         <button id="LogoutButton" style="display: none;">Logout</button>
-        <button id="LoginButton"  style="display: none;">Login</button>
+        <button id="LoginButton"  style="display: none;" title="Login using a Google Account. This allows you to load and save shaders."><img src="google_account.png"> Login</button>
     </div>
     <h1>Preview</h1>
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+  <canvas id="canvas" style="border: none;" width="300" height="300" title="Click to toggle full screen"></canvas>
 </article>
 <article id="mainEditor">
     <div id="editorSection">
@@ -130,8 +130,7 @@
 
             <div id="textureDetails" style="width:300px;display: none;">
                 <h3>Texture detail</h3>
-                Texture source: [<a href="#" onclick="document.getElementById('tnote').style.display = 'block';return false;">Note</a>]<br>
-                <span style="font-size: smaller; display: none;" id="tnote">Due to browser security cross site images is not allowed. A workaround it to <a href="http://www.greywyvern.com/code/php/binary2base64" target="_blank">Base64 encode</a> the images</span>
+                Texture source:<br>
                 <input type="text" id="textureSrc" style="width:300px;"><br>
                 Texture format:
                 <select id="textureFormat" style="float:right;">

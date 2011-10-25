@@ -227,7 +227,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Create a code of size length. The cube has colors, normals and UVs.
+     * Create a code of size length. The cube has colors, normals and UVs.<br>
+     * Note that the length of the sides are 2*length
      * @method createCubeData
      * @static
      * @param {Number} length Optional, default value is 1.0

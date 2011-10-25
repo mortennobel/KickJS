@@ -5118,6 +5118,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             timeObj = new core.Time(),
             timeSinceStart = 0,
             frameCount = 0,
+            contextListeners = [],
             frameListeners = [],
             keyInput = null,
             activeScene = new scene.Scene(this),
@@ -5201,15 +5202,26 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             config: {
                 value: new core.Config(config || {})
+            },
+            /**
+             * @property isPaused
+             * @type boolean
+             */
+            isPaused:{
+                get:function(){
+                    return animationFrameObj === null;
+                }
             }
         });
+
+
 
         /**
          * Stop the game loop. Ignores if game engine is already paused
          * @method pause
          */
         this.pause = function(){
-            if (animationFrameObj !== null){
+            if (!thisObj.isPaused){
                 cancelRequestAnimFrame(animationFrameObj);
                 animationFrameObj = null;
             }
@@ -5220,7 +5232,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method resume
          */
         this.resume = function(){
-            if (animationFrameObj === null){
+            if (thisObj.isPaused){
                 lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
                 animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
             }
@@ -5265,7 +5277,25 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @return {boolean} element removed
          */
         this.removeFrameListener = function(frameListener){
-            return core.Util.removeElementFromArray(frameListener);
+            return core.Util.removeElementFromArray(frameListeners,frameListener);
+        };
+
+        /**
+         * @method addContextListener
+         * @param {Object} contextLostListener implements contextLost() and contextRestored(gl)
+         */
+        this.addContextListener = function(contextLostListener){
+            if (ASSERT){
+                if ((typeof contextLostListener.contextLost !== "function") ||
+                    (typeof contextLostListener.contextRestored !== "function")){
+                    KICK.core.Util.fail("contextLostListener must define the functions contextLost() and contextRestored(gl)");
+                }
+            }
+            contextListeners.push(contextLostListener);
+        };
+
+        this.removeContextListener = function(contextLostListener){
+            return core.Util.removeElementFromArray(contextListeners,contextLostListener);
         };
 
 
@@ -5295,36 +5325,61 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         (function init() {
-            var c = KICK.core.Constants;
-            for (var i = webGlContextNames.length-1; i >= 0; i--) {
-                try {
-                    gl = canvas.getContext(webGlContextNames[i],{
-                        preserveDrawingBuffer: thisObj.config.preserveDrawingBuffer
-                    });
-                    if (gl) {
-                        break;
+            var c = KICK.core.Constants,
+                i,
+                wasPaused,
+                initGL = function(){
+                    for (i = webGlContextNames.length-1; i >= 0; i--) {
+                        try {
+                            gl = canvas.getContext(webGlContextNames[i],{
+                                preserveDrawingBuffer: thisObj.config.preserveDrawingBuffer
+                            });
+                            if (gl) {
+                                break;
+                            }
+                        } catch (e) {
+                            // ignore
+                            alert(e);
+                        }
                     }
-                } catch (e) {
-                    // ignore
-                    alert(e);
-                }
-            }
 
-            if (!gl) {
-                throw {
-                    name: "Error",
-                    message: "Cannot create gl-context"
+                    if (!gl) {
+                        throw {
+                            name: "Error",
+                            message: "Cannot create gl-context"
+                        };
+                    }
+
+                    if (thisObj.config.enableDebugContext){
+                        if (window["WebGLDebugUtils"]){
+                            gl = WebGLDebugUtils.makeDebugContext(gl);
+                        } else {
+                            console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
+                        }
+                    }
                 };
-            }
+            initGL();
 
-            if (thisObj.config.enableDebugContext){
-                if (window["WebGLDebugUtils"]){
-                    gl = WebGLDebugUtils.makeDebugContext(gl);
-                } else {
-                    console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
+            canvas.addEventListener("webglcontextlost", function(event) {
+                wasPaused = thisObj.isPaused;
+                thisObj.pause();
+                for (i=0;i<contextListeners.length;i++){
+                    contextListeners[i].contextLost();
                 }
-            }
-
+                event.preventDefault();
+            }, false);
+            canvas.addEventListener("webglcontextrestored", function(event) {
+                initGL();
+                for (i=0;i<contextListeners.length;i++){
+                    contextListeners[i].contextRestored(gl);
+                }
+                // restart rendering loop
+                if (!wasPaused){
+                    thisObj.resume();
+                }
+                event.preventDefault();
+            }, false);
+            
             thisObj.canvasResized();
             if (thisObj.config.checkCanvasResizeInterval){
                 setInterval(function(){
@@ -5335,10 +5390,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             thisObj.renderer = new renderer.ForwardRenderer();
-
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
-            gl.enable(2929);
-            gl.clear(16384 | 256);
 
             // API documentation of Time is found in KICK.core.Time
             Object.defineProperties(timeObj,{
@@ -6149,6 +6200,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             var vertexCount = data.vertex.length/3;
             for (var i=_indices.length-1;i>=0;i--){
                 if (_indices[i]<0 || _indices[i] >= vertexCount){
+                    debugger;
                     return false;
                 }
             }
@@ -6245,7 +6297,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
 
             appendObject(newConfig,thisObj,0);
-            appendObject(newConfig,secondMesh,thisObj.indices.length);
+            appendObject(newConfig,secondMesh,this.vertex.length/3);
 
             if (thisObj.meshType === 5){
                 // create two degenerate triangles to connect the two triangle strips
@@ -6446,6 +6498,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             vertexAttrLength,
             meshType,
             meshElements,
+            contextListener = {
+                contextLost: function(){},
+                contextRestored: function(newGl){
+                    meshVertexIndexBuffer = null;
+                    meshVertexAttBuffer = null;
+                    gl = newGl;
+                    updateData();
+                }
+            },
+            deleteBuffers = function(){
+                if (typeof meshVertexIndexBuffer === "number"){
+                    gl.deleteBuffer(meshVertexIndexBuffer);
+                }
+                if (typeof meshVertexAttBuffer === "number"){
+                    gl.deleteBuffer(meshVertexAttBuffer);
+                }
+            },
             /**
              * Copy data to the vertex buffer object (VBO)
              * @method updateData
@@ -6454,12 +6523,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             updateData = function () {
                 var indices = _meshData.indices;
                 // delete current buffers
-                if (typeof meshVertexIndexBuffer === "number"){
-                    gl.deleteBuffer(meshVertexIndexBuffer);
-                }
-                if (typeof meshVertexAttBuffer === "number"){
-                    gl.deleteBuffer(meshVertexAttBuffer);
-                }
+                deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 vertexAttrLength = _meshData.vertexAttrLength;
@@ -6477,6 +6541,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 gl.bindBuffer(34963, meshVertexIndexBuffer);
                 gl.bufferData(34963, indices, 35044);
             };
+
+        engine.addContextListener(contextListener);
 
         if (ASSERT){
             if (!(meshData instanceof mesh.MeshData)){
@@ -6573,6 +6639,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.render = function () {
             gl.drawElements(meshType, meshElements, 5123, 0);
+        };
+
+        /**
+         * Destroys the mesh data and deletes the associated resources
+         * After this the mesh cannot be bound
+         * @method destroy
+         */
+        this.destroy = function(){
+            deleteBuffers();
+            engine.removeContextListener(contextListener);
         };
     };
 })();/*!
@@ -9350,7 +9426,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Create a code of size length. The cube has colors, normals and UVs.
+     * Create a code of size length. The cube has colors, normals and UVs.<br>
+     * Note that the length of the sides are 2*length
      * @method createCubeData
      * @static
      * @param {Number} length Optional, default value is 1.0

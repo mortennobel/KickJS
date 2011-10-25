@@ -729,6 +729,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             vertexAttrLength,
             meshType,
             meshElements,
+            contextListener = {
+                contextLost: function(){},
+                contextRestored: function(newGl){
+                    meshVertexIndexBuffer = null;
+                    meshVertexAttBuffer = null;
+                    gl = newGl;
+                    updateData();
+                }
+            },
+            deleteBuffers = function(){
+                if (typeof meshVertexIndexBuffer === "number"){
+                    gl.deleteBuffer(meshVertexIndexBuffer);
+                }
+                if (typeof meshVertexAttBuffer === "number"){
+                    gl.deleteBuffer(meshVertexAttBuffer);
+                }
+            },
             /**
              * Copy data to the vertex buffer object (VBO)
              * @method updateData
@@ -737,12 +754,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             updateData = function () {
                 var indices = _meshData.indices;
                 // delete current buffers
-                if (typeof meshVertexIndexBuffer === "number"){
-                    gl.deleteBuffer(meshVertexIndexBuffer);
-                }
-                if (typeof meshVertexAttBuffer === "number"){
-                    gl.deleteBuffer(meshVertexAttBuffer);
-                }
+                deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 vertexAttrLength = _meshData.vertexAttrLength;
@@ -760,6 +772,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
                 gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
             };
+
+        engine.addContextListener(contextListener);
 
         if (ASSERT){
             if (!(meshData instanceof mesh.MeshData)){
@@ -856,6 +870,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.render = function () {
             gl.drawElements(meshType, meshElements, c.GL_UNSIGNED_SHORT, 0);
+        };
+
+        /**
+         * Destroys the mesh data and deletes the associated resources
+         * After this the mesh cannot be bound
+         * @method destroy
+         */
+        this.destroy = function(){
+            deleteBuffers();
+            engine.removeContextListener(contextListener);
         };
     };
 })();

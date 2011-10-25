@@ -184,7 +184,7 @@
         }
         var texture = shaderEditor.textures[selectedIndex];
         document.getElementById('textureSrc').value = texture.dataURI;
-        document.getElementById('texturePreviewImg').src = texture.dataURI;
+        document.getElementById('texturePreviewImg').src = shaderEditor.getWrappedImageSource(texture.dataURI);
 
         setSelectedGLConstant('textureFormat',texture.internalFormal);
         document.getElementById('mipMapping').checked = texture.generateMipmaps;
@@ -218,8 +218,9 @@
         image.onload = function() {
             texture.setImage(image, imgSrc);
         };
-        image.src = imgSrc;
-        document.getElementById('texturePreviewImg').src = imgSrc;
+        var wrappedImgSrc = shaderEditor.getWrappedImageSource(imgSrc);
+        image.src = wrappedImgSrc;
+        document.getElementById('texturePreviewImg').src = wrappedImgSrc;
         if (imgSrc.length>0){
             currentTextures.options[selectedIndex].text = imgSrc.length<40?imgSrc:imgSrc.substr(0,40)+'...';
         }
