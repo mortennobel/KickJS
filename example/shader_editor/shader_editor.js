@@ -107,8 +107,12 @@ window.shaderEditor = new (function(){
 
     //
     this.getWrappedImageSource = function(imgSrc){
-        if (imgSrc.indexOf("http")===0 && imgSrc.indexOf(location.origin+"/")===-1){
-            return location.origin+"/images/imageProxy?url="+encodeURIComponent(imgSrc);
+        var origin = location.origin;
+        if (!origin){
+            origin = location.protocol+"//"+location.host;
+        }
+        if (imgSrc.indexOf("http")===0 && imgSrc.indexOf(origin+"/")===-1){
+            return origin+"/images/imageProxy?url="+encodeURIComponent(imgSrc);
         } else {
             return imgSrc;
         }
