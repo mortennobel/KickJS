@@ -297,7 +297,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             alert(e);
                         }
                     }
-
+                    gl.enable(c.GL_DEPTH_TEST);
                     if (!gl) {
                         throw {
                             name: "Error",
