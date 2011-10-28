@@ -779,7 +779,7 @@
         bottomText.appendChild(statsText);
         div.appendChild(bottomText);
         div.appendChild(document.createElement("br"));
-        var tweet = document.createTextNode("For tweeting use #KickjsShader");
+        var tweet = document.createTextNode("For tweeting use #KickJS");
         div.appendChild(tweet);
 
 
