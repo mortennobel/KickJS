@@ -6,6 +6,7 @@ window.shaderEditor = new (function(){
         previousShaderError = false,
         _light,
         _ambientLight,
+        camera,
         _lightTransform,
         shader = null,
         thisObj = this,
@@ -38,6 +39,19 @@ window.shaderEditor = new (function(){
         _lightTransform.rotationEuler = settings.lightrot;
         _lightTransform.position = settings.lightpos;
         isRotating = settings.rotatemesh==="on";
+        var cameraTransform = camera.gameObject.transform;
+        if (settings.projection === "perspective"){
+            camera.fieldOfView = 60;
+            camera.cameraTypePerspective = true;
+            camera.near = 0.1;
+            camera.far = 10;
+            cameraTransform.localPosition = [0,0,2];
+        } else {
+            camera.cameraTypePerspective = false;
+            camera.near = -1;
+            camera.far = 1;
+            cameraTransform.localPosition = [0,0,0];
+        }
         if (meshsetting !== settings.meshsetting){
             meshsetting = settings.meshsetting;
             switch (meshsetting){
@@ -139,7 +153,7 @@ window.shaderEditor = new (function(){
 
     this.canvasResized = function(){
         _engine.canvasResized();
-    }
+    };
 
     this.initKick = function() {
         try{
@@ -149,7 +163,7 @@ window.shaderEditor = new (function(){
                 checkCanvasResizeInterval:0
             });
             var cameraObject = _engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
+            camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],
                 cameraTypePerspective: false,
                 near:-1,

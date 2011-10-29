@@ -92,12 +92,24 @@
 
     function setRadioValue(elementName,value){
         var  elem = document.getElementById(elementName),
-            checked = null;
+            checked = null,
+            isElementChecked,
+            firstInputElement = null;
         for (i=0;i<elem.children.length;i++){
             var childElem =elem.children[i];
             if (childElem.nodeName === 'INPUT'){
-                childElem.checked = childElem.value === value;
+                isElementChecked = childElem.value === value;
+                childElem.checked = isElementChecked;
+                if (isElementChecked){
+                    checked = childElem;
+                }
+                if (firstInputElement === null){
+                    firstInputElement = childElem;
+                }
             }
+        }
+        if (checked === null){ // if no element found - check the first element
+            firstInputElement.checked = true;
         }
     }
 
@@ -124,6 +136,7 @@
     function getSettingsData(){
         return {
             meshsetting: getRadioValue('meshsetting'),
+            projection: getRadioValue('projection'),
             rotatemesh: getRadioValue('rotatemesh'),
             lightpos: getChildrenValueVector('lightpos'),
             lightrot: getChildrenValueVector('lightrot'),
@@ -135,6 +148,7 @@
 
     function setSettingsData(settingsData){
         setRadioValue('meshsetting',settingsData.meshsetting);
+        setRadioValue('projection',settingsData.projection);
         setRadioValue('rotatemesh',settingsData.rotatemesh);
         var lightintensity = document.getElementById('lightintensity');
         setChildrenValueVector('lightpos',settingsData.lightpos);
@@ -995,6 +1009,7 @@
 
         (function setupSettings(){
             var meshsetting = document.getElementById('meshsetting'),
+                projection = document.getElementById('projection'),
                 rotatemesh = document.getElementById('rotatemesh'),
                 resetShaderBut = document.getElementById('resetShader'),
                 addChildListeners = function (component, listener, listenerNames,tag){
@@ -1014,6 +1029,7 @@
                 };
 
             addChildListeners(meshsetting,updateSettings,'click',"meshid");
+            addChildListeners(projection,updateSettings,'click',"projection");
             addChildListeners(rotatemesh,updateSettings,'click',"isOn");
             resetShaderBut.addEventListener('click',resetShader,false);
 
