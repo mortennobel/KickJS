@@ -20,7 +20,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -48,7 +47,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         math = KICK.namespace("KICK.math"),
         mat3 = math.mat3,
         mat4 = math.mat4,
-        core = KICK.namespace("KICK.core");
+        core = KICK.namespace("KICK.core"),
+        c = KICK.core.Constants;
 
     /**
      * GLSL Shader object
@@ -66,6 +66,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisConfig = config || {},
             _uid = engine.createUID(),
             _shaderProgramId = -1,
+            _depthMask = true,
             _faceCulling = thisConfig.faceCulling || core.Constants.GL_BACK,
             _zTest = thisConfig.zTest || core.Constants.GL_LESS,
             _blend = thisConfig.blend || false,
@@ -116,8 +117,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             updateCullFace = function () {
                 var shaderFaceCulling = thisObj.faceCulling,
-                    currentFaceCulling = gl.faceCulling,
-                    c = KICK.core.Constants;
+                    currentFaceCulling = gl.faceCulling;
                 if (currentFaceCulling !== shaderFaceCulling) {
                     if (shaderFaceCulling === core.Constants.GL_NONE) {
                         gl.disable( c.GL_CULL_FACE );
@@ -130,11 +130,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gl.faceCulling = shaderFaceCulling;
                 }
             },
-            updateDepthBuffer = function () {
-                var zTest = thisObj.zTest;
-                if (gl.zTest != zTest) {
-                    gl.depthFunc(zTest);
-                    gl.zTest = zTest;
+            updateDepthProperties = function () {
+                if (gl.zTest !== _zTest) {
+                    gl.depthFunc(_zTest);
+                    gl.zTest = _zTest;
+                }
+                if (gl.depthMask !== _depthMask){
+                    gl.depthMask(_depthMask);
+                    gl.depthMask = _depthMask;
                 }
             },
             updateBlending = function () {
@@ -243,6 +246,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         }
                     }
                     _faceCulling = newValue;
+                }
+            },
+            depthMask:{
+                get:function(){return _depthMask},
+                set:function(newValue){
+                    if (KICK.core.Constants._ASSERT){
+                        if (typeof newValue !== 'boolean'){
+                            KICK.core.Util.fail("Shader.depthMask must be a boolean. Was "+(typeof newValue));
+                        }
+                    }
+                    _depthMask = newValue;
                 }
             },
             /**
@@ -500,8 +514,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             gl.useProgram(_shaderProgramId);
             updateCullFace();
-            updateDepthBuffer();
+            updateDepthProperties();
             updateBlending();
+
         };
 
         /**
@@ -514,6 +529,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             return {
                 faceCulling:_faceCulling,
                 zTest:_zTest,
+                depthMask: _depthMask,
                 vertexShaderSrc:_vertexShaderSrc,
                 fragmentShaderSrc:_fragmentShaderSrc
             };
