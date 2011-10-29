@@ -794,6 +794,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Calculates the length of a vec4
+     * @method length
+     * @param {KICK.math.vec4} vec vec4 to calculate length of
+     * @return {Number} Length of vec
+     */
+    vec4.length = function(vec){
+        var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
+        return Math.sqrt(x*x + y*y + z*z + w*w);
+    };
+
+    /**
      * Multiplies the components of a vec4 by a scalar value
      * @method scale
      * @param {KICK.math.vec4} vec vec4 to scale
@@ -1985,18 +1996,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Array[Number]} quat Optional, quat4 containing values to initialize with
      * @return {KICK.math.quat4} New quat4
      */
-    quat4.create = function(quat) {
-        var dest = new Float32Array(4);
-
-        if(quat) {
-            dest[0] = quat[0];
-            dest[1] = quat[1];
-            dest[2] = quat[2];
-            dest[3] = quat[3];
-        }
-
-        return dest;
-    };
+    quat4.create = vec4.create;
 
     /**
      * Copies the values of one quat4 to another
@@ -2005,14 +2005,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.math.quat4} dest quat4 receiving copied values
      * @return {KICK.math.quat4} dest
      */
-    quat4.set = function(quat, dest) {
-        dest[0] = quat[0];
-        dest[1] = quat[1];
-        dest[2] = quat[2];
-        dest[3] = quat[3];
-
-        return dest;
-    };
+    quat4.set = vec4.set;
 
     /**
      * Calculates the W component of a quat4 from the X, Y, and Z components.<br>
@@ -2065,10 +2058,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {Number} Length of quat
      *
      */
-    quat4.length = function(quat) {
-        var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
-        return Math.sqrt(x*x + y*y + z*z + w*w);
-    }
+    quat4.length = vec4.length;
 
     /**
      * Generates a unit quaternion of the same direction as the provided quat4<br>
