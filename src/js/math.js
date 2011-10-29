@@ -1445,6 +1445,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Transforms a vec3 with the given matrix<br>
+     * 4th vector component is implicitly '0'
+     * @method multiplyVec3Vector
+     * @param {KICK.math.mat4} mat mat4 to transform the vector with
+     * @param {KICK.math.vec3} vec vec3 to transform
+     * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+     * @return {KICK.math.vec3} dest if specified, vec otherwise
+     */
+    mat4.multiplyVec3Vector = function(mat, vec, dest) {
+        if(!dest) { dest = vec }
+
+        var x = vec[0], y = vec[1], z = vec[2];
+
+        dest[0] = mat[0]*x + mat[4]*y + mat[8]*z;
+        dest[1] = mat[1]*x + mat[5]*y + mat[9]*z;
+        dest[2] = mat[2]*x + mat[6]*y + mat[10]*z;
+        dest[3] = mat[3]*x + mat[7]*y + mat[11]*z;
+
+        return dest;
+    };
+
+    /**
      * Transforms a vec4 with the given matrix
      * @method multiplyVec4
      * @param {KICK.math.mat4} mat mat4 to transform the vector with
