@@ -20,7 +20,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -763,12 +762,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 
                 meshVertexAttBuffer = gl.createBuffer();
-                console.log("Fill data in "+meshVertexAttBuffer+ " length of data "+_meshData.interleavedArray.byteLength);
                 gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
                 gl.bufferData(c.GL_ARRAY_BUFFER, _meshData.interleavedArray, c.GL_STATIC_DRAW);
 
                 meshVertexIndexBuffer = gl.createBuffer();
-                console.log("Fill data in "+meshVertexIndexBuffer+ " length of data "+indices.length);
                 gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
                 gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
             };
