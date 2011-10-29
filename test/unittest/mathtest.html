@@ -245,6 +245,22 @@ YUI().use('node', 'console', 'test', function (Y) {
             KICK.math.quat4.toEuler(quat,vec);
             Assert.compareVec([0,0,0],vec);
         },
+        testQuad4EulerRotation: function(){
+            var Assert = Y.Assert;
+            var quat = KICK.math.quat4.create([0,0,0,1]);
+            KICK.math.quat4.setEuler([0,180,0],quat);
+            var left = KICK.math.vec3.create([1,0,0]);
+            var right = KICK.math.vec3.create([-1,0,0]);
+            var res = KICK.math.vec3.create([0,0,0]);
+            var testRotation = KICK.math.quat4.create();
+            KICK.math.quat4.angleAxis(180,[0,1,0],testRotation);
+            KICK.math.quat4.multiplyVec3(testRotation,left,res);
+            Assert.compareVec(res,right);
+            KICK.math.quat4.multiplyVec3(quat,left,res);
+            Assert.compareVec(res,right);
+            KICK.math.quat4.multiplyVec3(quat,right,res);
+            Assert.compareVec(res,left);
+        },
         testQuad4Difference: function(){
             var Assert = Y.Assert;
             var quat1 = KICK.math.quat4.create([0,0,0,1]);
@@ -280,19 +296,23 @@ YUI().use('node', 'console', 'test', function (Y) {
     });
 
     /// extend Asset to compare float values
-    Y.Assert.compareVec = function(f1,f2,message){
+    Y.Assert.compareVec = function(expected,actual,message){
         if (!message){
-            if (f1.length==3){
-                message = "Expected "+KICK.math.vec3.str(f1)+" Actual "+KICK.math.vec3.str(f2);
+            if (expected.length==3){
+                message = "Expected "+KICK.math.vec3.str(expected)+" Actual "+KICK.math.vec3.str(actual);
             }
         }
-        for (var i=0;i<f1.length;i++){
-            Y.Assert.compareFloat(f1[i],f2[i],message);
+        for (var i=0;i<expected.length;i++){
+            Y.Assert.compareFloat(expected[i],actual[i],message);
         }
     };
     Y.Assert.compareFloat = function(f1,f2,message){
         var epsilon = 0.001;
-        return Y.Assert.isTrue(Math.abs(f1-f2)<epsilon,message);
+        var res = Math.abs(f1-f2)<epsilon;
+        if (!res){
+            debugger;
+        }
+        return Y.Assert.isTrue(res,message);
     };
 
     var ExampleSuite = new Y.Test.Suite("Example Suite");
