@@ -70,8 +70,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -2569,7 +2567,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 // Node.js export (used for preprocessor)
 this["exports"] = this["exports"] || {};
-exports.Constants = KICK.core.Constants;var KICK = KICK || {};
+exports.Constants = KICK.core.Constants;/*!
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
     var parts = ns_string.split("."),
@@ -3415,6 +3435,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Calculates the length of a vec4
+     * @method length
+     * @param {KICK.math.vec4} vec vec4 to calculate length of
+     * @return {Number} Length of vec
+     */
+    vec4.length = function(vec){
+        var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
+        return Math.sqrt(x*x + y*y + z*z + w*w);
+    };
+
+    /**
      * Multiplies the components of a vec4 by a scalar value
      * @method scale
      * @param {KICK.math.vec4} vec vec4 to scale
@@ -4055,6 +4086,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
+     * Transforms a vec3 with the given matrix<br>
+     * 4th vector component is implicitly '0'
+     * @method multiplyVec3Vector
+     * @param {KICK.math.mat4} mat mat4 to transform the vector with
+     * @param {KICK.math.vec3} vec vec3 to transform
+     * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+     * @return {KICK.math.vec3} dest if specified, vec otherwise
+     */
+    mat4.multiplyVec3Vector = function(mat, vec, dest) {
+        if(!dest) { dest = vec }
+
+        var x = vec[0], y = vec[1], z = vec[2];
+
+        dest[0] = mat[0]*x + mat[4]*y + mat[8]*z;
+        dest[1] = mat[1]*x + mat[5]*y + mat[9]*z;
+        dest[2] = mat[2]*x + mat[6]*y + mat[10]*z;
+        dest[3] = mat[3]*x + mat[7]*y + mat[11]*z;
+
+        return dest;
+    };
+
+    /**
      * Transforms a vec4 with the given matrix
      * @method multiplyVec4
      * @param {KICK.math.mat4} mat mat4 to transform the vector with
@@ -4606,18 +4659,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {Array[Number]} quat Optional, quat4 containing values to initialize with
      * @return {KICK.math.quat4} New quat4
      */
-    quat4.create = function(quat) {
-        var dest = new Float32Array(4);
-
-        if(quat) {
-            dest[0] = quat[0];
-            dest[1] = quat[1];
-            dest[2] = quat[2];
-            dest[3] = quat[3];
-        }
-
-        return dest;
-    };
+    quat4.create = vec4.create;
 
     /**
      * Copies the values of one quat4 to another
@@ -4626,14 +4668,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.math.quat4} dest quat4 receiving copied values
      * @return {KICK.math.quat4} dest
      */
-    quat4.set = function(quat, dest) {
-        dest[0] = quat[0];
-        dest[1] = quat[1];
-        dest[2] = quat[2];
-        dest[3] = quat[3];
-
-        return dest;
-    };
+    quat4.set = vec4.set;
 
     /**
      * Calculates the W component of a quat4 from the X, Y, and Z components.<br>
@@ -4686,10 +4721,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @return {Number} Length of quat
      *
      */
-    quat4.length = function(quat) {
-        var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
-        return Math.sqrt(x*x + y*y + z*z + w*w);
-    }
+    quat4.length = vec4.length;
 
     /**
      * Generates a unit quaternion of the same direction as the provided quat4<br>
@@ -4786,7 +4818,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Calculates a rotation represented in eulers angles
+     * Calculates a rotation represented in eulers angles (in degrees)
      * @method toEuler
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
@@ -4843,34 +4875,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             dest = quat4.create();
         }
 
-        // todo optimize this method. It shold basically inline all three multiplications like the code below
+        // todo optimize this method. It should basically inline all three multiplications like the code below
         quat4.multiply(axisZ,axisY,dest);
         quat4.multiply(dest,axisX,dest);
         return dest;
-        /*
-        var DEGREE_TO_RADIAN_HALF = DEGREE_TO_RADIAN*0.5,
-            xHalf = vec[0]*(DEGREE_TO_RADIAN_HALF),
-            yHalf = vec[1]*(DEGREE_TO_RADIAN_HALF),
-            zHalf = vec[2]*(-DEGREE_TO_RADIAN_HALF);
-        if(!dest) { dest = quat4.create(); }
-
-        if (xHalf===0 && yHalf===0 && zHalf===0){
-            return quat4.identity(dest);
-        }
-
-        var cosxHalf = Math.cos(xHalf),
-            cosyHalf = Math.cos(yHalf),
-            coszHalf = Math.cos(zHalf),
-            sinxHalf = Math.sin(xHalf),
-            sinyHalf = Math.sin(yHalf),
-            sinzHalf = Math.sin(zHalf);
-
-        dest[0] = cosxHalf*cosyHalf*coszHalf + sinxHalf*sinyHalf*sinzHalf;
-        dest[1] = sinxHalf*cosyHalf*coszHalf - cosxHalf*sinyHalf*sinzHalf;
-        dest[2] = cosxHalf*sinyHalf*coszHalf + sinxHalf*cosyHalf*sinzHalf;
-        dest[3] = cosxHalf*cosyHalf*sinzHalf - sinxHalf*sinyHalf*coszHalf;
-
-        return dest;*/
     }
 
 
@@ -5009,7 +5017,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Return rotation that goes from quat to quat2.<br>
      * It is the same as: quat4.multiply(quat4.inverse(quat),quat2,dest);
-     * @method {KICK.math.quat4} difference
+     * @method difference
      * @param {KICK.math.quat4} quat from rotation
      * @param {KICK.math.quat4} quat2 to rotation
      * @param {KICK.math.quat4} dest Optional
@@ -5342,7 +5350,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             alert(e);
                         }
                     }
-
+                    gl.enable(2929);
                     if (!gl) {
                         throw {
                             name: "Error",
@@ -5789,7 +5797,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -6532,12 +6539,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 
                 meshVertexAttBuffer = gl.createBuffer();
-                console.log("Fill data in "+meshVertexAttBuffer+ " length of data "+_meshData.interleavedArray.byteLength);
                 gl.bindBuffer(34962, meshVertexAttBuffer);
                 gl.bufferData(34962, _meshData.interleavedArray, 35044);
 
                 meshVertexIndexBuffer = gl.createBuffer();
-                console.log("Fill data in "+meshVertexIndexBuffer+ " length of data "+indices.length);
                 gl.bindBuffer(34963, meshVertexIndexBuffer);
                 gl.bufferData(34963, indices, 35044);
             };
@@ -6673,7 +6678,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -7005,7 +7009,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 get: function(){
                     var parentIterator = null;
                     if (parentTransform==null){
-                        return vec4.create(localRotationQuat);
+                        return quat4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]){
                         quat4.set(localRotationQuat,globalRotationQuat);
@@ -7450,7 +7454,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     this.near, this.far, projectionMatrix);
             }
 
-            // todo - this allocates a new mat4 - remove this
             var globalMatrixInv = transform.getGlobalTRSInverse();
             mat4.set(globalMatrixInv, modelViewMatrix);
 
@@ -7480,7 +7483,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @property cameraTypePerspective
          * @type Boolean
          */
-        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraType : true;
+        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
         /**
          * Only used when orthogonal camera type (!cameraTypePerspective)
          * @property left
@@ -7817,29 +7820,43 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
                 // compute light direction (note direction from surface towards camera)
-                vec3.set([0,0,1],directionalLightDirection);
+                vec4.set([0,0,1],directionalLightDirection);
                 quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
 
                 // transform to eye space
-                mat4.multiplyVec3(modelViewMatrix,directionalLightDirection);
+                mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
+                vec3.normalize(directionalLightDirection);
 
                 // compute eye direction
-                var eyeDirection = directionalHalfVector; // use directionalHalfVector as temp
-                vec3.set([0,0,-1],eyeDirection);
-                // transform to eye space
-                mat4.multiplyVec3(modelViewMatrix,eyeDirection);
-
+                var eyeDirection = [0,0,1];
                 // compute half vector
                 vec3.add(eyeDirection, directionalLightDirection, directionalHalfVector);
-                if (vec3.lengthSqr(directionalHalfVector)<0.001){ // if looking towards the light
-                    vec3.set([0,0,1],directionalHalfVector);
-                } else {
-                    vec3.normalize(directionalHalfVector);
-                }
+                vec3.normalize(directionalHalfVector);
             }
         };
     };
- })();
+ })();/*!
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -8229,7 +8246,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -8410,7 +8426,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -8438,7 +8453,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         math = KICK.namespace("KICK.math"),
         mat3 = math.mat3,
         mat4 = math.mat4,
-        core = KICK.namespace("KICK.core");
+        core = KICK.namespace("KICK.core"),
+        c = KICK.core.Constants;
 
     /**
      * GLSL Shader object
@@ -8456,6 +8472,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisConfig = config || {},
             _uid = engine.createUID(),
             _shaderProgramId = -1,
+            _depthMask = true,
             _faceCulling = thisConfig.faceCulling || 1029,
             _zTest = thisConfig.zTest || 513,
             _blend = thisConfig.blend || false,
@@ -8506,8 +8523,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             updateCullFace = function () {
                 var shaderFaceCulling = thisObj.faceCulling,
-                    currentFaceCulling = gl.faceCulling,
-                    c = KICK.core.Constants;
+                    currentFaceCulling = gl.faceCulling;
                 if (currentFaceCulling !== shaderFaceCulling) {
                     if (shaderFaceCulling === 0) {
                         gl.disable( 2884 );
@@ -8520,11 +8536,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gl.faceCulling = shaderFaceCulling;
                 }
             },
-            updateDepthBuffer = function () {
-                var zTest = thisObj.zTest;
-                if (gl.zTest != zTest) {
-                    gl.depthFunc(zTest);
-                    gl.zTest = zTest;
+            updateDepthProperties = function () {
+                if (gl.zTest !== _zTest) {
+                    gl.depthFunc(_zTest);
+                    gl.zTest = _zTest;
+                }
+                if (gl.depthMask !== _depthMask){
+                    gl.depthMask(_depthMask);
+                    gl.depthMask = _depthMask;
                 }
             },
             updateBlending = function () {
@@ -8633,6 +8652,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         }
                     }
                     _faceCulling = newValue;
+                }
+            },
+            depthMask:{
+                get:function(){return _depthMask},
+                set:function(newValue){
+                    if (true){
+                        if (typeof newValue !== 'boolean'){
+                            KICK.core.Util.fail("Shader.depthMask must be a boolean. Was "+(typeof newValue));
+                        }
+                    }
+                    _depthMask = newValue;
                 }
             },
             /**
@@ -8890,8 +8920,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             gl.useProgram(_shaderProgramId);
             updateCullFace();
-            updateDepthBuffer();
+            updateDepthProperties();
             updateBlending();
+
         };
 
         /**
@@ -8904,6 +8935,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             return {
                 faceCulling:_faceCulling,
                 zTest:_zTest,
+                depthMask: _depthMask,
                 vertexShaderSrc:_vertexShaderSrc,
                 fragmentShaderSrc:_fragmentShaderSrc
             };
@@ -9197,7 +9229,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
         }
     };
-})();
+})();/*!
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -9583,4 +9636,340 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var meshDataObj = mesh.MeshFactory.createCubeData(length);
         return new mesh.Mesh(engine,config,meshDataObj);
     };
+})();/*!
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+KICK.namespace = KICK.namespace || function (ns_string) {
+    var parts = ns_string.split("."),
+        parent = KICK,
+        i;
+    // strip redundant leading global
+    if (parts[0] === "KICK") {
+        parts = parts.slice(1);
+    }
+
+    for (i = 0; i < parts.length; i += 1) {
+        // create property if it doesn't exist
+        if (typeof parent[parts[i]] === "undefined") {
+            parent[parts[i]] = {};
+        }
+        parent = parent[parts[i]];
+    }
+    return parent;
+};
+
+(function () {
+    "use strict"; // force strict ECMAScript 5
+
+    var importer = KICK.namespace("KICK.importer");
+
+     /**
+     * Imports a collada meshes into a scene
+     * @class ColladaImporter
+     * @namespace KICK.importer
+     */
+    importer.ColladaImporter = {};
+
+    /**
+     * @method loadCollada
+     * @param {XMLDom} colladaDOM
+     * @param {KICK.core.Engine} engine
+     * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+     * @return {Array[KICK.scene.GameObject]}
+     * @static
+     */
+    importer.ColladaImporter.loadCollada = function (colladaDOM, engine, scene){
+        var dataCache = {},
+            constants = KICK.core.Constants,
+            /**
+             * Converts a string to an array
+             * @method stringToArray
+             * @param {String} numberString
+             * @param {Number} count Optional
+             * @param {Object} type Optional - valid types are Array (default), and typed arrays classes
+             * @private
+             */
+            stringToArray = function(numberString,count,type){
+                if (!type){
+                    type = Array;
+                }
+                if (!count){
+                    count = 0;
+                }
+                numberString = numberString.replace(/^\s+|\s+$/g,""); // trim
+                var res = new type(count);
+                var counter = 0;
+                var lastIndex = 0;
+                var currentPosition = 0;
+                while ((currentPosition = numberString.indexOf(' ',lastIndex)) !== -1){
+                    var num = numberString.substring(lastIndex,currentPosition);
+                    res[counter++] = Number(num);
+                    lastIndex = currentPosition+1;
+                }
+                num = numberString.substring(lastIndex);
+                res[counter] = Number(num);
+                return res;
+            },
+            /**
+             * Get data element by id<br>
+             * Note that the array is cached by id - this is done
+             * to speed up performance in case of interleaved data
+             * @getArrayElementById
+             * @param {String} id
+             * @return {Array[Number]} data
+             * @private
+             */
+            getArrayElementById = function(id){
+                if (id.charAt(0) === '#'){
+                    id = id.substring(1);
+                }
+                if (dataCache[id]){
+                    return dataCache[id];
+                }
+                var arrayElement = colladaDOM.getElementById(id);
+                var type;
+                if (arrayElement.tagName === "float_array"){
+                    type = Float32Array;
+                } else {
+                    type = Int32Array;
+                }
+                var count = Number(arrayElement.getAttribute("count"));
+                var res = stringToArray(arrayElement.textContent,count,type);
+                dataCache[id] = res;
+                return res;
+            },
+            /**
+             * Create accessor object for data
+             * @method buildDataAccessor
+             * @param {XML} elementChild
+             * @return function of type function(index,paramOffset)
+             * @private
+             */
+            buildDataAccessor = function(elementChild){
+                var semantic = elementChild.getAttribute('semantic');
+                var source = colladaDOM.getElementById(elementChild.getAttribute("source").substring(1));
+                if (source.tagName === "vertices"){
+                    source = source.getElementsByTagName("input")[0];
+                    source = colladaDOM.getElementById(source.getAttribute("source").substring(1));
+                }
+                var technique_common = source.getElementsByTagName("technique_common")[0];
+                var accessor = technique_common.getElementsByTagName("accessor")[0];
+                var count = Number(accessor.getAttribute("count"));
+                var stride = Number(accessor.getAttribute("stride"));
+                var offset = Number(accessor.getAttribute("offset"));
+                if (!offset){
+                    offset = 0;
+                }
+                var arraySource = accessor.getAttribute("source");
+                var rawData = getArrayElementById(arraySource);
+
+                /**
+                 * @param {Number} index (vertex index)
+                 * @param {Number} paramOffset (0 means x, 1 means y, etc)
+                 * @return {Number}
+                 */
+                return function(index,paramOffset){
+                    var arrayIndex = offset+stride*index+paramOffset;
+                    return rawData[arrayIndex];
+                };
+            },
+            /**
+             * @method buildFromPolyList
+             * @private
+             * @param {XMLDomElement} polylist
+             * @param {KICK.mesh.MeshData} destMeshData
+             */
+            buildFromPolyList = function(polylist, destMeshData){
+                var polylistChild = polylist.firstChild,
+                    tagName,
+                    i,j,
+                    vertexCount,
+                    count = Number(polylist.getAttribute("count")),
+                    dataAccessor = {names:[],offset:{},accessors:{},length:{}},
+                    offsetSet = [],
+                    contains = KICK.core.Util.contains;
+
+                while (polylistChild !== null){
+                    tagName = polylistChild.tagName;
+                    if (tagName === "input"){
+                        var semantic = polylistChild.getAttribute('semantic');
+                        var offset = Number(polylistChild.getAttribute('offset'));
+                        dataAccessor.accessors[semantic] = buildDataAccessor(polylistChild);
+                        dataAccessor.names.push(semantic);
+                        dataAccessor.offset[semantic] = offset;
+                        dataAccessor.length[semantic] = semantic === "TEXCOORD"?2:3;
+                        if (!contains(offsetSet,offset)){
+                            offsetSet.push(offset);
+                        }
+                    } else if (tagName === "vcount"){
+                        vertexCount = stringToArray(polylistChild.textContent,count,Int32Array);
+                    } else if (tagName === "p"){
+                        var numberOfVertexIndices = 0,
+                            vertexCountLength = vertexCount.length,
+                            offsetCount = offsetSet.length;
+                        for (i=vertexCountLength-1;i>=0;i--){
+                            numberOfVertexIndices += vertexCount[i];
+                        }
+
+                        var numberOfVertexIndicesWithOffset = numberOfVertexIndices*offsetCount;
+                        var vertexIndices = stringToArray(polylistChild.textContent,numberOfVertexIndicesWithOffset,Int32Array);
+
+                        // initialize data container
+                        var result = {};
+                        for (i=0;i<dataAccessor.names.length;i++){
+                            result[dataAccessor.names[i]] = [];
+                        }
+
+                        var addVertexAttributes = function(index,triangleIndices){
+                            index *= offsetCount;
+                            for (var i=0;i<dataAccessor.names.length;i++){
+                                var name = dataAccessor.names[i];
+                                var accessor = dataAccessor.accessors[name];
+                                var length = dataAccessor.length[name];
+                                var offset = dataAccessor.offset[name];
+                                var vertexIndex = vertexIndices[offset+index];
+                                for (var j=0;j<length;j++){
+                                    var value = accessor(vertexIndex,j);
+                                    result[name].push(value);
+                                }
+                            }
+                            triangleIndices.push(triangleIndices.length);
+                        };
+
+                        // triangulate data
+                        var index = 0;
+                        var triangleIndices = [];
+                        for (i=0;i<vertexCount.length;i++){
+                            for (j=0;j<3;j++){
+                                addVertexAttributes(index+j,triangleIndices);
+                            }
+                            for (j=3;j<vertexCount[i];j++){
+                                addVertexAttributes(index+0,triangleIndices);
+                                addVertexAttributes(index+j-1,triangleIndices);
+                                addVertexAttributes(index+j,triangleIndices);
+                            }
+                            index += vertexCount[i];
+                        }
+
+                        for (i=0;i<dataAccessor.names.length;i++){
+                            var name = dataAccessor.names[i];
+                            var nameMeshData = name.toLowerCase();
+                            if (nameMeshData === "texcoord"){
+                                nameMeshData = "uv1";
+                            }
+                            destMeshData[nameMeshData] = result[name];
+                        }
+
+                        destMeshData.meshType = 4;
+                        destMeshData.indices = triangleIndices;
+                    }
+                    polylistChild = polylistChild .nextSibling;
+                }
+            },
+            /**
+             * @method buildFromTriangles
+             * @private
+             */
+            buildFromTriangles = function(meshChild, destMeshData){
+                // todo: implement
+            },
+            /**
+             * @method buildFromTrianglestrips
+             * @private buildFromTrianglestrips
+             */
+            buildFromTrianglestrips = function(meshChild, destMeshData){
+                // todo: implement
+            },
+            buildMesh = function (colladaDOM, engine, geometry){
+                var i,
+                    tagName,
+                    meshChild,
+                    name = geometry.getAttribute('name'),
+                    destMeshData = new KICK.mesh.MeshData({name:name}),
+                    mesh = geometry.getElementsByTagName("mesh");
+                if (mesh.length==0){
+                    return null;
+                }
+                mesh = mesh[0];
+                meshChild = mesh.firstChild;
+                while (meshChild !== null){
+                    tagName = meshChild.tagName;
+                    if (tagName === "lines"){
+                        console.log("lines");
+                    } else if (tagName === "linestrips"){
+                        console.log("linestrips");
+                    } else if (tagName === "polygons"){
+                        console.log("polygons");
+                    } else if (tagName === "polylist"){
+                        buildFromPolyList(meshChild,destMeshData);
+                    } else if (tagName === "triangles"){
+                        buildFromTriangles(meshChild);
+                    } else if (tagName === "trifans"){
+                        console.log("trifans unsupported");
+                    } else if (tagName === "tristrips"){
+                        buildFromTrianglestrips(meshChild);
+                    }
+                    meshChild = meshChild.nextSibling;
+                }
+                return destMeshData;
+            };
+
+
+        var libraryGeometries = colladaDOM.firstChild.getElementsByTagName("library_geometries"),
+            geometries,
+            geometry,
+            i;
+
+        if (!scene){
+            scene = engine.activeScene;
+        }
+        if (libraryGeometries.length==0){
+            // no geometries found
+        }
+
+        libraryGeometries = libraryGeometries[0];
+        geometries = libraryGeometries.getElementsByTagName("geometry");
+        var gameObjectsCreated = [];
+        for (i=0;i<geometries.length;i++){
+            geometry = geometries[i];
+            var meshDataObject = buildMesh(colladaDOM, engine, geometry);
+
+            // debug - put it up on the screen
+            var gameObject = scene.createGameObject();
+            gameObjectsCreated.push(gameObject);
+            var meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine, {},meshDataObject);
+
+            var shader = new KICK.material.Shader(engine);
+
+            shader.updateShader();
+            meshRenderer.material = new KICK.material.Material({
+                name:"Some material",
+                shader:shader
+            });
+            gameObject.addComponent(meshRenderer);
+        }
+        return gameObjectsCreated;
+
+    }
 })();

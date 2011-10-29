@@ -20,7 +20,6 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {
@@ -352,7 +351,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 get: function(){
                     var parentIterator = null;
                     if (parentTransform==null){
-                        return vec4.create(localRotationQuat);
+                        return quat4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]){
                         quat4.set(localRotationQuat,globalRotationQuat);
@@ -797,7 +796,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     this.near, this.far, projectionMatrix);
             }
 
-            // todo - this allocates a new mat4 - remove this
             var globalMatrixInv = transform.getGlobalTRSInverse();
             mat4.set(globalMatrixInv, modelViewMatrix);
 
@@ -827,7 +825,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @property cameraTypePerspective
          * @type Boolean
          */
-        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraType : true;
+        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
         /**
          * Only used when orthogonal camera type (!cameraTypePerspective)
          * @property left
@@ -1164,25 +1162,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
                 // compute light direction (note direction from surface towards camera)
-                vec3.set([0,0,1],directionalLightDirection);
+                vec4.set([0,0,1],directionalLightDirection);
                 quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
 
                 // transform to eye space
-                mat4.multiplyVec3(modelViewMatrix,directionalLightDirection);
+                mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
+                vec3.normalize(directionalLightDirection);
 
                 // compute eye direction
-                var eyeDirection = directionalHalfVector; // use directionalHalfVector as temp
-                vec3.set([0,0,-1],eyeDirection);
-                // transform to eye space
-                mat4.multiplyVec3(modelViewMatrix,eyeDirection);
-
+                var eyeDirection = [0,0,1];
                 // compute half vector
                 vec3.add(eyeDirection, directionalLightDirection, directionalHalfVector);
-                if (vec3.lengthSqr(directionalHalfVector)<0.001){ // if looking towards the light
-                    vec3.set([0,0,1],directionalHalfVector);
-                } else {
-                    vec3.normalize(directionalHalfVector);
-                }
+                vec3.normalize(directionalHalfVector);
             }
         };
     };

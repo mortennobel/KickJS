@@ -21,8 +21,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
 var KICK = KICK || {};
 
 KICK.namespace = KICK.namespace || function (ns_string) {

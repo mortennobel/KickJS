@@ -1,0 +1,95 @@
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset=UTF-8”>
+    <title>Kick.js | Collada model viewer</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css">
+    <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
+    <script type="text/javascript" src="../snake/kick/webgl-debug.js"></script>
+    <!--<script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>-->
+    <script type="text/javascript" src="../snake/kick/kick-uncompressed-0.1.0.js"></script>
+    <script src="collada_viewer.js"></script>
+</head>
+<body>
+<canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
+<button id="duckButton">Duck</button>
+<button id="cubeButton">Cube</button>
+<input type="file" id="file" />
+
+<div style="display: none">
+<textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec3 uv1;
+attribute vec3 normal;
+uniform mat4 _mvProj;
+uniform mat3 _norm;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    // vColor = vec3(uv1.x,uv1.y,0.0);
+    vColor = _norm * normal;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+      vec3 color = vColor*0.5+vec3(0.5,0.5,0.5);
+    gl_FragColor = vec4(color.x, color.y, color.z, 1.0);
+}
+  </textarea>
+
+<textarea style="width:500px;height:150px;" id="vertexShaderColorImg">
+attribute vec3 vertex;
+attribute vec3 normal;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+uniform mat3 _norm;
+uniform float _time;
+
+varying vec2 uv;
+varying vec3 vColor;
+varying float vSpecular;
+
+#pragma include "light.glsl"
+
+void main(void) {
+ // compute position
+ gl_Position = _mvProj * vec4(vertex, 1.0);
+
+ uv = uv1;
+ // compute light info
+ vec3 n = normalize(_norm * normal);
+ vec3 diffuse;
+ float glowingSpecular = 50.0;
+ getDirectionalLight(n, _dLight, glowingSpecular, diffuse, vSpecular);
+
+    vColor = max(diffuse,_ambient.xyz);
+} 
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShaderImg">
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+      varying vec3 vColor;
+      varying vec2 uv;
+      varying float vSpecular;
+
+      uniform sampler2D tex;
+
+      void main(void)
+      {
+      gl_FragColor = texture2D(tex,uv) *  vec4(vColor.x, vColor.y, vColor.z, 1.0)+ vec4(vSpecular,vSpecular,vSpecular,1.0);
+      }
+ 
+  </textarea>
+
+    </div>
+</body>
+</html>
