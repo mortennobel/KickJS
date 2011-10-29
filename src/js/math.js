@@ -2165,7 +2165,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     };
 
     /**
-     * Calculates a rotation represented in eulers angles
+     * Calculates a rotation represented in eulers angles (in degrees)
      * @method toEuler
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
@@ -2222,34 +2222,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             dest = quat4.create();
         }
 
-        // todo optimize this method. It shold basically inline all three multiplications like the code below
+        // todo optimize this method. It should basically inline all three multiplications like the code below
         quat4.multiply(axisZ,axisY,dest);
         quat4.multiply(dest,axisX,dest);
         return dest;
-        /*
-        var DEGREE_TO_RADIAN_HALF = DEGREE_TO_RADIAN*0.5,
-            xHalf = vec[0]*(DEGREE_TO_RADIAN_HALF),
-            yHalf = vec[1]*(DEGREE_TO_RADIAN_HALF),
-            zHalf = vec[2]*(-DEGREE_TO_RADIAN_HALF);
-        if(!dest) { dest = quat4.create(); }
-
-        if (xHalf===0 && yHalf===0 && zHalf===0){
-            return quat4.identity(dest);
-        }
-
-        var cosxHalf = Math.cos(xHalf),
-            cosyHalf = Math.cos(yHalf),
-            coszHalf = Math.cos(zHalf),
-            sinxHalf = Math.sin(xHalf),
-            sinyHalf = Math.sin(yHalf),
-            sinzHalf = Math.sin(zHalf);
-
-        dest[0] = cosxHalf*cosyHalf*coszHalf + sinxHalf*sinyHalf*sinzHalf;
-        dest[1] = sinxHalf*cosyHalf*coszHalf - cosxHalf*sinyHalf*sinzHalf;
-        dest[2] = cosxHalf*sinyHalf*coszHalf + sinxHalf*cosyHalf*sinzHalf;
-        dest[3] = cosxHalf*cosyHalf*sinzHalf - sinxHalf*sinyHalf*coszHalf;
-
-        return dest;*/
     }
 
 
@@ -2388,7 +2364,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     /**
      * Return rotation that goes from quat to quat2.<br>
      * It is the same as: quat4.multiply(quat4.inverse(quat),quat2,dest);
-     * @method {KICK.math.quat4} difference
+     * @method difference
      * @param {KICK.math.quat4} quat from rotation
      * @param {KICK.math.quat4} quat2 to rotation
      * @param {KICK.math.quat4} dest Optional
