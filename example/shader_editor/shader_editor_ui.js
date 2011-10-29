@@ -78,7 +78,6 @@
     function getRadioValue(elementName){
         var elem = document.getElementById(elementName),
             i,
-            count = 0,
             childElem;
         for (i=0;i<elem.children.length;i++){
             childElem =elem.children[i];
