@@ -83,7 +83,7 @@ window.shaderEditor = new (function(){
         var textures = shaderData.textureData,
             materialUniforms = shaderData.material.uniforms;
         shader = new KICK.material.Shader(_engine,shaderData.shader);
-        shader.faceCulling = KICK.core.Constants.NONE;
+        shader.faceCulling = KICK.core.Constants.GL_NONE;
         var missingAttributes = _meshRenderer.mesh.verify(shader);
         if (missingAttributes){
             logFn("Missing mesh vertex attributes.");
