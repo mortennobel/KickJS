@@ -116,18 +116,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return shader;
             },
             updateCullFace = function () {
-                var shaderFaceCulling = thisObj.faceCulling,
-                    currentFaceCulling = gl.faceCulling;
-                if (currentFaceCulling !== shaderFaceCulling) {
-                    if (shaderFaceCulling === core.Constants.GL_NONE) {
+                var currentFaceCulling = gl.faceCulling;
+                if (currentFaceCulling !== _faceCulling) {
+                    if (_faceCulling === core.Constants.GL_NONE) {
                         gl.disable( c.GL_CULL_FACE );
                     } else {
                         if (!currentFaceCulling || currentFaceCulling === core.Constants.GL_NONE) {
                             gl.enable( c.GL_CULL_FACE );
                         }
-                        gl.cullFace( shaderFaceCulling );
+                        gl.cullFace( _faceCulling );
                     }
-                    gl.faceCulling = shaderFaceCulling;
+                    gl.faceCulling = _faceCulling;
                 }
             },
             updateDepthProperties = function () {
