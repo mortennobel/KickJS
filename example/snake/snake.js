@@ -342,9 +342,6 @@ window.onload = function(){
 
         this.activated = function(){
             engine.paused = true;
-        };
-
-        this.activated = function(){
             food = this.gameObject.scene.findComponentsOfType(SnakeFood)[0];
         };
         this.update = function(){
@@ -459,7 +456,7 @@ window.onload = function(){
         }
     }
 
-    window.YUI().use('slider', function (Y) {
+    window.YUI().use('slider','panel', function (Y) {
         var xSlider = new Y.Slider({
             min   : 225,
             max   : 25,
@@ -473,6 +470,20 @@ window.onload = function(){
 
         var xInput = Y.one( "#horiz_value" );
         xSlider.on( "valueChange", updateInput, xInput );
+
+        var panel = new Y.Panel({
+            srcNode: "#panelContent",
+            width: 250,
+            y: 25,
+            x: 5,
+            buttons:[],
+            centered: false,
+            visible: true,
+            modal:false,
+            headerContent: "Snake"
+        });
+
+        panel.render();
     });
 
     function playButtonClicked(){
