@@ -159,39 +159,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value: new core.Config(config || {})
             },
             /**
+             * Controls is the gameloop is running
              * @property paused
              * @type boolean
              */
             paused:{
                 get:function(){
                     return animationFrameObj === null;
+                },
+                set:function(pause){
+                    var currentValue = thisObj.paused;
+                    if (pause != currentValue){
+                        if (pause){
+                            cancelRequestAnimFrame(animationFrameObj);
+                            animationFrameObj = null;
+                        } else {
+                            lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
+                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+                        }
+                    }
                 }
             }
         });
-
-
-
-        /**
-         * Stop the game loop. Ignores if game engine is already paused
-         * @method pause
-         */
-        this.pause = function(){
-            if (!thisObj.paused){
-                cancelRequestAnimFrame(animationFrameObj);
-                animationFrameObj = null;
-            }
-        };
-
-        /**
-         * Resume the game loop. Ignored if the game engine is already running.
-         * @method resume
-         */
-        this.resume = function(){
-            if (thisObj.paused){
-                lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
-                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
-            }
-        };
 
         /**
          * @method _gameLoop
