@@ -145,6 +145,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * </pre>
          * @method getComponentOfType
          * @param {Object} type the constructor of the wanted component
+         * @return {Object} component of specified type or null
          */
         this.getComponentOfType = function (type) {
             var component,
@@ -159,6 +160,35 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return this.transform;
             }
             return null;
+        };
+
+        /**
+         * Get all component of a specified type. Internally uses instanceof.<br>
+         * Example usage:<br>
+         * <pre class="brush: js">
+         * var meshRenderer = someGameObject.getComponentsOfType(KICK.scene.MeshRenderer);
+         * if (meshRenderer.length > 0){
+         * material = meshRenderer[0].material;
+         * }
+         * </pre>
+         * @method getComponentsOfType
+         * @param {Object} type the constructor of the wanted component
+         * @return {Array[Object]} arrays of components of specified type
+         */
+        this.getComponentsOfType = function (type) {
+            var component,
+                i,
+                res = [];
+            for (i=_components.length-1;i>=0;i--){
+                component = _components[i];
+                if (component instanceof type){
+                    res.push(component);
+                }
+            }
+            if (type === scene.Transform){
+                res.push(this.transform);
+            }
+            return res;
         };
     };
 
@@ -609,7 +639,25 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
             }
             componentListenes.push(componentListener);
-        }
+        };
+
+        /**
+         * Search the scene for components of the specified type in the scene. Note that this
+         * method is slow - do not run in the the update function.
+         * @method findComponentsOfType
+         * @param {Type} componentType
+         * @return {Array[KICK.scene.Component]} components
+         */
+        this.findComponentsOfType = function(componentType){
+            var res = [];
+            for (var i=gameObjects.length-1;i>=0;i--){
+                var component = gameObjects[i].getComponentsOfType(componentType);
+                for (var j=0;j<component.length;j++){
+                    res.push(component[j]);
+                }
+            }
+            return res;
+        };
 
         /**
          * Removes a component change listener from the scene
@@ -638,6 +686,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {KICK.scene} component
          */
         this.removeComponent = function (component) {
+            core.Util.removeElementFromArray(componentsNew,component);
             componentsDelete.push(component);
         };
 
