@@ -5130,7 +5130,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             frameListeners = [],
             keyInput = null,
             activeScene = new scene.Scene(this),
-            animationFrameObj = null,
+            animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
@@ -5212,39 +5212,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value: new core.Config(config || {})
             },
             /**
-             * @property isPaused
+             * Controls is the gameloop is running
+             * @property paused
              * @type boolean
              */
-            isPaused:{
+            paused:{
                 get:function(){
                     return animationFrameObj === null;
+                },
+                set:function(pause){
+                    var currentValue = thisObj.paused;
+                    if (pause != currentValue){
+                        if (pause){
+                            cancelRequestAnimFrame(animationFrameObj);
+                            animationFrameObj = null;
+                        } else {
+                            lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
+                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+                        }
+                    }
                 }
             }
         });
-
-
-
-        /**
-         * Stop the game loop. Ignores if game engine is already paused
-         * @method pause
-         */
-        this.pause = function(){
-            if (!thisObj.isPaused){
-                cancelRequestAnimFrame(animationFrameObj);
-                animationFrameObj = null;
-            }
-        };
-
-        /**
-         * Resume the game loop. Ignored if the game engine is already running.
-         * @method resume
-         */
-        this.resume = function(){
-            if (thisObj.isPaused){
-                lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
-                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
-            }
-        };
 
         /**
          * @method _gameLoop
@@ -5261,7 +5250,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             lastTime = time;
             timeSinceStart += deltaTime;
             frameCount += 1;
-            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+            if (animationFrameObj !== null){
+                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+            }
         };
 
         /**
@@ -5350,14 +5341,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             alert(e);
                         }
                     }
-                    gl.enable(2929);
                     if (!gl) {
                         throw {
                             name: "Error",
                             message: "Cannot create gl-context"
                         };
                     }
-
                     if (thisObj.config.enableDebugContext){
                         if (window["WebGLDebugUtils"]){
                             gl = WebGLDebugUtils.makeDebugContext(gl);
@@ -5365,11 +5354,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
                     }
+                    
+                    gl.enable(2929);
                 };
             initGL();
 
             canvas.addEventListener("webglcontextlost", function(event) {
-                wasPaused = thisObj.isPaused;
+                wasPaused = thisObj.paused;
                 thisObj.pause();
                 for (i=0;i<contextListeners.length;i++){
                     contextListeners[i].contextLost();
@@ -6803,6 +6794,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * </pre>
          * @method getComponentOfType
          * @param {Object} type the constructor of the wanted component
+         * @return {Object} component of specified type or null
          */
         this.getComponentOfType = function (type) {
             var component,
@@ -6817,6 +6809,35 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return this.transform;
             }
             return null;
+        };
+
+        /**
+         * Get all component of a specified type. Internally uses instanceof.<br>
+         * Example usage:<br>
+         * <pre class="brush: js">
+         * var meshRenderer = someGameObject.getComponentsOfType(KICK.scene.MeshRenderer);
+         * if (meshRenderer.length > 0){
+         * material = meshRenderer[0].material;
+         * }
+         * </pre>
+         * @method getComponentsOfType
+         * @param {Object} type the constructor of the wanted component
+         * @return {Array[Object]} arrays of components of specified type
+         */
+        this.getComponentsOfType = function (type) {
+            var component,
+                i,
+                res = [];
+            for (i=_components.length-1;i>=0;i--){
+                component = _components[i];
+                if (component instanceof type){
+                    res.push(component);
+                }
+            }
+            if (type === scene.Transform){
+                res.push(this.transform);
+            }
+            return res;
         };
     };
 
@@ -7267,7 +7288,25 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
             }
             componentListenes.push(componentListener);
-        }
+        };
+
+        /**
+         * Search the scene for components of the specified type in the scene. Note that this
+         * method is slow - do not run in the the update function.
+         * @method findComponentsOfType
+         * @param {Type} componentType
+         * @return {Array[KICK.scene.Component]} components
+         */
+        this.findComponentsOfType = function(componentType){
+            var res = [];
+            for (var i=gameObjects.length-1;i>=0;i--){
+                var component = gameObjects[i].getComponentsOfType(componentType);
+                for (var j=0;j<component.length;j++){
+                    res.push(component[j]);
+                }
+            }
+            return res;
+        };
 
         /**
          * Removes a component change listener from the scene
@@ -7296,6 +7335,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {KICK.scene} component
          */
         this.removeComponent = function (component) {
+            core.Util.removeElementFromArray(componentsNew,component);
             componentsDelete.push(component);
         };
 
@@ -7485,7 +7525,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
         /**
-         * Only used when orthogonal camera type (!cameraTypePerspective)
+         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
          * @property left
          * @type Number
          */
@@ -7497,7 +7537,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.right = isNumber(config.right) ? config.right : 1;
         /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
+         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
          * @property bottom
          * @type Number
          */
@@ -7885,7 +7925,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         core = KICK.namespace("KICK.core");
 
     /**
-     * Renders a Mesh
+     * Encapsulate a texture object and its configuration.
      * @class Texture
      * @namespace KICK.texture
      * @constructor
@@ -8522,18 +8562,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return shader;
             },
             updateCullFace = function () {
-                var shaderFaceCulling = thisObj.faceCulling,
-                    currentFaceCulling = gl.faceCulling;
-                if (currentFaceCulling !== shaderFaceCulling) {
-                    if (shaderFaceCulling === 0) {
+                var currentFaceCulling = gl.faceCulling;
+                if (currentFaceCulling !== _faceCulling) {
+                    if (_faceCulling === 0) {
                         gl.disable( 2884 );
                     } else {
                         if (!currentFaceCulling || currentFaceCulling === 0) {
                             gl.enable( 2884 );
                         }
-                        gl.cullFace( shaderFaceCulling );
+                        gl.cullFace( _faceCulling );
                     }
-                    gl.faceCulling = shaderFaceCulling;
+                    gl.faceCulling = _faceCulling;
                 }
             },
             updateDepthProperties = function () {
