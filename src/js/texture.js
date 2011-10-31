@@ -48,7 +48,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         core = KICK.namespace("KICK.core");
 
     /**
-     * Renders a Mesh
+     * Encapsulate a texture object and its configuration.
      * @class Texture
      * @namespace KICK.texture
      * @constructor
