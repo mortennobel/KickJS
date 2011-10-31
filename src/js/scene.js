@@ -827,7 +827,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
         /**
-         * Only used when orthogonal camera type (!cameraTypePerspective)
+         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
          * @property left
          * @type Number
          */
@@ -839,7 +839,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.right = isNumber(config.right) ? config.right : 1;
         /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
+         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
          * @property bottom
          * @type Number
          */
