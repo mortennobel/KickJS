@@ -77,7 +77,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             frameListeners = [],
             keyInput = null,
             activeScene = new scene.Scene(this),
-            animationFrameObj = null,
+            animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
@@ -159,10 +159,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value: new core.Config(config || {})
             },
             /**
-             * @property isPaused
+             * @property paused
              * @type boolean
              */
-            isPaused:{
+            paused:{
                 get:function(){
                     return animationFrameObj === null;
                 }
@@ -176,7 +176,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method pause
          */
         this.pause = function(){
-            if (!thisObj.isPaused){
+            if (!thisObj.paused){
                 cancelRequestAnimFrame(animationFrameObj);
                 animationFrameObj = null;
             }
@@ -187,7 +187,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method resume
          */
         this.resume = function(){
-            if (thisObj.isPaused){
+            if (thisObj.paused){
                 lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
                 animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
             }
@@ -208,7 +208,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             lastTime = time;
             timeSinceStart += deltaTime;
             frameCount += 1;
-            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+            if (animationFrameObj){
+                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+            }
         };
 
         /**
@@ -316,7 +318,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             initGL();
 
             canvas.addEventListener("webglcontextlost", function(event) {
-                wasPaused = thisObj.isPaused;
+                wasPaused = thisObj.paused;
                 thisObj.pause();
                 for (i=0;i<contextListeners.length;i++){
                     contextListeners[i].contextLost();
