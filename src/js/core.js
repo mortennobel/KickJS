@@ -197,7 +197,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             lastTime = time;
             timeSinceStart += deltaTime;
             frameCount += 1;
-            if (animationFrameObj){
+            if (animationFrameObj !== null){
                 animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
             }
         };
@@ -288,14 +288,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             alert(e);
                         }
                     }
-                    gl.enable(c.GL_DEPTH_TEST);
                     if (!gl) {
                         throw {
                             name: "Error",
                             message: "Cannot create gl-context"
                         };
                     }
-
                     if (thisObj.config.enableDebugContext){
                         if (window["WebGLDebugUtils"]){
                             gl = WebGLDebugUtils.makeDebugContext(gl);
@@ -303,6 +301,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
                     }
+                    
+                    gl.enable(c.GL_DEPTH_TEST);
                 };
             initGL();
 
