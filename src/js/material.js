@@ -228,7 +228,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default),
-             * KICK.core.Constants.GL_FRONT_AND_BACK, KICK.core.Constants.NONE
+             * KICK.core.Constants.GL_FRONT_AND_BACK, KICK.core.Constants.NONE<br>
+             * Note that in faceCulling = GL_FRONT, GL_BACK or GL_FRONT_AND_BACK with face culling enabled<br>
+             * faceCulling = GL_NONE means face culling disabled
              * @property faceCulling
              * @type Object
              */
