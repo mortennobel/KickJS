@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../src/js/glslconstants.js"></script>
     <script type="text/javascript" src="../src/js/math.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/core-default.js"></script>
     <script type="text/javascript" src="../src/js/mesh.js"></script>
     <script type="text/javascript" src="../src/js/scene.js"></script>
     <script type="text/javascript" src="../src/js/renderer.js"></script>
@@ -32,11 +33,11 @@
             gameObjects.length = 0;
         }
 
-        function runTest(vertexShaderId, fragmentShaderId, meshFactoryFunc) {
+        function runTest(vertexShaderId, fragmentShaderId, meshURL) {
             var element = document.getElementById("output");
             element.innerHTML = "";
             var gameObject = engine.activeScene.createGameObject();
-            var mesh = meshFactoryFunc(engine);
+            var mesh = engine.resourceManager.getMesh(meshURL);
             var meshRenderer = new KICK.scene.MeshRenderer();
             meshRenderer.mesh = mesh;
             var vs = document.getElementById(vertexShaderId).value;
@@ -68,12 +69,12 @@
         }
 
         function runTestTriangle() {
-            runTest('vertexShader','fragmentShader',KICK.mesh.MeshFactory.createTriangle);
+            runTest('vertexShader','fragmentShader',"kickjs://cube/?length=0.5");
 
         }
 
         function runTestPlane() {
-            runTest('vertexShader','fragmentShaderBlue',KICK.mesh.MeshFactory.createPlane);
+            runTest('vertexShader','fragmentShaderBlue',"kickjs://plane/");
         }
 
         function initKick() {

@@ -68,16 +68,17 @@ $nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/
 $nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js
 $nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js
 $nodejs $project/preprocessor/preprocessor $project/src/js/collada.js $project/build/pre/collada.js
+$nodejs $project/preprocessor/preprocessor $project/src/js/core-default.js $project/build/pre/core-default.js
 cp $project/src/js/constants.js $project/build/pre/constants.js
 cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 
 ##############################################################################
 echo "Running Google Clojure compiler"
-java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/glslconstants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/mesh.js --js $project/build/pre/renderer.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --js $project/build/pre/collada.js --language_in ECMASCRIPT5_STRICT
+java -jar $googleClojure  --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/glslconstants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/mesh.js --js $project/build/pre/renderer.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --js $project/build/pre/collada.js --js $project/build/pre/core-default.js --language_in ECMASCRIPT5_STRICT
 
 ##############################################################################
 echo "Creating kick-uncompressed.js"
-cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/mesh.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/renderer.js $project/build/pre/material.js $project/build/pre/meshfactory.js $project/build/pre/collada.js > $project/build/kick-uncompressed-$version.js
+cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/mesh.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/renderer.js $project/build/pre/material.js $project/build/pre/meshfactory.js $project/build/pre/collada.js $project/build/pre/core-default.js > $project/build/kick-uncompressed-$version.js
 
 ##############################################################################
 echo "Adding license info compiler"

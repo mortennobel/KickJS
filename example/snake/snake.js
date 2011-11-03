@@ -15,7 +15,7 @@ window.onload = function(){
                     shader:shader,
                     name:"SnakeFood material"
                 }),
-                mesh = KICK.mesh.MeshFactory.createUVSphere(engine,12,6,0.5);
+                mesh = engine.resourceManager.getMesh("kickjs://uvsphere/?slices=12&stacks=6&radius=0.5");
             transform = this.gameObject.transform;
             var meshRenderer = new KICK.scene.MeshRenderer();
             meshRenderer.mesh = mesh;
@@ -101,7 +101,7 @@ window.onload = function(){
                 shader:shader,
                 name:"Snake material"
             }),
-            mesh = KICK.mesh.MeshFactory.createCube(engine,0.5),
+            mesh = engine.resourceManager.getMesh("kickjs://cube/?length=0.5"),
             rotateLeft = function(){
                 if (currentMovement==-1){
                     return;

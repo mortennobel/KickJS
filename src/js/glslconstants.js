@@ -69,5 +69,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 * @property light.glsl
 * @type String
 */
-{"default_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","default_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;"};
+/**
+* GLSL file content
+* @property phong_fs.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property phong_fs_tex.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property phong_vs.glsl
+* @type String
+*/
+{"default_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","default_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 uv;\nvarying vec3 vNormal;\n\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform vec3 materialColor;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 vColor = max(diffuse,_ambient.xyz)*materialColor;\n    \n    gl_FragColor = vec4(vColor, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_fs_tex.glsl":" #ifdef GL_ES\n precision highp float;\n #endif\n varying vec2 uv;\n varying vec3 vNormal;\n\n uniform float specularExponent;\n uniform vec3 specularColor;\n uniform vec3 materialColor;\n uniform sampler2D tex;\n\n #pragma include \"light.glsl\"\n\n void main(void)\n {\n     vec3 diffuse;\n     float specular;\n     getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n     vec3 vColor = max(diffuse,_ambient.xyz)*materialColor;\n\n     gl_FragColor = texture2D(tex,uv)*vec4(vColor, 1.0)+vec4(specular*specularColor,0.0);\n }\n","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 uv;\nvarying vec3 vNormal;\n\nvoid main(void) {\n // compute position\n gl_Position = _mvProj * vec4(vertex, 1.0);\n\n uv = uv1;\n // compute light info\n vNormal= normalize(_norm * normal);\n\n} "};
 })();

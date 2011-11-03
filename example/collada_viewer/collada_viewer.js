@@ -43,7 +43,6 @@ function loadCollada(url){
 
 var material;
 var duckMaterial;
-
 function duckClicked(){
     loadCollada("duck.dae");
 
@@ -155,7 +154,6 @@ function initDuckTexture(){
 }
 
 function initLights(){
-
     var ambientlightGameObject = engine.activeScene.createGameObject();
     var ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
     ambientLight.color = [0.1,0.1,0.1,1];
@@ -176,7 +174,7 @@ function initLights(){
 
 function initKick() {
     engine = new KICK.core.Engine('canvas',{
- //       enableDebugContext: true
+        enableDebugContext: true
     });
     var cameraObject = engine.activeScene.createGameObject();
     var camera = new KICK.scene.Camera({
@@ -189,7 +187,7 @@ function initKick() {
 
     var gameObject = engine.activeScene.createGameObject();
     meshRenderer = new KICK.scene.MeshRenderer();
-    setMesh(KICK.mesh.MeshFactory.createUVSphere, 0.5);
+    meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://uvsphere/?radius=0.5");
     material = createMaterial('vertexShaderColor','fragmentShader');
 
     duckMaterial = createMaterial('vertexShaderColorImg','fragmentShaderImg');
@@ -200,10 +198,6 @@ function initKick() {
     gameObject.addComponent(meshRenderer);
 
 
-}
-
-function UVSphere(){
-    setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
 }
 
 window.addEventListener("load",function(){

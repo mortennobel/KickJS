@@ -9,6 +9,7 @@
     <script type="text/javascript" src="../src/js/constants.js"></script>
     <script type="text/javascript" src="../src/js/glslconstants.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/core-default.js"></script>
     <script type="text/javascript" src="../src/js/math.js"></script>
     <script type="text/javascript" src="../src/js/mesh.js"></script>
     <script type="text/javascript" src="../src/js/scene.js"></script>
@@ -32,10 +33,7 @@
             element.innerHTML = "";
         }
 
-        function setMesh(meshFactoryFunc){
-            clearLog();
-            meshRenderer.mesh = meshFactoryFunc(engine);
-        }
+
 
         function initMaterials(vertexShaderId, fragmentShaderId){
             clearLog();
@@ -93,7 +91,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.mesh.MeshFactory.createPlane);
+            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://cube/?length=0.5");
             initMaterials('vertexShader','fragmentShader');
             gameObject.addComponent(meshRenderer);
         }

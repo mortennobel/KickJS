@@ -55,6 +55,145 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         ASSERT = constants._ASSERT;
 
     /**
+     * Responsible for creating or loading a resource using a given url
+     * @class ResourceProvider
+     * @namespace KICK.core
+     * @constructor
+     * @param {String} protocol
+     */
+        /**
+         * Protocol of the resource, such as http, kickjs<br>
+         * The protocol must uniquely identify a resource provider
+         * @property protocol
+         * @type String
+         */
+
+        /**
+         * @method getMesh
+         * @param {String} url
+         * @return {KICK.mesh.Mesh}
+         */
+        /**
+         * @method getShader
+         * @param {String} url
+         * @return {KICK.material.Shader}
+         */
+        /**
+         * @method getTexture
+         * @param {String} url
+         * @return {KICK.texture.Texture}
+         */
+        /**
+         * @method getScene
+         * @param {String} url
+         * @return {KICK.scene.Scene}
+         */
+
+
+    /**
+     * Responsible for allocation and deallocation of resources.
+     * @class ResourceManager
+     * @namespace KICK.core
+     * @constructor
+     */
+    core.ResourceManager = function (engine) {
+        var resourceProviders = [new core.DefaultResourceProvider(engine)],
+            buildCache = function(){
+                return {
+                    ref: {},
+                    refCount: {}
+                }
+            },
+            meshCache = buildCache(),
+            shaderCache = buildCache(),
+            textureCache = buildCache(),
+            sceneCache = buildCache(),
+            allCaches = [meshCache,shaderCache,textureCache,sceneCache],
+            getFromCache = function(cache, url){
+                var res = cache.ref[url];
+                if (res){
+                    cache.refCount[url]++;
+                }
+                return res;
+            },
+            addToCache = function(cache, url, resource){
+                cache.ref[url] = resource;
+                cache.refCount[url] = 1;
+            },
+            /**
+             * @method buildGetFunc
+             * @param {Object} cache
+             * @param {String} methodName
+             * @return {Function} getter function with the signature function(url)
+             * @private
+             */
+            buildGetFunc = function(cache,methodName){
+                return function(url){
+                    var res = getFromCache(cache,url),
+                        i;
+                    if (res){
+                        return res;
+                    }
+                    for (i=resourceProviders.length-1;i>=0;i--){
+                        res = resourceProviders[i][methodName](url);
+                    }
+                    if (res){
+                        addToCache(cache,url,res);
+                    }
+                    return res;
+                };
+            };
+
+        /**
+         * @method getMesh
+         * @param {String} url
+         * @return {KICK.mesh.Mesh}
+         */
+        this.getMesh = buildGetFunc(meshCache,"getMesh");
+        /**
+         * @method getShader
+         * @param {String} url
+         * @return {KICK.material.Shader}
+         */
+        this.getShader = buildGetFunc(shaderCache,"getShader");
+        /**
+         * @method getTexture
+         * @param {String} url
+         * @return {KICK.texture.Texture}
+         */
+        this.getTexture = buildGetFunc(textureCache,"getTexture");
+        /**
+         * @method getScene
+         * @param {String} url
+         * @return {KICK.scene.Scene}
+         */
+        this.getScene = buildGetFunc(sceneCache,"getScene");
+
+        /**
+         * Release a reference to the resource.
+         * If reference count is 0, then the reference is deleted and the destroy method on the
+         * resource object are invoked.
+         * @method release
+         * @param {String} url
+         */
+        this.release = function(url){
+            for (var i=allCaches.length-1;i>=0;i--){
+                if (allCaches[i].refCount[url]){
+                    allCaches[i].refCount[url]--;
+                    if (allCaches[i].refCount[url]<=0){
+                        if (allCaches[i].ref[url].destroy){
+                            allCaches[i].ref[url].destroy();
+                        }
+                        delete allCaches[i].refCount[url];
+                        delete allCaches[i].ref[url];
+                    }
+                }
+            }
+        };
+    };
+
+
+    /**
      * Game engine object
      * @class Engine
      * @namespace KICK.core
@@ -84,6 +223,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             uniqIdCounter = 1;
 
         Object.defineProperties(this,{
+            /**
+             * Resource manager of the engine. Loads and cache resources.
+             * @property resourceManager
+             * @type KICK.core.ResourceManager
+             */
+            resourceManager:{
+                value: new core.ResourceManager(this)
+            },
             /**
              * The WebGL context (readonly)
              * @property gl
@@ -534,7 +681,50 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
-
+        /**
+         * Reads a parameter from a url string.
+         * @method getParameter
+         * @param {String} url
+         * @param {String} parameterName
+         * @return {String} parameter value or null if not found.
+         */
+        getParameter: function(url, parameterName){
+            var regexpStr = "[\\?&]"+parameterName+"=([^&#]*)",
+                regexp = new RegExp( regexpStr ),
+                res = regexp.exec( url );
+            if( res == null )
+                return null;
+            else
+                return res[1];
+        },
+        /**
+         * Reads a int parameter from a url string.
+         * @method getParameterInt
+         * @param {String} url
+         * @param {String} parameterName
+         * @return {String} parameter value or null if not found.
+         */
+        getParameterInt: function(url, parameterName, notFoundValue){
+            var res = core.Util.getParameter(url,parameterName);
+            if( res === null )
+                return notFoundValue;
+            else
+                return parseInt(res);
+        },
+        /**
+         * Reads a float parameter from a url string.
+         * @method getParameterInt
+         * @param {String} url
+         * @param {String} parameterName
+         * @return {String} parameter value or null if not found.
+         */
+        getParameterFloat: function(url, parameterName, notFoundValue){
+            var res = core.Util.getParameter(url,parameterName);
+            if( res === null )
+                return notFoundValue;
+            else
+                return parseFloat(res);
+        },
         /**
          * Scales the image by drawing the image on a canvas object.
          * @method scaleImage

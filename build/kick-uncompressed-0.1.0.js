@@ -2638,7 +2638,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 * @property light.glsl
 * @type String
 */
-{"default_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","default_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;"};
+/**
+* GLSL file content
+* @property phong_fs.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property phong_fs_tex.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property phong_vs.glsl
+* @type String
+*/
+{"default_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","default_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 uv;\nvarying vec3 vNormal;\n\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform vec3 materialColor;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 vColor = max(diffuse,_ambient.xyz)*materialColor;\n    \n    gl_FragColor = vec4(vColor, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_fs_tex.glsl":" #ifdef GL_ES\n precision highp float;\n #endif\n varying vec2 uv;\n varying vec3 vNormal;\n\n uniform float specularExponent;\n uniform vec3 specularColor;\n uniform vec3 materialColor;\n uniform sampler2D tex;\n\n #pragma include \"light.glsl\"\n\n void main(void)\n {\n     vec3 diffuse;\n     float specular;\n     getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n     vec3 vColor = max(diffuse,_ambient.xyz)*materialColor;\n\n     gl_FragColor = texture2D(tex,uv)*vec4(vColor, 1.0)+vec4(specular*specularColor,0.0);\n }\n","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 uv;\nvarying vec3 vNormal;\n\nvoid main(void) {\n // compute position\n gl_Position = _mvProj * vec4(vertex, 1.0);\n\n uv = uv1;\n // compute light info\n vNormal= normalize(_norm * normal);\n\n} "};
 })();/*!
  * New BSD License
  *
@@ -5108,6 +5123,145 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         ASSERT = true;
 
     /**
+     * Responsible for creating or loading a resource using a given url
+     * @class ResourceProvider
+     * @namespace KICK.core
+     * @constructor
+     * @param {String} protocol
+     */
+        /**
+         * Protocol of the resource, such as http, kickjs<br>
+         * The protocol must uniquely identify a resource provider
+         * @property protocol
+         * @type String
+         */
+
+        /**
+         * @method getMesh
+         * @param {String} url
+         * @return {KICK.mesh.Mesh}
+         */
+        /**
+         * @method getShader
+         * @param {String} url
+         * @return {KICK.material.Shader}
+         */
+        /**
+         * @method getTexture
+         * @param {String} url
+         * @return {KICK.texture.Texture}
+         */
+        /**
+         * @method getScene
+         * @param {String} url
+         * @return {KICK.scene.Scene}
+         */
+
+
+    /**
+     * Responsible for allocation and deallocation of resources.
+     * @class ResourceManager
+     * @namespace KICK.core
+     * @constructor
+     */
+    core.ResourceManager = function (engine) {
+        var resourceProviders = [new core.DefaultResourceProvider(engine)],
+            buildCache = function(){
+                return {
+                    ref: {},
+                    refCount: {}
+                }
+            },
+            meshCache = buildCache(),
+            shaderCache = buildCache(),
+            textureCache = buildCache(),
+            sceneCache = buildCache(),
+            allCaches = [meshCache,shaderCache,textureCache,sceneCache],
+            getFromCache = function(cache, url){
+                var res = cache.ref[url];
+                if (res){
+                    cache.refCount[url]++;
+                }
+                return res;
+            },
+            addToCache = function(cache, url, resource){
+                cache.ref[url] = resource;
+                cache.refCount[url] = 1;
+            },
+            /**
+             * @method buildGetFunc
+             * @param {Object} cache
+             * @param {String} methodName
+             * @return {Function} getter function with the signature function(url)
+             * @private
+             */
+            buildGetFunc = function(cache,methodName){
+                return function(url){
+                    var res = getFromCache(cache,url),
+                        i;
+                    if (res){
+                        return res;
+                    }
+                    for (i=resourceProviders.length-1;i>=0;i--){
+                        res = resourceProviders[i][methodName](url);
+                    }
+                    if (res){
+                        addToCache(cache,url,res);
+                    }
+                    return res;
+                };
+            };
+
+        /**
+         * @method getMesh
+         * @param {String} url
+         * @return {KICK.mesh.Mesh}
+         */
+        this.getMesh = buildGetFunc(meshCache,"getMesh");
+        /**
+         * @method getShader
+         * @param {String} url
+         * @return {KICK.material.Shader}
+         */
+        this.getShader = buildGetFunc(shaderCache,"getShader");
+        /**
+         * @method getTexture
+         * @param {String} url
+         * @return {KICK.texture.Texture}
+         */
+        this.getTexture = buildGetFunc(textureCache,"getTexture");
+        /**
+         * @method getScene
+         * @param {String} url
+         * @return {KICK.scene.Scene}
+         */
+        this.getScene = buildGetFunc(sceneCache,"getScene");
+
+        /**
+         * Release a reference to the resource.
+         * If reference count is 0, then the reference is deleted and the destroy method on the
+         * resource object are invoked.
+         * @method release
+         * @param {String} url
+         */
+        this.release = function(url){
+            for (var i=allCaches.length-1;i>=0;i--){
+                if (allCaches[i].refCount[url]){
+                    allCaches[i].refCount[url]--;
+                    if (allCaches[i].refCount[url]<=0){
+                        if (allCaches[i].ref[url].destroy){
+                            allCaches[i].ref[url].destroy();
+                        }
+                        delete allCaches[i].refCount[url];
+                        delete allCaches[i].ref[url];
+                    }
+                }
+            }
+        };
+    };
+
+
+    /**
      * Game engine object
      * @class Engine
      * @namespace KICK.core
@@ -5137,6 +5291,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             uniqIdCounter = 1;
 
         Object.defineProperties(this,{
+            /**
+             * Resource manager of the engine. Loads and cache resources.
+             * @property resourceManager
+             * @type KICK.core.ResourceManager
+             */
+            resourceManager:{
+                value: new core.ResourceManager(this)
+            },
             /**
              * The WebGL context (readonly)
              * @property gl
@@ -5587,7 +5749,50 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
-
+        /**
+         * Reads a parameter from a url string.
+         * @method getParameter
+         * @param {String} url
+         * @param {String} parameterName
+         * @return {String} parameter value or null if not found.
+         */
+        getParameter: function(url, parameterName){
+            var regexpStr = "[\\?&]"+parameterName+"=([^&#]*)",
+                regexp = new RegExp( regexpStr ),
+                res = regexp.exec( url );
+            if( res == null )
+                return null;
+            else
+                return res[1];
+        },
+        /**
+         * Reads a int parameter from a url string.
+         * @method getParameterInt
+         * @param {String} url
+         * @param {String} parameterName
+         * @return {String} parameter value or null if not found.
+         */
+        getParameterInt: function(url, parameterName, notFoundValue){
+            var res = core.Util.getParameter(url,parameterName);
+            if( res === null )
+                return notFoundValue;
+            else
+                return parseInt(res);
+        },
+        /**
+         * Reads a float parameter from a url string.
+         * @method getParameterInt
+         * @param {String} url
+         * @param {String} parameterName
+         * @return {String} parameter value or null if not found.
+         */
+        getParameterFloat: function(url, parameterName, notFoundValue){
+            var res = core.Util.getParameter(url,parameterName);
+            if( res === null )
+                return notFoundValue;
+            else
+                return parseFloat(res);
+        },
         /**
          * Scales the image by drawing the image on a canvas object.
          * @method scaleImage
@@ -8674,7 +8879,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * Must be set to 1028, 1029 (default),
-             * 1032, KICK.core.Constants.NONE
+             * 1032, KICK.core.Constants.NONE<br>
+             * Note that in faceCulling = 1028, 1029 or 1032 with face culling enabled<br>
+             * faceCulling = 0 means face culling disabled
              * @property faceCulling
              * @type Object
              */
@@ -9326,354 +9533,292 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.mesh
      * @static
      */
-    mesh.MeshFactory = {};
+    mesh.MeshFactory = {
 
-    /**
-     * Creates a triangle in the XY plane
-     * @method createTriangleData
-     * @static
-     * @return {KICK.core.MeshData} triangle mesh
-     */
-    mesh.MeshFactory.createTriangleData = function () {
-        return new mesh.MeshData( {
-            name: "Triangle",
-            vertex: [
-                0,1,0,
-                -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                0.866025403784439,-0.5,0
-            ],
-            uv1: [
-                0,1,
-                -0.866025403784439,-0.5,
-                0.866025403784439,-0.5
-            ],
-            normal: [
-                0,0,1,
-                0,0,1,
-                0,0,1
-            ],
-            indices: [0,1,2]
-        });
-    }
+        /**
+         * Creates a triangle in the XY plane
+         * @method createTriangleData
+         * @static
+         * @return {KICK.core.MeshData} triangle mesh
+         */
+        createTriangleData : function () {
+            return new mesh.MeshData( {
+                name: "Triangle",
+                vertex: [
+                    0,1,0,
+                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
+                    0.866025403784439,-0.5,0
+                ],
+                uv1: [
+                    0,1,
+                    -0.866025403784439,-0.5,
+                    0.866025403784439,-0.5
+                ],
+                normal: [
+                    0,0,1,
+                    0,0,1,
+                    0,0,1
+                ],
+                indices: [0,1,2]
+            });
+        },
 
-    /**
-     * Creates a triangle in the XY plane
-     * @method createTriangle
-     * @static
-     * @param {KICK.core.Engine} engine
-     * @return {KICK.core.Mesh} triangle mesh
-     */
-    mesh.MeshFactory.createTriangle = function (engine) {
-        var config = {
-                name: "Triangle"
-            },
-            meshDataObj = mesh.MeshFactory.createTriangleData();
-        return new mesh.Mesh(engine,config, meshDataObj);
-    };
+        /**
+         * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
+         * @method createPlaneData
+         * @static
+         * @return {KICK.mesh.MeshData} plane mesh
+         */
+        createPlaneData : function () {
+            return new mesh.MeshData({
+                name: "Plane",
+                vertex: [
+                    1,-1,0,
+                    1,1,0,
+                    -1,-1,0,
+                    -1,1,0
 
-    /**
-     * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
-     * @method createPlaneData
-     * @static
-     * @return {KICK.mesh.MeshData} plane mesh
-     */
-    mesh.MeshFactory.createPlaneData = function () {
-        return new mesh.MeshData({
-            name: "Plane",
-            vertex: [
-                1,-1,0,
-                1,1,0,
-                -1,-1,0,
-                -1,1,0
+                ],
+                uv1: [
+                    1,0,
+                    1,1,
+                    0,0,
+                    0,1
+                ],
+                normal: [
+                    0,0,1,
+                    0,0,1,
+                    0,0,1,
+                    0,0,1
+                ],
+                indices: [0,1,2,2,1,3]
+            });
+        },
 
-            ],
-            uv1: [
-                1,0,
-                1,1,
-                0,0,
-                0,1
-            ],
-            normal: [
-                0,0,1,
-                0,0,1,
-                0,0,1,
-                0,0,1
-            ],
-            indices: [0,1,2,2,1,3]
-        });
-    };
-
-    /**
-     * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
-     * @method createPlane
-     * @static
-     * @param {KICK.core.Engine} engine
-     * @return {KICK.mesh.Mesh} plane mesh
-     */
-    mesh.MeshFactory.createPlane = function (engine) {
-        var config = {
-              name: "Plane"
-            },
-            meshDataObject = mesh.MeshFactory.createPlaneData();
-        return new mesh.Mesh(engine,config,meshDataObject);
-    };
-
-
-
-    /**
-     * Create a UV sphere
-     * @method createUVSphereData
-     * @static
-     * @param {Number} slices
-     * @param {Number} stacks
-     * @param {Number} radius
-     * @return {KICK.mesh.MeshData} uv-sphere mesh
-     */
-    mesh.MeshFactory.createUVSphereData = function(slices, stacks, radius){
-        if (!slices || slices < 3){
-            slices = 20;
-        }
-        if (!stacks || stacks < 2){
-            stacks = 10;
-        }
-        if (!radius){
-            radius = 1;
-        }
-        var vertexCount =
-            stacks*(slices+1)*2+
-            2*(stacks-1), // degenerate vertex info
-            normalsMemory = {},
-            normals = vec3.array(vertexCount,normalsMemory),
-            verticesMemory = {},
-            vertices = vec3.array(vertexCount,verticesMemory),
-            uvsMemory = {},
-            uvs = vec2.array(vertexCount,uvsMemory),
-            indices = [],
-            piDivStacks = Math.PI/stacks,
-            PIDiv2 = Math.PI/2,
-            PI2 = Math.PI*2;
-
-        var index = 0;
-
-        for (var j = 0; j < stacks; j++) {
-            var latitude1 = piDivStacks * j - PIDiv2;
-            var latitude2 = piDivStacks * (j+1) - PIDiv2;
-            var sinLat1 = Math.sin(latitude1);
-            var cosLat1 = Math.cos(latitude1);
-            var sinLat2 = Math.sin(latitude2);
-            var cosLat2 = Math.cos(latitude2);
-            for (var i = 0; i <= slices; i++) {
-                var longitude = (PI2/slices) * i;
-                var sinLong = Math.sin(longitude);
-                var cosLong = Math.cos(longitude);
-                var x1 = cosLong * cosLat1;
-                var y1 = sinLat1;
-                var z1 = sinLong * cosLat1;
-                var x2 = cosLong * cosLat2;
-                var y2 = sinLat2;
-                var z2 = sinLong * cosLat2;
-                vec3.set([x1,y1,z1],normals[index]);
-                vec2.set([1-i/slices, j/stacks ],uvs[index]);
-                vec3.set([radius*x1,radius*y1,radius*z1],vertices[index]);
-                indices.push(index);
-                if (j>0 && i==0){
-                    indices.push(index); // make degenerate
-                }
-                index++;
-
-                vec3.set([x2,y2,z2],normals[index]);
-                vec2.set([ 1-i /slices, (j+1)/stacks],uvs[index]);
-                vec3.set([radius*x2,radius*y2,radius*z2],vertices[index]);
-                indices.push(index);
-                if (i==slices && j<stacks-1){
-                    indices.push(index); // make degenerate
-                }
-                index++;
+        /**
+         * Create a UV sphere
+         * @method createUVSphereData
+         * @static
+         * @param {Number} slices
+         * @param {Number} stacks
+         * @param {Number} radius
+         * @return {KICK.mesh.MeshData} uv-sphere mesh
+         */
+        createUVSphereData : function(slices, stacks, radius){
+            if (!slices || slices < 3){
+                slices = 20;
             }
+            if (!stacks || stacks < 2){
+                stacks = 10;
+            }
+            if (!radius){
+                radius = 1;
+            }
+            var vertexCount =
+                stacks*(slices+1)*2+
+                2*(stacks-1), // degenerate vertex info
+                normalsMemory = {},
+                normals = vec3.array(vertexCount,normalsMemory),
+                verticesMemory = {},
+                vertices = vec3.array(vertexCount,verticesMemory),
+                uvsMemory = {},
+                uvs = vec2.array(vertexCount,uvsMemory),
+                indices = [],
+                piDivStacks = Math.PI/stacks,
+                PIDiv2 = Math.PI/2,
+                PI2 = Math.PI*2;
+
+            var index = 0;
+
+            for (var j = 0; j < stacks; j++) {
+                var latitude1 = piDivStacks * j - PIDiv2;
+                var latitude2 = piDivStacks * (j+1) - PIDiv2;
+                var sinLat1 = Math.sin(latitude1);
+                var cosLat1 = Math.cos(latitude1);
+                var sinLat2 = Math.sin(latitude2);
+                var cosLat2 = Math.cos(latitude2);
+                for (var i = 0; i <= slices; i++) {
+                    var longitude = (PI2/slices) * i;
+                    var sinLong = Math.sin(longitude);
+                    var cosLong = Math.cos(longitude);
+                    var x1 = cosLong * cosLat1;
+                    var y1 = sinLat1;
+                    var z1 = sinLong * cosLat1;
+                    var x2 = cosLong * cosLat2;
+                    var y2 = sinLat2;
+                    var z2 = sinLong * cosLat2;
+                    vec3.set([x1,y1,z1],normals[index]);
+                    vec2.set([1-i/slices, j/stacks ],uvs[index]);
+                    vec3.set([radius*x1,radius*y1,radius*z1],vertices[index]);
+                    indices.push(index);
+                    if (j>0 && i==0){
+                        indices.push(index); // make degenerate
+                    }
+                    index++;
+
+                    vec3.set([x2,y2,z2],normals[index]);
+                    vec2.set([ 1-i /slices, (j+1)/stacks],uvs[index]);
+                    vec3.set([radius*x2,radius*y2,radius*z2],vertices[index]);
+                    indices.push(index);
+                    if (i==slices && j<stacks-1){
+                        indices.push(index); // make degenerate
+                    }
+                    index++;
+                }
+            }
+            var meshDataConf = {
+                name: "UVSphere",
+                vertex: verticesMemory.mem,
+                uv1: uvsMemory.mem,
+                normal: normalsMemory.mem,
+                indices: indices,
+                meshType: 5
+            };
+            return new mesh.MeshData(meshDataConf);
+        },
+
+        /**
+         * Create a code of size length. The cube has colors, normals and UVs.<br>
+         * Note that the length of the sides are 2*length
+         * @method createCubeData
+         * @static
+         * @param {Number} length Optional, default value is 1.0
+         * @return {KICK.mesh.Mesh} cube mesh
+         */
+        createCubeData : function (length) {
+            if (!length){
+                length = 1;
+            }
+
+            //    v6----- v5
+            //   /|      /|
+            //  v1------v0|
+            //  | |     | |
+            //  | |v7---|-|v4
+            //  |/      |/
+            //  v2------v3
+            var meshDataConf = {
+                name: "Cube",
+                vertex: [
+                   length,length,length,
+                   -length,length,length,
+                   -length,-length,length,
+                   length,-length,length,        // v0-v1-v2-v3
+                   length,length,length,
+                   length,-length,length,
+                   length,-length,-length,
+                   length,length,-length,        // v0-v3-v4-v5
+                   length,length,length,
+                   length,length,-length,
+                   -length,length,-length,
+                   -length,length,length,        // v0-v5-v6-v1
+                   -length,length,length,
+                   -length,length,-length,
+                   -length,-length,-length,
+                   -length,-length,length,    // v1-v6-v7-v2
+                   -length,-length,-length,
+                   length,-length,-length,
+                   length,-length,length,
+                   -length,-length,length,    // v7-v4-v3-v2
+                   length,-length,-length,
+                   -length,-length,-length,
+                    -length,length,-length,
+                    length,length,-length   // v4-v7-v6-v5
+                ],
+                uv1: [
+                    1,1,
+                    0,1,
+                    0,0,
+                    1,0,                    // v0-v1-v2-v3
+                    0,1,
+                    0,0,
+                    1,0,
+                    1,1,              // v0-v3-v4-v5
+                    1,0,
+                    1,1,
+                    0,1,
+                    0,0,              // v0-v5-v6-v1 (top)
+                    1,1,
+                    0,1,
+                    0,0,
+                    1,0,              // v1-v6-v7-v2
+                    1,1,
+                    0,1,
+                    0,0,
+                    1,0,              // v7-v4-v3-v2 (bottom)
+                    0,0,
+                    1,0,
+                    1,1,
+                    0,1             // v4-v7-v6-v5
+                ],
+                normal: [
+                    0,0,1,
+                    0,0,1,
+                    0,0,1,
+                    0,0,1,             // v0-v1-v2-v3
+                    1,0,0,
+                    1,0,0,
+                    1,0,0,
+                    1,0,0,              // v0-v3-v4-v5
+                    0,1,0,
+                    0,1,0,
+                    0,1,0,
+                    0,1,0,              // v0-v5-v6-v1
+                    -1,0,0,
+                    -1,0,0,
+                    -1,0,0,
+                    -1,0,0,          // v1-v6-v7-v2
+                    0,-1,0,
+                    0,-1,0,
+                    0,-1,0,
+                    0,-1,0,         // v7-v4-v3-v2
+                    0,0,-1,
+                    0,0,-1,
+                    0,0,-1,
+                    0,0,-1        // v4-v7-v6-v5
+                ],
+                color: [
+                    1,1,1,1,
+                    1,1,0,1,
+                    1,0,0,1,
+                    1,0,1,1,              // v0-v1-v2-v3
+                    1,1,1,1,
+                    1,0,1,1,
+                    0,0,1,1,
+                    0,1,1,1,              // v0-v3-v4-v5
+                    1,1,1,1,
+                    0,1,1,1,
+                    0,1,0,1,
+                    1,1,0,1,              // v0-v5-v6-v1
+                    1,1,0,1,
+                    0,1,0,1,
+                    0,0,0,1,
+                    1,0,0,1,              // v1-v6-v7-v2
+                    0,0,0,1,
+                    0,0,1,1,
+                    1,0,1,1,
+                    1,0,0,1,              // v7-v4-v3-v2
+                    0,0,1,1,
+                    0,0,0,1,
+                    0,1,0,1,
+                    0,1,1,1             // v4-v7-v6-v5
+                ],
+                indices: [
+                    0,1,2,
+                    0,2,3,
+                    4,5,6,
+                    4,6,7,
+                    8,9,10,
+                    8,10,11,
+                    12,13,14,
+                    12,14,15,
+                    16,17,18,
+                    16,18,19,
+                    20,21,22,
+                    20,22,23]
+            };
+            return new mesh.MeshData(meshDataConf);
         }
-        var meshDataConf = {
-            name: "UVSphere",
-            vertex: verticesMemory.mem,
-            uv1: uvsMemory.mem,
-            normal: normalsMemory.mem,
-            indices: indices,
-            meshType: 5
-        };
-        return new mesh.MeshData(meshDataConf);
-    };
-
-    /**
-     * Create a UV sphere
-     * @method createUVSphere
-     * @static
-     * @param {KICK.core.Engine} engine
-     * @param {Number} slices
-     * @param {Number} stacks
-     * @param {Number} radius
-     * @return {KICK.mesh.Mesh} uv-sphere mesh
-     */
-    mesh.MeshFactory.createUVSphere = function(engine, slices, stacks, radius){
-        var meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
-        return new mesh.Mesh(engine, {name: "UVSphere"},meshDataObj);
-    };
-
-    /**
-     * Create a code of size length. The cube has colors, normals and UVs.<br>
-     * Note that the length of the sides are 2*length
-     * @method createCubeData
-     * @static
-     * @param {Number} length Optional, default value is 1.0
-     * @return {KICK.mesh.Mesh} cube mesh
-     */
-    mesh.MeshFactory.createCubeData = function (length) {
-        if (!length){
-            length = 1;
-        }
-
-        //    v6----- v5
-        //   /|      /|
-        //  v1------v0|
-        //  | |     | |
-        //  | |v7---|-|v4
-        //  |/      |/
-        //  v2------v3
-        var meshDataConf = {
-            name: "Cube",
-            vertex: [
-               length,length,length,
-               -length,length,length,
-               -length,-length,length,
-               length,-length,length,        // v0-v1-v2-v3
-               length,length,length,
-               length,-length,length,
-               length,-length,-length,
-               length,length,-length,        // v0-v3-v4-v5
-               length,length,length,
-               length,length,-length,
-               -length,length,-length,
-               -length,length,length,        // v0-v5-v6-v1
-               -length,length,length,
-               -length,length,-length,
-               -length,-length,-length,
-               -length,-length,length,    // v1-v6-v7-v2
-               -length,-length,-length,
-               length,-length,-length,
-               length,-length,length,
-               -length,-length,length,    // v7-v4-v3-v2
-               length,-length,-length,
-               -length,-length,-length,
-                -length,length,-length,
-                length,length,-length   // v4-v7-v6-v5
-            ],
-            uv1: [
-                1,1,
-                0,1,
-                0,0,
-                1,0,                    // v0-v1-v2-v3
-                0,1,
-                0,0,
-                1,0,
-                1,1,              // v0-v3-v4-v5
-                1,0,
-                1,1,
-                0,1,
-                0,0,              // v0-v5-v6-v1 (top)
-                1,1,
-                0,1,
-                0,0,
-                1,0,              // v1-v6-v7-v2
-                1,1,
-                0,1,
-                0,0,
-                1,0,              // v7-v4-v3-v2 (bottom)
-                0,0,
-                1,0,
-                1,1,
-                0,1             // v4-v7-v6-v5
-            ],
-            normal: [
-                0,0,1,
-                0,0,1,
-                0,0,1,
-                0,0,1,             // v0-v1-v2-v3
-                1,0,0,
-                1,0,0,
-                1,0,0,
-                1,0,0,              // v0-v3-v4-v5
-                0,1,0,
-                0,1,0,
-                0,1,0,
-                0,1,0,              // v0-v5-v6-v1
-                -1,0,0,
-                -1,0,0,
-                -1,0,0,
-                -1,0,0,          // v1-v6-v7-v2
-                0,-1,0,
-                0,-1,0,
-                0,-1,0,
-                0,-1,0,         // v7-v4-v3-v2
-                0,0,-1,
-                0,0,-1,
-                0,0,-1,
-                0,0,-1        // v4-v7-v6-v5
-            ],
-            color: [
-                1,1,1,1,
-                1,1,0,1,
-                1,0,0,1,
-                1,0,1,1,              // v0-v1-v2-v3
-                1,1,1,1,
-                1,0,1,1,
-                0,0,1,1,
-                0,1,1,1,              // v0-v3-v4-v5
-                1,1,1,1,
-                0,1,1,1,
-                0,1,0,1,
-                1,1,0,1,              // v0-v5-v6-v1
-                1,1,0,1,
-                0,1,0,1,
-                0,0,0,1,
-                1,0,0,1,              // v1-v6-v7-v2
-                0,0,0,1,
-                0,0,1,1,
-                1,0,1,1,
-                1,0,0,1,              // v7-v4-v3-v2
-                0,0,1,1,
-                0,0,0,1,
-                0,1,0,1,
-                0,1,1,1             // v4-v7-v6-v5
-            ],
-            indices: [
-                0,1,2,
-                0,2,3,
-                4,5,6,
-                4,6,7,
-                8,9,10,
-                8,10,11,
-                12,13,14,
-                12,14,15,
-                16,17,18,
-                16,18,19,
-                20,21,22,
-                20,22,23]
-        };
-        return new mesh.MeshData(meshDataConf);
-    };
-
-    /**
-     * Create a code of size length. The cube has colors, normals and UVs.
-     * @method createCube
-     * @static
-     * @param {KICK.core.Engine} engine
-     * @param {Number} length Optional, default value is 1.0
-     * @return {KICK.mesh.Mesh} cube mesh
-     */
-    mesh.MeshFactory.createCube = function (engine,length) {
-        var config = {
-            name:"Cube"
-        };
-        var meshDataObj = mesh.MeshFactory.createCubeData(length);
-        return new mesh.Mesh(engine,config,meshDataObj);
     };
 })();/*!
  * New BSD License
@@ -10011,4 +10156,152 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         return gameObjectsCreated;
 
     }
+})();/*!
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+var KICK = KICK || {};
+
+KICK.namespace = KICK.namespace || function (ns_string) {
+    var parts = ns_string.split("."),
+        parent = KICK,
+        i;
+    // strip redundant leading global
+    if (parts[0] === "KICK") {
+        parts = parts.slice(1);
+    }
+
+    for (i = 0; i < parts.length; i += 1) {
+        // create property if it doesn't exist
+        if (typeof parent[parts[i]] === "undefined") {
+            parent[parts[i]] = {};
+        }
+        parent = parent[parts[i]];
+    }
+    return parent;
+};
+
+(function () {
+    "use strict"; // force strict ECMAScript 5
+
+    var core = KICK.namespace("KICK.core"),
+        mesh = KICK.namespace("KICK.mesh");
+
+    /**
+     * The default resource manager
+     * @class DefaultResourceProvider
+     * @namespace KICK.core
+     * @constructor
+     * @extends KICK.core.ResourceProvider
+     * @param {KICK.core.Engine} engine
+     */
+    core.DefaultResourceProvider = function(engine){
+
+        Object.defineProperties(this,{
+            /**
+             * Protocol of the resource, such as http, kickjs<br>
+             * The protocol must uniquely identify a resource provider
+             * @property protocol
+             * @type String
+             */
+            protocol:{
+                value:"kickjs"
+            }
+        });
+
+        /**
+         * Creates a Mesh object based on a url.<br>
+         * The following resources can be created:<br>
+         * <ul>
+         * <li><b>Triangle</b> Url: kickjs://triangle/</li>
+         * <li><b>Plane</b> Url: kickjs://plane/<br></li>
+         * <li><b>UVSphere</b> Url: kickjs://uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Cube</b> Url: kickjs://cube/?length=1.0<br>Note that the parameters is optional</li>
+         * </ul>
+         * @method getMesh
+         * @param {String} url
+         * @return {KICK.mesh.Mesh}
+         */
+        this.getMesh = function(url){
+            var config,
+                meshDataObj,
+                getParameterInt = core.Util.getParameterInt,
+                getParameterFloat = core.Util.getParameterFloat;
+            if (url.indexOf("kickjs://triangle/")==0){
+                config = {
+                    name: "Triangle"
+                };
+                meshDataObj = mesh.MeshFactory.createTriangleData();
+            } else if (url.indexOf("kickjs://plane/")==0){
+                config = {
+                    name: "Plane"
+                };
+                meshDataObj = mesh.MeshFactory.createPlaneData();
+            } else if (url.indexOf("kickjs://uvsphere/")==0){
+                config = {
+                    name: "UVSphere"
+                };
+                var slices = getParameterInt(url, "slices"),
+                    stacks = getParameterInt(url, "stacks"),
+                    radius = getParameterFloat(url, "radius");
+                meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
+            } else if (url.indexOf("kickjs://cube/")==0){
+                config = {
+                    name: "Cube"
+                };
+                var length = getParameterFloat(url, "length");
+                meshDataObj = mesh.MeshFactory.createCubeData(length);
+            }
+            
+            if (meshDataObj){
+                return new mesh.Mesh(engine,config, meshDataObj);
+            }
+        };
+
+        /**
+         * @method getShader
+         * @param {String} url
+         * @return {KICK.material.Shader}
+         */
+        this.getShader = function(url){
+
+        };
+
+        /**
+         * @method getTexture
+         * @param {String} url
+         * @return {KICK.texture.Texture}
+         */
+        this.getTexture = function(url){
+
+        };
+
+        /**
+         * @method getScene
+         * @param {String} url
+         * @return {KICK.scene.Scene} or null if scene cannot be initialized
+         */
+        this.getScene = function(url){
+            return null;
+        };
+    };
 })();

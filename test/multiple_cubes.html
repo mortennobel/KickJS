@@ -11,6 +11,7 @@
     <script type="text/javascript" src="../src/js/constants.js"></script>
     <script type="text/javascript" src="../src/js/glslconstants.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/core-default.js"></script>
     <script type="text/javascript" src="../src/js/math.js"></script>
     <script type="text/javascript" src="../src/js/mesh.js"></script>
     <script type="text/javascript" src="../src/js/scene.js"></script>
@@ -34,11 +35,6 @@
             element.innerHTML = "";
         }
 
-        function setMesh(meshFactoryFunc,subdivisions){
-            clearLog();
-            meshRenderer.mesh = meshFactoryFunc(engine,subdivisions);
-        }
-
         function setMaterial(vertexShaderId, fragmentShaderId){
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
@@ -60,25 +56,11 @@
             });
         }
 
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
-        }
-
         function addObject(pos){
             var gameObject = engine.activeScene.createGameObject(),
                     transform = gameObject.transform;
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.mesh.MeshFactory.createCube, 0.5);
+            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://cube/?length=0.5");
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             transform.localScale = [0.8*Math.random(),0.8*Math.random(),0.8*Math.random()];

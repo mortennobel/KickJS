@@ -12,8 +12,8 @@ window.shaderEditor = new (function(){
         thisObj = this,
         isRotating = true,
         meshsetting,
-        setMesh = function (meshFactoryFunc,size){
-            _meshRenderer.mesh = meshFactoryFunc(_engine,size);
+        setMesh = function (url){
+            _meshRenderer.mesh = engine.resourceManager.getMesh(url);
         };
 
     this.textures = [];
@@ -56,13 +56,13 @@ window.shaderEditor = new (function(){
             meshsetting = settings.meshsetting;
             switch (meshsetting){
                 case "cube":
-                    setMesh(KICK.mesh.MeshFactory.createCube,0.5);
+                    setMesh("kickjs://cube/?length=0.5");
                 break;
                 case "sphere":
-                    setMesh(KICK.mesh.MeshFactory.createUVSphere);
+                    setMesh('kickjs://uvsphere/');
                 break;
                 default:
-                    setMesh(KICK.mesh.MeshFactory.createPlane);
+                    setMesh('kickjs://plane/');
                 break;
             }
         }
