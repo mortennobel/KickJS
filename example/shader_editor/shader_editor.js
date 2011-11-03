@@ -13,7 +13,7 @@ window.shaderEditor = new (function(){
         isRotating = true,
         meshsetting,
         setMesh = function (url){
-            _meshRenderer.mesh = engine.resourceManager.getMesh(url);
+            _meshRenderer.mesh = _engine.resourceManager.getMesh(url);
         };
 
     this.textures = [];
@@ -174,7 +174,7 @@ window.shaderEditor = new (function(){
 
             var gameObject = _engine.activeScene.createGameObject();
             _meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh(KICK.mesh.MeshFactory.createPlane);
+            setMesh("kickjs://plane/");
             if (window.shader){
                 // load saved content
                 loadMaterial(window.shader);
