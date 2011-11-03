@@ -220,7 +220,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
-            uniqIdCounter = 1;
+            uniqIdCounter = 1,
+            vec2 = KICK.math.vec2;
 
         Object.defineProperties(this,{
             /**
@@ -409,8 +410,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method canvasResized
          */
         this.canvasResized = function(){
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
+            gl.viewportSize = vec2.create([canvas.width,canvas.height]);
         };
 
         /**
@@ -476,7 +476,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisObj.canvasResized();
             if (thisObj.config.checkCanvasResizeInterval){
                 setInterval(function(){
-                    if( canvas.height !== gl.viewportWidth || canvas.width !== gl.viewportHeight ){
+                    if( canvas.height !== gl.viewportSize[0] || canvas.width !== gl.viewportSize[1] ){
                         thisObj.canvasResized();
                     }
                 }, thisObj.config.checkCanvasResizeInterval);

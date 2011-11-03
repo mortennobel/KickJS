@@ -797,7 +797,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return typeof (o) === "boolean";
             },
             setupViewport = function () {
-                gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+                gl.viewport(0, 0, gl.viewportSize[0], gl.viewportSize[1]);
             },
             setupClear = function () {
                 if (!thisObj._currentClearFlags) {
@@ -838,7 +838,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             setupClear();
 
             if (this.cameraTypePerspective) {
-                mat4.perspective(this.fieldOfView, gl.viewportWidth / gl.viewportHeight,
+                mat4.perspective(this.fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
                     this.near, this.far, projectionMatrix);
             } else {
                 mat4.ortho(this.left, this.right, this.bottom, this.top,

@@ -593,6 +593,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             norm = this.lookupUniform["_norm"],
             lightUniform,
             time = this.lookupUniform["_time"],
+            viewport = this.lookupUniform["_viewport"],
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             otherLights = sceneLights.otherLights,
@@ -701,6 +702,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (time){
             timeObj = this.engine.time;
             gl.uniform1f(time.location, timeObj.time);
+        }
+        if (viewport){
+            gl.uniform2fv(viewport.location, gl.viewportSize);
         }
     };
 

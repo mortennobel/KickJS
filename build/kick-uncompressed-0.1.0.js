@@ -5288,7 +5288,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
-            uniqIdCounter = 1;
+            uniqIdCounter = 1,
+            vec2 = KICK.math.vec2;
 
         Object.defineProperties(this,{
             /**
@@ -5477,8 +5478,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method canvasResized
          */
         this.canvasResized = function(){
-            gl.viewportWidth = canvas.width;
-            gl.viewportHeight = canvas.height;
+            gl.viewportSize = vec2.create([canvas.width,canvas.height]);
         };
 
         /**
@@ -5544,7 +5544,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisObj.canvasResized();
             if (thisObj.config.checkCanvasResizeInterval){
                 setInterval(function(){
-                    if( canvas.height !== gl.viewportWidth || canvas.width !== gl.viewportHeight ){
+                    if( canvas.height !== gl.viewportSize[0] || canvas.width !== gl.viewportSize[1] ){
                         thisObj.canvasResized();
                     }
                 }, thisObj.config.checkCanvasResizeInterval);
@@ -7651,7 +7651,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return typeof (o) === "boolean";
             },
             setupViewport = function () {
-                gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+                gl.viewport(0, 0, gl.viewportSize[0], gl.viewportSize[1]);
             },
             setupClear = function () {
                 if (!thisObj._currentClearFlags) {
@@ -7692,7 +7692,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             setupClear();
 
             if (this.cameraTypePerspective) {
-                mat4.perspective(this.fieldOfView, gl.viewportWidth / gl.viewportHeight,
+                mat4.perspective(this.fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
                     this.near, this.far, projectionMatrix);
             } else {
                 mat4.ortho(this.left, this.right, this.bottom, this.top,
@@ -9244,6 +9244,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             norm = this.lookupUniform["_norm"],
             lightUniform,
             time = this.lookupUniform["_time"],
+            viewport = this.lookupUniform["_viewport"],
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             otherLights = sceneLights.otherLights,
@@ -9352,6 +9353,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         if (time){
             timeObj = this.engine.time;
             gl.uniform1f(time.location, timeObj.time);
+        }
+        if (viewport){
+            gl.uniform2fv(viewport.location, gl.viewportSize);
         }
     };
 
