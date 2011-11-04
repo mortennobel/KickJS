@@ -7787,7 +7787,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.componentsAdded = function( components ){
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
-                if (typeof(component.render) === "function") {
+                if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
                     renderableComponents.push(component);
                 }
             }
