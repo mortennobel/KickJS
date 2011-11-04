@@ -155,12 +155,14 @@ function initDuckTexture(){
 
 function initLights(){
     var ambientlightGameObject = engine.activeScene.createGameObject();
+    ambientlightGameObject.name = "ambient light";
     var ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
     ambientLight.color = [0.1,0.1,0.1,1];
     ambientlightGameObject.addComponent(ambientLight);
 
 
     var lightGameObject = engine.activeScene.createGameObject();
+    lightGameObject.name = "directional light";
     var light = new KICK.scene.Light(
         {
             type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
@@ -177,6 +179,7 @@ function initKick() {
         enableDebugContext: true
     });
     var cameraObject = engine.activeScene.createGameObject();
+    cameraObject.name = "Camera";
     var camera = new KICK.scene.Camera({
         clearColor: [0,0,0,1],
         fieldOfView:60
@@ -186,6 +189,7 @@ function initKick() {
     addRotatorComponent(cameraObject);
 
     var gameObject = engine.activeScene.createGameObject();
+    gameObject.name = "Mesh";
     meshRenderer = new KICK.scene.MeshRenderer();
     meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://uvsphere/?radius=0.5");
     material = createMaterial('vertexShaderColor','fragmentShader');
