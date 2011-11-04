@@ -790,6 +790,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisObj = this,
             transform,
             c = KICK.core.Constants,
+//            _renderTarget,
+            _fieldOfView,
+            _near,
+            _far,
+            _left,
+            _right,
+            _bottom,
+            _top,
+            _clearColor,
+            _cameraTypePerspective,
+            _clearFlagColor,
+            _clearFlagDepth,
+            _normalizedViewportRect = vec4.create([0,0,1,1]),
             isNumber = function (o) {
                 return typeof (o) === "number";
             },
@@ -797,7 +810,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return typeof (o) === "boolean";
             },
             setupViewport = function () {
-                gl.viewport(0, 0, gl.viewportSize[0], gl.viewportSize[1]);
+                var viewPortWidth = gl.viewportSize[0],
+                    viewPortHeight = gl.viewportSize[1],
+                    offsetX = viewPortWidth*_normalizedViewportRect[0],
+                    offsetY = viewPortWidth*_normalizedViewportRect[1],
+                    width = viewPortWidth*_normalizedViewportRect[2],
+                    height = viewPortHeight*_normalizedViewportRect[3];
+
+                gl.viewport(offsetX, offsetY,width , height);
             },
             setupClear = function () {
                 if (!thisObj._currentClearFlags) {
@@ -812,6 +832,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gl.currentClearColor = thisObj.clearColor;
                     var color = thisObj.clearColor;
                     gl.clearColor(color[0], color[1], color[2], color[3]);
+                }
+            },
+            assertNumber = function(newValue,name){
+                if (!isNumber(newValue)){
+                    KICK.core.Util.fail("Camera."+name+" must be number");
                 }
             };
 
@@ -851,71 +876,234 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
         };
 
-        /**
-         * Only used when perspective camera type. Default 60.0
-         * @property fieldOfView
-         * @type Number
-         */
-        this.fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
-        /**
-         * Default 0.1
-         * @property near
-         * @type Number
-         */
-        this.near = isNumber(config.near) ? config.near : 0.1;
-        /**
-         * Default 1000.0
-         * @property far
-         * @type Number
-         */
-        this.far = isNumber(config.far) ? config.far : 1000;
-        /**
-         * Default true
-         * @property cameraTypePerspective
-         * @type Boolean
-         */
-        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
-         * @property left
-         * @type Number
-         */
-        this.left = isNumber(config.left) ? config.left : -1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
-         * @property right
-         * @type Number
-         */
-        this.right = isNumber(config.right) ? config.right : 1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
-         * @property bottom
-         * @type Number
-         */
-        this.bottom = isNumber(config.bottom) ? config.bottom : -1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
-         * @property top
-         * @type Number
-         */
-        this.top = isNumber(config.top) ? config.top : 1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
-         * @property clearColor
-         * @type KICK.math.vec4
-         */
-        this.clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
-        /**
-         * @property clearFlagColor
-         * @type Boolean
-         */
-        this.clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
-        /**
-         * @property clearFlagDepth
-         * @type Boolean
-         */
-        this.clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
+        Object.defineProperties(this,{
+            /**
+             * Set the render target of the camera. Null means screen framebuffer.<br>
+             * @property renderTarget
+             * @type KICK.texture.RenderTexture
+             */
+//            renderTarget:{
+//                get:function(){ return _renderTarget;},
+//                set:function(newValue){
+//                    if (c._ASSERT){
+//                        if (newValue != null && !(newValue instanceof KICK.texture.RenderTexture)){
+//                            KICK.core.Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
+//                        }
+//                    }
+//                    _renderTarget = newValue;
+//                }
+//            },
+            /**
+             * Set the field of view Y in degrees<br>
+             * Only used when perspective camera type. Default 60.0
+             * @property fieldOfView
+             * @type Number
+             */
+            fieldOfView:{
+                get:function(){ return _fieldOfView;},
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"fieldOfView");
+                    }
+                    _fieldOfView = newValue;
+                }
+            },
+            /**
+             * Set the near clipping plane of the view volume<br>
+             * Used in both perspective and orthogonale camera.<br>
+             * Default 0.1
+             * @property near
+             * @type Number
+             */
+            near:{
+                get:function(){
+                    return _near;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"near");
+                    }
+                    _near = newValue;
+                }
+            },
+            /**
+             * Set the far clipping plane of the view volume<br>
+             * Used in both perspective and orthogonale camera.<br>
+             * Default 1000.0
+             * @property far
+             * @type Number
+             */
+            far:{
+                get:function(){
+                    return _far;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"far");
+                    }
+                    _far = newValue;
+                }
+            },
+            /**
+             * True means camera is perspective projection, false means orthogonale projection<br>
+             * Default true
+             * @property cameraTypePerspective
+             * @type Boolean
+             */
+            cameraTypePerspective:{
+                get:function(){
+                    return _cameraTypePerspective;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        if (!isBoolean(newValue)){
+                            KICK.core.Util.fail("Camera.cameraTypePerspective must be a boolean");
+                        }
+                    }
+                    _cameraTypePerspective = newValue;
+                }
+            },
+            /**
+             * Only used for orthogonal camera type (!cameraTypePerspective). Default -1
+             * @property left
+             * @type Number
+             */
+            left:{
+                get:function(){
+                    return _left;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"left");
+                    }
+                    _left = newValue;
+                }
+            },
+            /**
+             * Only used for orthogonal camera type (!cameraTypePerspective). Default 1
+             * @property left
+             * @type Number
+             */
+            right:{
+                get:function(){
+                    return _right;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"right");
+                    }
+                    _right= newValue;
+                }
+            },
+            /**
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
+             * @property bottom
+             * @type Number
+             */
+            bottom:{
+                get:function(){
+                    return _bottom;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"bottom");
+                    }
+                    _bottom = newValue;
+                }
+            },
+            /**
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
+             * @property top
+             * @type Number
+             */
+            top:{
+                get:function(){
+                    return _top;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"top");
+                    }
+                    _top = newValue;
+                }
+            },
+            /**
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
+             * @property clearColor
+             * @type KICK.math.vec4
+             */
+            clearColor:{
+                get:function(){
+                    return _clearColor;
+                },
+                set:function(newValue){
+                    _clearColor = newValue;
+                }
+            },
+            /**
+             * Indicates if the camera should clear color buffer.<br>
+             * Default value is true
+             * @property clearFlagColor
+             * @type Boolean
+             */
+            clearFlagColor:{
+                get:function(){
+                    return _clearFlagColor;
+                },
+                set:function(newValue){
+                    _clearFlagColor = newValue;
+                }
+            },
+            /**
+             * Indicates if the camera should clear the depth buffer.<br>
+             * Default is true.
+             * @property clearFlagDepth
+             * @type Boolean
+             */
+            clearFlagDepth:{
+                get:function(){
+                    return _clearFlagDepth;
+                },
+                set:function(newValue){
+                    _clearFlagDepth = newValue;
+                }
+            },
+            /**
+             * Normalized viewport rect [xOffset,yOffset,xWidth,yHeight]<br>
+             * Default is [0,0,1,1]
+             * @property normalizedViewportRect
+             * @type Array[Number]
+             */
+            normalizedViewportRect:{
+                get:function(){
+                    return _normalizedViewportRect;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        if (newValue.length !== 4){
+                            KICK.core.Util.fail("Camera.normalizedViewportRect must be Float32Array of length 4");
+                        }
+                    }
+                    vec4.set(newValue,_normalizedViewportRect);
+                }
+            }
+        });
 
+        _fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
+        _near = isNumber(config.near) ? config.near : 0.1;
+        _far = isNumber(config.far) ? config.far : 1000;
+        _cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
+        _left = isNumber(config.left) ? config.left : -1;
+        _right = isNumber(config.right) ? config.right : 1;
+        _bottom = isNumber(config.bottom) ? config.bottom : -1;
+        _top = isNumber(config.top) ? config.top : 1;
+        _clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
+        _clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
+        _clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
+//        _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
+        if (config.normalizedViewportRect){
+            this.normalizedViewportRect = config.normalizedViewportRect;
+        }
         this.setupClearFlags(config.clearColor,config.clearDepth);
     };
 
