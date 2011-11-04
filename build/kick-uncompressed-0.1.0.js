@@ -7420,6 +7420,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
+            componentsAll = [],
             cameras = [],
             renderableComponents = [],
             sceneLightObj = new KICK.scene.SceneLights(),
@@ -7487,6 +7488,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     componentsNew = [];
                     for (i = componentsNewCopy.length-1; i >= 0; i--) {
                         component = componentsNewCopy[i];
+                        componentsAll.push(component);
                         if (typeof(component.activated) === "function") {
                             component.activated();
                         }
@@ -7517,6 +7519,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     componentsDelete = [];
                     for (i = componentsDeleteCopy.length-1; i >= 0; i--) {
                         component = componentsDeleteCopy[i];
+                        core.Util.removeElementFromArray(componentsAll,component);
                         if (typeof(component.deactivated) === "function") {
                             component.deactivated();
                         }
@@ -7570,15 +7573,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             componentListenes.push(componentListener);
             // add current components to component listener
-            var gameObjectLength = gameObjects.length;
-            for (var i = 0 ; i < gameObjectLength ; i++){
-                var gameObject = gameObjects[i];
-                var numberOfComponents = gameObject.numberOfComponents;
-                for (var j = 0 ; j < numberOfComponents ; j++){
-                    var component = gameObject.getComponent(j);
-                    componentListener.componentsAdded([component]);
-                }
-            }
+            componentListener.componentsAdded(componentsAll);
         };
 
         /**
