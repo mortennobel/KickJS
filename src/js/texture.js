@@ -50,6 +50,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * Render texture (used for camera's render target)
+     * @todo - currently incomplete
      * @class RenderTexture
      * @namespace KICK.texture
      * @constructor

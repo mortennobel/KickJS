@@ -5516,8 +5516,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
                     }
-                    
                     gl.enable(2929);
+                    gl.enable(3089);
                 };
             initGL();
 
@@ -7644,28 +7644,39 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisObj = this,
             transform,
             c = KICK.core.Constants,
+            _renderTarget,
+            _fieldOfView,
+            _near,
+            _far,
+            _left,
+            _right,
+            _bottom,
+            _top,
+            _clearColor,
+            _cameraTypePerspective,
+            _clearFlagColor,
+            _clearFlagDepth,
+            _currentClearFlags,
+            _cameraIndex,
+            _normalizedViewportRect = vec4.create([0,0,1,1]),
             isNumber = function (o) {
                 return typeof (o) === "number";
             },
             isBoolean = function(o){
                 return typeof (o) === "boolean";
             },
-            setupViewport = function () {
-                gl.viewport(0, 0, gl.viewportSize[0], gl.viewportSize[1]);
-            },
-            setupClear = function () {
-                if (!thisObj._currentClearFlags) {
-                    // I use '+' instead of '|' since it tends to perform better in JS
-                    // and it should give the same result when the bit-fields are different (power of two)
-                    thisObj._currentClearFlags = (thisObj.clearFlagColor ? 16384 : 0) + (thisObj.clearFlagDepth ? 256 : 0);
-                }
-                gl.clear(thisObj._currentClearFlags);
+            computeClearFlag = function(){
+                _currentClearFlags = (_clearFlagColor ? 16384 : 0) | (_clearFlagDepth ? 256 : 0);
             },
             setupClearColor = function () {
-                if (gl.currentClearColor !== thisObj.clearColor) {
-                    gl.currentClearColor = thisObj.clearColor;
-                    var color = thisObj.clearColor;
-                    gl.clearColor(color[0], color[1], color[2], color[3]);
+                if (gl.currentClearColor !== _clearColor) {
+                    gl.currentClearColor = _clearColor;
+                    gl.clearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
+                }
+            },
+            assertNumber = function(newValue,name){
+                if (!isNumber(newValue)){
+                    KICK.core.Util.fail("Camera."+name+" must be number");
                 }
             };
 
@@ -7687,9 +7698,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
          */
         this.setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
-            setupViewport();
+            var viewPortWidth = gl.viewportSize[0],
+                viewPortHeight = gl.viewportSize[1],
+                offsetX = viewPortWidth*_normalizedViewportRect[0],
+                offsetY = viewPortWidth*_normalizedViewportRect[1],
+                width = viewPortWidth*_normalizedViewportRect[2],
+                height = viewPortHeight*_normalizedViewportRect[3];
+
+            gl.viewport(offsetX,offsetY,width,height);
+            gl.scissor(offsetX,offsetY,width,height);
             setupClearColor();
-            setupClear();
+            gl.clear(_currentClearFlags);
 
             if (this.cameraTypePerspective) {
                 mat4.perspective(this.fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
@@ -7705,72 +7724,255 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
         };
 
-        /**
-         * Only used when perspective camera type. Default 60.0
-         * @property fieldOfView
-         * @type Number
-         */
-        this.fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
-        /**
-         * Default 0.1
-         * @property near
-         * @type Number
-         */
-        this.near = isNumber(config.near) ? config.near : 0.1;
-        /**
-         * Default 1000.0
-         * @property far
-         * @type Number
-         */
-        this.far = isNumber(config.far) ? config.far : 1000;
-        /**
-         * Default true
-         * @property cameraTypePerspective
-         * @type Boolean
-         */
-        this.cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
-         * @property left
-         * @type Number
-         */
-        this.left = isNumber(config.left) ? config.left : -1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
-         * @property right
-         * @type Number
-         */
-        this.right = isNumber(config.right) ? config.right : 1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
-         * @property bottom
-         * @type Number
-         */
-        this.bottom = isNumber(config.bottom) ? config.bottom : -1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
-         * @property top
-         * @type Number
-         */
-        this.top = isNumber(config.top) ? config.top : 1;
-        /**
-         * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
-         * @property clearColor
-         * @type KICK.math.vec4
-         */
-        this.clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
-        /**
-         * @property clearFlagColor
-         * @type Boolean
-         */
-        this.clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
-        /**
-         * @property clearFlagDepth
-         * @type Boolean
-         */
-        this.clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
+        Object.defineProperties(this,{
+            /**
+             * Set the render target of the camera. Null means screen framebuffer.<br>
+             * @property renderTarget
+             * @type KICK.texture.RenderTexture
+             */
+            renderTarget:{
+                get:function(){ return _renderTarget;},
+                set:function(newValue){
+                    if (true){
+                        if (newValue != null && !(newValue instanceof KICK.texture.RenderTexture)){
+                            KICK.core.Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
+                        }
+                    }
+                    _renderTarget = newValue;
+                }
+            },
+            /**
+             * Set the field of view Y in degrees<br>
+             * Only used when perspective camera type. Default 60.0
+             * @property fieldOfView
+             * @type Number
+             */
+            fieldOfView:{
+                get:function(){ return _fieldOfView;},
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"fieldOfView");
+                    }
+                    _fieldOfView = newValue;
+                }
+            },
+            /**
+             * Set the near clipping plane of the view volume<br>
+             * Used in both perspective and orthogonale camera.<br>
+             * Default 0.1
+             * @property near
+             * @type Number
+             */
+            near:{
+                get:function(){
+                    return _near;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"near");
+                    }
+                    _near = newValue;
+                }
+            },
+            /**
+             * Set the far clipping plane of the view volume<br>
+             * Used in both perspective and orthogonale camera.<br>
+             * Default 1000.0
+             * @property far
+             * @type Number
+             */
+            far:{
+                get:function(){
+                    return _far;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"far");
+                    }
+                    _far = newValue;
+                }
+            },
+            /**
+             * True means camera is perspective projection, false means orthogonale projection<br>
+             * Default true
+             * @property cameraTypePerspective
+             * @type Boolean
+             */
+            cameraTypePerspective:{
+                get:function(){
+                    return _cameraTypePerspective;
+                },
+                set:function(newValue){
+                    if (true){
+                        if (!isBoolean(newValue)){
+                            KICK.core.Util.fail("Camera.cameraTypePerspective must be a boolean");
+                        }
+                    }
+                    _cameraTypePerspective = newValue;
+                }
+            },
+            /**
+             * Only used for orthogonal camera type (!cameraTypePerspective). Default -1
+             * @property left
+             * @type Number
+             */
+            left:{
+                get:function(){
+                    return _left;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"left");
+                    }
+                    _left = newValue;
+                }
+            },
+            /**
+             * Only used for orthogonal camera type (!cameraTypePerspective). Default 1
+             * @property left
+             * @type Number
+             */
+            right:{
+                get:function(){
+                    return _right;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"right");
+                    }
+                    _right= newValue;
+                }
+            },
+            /**
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default -1
+             * @property bottom
+             * @type Number
+             */
+            bottom:{
+                get:function(){
+                    return _bottom;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"bottom");
+                    }
+                    _bottom = newValue;
+                }
+            },
+            /**
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default 1
+             * @property top
+             * @type Number
+             */
+            top:{
+                get:function(){
+                    return _top;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"top");
+                    }
+                    _top = newValue;
+                }
+            },
+            /**
+             * The sorting order when multiple cameras exists in the scene.<br>
+             * Cameras with lowest number is rendered first.
+             * @property cameraIndex
+             * @type Number
+             */
+            cameraIndex:{
+                get:function(){
+                    return _cameraIndex;
+                },
+                set:function(newValue){
+                    if (true){
+                        assertNumber(newValue,"cameraIndex");
+                    }
+                    _cameraIndex = newValue;
+                }
+            },
+            /**
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
+             * @property clearColor
+             * @type KICK.math.vec4
+             */
+            clearColor:{
+                get:function(){
+                    return _clearColor;
+                },
+                set:function(newValue){
+                    _clearColor = newValue;
+                }
+            },
+            /**
+             * Indicates if the camera should clear color buffer.<br>
+             * Default value is true
+             * @property clearFlagColor
+             * @type Boolean
+             */
+            clearFlagColor:{
+                get:function(){
+                    return _clearFlagColor;
+                },
+                set:function(newValue){
+                    computeClearFlag();
+                    _clearFlagColor = newValue;
+                }
+            },
+            /**
+             * Indicates if the camera should clear the depth buffer.<br>
+             * Default is true.
+             * @property clearFlagDepth
+             * @type Boolean
+             */
+            clearFlagDepth:{
+                get:function(){
+                    return _clearFlagDepth;
+                },
+                set:function(newValue){
+                    computeClearFlag();
+                    _clearFlagDepth = newValue;
+                }
+            },
+            /**
+             * Normalized viewport rect [xOffset,yOffset,xWidth,yHeight]<br>
+             * Default is [0,0,1,1]
+             * @property normalizedViewportRect
+             * @type Array[Number]
+             */
+            normalizedViewportRect:{
+                get:function(){
+                    return _normalizedViewportRect;
+                },
+                set:function(newValue){
+                    if (true){
+                        if (newValue.length !== 4){
+                            KICK.core.Util.fail("Camera.normalizedViewportRect must be Float32Array of length 4");
+                        }
+                    }
+                    vec4.set(newValue,_normalizedViewportRect);
+                }
+            }
+        });
 
-        this.setupClearFlags(config.clearColor,config.clearDepth);
+        _fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
+        _near = isNumber(config.near) ? config.near : 0.1;
+        _far = isNumber(config.far) ? config.far : 1000;
+        _cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
+        _left = isNumber(config.left) ? config.left : -1;
+        _right = isNumber(config.right) ? config.right : 1;
+        _bottom = isNumber(config.bottom) ? config.bottom : -1;
+        _top = isNumber(config.top) ? config.top : 1;
+        _clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
+        _clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
+        _clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
+        _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
+        _cameraIndex = isNumber(config.cameraIndex) ? config.cameraIndex : 1;
+        if (config.normalizedViewportRect){
+            this.normalizedViewportRect = config.normalizedViewportRect;
+        }
+        computeClearFlag();
     };
 
     /**
@@ -8129,6 +8331,52 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var texture = KICK.namespace("KICK.texture"),
         core = KICK.namespace("KICK.core"),
         constants = core.Constants;
+
+    /**
+     * Render texture (used for camera's render target)
+     * @todo - currently incomplete
+     * @class RenderTexture
+     * @namespace KICK.texture
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config Optional
+     */
+    texture.RenderTexture = function (engine, config){
+        var framebuffer = gl.createFramebuffer(),
+            textureId = gl.createTexture(),
+            renderbuffer = gl.createRenderbuffer(),
+            thisConfig = config || {},
+            _wrapS = thisConfig.wrapS ||  10497,
+            _wrapT = thisConfig.wrapT || 10497,
+            _minFilter = thisConfig.minFilter || 9729,
+            _magFilter = thisConfig.magFilter || 9729,
+            _width = thisConfig.width || 512,
+            _height = thisConfig.height || 512,
+            _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
+            _intformat = thisConfig.intformat || 6408;
+
+
+        (function init(){
+            gl.bindFramebuffer(36160, framebuffer);
+            gl.bindTexture(3553, textureId);
+            gl.texParameteri(3553, 10240, _magFilter);
+            gl.texParameteri(3553, 10241, _minFilter);
+            gl.texParameteri(3553, 10242, _wrapS);
+            gl.texParameteri(3553, 10243, _wrapT);
+            if (_generateMipmaps){
+                gl.generateMipmap(3553);
+            }
+            gl.texImage2D(3553, 0, 6408, _width, _height, 0, 6408, 5121, null);
+
+            gl.bindRenderbuffer(36161, renderbuffer);
+            
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, _width, _height);
+
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureId, 0);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+
+        })();
+    };
 
     /**
      * Encapsulate a texture object and its configuration.
@@ -8583,6 +8831,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             lights = [],
             maxNumberOfLights,
             sceneLightObj = new KICK.scene.SceneLights(),
+            cameraSortFunc = function(a,b){
+                return b.cameraIndex - a.cameraIndex;
+            },
             addLight = function(light){
                 lights.push(light);
                 if (light.type == 1){
@@ -8626,7 +8877,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
                 if (component instanceof scene.Camera) {
-                    cameras.push(component);
+                    KICK.core.Util.insertSorted(component,cameras,cameraSortFunc);
                 }
                 if (component instanceof scene.Light){
                     addLight(component);
