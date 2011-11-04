@@ -8127,7 +8127,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var texture = KICK.namespace("KICK.texture"),
-        core = KICK.namespace("KICK.core");
+        core = KICK.namespace("KICK.core"),
+        constants = core.Constants;
 
     /**
      * Encapsulate a texture object and its configuration.
@@ -8141,7 +8142,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     texture.Texture = function (engine, config, uidMapping) {
         var gl = engine.gl,
             _uid = engine.createUID(), // note uid is always
-            constants = core.Constants,
             texture0 = 33984,
             thisConfig = config || {},
             textureId = gl.createTexture(),
@@ -8213,7 +8213,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             gl.pixelStorei(3317, 1);
             gl.texImage2D(3553, 0, _intformat, _intformat, 5121, imageObj);
-   
+
+            gl.texParameteri(3553, 10240, _magFilter);
+            gl.texParameteri(3553, 10241, _minFilter);
+            gl.texParameteri(3553, 10242, _wrapS);
+            gl.texParameteri(3553, 10243, _wrapT);
+
             if (_generateMipmaps){
                 gl.generateMipmap(3553);
             }
