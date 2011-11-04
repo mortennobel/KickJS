@@ -49,6 +49,51 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         constants = core.Constants;
 
     /**
+     * Render texture (used for camera's render target)
+     * @class RenderTexture
+     * @namespace KICK.texture
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config Optional
+     */
+    texture.RenderTexture = function (engine, config){
+        var framebuffer = gl.createFramebuffer(),
+            textureId = gl.createTexture(),
+            renderbuffer = gl.createRenderbuffer(),
+            thisConfig = config || {},
+            _wrapS = thisConfig.wrapS ||  constants.GL_REPEAT,
+            _wrapT = thisConfig.wrapT || constants.GL_REPEAT,
+            _minFilter = thisConfig.minFilter || constants.GL_LINEAR,
+            _magFilter = thisConfig.magFilter || constants.GL_LINEAR,
+            _width = thisConfig.width || 512,
+            _height = thisConfig.height || 512,
+            _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
+            _intformat = thisConfig.intformat || constants.GL_RGBA;
+
+
+        (function init(){
+            gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
+            gl.bindTexture(constants.GL_TEXTURE_2D, textureId);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
+            if (_generateMipmaps){
+                gl.generateMipmap(constants.GL_TEXTURE_2D);
+            }
+            gl.texImage2D(constants.GL_TEXTURE_2D, 0, constants.GL_RGBA, _width, _height, 0, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, null);
+
+            gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+            
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, _width, _height);
+
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureId, 0);
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+
+        })();
+    };
+
+    /**
      * Encapsulate a texture object and its configuration.
      * @class Texture
      * @namespace KICK.texture

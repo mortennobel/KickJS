@@ -790,7 +790,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             thisObj = this,
             transform,
             c = KICK.core.Constants,
-//            _renderTarget,
+            _renderTarget,
             _fieldOfView,
             _near,
             _far,
@@ -802,6 +802,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _cameraTypePerspective,
             _clearFlagColor,
             _clearFlagDepth,
+            _currentClearFlags,
+            _cameraIndex,
             _normalizedViewportRect = vec4.create([0,0,1,1]),
             isNumber = function (o) {
                 return typeof (o) === "number";
@@ -809,29 +811,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             isBoolean = function(o){
                 return typeof (o) === "boolean";
             },
-            setupViewport = function () {
-                var viewPortWidth = gl.viewportSize[0],
-                    viewPortHeight = gl.viewportSize[1],
-                    offsetX = viewPortWidth*_normalizedViewportRect[0],
-                    offsetY = viewPortWidth*_normalizedViewportRect[1],
-                    width = viewPortWidth*_normalizedViewportRect[2],
-                    height = viewPortHeight*_normalizedViewportRect[3];
-
-                gl.viewport(offsetX, offsetY,width , height);
-            },
-            setupClear = function () {
-                if (!thisObj._currentClearFlags) {
-                    // I use '+' instead of '|' since it tends to perform better in JS
-                    // and it should give the same result when the bit-fields are different (power of two)
-                    thisObj._currentClearFlags = (thisObj.clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) + (thisObj.clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
-                }
-                gl.clear(thisObj._currentClearFlags);
+            computeClearFlag = function(){
+                _currentClearFlags = (_clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) | (_clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
             },
             setupClearColor = function () {
-                if (gl.currentClearColor !== thisObj.clearColor) {
-                    gl.currentClearColor = thisObj.clearColor;
-                    var color = thisObj.clearColor;
-                    gl.clearColor(color[0], color[1], color[2], color[3]);
+                if (gl.currentClearColor !== _clearColor) {
+                    gl.currentClearColor = _clearColor;
+                    gl.clearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
                 }
             },
             assertNumber = function(newValue,name){
@@ -858,9 +844,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
          */
         this.setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
-            setupViewport();
+            var viewPortWidth = gl.viewportSize[0],
+                viewPortHeight = gl.viewportSize[1],
+                offsetX = viewPortWidth*_normalizedViewportRect[0],
+                offsetY = viewPortWidth*_normalizedViewportRect[1],
+                width = viewPortWidth*_normalizedViewportRect[2],
+                height = viewPortHeight*_normalizedViewportRect[3];
+
+            gl.viewport(offsetX,offsetY,width,height);
+            gl.scissor(offsetX,offsetY,width,height);
             setupClearColor();
-            setupClear();
+            gl.clear(_currentClearFlags);
 
             if (this.cameraTypePerspective) {
                 mat4.perspective(this.fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
@@ -882,17 +876,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * @property renderTarget
              * @type KICK.texture.RenderTexture
              */
-//            renderTarget:{
-//                get:function(){ return _renderTarget;},
-//                set:function(newValue){
-//                    if (c._ASSERT){
-//                        if (newValue != null && !(newValue instanceof KICK.texture.RenderTexture)){
-//                            KICK.core.Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
-//                        }
-//                    }
-//                    _renderTarget = newValue;
-//                }
-//            },
+            renderTarget:{
+                get:function(){ return _renderTarget;},
+                set:function(newValue){
+                    if (c._ASSERT){
+                        if (newValue != null && !(newValue instanceof KICK.texture.RenderTexture)){
+                            KICK.core.Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
+                        }
+                    }
+                    _renderTarget = newValue;
+                }
+            },
             /**
              * Set the field of view Y in degrees<br>
              * Only used when perspective camera type. Default 60.0
@@ -1028,6 +1022,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
+             * The sorting order when multiple cameras exists in the scene.<br>
+             * Cameras with lowest number is rendered first.
+             * @property cameraIndex
+             * @type Number
+             */
+            cameraIndex:{
+                get:function(){
+                    return _cameraIndex;
+                },
+                set:function(newValue){
+                    if (c._ASSERT){
+                        assertNumber(newValue,"cameraIndex");
+                    }
+                    _cameraIndex = newValue;
+                }
+            },
+            /**
              * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
              * @property clearColor
              * @type KICK.math.vec4
@@ -1051,6 +1062,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     return _clearFlagColor;
                 },
                 set:function(newValue){
+                    computeClearFlag();
                     _clearFlagColor = newValue;
                 }
             },
@@ -1065,6 +1077,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     return _clearFlagDepth;
                 },
                 set:function(newValue){
+                    computeClearFlag();
                     _clearFlagDepth = newValue;
                 }
             },
@@ -1100,11 +1113,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         _clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
         _clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
         _clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
-//        _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
+        _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
+        _cameraIndex = isNumber(config.cameraIndex) ? config.cameraIndex : 1;
         if (config.normalizedViewportRect){
             this.normalizedViewportRect = config.normalizedViewportRect;
         }
-        this.setupClearFlags(config.clearColor,config.clearDepth);
+        computeClearFlag();
     };
 
     /**

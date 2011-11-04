@@ -107,6 +107,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             lights = [],
             maxNumberOfLights,
             sceneLightObj = new KICK.scene.SceneLights(),
+            cameraSortFunc = function(a,b){
+                return b.cameraIndex - a.cameraIndex;
+            },
             addLight = function(light){
                 lights.push(light);
                 if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
@@ -150,7 +153,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
                 if (component instanceof scene.Camera) {
-                    cameras.push(component);
+                    KICK.core.Util.insertSorted(component,cameras,cameraSortFunc);
                 }
                 if (component instanceof scene.Light){
                     addLight(component);

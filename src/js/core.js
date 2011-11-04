@@ -448,8 +448,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
                     }
-                    
                     gl.enable(c.GL_DEPTH_TEST);
+                    gl.enable(c.GL_SCISSOR_TEST);
                 };
             initGL();
 
