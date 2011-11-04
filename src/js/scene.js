@@ -941,20 +941,16 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * @private
              */
             setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
-                var viewPortWidth,
-                    viewPortHeight,
-                    offsetX,
-                    offsetY,
-                    width,
-                    height;
-                // setup viewport width
-                if (_renderTarget){
-                    viewPortWidth = _renderTarget.width;
-                    viewPortHeight =_renderTarget.height;
-                } else {
-                    viewPortWidth = gl.viewportSize[0];
-                    viewPortHeight = gl.viewportSize[1];
-                }
+                var viewportDimension = _renderTarget?_renderTarget.dimension:gl.viewportSize,
+                    viewPortWidth = viewportDimension[0],
+                    viewPortHeight = viewportDimension[1],
+                    offsetX = viewPortWidth*_normalizedViewportRect[0],
+                    offsetY = viewPortWidth*_normalizedViewportRect[1],
+                    width = viewPortWidth*_normalizedViewportRect[2],
+                    height = viewPortHeight*_normalizedViewportRect[3];
+                gl.viewport(offsetX,offsetY,width,height);
+                gl.scissor(offsetX,offsetY,width,height);
+                
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
                     gl.renderTarget = _renderTarget;
@@ -964,13 +960,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
                     }
                 }
-                offsetX = viewPortWidth*_normalizedViewportRect[0];
-                offsetY = viewPortWidth*_normalizedViewportRect[1];
-                width = viewPortWidth*_normalizedViewportRect[2];
-                height = viewPortHeight*_normalizedViewportRect[3];
 
-                gl.viewport(offsetX,offsetY,width,height);
-                gl.scissor(offsetX,offsetY,width,height);
                 setupClearColor();
                 gl.clear(_currentClearFlags);
 
@@ -1036,6 +1026,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
             _renderer.render(renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
+                var textureId = _renderTarget.colorTexture.textureId;
+                gl.bindTexture(gl.TEXTURE_2D, textureId);
+                gl.generateMipmap(gl.TEXTURE_2D);
+            }
         };
 
         Object.defineProperties(this,{

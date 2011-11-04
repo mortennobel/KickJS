@@ -33,7 +33,7 @@
             element.innerHTML = "";
         };
 
-        function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer){
+        function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer, materialUniforms){
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
@@ -50,7 +50,8 @@
 
             meshRenderer.material = new KICK.material.Material({
                 name:"Some material",
-                shader:shader
+                shader:shader,
+                uniforms: materialUniforms
             });
         }
 
@@ -98,38 +99,29 @@
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true
             });
+
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],
                 fieldOfView:60,
-                normalizedViewportRect:[0.5,0.5,0.5,0.5]
+                layerMask:1
             });
             cameraObject.addComponent(camera);
 
             var cameraObject2 = engine.activeScene.createGameObject();
             var camera2 = new KICK.scene.Camera({
-                clearColor: [1,1,0,1],
-                fieldOfView:60,
-                cameraIndex:2,
-                normalizedViewportRect:[0.0,0.5,0.5,0.5]
-            });
-            cameraObject2.addComponent(camera2);
-            cameraObject2.transform.position = [0,0,3];
-            var cameraObject3 = engine.activeScene.createGameObject();
-            var camera3 = new KICK.scene.Camera({
                 clearColor: [.1,.3,.6,1],
                 fieldOfView:60,
                 cameraIndex:2,
-                layerMask: 2,
-                normalizedViewportRect:[0.0,0.0,1.0,0.5]
+                layerMask: 2
             });
-            cameraObject3.addComponent(camera3);
-            cameraObject3.transform.position = [0,0,3];
-
+            cameraObject2.addComponent(camera2);
+            cameraObject2.transform.position = [0,0,3];
+            
             var texture = new KICK.texture.Texture(engine);
             texture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
             var renderTexture = new KICK.texture.RenderTexture(engine,texture,null);
-
+            camera.renderTarget = renderTexture;
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://cube/?length=0.5");
@@ -139,11 +131,17 @@
             var gameObject2 = engine.activeScene.createGameObject();
             gameObject2.layer = 2;
             meshRenderer2 = new KICK.scene.MeshRenderer();
-            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://uvsphere/?radius=0.6");
-            setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
+            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://cube/?length=0.5");
+            setMaterial('vertexShaderTex','fragmentShaderTex',meshRenderer2, {
+                    tex: {
+                        value: texture,
+                        type: KICK.core.Constants.GL_SAMPLER_2D
+                    }
+                });
             gameObject2.addComponent(meshRenderer2);
 
             addRotatorComponent(cameraObject);
+            addRotatorComponent(cameraObject2);
         }
 
         function UVSphere(){
@@ -189,6 +187,31 @@ varying vec3 vColor;
 void main(void)
 {
     gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+      <textarea style="width:500px;height:150px;" id="vertexShaderTex">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec2 uv;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    uv = uv1;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShaderTex">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec2 uv;
+uniform sampler2D tex;
+
+void main(void)
+{
+    gl_FragColor = texture2D(tex,uv);
 }
   </textarea>
 </div>
