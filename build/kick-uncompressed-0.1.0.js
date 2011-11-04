@@ -5119,7 +5119,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
-        renderer = KICK.namespace("KICK.renderer"),
         ASSERT = true;
 
     /**
@@ -5274,7 +5273,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             canvas = document.getElementById(id),
             webGlContextNames = ["experimental-webgl","webgl"],
             thisObj = this,
-            activeRenderer,
             lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
             deltaTime = 0,
             timeObj = new core.Time(),
@@ -5339,26 +5337,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
-             * The renderer
-             * @property renderer
-             * @type KICK.renderer.Renderer
-             */
-            renderer:{
-                get: function () {
-                    return activeRenderer;
-                },
-                set: function (val) {
-                    if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
-                        this.activeScene.removeComponentListener(activeRenderer);
-                    }
-                    activeRenderer = val;
-                    if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
-                        this.activeScene.addComponentListener(activeRenderer);
-                    }
-                    activeRenderer.init(thisObj);
-                }
-            },
-            /**
              * Time object of the engine. Is updated every frame
              * @property time
              * @type KICK.core.Time
@@ -5404,8 +5382,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         this._gameLoop = function (time) {
-            this.activeScene.update();
-            this.renderer.render();
+            this.activeScene.updateAndRender();
             for (var i=frameListeners.length-1;i>=0;i--){
                 frameListeners[i].frameUpdated();
             }
@@ -5549,8 +5526,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     }
                 }, thisObj.config.checkCanvasResizeInterval);
             }
-
-            thisObj.renderer = new renderer.ForwardRenderer();
 
             // API documentation of Time is found in KICK.core.Time
             Object.defineProperties(timeObj,{
@@ -6917,7 +6892,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param scene {KICK.scene.Scene}
      */
     scene.GameObject = function (scene) {
-        var _components = [];
+        var _components = [],
+            _layer = 1;
         Object.defineProperties(this,
             {
                 /**
@@ -6943,9 +6919,46 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                  */
                 transform:{
                     value:new KICK.scene.Transform(this)
+                },
+                /**
+                 * Layer bit flag. The default value is 1.
+                 * The layer should have a value of 2^n
+                 * @property layer
+                 * @type Number
+                 */
+                layer:{
+                    get:function(){
+                        return _layer;
+                    },
+                    set:function(newValue){
+                        if (typeof newValue !== 'number'){
+                            KICK.core.Util.fail("GameObject.layer must be a Number")
+                        }
+                        _layer = newValue;
+                    }
+                },
+                /**
+                 * Number of components (excluding transform)
+                 * @property numberOfComponents
+                 * @type Number
+                 */
+                numberOfComponents:{
+                    get:function(){
+                        return _components.length;
+                    }
                 }
             }
         );
+
+        /**
+         * Get component by index (note the Transform component will not be returned this way).
+         * @method getComponent
+         * @param {Number} index
+         * @return {KICK.scene.Component}
+         */
+        this.getComponent = function(index){
+            return _components[index];
+        };
 
         /**
          * Add the component to a gameObject and set the gameObject field on the component
@@ -7407,7 +7420,29 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
+            cameras = [],
+            renderableComponents = [],
+            sceneLightObj = new KICK.scene.SceneLights(),
+            gl,
             i,
+            addLight = function(light){
+                if (light.type == 1){
+                    sceneLightObj.ambientLight = light;
+                } else if (light.type === 2){
+                    sceneLightObj.directionalLight = light;
+                } else {
+                    sceneLightObj.otherLights.push(light);
+                }
+            },
+            removeLight = function(light){
+                if (light.type == 1){
+                    sceneLightObj.ambientLight = null;
+                } else if (light.type === 2){
+                    sceneLightObj.directionalLight = null;
+                } else {
+                    core.Util.removeElementFromArray(sceneLightObj.otherLights,light);
+                }
+            },
             /**
              * Compares two objects based on scriptPriority
              * @method sortByScriptPriority
@@ -7418,6 +7453,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             sortByScriptPriority = function (a,b) {
                 return a.scriptPriority-b.scriptPriority;
+            },
+            /**
+             * Compares two camera objects by their cameraIndex attribute
+             * @method cameraSortFunc
+             * @param {KICK.scene.Camera} a
+             * @param {KICK.scene.Camera} b
+             * @param {Number} difference
+             * @private
+             */
+            cameraSortFunc = function(a,b){
+                return b.cameraIndex - a.cameraIndex;
             },
             /**
              * Handle insertions and removal of gameobjects and components. This is done in a separate step to avoid problems
@@ -7450,6 +7496,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         if (typeof(component.lateUpdate) === "function") {
                             core.Util.insertSorted(component,lateUpdateableComponents,sortByScriptPriority);
                         }
+                        if (typeof(component.render) === "function") {
+                            renderableComponents.push(component);
+                        }
+                        if (typeof(component.render) === "function") {
+                            core.Util.removeElementFromArray(renderableComponents,component);
+                        }
+                        if (component instanceof scene.Camera){
+                            KICK.core.Util.insertSorted(component,cameras,cameraSortFunc);
+                        } else if (component instanceof scene.Light){
+                            addLight(component);
+                        }
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
                         componentListenes[i].componentsAdded(componentsNewCopy);
@@ -7469,11 +7526,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         if (typeof(component.lateUpdate) === "function") {
                             core.Util.removeElementFromArray(lateUpdateableComponents,component);
                         }
+                        if (component instanceof scene.Camera){
+                            core.Util.removeElementFromArray(cameras,component);
+                        } else if (component instanceof scene.Light){
+                            removeLight(component);
+                        }
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
                         componentListenes[i].componentsRemoved(componentsDeleteCopy);
                     }
                 }
+            },
+            updateComponents = function(){
+                var i;
+                for (i=updateableComponents.length-1; i >= 0; i--) {
+                    updateableComponents[i].update();
+                }
+                for (i=lateUpdateableComponents.length-1; i >= 0; i--) {
+                    lateUpdateableComponents[i].lateUpdate();
+                }
+                cleanupGameObjects();
+            },
+            renderComponents = function(){
+                var i;
+                for (i=cameras.length-1; i >= 0; i--) {
+                    cameras[i].renderScene(sceneLightObj);
+                }
+                engine.gl.flush();
             };
 
         /**
@@ -7485,14 +7564,21 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.addComponentListener = function (componentListener) {
             if (!scene.ComponentChangedListener.isComponentListener(componentListener) ) {
-                throw {
-                    name: "Error",
-                    message:"Component listener does not have the correct interface. " +
+                KICK.core.Util.fail("Component listener does not have the correct interface. " +
                         "It should contain the two functions: " +
-                        "componentsAdded(components) and componentsRemoved(components)"
-                };
+                        "componentsAdded(components) and componentsRemoved(components)");
             }
             componentListenes.push(componentListener);
+            // add current components to component listener
+            var gameObjectLength = gameObjects.length;
+            for (var i = 0 ; i < gameObjectLength ; i++){
+                var gameObject = gameObjects[i];
+                var numberOfComponents = gameObject.numberOfComponents;
+                for (var j = 0 ; j < numberOfComponents ; j++){
+                    var component = gameObject.getComponent(j);
+                    componentListener.componentsAdded([component]);
+                }
+            }
         };
 
         /**
@@ -7606,17 +7692,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         /**
          * Called by engine every frame. Updates and render scene
-         * @method update
+         * @method updateAndRender
          */
-        this.update = function () {
-            var i;
-            for (i=updateableComponents.length-1; i >= 0; i--) {
-                updateableComponents[i].update();
-            }
-            for (i=lateUpdateableComponents.length-1; i >= 0; i--) {
-                lateUpdateableComponents[i].lateUpdate();
-            }
-            cleanupGameObjects();
+        this.updateAndRender = function () {
+            updateComponents();
+            renderComponents();
         };
 
         /**
@@ -7658,6 +7738,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _clearFlagDepth,
             _currentClearFlags,
             _cameraIndex,
+            _layerMask,
+            _renderer,
+            _scene,
+            projectionMatrix = mat4.create(),
+            modelViewMatrix = mat4.create(),
+            modelViewProjectionMatrix = mat4.create(),
+            renderableComponents = [],
             _normalizedViewportRect = vec4.create([0,0,1,1]),
             isNumber = function (o) {
                 return typeof (o) === "number";
@@ -7681,13 +7768,43 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             };
 
         /**
-         * Handles the camera setup (get fast reference to transform and glcontext)
+         * Handles the camera setup (get fast reference to transform and glcontext).
+         * Also register component listener on scene
          * @method activated
          */
         this.activated = function(){
-            var gameObject = this.gameObject;
+            var gameObject = this.gameObject,
+                engine = gameObject.engine;
             transform = gameObject.transform;
-            gl = gameObject.engine.gl;
+            gl = engine.gl;
+            _scene = gameObject.scene;
+            _scene.addComponentListener(thisObj);
+        };
+
+        /**
+         * Deregister component listener on scene
+         * @method deactivated
+         */
+        this.deactivated = function(){
+            _scene.removeComponentListener(thisObj);
+        };
+
+        this.componentsAdded = function( components ){
+            for (var i=components.length-1; i>=0; i--) {
+                var component = components[i];
+                if (typeof(component.render) === "function") {
+                    renderableComponents.push(component);
+                }
+            }
+        };
+
+        this.componentsRemoved = function ( components ){
+            for (var i=components.length-1; i>=0; i--) {
+                var component = components[i];
+                if (typeof(component.render) === "function") {
+                    core.Util.removeElementFromArray(renderableComponents,component);
+                }
+            }
         };
 
         /**
@@ -7724,7 +7841,45 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
         };
 
+        /**
+         * @method renderScene
+         * @param {KICK.scene.SceneLights} sceneLightObj
+         */
+        this.renderScene = function(sceneLightObj){
+            this.setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+            sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
+            _renderer.render(renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+        };
+
         Object.defineProperties(this,{
+            renderer:{
+                get:function(){ return _renderer;},
+                set:function(newValue){
+                    if (true){
+                        if (typeof newValue.render !== "function"){
+                            KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
+                        }
+                    }
+                    _renderer = newValue;
+                }
+            },
+            /**
+             * Camera renders only objects where the components layer exist in the layer mask. <br>
+             * The two values a
+             * @property layerMask
+             * @type Number
+             */
+            layerMask:{
+                get:function(){ return _layerMask;},
+                set:function(newValue){
+                    if (true){
+                        if (!isNumber(newValue)){
+                            KICK.core.Util.fail("Camera.layerMask should be a number");
+                        }
+                    }
+                    _layerMask = newValue;
+                }
+            },
             /**
              * Set the render target of the camera. Null means screen framebuffer.<br>
              * @property renderTarget
@@ -7969,6 +8124,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         _clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
         _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
         _cameraIndex = isNumber(config.cameraIndex) ? config.cameraIndex : 1;
+        _layerMask = isNumber(config.layerMask) ? config.layerMask : 0xffffffff;
+        _renderer = config.renderer ? config.renderer : new KICK.renderer.ForwardRenderer();
         if (config.normalizedViewportRect){
             this.normalizedViewportRect = config.normalizedViewportRect;
         }
@@ -7997,11 +8154,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     scene.ComponentChangedListener = {
         /**
          * @method componentsAdded
-         * @param {Array ofKICK.scene.Components} components
+         * @param {Array[KICK.scene.Components]} components
          */
         /**
          * @method componentsRemoved
-         * @param {Array ofKICK.scene.Components} components
+         * @param {Array[KICK.scene.Components]} components
          */
         /**
          * @method isComponentListener
@@ -8771,8 +8928,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var renderer = KICK.namespace("KICK.renderer"),
         core = KICK.namespace("KICK.core"),
         scene = KICK.namespace("KICK.scene"),
-        math = KICK.namespace("KICK.math"),
-        mat4 = math.mat4;
+        math = KICK.namespace("KICK.math");
 
     /**
      * Defines interface for render classes.
@@ -8781,24 +8937,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @constructor
      */
     /**
-     * @method init
-     * @param {KICK.core.Engine}engine
-     */
-    /**
      * Called each frame to render the components
      * @method render
+     * @param {KICK.scene.Component} renderableComponents
      */
-    /**
-     * Event when new renderable is added to scene
-     * @method addRenderableComponent
-     * @param {KICK.scene.Component} component
-     */
-    /**
-     * Event when new renderable is removed from scene
-     * @method removeRenderableComponent
-     * @param {KICK.scene.Component} component
-     */
-
 
     /**
      * Does not render any components
@@ -8809,11 +8951,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-    renderer.NullRenderer.prototype.render = function () {};
-    renderer.NullRenderer.prototype.init = function (engine) {};
-    renderer.NullRenderer.prototype.addRenderableComponent = function () {};
-    renderer.NullRenderer.prototype.removeRenderableComponent = function () {};
-
+    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {};
+    
     /**
      * Forward renderer
      * @class ForwardRenderer
@@ -8822,85 +8961,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @extends KICK.renderer.Renderer
      */
     renderer.ForwardRenderer = function () {
-        var renderableComponents = [],
-            cameras = [],
-            projectionMatrix = mat4.create(),
-            modelViewMatrix = mat4.create(),
-            modelViewProjectionMatrix = mat4.create(),
-            gl,
-            lights = [],
-            maxNumberOfLights,
-            sceneLightObj = new KICK.scene.SceneLights(),
-            cameraSortFunc = function(a,b){
-                return b.cameraIndex - a.cameraIndex;
-            },
-            addLight = function(light){
-                lights.push(light);
-                if (light.type == 1){
-                    sceneLightObj.ambientLight = light;
-                } else if (light.type === 2){
-                    sceneLightObj.directionalLight = light;
-                } else {
-                    sceneLightObj.otherLights.push(light);
-                }
-            },
-            removeLight = function(light){
-                core.Util.removeElementFromArray(lights,light);
-                if (light.type == 1){
-                    sceneLightObj.ambientLight = null;
-                } else if (light.type === 2){
-                    sceneLightObj.directionalLight = null;
-                } else {
-                    core.Util.removeElementFromArray(sceneLightObj.otherLights,light);
-                }
-            };
-
-        this.init = function (engine) {
-            gl = engine.gl;
-            maxNumberOfLights = engine.config.maxNumerOfLights;
-        }
-
-        this.render = function () {
-            var i,j, camera;
-            for (i=cameras.length-1; i >= 0; i--) {
-                camera = cameras[i];
-                camera.setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
-                sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
-                for (j=renderableComponents.length-1; j >= 0; j--) {
-                    renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
-                }
-            }
-            gl.flush();
-        };
-
-        this.componentsAdded = function (components) {
-            for (var i=components.length-1; i>=0; i--) {
-                var component = components[i];
-                if (component instanceof scene.Camera) {
-                    KICK.core.Util.insertSorted(component,cameras,cameraSortFunc);
-                }
-                if (component instanceof scene.Light){
-                    addLight(component);
-                }
-                if (typeof(component.render) === "function") {
-                    renderableComponents.push(component);
-                }
-
-            }
-        };
-
-        this.componentsRemoved = function (components) {
-            for (var i=components.length-1; i>=0; i--) {
-                var component = components[i];
-                if (component instanceof scene.Camera) {
-                    core.Util.removeElementFromArray(cameras,component);
-                }
-                if (component instanceof scene.Light){
-                    removeLight(component);
-                }
-                if (typeof(component.render) === "function") {
-                    core.Util.removeElementFromArray(renderableComponents,component);
-                }
+        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {
+            var length = renderableComponents.length;
+            for (var j=0;j<length;j++){
+                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             }
         };
     };

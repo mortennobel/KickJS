@@ -51,7 +51,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
-        renderer = KICK.namespace("KICK.renderer"),
         ASSERT = constants._ASSERT;
 
     /**
@@ -206,7 +205,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             canvas = document.getElementById(id),
             webGlContextNames = ["experimental-webgl","webgl"],
             thisObj = this,
-            activeRenderer,
             lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
             deltaTime = 0,
             timeObj = new core.Time(),
@@ -271,26 +269,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
-             * The renderer
-             * @property renderer
-             * @type KICK.renderer.Renderer
-             */
-            renderer:{
-                get: function () {
-                    return activeRenderer;
-                },
-                set: function (val) {
-                    if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
-                        this.activeScene.removeComponentListener(activeRenderer);
-                    }
-                    activeRenderer = val;
-                    if (scene.ComponentChangedListener.isComponentListener(activeRenderer)) {
-                        this.activeScene.addComponentListener(activeRenderer);
-                    }
-                    activeRenderer.init(thisObj);
-                }
-            },
-            /**
              * Time object of the engine. Is updated every frame
              * @property time
              * @type KICK.core.Time
@@ -336,8 +314,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         this._gameLoop = function (time) {
-            this.activeScene.update();
-            this.renderer.render();
+            this.activeScene.updateAndRender();
             for (var i=frameListeners.length-1;i>=0;i--){
                 frameListeners[i].frameUpdated();
             }
@@ -481,8 +458,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     }
                 }, thisObj.config.checkCanvasResizeInterval);
             }
-
-            thisObj.renderer = new renderer.ForwardRenderer();
 
             // API documentation of Time is found in KICK.core.Time
             Object.defineProperties(timeObj,{

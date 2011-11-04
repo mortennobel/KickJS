@@ -47,8 +47,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var renderer = KICK.namespace("KICK.renderer"),
         core = KICK.namespace("KICK.core"),
         scene = KICK.namespace("KICK.scene"),
-        math = KICK.namespace("KICK.math"),
-        mat4 = math.mat4;
+        math = KICK.namespace("KICK.math");
 
     /**
      * Defines interface for render classes.
@@ -57,24 +56,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @constructor
      */
     /**
-     * @method init
-     * @param {KICK.core.Engine}engine
-     */
-    /**
      * Called each frame to render the components
      * @method render
+     * @param {KICK.scene.Component} renderableComponents
      */
-    /**
-     * Event when new renderable is added to scene
-     * @method addRenderableComponent
-     * @param {KICK.scene.Component} component
-     */
-    /**
-     * Event when new renderable is removed from scene
-     * @method removeRenderableComponent
-     * @param {KICK.scene.Component} component
-     */
-
 
     /**
      * Does not render any components
@@ -85,11 +70,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-    renderer.NullRenderer.prototype.render = function () {};
-    renderer.NullRenderer.prototype.init = function (engine) {};
-    renderer.NullRenderer.prototype.addRenderableComponent = function () {};
-    renderer.NullRenderer.prototype.removeRenderableComponent = function () {};
-
+    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {};
+    
     /**
      * Forward renderer
      * @class ForwardRenderer
@@ -98,85 +80,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @extends KICK.renderer.Renderer
      */
     renderer.ForwardRenderer = function () {
-        var renderableComponents = [],
-            cameras = [],
-            projectionMatrix = mat4.create(),
-            modelViewMatrix = mat4.create(),
-            modelViewProjectionMatrix = mat4.create(),
-            gl,
-            lights = [],
-            maxNumberOfLights,
-            sceneLightObj = new KICK.scene.SceneLights(),
-            cameraSortFunc = function(a,b){
-                return b.cameraIndex - a.cameraIndex;
-            },
-            addLight = function(light){
-                lights.push(light);
-                if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
-                    sceneLightObj.ambientLight = light;
-                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
-                    sceneLightObj.directionalLight = light;
-                } else {
-                    sceneLightObj.otherLights.push(light);
-                }
-            },
-            removeLight = function(light){
-                core.Util.removeElementFromArray(lights,light);
-                if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
-                    sceneLightObj.ambientLight = null;
-                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
-                    sceneLightObj.directionalLight = null;
-                } else {
-                    core.Util.removeElementFromArray(sceneLightObj.otherLights,light);
-                }
-            };
-
-        this.init = function (engine) {
-            gl = engine.gl;
-            maxNumberOfLights = engine.config.maxNumerOfLights;
-        }
-
-        this.render = function () {
-            var i,j, camera;
-            for (i=cameras.length-1; i >= 0; i--) {
-                camera = cameras[i];
-                camera.setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
-                sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
-                for (j=renderableComponents.length-1; j >= 0; j--) {
-                    renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
-                }
-            }
-            gl.flush();
-        };
-
-        this.componentsAdded = function (components) {
-            for (var i=components.length-1; i>=0; i--) {
-                var component = components[i];
-                if (component instanceof scene.Camera) {
-                    KICK.core.Util.insertSorted(component,cameras,cameraSortFunc);
-                }
-                if (component instanceof scene.Light){
-                    addLight(component);
-                }
-                if (typeof(component.render) === "function") {
-                    renderableComponents.push(component);
-                }
-
-            }
-        };
-
-        this.componentsRemoved = function (components) {
-            for (var i=components.length-1; i>=0; i--) {
-                var component = components[i];
-                if (component instanceof scene.Camera) {
-                    core.Util.removeElementFromArray(cameras,component);
-                }
-                if (component instanceof scene.Light){
-                    removeLight(component);
-                }
-                if (typeof(component.render) === "function") {
-                    core.Util.removeElementFromArray(renderableComponents,component);
-                }
+        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {
+            var length = renderableComponents.length;
+            for (var j=0;j<length;j++){
+                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             }
         };
     };
