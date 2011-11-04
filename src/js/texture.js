@@ -46,7 +46,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     var texture = KICK.namespace("KICK.texture"),
         core = KICK.namespace("KICK.core"),
-        constants = core.Constants;
+        constants = core.Constants,
+        vec2 = KICK.math.vec2;
 
     /**
      * Render texture (used for camera's render target)
@@ -55,42 +56,93 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.texture
      * @constructor
      * @param {KICK.core.Engine} engine
-     * @param {Object} config Optional
+     * @param {KICK.texture.Texture} _colorTexture Optional (may be null)
+     * @param {KICK.texture.Texture} _depthTexture Optional (may be null)
      */
-    texture.RenderTexture = function (engine, config){
-        var framebuffer = gl.createFramebuffer(),
-            textureId = gl.createTexture(),
-            renderbuffer = gl.createRenderbuffer(),
-            thisConfig = config || {},
-            _wrapS = thisConfig.wrapS ||  constants.GL_REPEAT,
-            _wrapT = thisConfig.wrapT || constants.GL_REPEAT,
-            _minFilter = thisConfig.minFilter || constants.GL_LINEAR,
-            _magFilter = thisConfig.magFilter || constants.GL_LINEAR,
-            _width = thisConfig.width || 512,
-            _height = thisConfig.height || 512,
-            _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
-            _intformat = thisConfig.intformat || constants.GL_RGBA;
+    texture.RenderTexture = function (engine, _colorTexture, _depthTexture){
+        var gl = engine.gl,
+            framebuffer = gl.createFramebuffer(),
+            validTexture = _colorTexture || _depthTexture,
+            _dimension = validTexture.dimension,
+            renderBuffers = [];
 
-
-        (function init(){
+        /**
+         * @method bind
+         */
+        this.bind = function(){
             gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
-            gl.bindTexture(constants.GL_TEXTURE_2D, textureId);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
-            if (_generateMipmaps){
-                gl.generateMipmap(constants.GL_TEXTURE_2D);
+        };
+
+        Object.defineProperties(this,{
+            /**
+             * Read only
+             * @property dimension
+             * @type KICK.math.vec2
+             */
+            dimension:{
+                value:_dimension
+            },
+            /**
+             * Read only
+             * @property colorTexture
+             * @type KICK.texture.Texture
+             */
+            colorTexture:{
+                value: _colorTexture
+            },
+            /**
+             * Read only
+             * @property depthTexture
+             * @type KICK.texture.Texture
+             */
+            depthTexture:{
+                value: _depthTexture
             }
-            gl.texImage2D(constants.GL_TEXTURE_2D, 0, constants.GL_RGBA, _width, _height, 0, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, null);
-
-            gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+        });
             
-            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, _width, _height);
+        (function init(){
+            var renderbuffer;
+            gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
 
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textureId, 0);
-            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+            if (_colorTexture){
+                gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_TEXTURE_2D, _colorTexture.textureId, 0);
+            } else {
+                renderbuffer = gl.createRenderbuffer();
+                gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+                gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_RGBA4, _dimension[0], _dimension[1]);
+                gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_RENDERBUFFER, renderbuffer);
+                renderBuffers.push(renderbuffer);
+            }
 
+            if (_depthTexture){
+                gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_TEXTURE_2D, _depthTexture.textureId, 0);
+            } else {
+                renderbuffer = gl.createRenderbuffer();
+                gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+                gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_DEPTH_COMPONENT16, _dimension[0], _dimension[1]);
+                gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_RENDERBUFFER, renderbuffer);
+                renderBuffers.push(renderbuffer);
+            }
+            if (constants._ASSERT){
+                var frameBufferStatus = gl.checkFramebufferStatus( constants.GL_FRAMEBUFFER );
+                if (frameBufferStatus !== constants.GL_FRAMEBUFFER_COMPLETE){
+                    switch (frameBufferStatus){
+                        case constants.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                            break;
+                        case constants.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                            break;
+                        case constants.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+                            break;
+                        case constants.GL_FRAMEBUFFER_UNSUPPORTED:
+                            KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
+                            break;
+                    }
+                }
+            }
+            gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
         })();
     };
 
@@ -108,7 +160,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _uid = engine.createUID(), // note uid is always
             texture0 = constants.GL_TEXTURE0,
             thisConfig = config || {},
-            textureId = gl.createTexture(),
+            _textureId = gl.createTexture(),
             _wrapS = thisConfig.wrapS ||  constants.GL_REPEAT,
             _wrapT = thisConfig.wrapT || constants.GL_REPEAT,
             _minFilter = thisConfig.minFilter || constants.GL_LINEAR,
@@ -119,6 +171,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
             _intformat = thisConfig.intformat || constants.GL_RGBA,
             activeTexture,
+            _dimension = vec2.create(),
             isPowerOfTwo = function (x) {
                 return (x & (x - 1)) == 0;
             },
@@ -149,7 +202,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.bind = function(textureSlot){
             if (activeTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(constants.GL_TEXTURE_2D, textureId);
+                gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
                 activeTexture[textureSlot] = this;
             }
         };
@@ -182,7 +235,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
-
+            vec2.set([imageObj.width,imageObj.height],_dimension);
             if (_generateMipmaps){
                 gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
@@ -195,7 +248,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {Number} height image height in pixels
          * @param {Number} border image border in pixels
          * @param {Object} type GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5
-         * @param {Array} pixels array of pixels
+         * @param {Array} pixels array of pixels (may be null)
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function(width, height, border, type, pixels, dataURI){
@@ -207,6 +260,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     KICK.core.Util.fail("Texture.setImageData (type) should be either GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5");
                 }
             }
+            vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
             this.bind(0);
@@ -229,6 +283,24 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             *
+             * @property textureId
+             * @type {Number}
+             */
+            textureId:{
+                value:_textureId
+            },
+            /**
+             * Dimension of texture [width,height]
+             * @property dimension
+             * @type {vec2}
+             */
+            dimension:{
+                get:function(){
+                    return _dimension;
+                }
+            },
             /**
              * Unique identifier of the texture
              * @property uid

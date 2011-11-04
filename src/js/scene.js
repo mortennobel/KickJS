@@ -931,6 +931,61 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (!isNumber(newValue)){
                     KICK.core.Util.fail("Camera."+name+" must be number");
                 }
+            },
+            /**
+             * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
+             * @method setupCamera
+             * @param {KICK.math.mat4} projectionMatrix Projection of the camera
+             * @param {KICK.math.mat4} modelViewMatrix Modelview of the camera (the inverse global transform matrix of the camera)
+             * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
+             * @private
+             */
+            setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
+                var viewPortWidth,
+                    viewPortHeight,
+                    offsetX,
+                    offsetY,
+                    width,
+                    height;
+                // setup viewport width
+                if (_renderTarget){
+                    viewPortWidth = _renderTarget.width;
+                    viewPortHeight =_renderTarget.height;
+                } else {
+                    viewPortWidth = gl.viewportSize[0];
+                    viewPortHeight = gl.viewportSize[1];
+                }
+                // setup render target
+                if (gl.renderTarget !== _renderTarget){
+                    gl.renderTarget = _renderTarget;
+                    if (_renderTarget){
+                        _renderTarget.bind();
+                    } else {
+                        gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
+                    }
+                }
+                offsetX = viewPortWidth*_normalizedViewportRect[0];
+                offsetY = viewPortWidth*_normalizedViewportRect[1];
+                width = viewPortWidth*_normalizedViewportRect[2];
+                height = viewPortHeight*_normalizedViewportRect[3];
+
+                gl.viewport(offsetX,offsetY,width,height);
+                gl.scissor(offsetX,offsetY,width,height);
+                setupClearColor();
+                gl.clear(_currentClearFlags);
+
+                if (_cameraTypePerspective) {
+                    mat4.perspective(_fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
+                        _near, _far, projectionMatrix);
+                } else {
+                    mat4.ortho(_left, _right, _bottom, _top,
+                        _near, _far, projectionMatrix);
+                }
+
+                var globalMatrixInv = transform.getGlobalTRSInverse();
+                mat4.set(globalMatrixInv, modelViewMatrix);
+
+                mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
             };
 
         /**
@@ -974,45 +1029,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
-         * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
-         * @method setupCamera
-         * @param {KICK.math.mat4} projectionMatrix Projection of the camera
-         * @param {KICK.math.mat4} modelViewMatrix Modelview of the camera (the inverse global transform matrix of the camera)
-         * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
-         */
-        this.setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
-            var viewPortWidth = gl.viewportSize[0],
-                viewPortHeight = gl.viewportSize[1],
-                offsetX = viewPortWidth*_normalizedViewportRect[0],
-                offsetY = viewPortWidth*_normalizedViewportRect[1],
-                width = viewPortWidth*_normalizedViewportRect[2],
-                height = viewPortHeight*_normalizedViewportRect[3];
-
-            gl.viewport(offsetX,offsetY,width,height);
-            gl.scissor(offsetX,offsetY,width,height);
-            setupClearColor();
-            gl.clear(_currentClearFlags);
-
-            if (this.cameraTypePerspective) {
-                mat4.perspective(this.fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
-                    this.near, this.far, projectionMatrix);
-            } else {
-                mat4.ortho(this.left, this.right, this.bottom, this.top,
-                    this.near, this.far, projectionMatrix);
-            }
-
-            var globalMatrixInv = transform.getGlobalTRSInverse();
-            mat4.set(globalMatrixInv, modelViewMatrix);
-
-            mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
-        };
-
-        /**
          * @method renderScene
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            this.setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+            setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
             _renderer.render(renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
         };
