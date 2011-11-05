@@ -266,11 +266,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             this.bind(0);
             gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
             gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intformat, width, height, border, _intformat, type, pixels);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
             if (_generateMipmaps){
                 gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
         };
 
+        /**
+         * Creates a 2x2 temporary image
+         * @method setTemporaryTexture
+         */
         this.setTemporaryTexture = function(){
             var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,
                                              0,   0,   0,
