@@ -257,7 +257,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             /**
              * Returns a keyInput object. This object is used to detect key input.
              * @property keyInput
-             * @type KICK.core.Input
+             * @type KICK.core.KeyInput
              */
             keyInput:{
                 get: function(){
