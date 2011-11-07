@@ -557,8 +557,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         var copyInterleavedData = function(){
             thisObj.interleavedArray = config.interleavedArray;
             thisObj.interleavedArrayFormat = config.interleavedArrayFormat;
-            thisObj.vertexAttrLength = config.vertexAttrLength;;
-        }
+            thisObj.vertexAttrLength = config.vertexAttrLength;
+        };
 
         if (config instanceof mesh.MeshData){
             if (config.isVertexDataInitialized()){
@@ -856,6 +856,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     gl.enableVertexAttribArray(attributeIndex);
                     gl.vertexAttribPointer(attributeIndex, desc.size,
                        desc.type, false, vertexAttrLength, desc.pointer);
+                }
+            }
+            if (ASSERT){
+                for (var i = shader.activeAttributes.length-1;i>=0;i--){
+                    var activeAttribute = shader.activeAttributes[i];
+                    if (!(interleavedArrayFormat[activeAttribute.name])){
+                        KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
+                        attributeIndex = shader.lookupAttribute[activeAttribute.name];
+                        gl.disableVertexAttribArray(attributeIndex);
+                        switch(activeAttribute.type){
+                            case c.GL_FLOAT:
+                                gl.vertexAttrib1f(attributeIndex,0.0);
+                            break;
+                            case c.GL_FLOAT_VEC2:
+                                gl.vertexAttrib2f(attributeIndex,0.0,0.0);
+                            break;
+                            case c.GL_FLOAT_VEC3:
+                                gl.vertexAttrib3f(attributeIndex,0.0,0.0,0.0);
+                            break;
+                            case c.GL_FLOAT_VEC4:
+                                gl.vertexAttrib4f(attributeIndex,0.0,0.0,0.0,0.0);
+                            break;
+                            default:
+                                KICK.core.Util.fail("Shader wants "+activeAttribute.name+" no default value for type.");
+                            break;
+                        }
+                    }
                 }
             }
             gl.bindBuffer(constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
