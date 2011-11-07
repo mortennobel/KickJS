@@ -539,7 +539,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
                 var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
-                    mat4.multiply(globalMatrix, transformIterator.getLocalMatrix(),globalMatrix);
+                    mat4.multiply(transformIterator.getLocalMatrix(),globalMatrix,globalMatrix);
                     transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL] = 0;
