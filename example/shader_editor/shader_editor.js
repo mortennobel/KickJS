@@ -56,13 +56,13 @@ window.shaderEditor = new (function(){
             meshsetting = settings.meshsetting;
             switch (meshsetting){
                 case "cube":
-                    setMesh("kickjs://cube/?length=0.5");
+                    setMesh("kickjs://mesh/cube/?length=0.5");
                 break;
                 case "sphere":
-                    setMesh('kickjs://uvsphere/');
+                    setMesh('kickjs://mesh/uvsphere/');
                 break;
                 default:
-                    setMesh('kickjs://plane/');
+                    setMesh('kickjs://mesh/plane/');
                 break;
             }
         }
@@ -174,7 +174,7 @@ window.shaderEditor = new (function(){
 
             var gameObject = _engine.activeScene.createGameObject();
             _meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh("kickjs://plane/");
+            setMesh("kickjs://mesh/plane/");
             if (window.shader){
                 // load saved content
                 loadMaterial(window.shader);

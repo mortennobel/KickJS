@@ -42,7 +42,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 (function () {
     "use strict"; // force strict ECMAScript 5
 
-    var importer = KICK.namespace("KICK.importer");
+    var importer = KICK.namespace("KICK.importer"),
+        math = KICK.namespace("KICK.math"),
+        quat4 = math.quat4;
 
      /**
      * Imports a collada meshes into a scene
@@ -56,10 +58,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {XMLDom} colladaDOM
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+     * @param {boolean} rotate90x rotate -90 degrees around x axis
      * @return {Array[KICK.scene.GameObject]}
      * @static
      */
-    importer.ColladaImporter.loadCollada = function (colladaDOM, engine, scene){
+    importer.ColladaImporter.loadCollada = function (colladaDOM, engine, scene, rotate90x){
         var dataCache = {},
             constants = KICK.core.Constants,
             /**
@@ -253,6 +256,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             buildFromTriangles = function(meshChild, destMeshData){
                 // todo: implement
+                KICK.core.Util.fail("buildFromTriangles not implemented");
             },
             /**
              * @method buildFromTrianglestrips
@@ -260,8 +264,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             buildFromTrianglestrips = function(meshChild, destMeshData){
                 // todo: implement
+                KICK.core.Util.fail("buildFromTrianglestrips not implemented");
             },
-            buildMesh = function (colladaDOM, engine, geometry){
+            buildMeshData = function (colladaDOM, engine, geometry){
                 var i,
                     tagName,
                     meshChild,
@@ -297,8 +302,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
 
         var libraryGeometries = colladaDOM.firstChild.getElementsByTagName("library_geometries"),
+            visualScenes = colladaDOM.firstChild.getElementsByTagName("visual_scene"),
             geometries,
-            geometry,
             i;
 
         if (!scene){
@@ -311,25 +316,109 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         libraryGeometries = libraryGeometries[0];
         geometries = libraryGeometries.getElementsByTagName("geometry");
         var gameObjectsCreated = [];
-        for (i=0;i<geometries.length;i++){
-            geometry = geometries[i];
-            var meshDataObject = buildMesh(colladaDOM, engine, geometry);
+        var meshCache = {};
+        var getMeshById = function(engine, meshid){
+            var mesh,
+                k,
+                geometry;
+            if (meshCache[meshid]){
+                return meshCache[meshid];
+            }
+            if (meshid && meshid.charAt(0)==="#"){
+                meshid = meshid.substring(1);
+            }
+            for (k=0;k<geometries.length;k++){
+                geometry = geometries[k];
+                if (geometry.getAttribute("id") === meshid){
+                    var meshData = buildMeshData(colladaDOM, engine, geometry);
+                    mesh = new KICK.mesh.Mesh(engine, {},meshData);
+                    break;
+                }
+            }
+            meshCache[meshid] = mesh;
+            return mesh;
+        };
 
-            // debug - put it up on the screen
-            var gameObject = scene.createGameObject();
-            gameObjectsCreated.push(gameObject);
-            var meshRenderer = new KICK.scene.MeshRenderer();
+        var updateTransform = function(transform, node){
+            var tagName = node.tagName,
+                sid = node.getAttribute('sid');
+            if (tagName === "translate"){
+                transform.localPosition = stringToArray(node.textContent);
+            } else if (tagName === "rotate"){
+                var angleAxis = stringToArray(node.textContent);
+                var angle = angleAxis[3];
+                if (angle){
+                    var rotationQuat = quat4.angleAxis(angle,angleAxis);
+                    var currentQuat = transform.localRotation;
+                    transform.localRotation = quat4.multiply(currentQuat,rotationQuat,rotationQuat);
+                }
+            } else if (tagName === "scale"){
+                transform.localScale = stringToArray(node.textContent);
+            }
+        };
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine, {},meshDataObject);
-
+        var createMeshRenderer = function(gameObject, node){
+            var url = node.getAttribute("url"),
+                meshRenderer = new KICK.scene.MeshRenderer();
+            if (url){
+                url = url.substring(1);
+            }
             var shader = new KICK.material.Shader(engine);
 
             shader.updateShader();
+            var url = node.getAttribute("url");
+
+            meshRenderer.mesh = getMeshById(engine,url);
+            console.log("Mesh",meshRenderer.mesh);
             meshRenderer.material = new KICK.material.Material({
                 name:"Some material",
                 shader:shader
             });
+            console.log("Getting mesh by id "+url);
+            console.log("meshRenderer.material name "+meshRenderer.material.name);
+            console.log("meshRenderer.material shader "+meshRenderer.material.shader);
+
             gameObject.addComponent(meshRenderer);
+
+        };
+
+        var addNode = function(node, parent){
+            var gameObject = scene.createGameObject();
+            var transform = gameObject.transform;
+            if (parent){
+                transform.parent = parent;
+            }
+            gameObject.name = node.getAttribute("id");
+            gameObjectsCreated.push(gameObject);
+            var childNode = node.firstElementChild;
+            while (childNode){
+                var tagName = childNode.tagName;
+                if (tagName === "translate" ||
+                    tagName === "rotate" ||
+                    tagName === "scale"){
+                    updateTransform(transform, childNode);
+                }
+                else if (tagName === "instance_geometry"){
+                    createMeshRenderer(gameObject, childNode);
+                    /*if (rotate90x){
+                        var currentRotation = transform.localRotation;
+                        var rotationAroundX = quat4.angleAxis(-90,[1,0,0]);
+                        transform.localRotation = quat4.multiply(rotationAroundX,currentRotation);
+                    }*/
+                } else if (tagName === "node"){
+                    addNode(childNode,transform);
+                }
+                childNode = childNode.nextElementSibling;
+            }
+        };
+
+        for (var i=0;i<visualScenes.length;i++){
+            var visualScene = visualScenes[i];
+            var node = visualScene.firstElementChild;
+            while (node){
+                addNode(node, null);
+                node = node.nextElementSibling;
+            }
         }
         return gameObjectsCreated;
 

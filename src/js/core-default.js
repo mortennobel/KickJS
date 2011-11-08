@@ -57,6 +57,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @param {KICK.core.Engine} engine
      */
     core.DefaultResourceProvider = function(engine){
+        var gl = engine.gl;
 
         Object.defineProperties(this,{
             /**
@@ -74,10 +75,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Creates a Mesh object based on a url.<br>
          * The following resources can be created:<br>
          * <ul>
-         * <li><b>Triangle</b> Url: kickjs://triangle/</li>
-         * <li><b>Plane</b> Url: kickjs://plane/<br></li>
-         * <li><b>UVSphere</b> Url: kickjs://uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
-         * <li><b>Cube</b> Url: kickjs://cube/?length=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Triangle</b> Url: kickjs://mesh/triangle/</li>
+         * <li><b>Plane</b> Url: kickjs://mesh/plane/<br></li>
+         * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
          * </ul>
          * @method getMesh
          * @param {String} url
@@ -88,17 +89,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 meshDataObj,
                 getParameterInt = core.Util.getParameterInt,
                 getParameterFloat = core.Util.getParameterFloat;
-            if (url.indexOf("kickjs://triangle/")==0){
+            if (url.indexOf("kickjs://mesh/triangle/")==0){
                 config = {
                     name: "Triangle"
                 };
                 meshDataObj = mesh.MeshFactory.createTriangleData();
-            } else if (url.indexOf("kickjs://plane/")==0){
+            } else if (url.indexOf("kickjs://mesh/plane/")==0){
                 config = {
                     name: "Plane"
                 };
                 meshDataObj = mesh.MeshFactory.createPlaneData();
-            } else if (url.indexOf("kickjs://uvsphere/")==0){
+            } else if (url.indexOf("kickjs://mesh/uvsphere/")==0){
                 config = {
                     name: "UVSphere"
                 };
@@ -106,7 +107,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     stacks = getParameterInt(url, "stacks"),
                     radius = getParameterFloat(url, "radius");
                 meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
-            } else if (url.indexOf("kickjs://cube/")==0){
+            } else if (url.indexOf("kickjs://mesh/cube/")==0){
                 config = {
                     name: "Cube"
                 };
@@ -129,6 +130,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * Create a default texture based on a URL.<br>
+         * The following default textures exists:
+         *
          * @method getTexture
          * @param {String} url
          * @return {KICK.texture.Texture}

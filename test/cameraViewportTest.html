@@ -131,14 +131,14 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://cube/?length=0.5");
+            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
             gameObject.addComponent(meshRenderer);
 
             var gameObject2 = engine.activeScene.createGameObject();
             gameObject2.layer = 2;
             meshRenderer2 = new KICK.scene.MeshRenderer();
-            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://uvsphere/?radius=0.6");
+            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/?radius=0.6");
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
             gameObject2.addComponent(meshRenderer2);
 
@@ -147,7 +147,7 @@
 
         function UVSphere(){
             // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://uvsphere/");
+            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
         }
     </script>
 </head>

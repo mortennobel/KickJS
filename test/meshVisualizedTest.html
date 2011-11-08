@@ -85,7 +85,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh("kickjs://cube/?length=0.5");
+            setMesh("kickjs://mesh/cube/?length=0.5");
             setMaterial('vertexShaderUV','fragmentShader');
             gameObject.addComponent(meshRenderer);
         }
@@ -223,10 +223,10 @@
   This example shows how vertex attributes can be visualized.
   <br>
   <b>Mesh</b><br>
-  [<a href="#" onclick="setMesh('kickjs://plane/');">Plane</a>]
-  [<a href="#" onclick="setMesh('kickjs://triangle/');">Triangle</a>]
-  [<a href="#" onclick="setMesh('kickjs://cube/?length=0.5');">Cube</a>]
-  [<a href="#" onclick="setMesh('kickjs://uvsphere/');">UVsphere</a>]
+  [<a href="#" onclick="setMesh('kickjs://mesh/plane/');">Plane</a>]
+  [<a href="#" onclick="setMesh('kickjs://mesh/triangle/');">Triangle</a>]
+  [<a href="#" onclick="setMesh('kickjs://mesh/cube/?length=0.5');">Cube</a>]
+  [<a href="#" onclick="setMesh('kickjs://mesh/uvsphere/');">UVsphere</a>]
   <br>
   <h2>Shaders</h2>
   [<a href="#" onclick="setMaterial('vertexShaderUV','fragmentShader');">UV1</a>]

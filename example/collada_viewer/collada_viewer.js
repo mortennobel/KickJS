@@ -11,12 +11,13 @@ function destroyAllMeshRenderersInScene(){
 function load(xmlDom,url){
     destroyAllMeshRenderersInScene();
 
-    var gameObjectsCreated = KICK.importer.ColladaImporter.loadCollada(xmlDom,engine);
+    var gameObjectsCreated = KICK.importer.ColladaImporter.loadCollada(xmlDom,engine,null,true);
     for (var i=0;i<gameObjectsCreated.length;i++){
         var gameObject = gameObjectsCreated[i];
         var isDuck = url==="duck.dae";
         if (isDuck){
             gameObject.transform.localScale = [0.01,0.01,0.01];
+
         }
         var meshRenderer = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
         if (meshRenderer){
@@ -191,7 +192,7 @@ function initKick() {
     var gameObject = engine.activeScene.createGameObject();
     gameObject.name = "Mesh";
     meshRenderer = new KICK.scene.MeshRenderer();
-    meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://uvsphere/?radius=0.5");
+    meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/?radius=0.5");
     material = createMaterial('vertexShaderColor','fragmentShader');
 
     duckMaterial = createMaterial('vertexShaderColorImg','fragmentShaderImg');
@@ -200,15 +201,20 @@ function initKick() {
     initLights();
 
     gameObject.addComponent(meshRenderer);
+}
 
-
+function pauseResume(){
+    engine.paused = !engine.paused;
+    this.innerHTML = engine.paused? "Play":"Pause";
 }
 
 window.addEventListener("load",function(){
     initKick();
     document.getElementById("duckButton").addEventListener("click", duckClicked,false);
     document.getElementById("cubeButton").addEventListener("click", cubeClicked,false);
+    document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
     document.getElementById("file").onchange = function() {
           loadClicked(this.files[0]);
         };
+
 },false);

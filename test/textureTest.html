@@ -95,7 +95,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://plane/");
+            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
             initMaterials('vertexShader','fragmentShader');
             gameObject.addComponent(meshRenderer);
         }

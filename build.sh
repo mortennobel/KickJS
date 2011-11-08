@@ -96,3 +96,8 @@ mkdir "$project/example/snake/kick/"
 cp "$project/build/kick-min-$version.js" "$project/example/snake/kick/kick-min-$version.js"
 cp "$project/build/kick-uncompressed-$version.js" "$project/example/snake/kick/kick-uncompressed-$version.js"
 cp "$project/src/js-dependencies/webgl-debug.js" ""$project/example/snake/kick/webgl-debug.js""
+
+mkdir "$project/example/video_ascii_art/kick/"
+cp "$project/build/kick-min-$version.js" "$project/example/video_ascii_art/kick/kick-min-$version.js"
+cp "$project/build/kick-uncompressed-$version.js" "$project/example/video_ascii_art/kick/kick-uncompressed-$version.js"
+cp "$project/src/js-dependencies/webgl-debug.js" ""$project/example/video_ascii_art/kick/webgl-debug.js""
