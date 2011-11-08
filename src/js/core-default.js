@@ -46,7 +46,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var core = KICK.namespace("KICK.core"),
-        mesh = KICK.namespace("KICK.mesh");
+        mesh = KICK.namespace("KICK.mesh"),
+        constants = core.Constants;
 
     /**
      * The default resource manager
@@ -132,13 +133,42 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         /**
          * Create a default texture based on a URL.<br>
          * The following default textures exists:
-         *
+         *  <ul>
+         *  <li><b>Black</b> Url: kickjs://texture/black/</li>
+         *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
+         *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
+         *  </ul>
          * @method getTexture
          * @param {String} url
          * @return {KICK.texture.Texture}
          */
         this.getTexture = function(url){
+            var data;
+            if (url.indexOf("kickjs://texture/black/")==0){
+                data = new Uint8Array([0, 0, 0,
+                                         0,   0,   0,
+                                         0,   0,   0,
+                                         0,   0,   0]);
+            } else if (url.indexOf("kickjs://texture/white/")==0){
+                data = new Uint8Array([255, 255, 255,
+                                         255,   255,   255,
+                                         255,   255,   255,
+                                         255,   255,   255]);
+            } else if (url.indexOf("kickjs://texture/gray/")==0){
+                data = new Uint8Array([127, 127, 127,
+                                         127,   127,   127,
+                                         127,   127,   127,
+                                         127,   127,   127]);
+            }
+            var texture = new KICK.texture.Texture(engine,{
+                minFilter: constants.GL_NEAREST,
+                magFilter: constants.GL_NEAREST,
+                generateMipmaps: false,
+                intformat: constants.GL_RGB
+            });
 
+            texture.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,data, url);
+            return texture;
         };
 
         /**
