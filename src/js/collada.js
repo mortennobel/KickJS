@@ -98,7 +98,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Get data element by id<br>
              * Note that the array is cached by id - this is done
              * to speed up performance in case of interleaved data
-             * @getArrayElementById
+             * @method getArrayElementById
              * @param {String} id
              * @return {Array[Number]} data
              * @private
