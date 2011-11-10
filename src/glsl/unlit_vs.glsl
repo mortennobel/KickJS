@@ -1,9 +1,7 @@
 attribute vec3 vertex;
-attribute vec3 normal;
 attribute vec2 uv1;
 
 uniform mat4 _mvProj;
-uniform mat3 _norm;
 
 varying vec2 vUv;
 
