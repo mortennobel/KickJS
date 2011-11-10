@@ -222,6 +222,10 @@
             return;
         }
         var texture = shaderEditor.textures[selectedIndex];
+        if (texture.textureType !== getSelectedGLConstant('textureType')){
+            texture.destroy();
+            texture = new KICK.texture.Texture(shaderEditor.engine);
+        }
         texture.internalFormat = getSelectedGLConstant('textureFormat');
         texture.generateMipmaps = document.getElementById('mipMapping').checked;
         texture.wrapS = getSelectedGLConstant('textureMode');
