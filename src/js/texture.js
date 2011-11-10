@@ -500,10 +500,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * GL_RGBA,
              * GL_LUMINANCE,
              * GL_LUMINANCE_ALPHA
-             * @property internalFormal
+             * @property internalFormat
              * @type Number
              */
-            internalFormal:{
+            internalFormat:{
                 get:function(){
                     return _intFormat;
                 },
@@ -513,7 +513,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         value !== constants.GL_RGBA &&
                         value !== constants.GL_LUMINANCE &&
                         value !== constants.GL_LUMINANCE_ALPHA){
-                        KICK.core.Util.fail("Texture.internalFormal should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
+                        KICK.core.Util.fail("Texture.internalFormat should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
                     }
                     _intFormat = value;
                 }
@@ -524,7 +524,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Must be one of the following:
              * GL_TEXTURE_2D,
              * GL_TEXTURE_CUBE_MAP
-             * @property internalFormal
+             * @property textureType
              * @type Number
              */
             textureType:{
