@@ -202,7 +202,7 @@
         document.getElementById('textureSrc').value = texture.dataURI;
         document.getElementById('texturePreviewImg').src = shaderEditor.getWrappedImageSource(texture.dataURI);
 
-        setSelectedGLConstant('textureFormat',texture.internalFormal);
+        setSelectedGLConstant('textureFormat',texture.internalFormat);
         document.getElementById('mipMapping').checked = texture.generateMipmaps;
         setSelectedGLConstant('textureMode',texture.wrapS);
         document.getElementById('flipY').checked = texture.flipY;
@@ -222,7 +222,7 @@
             return;
         }
         var texture = shaderEditor.textures[selectedIndex];
-        texture.internalFormal = getSelectedGLConstant('textureFormat');
+        texture.internalFormat = getSelectedGLConstant('textureFormat');
         texture.generateMipmaps = document.getElementById('mipMapping').checked;
         texture.wrapS = getSelectedGLConstant('textureMode');
         texture.wrapT = texture.wrapS;
@@ -544,10 +544,11 @@
             currentUniforms = document.getElementById('currentUniforms'),
             selectedIndex = currentUniforms.selectedIndex,
             uniform = activeUniforms[selectedIndex],
-            c = KICK.core.Constants;
+            c = KICK.core.Constants,
+            selectedTexture = shaderEditor.textures[selectedSampler];
         material.uniforms[uniform.name] = {
-            value: shaderEditor.textures[selectedSampler],
-            type: c.GL_SAMPLER_2D
+            value: selectedTexture,
+            type: selectedTexture.textureType === c.GL_TEXTURE_2D ? c.GL_SAMPLER_2D : c.GL_SAMPLER_CUBE
         };
     }
 
@@ -968,6 +969,7 @@
             });
 
             panel.render();
+            window.tabview.selectChild(0);
         };
 
         window.YUIConfirm = function (headerTxt,bodyTxt,onCancel,onOK){

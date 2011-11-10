@@ -20,7 +20,7 @@ Object.defineProperty(window,"defaultMaterial",{
                 "autoScaleImage":true,
                 "dataURI":"http://www.kickjs.org/images/webgl.png",
                 "flipY":true,
-                "internalFormal":6408}],
+                "internalFormat":6408}],
             "settingsData":{
                 "meshsetting":"sphere",
                 "rotatemesh":"on",
