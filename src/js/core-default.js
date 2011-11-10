@@ -129,7 +129,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * The following shaders are available:
          *  <ul>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
-         *  <li><b>Unlit</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShader
@@ -146,6 +146,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/unlit/")==0){
+                vertexShaderSrc = glslConstants["unlit_vs.glsl"];
+                fragmentShaderSrc = glslConstants["unlit_fs.glsl"];
             } else {
                 return null;
             }
