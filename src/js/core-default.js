@@ -193,7 +193,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 minFilter: constants.GL_NEAREST,
                 magFilter: constants.GL_NEAREST,
                 generateMipmaps: false,
-                intformat: constants.GL_RGB
+                internalFormat: constants.GL_RGB
             });
 
             texture.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,data, url);
