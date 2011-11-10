@@ -125,10 +125,10 @@ window.onload = function(){
     initKick();
 
     function documentResized(){
-    /*    var canvas = document.getElementById('canvas');
+        var canvas = document.getElementById('canvas');
         canvas.width = document.width;
         canvas.height = document.height-canvas.offsetTop;
-        engine.canvasResized();*/
+        engine.canvasResized();
     }
     documentResized();
 
