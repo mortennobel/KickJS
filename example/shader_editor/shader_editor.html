@@ -132,6 +132,12 @@
                 <h3>Texture detail</h3>
                 Texture source:<br>
                 <input type="text" id="textureSrc" style="width:300px;"><br>
+                Texture type [<a id="textureTypeInfo" style="font-weight: bold;color: blue;cursor: pointer;">?</a>]:
+                <select id="textureType" style="float:right;">
+                    <option value="Texture2D">Texture 2D</option>
+                    <option value="CubeMap">Cube map</option>
+                </select><br style="clear: both;">
+                <br>
                 Texture format:
                 <select id="textureFormat" style="float:right;">
                     <option value="Alpha">Alpha</option>
@@ -141,7 +147,6 @@
                     <option value="Luminance alpha">Luminance alpha</option>
                 </select><br style="clear: both;">
                 Mip mapping: <span style="float:right;"><input type="checkbox" id="mipMapping"/>&nbsp;<label for="mipMapping" >Enabled</label></span><br style="clear: both;">
-                Autoscale image: <span style="float:right;"><input type="checkbox" id="autoScaleImage"/>&nbsp;<label for="autoScaleImage" >Enabled</label></span><br style="clear: both;">
                 Texture mode:
                 <select id="textureMode" style="float:right;">
                     <option value="Repeat">Repeat</option>

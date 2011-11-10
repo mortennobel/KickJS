@@ -201,11 +201,11 @@
 
         setSelectedGLConstant('textureFormat',texture.internalFormal);
         document.getElementById('mipMapping').checked = texture.generateMipmaps;
-        document.getElementById('autoScaleImage').checked = texture.autoScaleImage;
         setSelectedGLConstant('textureMode',texture.wrapS);
         document.getElementById('flipY').checked = texture.flipY;
         setSelectedGLConstant('minFilter',texture.minFilter);
         setSelectedGLConstant('magFilter',texture.magFilter);
+        setSelectedGLConstant('textureType',texture.textureType);
 
         document.getElementById('textureDetails').style.display = 'block';
         document.getElementById('texturePreview').style.display = 'block';
@@ -221,12 +221,12 @@
         var texture = shaderEditor.textures[selectedIndex];
         texture.internalFormal = getSelectedGLConstant('textureFormat');
         texture.generateMipmaps = document.getElementById('mipMapping').checked;
-        texture.autoScaleImage = document.getElementById('autoScaleImage').checked;
         texture.wrapS = getSelectedGLConstant('textureMode');
         texture.wrapT = texture.wrapS;
         texture.flipY = document.getElementById('flipY').checked;
         texture.minFilter = getSelectedGLConstant('minFilter');
         texture.magFilter = getSelectedGLConstant('magFilter');
+        texture.textureType = getSelectedGLConstant('textureType');
         var image = new Image();
         image.onload = function() {
             texture.setImage(image, imgSrc);
@@ -1056,22 +1056,28 @@
             addGLConstantToSelect('textureMode',[c.GL_REPEAT,c.GL_CLAMP_TO_EDGE]);
             addGLConstantToSelect('minFilter',[c.GL_NEAREST,c.GL_LINEAR,c.GL_NEAREST_MIPMAP_NEAREST,c.GL_LINEAR_MIPMAP_NEAREST,c.GL_NEAREST_MIPMAP_LINEAR,c.GL_LINEAR_MIPMAP_LINEAR]);
             addGLConstantToSelect('magFilter',[c.GL_NEAREST,c.GL_LINEAR]);
+            addGLConstantToSelect('textureType',[c.GL_TEXTURE_2D,c.GL_TEXTURE_CUBE_MAP]);
+
+            document.getElementById('textureTypeInfo').addEventListener('click', function(){
+                window.YUIMessage("Texture type", "Cube maps must be arranged in one row with the order [Right, Left, Top, Bottom, Front, Back] (also used in <a href='http://www.cgtextures.com/content.php?action=tutorial&name=cubemaps'>NVidia DDS Exporter</a>)<br>");
+            }, false);
+
 
             document.getElementById('fullscreen').addEventListener('click', toogleFullscreen,false);
             document.getElementById('LogoutButton').addEventListener('click', onLogoutButton,false);
             document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
             document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
             document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
+
             document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
 
+
             document.getElementById('canvas').addEventListener('click', toogleFullscreen,false);
-
-
             document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
             document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
             document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
-            document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
 
+            document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
             document.getElementById('currentUniforms').addEventListener('click', uniformSelected, false);
             document.getElementById('uniform_sampler_update').addEventListener('click', updateUniformSampler, false);
             document.getElementById('uniform_number_update').addEventListener('click', updateUniformNumber, false);
