@@ -122,6 +122,9 @@ window.shaderEditor = new (function(){
 
     //
     this.getWrappedImageSource = function(imgSrc){
+        if (!imgSrc){
+            return "";
+        }
         var origin = location.origin;
         if (!origin){
             origin = location.protocol+"//"+location.host;

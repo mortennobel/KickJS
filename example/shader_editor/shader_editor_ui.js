@@ -126,7 +126,8 @@
         for (var i=0;i<textures.length;i++){
             var imageSrc = textures[i].dataURI,
                 newOption = document.createElement('option');
-            newOption.text = imageSrc.length<40?imageSrc:imageSrc.substr(0,40)+'...';
+            newOption.text = (!imageSrc)?"":
+                (imageSrc.length<40?imageSrc:imageSrc.substr(0,40)+'...');
             newOption.value = currentTextures.options.length;
             currentTextures.add(newOption,null);
         }
@@ -176,6 +177,7 @@
         currentTextures.add(newOption,null);
         currentTextures.selectedIndex = currentTextures.options.length-1;
         shaderEditor.textures.push(t);
+        textureSelected();
     }
 
     function removeTexture(){
@@ -193,6 +195,7 @@
             selectedIndex = currentTextures.selectedIndex,
             c = KICK.core.Constants;
         if (selectedIndex<0){
+            console.log("No texture selected");
             return;
         }
         var texture = shaderEditor.textures[selectedIndex];
