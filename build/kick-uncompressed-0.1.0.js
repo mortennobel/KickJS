@@ -8684,11 +8684,23 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
+            // todo reintroduce optimization 
 //            if (currentTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
                 currentTexture[textureSlot] = this;
 //            }
+        };
+
+        /**
+         * Deallocates the texture from memory
+         * @method destroy
+         */
+        this.destroy = function(){
+            if (_textureId !== null){
+                gl.deleteTexture(_textureId);
+                _textureId = null;
+            }
         };
 
         /**

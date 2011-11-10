@@ -209,6 +209,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * Deallocates the texture from memory
+         * @method destroy
+         */
+        this.destroy = function(){
+            if (_textureId !== null){
+                gl.deleteTexture(_textureId);
+                _textureId = null;
+            }
+        };
+
+        /**
          * Set texture image based on a image object.<br>
          * The image is automatically resized nearest power of two<br>
          * When a textureType == TEXTURE_CUBE_MAP the image needs to be in the following format:
