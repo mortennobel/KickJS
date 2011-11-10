@@ -180,7 +180,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
             _intFormat = thisConfig.internalFormat || constants.GL_RGBA,
             _textureType = thisConfig.textureType || constants.GL_TEXTURE_2D,
-            activeTexture,
+            currentTexture,
             _dimension = vec2.create();
 
         if (uidMapping && thisConfig.uid){
@@ -189,10 +189,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         (function init(){
             // create active texture component on glContext
-            if (!gl.activeTexture){
-                gl.activeTexture = {};
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
             }
-            activeTexture = gl.activeTexture;
+            currentTexture = gl.currentTexture;
         })();
 
         /**
@@ -200,10 +200,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (activeTexture[textureSlot] !== this){
+            if (currentTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
-                activeTexture[textureSlot] = this;
+                currentTexture[textureSlot] = this;
             }
         };
 
