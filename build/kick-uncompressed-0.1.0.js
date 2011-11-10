@@ -2658,7 +2658,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 * @property unlit_vs.glsl
 * @type String
 */
-{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 color = max(diffuse,_ambient.xyz)*mainColor;\n    \n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n    vNormal= normalize(_norm * normal);\n} ","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n ","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}"};
+{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 color = max(diffuse,_ambient.xyz)*mainColor;\n    \n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n    vNormal= normalize(_norm * normal);\n} ","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n ","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}"};
 })();/*!
  * New BSD License
  *
@@ -8664,7 +8664,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
             _intFormat = thisConfig.internalFormat || 6408,
             _textureType = thisConfig.textureType || 3553,
-            activeTexture,
+            currentTexture,
             _dimension = vec2.create();
 
         if (uidMapping && thisConfig.uid){
@@ -8673,10 +8673,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         (function init(){
             // create active texture component on glContext
-            if (!gl.activeTexture){
-                gl.activeTexture = {};
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
             }
-            activeTexture = gl.activeTexture;
+            currentTexture = gl.currentTexture;
         })();
 
         /**
@@ -8684,11 +8684,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (activeTexture[textureSlot] !== this){
+//            if (currentTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
-                activeTexture[textureSlot] = this;
-            }
+                currentTexture[textureSlot] = this;
+//            }
         };
 
         /**
@@ -8984,10 +8984,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * 6408,
              * 6409,
              * 6410
-             * @property internalFormal
+             * @property internalFormat
              * @type Number
              */
-            internalFormal:{
+            internalFormat:{
                 get:function(){
                     return _intFormat;
                 },
@@ -8997,7 +8997,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         value !== 6408 &&
                         value !== 6409 &&
                         value !== 6410){
-                        KICK.core.Util.fail("Texture.internalFormal should be either 6406, 6407, 6408, 6409, or LUMINANCE_ALPHA");
+                        KICK.core.Util.fail("Texture.internalFormat should be either 6406, 6407, 6408, 6409, or LUMINANCE_ALPHA");
                     }
                     _intFormat = value;
                 }
@@ -9008,7 +9008,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Must be one of the following:
              * 3553,
              * 34067
-             * @property internalFormal
+             * @property textureType
              * @type Number
              */
             textureType:{
@@ -10865,7 +10865,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * The following shaders are available:
          *  <ul>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
-         *  <li><b>Unlit</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShader
@@ -10882,6 +10882,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/unlit/")==0){
+                vertexShaderSrc = glslConstants["unlit_vs.glsl"];
+                fragmentShaderSrc = glslConstants["unlit_fs.glsl"];
             } else {
                 return null;
             }
@@ -10929,7 +10932,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 minFilter: 9728,
                 magFilter: 9728,
                 generateMipmaps: false,
-                intformat: 6407
+                internalFormat: 6407
             });
 
             texture.setImageData( 2, 2, 0, 5121,data, url);

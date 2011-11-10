@@ -200,11 +200,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (currentTexture[textureSlot] !== this){
+            // todo reintroduce optimization 
+//            if (currentTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
                 currentTexture[textureSlot] = this;
-            }
+//            }
         };
 
         /**
