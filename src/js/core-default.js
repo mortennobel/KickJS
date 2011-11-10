@@ -47,6 +47,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     var core = KICK.namespace("KICK.core"),
         mesh = KICK.namespace("KICK.mesh"),
+        material = KICK.namespace("KICK.material"),
         constants = core.Constants;
 
     /**
@@ -114,6 +115,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
                 var length = getParameterFloat(url, "length");
                 meshDataObj = mesh.MeshFactory.createCubeData(length);
+            } else {
+                return null;
             }
             
             if (meshDataObj){
@@ -122,12 +125,36 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * Create a default shader based on a URL<br>
+         * The following shaders are available:
+         *  <ul>
+         *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Unlit</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
+         *  </ul>
          * @method getShader
          * @param {String} url
-         * @return {KICK.material.Shader}
+         * @return {KICK.material.Shader} Shader or null if not found
          */
-        this.getShader = function(url){
-
+        this.getShader = function(url,errorLog){
+            var vertexShaderSrc,
+                fragmentShaderSrc,
+                glslConstants = KICK.material.GLSLConstants;
+            if (url.indexOf("kickjs://shader/phong/")==0){
+                vertexShaderSrc = glslConstants["phong_vs.glsl"];
+                fragmentShaderSrc = glslConstants["phong_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/error/")==0){
+                vertexShaderSrc = glslConstants["error_vs.glsl"];
+                fragmentShaderSrc = glslConstants["error_fs.glsl"];
+            } else {
+                return null;
+            }
+            var shader = new KICK.material.Shader(engine);
+            shader.vertexShaderSrc = vertexShaderSrc;
+            shader.fragmentShaderSrc = fragmentShaderSrc;
+            shader.errorLog = errorLog;
+            shader.updateShader();
+            return shader;
         };
 
         /**
@@ -140,7 +167,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          *  </ul>
          * @method getTexture
          * @param {String} url
-         * @return {KICK.texture.Texture}
+         * @return {KICK.texture.Texture} Texture object - or null if no texture is found for the specified url
          */
         this.getTexture = function(url){
             var data;
@@ -159,6 +186,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                                          127,   127,   127,
                                          127,   127,   127,
                                          127,   127,   127]);
+            } else {
+                return null;
             }
             var texture = new KICK.texture.Texture(engine,{
                 minFilter: constants.GL_NEAREST,

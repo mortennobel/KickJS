@@ -10,5 +10,4 @@ varying vec2 vUv;
 void main(void) {
     gl_Position = _mvProj * vec4(vertex, 1.0);
     vUv = uv1;
-    vNormal= normalize(_norm * normal);
-} 
+}

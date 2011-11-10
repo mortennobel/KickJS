@@ -74,8 +74,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _blendDFactor = thisConfig.blendDFactor || core.Constants.GL_ONE_MINUS_SRC_ALPHA,
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["default_vs.glsl"],
-            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["default_fs.glsl"],
+            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["error_vs.glsl"],
+            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["error_fs.glsl"],
             _errorLog = thisConfig.errorLog,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
@@ -413,8 +413,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 activeAttributes,
                 attribute;
             if (compileError){
-                vertexShader = compileShader(glslConstants["default_vs.glsl"], false, errorLog);
-                fragmentShader = compileShader(glslConstants["default_fs.glsl"], true, errorLog);
+                vertexShader = compileShader(glslConstants["error_vs.glsl"], false, errorLog);
+                fragmentShader = compileShader(glslConstants["error_fs.glsl"], true, errorLog);
             }
 
             //thisObj.destroy();
@@ -643,9 +643,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         gl.uniform4iv(location,value);
                         break;
                     case c.GL_SAMPLER_CUBE:
-                        // todo implement
-                        KICK.core.Util.fail("Not implemented");
-                        break;
                     case c.GL_SAMPLER_2D:
                         value.bind(currentTexture);
                         gl.uniform1i(location,currentTexture);

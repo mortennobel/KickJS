@@ -19,6 +19,7 @@
     <script type="text/javascript" src="../src/js/meshfactory.js"></script>
     <script type="text/javascript" src="../src/js/texture.js"></script>
     <script type="text/javascript">
+        "use strict";
         var engine;
         var meshRenderer;
         var material;
@@ -26,28 +27,11 @@
 
         var materials = [];
 
-        var log = function (output) {
-            var element = document.getElementById("output");
-            element.innerHTML = element.innerHTML+output+"<br>";
-        };
-
-        var clearLog = function(){
-            var element = document.getElementById("output");
-            element.innerHTML = "";
-        };
-
         function initMaterials(vertexShaderId, fragmentShaderId){
-            clearLog();
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
-            shader.updateShader();
+            var shader = engine.resourceManager.getShader("kickjs://shader/phong/");
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
                 return;
             }
 
@@ -58,9 +42,13 @@
                 name:"Some material ",
                 shader:shader,
                 uniforms: {
-                    tex: {
+                    mainTexture: {
                         value: texture,
                         type: KICK.core.Constants.GL_SAMPLER_2D
+                    },
+                    mainColor:{
+                        value: KICK.math.vec3.create([1,1,1]),
+                        type: KICK.core.Constants.GL_FLOAT_VEC3
                     }
                 }
             });
@@ -70,14 +58,12 @@
         }
 
         function recalculateNormals(){
-            clearLog();
             var mesh = meshRenderer.mesh;
             mesh.recalculateNormals();
             mesh.updateData();
         }
 
         function recalculateTangents(){
-            clearLog();
             var mesh = meshRenderer.mesh;
             mesh.recalculateTangents();
             mesh.updateData();
@@ -123,7 +109,7 @@
         function setURL(url){
             texture = engine.resourceManager.getTexture(url);
             var uniforms = material.uniforms;
-            uniforms.tex.value = texture;
+            uniforms.mainTexture.value = texture;
             material.uniforms = uniforms;
         }
     </script>
@@ -139,35 +125,5 @@
   <a href="#" onclick="setURL('kickjs://texture/black/'); return false;">Black</a>
   <a href="#" onclick="setURL('kickjs://texture/white/'); return false;">White</a>
   <a href="#" onclick="setURL('kickjs://texture/gray/'); return false;">Gray</a>
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Show data</h2>
-  <div style="display:none;">
-    <textarea style="width:500px;height:150px;" id="vertexShader">
-attribute vec3 vertex;
-attribute vec2 uv1;
-
-varying vec2 uv;
-
-void main(void) {
-    gl_Position = vec4(vertex, 1.0);
-    uv = uv1;
-}
-  </textarea>
-
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-uniform sampler2D tex;
-varying vec2 uv;
-void main(void)
-{
-    gl_FragColor = texture2D(tex, uv);
-}
-  </textarea>
-</div>
-  <br/>
 </body>
 </html>

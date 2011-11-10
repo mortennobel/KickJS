@@ -2625,12 +2625,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     // created by include_glsl_files.js - do not edit content
 /**
 * GLSL file content
-* @property default_fs.glsl
+* @property error_fs.glsl
 * @type String
 */
 /**
 * GLSL file content
-* @property default_vs.glsl
+* @property error_vs.glsl
 * @type String
 */
 /**
@@ -2645,15 +2645,20 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 */
 /**
 * GLSL file content
-* @property phong_fs_tex.glsl
+* @property phong_vs.glsl
 * @type String
 */
 /**
 * GLSL file content
-* @property phong_vs.glsl
+* @property unlit_fs.glsl
 * @type String
 */
-{"default_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","default_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 uv;\nvarying vec3 vNormal;\n\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform vec3 materialColor;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 vColor = max(diffuse,_ambient.xyz)*materialColor;\n    \n    gl_FragColor = vec4(vColor, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_fs_tex.glsl":" #ifdef GL_ES\n precision highp float;\n #endif\n varying vec2 uv;\n varying vec3 vNormal;\n\n uniform float specularExponent;\n uniform vec3 specularColor;\n uniform vec3 materialColor;\n uniform sampler2D tex;\n\n #pragma include \"light.glsl\"\n\n void main(void)\n {\n     vec3 diffuse;\n     float specular;\n     getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n     vec3 vColor = max(diffuse,_ambient.xyz)*materialColor;\n\n     gl_FragColor = texture2D(tex,uv)*vec4(vColor, 1.0)+vec4(specular*specularColor,0.0);\n }\n","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 uv;\nvarying vec3 vNormal;\n\nvoid main(void) {\n // compute position\n gl_Position = _mvProj * vec4(vertex, 1.0);\n\n uv = uv1;\n // compute light info\n vNormal= normalize(_norm * normal);\n\n} "};
+/**
+* GLSL file content
+* @property unlit_vs.glsl
+* @type String
+*/
+{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 color = max(diffuse,_ambient.xyz)*mainColor;\n    \n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n    vNormal= normalize(_norm * normal);\n} ","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n ","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}"};
 })();/*!
  * New BSD License
  *
@@ -8526,7 +8531,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var texture = KICK.namespace("KICK.texture"),
         core = KICK.namespace("KICK.core"),
         constants = core.Constants,
-        vec2 = KICK.math.vec2;
+        vec2 = KICK.math.vec2,
+        isPowerOfTwo = function (x) {
+            return (x & (x - 1)) == 0;
+        },
+        nextHighestPowerOfTwo = function (x) {
+            --x;
+            for (var i = 1; i < 32; i <<= 1) {
+                x = x | x >> i;
+            }
+            return x + 1;
+        };
 
     /**
      * Render texture (used for camera's render target)
@@ -8645,22 +8660,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _minFilter = thisConfig.minFilter || 9729,
             _magFilter = thisConfig.magFilter || 9729,
             _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
-            _autoScaleImage = typeof (thisConfig.autoScaleImage) === 'boolean'? thisConfig.autoScaleImage : true,
             _dataURI = thisConfig.dataURI || null,
             _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
-            _intformat = thisConfig.intformat || 6408,
+            _intFormat = thisConfig.internalFormat || 6408,
+            _textureType = thisConfig.textureType || 3553,
             activeTexture,
-            _dimension = vec2.create(),
-            isPowerOfTwo = function (x) {
-                return (x & (x - 1)) == 0;
-            },
-            nextHighestPowerOfTwo = function (x) {
-                --x;
-                for (var i = 1; i < 32; i <<= 1) {
-                    x = x | x >> i;
-                }
-                return x + 1;
-            };
+            _dimension = vec2.create();
 
         if (uidMapping && thisConfig.uid){
             uidMapping[thisConfig.uid] = _uid;
@@ -8681,42 +8686,76 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.bind = function(textureSlot){
             if (activeTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(3553, _textureId);
+                gl.bindTexture(_textureType, _textureId);
                 activeTexture[textureSlot] = this;
             }
         };
 
         /**
-         * Set texture image based on a image object
+         * Set texture image based on a image object.<br>
+         * The image is automatically resized nearest power of two<br>
+         * When a textureType == TEXTURE_CUBE_MAP the image needs to be in the following format:
+         * <ul>
+         *     <li>width = 6*height</li>
+         *     <li>Image needs to be ordered: [Right, Left, Top, Bottom, Front, Back] (As in <a href="http://www.cgtextures.com/content.php?action=tutorial&name=cubemaps">NVidia DDS Exporter</a>)</li>
+         * </ul>
          * @method setImage
          * @param {Image} imageObj image object to import
          * @param {String} dataURI String representing the image
          */
         this.setImage = function(imageObj, dataURI){
+            var width, height;
             _dataURI = dataURI;
-
-            if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
-                var width = nextHighestPowerOfTwo(imageObj.width),
+            this.bind(0); // bind to texture slot 0
+            if (_textureType === 3553){
+                if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
+                    width = nextHighestPowerOfTwo(imageObj.width);
                     height = nextHighestPowerOfTwo(imageObj.height);
-                imageObj = core.Util.scaleImage(imageObj,width,height)
-            }
+                    imageObj = core.Util.scaleImage(imageObj,width,height);
+                }
 
-            this.bind(0);
-            if (_flipY){
-                gl.pixelStorei(37440, true);
+                if (_flipY){
+                    gl.pixelStorei(37440, true);
+                } else {
+                    gl.pixelStorei(37440, false);
+                }
+                gl.pixelStorei(3317, 1);
+                gl.texImage2D(3553, 0, _intFormat, _intFormat, 5121, imageObj);
+
+                gl.texParameteri(3553, 10242, _wrapS);
+                gl.texParameteri(3553, 10243, _wrapT);
+                vec2.set([imageObj.width,imageObj.height],_dimension);
             } else {
-                gl.pixelStorei(37440, false);
+                 var cubemapOrder = [
+                     34069,
+                     34070,
+                     34071,
+                     34072,
+                     34073,
+                     34074
+                 ];
+                var srcWidth = imageObj.width/6;
+                var srcHeight = imageObj.height;
+                height = nextHighestPowerOfTwo(imageObj.height);
+                width = height;
+                var canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext("2d");
+                for (var i=0;i<6;i++){
+                    ctx.drawImage(imageObj,
+                        i*srcWidth, 0, srcWidth, srcHeight,
+                        0, 0, width, height);
+                    gl.pixelStorei(37440, false);
+                    gl.pixelStorei(3317, 1);
+                    gl.texImage2D(cubemapOrder[i], 0, _intFormat, _intFormat, 5121, canvas);
+                }
+                vec2.set([width,height],_dimension);
             }
-            gl.pixelStorei(3317, 1);
-            gl.texImage2D(3553, 0, _intformat, _intformat, 5121, imageObj);
-
-            gl.texParameteri(3553, 10240, _magFilter);
-            gl.texParameteri(3553, 10241, _minFilter);
-            gl.texParameteri(3553, 10242, _wrapS);
-            gl.texParameteri(3553, 10243, _wrapT);
-            vec2.set([imageObj.width,imageObj.height],_dimension);
+            gl.texParameteri(_textureType, 10240, _magFilter);
+            gl.texParameteri(_textureType, 10241, _minFilter);
             if (_generateMipmaps){
-                gl.generateMipmap(3553);
+                gl.generateMipmap(_textureType);
             }
         };
         
@@ -8739,12 +8778,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     KICK.core.Util.fail("Texture.setImageData (type) should be either 5121, 32819, 32820 or 33635");
                 }
             }
+            if (_textureType !== 3553){
+                KICK.core.Util.fail("Texture.setImageData only supported by TEXTURE_2D");
+                return;
+            }
+
             vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
-            this.bind(0);
+            this.bind(0); // bind to texture slot 0
             gl.pixelStorei(3317, 1);
-            gl.texImage2D(3553, 0, _intformat, width, height, border, _intformat, type, pixels);
+            gl.texImage2D(3553, 0, _intFormat, width, height, border, _intFormat, type, pixels);
             gl.texParameteri(3553, 10240, _magFilter);
             gl.texParameteri(3553, 10241, _minFilter);
             gl.texParameteri(3553, 10242, _wrapS);
@@ -8755,7 +8799,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
-         * Creates a 2x2 temporary image
+         * Creates a 2x2 temporary image (checkerboard)
          * @method setTemporaryTexture
          */
         this.setTemporaryTexture = function(){
@@ -8763,10 +8807,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                                              0,   0,   0,
                                              0,   0,   0,
                                              255, 255, 255]),
-                oldIntFormat = _intformat;
-            _intformat = 6407;
+                oldIntFormat = _intFormat;
+            _intFormat = 6407;
             this.setImageData( 2, 2, 0, 5121,blackWhiteCheckerboard, "tempTexture");
-            _intformat = oldIntFormat;
+            _intFormat = oldIntFormat;
         };
 
         Object.defineProperties(this,{
@@ -8779,7 +8823,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value:_textureId
             },
             /**
-             * Dimension of texture [width,height]
+             * Dimension of texture [width,height].<br>
+             * Note for cube maps the size is for one face
              * @property dimension
              * @type {vec2}
              */
@@ -8892,25 +8937,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
-             * Scales image to nearest power of two if not a power of two. <br>
-             * (Default true)
-             * @property autoScaleImage
-             * @type Boolean
-             */
-            autoScaleImage:{
-                get: function(){
-                    return _autoScaleImage;
-                },
-                set: function(value){
-                    if (true){
-                        if (typeof value !== 'boolean'){
-                            KICK.core.Util.fail("Texture.autoScaleImage was not be a boolean");
-                        }
-                    }
-                    _autoScaleImage = value;
-                }
-            },
-            /**
              * Autogenerate mipmap levels<br>
              * (Default true)
              * @property generateMipmaps
@@ -8931,7 +8957,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * When importing image flip the Y direction of the image
-             * (Default true)
+             * (Default true).<br>
+             * This property is ignored for cube maps.
              * @property flipY
              * @type Boolean
              */
@@ -8957,10 +8984,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * 6408,
              * 6409,
              * 6410
+             * @property internalFormal
+             * @type Number
              */
             internalFormal:{
                 get:function(){
-                    return _intformat;
+                    return _intFormat;
                 },
                 set:function(value){
                     if (value !== 6406 &&
@@ -8970,7 +8999,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         value !== 6410){
                         KICK.core.Util.fail("Texture.internalFormal should be either 6406, 6407, 6408, 6409, or LUMINANCE_ALPHA");
                     }
-                    _intformat = value;
+                    _intFormat = value;
+                }
+            },
+            /**
+             * Specifies the texture type<br>
+             * Default is 3553<br>
+             * Must be one of the following:
+             * 3553,
+             * 34067
+             * @property internalFormal
+             * @type Number
+             */
+            textureType:{
+                get:function(){
+                    return _textureType;
+                },
+                set:function(value){
+                    if (value !== 3553 &&
+                        value !== 34067){
+                        KICK.core.Util.fail("Texture.textureType should be either 3553 or 34067");
+                    }
+                    _textureType = value;
                 }
             }
         });
@@ -8990,10 +9040,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 minFilter:_minFilter,
                 magFilter:_magFilter,
                 generateMipmaps:_generateMipmaps,
-                autoScaleImage:_autoScaleImage,
                 dataURI:_dataURI,
                 flipY:_flipY,
-                internalFormal:_intformat
+                internalFormat:_intFormat,
+                textureType:_textureType
             };
         }
     };
@@ -9163,8 +9213,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _blendDFactor = thisConfig.blendDFactor || 771,
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["default_vs.glsl"],
-            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["default_fs.glsl"],
+            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["error_vs.glsl"],
+            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["error_fs.glsl"],
             _errorLog = thisConfig.errorLog,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
@@ -9502,8 +9552,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 activeAttributes,
                 attribute;
             if (compileError){
-                vertexShader = compileShader(glslConstants["default_vs.glsl"], false, errorLog);
-                fragmentShader = compileShader(glslConstants["default_fs.glsl"], true, errorLog);
+                vertexShader = compileShader(glslConstants["error_vs.glsl"], false, errorLog);
+                fragmentShader = compileShader(glslConstants["error_fs.glsl"], true, errorLog);
             }
 
             //thisObj.destroy();
@@ -9732,9 +9782,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         gl.uniform4iv(location,value);
                         break;
                     case 35680:
-                        // todo implement
-                        KICK.core.Util.fail("Not implemented");
-                        break;
                     case 35678:
                         value.bind(currentTexture);
                         gl.uniform1i(location,currentTexture);
@@ -10362,7 +10409,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * Get data element by id<br>
              * Note that the array is cached by id - this is done
              * to speed up performance in case of interleaved data
-             * @getArrayElementById
+             * @method getArrayElementById
              * @param {String} id
              * @return {Array[Number]} data
              * @private
@@ -10735,7 +10782,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var core = KICK.namespace("KICK.core"),
-        mesh = KICK.namespace("KICK.mesh");
+        mesh = KICK.namespace("KICK.mesh"),
+        material = KICK.namespace("KICK.material"),
+        constants = core.Constants;
 
     /**
      * The default resource manager
@@ -10802,6 +10851,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 };
                 var length = getParameterFloat(url, "length");
                 meshDataObj = mesh.MeshFactory.createCubeData(length);
+            } else {
+                return null;
             }
             
             if (meshDataObj){
@@ -10810,24 +10861,79 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * Create a default shader based on a URL<br>
+         * The following shaders are available:
+         *  <ul>
+         *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Unlit</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
+         *  </ul>
          * @method getShader
          * @param {String} url
-         * @return {KICK.material.Shader}
+         * @return {KICK.material.Shader} Shader or null if not found
          */
-        this.getShader = function(url){
-
+        this.getShader = function(url,errorLog){
+            var vertexShaderSrc,
+                fragmentShaderSrc,
+                glslConstants = KICK.material.GLSLConstants;
+            if (url.indexOf("kickjs://shader/phong/")==0){
+                vertexShaderSrc = glslConstants["phong_vs.glsl"];
+                fragmentShaderSrc = glslConstants["phong_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/error/")==0){
+                vertexShaderSrc = glslConstants["error_vs.glsl"];
+                fragmentShaderSrc = glslConstants["error_fs.glsl"];
+            } else {
+                return null;
+            }
+            var shader = new KICK.material.Shader(engine);
+            shader.vertexShaderSrc = vertexShaderSrc;
+            shader.fragmentShaderSrc = fragmentShaderSrc;
+            shader.errorLog = errorLog;
+            shader.updateShader();
+            return shader;
         };
 
         /**
          * Create a default texture based on a URL.<br>
          * The following default textures exists:
-         *
+         *  <ul>
+         *  <li><b>Black</b> Url: kickjs://texture/black/</li>
+         *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
+         *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
+         *  </ul>
          * @method getTexture
          * @param {String} url
-         * @return {KICK.texture.Texture}
+         * @return {KICK.texture.Texture} Texture object - or null if no texture is found for the specified url
          */
         this.getTexture = function(url){
+            var data;
+            if (url.indexOf("kickjs://texture/black/")==0){
+                data = new Uint8Array([0, 0, 0,
+                                         0,   0,   0,
+                                         0,   0,   0,
+                                         0,   0,   0]);
+            } else if (url.indexOf("kickjs://texture/white/")==0){
+                data = new Uint8Array([255, 255, 255,
+                                         255,   255,   255,
+                                         255,   255,   255,
+                                         255,   255,   255]);
+            } else if (url.indexOf("kickjs://texture/gray/")==0){
+                data = new Uint8Array([127, 127, 127,
+                                         127,   127,   127,
+                                         127,   127,   127,
+                                         127,   127,   127]);
+            } else {
+                return null;
+            }
+            var texture = new KICK.texture.Texture(engine,{
+                minFilter: 9728,
+                magFilter: 9728,
+                generateMipmaps: false,
+                intformat: 6407
+            });
 
+            texture.setImageData( 2, 2, 0, 5121,data, url);
+            return texture;
         };
 
         /**

@@ -47,7 +47,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     var texture = KICK.namespace("KICK.texture"),
         core = KICK.namespace("KICK.core"),
         constants = core.Constants,
-        vec2 = KICK.math.vec2;
+        vec2 = KICK.math.vec2,
+        isPowerOfTwo = function (x) {
+            return (x & (x - 1)) == 0;
+        },
+        nextHighestPowerOfTwo = function (x) {
+            --x;
+            for (var i = 1; i < 32; i <<= 1) {
+                x = x | x >> i;
+            }
+            return x + 1;
+        };
 
     /**
      * Render texture (used for camera's render target)
@@ -166,22 +176,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _minFilter = thisConfig.minFilter || constants.GL_LINEAR,
             _magFilter = thisConfig.magFilter || constants.GL_LINEAR,
             _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
-            _autoScaleImage = typeof (thisConfig.autoScaleImage) === 'boolean'? thisConfig.autoScaleImage : true,
             _dataURI = thisConfig.dataURI || null,
             _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
-            _intformat = thisConfig.intformat || constants.GL_RGBA,
+            _intFormat = thisConfig.internalFormat || constants.GL_RGBA,
+            _textureType = thisConfig.textureType || constants.GL_TEXTURE_2D,
             activeTexture,
-            _dimension = vec2.create(),
-            isPowerOfTwo = function (x) {
-                return (x & (x - 1)) == 0;
-            },
-            nextHighestPowerOfTwo = function (x) {
-                --x;
-                for (var i = 1; i < 32; i <<= 1) {
-                    x = x | x >> i;
-                }
-                return x + 1;
-            };
+            _dimension = vec2.create();
 
         if (uidMapping && thisConfig.uid){
             uidMapping[thisConfig.uid] = _uid;
@@ -202,42 +202,76 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.bind = function(textureSlot){
             if (activeTexture[textureSlot] !== this){
                 gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
+                gl.bindTexture(_textureType, _textureId);
                 activeTexture[textureSlot] = this;
             }
         };
 
         /**
-         * Set texture image based on a image object
+         * Set texture image based on a image object.<br>
+         * The image is automatically resized nearest power of two<br>
+         * When a textureType == TEXTURE_CUBE_MAP the image needs to be in the following format:
+         * <ul>
+         *     <li>width = 6*height</li>
+         *     <li>Image needs to be ordered: [Right, Left, Top, Bottom, Front, Back] (As in <a href="http://www.cgtextures.com/content.php?action=tutorial&name=cubemaps">NVidia DDS Exporter</a>)</li>
+         * </ul>
          * @method setImage
          * @param {Image} imageObj image object to import
          * @param {String} dataURI String representing the image
          */
         this.setImage = function(imageObj, dataURI){
+            var width, height;
             _dataURI = dataURI;
-
-            if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
-                var width = nextHighestPowerOfTwo(imageObj.width),
+            this.bind(0); // bind to texture slot 0
+            if (_textureType === constants.GL_TEXTURE_2D){
+                if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
+                    width = nextHighestPowerOfTwo(imageObj.width);
                     height = nextHighestPowerOfTwo(imageObj.height);
-                imageObj = core.Util.scaleImage(imageObj,width,height)
-            }
+                    imageObj = core.Util.scaleImage(imageObj,width,height);
+                }
 
-            this.bind(0);
-            if (_flipY){
-                gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, true);
+                if (_flipY){
+                    gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, true);
+                } else {
+                    gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, false);
+                }
+                gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
+                gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, _intFormat, constants.GL_UNSIGNED_BYTE, imageObj);
+
+                gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
+                gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
+                vec2.set([imageObj.width,imageObj.height],_dimension);
             } else {
-                gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, false);
+                 var cubemapOrder = [
+                     constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                     constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                     constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                     constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                     constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                     constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+                 ];
+                var srcWidth = imageObj.width/6;
+                var srcHeight = imageObj.height;
+                height = nextHighestPowerOfTwo(imageObj.height);
+                width = height;
+                var canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext("2d");
+                for (var i=0;i<6;i++){
+                    ctx.drawImage(imageObj,
+                        i*srcWidth, 0, srcWidth, srcHeight,
+                        0, 0, width, height);
+                    gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, false);
+                    gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
+                    gl.texImage2D(cubemapOrder[i], 0, _intFormat, _intFormat, constants.GL_UNSIGNED_BYTE, canvas);
+                }
+                vec2.set([width,height],_dimension);
             }
-            gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
-            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intformat, _intformat, constants.GL_UNSIGNED_BYTE, imageObj);
-
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
-            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
-            vec2.set([imageObj.width,imageObj.height],_dimension);
+            gl.texParameteri(_textureType, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+            gl.texParameteri(_textureType, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             if (_generateMipmaps){
-                gl.generateMipmap(constants.GL_TEXTURE_2D);
+                gl.generateMipmap(_textureType);
             }
         };
         
@@ -260,12 +294,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     KICK.core.Util.fail("Texture.setImageData (type) should be either GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5");
                 }
             }
+            if (_textureType !== constants.GL_TEXTURE_2D){
+                KICK.core.Util.fail("Texture.setImageData only supported by TEXTURE_2D");
+                return;
+            }
+
             vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
-            this.bind(0);
+            this.bind(0); // bind to texture slot 0
             gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
-            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intformat, width, height, border, _intformat, type, pixels);
+            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, width, height, border, _intFormat, type, pixels);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
@@ -276,7 +315,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
-         * Creates a 2x2 temporary image
+         * Creates a 2x2 temporary image (checkerboard)
          * @method setTemporaryTexture
          */
         this.setTemporaryTexture = function(){
@@ -284,10 +323,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                                              0,   0,   0,
                                              0,   0,   0,
                                              255, 255, 255]),
-                oldIntFormat = _intformat;
-            _intformat = constants.GL_RGB;
+                oldIntFormat = _intFormat;
+            _intFormat = constants.GL_RGB;
             this.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,blackWhiteCheckerboard, "tempTexture");
-            _intformat = oldIntFormat;
+            _intFormat = oldIntFormat;
         };
 
         Object.defineProperties(this,{
@@ -300,7 +339,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 value:_textureId
             },
             /**
-             * Dimension of texture [width,height]
+             * Dimension of texture [width,height].<br>
+             * Note for cube maps the size is for one face
              * @property dimension
              * @type {vec2}
              */
@@ -413,25 +453,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             /**
-             * Scales image to nearest power of two if not a power of two. <br>
-             * (Default true)
-             * @property autoScaleImage
-             * @type Boolean
-             */
-            autoScaleImage:{
-                get: function(){
-                    return _autoScaleImage;
-                },
-                set: function(value){
-                    if (constants._ASSERT){
-                        if (typeof value !== 'boolean'){
-                            KICK.core.Util.fail("Texture.autoScaleImage was not be a boolean");
-                        }
-                    }
-                    _autoScaleImage = value;
-                }
-            },
-            /**
              * Autogenerate mipmap levels<br>
              * (Default true)
              * @property generateMipmaps
@@ -452,7 +473,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * When importing image flip the Y direction of the image
-             * (Default true)
+             * (Default true).<br>
+             * This property is ignored for cube maps.
              * @property flipY
              * @type Boolean
              */
@@ -478,10 +500,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * GL_RGBA,
              * GL_LUMINANCE,
              * GL_LUMINANCE_ALPHA
+             * @property internalFormal
+             * @type Number
              */
             internalFormal:{
                 get:function(){
-                    return _intformat;
+                    return _intFormat;
                 },
                 set:function(value){
                     if (value !== constants.GL_ALPHA &&
@@ -491,7 +515,28 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         value !== constants.GL_LUMINANCE_ALPHA){
                         KICK.core.Util.fail("Texture.internalFormal should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
                     }
-                    _intformat = value;
+                    _intFormat = value;
+                }
+            },
+            /**
+             * Specifies the texture type<br>
+             * Default is GL_TEXTURE_2D<br>
+             * Must be one of the following:
+             * GL_TEXTURE_2D,
+             * GL_TEXTURE_CUBE_MAP
+             * @property internalFormal
+             * @type Number
+             */
+            textureType:{
+                get:function(){
+                    return _textureType;
+                },
+                set:function(value){
+                    if (value !== constants.GL_TEXTURE_2D &&
+                        value !== constants.GL_TEXTURE_CUBE_MAP){
+                        KICK.core.Util.fail("Texture.textureType should be either GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP");
+                    }
+                    _textureType = value;
                 }
             }
         });
@@ -511,10 +556,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 minFilter:_minFilter,
                 magFilter:_magFilter,
                 generateMipmaps:_generateMipmaps,
-                autoScaleImage:_autoScaleImage,
                 dataURI:_dataURI,
                 flipY:_flipY,
-                internalFormal:_intformat
+                internalFormat:_intFormat,
+                textureType:_textureType
             };
         }
     };
