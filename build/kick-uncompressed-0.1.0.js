@@ -10490,7 +10490,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 var polylistChild = polylist.firstChild,
                     tagName,
                     i,j,
-                    vertexCount,
+                    vertexCount = function(){return 3;},
                     count = Number(polylist.getAttribute("count")),
                     dataAccessor = {names:[],offset:{},accessors:{},length:{}},
                     offsetSet = [],
@@ -10509,13 +10509,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             offsetSet.push(offset);
                         }
                     } else if (tagName === "vcount"){
-                        vertexCount = stringToArray(polylistChild.textContent,count,Int32Array);
+                        var vCount = stringToArray(polylistChild.textContent,count,Int32Array);
+                        vertexCount = function(i){ return vCount[i];}
                     } else if (tagName === "p"){
                         var numberOfVertexIndices = 0,
-                            vertexCountLength = vertexCount.length,
                             offsetCount = offsetSet.length;
-                        for (i=vertexCountLength-1;i>=0;i--){
-                            numberOfVertexIndices += vertexCount[i];
+                        for (i=count-1;i>=0;i--){
+                            numberOfVertexIndices += vertexCount(i);
                         }
 
                         var numberOfVertexIndicesWithOffset = numberOfVertexIndices*offsetCount;
@@ -10546,16 +10546,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         // triangulate data
                         var index = 0;
                         var triangleIndices = [];
-                        for (i=0;i<vertexCount.length;i++){
+                        for (i=0;i<count;i++){
+                            var vertexCountI = vertexCount(i);
                             for (j=0;j<3;j++){
                                 addVertexAttributes(index+j,triangleIndices);
                             }
-                            for (j=3;j<vertexCount[i];j++){
+                            for (j=3;j<vertexCountI;j++){
                                 addVertexAttributes(index+0,triangleIndices);
                                 addVertexAttributes(index+j-1,triangleIndices);
                                 addVertexAttributes(index+j,triangleIndices);
                             }
-                            index += vertexCount[i];
+                            index += vertexCountI;
                         }
 
                         for (i=0;i<dataAccessor.names.length;i++){
@@ -10572,14 +10573,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     }
                     polylistChild = polylistChild .nextSibling;
                 }
-            },
-            /**
-             * @method buildFromTriangles
-             * @private
-             */
-            buildFromTriangles = function(meshChild, destMeshData){
-                // todo: implement
-                KICK.core.Util.fail("buildFromTriangles not implemented");
             },
             /**
              * @method buildFromTrianglestrips
@@ -10609,10 +10602,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         console.log("linestrips");
                     } else if (tagName === "polygons"){
                         console.log("polygons");
-                    } else if (tagName === "polylist"){
+                    } else if (tagName === "polylist" || tagName === "triangles"){
                         buildFromPolyList(meshChild,destMeshData);
-                    } else if (tagName === "triangles"){
-                        buildFromTriangles(meshChild);
                     } else if (tagName === "trifans"){
                         console.log("trifans unsupported");
                     } else if (tagName === "tristrips"){
