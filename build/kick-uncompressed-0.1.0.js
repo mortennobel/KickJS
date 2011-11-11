@@ -10412,6 +10412,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     var num = numberString.substring(lastIndex,currentPosition);
                     res[counter++] = Number(num);
                     lastIndex = currentPosition+1;
+
+                    // strip any non numbers
+                    var charDigit = numberString.charCodeAt(lastIndex);
+                    while (lastIndex < numberString.length && charDigit !== 45 /* '-' */
+                        && (charDigit < 48 /*'0'*/ || charDigit > 57 /* '9' */)){
+                        lastIndex++;
+                        charDigit = numberString.charCodeAt(lastIndex);
+                    }
+                    if (lastIndex>= numberString.length){
+                        break;
+                    }
                 }
                 num = numberString.substring(lastIndex);
                 res[counter] = Number(num);
@@ -10447,12 +10458,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * Create accessor object for data
-             * @method buildDataAccessor
+             * @method DataAccessor
              * @param {XML} elementChild
              * @return function of type function(index,paramOffset)
              * @private
              */
-            buildDataAccessor = function(elementChild){
+            DataAccessor = function(elementChild){
                 var semantic = elementChild.getAttribute('semantic');
                 var source = colladaDOM.getElementById(elementChild.getAttribute("source").substring(1));
                 if (source.tagName === "vertices"){
@@ -10501,7 +10512,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (tagName === "input"){
                         var semantic = polylistChild.getAttribute('semantic');
                         var offset = Number(polylistChild.getAttribute('offset'));
-                        dataAccessor.accessors[semantic] = buildDataAccessor(polylistChild);
+                        dataAccessor.accessors[semantic] = new DataAccessor(polylistChild);
                         dataAccessor.names.push(semantic);
                         dataAccessor.offset[semantic] = offset;
                         dataAccessor.length[semantic] = semantic === "TEXCOORD"?2:3;
@@ -10522,25 +10533,55 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         var vertexIndices = stringToArray(polylistChild.textContent,numberOfVertexIndicesWithOffset,Int32Array);
 
                         // initialize data container
-                        var result = {};
+                        var outVertexAttributes = {};
                         for (i=0;i<dataAccessor.names.length;i++){
-                            result[dataAccessor.names[i]] = [];
+                            outVertexAttributes[dataAccessor.names[i]] = [];
                         }
-
-                        var addVertexAttributes = function(index,triangleIndices){
-                            index *= offsetCount;
-                            for (var i=0;i<dataAccessor.names.length;i++){
-                                var name = dataAccessor.names[i];
-                                var accessor = dataAccessor.accessors[name];
-                                var length = dataAccessor.length[name];
-                                var offset = dataAccessor.offset[name];
-                                var vertexIndex = vertexIndices[offset+index];
-                                for (var j=0;j<length;j++){
-                                    var value = accessor(vertexIndex,j);
-                                    result[name].push(value);
-                                }
+                        var vertexAttributeCache = {};
+                        var numberOfVertices = 0;
+                        /**
+                         * This method adds vertex attributes to the result index and
+                         * @method addVertexAttributes
+                         * @param {Number} index Source index in vertex array (the p element)
+                         * @param {Object} outVertexAttributes Destination vertex index array
+                         * @param {Array[Number]} outTriangleIndices Destination vertex index array
+                         * @private
+                         */
+                        var addVertexAttributes = function(index,outVertexAttributes,outTriangleIndices){
+                            var cacheKey = "",
+                                offset,
+                                vertexIndex,
+                                name,
+                                i,j,
+                                indexInVertexIndices = index * offsetCount;
+                            for (i=0;i<dataAccessor.names.length;i++){
+                                name = dataAccessor.names[i];
+                                offset = dataAccessor.offset[name];
+                                vertexIndex = vertexIndices[offset+indexInVertexIndices];
+                                cacheKey += index+"#"+vertexIndex+"#";
                             }
-                            triangleIndices.push(triangleIndices.length);
+
+                            var cacheLookupRes = vertexAttributeCache[cacheKey];
+                            var foundInCache = typeof cacheLookupRes === 'number';
+                            if (foundInCache){
+                                triangleIndices.push(cacheLookupRes);
+                            } else {
+                                for (i=0;i<dataAccessor.names.length;i++){
+                                    name = dataAccessor.names[i];
+                                    var accessor = dataAccessor.accessors[name];
+                                    var length = dataAccessor.length[name];
+                                    offset = dataAccessor.offset[name];
+                                    vertexIndex = vertexIndices[offset+indexInVertexIndices];
+                                    for (j=0;j<length;j++){
+                                        var value = accessor(vertexIndex,j);
+                                        outVertexAttributes[name].push(value);
+                                    }
+                                }
+                                var idx = numberOfVertices;
+                                numberOfVertices += 1;
+                                outTriangleIndices.push(idx);
+                                vertexAttributeCache[cacheKey] =idx;
+                            }
                         };
 
                         // triangulate data
@@ -10549,12 +10590,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         for (i=0;i<count;i++){
                             var vertexCountI = vertexCount(i);
                             for (j=0;j<3;j++){
-                                addVertexAttributes(index+j,triangleIndices);
+                                addVertexAttributes(index+j,outVertexAttributes,triangleIndices);
                             }
                             for (j=3;j<vertexCountI;j++){
-                                addVertexAttributes(index+0,triangleIndices);
-                                addVertexAttributes(index+j-1,triangleIndices);
-                                addVertexAttributes(index+j,triangleIndices);
+                                addVertexAttributes(index+0,outVertexAttributes,triangleIndices);
+                                addVertexAttributes(index+j-1,outVertexAttributes,triangleIndices);
+                                addVertexAttributes(index+j,outVertexAttributes,triangleIndices);
                             }
                             index += vertexCountI;
                         }
@@ -10565,9 +10606,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             if (nameMeshData === "texcoord"){
                                 nameMeshData = "uv1";
                             }
-                            destMeshData[nameMeshData] = result[name];
+                            destMeshData[nameMeshData] = outVertexAttributes[name];
                         }
-
                         destMeshData.meshType = 4;
                         destMeshData.indices = triangleIndices;
                     }
@@ -10735,8 +10775,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
         }
         return gameObjectsCreated;
-
-    }
+    };
 })();/*!
  * New BSD License
  *
