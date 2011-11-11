@@ -217,33 +217,27 @@
     function textureUpdate(){
         var currentTextures = document.getElementById('currentTextures'),
             selectedIndex = currentTextures.selectedIndex,
-            imgSrc = document.getElementById('textureSrc').value;
+            imgSrc = document.getElementById('textureSrc').value,
+            preview = document.getElementById('texturePreviewImg'),
+            updatePreview = function(url){
+                preview.src = url;
+            };
         if (selectedIndex<0){
             return;
         }
         var texture = shaderEditor.textures[selectedIndex];
-        if (texture.textureType !== getSelectedGLConstant('textureType')){
-            texture.destroy();
-            texture = new KICK.texture.Texture(shaderEditor.engine);
-        }
-        texture.internalFormat = getSelectedGLConstant('textureFormat');
-        texture.generateMipmaps = document.getElementById('mipMapping').checked;
-        texture.wrapS = getSelectedGLConstant('textureMode');
-        texture.wrapT = texture.wrapS;
-        texture.flipY = document.getElementById('flipY').checked;
-        texture.minFilter = getSelectedGLConstant('minFilter');
-        texture.magFilter = getSelectedGLConstant('magFilter');
-        texture.textureType = getSelectedGLConstant('textureType');
-        var image = new Image();
-        image.onload = function() {
-            texture.setImage(image, imgSrc);
+        var textureConf = {
+            internalFormat: getSelectedGLConstant('textureFormat'),
+            generateMipmaps: document.getElementById('mipMapping').checked,
+            wrapS: getSelectedGLConstant('textureMode'),
+            wrapT: getSelectedGLConstant('textureMode'),
+            flipY: document.getElementById('flipY').checked,
+            minFilter: getSelectedGLConstant('minFilter'),
+            magFilter: getSelectedGLConstant('magFilter'),
+            textureType: getSelectedGLConstant('textureType'),
+            dataURI:imgSrc
         };
-        var wrappedImgSrc = shaderEditor.getWrappedImageSource(imgSrc);
-        image.src = wrappedImgSrc;
-        document.getElementById('texturePreviewImg').src = wrappedImgSrc;
-        if (imgSrc.length>0){
-            currentTextures.options[selectedIndex].text = imgSrc.length<40?imgSrc:imgSrc.substr(0,40)+'...';
-        }
+        shaderEditor.updateTexture(texture,textureConf,updatePreview);
     }
 
     function saveLocally(){

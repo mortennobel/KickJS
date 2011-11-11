@@ -79,6 +79,55 @@ window.shaderEditor = new (function(){
         }
     };
 
+    /**
+     * @method updateTexture
+     * @param texture
+     * @param config
+     * @return {KICK.texture.Texture}
+     */
+    this.updateTexture = function(texture,config, fnSetImageSrc){
+        for (var name in config){
+            if (typeof name === 'string'){
+                try{
+                texture[name] = config[name];
+                } catch (ignore){}
+            }
+        }
+        var loadImageUsingProxy = function(){
+            var imgProxied = new Image();
+            imgProxied.onload = function(){
+                try{
+                    texture.setImage(imgProxied,config.dataURI);
+                } catch (e){
+                    logFn("Error loading texture "+config.dataURI.substring(0,100));
+                }
+            };
+            console.log("Loading using proxy "+thisObj.getWrappedImageSource(config.dataURI));
+            imgProxied.src = thisObj.getWrappedImageSource(config.dataURI);
+            if (fnSetImageSrc){
+                fnSetImageSrc(thisObj.getWrappedImageSource(config.dataURI));
+            }
+        };
+        var img = new Image();
+        img.onload = function(){
+            try{
+                texture.setImage(img,config.dataURI);
+            } catch (e){
+                console.log("Exception when loading image - trying to load using image proxy",e);
+                loadImageUsingProxy();
+            }
+        };
+        img.onerror = function(e){
+            console.log("Error using image - trying to load using image proxy",e);
+            loadImageUsingProxy();
+        };
+        img.crossOrigin = "anonymous"; // Ask for a CORS image
+        img.src = config.dataURI;
+        if (fnSetImageSrc){
+            fnSetImageSrc(config.dataURI);
+        }
+    };
+
     var loadMaterial = function (shaderData){
         var textures = shaderData.textureData,
             materialUniforms = shaderData.material.uniforms;
@@ -94,16 +143,9 @@ window.shaderEditor = new (function(){
         for (var i=0;i<textures.length;i++){
             (function newScope(){
                 var textureConf = textures[i],
-                    t = new KICK.texture.Texture(_engine,textureConf);
+                    t = new KICK.texture.Texture(_engine);
                 textureMapping[textureConf.uid] = t;
-                var img = new Image();
-                img.onload = function(){
-                    t.setImage(img,textureConf.dataURI);
-                };
-                img.onerror = function(){
-                    logFn("Error loading texture "+textureConf.dataURI.substring(0,100));
-                };
-                img.src = thisObj.getWrappedImageSource(textureConf.dataURI);
+                thisObj.updateTexture(t,textureConf);
                 thisObj.textures.push(t);
             })();
         }
