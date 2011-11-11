@@ -8664,8 +8664,21 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
             _intFormat = thisConfig.internalFormat || 6408,
             _textureType = thisConfig.textureType || 3553,
+            _boundTextureType = null,
             currentTexture,
-            _dimension = vec2.create();
+            thisObj = this,
+            _dimension = vec2.create(),
+            /**
+             * @method recreateTextureIfDifferentType
+             * @private
+             */
+            recreateTextureIfDifferentType = function(){
+                if (_boundTextureType !== null && _boundTextureType !== _textureType){
+                    thisObj.destroy();
+                    _textureId = gl.createTexture();
+                }
+                _boundTextureType = _textureType;
+            };
 
         if (uidMapping && thisConfig.uid){
             uidMapping[thisConfig.uid] = _uid;
@@ -8718,6 +8731,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.setImage = function(imageObj, dataURI){
             var width, height;
             _dataURI = dataURI;
+            recreateTextureIfDifferentType();
             this.bind(0); // bind to texture slot 0
             if (_textureType === 3553){
                 if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
@@ -8782,6 +8796,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function(width, height, border, type, pixels, dataURI){
+            recreateTextureIfDifferentType();
+
             if (true){
                 if (type !== 5121 &&
                     type !== 32819  &&
@@ -8900,7 +8916,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             KICK.core.Util.fail("Texture.wrapT should be either 33071 or 10497");
                         }
                     }
-                    return _wrapT;
+                    _wrapT = value;
                 }
             },
             /**
