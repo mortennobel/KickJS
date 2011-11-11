@@ -10404,29 +10404,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     count = 0;
                 }
                 numberString = numberString.replace(/^\s+|\s+$/g,""); // trim
-                var res = new type(count);
-                var counter = 0;
-                var lastIndex = 0;
-                var currentPosition = 0;
-                while ((currentPosition = numberString.indexOf(' ',lastIndex)) !== -1){
-                    var num = numberString.substring(lastIndex,currentPosition);
-                    res[counter++] = Number(num);
-                    lastIndex = currentPosition+1;
-
-                    // strip any non numbers
-                    var charDigit = numberString.charCodeAt(lastIndex);
-                    while (lastIndex < numberString.length && charDigit !== 45 /* '-' */
-                        && (charDigit < 48 /*'0'*/ || charDigit > 57 /* '9' */)){
-                        lastIndex++;
-                        charDigit = numberString.charCodeAt(lastIndex);
-                    }
-                    if (lastIndex>= numberString.length){
-                        break;
-                    }
+                numberString = numberString.replace(/\s{2,}/g, ' '); // remove double white spaces
+                var numberArray = numberString.split(" ").map(Number);
+                if (!type || type === Array){
+                    return numberArray;
+                } else {
+                    // typed array
+                    return new type(numberArray);
                 }
-                num = numberString.substring(lastIndex);
-                res[counter] = Number(num);
-                return res;
             },
             /**
              * Get data element by id<br>
@@ -10458,12 +10443,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             },
             /**
              * Create accessor object for data
-             * @method DataAccessor
+             * @method buildDataAccessor
              * @param {XML} elementChild
              * @return function of type function(index,paramOffset)
              * @private
              */
-            DataAccessor = function(elementChild){
+            buildDataAccessor = function(elementChild){
                 var semantic = elementChild.getAttribute('semantic');
                 var source = colladaDOM.getElementById(elementChild.getAttribute("source").substring(1));
                 if (source.tagName === "vertices"){
@@ -10512,7 +10497,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     if (tagName === "input"){
                         var semantic = polylistChild.getAttribute('semantic');
                         var offset = Number(polylistChild.getAttribute('offset'));
-                        dataAccessor.accessors[semantic] = new DataAccessor(polylistChild);
+                        dataAccessor.accessors[semantic] = new buildDataAccessor(polylistChild);
                         dataAccessor.names.push(semantic);
                         dataAccessor.offset[semantic] = offset;
                         dataAccessor.length[semantic] = semantic === "TEXCOORD"?2:3;
