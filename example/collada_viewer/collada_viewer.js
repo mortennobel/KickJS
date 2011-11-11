@@ -14,7 +14,7 @@ function load(xmlDom,url){
     var gameObjectsCreated = KICK.importer.ColladaImporter.loadCollada(xmlDom,engine,null,true);
     for (var i=0;i<gameObjectsCreated.length;i++){
         var gameObject = gameObjectsCreated[i];
-        var isDuck = url==="duck.dae";
+        var isDuck = url==="duck.dae" || url==="duck_triangulate.dae";
         if (isDuck){
             gameObject.transform.localScale = [0.01,0.01,0.01];
 
