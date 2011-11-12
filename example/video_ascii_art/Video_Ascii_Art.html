@@ -5,30 +5,80 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Video Ascii Art</title>
 
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssbase/base-min.css">
+    <style>
+        #glslEditor {
+            position: absolute;
+            width: 800px;
+            height: 400px;
+        }
+         #glslEditorInfo{
+            position: absolute;
+            left: 830px;
+            height: 400px;
+         }
+
+        #desc {
+            margin-bottom:20px;
+            border-bottom:1px dotted #333;
+        }
+        #desc span {
+            background:#a3350d;
+            padding:2px;
+            color:#f27243;
+        }
+
+        .yui3-panel {
+            outline:none;
+
+        }
+
+        .yui3-panel-content .yui3-widget-hd {
+            font-weight:bold;
+        }
+
+        .yui3-panel-content .yui3-widget-bd {
+            padding:15px;
+        }
+        .yui3-panel-content label {
+            margin-right:30px;
+        }
+        .yui3-panel-content fieldset {
+            border:none;
+            padding:0;
+        }
+        .yui3-panel-content input[type="text"] {
+            border:none;
+            border:1px solid #ccc;
+            padding: 3px 7px;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            font-size:100%;
+            width:200px;
+        }
+    </style>
+
+    <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
+
     <link rel="stylesheet" href="reset-min.css">
-    <!--<script type="text/javascript" src="kick/webgl-debug.js"></script>-->
     <script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>
-    <!--<script type="text/javascript" src="kick/kick-uncompressed-0.1.0.js"></script>-->
     <script type="text/javascript" src="ascii.js"></script>
     <!-- Google analytics-->
-    <!--<script type="text/javascript">-->
-      <!--var _gaq = _gaq || [];-->
-      <!--_gaq.push(['_setAccount', 'UA-26354413-1']);-->
-      <!--_gaq.push(['_trackPageview']);-->
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-26354413-1']);
+      _gaq.push(['_trackPageview']);
 
-      <!--(function() {-->
-        <!--var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;-->
-        <!--ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';-->
-        <!--var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);-->
-      <!--})();-->
-    <!--</script>-->
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
     <style>
         body{
             overflow: hidden;
-        }
-
-        video {
-            display: none;
         }
     </style>
 </head>
@@ -39,10 +89,8 @@
     <h1 id="header"><a href="http://www.kickjs.org/">Kick.js</a> | Video Ascii Art - Chrome browser only (must be run from a website)</h1>
 </header>
 <article>
-    <video id="video" src="Firefox.ogv" autoplay>
-  Your browser doesn't appear to support the HTML5 <code>&lt;video&gt;</code> element.
-</video>
     <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+    <div id="panelContent"></div>
     <div style="display: none">
     <textarea style="width:500px;height:150px;" id="vertexShaderTex">
 attribute vec3 vertex;
@@ -107,7 +155,6 @@ void main(void)
 }
 
   </textarea>
-
         </div>
 </article>
 <footer id="kickjs-footer">
