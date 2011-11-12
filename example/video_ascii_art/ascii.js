@@ -118,7 +118,7 @@ window.onload = function(){
 
     // initKick();
     window.YUI().use("panel",function(Y) {
-        var YUIConfirm = function (headerTxt,bodyTxt){
+        var YUIConfirm = function (headerTxt,bodyTxt, buttons){
             var nestedPanel = new Y.Panel({
                 headerContent: headerTxt,
                 bodyContent:bodyTxt,
@@ -126,21 +126,29 @@ window.onload = function(){
                 centered:true,
                 width:300,
                 modal:true,
-                buttons: []
+                buttons: buttons
             });
 
             nestedPanel.render('#nestedPanel');
             return nestedPanel;
         };
 
+        var onEnd = function(){
+            YUIConfirm("End of video", "Reload page to see another video",[]);
+        };
+
         var buildLoadVideoDialog = function(){
             var div = document.createElement("div");
+            div.appendChild(document.createTextNode("Video ascii art is a real time post processing effect that will transform any video into ASCII art. The effect is created in a shader and uses the KickJS engine."));
+            div.appendChild(document.createElement("br"));
+            div.appendChild(document.createElement("br"));
             div.appendChild(document.createTextNode("To see the ASCII shader in action you need to load a local video (in a format that your browser can play)"));
             div.appendChild(document.createElement("br"));
             div.appendChild(document.createElement("br"));
             div.appendChild(document.createTextNode("Known issue: Problems with large video files and the effect currently only works in Chrome."));
             div.appendChild(document.createElement("br"));
             div.appendChild(document.createElement("br"));
+
             var file = document.createElement("input");
             file.type = "file";
             file.onchange = function() {
@@ -151,8 +159,9 @@ window.onload = function(){
                 var reader = new window.FileReader();
                 reader.onload = function(e){
                     var video = document.createElement("video");
+                    video.autoplay = true;
+                    video.addEventListener('ended', onEnd, false);
                     video.src = e.target.result;
-                    video.play();
                     initKick(video);
                 };
                 reader.readAsDataURL(this.files[0]);
@@ -168,11 +177,13 @@ window.onload = function(){
             button.onclick = function(){
                 window.currentDialog.hide();
                 var video = document.createElement("video");
+                video.autoplay = true;
+                video.addEventListener('ended', onEnd, false);
                 video.src = "BigBuckBunny.m4v";
                 video.play();
                 initKick(video);
             };
-            window.currentDialog = YUIConfirm("Load video", div);
+            window.currentDialog = YUIConfirm("Load video", div,[]);
         };
         buildLoadVideoDialog();
     });
