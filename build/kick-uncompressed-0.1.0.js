@@ -2755,6 +2755,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     /**
      * vec2 - 2 dimensional vector
+     * @class vec2
+     * @namespace KICK.math
      */
     math.vec2 = vec2;
 
