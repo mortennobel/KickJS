@@ -5,6 +5,14 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 	<title>API: $modulename #if $classname# $classname #end if# #if $filename# $filename #end if# (Kickstart Engine)</title>
 
+    <!-- YUI 3.4.1-->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssgrids/grids-min.css&amp;3.4.1/build/cssbase/base-min.css">
+    <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
+
+    
+    <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
+
 	<link rel="stylesheet" type="text/css" href="assets/reset-fonts-grids-min.css#if $timestamp#?stamp=$timestamp#end if#" />
 	<link rel="stylesheet" type="text/css" href="assets/api.css#if $timestamp#?stamp=$timestamp#end if#" />
 
@@ -32,11 +40,11 @@
     </script>
 </head>
 
-<body id="yahoo-com">
+<body id="yahoo-com" class="yui3-skin-sam">
 
 <div id="doc3" class="yui-t2">
 	<div id="hd">
-        <h1><a href="$projecturl" title="$projectname">$projectname</a></h1>
+        <header></header>
         <h3>$moduletitle&nbsp; <span class="subtitle">$version</span></h3>
         <a href="./index.html" title="$projectname">$projectname</a> 
         #if $modulename
@@ -712,5 +720,6 @@ YWA.getTracker("10001393677061").submit();
 <div><img src="http://a.analytics.yahoo.com/p.pl?a=10001393677061&amp;js=no" width="1" height="1" alt="" /></div>
 </noscript>
 #end if
+<script type="text/javascript" src="/header.js"></script>
 </body>
 </html>
