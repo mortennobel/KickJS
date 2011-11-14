@@ -44,7 +44,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     var importer = KICK.namespace("KICK.importer"),
         math = KICK.namespace("KICK.math"),
-        quat4 = math.quat4;
+        quat4 = math.quat4,
+        getXMLElementById = function(doc, id){
+            return doc.querySelector("[id=" + id + "]");
+        };
 
      /**
      * Imports a collada meshes into a scene
@@ -106,7 +109,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 if (dataCache[id]){
                     return dataCache[id];
                 }
-                var arrayElement = colladaDOM.getElementById(id);
+                var arrayElement = getXMLElementById(colladaDOM,id);
                 var type;
                 if (arrayElement.tagName === "float_array"){
                     type = Float32Array;
@@ -127,10 +130,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             buildDataAccessor = function(elementChild){
                 var semantic = elementChild.getAttribute('semantic');
-                var source = colladaDOM.getElementById(elementChild.getAttribute("source").substring(1));
+                var source = getXMLElementById(colladaDOM,elementChild.getAttribute("source").substring(1));
                 if (source.tagName === "vertices"){
                     source = source.getElementsByTagName("input")[0];
-                    source = colladaDOM.getElementById(source.getAttribute("source").substring(1));
+                    source = getXMLElementById(colladaDOM,source.getAttribute("source").substring(1));
                 }
                 var technique_common = source.getElementsByTagName("technique_common")[0];
                 var accessor = technique_common.getElementsByTagName("accessor")[0];
