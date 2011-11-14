@@ -61,6 +61,10 @@
             font-size:100%;
             width:200px;
         }
+        
+        .yui3-console{
+            top:150px !important;
+        }
     </style>
 
     <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
@@ -70,6 +74,7 @@
     <script type="text/javascript" src="shader_editor_default.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
     <script type="text/javascript">
 
       var _gaq = _gaq || [];
@@ -84,8 +89,8 @@
 
 </script>
 </head>
-<body class="yui3-skin-sam">
-<header id="kickjs-header">
+<body class="yui3-skin-sam" style="background-color: white;">
+<header>
 </header>
 <header id="ahead">
     <h1 id="header"><a href="/">Kick.js</a> | Shader editor</h1>
@@ -103,7 +108,7 @@
         <button id="LogoutButton" style="display: none;">Logout</button>
         <button id="LoginButton"  style="display: none;" title="Login using a Google Account. This allows you to load and save shaders."><img src="google_account.png"> Login</button>
     </div>
-    <h1>Preview</h1>
+    <h2>Preview</h2>
   <canvas id="canvas" style="border: none;" width="300" height="300" title="Click to toggle full screen"></canvas>
 </article>
 <article id="mainEditor">
@@ -317,5 +322,6 @@
 </footer>
 <div id="panelContent"></div>
 <div id="nestedPanel"></div>
+<script type="text/javascript" src="/header.js"></script>
 </body>
 </html>

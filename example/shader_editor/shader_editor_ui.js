@@ -827,7 +827,6 @@
         //create the console
         var r = new Y.Console({
             newestOnTop : false,
-            //style: 'block',
             width: 600,
             height: 200,
             consoleLimit:10

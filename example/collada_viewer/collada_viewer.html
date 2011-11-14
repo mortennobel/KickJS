@@ -3,14 +3,17 @@
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta charset=UTF-8”>
     <title>Kick.js | Collada model viewer</title>
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssgrids/grids-min.css&amp;3.4.1/build/cssbase/base-min.css">
+    <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
     <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
     <script type="text/javascript" src="../snake/kick/webgl-debug.js"></script>
     <!--<script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>-->
     <script type="text/javascript" src="../snake/kick/kick-uncompressed-0.1.0.js"></script>
     <script src="collada_viewer.js"></script>
 </head>
-<body>
+<body class="yui3-skin-sam">
+<header></header>
 <canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
 <button id="duckButton">Duck</button>
 <button id="cubeButton">Cube</button>
@@ -90,7 +93,7 @@ void main(void) {
       }
  
   </textarea>
-
+<script type="text/javascript" src="/header.js"></script>
     </div>
 </body>
 </html>

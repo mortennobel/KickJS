@@ -5,7 +5,7 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Video Ascii Art</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssbase/base-min.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssgrids/grids-min.css&amp;3.4.1/build/cssbase/base-min.css">
     <style>
         #glslEditor {
             position: absolute;
@@ -64,6 +64,8 @@
     <link rel="stylesheet" href="reset-min.css">
     <script type="text/javascript" src="kick/kick-min-0.1.0.js"></script>
     <script type="text/javascript" src="ascii.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
     <!-- Google analytics-->
     <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -85,8 +87,7 @@
 <body class="yui3-skin-sam">
 <header id="kickjs-header">
 </header>
-<header id="ahead">
-    <h1 id="header"><a href="http://www.kickjs.org/">Kick.js</a> | Video Ascii Art - Chrome browser only (must be run from a website)</h1>
+<header>
 </header>
 <article>
     <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
@@ -157,7 +158,6 @@ void main(void)
   </textarea>
         </div>
 </article>
-<footer id="kickjs-footer">
-</footer>
+<script type="text/javascript" src="/header.js"></script>
 </body>
 </html>
