@@ -5689,6 +5689,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             array.sort();
             return array;
         };
+
+        /**
+         * @method toJSON
+         */
+        this.toJSON = function(){
+            var res = [];
+            for (var name in resourceDescriptors){
+                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
+                    res.push(resourceDescriptors[name].toJSON());
+                }
+            }
+            return res;
+        };
     };
 
     /**
@@ -5704,7 +5717,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      *          }
      *      };
      *      var resourceDescriptorConfig = {
-     *          name: "Some material",
      *          type: "KICK.material.Material",
      *          config: materialConfig
      *      };
@@ -5717,22 +5729,21 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     core.ResourceDescriptor = function(config){
         var _config = config || {},
-            name = _config.name,
             type = _config.type,
             config = _config.config,
             source = _config.source;
         Object.defineProperties(this,{
             /**
-             * The name may contain '/' as folder seperator
+             * The name may contain '/' as folder separator. The name property is a shorthand for config.name
              * @property name
              * @type String
              */
             name:{
                 get: function(){
-                    return name;
+                    return config.name;
                 },
                 set: function(newValue){
-                    name = newValue;
+                    config.name = newValue;
                 }
             },
             /**
@@ -5783,7 +5794,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.toJSON = function(){
             return {
-                name:name,
                 type:type,
                 config:config,
                 source:source
@@ -10179,12 +10189,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 writable:true
             },
             /**
+             * Also allows string - this will be used to lookup the shader in engine.project 
              * @property shader
              * @type KICK.material.Shader
              */
             shader:{
-                value:_shader,
-                writable:true
+                get:function(){
+                    return _shader;
+                },
+                set:function(newValue){
+                    _shader = newValue;
+                    thisObj.init();
+                }
             },
             /**
              * Object with of uniforms.
@@ -10198,6 +10214,22 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 writeable:true
             }
         });
+
+        /**
+         * Initialize the material
+         * If the shader property is a string the shader is found in the engine.project.
+         * If shader is invalid, the error shader is used
+         * @method init
+         */
+        this.init = function(){
+            if (typeof _shader === 'string'){
+                _shader = engine.project.load(_shader);
+            }
+            if (!_shader){
+                // todo replace with default shader
+                KICK.core.Util.fail("Cannot initiate shader in material "+_name);
+            }
+        };
 
         /**
          * Binds textures and uniforms

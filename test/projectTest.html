@@ -103,6 +103,8 @@ void main(void)
             });
             var project = engine.project;
             project.loadProject(projectData);
+            // A simple way to test that the project can be serialized and reloaded (without loosing data)
+            project.loadProject(project.toJSON());
             console.log(project.getResourceDescriptorNames());
 
             var cameraObject = engine.activeScene.createGameObject();

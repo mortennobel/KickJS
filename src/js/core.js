@@ -614,6 +614,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             array.sort();
             return array;
         };
+
+        /**
+         * @method toJSON
+         */
+        this.toJSON = function(){
+            var res = [];
+            for (var name in resourceDescriptors){
+                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
+                    res.push(resourceDescriptors[name].toJSON());
+                }
+            }
+            return res;
+        };
     };
 
     /**
