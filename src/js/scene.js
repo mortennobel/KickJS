@@ -65,7 +65,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.GameObject = function (scene, config) {
         var _components = [],
-            _layer = 1;
+            _layer = 1,
+            _name;
         Object.defineProperties(this,
             {
                 /**
@@ -107,6 +108,18 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             KICK.core.Util.fail("GameObject.layer must be a Number")
                         }
                         _layer = newValue;
+                    }
+                },
+                /**
+                 * @property name
+                 * @type String
+                 */
+                name:{
+                    get:function(){
+                        return _name;
+                    },
+                    set:function(newValue){
+                        _name = newValue;
                     }
                 },
                 /**
