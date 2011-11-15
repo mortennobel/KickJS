@@ -629,7 +629,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      *          }
      *      };
      *      var resourceDescriptorConfig = {
-     *          name: "Some material",
      *          type: "KICK.material.Material",
      *          config: materialConfig
      *      };
@@ -642,22 +641,21 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     core.ResourceDescriptor = function(config){
         var _config = config || {},
-            name = _config.name,
             type = _config.type,
             config = _config.config,
             source = _config.source;
         Object.defineProperties(this,{
             /**
-             * The name may contain '/' as folder seperator
+             * The name may contain '/' as folder separator. The name property is a shorthand for config.name
              * @property name
              * @type String
              */
             name:{
                 get: function(){
-                    return name;
+                    return config.name;
                 },
                 set: function(newValue){
-                    name = newValue;
+                    config.name = newValue;
                 }
             },
             /**
@@ -708,7 +706,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.toJSON = function(){
             return {
-                name:name,
                 type:type,
                 config:config,
                 source:source

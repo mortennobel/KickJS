@@ -17,16 +17,50 @@
     <script type="text/javascript" src="../src/js/material.js"></script>
     <script type="text/javascript" src="../src/js/meshfactory.js"></script>
     <script type="text/javascript" src="../src/js/texture.js"></script>
-    <script type="text/javascript">
+</head>
+<body onload="initKick();">
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  Shows how the Project class can be used
+
+  <div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vColor = vec3(uv1.x,uv1.y,0.0);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+</div>
+  <script type="text/javascript">
         "use strict";
         var engine;
         var meshRenderer;
         var projectData = [
             {
-
+                type:"KICK.material.Shader",
+                config:{
+                    name:"UVShader",
+                    vertexShaderSrc: document.getElementById("vertexShaderColor").value,
+                    fragmentShaderSrc: document.getElementById("fragmentShader").value
+                }
             },
             {
-                name:"Some material",
                 type:"KICK.material.Material",
                 config: {
                     name:"Some material",
@@ -37,26 +71,6 @@
                     }
                 }}
         ];
-
-        function setMaterial(vertexShaderId, fragmentShaderId){
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = console.log;
-            shader.updateShader();
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                return;
-            }
-
-            meshRenderer.material = new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader
-            });
-        }
 
         function addRotatorComponent(gameObject){
             var time = engine.time,
@@ -102,7 +116,7 @@
             meshRenderer = new KICK.scene.MeshRenderer();
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            setMaterial('vertexShaderColor','fragmentShader');
+            meshRenderer.material = project.load("Some material");
             gameObject.addComponent(meshRenderer);
 
             addRotatorComponent(cameraObject);
@@ -113,36 +127,5 @@
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
         }
     </script>
-</head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  Shows how the Project class can be used
-
-  <div style="display:none;">
-  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
-attribute vec3 vertex;
-attribute vec2 uv1;
-
-uniform mat4 _mvProj;
-
-varying vec3 vColor;
-
-void main(void) {
-    gl_Position = _mvProj * vec4(vertex, 1.0);
-    vColor = vec3(uv1.x,uv1.y,0.0);
-}
-  </textarea>
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 vColor;
-void main(void)
-{
-    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
-}
-  </textarea>
-</div>
-  <br/>
 </body>
 </html>
