@@ -69,7 +69,15 @@ void main(void)
                         value:42,
                         type: KICK.core.Constants.GL_FLOAT
                     }
-                }}
+                }
+            },
+            {
+                type:"KICK.scene.Scene",
+                config:{
+                    name:"SimpleScene",
+                    gameObjects:[]
+                }
+            }
         ];
 
         function addRotatorComponent(gameObject){
@@ -105,12 +113,13 @@ void main(void)
             project.loadProject(projectData);
             // A simple way to test that the project can be serialized and reloaded (without loosing data)
             project.loadProject(project.toJSON());
+            engine.activeScene = project.load("SimpleScene");
             console.log(project.getResourceDescriptorNames());
 
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],
-                fieldOfView:60
+                fieldOfView: 60
             });
             cameraObject.addComponent(camera);
 

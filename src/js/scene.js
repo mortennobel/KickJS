@@ -56,13 +56,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         ASSERT = constants._ASSERT;
 
     /**
-     * Game objects. (Always attached to a given scene)
+     * Game objects. (Always attached to a given scene).
+     * This constructor should not be called directly - Scene.createGameObject() should be used instead.
      * @class GameObject
      * @namespace KICK.scene
      * @constructor
      * @param scene {KICK.scene.Scene}
      */
-    scene.GameObject = function (scene) {
+    scene.GameObject = function (scene, config) {
         var _components = [],
             _layer = 1;
         Object.defineProperties(this,
@@ -580,9 +581,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @class Scene
      * @namespace KICK.scene
      * @constructor
-     * @param engine {KICK.core.Engine}
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config
      */
-    scene.Scene = function (engine) {
+    scene.Scene = function (engine, config) {
         var gameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
@@ -595,8 +597,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             cameras = [],
             renderableComponents = [],
             sceneLightObj = new KICK.scene.SceneLights(),
+            _name = config ? config.name : "Scene",
             gl,
             i,
+            thisObj = this,
             addLight = function(light){
                 if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
                     sceneLightObj.ambientLight = light;
@@ -772,7 +776,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.removeComponentListener = function (componentListener) {
             core.Util.removeElementFromArray(componentListenes,componentListener);
-        }
+        };
 
         /**
          * Should only be called by GameObject when a component is added. If the component is updateable (implements
@@ -796,37 +800,38 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentsDelete.push(component);
         };
 
-        /**
-         * Reference to the engine
-         * @property engine
-         * @type KICK.core.Engine
-         */
-        Object.defineProperty(this,"engine",{
-            value:engine
+        Object.defineProperties(this,{
+            /**
+             * Reference to the engine
+             * @property engine
+             * @type KICK.core.Engine
+             */
+            engine:{
+                value:engine
+            },
+            /**
+             * Name of the scene
+             * @property name
+             * @type String
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                    _name = newValue;
+                }
+
+            }
         });
 
         /**
-         * @method loadScene
-         * @param {String} jsonStr
-         */
-        this.loadScene = function (jsonStr) {
-            throw Error("Not implemented");
-        };
-
-        /**
-         * @method saveScene
-         * @return {String} in jsonFormat
-         */
-        this.saveScene = function () {
-            throw Error("Not implemented");
-        };
-
-        /**
          * @method createGameObject
+         * @param {Object} config Optionally configuration passed tothe Ga
          * @return {KICK.scene.GameObject}
          */
-        this.createGameObject = function () {
-            var gameObject = new scene.GameObject(this);
+        this.createGameObject = function (config) {
+            var gameObject = new scene.GameObject(this,config);
             gameObjectsNew.push(gameObject);
             return gameObject;
         };
@@ -866,6 +871,21 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * @method toJSON
+         * @return {Object}
+         */
+        this.toJSON = function (){
+            var gameObjects = [];
+            for (var i=0;i<gameObjects.length;i++){
+                gameObjects.push(gameObjects[i].toJSON());
+            }
+            return {
+                gameObjects: gameObjects,
+                name: _name
+            };
+        };
+
+        /**
          * Prints scene properties to the console
          * @method debug
          */
@@ -875,6 +895,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete
             );
         };
+
+        (function init(){
+            if (config){
+                var gameObjects = config.gameObjects;
+                for (var i=0;i<gameObjects.length;i++){
+                    thisObj.createGameObject(gameObjects[i]);
+                }
+            }
+        })();
     };
 
     /**
