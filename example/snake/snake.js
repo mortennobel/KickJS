@@ -10,8 +10,9 @@ window.onload = function(){
             transform,
             levelSize = snakeLevelComponent.size;
         this.activated = function (){
-            var shader = new KICK.material.Shader(this.gameObject.engine),
-                material = new KICK.material.Material({
+            var engine = this.gameObject.engine,
+                shader = new KICK.material.Shader(engine),
+                material = new KICK.material.Material(engine,{
                     shader:shader,
                     name:"SnakeFood material"
                 }),
@@ -97,7 +98,7 @@ window.onload = function(){
             currentMovement = 0, // limits movement to not go backwards
             shader = new KICK.material.Shader(engine),
 
-            material = new KICK.material.Material({
+            material = new KICK.material.Material(engine,{
                 shader:shader,
                 name:"Snake material"
             }),
@@ -267,11 +268,12 @@ window.onload = function(){
         Object.defineProperty(this,"size",{value:size});
 
         this.activated = function (){
+            var engine = this.gameObject.engine;
             meshRenderer = this.gameObject.getComponentOfType(KICK.scene.MeshRenderer);
 
-            shader = new KICK.material.Shader(this.gameObject.engine);
+            shader = new KICK.material.Shader(engine);
 
-            material = new KICK.material.Material({
+            material = new KICK.material.Material(engine,{
                 shader:shader,
                 name:"Snake material"
             });

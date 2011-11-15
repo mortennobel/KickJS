@@ -5287,6 +5287,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             frameCount = 0,
             contextListeners = [],
             frameListeners = [],
+            project = new core.Project(this),
             keyInput = null,
             activeScene = new scene.Scene(this),
             animationFrameObj = {},
@@ -5304,6 +5305,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             resourceManager:{
                 value: new core.ResourceManager(this)
+            },
+            /**
+             * Project describes the resources available for a given projects (such as Scenes, Materials, Shader and Meshes)
+             * @property project
+             * @type KICK.core.Project
+             */
+            project:{
+                value: project
             },
             /**
              * The WebGL context (readonly)
@@ -5556,6 +5565,230 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
             thisObj._gameLoop(lastTime);
         }());
+    };
+
+    /**
+     * A project is a container of all resources and assets used in a game.
+     * @class Project
+     * @namespace KICK.core
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {JSON} json project data
+     */
+    core.Project = function(engine){
+        var resourceDescriptors = {},
+            resourceCache = {},
+            resourceReferenceCount = {},
+            thisObj = this;
+
+        /**
+         * @method loadProject
+         * @param {Array[KICK.core.ResourceDescriptor]} resourceDescriptors
+         */
+        this.loadProject = function(resourceDescriptors){
+            if (thisObj.getResourceDescriptorNames().length>0){
+                thisObj.closeProject();
+            }
+            for (var i=0;i<resourceDescriptors.length;i++){
+                thisObj.addResourceDescriptor(resourceDescriptors[i]);
+            }
+        };
+
+        /**
+         * Close all resources in the project and remove all resource descriptors
+         * @method closeProject
+         */
+        this.closeProject = function(){
+            var resourceNames = thisObj.getResourceDescriptorNames();
+            for (var i=resourceNames.length;i>=0;i--){
+                thisObj.removeResourceDescriptor(resourceNames[i]);
+            }
+        };
+
+        /**
+         * Load a resource from the configuration (or cache).
+         * Also increases the resource reference counter.
+         * @method load
+         * @param {String} resourceName
+         * @return {Object} resource or undefined if resource is not found
+         */
+        this.load = function(resourceName){
+            var resourceObject = resourceCache[resourceName];
+            if (resourceObject){
+                resourceReferenceCount[resourceName]++;
+                return resourceObject;
+            }
+            var resourceConfig = resourceDescriptors[resourceName];
+            if (resourceConfig){
+                resourceObject = resourceConfig.instantiate(engine);
+                resourceCache[resourceName] = resourceObject;
+                resourceReferenceCount[resourceName] = 1;
+            }
+            return resourceObject;
+        };
+
+        /**
+         * Decreases the resource reference counter. If resource is no longer
+         * used it's destroy method will be invoked (if available).
+         * @method release
+         * @param resourceName
+         */
+        this.release = function(resourceName){
+            var resourceObject = resourceCache[resourceName];
+            if (resourceObject){
+                resourceReferenceCount[resourceName]--;
+                if (resourceReferenceCount[resourceName] <= 0){
+                    delete resourceCache[resourceName];
+                    delete resourceReferenceCount[resourceName];
+                    if (resourceObject.destroy){
+                        resourceObject.destroy();
+                    }
+                }
+            }
+        };
+
+        /**
+         * @method addResourceDescriptor
+         * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
+         */
+        this.addResourceDescriptor = function(resourceDescriptor){
+            if (!(resourceDescriptor instanceof core.ResourceDescriptor)){
+                resourceDescriptor = new core.ResourceDescriptor(resourceDescriptor);
+            }
+            resourceDescriptors[resourceDescriptor.name] = resourceDescriptor;
+        };
+
+        /**
+         * Remove resource descriptor and destroy the resource if already allocated.
+         * @method removeResourceDescriptor
+         * @param {String} resourceName
+         */
+        this.removeResourceDescriptor = function(resourceName){
+            // destroy the resource
+            var resource = resourceCache[resourceName];
+            if (resource && resource.detroy){
+                resource.destroy();
+            }
+            // remove references
+            delete resourceCache[resourceName];
+            delete resourceReferenceCount[resourceName];
+            delete resourceDescriptors[resourceName];
+        };
+
+        /**
+         * @method getResourceDescriptorNames
+         * @return {Array[String]} resource names
+         */
+        this.getResourceDescriptorNames = function(){
+            var array = [];
+            for (var name in resourceDescriptors){
+                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
+                    array.push(name);
+                }
+            }
+            array.sort();
+            return array;
+        };
+    };
+
+    /**
+     * A project is a container of all resources and assets used in a game.<br>
+     * Example usage:
+     * <pre class="brush: js">
+     * var materialConfig = {
+     *          name:"Some material",
+     *          shader:"Undefined",
+     *          uniforms: {
+     *              value:42,
+     *              type: 5126
+     *          }
+     *      };
+     *      var resourceDescriptorConfig = {
+     *          name: "Some material",
+     *          type: "KICK.material.Material",
+     *          config: materialConfig
+     *      };
+     *      var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
+     * </pre>
+     * @class ResourceDescriptor
+     * @namespace KICK.core
+     * @constructor
+     * @param {Object} config an object which attributes matches the properties of ResourceDescriptor
+     */
+    core.ResourceDescriptor = function(config){
+        var _config = config || {},
+            name = _config.name,
+            type = _config.type,
+            config = _config.config,
+            source = _config.source;
+        Object.defineProperties(this,{
+            /**
+             * The name may contain '/' as folder seperator
+             * @property name
+             * @type String
+             */
+            name:{
+                get: function(){
+                    return name;
+                },
+                set: function(newValue){
+                    name = newValue;
+                }
+            },
+            /**
+             * class name of the resource (such as 'KICK.material.Material')
+             * @property type
+             * @type String
+             */
+            type:{
+                value: type
+            },
+            /**
+             * Configuration of the resource.
+             * Optional
+             * @property config
+             * @type Object
+             */
+            config:{
+                value: config
+            },
+            /**
+             * @property source
+             * @type String
+             */
+            source:{
+                value:source
+            }
+        });
+        /**
+         * Create a instance of the resource by calling the constructor function with
+         * (engine,config) parameters.<br>
+         * If the resource object has a init function, this is also invoked.
+         * @method instantiate
+         * @param {KICK.core.Engine} engine
+         * @return {Object} instance of the resource
+         */
+        this.instantiate = function(engine){
+            var resourceClass = KICK.namespace(type);
+            var resource = new resourceClass(engine,config);
+            if (typeof resource.init === 'function'){
+                resource.init();
+            }
+            return resource;
+        };
+
+        /**
+         * @method toJSON
+         * @return {Object} A json data object
+         */
+        this.toJSON = function(){
+            return {
+                name:name,
+                type:type,
+                config:config,
+                source:source
+            };
+        };
     };
 
     /**
@@ -9927,8 +10160,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @class Material
      * @namespace KICK.material
      * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config
      */
-    material.Material = function (config) {
+    material.Material = function (engine,config) {
         var configObj = config || {},
             _name = configObj.name || "Material",
             _shader = configObj.shader,
@@ -10777,7 +11012,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
             meshRenderer.mesh = getMeshById(engine,url);
             console.log("Mesh",meshRenderer.mesh);
-            meshRenderer.material = new KICK.material.Material({
+            meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
             });

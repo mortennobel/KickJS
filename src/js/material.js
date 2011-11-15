@@ -711,8 +711,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @class Material
      * @namespace KICK.material
      * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config
      */
-    material.Material = function (config) {
+    material.Material = function (engine,config) {
         var configObj = config || {},
             _name = configObj.name || "Material",
             _shader = configObj.shader,

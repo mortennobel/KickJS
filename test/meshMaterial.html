@@ -51,7 +51,7 @@
                 return;
             }
             for (var i=0;i<3;i++){
-                var material = new KICK.material.Material({
+                var material = new KICK.material.Material(engine,{
                     name:"Some material "+i,
                     shader:shader,
                     uniforms: {

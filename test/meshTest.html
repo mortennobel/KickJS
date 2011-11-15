@@ -48,7 +48,7 @@
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
             shader.updateShader();
-            var material = new KICK.material.Material({
+            var material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
             });

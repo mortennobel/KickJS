@@ -90,7 +90,7 @@ function createMaterial(vertexShaderId, fragmentShaderId){
         return;
     }
 
-    var material = new KICK.material.Material({
+    var material = new KICK.material.Material(engine,{
         name:"Some material",
         shader:shader
     });

@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <!--<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Maven+Pro:400,700">-->
+
+            <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+            <link rel="stylesheet" href="/combo/css?main-min.css">
+
+        <link rel="stylesheet" href="/vendor/prettify/prettify-min.css">
+        <link rel="stylesheet" href="/css/docs-min.css">
+<script src="../../src/js/constants.js"></script>
+<script src="../../src/js/math.js"></script>
+<script src="../../src/js/core.js"></script>
+<script src="../../src/js/mesh.js"></script>
+<script src="../../src/js/meshFactory.js"></script>
+<script src="../../src/js/material.js"></script>
+<script src="../../src/js/scene.js"></script>
+    <!-- allows to use random seed -->
+       <!--<script type="text/javascript" src="http://davidbau.com/encode/seedrandom.js"></script>-->
+
+
+<script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+<h1>Light test</h1>
+<style scoped>
+    #testLogger {
+        margin-bottom: 1em;
+    }
+
+    #testLogger .yui3-console .yui3-console-title {
+        border: 0 none;
+        color: #000;
+        font-size: 13px;
+        font-weight: bold;
+        margin: 0;
+        text-transform: none;
+    }
+    #testLogger .yui3-console .yui3-console-entry-meta {
+        margin: 0;
+    }
+
+    .yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
+        background: #070;
+        color: #fff;
+    }
+    </style>
+
+    <div id="testLogger"></div>
+
+<script>
+YUI().use('node', 'console', 'test', function (Y) {
+
+    Y.namespace("KICK.math");
+
+    Y.KICK.math.vec3Test = new Y.Test.Case({
+
+        //name of the test case - if not provided, one is auto-generated
+        name : "vec3test",
+
+        //---------------------------------------------------------------------
+        // setUp and tearDown methods - optional
+        //---------------------------------------------------------------------
+
+        /*
+         * Sets up data that is needed by each test.
+         */
+        setUp : function () {
+        },
+
+        /*
+         * Cleans up everything that was created by setUp().
+         */
+        tearDown : function () {
+        },
+
+        //---------------------------------------------------------------------
+        // Test methods - names must begin with "test"
+        //---------------------------------------------------------------------
+        testProjectResourceDescriptor: function () {
+            var ProjectResourceDescriptor = KICK.core.ResourceDescriptor,
+                    Assert = Y.Assert;
+            var materialConfig = {
+                name:"Some material",
+                shader:"Undefined",
+                uniforms: {
+                    value:42,
+                    type: KICK.core.Constants.GL_FLOAT
+                }
+            };
+            var resourceDescriptorConfig = {
+                name: "Some material",
+                type: "KICK.material.Material",
+                config: materialConfig
+            };
+            var materialDescriptor = new ProjectResourceDescriptor(resourceDescriptorConfig);
+            var materialObject = materialDescriptor.instantiate(null);
+            Assert.isTrue(materialObject instanceof KICK.material.Material, "object is Material");
+            materialDescriptor.toJSON()
+        }
+    });
+
+    /// extend Asset to compare float values
+    Y.Assert.compareVec = function(f1,f2,message){
+        if (!message){
+            if (f1.length==3){
+                message = "Expected "+KICK.math.vec3.str(f1)+" Actual "+KICK.math.vec3.str(f2);
+            }
+        }
+        for (var i=0;i<f1.length;i++){
+            Y.Assert.compareFloat(f1[i],f2[i],message);
+        }
+    };
+    Y.Assert.compareFloat = function(f1,f2,message){
+        var epsilon = 0.001;
+        if (!message){
+            message = "f1 "+f1+" f2 "+f2;
+        }
+        var bool = Math.abs(f1-f2)<epsilon;
+        if (!bool){
+            debugger;
+        }
+        return Y.Assert.isTrue(bool,message);
+    };
+
+    var ExampleSuite = new Y.Test.Suite("Example Suite");
+    ExampleSuite.add(Y.KICK.math.vec3Test);
+
+    //create the console
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block', // to anchor in the example content,
+        width: 600,
+        height: 600
+    });
+
+    r.render('#testLogger');
+
+    window.logger = r;
+
+    Y.Test.Runner.add(ExampleSuite);
+
+    //run the tests
+    Y.Test.Runner.run();
+
+});
+</script>
+
+</div>
+
+</body>
+</html>

@@ -159,7 +159,7 @@ window.shaderEditor = new (function(){
         }
 
         shaderData.material.shader = shader;
-        _meshRenderer.material = new KICK.material.Material(shaderData.material);
+        _meshRenderer.material = new KICK.material.Material(_engine,shaderData.material);
     };
 
     //

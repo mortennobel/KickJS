@@ -389,7 +389,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
             meshRenderer.mesh = getMeshById(engine,url);
             console.log("Mesh",meshRenderer.mesh);
-            meshRenderer.material = new KICK.material.Material({
+            meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
             });

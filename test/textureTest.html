@@ -38,7 +38,7 @@
             texture = new KICK.texture.Texture(engine);
             texture.setTemporaryTexture();
 
-            material = new KICK.material.Material({
+            material = new KICK.material.Material(engine,{
                 name:"Some material ",
                 shader:shader,
                 uniforms: {

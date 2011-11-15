@@ -15,7 +15,7 @@ window.onload = function(){
                 return;
             }
 
-            meshRenderer.material = new KICK.material.Material({
+            meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader,
                 uniforms: materialUniforms
