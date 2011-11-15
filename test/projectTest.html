@@ -75,7 +75,29 @@ void main(void)
                 type:"KICK.scene.Scene",
                 config:{
                     name:"SimpleScene",
-                    gameObjects:[]
+                    gameObjects:[
+                        {
+                            name:"MainCamera",
+                            components:[
+                                {
+                                    type:"KICK.scene.Transform",
+                                    config: {
+                                        localPosition: [0,0,0],
+                                        localRotation: [0,0,0],
+                                        localScale:[1,1,1],
+                                        parent:null
+                                    }
+                                },
+                                {
+                                    type:"KICK.scene.Camera",
+                                    config:{
+                                        clearColor: [0,0,0,1],
+                                        fieldOfView: 60
+                                    }
+                                }
+                            ]
+                        }
+                    ]
                 }
             }
         ];
@@ -116,21 +138,19 @@ void main(void)
             engine.activeScene = project.load("SimpleScene");
             console.log(project.getResourceDescriptorNames());
 
-            var cameraObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1],
-                fieldOfView: 60
-            });
-            cameraObject.addComponent(camera);
-
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
             meshRenderer.material = project.load("Some material");
             gameObject.addComponent(meshRenderer);
-
-            addRotatorComponent(cameraObject);
+            var cameraObject = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
+            console.log("# gameobjects "+engine.activeScene.getNumberOfGameObjects());
+            if ( cameraObject ){
+                addRotatorComponent(cameraObject);
+            } else {
+                console.log("Cannot find camera");
+            }
         }
 
         function UVSphere(){

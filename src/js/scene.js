@@ -586,6 +586,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      */
     scene.Scene = function (engine, config) {
         var gameObjects = [],
+            activeGameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
             updateableComponents= [],
@@ -651,11 +652,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 var i,
                     component;
                 if (gameObjectsNew.length > 0) {
-                    gameObjects = gameObjects.concat(gameObjectsNew);
+                    activeGameObjects = activeGameObjects.concat(gameObjectsNew);
                     gameObjectsNew.length = 0;
                 }
                 if (gameObjectsDelete.length > 0) {
-                    core.Util.removeElementsFromArray(gameObjects,gameObjectsDelete);
+                    core.Util.removeElementsFromArray(activeGameObjects,gameObjectsDelete);
                     gameObjectsDelete.length = 0;
                 }
                 if (componentsNew.length > 0) {
@@ -709,6 +710,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         } else if (component instanceof scene.Light){
                             removeLight(component);
                         }
+                        core.Util.removeElementFromArray(gameObjects,component);
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
                         componentListenes[i].componentsRemoved(componentsDeleteCopy);
@@ -755,10 +757,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Search the scene for components of the specified type in the scene. Note that this
          * method is slow - do not run in the the update function.
          * @method findComponentsOfType
-         * @param {Type} componentType
+         * @param {Function} componentType
          * @return {Array[KICK.scene.Component]} components
          */
         this.findComponentsOfType = function(componentType){
+            if (ASSERT){
+                if (typeof componentType !== 'function'){
+                    KICK.core.Util.fail("Scene.findComponentsOfType expects a function");
+                }
+            }
             var res = [];
             for (var i=gameObjects.length-1;i>=0;i--){
                 var component = gameObjects[i].getComponentsOfType(componentType);
@@ -833,6 +840,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.createGameObject = function (config) {
             var gameObject = new scene.GameObject(this,config);
             gameObjectsNew.push(gameObject);
+            gameObjects.push(gameObject);
             return gameObject;
         };
 
@@ -890,7 +898,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @method debug
          */
         this.debug = function () {
-            console.log("gameObjects "+gameObjects.length,gameObjects,
+            console.log("gameObjects "+activeGameObjects.length,activeGameObjects,
                 "gameObjectsNew "+gameObjectsNew.length,gameObjectsNew,
                 "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete
             );
