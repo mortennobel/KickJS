@@ -72,6 +72,12 @@ void main(void)
                 }
             },
             {
+                type:"KICK.mesh.Mesh",
+                config: {
+                    name:"CubeMesh"
+                }
+            },
+            {
                 type:"KICK.scene.Scene",
                 config:{
                     name:"SimpleScene",
@@ -103,6 +109,28 @@ void main(void)
                             ]
                         },
                         {
+                            name:"Cube",
+                            uid:1237,
+                            components:[
+                                {
+                                    type:"KICK.scene.MeshRenderer",
+                                    config:{
+                                        material:{
+                                            ref:"Some material",
+                                            type:"project"
+                                        }
+                                        /*,
+                                        mesh:{
+                                            ref:"",
+                                            type:"project"
+                                        }*/
+                                    }
+                                }
+                            ]
+                        },
+
+                        /*,
+                        {
                             name:"MainCameraChild",
                             uid:120,
                             components:[
@@ -116,7 +144,7 @@ void main(void)
                                     }
                                 }
                             ]
-                        }
+                        } */
                     ]
                 }
             }
@@ -162,12 +190,11 @@ void main(void)
             project.loadProject(project.toJSON());
             engine.activeScene = project.load("SimpleScene");
 
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
+            meshRenderer = engine.activeScene.findComponentsOfType(KICK.scene.MeshRenderer)[0];
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
             meshRenderer.material = project.load("Some material");
-            gameObject.addComponent(meshRenderer);
+            //gameObject.addComponent(meshRenderer);
         }
     </script>
 </body>
