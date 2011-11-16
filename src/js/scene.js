@@ -986,17 +986,6 @@ KICK.namespace = function (ns_string) {
             };
         };
 
-        /**
-         * Prints scene properties to the console
-         * @method debug
-         */
-        this.debug = function () {
-            console.log("gameObjects "+activeGameObjects.length,activeGameObjects,
-                "gameObjectsNew "+gameObjectsNew.length,gameObjectsNew,
-                "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete
-            );
-        };
-
         (function init(){
             var gameObject;
             if (config){
