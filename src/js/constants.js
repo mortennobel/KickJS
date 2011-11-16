@@ -22,10 +22,15 @@
  */
 
 var KICK = KICK || {};
-KICK.namespace = function (ns_string) {
+
+KICK.namespace = KICK.namespace || function (ns_string) {
     var parts = ns_string.split("."),
-        parent = window,
+        parent = KICK,
         i;
+    // strip redundant leading global
+    if (parts[0] === "KICK") {
+        parts = parts.slice(1);
+    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -2509,7 +2514,7 @@ KICK.namespace = function (ns_string) {
          */
         GL_BROWSER_DEFAULT_WEBGL: { value: 37444,enumerable:true}
     });
-}());
+})();
 
 // Node.js export (used for preprocessor)
 this["exports"] = this["exports"] || {};
