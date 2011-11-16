@@ -20,14 +20,11 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-KICK.namespace = KICK.namespace || function (ns_string) {
+var KICK = KICK || {};
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist

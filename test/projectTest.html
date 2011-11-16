@@ -78,6 +78,7 @@ void main(void)
                     gameObjects:[
                         {
                             name:"MainCamera",
+                            uid:123,
                             components:[
                                 {
                                     type:"KICK.scene.Transform",
@@ -94,6 +95,25 @@ void main(void)
                                         clearColor: [0,0,0,1],
                                         fieldOfView: 60
                                     }
+                                },
+                                {
+                                    type:"Rotator",
+                                    config:{}
+                                }
+                            ]
+                        },
+                        {
+                            name:"MainCameraChild",
+                            uid:120,
+                            components:[
+                                {
+                                    type:"KICK.scene.Transform",
+                                    config: {
+                                        localPosition: [1,2,3],
+                                        localRotationQuat: [4,5,6,1],
+                                        localScale:[1,1,1],
+                                        parent:null
+                                    }
                                 }
                             ]
                         }
@@ -102,29 +122,34 @@ void main(void)
             }
         ];
 
-        function addRotatorComponent(gameObject){
+        function Rotator(config){
             var time = engine.time,
-                    transform = gameObject.transform,
+                    transform,
                     rotationSpeed = 0.001,
-                    translation = transform.localPosition,
-                    rotVec = transform.localRotationEuler,
+                    translation,
+                    rotVec,
                     radius = 5,
                     radianToDegree = KICK.core.Constants._RADIAN_TO_DEGREE,
                     res = document.getElementById("res");
-            gameObject.addComponent({
-                update: function(){
-                    var timeTotal = time.time,
-                            rot = timeTotal*rotationSpeed;
-                    translation[0] = Math.sin(rot)*radius;
-                    translation[1] = Math.sin(rot*3);
-                    translation[2] = Math.cos(rot)*radius;
-                    rotVec[1] = rot*radianToDegree;
-                    transform.localPosition = translation;
+            this.activated = function(){
+                var gameObject = this.gameObject;
+                transform = gameObject.transform;
+                translation = transform.localPosition;
+                rotVec = transform.localRotationEuler;
+            };
 
-                    //new Date().getMilliseconds();
-                    transform.localRotationEuler = rotVec;
-                }
-            });
+            this.update = function(){
+                var timeTotal = time.time,
+                        rot = timeTotal*rotationSpeed;
+                translation[0] = Math.sin(rot)*radius;
+                translation[1] = Math.sin(rot*3);
+                translation[2] = Math.cos(rot)*radius;
+                rotVec[1] = rot*radianToDegree;
+                transform.localPosition = translation;
+
+                //new Date().getMilliseconds();
+                transform.localRotationEuler = rotVec;
+            }
         }
 
         function initKick() {
@@ -136,7 +161,6 @@ void main(void)
             // A simple way to test that the project can be serialized and reloaded (without loosing data)
             project.loadProject(project.toJSON());
             engine.activeScene = project.load("SimpleScene");
-            console.log(project.getResourceDescriptorNames());
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
@@ -144,22 +168,6 @@ void main(void)
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
             meshRenderer.material = project.load("Some material");
             gameObject.addComponent(meshRenderer);
-            var cameraObject = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
-            console.log("# gameobjects "+engine.activeScene.getNumberOfGameObjects());
-            for (var i=0;i<engine.activeScene.getNumberOfGameObjects();i++){
-                console.log("# "+i+" "+engine.activeScene.getGameObject(i).name);
-                console.log("# "+i+" "+engine.activeScene.getGameObject(i).transform.str());
-            }
-            if ( cameraObject ){
-                addRotatorComponent(cameraObject.gameObject);
-            } else {
-                console.log("Cannot find camera");
-            }
-        }
-
-        function UVSphere(){
-            // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
         }
     </script>
 </body>

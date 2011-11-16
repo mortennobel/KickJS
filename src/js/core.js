@@ -25,15 +25,10 @@
  * @module KICK
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -655,7 +650,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     core.ResourceDescriptor = function(config){
         var _config = config || {},
             type = _config.type,
-            config = _config.config,
+            resourceConfig = _config.config,
             source = _config.source;
         Object.defineProperties(this,{
             /**
@@ -665,10 +660,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             name:{
                 get: function(){
-                    return config.name;
+                    return resourceConfig.name;
                 },
                 set: function(newValue){
-                    config.name = newValue;
+                    resourceConfig.name = newValue;
                 }
             },
             /**
@@ -686,7 +681,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * @type Object
              */
             config:{
-                value: config
+                value: resourceConfig
             },
             /**
              * @property source
@@ -706,7 +701,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.instantiate = function(engine){
             var resourceClass = KICK.namespace(type);
-            var resource = new resourceClass(engine,config);
+            var resource = new resourceClass(engine,resourceConfig);
             if (typeof resource.init === 'function'){
                 resource.init();
             }
@@ -720,7 +715,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.toJSON = function(){
             return {
                 type:type,
-                config:config,
+                config:resourceConfig,
                 source:source
             };
         };
@@ -960,6 +955,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         applyConfig: function(object,config,excludeFilter){
             var contains = core.Util.contains,
                 hasProperty = core.Util.hasProperty;
+            config = config || {};
             excludeFilter = excludeFilter || [];
             for (var name in config){
                 if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
