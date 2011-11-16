@@ -2563,11 +2563,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         GL_BROWSER_DEFAULT_WEBGL: { value: 37444,enumerable:true}
     });
-}());
+})();
 
 // Node.js export (used for preprocessor)
 this["exports"] = this["exports"] || {};
-exports.Constants = KICK.core.Constants;/*!
+exports.Constants = KICK.core.Constants;
+/*!
  * New BSD License
  *
  * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
@@ -2590,15 +2591,10 @@ exports.Constants = KICK.core.Constants;/*!
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -2711,15 +2707,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  *    distribution.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -2730,7 +2721,6 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     }
     return parent;
 };
-
 (function () {
     "use strict"; // force strict ECMAScript 5
 
@@ -5100,15 +5090,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * @module KICK
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -5730,7 +5715,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     core.ResourceDescriptor = function(config){
         var _config = config || {},
             type = _config.type,
-            config = _config.config,
+            resourceConfig = _config.config,
             source = _config.source;
         Object.defineProperties(this,{
             /**
@@ -5740,10 +5725,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              */
             name:{
                 get: function(){
-                    return config.name;
+                    return resourceConfig.name;
                 },
                 set: function(newValue){
-                    config.name = newValue;
+                    resourceConfig.name = newValue;
                 }
             },
             /**
@@ -5761,7 +5746,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
              * @type Object
              */
             config:{
-                value: config
+                value: resourceConfig
             },
             /**
              * @property source
@@ -5781,7 +5766,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.instantiate = function(engine){
             var resourceClass = KICK.namespace(type);
-            var resource = new resourceClass(engine,config);
+            var resource = new resourceClass(engine,resourceConfig);
             if (typeof resource.init === 'function'){
                 resource.init();
             }
@@ -5795,7 +5780,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         this.toJSON = function(){
             return {
                 type:type,
-                config:config,
+                config:resourceConfig,
                 source:source
             };
         };
@@ -6035,6 +6020,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         applyConfig: function(object,config,excludeFilter){
             var contains = core.Util.contains,
                 hasProperty = core.Util.hasProperty;
+            config = config || {};
             excludeFilter = excludeFilter || [];
             for (var name in config){
                 if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
@@ -6287,15 +6273,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -7195,15 +7176,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -7237,7 +7213,8 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @class GameObject
      * @namespace KICK.scene
      * @constructor
-     * @param scene {KICK.scene.Scene}
+     * @param {KICK.scene.Scene} scene
+     * @param {Object} config configuration for gameObject (components will not be initialized)
      */
     scene.GameObject = function (scene, config) {
         var _components = [],
@@ -7435,30 +7412,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         (function init(){
-            var component;
-            var componentObj;
-            var type;
-            config = config || {};
-            applyConfig(thisObj,config);
-            // build components
-            for (var i=0;config.components && i<config.components.length;i++){
-                component = config.components[i];
-                if (component.type === "KICK.scene.Transform"){
-                    componentObj = thisObj.transform;
-                    componentObj.localPosition = component.config.localPosition;
-                    componentObj.localRotationQuat = component.config.localRotationQuat;
-                    componentObj.localScale = component.config.localScale;
-                    if (component.config.parent){
-                        console.log("Implement finding parent"); // todo implement
-                        componentObj.parent = component.config.parent;
-                    }
-                } else {
-                    type = KICK.namespace(component.type);
-                    componentObj = new type(component.config);
-                    thisObj.addComponent(componentObj);
-                }
-            }
-
+            applyConfig(thisObj,config,["uid"]);
         })();
     };
 
@@ -7895,21 +7849,17 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 return b.cameraIndex - a.cameraIndex;
             },
             /**
-             * Handle insertions and removal of gameobjects and components. This is done in a separate step to avoid problems
+             * Handle insertions of new gameobjects and components. This is done in a separate step to avoid problems
              * with missed updates (or multiple updates) due to modifying the array while iterating it.
-             * @method cleanupGameObjects
+             * @method addNewGameObjects
              * @private
              */
-            cleanupGameObjects = function () {
+            addNewGameObjects = function () {
                 var i,
                     component;
                 if (gameObjectsNew.length > 0) {
                     activeGameObjects = activeGameObjects.concat(gameObjectsNew);
                     gameObjectsNew.length = 0;
-                }
-                if (gameObjectsDelete.length > 0) {
-                    core.Util.removeElementsFromArray(activeGameObjects,gameObjectsDelete);
-                    gameObjectsDelete.length = 0;
                 }
                 if (componentsNew.length > 0) {
                     var componentsNewCopy = componentsNew;
@@ -7942,6 +7892,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         componentListenes[i].componentsAdded(componentsNewCopy);
                     }
                 }
+            },/**
+             * Handle deletion of new gameobjects and components. This is done in a separate step to avoid problems
+             * with missed updates (or multiple updates) due to modifying the array while iterating it.
+             * @method cleanupGameObjects
+             * @private
+             */
+            cleanupGameObjects = function () {
+                var i,
+                    component;
+                if (gameObjectsDelete.length > 0) {
+                    core.Util.removeElementsFromArray(activeGameObjects,gameObjectsDelete);
+                    gameObjectsDelete.length = 0;
+                }
                 if (componentsDelete.length > 0) {
                     var componentsDeleteCopy = componentsDelete;
                     componentsDelete = [];
@@ -7970,6 +7933,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
             },
             updateComponents = function(){
+                addNewGameObjects();
                 var i;
                 for (i=updateableComponents.length-1; i >= 0; i--) {
                     updateableComponents[i].update();
@@ -7986,6 +7950,38 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 }
                 engine.gl.flush();
             };
+
+        this.init = function(){
+            var component,
+                componentObj,
+                type,
+                gameObjectConfig,
+                gameObject;
+            config = config || {};
+            var gameObjects = config.gameObjects;
+            for (var j=0;j<gameObjects.length;j++){
+                gameObjectConfig = config.gameObjects[j];
+                gameObject = gameObjectConfig.newObject;
+                // build components
+                for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
+                    component = gameObjectConfig.components[i];
+                    if (component.type === "KICK.scene.Transform"){
+                        componentObj = gameObject.transform;
+                        componentObj.localPosition = component.config.localPosition;
+                        componentObj.localRotationQuat = component.config.localRotationQuat;
+                        componentObj.localScale = component.config.localScale;
+                        if (component.config.parent){
+                            console.log("Implement finding parent"); // todo implement
+                            componentObj.parent = component.config.parent;
+                        }
+                    } else {
+                        type = KICK.namespace(component.type);
+                        componentObj = new type(component.config);
+                        gameObject.addComponent(componentObj);
+                    }
+                }
+            }
+        };
 
         /**
          * Add a component listener to the scene. A component listener should contain two functions:
@@ -8086,7 +8082,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
         /**
          * @method createGameObject
-         * @param {Object} config Optionally configuration passed tothe Ga
+         * @param {Object} config Optionally configuration passed to the game objects
          * @return {KICK.scene.GameObject}
          */
         this.createGameObject = function (config) {
@@ -8157,10 +8153,13 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         (function init(){
+            var gameObject;
             if (config){
                 var gameObjects = config.gameObjects;
                 for (var i=0;i<gameObjects.length;i++){
-                    thisObj.createGameObject(gameObjects[i]);
+                    gameObject = config.gameObjects[i];
+                    // save a reference to the newly created object (used in the init function to resolve references to other game objects)
+                    gameObject.newObject = thisObj.createGameObject(gameObject);
                 }
             }
         })();
@@ -8933,15 +8932,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -9526,15 +9520,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -9616,15 +9605,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -10467,15 +10451,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -10811,14 +10790,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-KICK.namespace = KICK.namespace || function (ns_string) {
+var KICK = KICK || {};
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
@@ -11256,15 +11232,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
  */
 
 var KICK = KICK || {};
-
-KICK.namespace = KICK.namespace || function (ns_string) {
+KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
-        parent = KICK,
+        parent = window,
         i;
-    // strip redundant leading global
-    if (parts[0] === "KICK") {
-        parts = parts.slice(1);
-    }
 
     for (i = 0; i < parts.length; i += 1) {
         // create property if it doesn't exist
