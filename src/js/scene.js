@@ -257,7 +257,7 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            applyConfig(thisObj,config,["uid"]);
+            applyConfig(scene,thisObj,config,["uid"]);
         })();
     };
 
@@ -821,7 +821,7 @@ KICK.namespace = function (ns_string) {
                         }
                     } else {
                         type = KICK.namespace(component.type);
-                        componentObj = new type(component.config);
+                        componentObj = new type(gameObject,component.config);
                         gameObject.addComponent(componentObj);
                     }
                 }
@@ -1485,8 +1485,10 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @extends KICK.scene.Component
      * @final
+     * @param {KICK.scene.GameObject} gameObject
+     * @param {Object} config configuration
      */
-    scene.MeshRenderer = function () {
+    scene.MeshRenderer = function (gameObject,config) {
         var transform;
 
         /**
@@ -1501,6 +1503,14 @@ KICK.namespace = function (ns_string) {
          * @type KICK.material.Material
          */
         this.material = undefined;
+
+
+        /**
+         * @property mesh
+         * @type KICK.mesh.Mesh
+         */
+        this.mesh = undefined;
+
 
         /**
          * This method may not be called (the renderer could make the same calls)
@@ -1519,11 +1529,7 @@ KICK.namespace = function (ns_string) {
             mesh.render();
         };
 
-        /**
-         * @property mesh
-         * @type KICK.mesh.Mesh
-         */
-        this.mesh = undefined;
+        applyConfig(gameObject,this,config);
     };
 
     /**

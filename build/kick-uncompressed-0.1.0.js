@@ -6013,18 +6013,29 @@ KICK.namespace = function (ns_string) {
         /**
          * For each non function attribute in config, set the attribute on object
          * @method applyConfig
+         * @param {GameObject_Scene_Engine} context
          * @param {Object} object
          * @param {Object} config
          * @param {Array[String]} excludeFilter
          */
-        applyConfig: function(object,config,excludeFilter){
+        applyConfig: function(context,object,config,excludeFilter){
             var contains = core.Util.contains,
                 hasProperty = core.Util.hasProperty;
             config = config || {};
             excludeFilter = excludeFilter || [];
             for (var name in config){
                 if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
-                    object[name] = config[name];
+                    var value = config[name];
+                    if (value.ref && value.type){
+                        if (value.type === 'project'){
+                            while (!(context instanceof KICK.core.Engine)){
+                                context = context.engine;
+                            }
+                            object[name] = context.project.load(value.ref);
+                        }
+                    } else {
+                        object[name] = value;
+                    }
                 }
             }
         },
@@ -7412,7 +7423,7 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            applyConfig(thisObj,config,["uid"]);
+            applyConfig(scene,thisObj,config,["uid"]);
         })();
     };
 
@@ -7976,7 +7987,7 @@ KICK.namespace = function (ns_string) {
                         }
                     } else {
                         type = KICK.namespace(component.type);
-                        componentObj = new type(component.config);
+                        componentObj = new type(gameObject,component.config);
                         gameObject.addComponent(componentObj);
                     }
                 }
@@ -8139,17 +8150,6 @@ KICK.namespace = function (ns_string) {
                 gameObjects: gameObjects,
                 name: _name
             };
-        };
-
-        /**
-         * Prints scene properties to the console
-         * @method debug
-         */
-        this.debug = function () {
-            console.log("gameObjects "+activeGameObjects.length,activeGameObjects,
-                "gameObjectsNew "+gameObjectsNew.length,gameObjectsNew,
-                "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete
-            );
         };
 
         (function init(){
@@ -8651,8 +8651,10 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @extends KICK.scene.Component
      * @final
+     * @param {KICK.scene.GameObject} gameObject
+     * @param {Object} config configuration
      */
-    scene.MeshRenderer = function () {
+    scene.MeshRenderer = function (gameObject,config) {
         var transform;
 
         /**
@@ -8667,6 +8669,14 @@ KICK.namespace = function (ns_string) {
          * @type KICK.material.Material
          */
         this.material = undefined;
+
+
+        /**
+         * @property mesh
+         * @type KICK.mesh.Mesh
+         */
+        this.mesh = undefined;
+
 
         /**
          * This method may not be called (the renderer could make the same calls)
@@ -8685,11 +8695,7 @@ KICK.namespace = function (ns_string) {
             mesh.render();
         };
 
-        /**
-         * @property mesh
-         * @type KICK.mesh.Mesh
-         */
-        this.mesh = undefined;
+        applyConfig(gameObject,this,config);
     };
 
     /**

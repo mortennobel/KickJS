@@ -127,8 +127,7 @@ void main(void)
                                     }
                                 }
                             ]
-                        },
-
+                        }
                         /*,
                         {
                             name:"MainCameraChild",
@@ -193,8 +192,7 @@ void main(void)
             meshRenderer = engine.activeScene.findComponentsOfType(KICK.scene.MeshRenderer)[0];
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            meshRenderer.material = project.load("Some material");
-            //gameObject.addComponent(meshRenderer);
+            // meshRenderer.material = project.load("Some material");
         }
     </script>
 </body>
