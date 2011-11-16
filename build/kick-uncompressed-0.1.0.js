@@ -6021,6 +6021,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        hasProperty:function (obj, prop)
+        {
+            return Object.prototype.hasOwnProperty.call(obj, prop);
+        },
+        /**
+         * For each non function attribute in config, set the attribute on object
+         * @method applyConfig
+         * @param {Object} object
+         * @param {Object} config
+         * @param {Array[String]} excludeFilter
+         */
+        applyConfig: function(object,config,excludeFilter){
+            var contains = core.Util.contains,
+                hasProperty = core.Util.hasProperty;
+            excludeFilter = excludeFilter || [];
+            for (var name in config){
+                if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
+                    object[name] = config[name];
+                }
+            }
+        },
         /**
          * Reads a parameter from a url string.
          * @method getParameter
@@ -7206,18 +7227,24 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         mat4 = KICK.namespace("KICK.math.mat4"),
         constants = KICK.core.Constants,
         DEBUG = true,
-        ASSERT = true;
+        ASSERT = true,
+        applyConfig = KICK.core.Util.applyConfig,
+        thisObj = this;
 
     /**
-     * Game objects. (Always attached to a given scene)
+     * Game objects. (Always attached to a given scene).
+     * This constructor should not be called directly - Scene.createGameObject() should be used instead.
      * @class GameObject
      * @namespace KICK.scene
      * @constructor
      * @param scene {KICK.scene.Scene}
      */
-    scene.GameObject = function (scene) {
+    scene.GameObject = function (scene, config) {
         var _components = [],
-            _layer = 1;
+            _layer = 1,
+            _name,
+            _uid = scene.engine.createUID(),
+            thisObj = this;
         Object.defineProperties(this,
             {
                 /**
@@ -7259,6 +7286,31 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                             KICK.core.Util.fail("GameObject.layer must be a Number")
                         }
                         _layer = newValue;
+                    }
+                },
+                /**
+                 * @property name
+                 * @type String
+                 */
+                name:{
+                    get:function(){
+                        return _name;
+                    },
+                    set:function(newValue){
+                        _name = newValue;
+                    }
+                },
+                /**
+                 * Unique id - identifies a game object (within a scene).
+                 * @property uid
+                 * @type Number
+                 */
+                uid:{
+                    get:function(){
+                        return _uid;
+                    },
+                    set:function(newValue){
+                        _uid = newValue;
                     }
                 },
                 /**
@@ -7381,6 +7433,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             return res;
         };
+
+        (function init(){
+            var component;
+            var componentObj;
+            var type;
+            config = config || {};
+            applyConfig(thisObj,config);
+            // build components
+            for (var i=0;config.components && i<config.components.length;i++){
+                component = config.components[i];
+                if (component.type === "KICK.scene.Transform"){
+                    componentObj = thisObj.transform;
+                    componentObj.localPosition = component.config.localPosition;
+                    componentObj.localRotationQuat = component.config.localRotationQuat;
+                    componentObj.localScale = component.config.localScale;
+                    if (component.config.parent){
+                        console.log("Implement finding parent"); // todo implement
+                        componentObj.parent = component.config.parent;
+                    }
+                } else {
+                    type = KICK.namespace(component.type);
+                    componentObj = new type(component.config);
+                    thisObj.addComponent(componentObj);
+                }
+            }
+
+        })();
     };
 
     /**
@@ -7726,6 +7805,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         this._markGlobalDirty = markGlobalDirty;
+
+        /**
+         * @method toJSON
+         * @return {Object} JSON formatted object
+         */
+        this.toJSON = function(){
+            var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+            return {
+                localPosition: typedArrayToArray(localPosition),
+                localRotationQuat: typedArrayToArray(localRotationQuat),
+                localScale: typedArrayToArray(localScale),
+                parent: parentTransform ? parentTransform.gameObject.uid : null // todo
+            };
+        };
+
+        /**
+         * @method
+         */
+        this.str = function(){
+            return JSON.stringify(thisObj.toJSON());
+        };
     };
 
     /**
@@ -7733,10 +7833,12 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @class Scene
      * @namespace KICK.scene
      * @constructor
-     * @param engine {KICK.core.Engine}
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config
      */
-    scene.Scene = function (engine) {
+    scene.Scene = function (engine, config) {
         var gameObjects = [],
+            activeGameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
             updateableComponents= [],
@@ -7748,8 +7850,10 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             cameras = [],
             renderableComponents = [],
             sceneLightObj = new KICK.scene.SceneLights(),
+            _name = config ? config.name : "Scene",
             gl,
             i,
+            thisObj = this,
             addLight = function(light){
                 if (light.type == 1){
                     sceneLightObj.ambientLight = light;
@@ -7800,11 +7904,11 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                 var i,
                     component;
                 if (gameObjectsNew.length > 0) {
-                    gameObjects = gameObjects.concat(gameObjectsNew);
+                    activeGameObjects = activeGameObjects.concat(gameObjectsNew);
                     gameObjectsNew.length = 0;
                 }
                 if (gameObjectsDelete.length > 0) {
-                    core.Util.removeElementsFromArray(gameObjects,gameObjectsDelete);
+                    core.Util.removeElementsFromArray(activeGameObjects,gameObjectsDelete);
                     gameObjectsDelete.length = 0;
                 }
                 if (componentsNew.length > 0) {
@@ -7858,6 +7962,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                         } else if (component instanceof scene.Light){
                             removeLight(component);
                         }
+                        core.Util.removeElementFromArray(gameObjects,component);
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
                         componentListenes[i].componentsRemoved(componentsDeleteCopy);
@@ -7904,10 +8009,15 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * Search the scene for components of the specified type in the scene. Note that this
          * method is slow - do not run in the the update function.
          * @method findComponentsOfType
-         * @param {Type} componentType
+         * @param {Function} componentType
          * @return {Array[KICK.scene.Component]} components
          */
         this.findComponentsOfType = function(componentType){
+            if (ASSERT){
+                if (typeof componentType !== 'function'){
+                    KICK.core.Util.fail("Scene.findComponentsOfType expects a function");
+                }
+            }
             var res = [];
             for (var i=gameObjects.length-1;i>=0;i--){
                 var component = gameObjects[i].getComponentsOfType(componentType);
@@ -7925,7 +8035,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          */
         this.removeComponentListener = function (componentListener) {
             core.Util.removeElementFromArray(componentListenes,componentListener);
-        }
+        };
 
         /**
          * Should only be called by GameObject when a component is added. If the component is updateable (implements
@@ -7949,38 +8059,40 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             componentsDelete.push(component);
         };
 
-        /**
-         * Reference to the engine
-         * @property engine
-         * @type KICK.core.Engine
-         */
-        Object.defineProperty(this,"engine",{
-            value:engine
+        Object.defineProperties(this,{
+            /**
+             * Reference to the engine
+             * @property engine
+             * @type KICK.core.Engine
+             */
+            engine:{
+                value:engine
+            },
+            /**
+             * Name of the scene
+             * @property name
+             * @type String
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                    _name = newValue;
+                }
+
+            }
         });
 
         /**
-         * @method loadScene
-         * @param {String} jsonStr
-         */
-        this.loadScene = function (jsonStr) {
-            throw Error("Not implemented");
-        };
-
-        /**
-         * @method saveScene
-         * @return {String} in jsonFormat
-         */
-        this.saveScene = function () {
-            throw Error("Not implemented");
-        };
-
-        /**
          * @method createGameObject
+         * @param {Object} config Optionally configuration passed tothe Ga
          * @return {KICK.scene.GameObject}
          */
-        this.createGameObject = function () {
-            var gameObject = new scene.GameObject(this);
+        this.createGameObject = function (config) {
+            var gameObject = new scene.GameObject(this,config);
             gameObjectsNew.push(gameObject);
+            gameObjects.push(gameObject);
             return gameObject;
         };
 
@@ -8019,15 +8131,39 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         };
 
         /**
+         * @method toJSON
+         * @return {Object}
+         */
+        this.toJSON = function (){
+            var gameObjects = [];
+            for (var i=0;i<gameObjects.length;i++){
+                gameObjects.push(gameObjects[i].toJSON());
+            }
+            return {
+                gameObjects: gameObjects,
+                name: _name
+            };
+        };
+
+        /**
          * Prints scene properties to the console
          * @method debug
          */
         this.debug = function () {
-            console.log("gameObjects "+gameObjects.length,gameObjects,
+            console.log("gameObjects "+activeGameObjects.length,activeGameObjects,
                 "gameObjectsNew "+gameObjectsNew.length,gameObjectsNew,
                 "gameObjectsDelete "+gameObjectsDelete.length,gameObjectsDelete
             );
         };
+
+        (function init(){
+            if (config){
+                var gameObjects = config.gameObjects;
+                for (var i=0;i<gameObjects.length;i++){
+                    thisObj.createGameObject(gameObjects[i]);
+                }
+            }
+        })();
     };
 
     /**

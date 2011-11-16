@@ -82,8 +82,8 @@ void main(void)
                                 {
                                     type:"KICK.scene.Transform",
                                     config: {
-                                        localPosition: [0,0,0],
-                                        localRotation: [0,0,0],
+                                        localPosition: [1,2,3],
+                                        localRotationQuat: [4,5,6,1],
                                         localScale:[1,1,1],
                                         parent:null
                                     }
@@ -146,8 +146,12 @@ void main(void)
             gameObject.addComponent(meshRenderer);
             var cameraObject = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
             console.log("# gameobjects "+engine.activeScene.getNumberOfGameObjects());
+            for (var i=0;i<engine.activeScene.getNumberOfGameObjects();i++){
+                console.log("# "+i+" "+engine.activeScene.getGameObject(i).name);
+                console.log("# "+i+" "+engine.activeScene.getGameObject(i).transform.str());
+            }
             if ( cameraObject ){
-                addRotatorComponent(cameraObject);
+                addRotatorComponent(cameraObject.gameObject);
             } else {
                 console.log("Cannot find camera");
             }

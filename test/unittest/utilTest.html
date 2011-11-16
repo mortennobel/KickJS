@@ -109,6 +109,37 @@ YUI().use('node', 'console', 'test', function (Y) {
             for (i=1;i<array.length;i++){
                 Assert.isTrue(sortedArray[i-1]<sortedArray[i],JSON.stringify(sortedArray));
             }
+        },
+        testApplyConfig : function(){
+            var Assert = Y.Assert;
+            var AClass = function(){
+                this.test = function(x,y){
+                    return x+y;
+                };
+                Object.defineProperties(this,{
+                    a:{
+                        value:123,
+                        writable:true
+                    },
+                    b:{
+                        value:1234,
+                        writable:true
+                    },
+                    c:{
+                        value:1234
+                    }
+                });
+            };
+            var AObj = new AClass();
+            var AConf = {
+                a:999,
+                b:888,
+                c:1
+            };
+            KICK.core.Util.applyConfig(AObj,AConf,["c"]);
+            Assert.isTrue(AObj.a === AConf.a);
+            Assert.isTrue(AObj.b === AConf.b);
+            Assert.isTrue(AObj.c !== AConf.c);
         }
     });
 

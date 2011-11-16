@@ -53,7 +53,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         mat4 = KICK.namespace("KICK.math.mat4"),
         constants = KICK.core.Constants,
         DEBUG = constants._DEBUG,
-        ASSERT = constants._ASSERT;
+        ASSERT = constants._ASSERT,
+        applyConfig = KICK.core.Util.applyConfig,
+        thisObj = this;
 
     /**
      * Game objects. (Always attached to a given scene).
@@ -66,7 +68,9 @@ KICK.namespace = KICK.namespace || function (ns_string) {
     scene.GameObject = function (scene, config) {
         var _components = [],
             _layer = 1,
-            _name;
+            _name,
+            _uid = scene.engine.createUID(),
+            thisObj = this;
         Object.defineProperties(this,
             {
                 /**
@@ -120,6 +124,19 @@ KICK.namespace = KICK.namespace || function (ns_string) {
                     },
                     set:function(newValue){
                         _name = newValue;
+                    }
+                },
+                /**
+                 * Unique id - identifies a game object (within a scene).
+                 * @property uid
+                 * @type Number
+                 */
+                uid:{
+                    get:function(){
+                        return _uid;
+                    },
+                    set:function(newValue){
+                        _uid = newValue;
                     }
                 },
                 /**
@@ -242,6 +259,33 @@ KICK.namespace = KICK.namespace || function (ns_string) {
             }
             return res;
         };
+
+        (function init(){
+            var component;
+            var componentObj;
+            var type;
+            config = config || {};
+            applyConfig(thisObj,config);
+            // build components
+            for (var i=0;config.components && i<config.components.length;i++){
+                component = config.components[i];
+                if (component.type === "KICK.scene.Transform"){
+                    componentObj = thisObj.transform;
+                    componentObj.localPosition = component.config.localPosition;
+                    componentObj.localRotationQuat = component.config.localRotationQuat;
+                    componentObj.localScale = component.config.localScale;
+                    if (component.config.parent){
+                        console.log("Implement finding parent"); // todo implement
+                        componentObj.parent = component.config.parent;
+                    }
+                } else {
+                    type = KICK.namespace(component.type);
+                    componentObj = new type(component.config);
+                    thisObj.addComponent(componentObj);
+                }
+            }
+
+        })();
     };
 
     /**
@@ -587,6 +631,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @private
          */
         this._markGlobalDirty = markGlobalDirty;
+
+        /**
+         * @method toJSON
+         * @return {Object} JSON formatted object
+         */
+        this.toJSON = function(){
+            var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+            return {
+                localPosition: typedArrayToArray(localPosition),
+                localRotationQuat: typedArrayToArray(localRotationQuat),
+                localScale: typedArrayToArray(localScale),
+                parent: parentTransform ? parentTransform.gameObject.uid : null // todo
+            };
+        };
+
+        /**
+         * @method
+         */
+        this.str = function(){
+            return JSON.stringify(thisObj.toJSON());
+        };
     };
 
     /**

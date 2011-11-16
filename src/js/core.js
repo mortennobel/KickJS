@@ -946,6 +946,27 @@ KICK.namespace = KICK.namespace || function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        hasProperty:function (obj, prop)
+        {
+            return Object.prototype.hasOwnProperty.call(obj, prop);
+        },
+        /**
+         * For each non function attribute in config, set the attribute on object
+         * @method applyConfig
+         * @param {Object} object
+         * @param {Object} config
+         * @param {Array[String]} excludeFilter
+         */
+        applyConfig: function(object,config,excludeFilter){
+            var contains = core.Util.contains,
+                hasProperty = core.Util.hasProperty;
+            excludeFilter = excludeFilter || [];
+            for (var name in config){
+                if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
+                    object[name] = config[name];
+                }
+            }
+        },
         /**
          * Reads a parameter from a url string.
          * @method getParameter
