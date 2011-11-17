@@ -8187,7 +8187,7 @@ KICK.namespace = function (ns_string) {
             _bottom,
             _top,
             _clearColor,
-            _cameraTypePerspective,
+            _perspective,
             _clearFlagColor,
             _clearFlagDepth,
             _currentClearFlags,
@@ -8252,7 +8252,7 @@ KICK.namespace = function (ns_string) {
                 setupClearColor();
                 gl.clear(_currentClearFlags);
 
-                if (_cameraTypePerspective) {
+                if (_perspective) {
                     mat4.perspective(_fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
                         _near, _far, projectionMatrix);
                 } else {
@@ -8422,10 +8422,11 @@ KICK.namespace = function (ns_string) {
              * Default true
              * @property cameraTypePerspective
              * @type Boolean
+             * @deprecated
              */
-            cameraTypePerspective:{
+            cameraTypePerspective:{ // todo remove this function
                 get:function(){
-                    return _cameraTypePerspective;
+                    return _perspective;
                 },
                 set:function(newValue){
                     if (true){
@@ -8433,7 +8434,7 @@ KICK.namespace = function (ns_string) {
                             KICK.core.Util.fail("Camera.cameraTypePerspective must be a boolean");
                         }
                     }
-                    _cameraTypePerspective = newValue;
+                    _perspective = newValue;
                 }
             },
             /**
@@ -8444,7 +8445,7 @@ KICK.namespace = function (ns_string) {
              */
             perspective:{
                 get:function(){
-                    return _cameraTypePerspective;
+                    return _perspective;
                 },
                 set:function(newValue){
                     if (true){
@@ -8452,7 +8453,7 @@ KICK.namespace = function (ns_string) {
                             KICK.core.Util.fail("Camera.perspective must be a boolean");
                         }
                     }
-                    _cameraTypePerspective = newValue;
+                    _perspective = newValue;
                 }
             },
             /**
@@ -8603,7 +8604,10 @@ KICK.namespace = function (ns_string) {
         _fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
         _near = isNumber(config.near) ? config.near : 0.1;
         _far = isNumber(config.far) ? config.far : 1000;
-        _cameraTypePerspective = isBoolean(config.cameraTypePerspective) ? config.cameraTypePerspective : true;
+        _perspective = isBoolean(config.perspective) ? config.cameraTypePerspective : true;
+        if (config.cameraTypePerspective){ // todo remove this (currently in there for backwards compatibility)
+            _perspective = true;
+        }
         _left = isNumber(config.left) ? config.left : -1;
         _right = isNumber(config.right) ? config.right : 1;
         _bottom = isNumber(config.bottom) ? config.bottom : -1;
