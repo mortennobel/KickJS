@@ -8437,6 +8437,25 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * True means camera is perspective projection, false means orthogonale projection<br>
+             * Default true
+             * @property perspective
+             * @type Boolean
+             */
+            perspective:{
+                get:function(){
+                    return _cameraTypePerspective;
+                },
+                set:function(newValue){
+                    if (true){
+                        if (!isBoolean(newValue)){
+                            KICK.core.Util.fail("Camera.perspective must be a boolean");
+                        }
+                    }
+                    _cameraTypePerspective = newValue;
+                }
+            },
+            /**
              * Only used for orthogonal camera type (!cameraTypePerspective). Default -1
              * @property left
              * @type Number
@@ -8518,7 +8537,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Only used when orthogonal camera type (!cameraTypePerspective). Default [1,1,1,1]
+             * Only used when orthogonal camera type (!cameraTypePerspective). Default [0,0,0,1]
              * @property clearColor
              * @type KICK.math.vec4
              */
@@ -8580,7 +8599,7 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
-
+        config = config || {};
         _fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
         _near = isNumber(config.near) ? config.near : 0.1;
         _far = isNumber(config.far) ? config.far : 1000;
@@ -8589,7 +8608,7 @@ KICK.namespace = function (ns_string) {
         _right = isNumber(config.right) ? config.right : 1;
         _bottom = isNumber(config.bottom) ? config.bottom : -1;
         _top = isNumber(config.top) ? config.top : 1;
-        _clearColor = config.clearColor ? config.clearColor : [1,1,1,1];
+        _clearColor = config.clearColor ? config.clearColor : [0,0,0,1];
         _clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
         _clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
         _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
