@@ -86,18 +86,8 @@ cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/ki
 rm "$project/build/kick-min.js.tmp"
 
 ##############################################################################
-echo "Copy kickjs to editor"
-mkdir "$project/example/shader_editor/kick/"
-cp "$project/build/kick-min-$version.js" "$project/example/shader_editor/kick/kick-min-$version.js"
-cp "$project/build/kick-uncompressed-$version.js" "$project/example/shader_editor/kick/kick-uncompressed-$version.js"
-cp "$project/src/js-dependencies/webgl-debug.js" "$project/example/shader_editor/kick/webgl-debug.js"
-
-mkdir "$project/example/snake/kick/"
-cp "$project/build/kick-min-$version.js" "$project/example/snake/kick/kick-min-$version.js"
-cp "$project/build/kick-uncompressed-$version.js" "$project/example/snake/kick/kick-uncompressed-$version.js"
-cp "$project/src/js-dependencies/webgl-debug.js" ""$project/example/snake/kick/webgl-debug.js""
-
-mkdir "$project/example/video_ascii_art/kick/"
-cp "$project/build/kick-min-$version.js" "$project/example/video_ascii_art/kick/kick-min-$version.js"
-cp "$project/build/kick-uncompressed-$version.js" "$project/example/video_ascii_art/kick/kick-uncompressed-$version.js"
-cp "$project/src/js-dependencies/webgl-debug.js" ""$project/example/video_ascii_art/kick/webgl-debug.js""
+echo "Copy kickjs to examples"
+mkdir "$project/example/js/"
+cp "$project/build/kick-min-$version.js" "$project/example/js/kick-min-$version.js"
+cp "$project/build/kick-uncompressed-$version.js" "$project/example/js/kick-uncompressed-$version.js"
+cp "$project/src/js-dependencies/webgl-debug.js" "$project/example/js/webgl-debug.js"
