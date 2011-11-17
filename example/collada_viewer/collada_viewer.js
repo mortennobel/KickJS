@@ -19,9 +19,11 @@ function load(xmlDom,url){
             gameObject.transform.localScale = [0.01,0.01,0.01];
 
         }
-        var meshRenderer = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
-        if (meshRenderer){
-            meshRenderer.material = duckMaterial;
+        var meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+        if (meshRendererNew){
+            meshRendererNew.material = duckMaterial;
+            meshRenderer = meshRendererNew;
+            recalculateNormals();
         }
     }
 }
@@ -44,15 +46,17 @@ function loadCollada(url){
 
 var material;
 var duckMaterial;
+var radius = 5;
+
 function duckClicked(){
     loadCollada("duck.dae");
-
 }
+
 function cubeClicked(){
     loadCollada("cube.dae");
 }
 
-function loadClicked(file){
+function loadColladaFile(file){
     var reader = new FileReader();
 
     reader.onload = function(event) {
@@ -69,12 +73,26 @@ function loadClicked(file){
     reader.readAsText(file);
 }
 
+function loadClicked(files){
+    for (var i=0;i<files.length;i++){
+        var file = files[i];
+        var fileLowerCase = file.fileName.toLowerCase();
+        if (fileLowerCase.indexOf(".dae") !== -1){
+            loadColladaFile(file);
+        } else if (fileLowerCase.indexOf(".jpg") > 0 || fileLowerCase.indexOf(".jpeg") > 0 || fileLowerCase.indexOf(".png") > 0){
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                loadTexture(e.target.result);
+            };
+            reader.readAsDataURL(file);
+
+        }
+    }
+}
+
 var engine;
 var meshRenderer;
-
-function setMesh(meshFactoryFunc,subdivisions){
-    meshRenderer.mesh = meshFactoryFunc(engine,subdivisions);
-}
+var texture;
 
 function createMaterial(vertexShaderId, fragmentShaderId){
     var vs = document.getElementById(vertexShaderId).value;
@@ -99,14 +117,11 @@ function createMaterial(vertexShaderId, fragmentShaderId){
 
 function recalculateNormals(){
     var mesh = meshRenderer.mesh;
-    mesh.recalculateNormals();
-    mesh.updateData();
-}
-
-function recalculateTangents(){
-    var mesh = meshRenderer.mesh;
-    mesh.recalculateTangents();
-    mesh.updateData();
+    var meshData = mesh.meshData;
+    if (!meshData.interleavedArrayFormat["normal"]){
+        meshData.recalculateNormals();
+        mesh.meshData = meshData;
+    }
 }
 
 function addRotatorComponent(gameObject){
@@ -115,7 +130,6 @@ function addRotatorComponent(gameObject){
         rotationSpeed = 0.001,
         translation = transform.localPosition,
         rotVec = transform.localRotationEuler,
-        radius = 5,
         radianToDegree = KICK.core.Constants._RADIAN_TO_DEGREE,
         res = document.getElementById("res");
     gameObject.addComponent({
@@ -138,20 +152,22 @@ function addRotatorComponent(gameObject){
     });
 }
 
+function loadTexture(url){
+    var image = new Image();
+    image.onload = function() {
+        texture.setImage(image, url);
+    };
+    image.src = url;
+}
+
 function initDuckTexture(){
-    var texture = new KICK.texture.Texture(engine);
+    texture = new KICK.texture.Texture(engine);
     texture.setTemporaryTexture();
     duckMaterial.uniforms.tex = {
         value:texture,
         type: KICK.core.Constants.GL_SAMPLER_2D
     };
-    var image = new Image();
-    var imageName = "duckCM.jpg";
-    image.onload = function() {
-        texture.setImage(image, imageName);
-        console.log("Duck image loaded");
-    };
-    image.src = imageName;
+    loadTexture("duckCM.jpg");
 }
 
 function initLights(){
@@ -208,13 +224,18 @@ function pauseResume(){
     this.innerHTML = engine.paused? "Play":"Pause";
 }
 
+function updateCameraRadius(){
+    radius = Number(document.getElementById("radius").value);
+}
+
 window.addEventListener("load",function(){
     initKick();
     document.getElementById("duckButton").addEventListener("click", duckClicked,false);
     document.getElementById("cubeButton").addEventListener("click", cubeClicked,false);
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
+    document.getElementById("radius").addEventListener("change", updateCameraRadius,false);
     document.getElementById("file").onchange = function() {
-          loadClicked(this.files[0]);
+          loadClicked(this.files);
         };
 
 },false);
