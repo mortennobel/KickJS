@@ -503,8 +503,8 @@ window.onload = function(){
     }
 
     function toogleCamera(){
-        if (camera.cameraTypePerspective){
-            camera.cameraTypePerspective = false;
+        if (camera.perspective){
+            camera.perspective = false;
             camera.near = -100;
             camera.far = 100;
             camera.top = 35;
@@ -512,7 +512,7 @@ window.onload = function(){
             camera.left = -35;
             camera.right = 35;
         } else {
-            camera.cameraTypePerspective = true;
+            camera.perspective = true;
             camera.near = 0.1;
             camera.far = 100;
         }

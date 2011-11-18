@@ -42,12 +42,12 @@ window.shaderEditor = new (function(){
         var cameraTransform = camera.gameObject.transform;
         if (settings.projection === "perspective"){
             camera.fieldOfView = 60;
-            camera.cameraTypePerspective = true;
+            camera.perspective = true;
             camera.near = 0.1;
             camera.far = 10;
             cameraTransform.localPosition = [0,0,2];
         } else {
-            camera.cameraTypePerspective = false;
+            camera.perspective = false;
             camera.near = -1;
             camera.far = 1;
             cameraTransform.localPosition = [0,0,0];
@@ -211,7 +211,7 @@ window.shaderEditor = new (function(){
             var cameraObject = _engine.activeScene.createGameObject();
             camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],
-                cameraTypePerspective: false,
+                perspective: false,
                 near:-1,
                 far:1
             });

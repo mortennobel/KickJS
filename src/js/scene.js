@@ -257,7 +257,7 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            applyConfig(scene,thisObj,config,["uid"]);
+            applyConfig(thisObj,config,["uid"]);
         })();
     };
 
@@ -1012,22 +1012,22 @@ KICK.namespace = function (ns_string) {
             thisObj = this,
             transform,
             c = KICK.core.Constants,
-            _renderTarget,
-            _fieldOfView,
-            _near,
-            _far,
-            _left,
-            _right,
-            _bottom,
-            _top,
-            _clearColor,
-            _perspective,
-            _clearFlagColor,
-            _clearFlagDepth,
+            _renderTarget = null,
+            _fieldOfView = 60,
+            _near = 0.1,
+            _far = 1000,
+            _left = -1,
+            _right = 1,
+            _bottom = -1,
+            _top = 1,
+            _clearColor = [0,0,0,1],
+            _perspective = true,
+            _clearFlagColor = true,
+            _clearFlagDepth = true,
             _currentClearFlags,
-            _cameraIndex,
-            _layerMask,
-            _renderer,
+            _cameraIndex = 1,
+            _layerMask = 0xffffffff,
+            _renderer = new KICK.renderer.ForwardRenderer(),
             _scene,
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
@@ -1254,26 +1254,6 @@ KICK.namespace = function (ns_string) {
             /**
              * True means camera is perspective projection, false means orthogonale projection<br>
              * Default true
-             * @property cameraTypePerspective
-             * @type Boolean
-             * @deprecated
-             */
-            cameraTypePerspective:{ // todo remove this function
-                get:function(){
-                    return _perspective;
-                },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        if (!isBoolean(newValue)){
-                            KICK.core.Util.fail("Camera.cameraTypePerspective must be a boolean");
-                        }
-                    }
-                    _perspective = newValue;
-                }
-            },
-            /**
-             * True means camera is perspective projection, false means orthogonale projection<br>
-             * Default true
              * @property perspective
              * @type Boolean
              */
@@ -1434,28 +1414,7 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
-        config = config || {};
-        _fieldOfView = isNumber(config.fieldOfView) ? config.fieldOfView : 60;
-        _near = isNumber(config.near) ? config.near : 0.1;
-        _far = isNumber(config.far) ? config.far : 1000;
-        _perspective = isBoolean(config.perspective) ? config.perspective : true;
-        if (config.cameraTypePerspective){ // todo remove this (currently in there for backwards compatibility)
-            _perspective = true;
-        }
-        _left = isNumber(config.left) ? config.left : -1;
-        _right = isNumber(config.right) ? config.right : 1;
-        _bottom = isNumber(config.bottom) ? config.bottom : -1;
-        _top = isNumber(config.top) ? config.top : 1;
-        _clearColor = config.clearColor ? config.clearColor : [0,0,0,1];
-        _clearFlagColor = config.clearFlagColor ? config.clearFlagColor:true;
-        _clearFlagDepth = config.clearFlagDepth ? config.clearFlagDepth:true;
-        _renderTarget = config.renderTarget instanceof KICK.texture.RenderTexture ? config.renderTarget : null;
-        _cameraIndex = isNumber(config.cameraIndex) ? config.cameraIndex : 1;
-        _layerMask = isNumber(config.layerMask) ? config.layerMask : 0xffffffff;
-        _renderer = config.renderer ? config.renderer : new KICK.renderer.ForwardRenderer();
-        if (config.normalizedViewportRect){
-            this.normalizedViewportRect = config.normalizedViewportRect;
-        }
+        applyConfig(this,config);
         computeClearFlag();
     };
 
@@ -1508,11 +1467,12 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @extends KICK.scene.Component
      * @final
-     * @param {KICK.scene.GameObject} gameObject
      * @param {Object} config configuration
      */
-    scene.MeshRenderer = function (gameObject,config) {
-        var transform;
+    scene.MeshRenderer = function (config) {
+        var transform,
+            _material,
+            _mesh;
 
         /**
          * @method activated
@@ -1520,20 +1480,43 @@ KICK.namespace = function (ns_string) {
         this.activated = function(){
             transform = this.gameObject.transform;
         };
-        
-        /**
-         * @property material
-         * @type KICK.material.Material
-         */
-        this.material = undefined;
 
-
-        /**
-         * @property mesh
-         * @type KICK.mesh.Mesh
-         */
-        this.mesh = undefined;
-
+        Object.defineProperties(this,{
+            /**
+             * @property material
+             * @type KICK.material.Material
+             */
+            material:{
+                get:function(){
+                    return _material;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (!(newValue instanceof KICK.material.Material)){
+                            KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
+                        }
+                    }
+                    _material = newValue;
+                }
+            },
+            /**
+             * @property mesh
+             * @type KICK.mesh.Mesh
+             */
+            mesh:{
+                get:function(){
+                    return _mesh;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (!(newValue instanceof KICK.mesh.Mesh)){
+                            KICK.core.Util.fail("MeshRenderer.mesh must be a KICK.mesh.Mesh");
+                        }
+                    }
+                    _mesh = newValue;
+                }
+            }
+        });
 
         /**
          * This method may not be called (the renderer could make the same calls)
@@ -1544,15 +1527,13 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLights
          */
         this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights) {
-            var mesh = this.mesh,
-                material = this.material,
-                shader = material.shader;
-            mesh.bind(shader);
-            material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
-            mesh.render();
+            var shader = _material.shader;
+            _mesh.bind(shader);
+            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
+            _mesh.render();
         };
 
-        applyConfig(gameObject,this,config);
+        applyConfig(this,config);
     };
 
     /**

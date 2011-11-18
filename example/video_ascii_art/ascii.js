@@ -54,7 +54,7 @@ window.onload = function(){
         var cameraObject = activeScene.createGameObject();
         camera = new KICK.scene.Camera({
             clearColor: [124/255,163/255,137/255,1],
-            cameraTypePerspective: false,
+            perspective: false,
             near: -1,
             far:1
         });
