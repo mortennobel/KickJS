@@ -802,9 +802,7 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     if (newValue !== _urlResource){
-                        engine.resourceManager.getMeshData(newValue,function(meshData){
-                            thisObj.meshData = meshData;
-                        });
+                        engine.resourceManager.getMeshData(newValue,thisObj);
                     }
                     _urlResource = newValue;
                 }

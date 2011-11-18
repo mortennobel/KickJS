@@ -137,12 +137,12 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             buildCallbackFunc = function(methodName){
-                return function(url,fnOnload){
+                return function(url,destination){
                     for (var i=resourceProviders.length-1;i>=0;i--){
                         var resourceProvider = resourceProviders[i];
                         var protocol = resourceProvider.protocol;
                         if (url.indexOf(protocol)===0){
-                            resourceProvider[methodName](url,fnOnload);
+                            resourceProvider[methodName](url,destination);
                             return;
                         }
                     }
@@ -151,7 +151,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method getMesh
          * @param {String} url
-         * @param {function(meshData)} fnOnload
+         * @param {KICK.mesh.Mesh} meshDestination
          */
         this.getMeshData = buildCallbackFunc("getMeshData");
         /**

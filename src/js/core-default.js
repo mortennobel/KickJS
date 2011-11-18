@@ -77,9 +77,9 @@ KICK.namespace = function (ns_string) {
          * <li><b>Cube</b> Url: kickjs://meshdata/cube/?length=1.0<br>Note that the parameters is optional</li>
          * </ul>
          * @param {String} url
-         * @param {function(meshData)} fnOnload
+         * @param {KICK.mesh.Mesh} meshDestination
          */
-        this.getMeshData = function(url,fnOnload){
+        this.getMeshData = function(url,meshDestination){
             var meshDataObj,
                 getParameterInt = core.Util.getParameterInt,
                 getParameterFloat = core.Util.getParameterFloat;
@@ -100,13 +100,13 @@ KICK.namespace = function (ns_string) {
                 return;
             }
             if (debug){
-                // simulate network traffic
+                // simulate asynchronous
                 setTimeout(function(){
-                    fnOnload(meshDataObj);
+                    meshDestination.meshData = meshDataObj;
                 },250);
             }
             else {
-                fnOnload(meshDataObj);
+                meshDestination.meshData = meshDataObj;
             }
         };
 
