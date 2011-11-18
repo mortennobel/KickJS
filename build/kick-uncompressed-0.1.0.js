@@ -6006,6 +6006,13 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        /**
+         * @method hasProperty
+         * @param {Object} obj
+         * @param {String} prop
+         * @return {Boolean}
+         * @static
+         */
         hasProperty:function (obj, prop)
         {
             return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -6016,6 +6023,7 @@ KICK.namespace = function (ns_string) {
          * @param {Object} object
          * @param {Object} config
          * @param {Array[String]} excludeFilter
+         * @static
          */
         applyConfig: function(object,config,excludeFilter){
             var contains = core.Util.contains,
@@ -6034,6 +6042,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @param {String} parameterName
          * @return {String} parameter value or null if not found.
+         * @static
          */
         getParameter: function(url, parameterName){
             var regexpStr = "[\\?&]"+parameterName+"=([^&#]*)",
@@ -6050,6 +6059,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @param {String} parameterName
          * @return {String} parameter value or null if not found.
+         * @static
          */
         getParameterInt: function(url, parameterName, notFoundValue){
             var res = core.Util.getParameter(url,parameterName);
@@ -6064,6 +6074,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @param {String} parameterName
          * @return {String} parameter value or null if not found.
+         * @static
          */
         getParameterFloat: function(url, parameterName, notFoundValue){
             var res = core.Util.getParameter(url,parameterName);
@@ -6079,6 +6090,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} newWidth
          * @param {Number} newHeight
          * @return {Canvas} return a Canvas object (acts as a image)
+         * @static
          */
         scaleImage: function(imageObj, newWidth, newHeight){
             // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
@@ -6962,9 +6974,8 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
-     * @param {MeshData} data
      */
-    mesh.Mesh = function (engine,config,meshData) {
+    mesh.Mesh = function (engine,config) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
@@ -6972,9 +6983,10 @@ KICK.namespace = function (ns_string) {
             _name,
             _meshData,
             c = KICK.core.Constants,
-            vertexAttrLength,
+            vertexAttrLength = 0,
             meshType,
             meshElements,
+            meshData = config.meshData,
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
@@ -7055,13 +7067,7 @@ KICK.namespace = function (ns_string) {
             }
         });
 
-
-        if (!config) {
-            config = {};
-        }
-
-        this.name = config.name;
-        this.meshData = meshData;
+        KICK.core.Util.applyConfig(this,config);
         
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
@@ -7675,14 +7681,16 @@ KICK.namespace = function (ns_string) {
                     if (newParent === this) {
                         KICK.core.Util.fail('Cannot assign parent to self');
                     }
-                    if (newParent === null){
-                        parentTransform = null;
-                        core.Util.removeElementFromArray(newParent.children,this);
-                    } else {
-                        parentTransform = newParent;
-                        newParent.children.push(this);
+                    if (newParent !== parentTransform){
+                        if (newParent === null){
+                            parentTransform = null;
+                            core.Util.removeElementFromArray(newParent.children,this);
+                        } else {
+                            parentTransform = newParent;
+                            newParent.children.push(this);
+                        }
+                        markGlobalDirty();
                     }
-                    markGlobalDirty();
                 }
             }
         });
@@ -7949,38 +7957,6 @@ KICK.namespace = function (ns_string) {
                 engine.gl.flush();
             };
 
-        this.init = function(){
-            var component,
-                componentObj,
-                type,
-                gameObjectConfig,
-                gameObject;
-            config = config || {};
-            var gameObjects = config.gameObjects;
-            for (var j=0;j<gameObjects.length;j++){
-                gameObjectConfig = config.gameObjects[j];
-                gameObject = gameObjectConfig.newObject;
-                // build components
-                for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
-                    component = gameObjectConfig.components[i];
-                    if (component.type === "KICK.scene.Transform"){
-                        componentObj = gameObject.transform;
-                        componentObj.localPosition = component.config.localPosition;
-                        componentObj.localRotationQuat = component.config.localRotationQuat;
-                        componentObj.localScale = component.config.localScale;
-                        if (component.config.parent){
-                            console.log("Implement finding parent"); // todo implement
-                            componentObj.parent = component.config.parent;
-                        }
-                    } else {
-                        type = KICK.namespace(component.type);
-                        componentObj = new type(gameObject,component.config);
-                        gameObject.addComponent(componentObj);
-                    }
-                }
-            }
-        };
-
         /**
          * Add a component listener to the scene. A component listener should contain two functions:
          * {componentsAdded(components) and componentsRemoved(components)}.
@@ -8140,14 +8116,77 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            var gameObject;
+            var gameObject,
+                hasProperty = KICK.core.Util.hasProperty,
+                applyConfig = KICK.core.Util.applyConfig;
             if (config){
                 var gameObjects = config.gameObjects;
-                for (var i=0;i<gameObjects.length;i++){
-                    gameObject = config.gameObjects[i];
-                    // save a reference to the newly created object (used in the init function to resolve references to other game objects)
-                    gameObject.newObject = thisObj.createGameObject(gameObject);
-                }
+                var mappingUidToObject = {};
+                var configs = {};
+                // create game objects
+                (function createGameObjects(){
+                    for (var i=0;i<gameObjects.length;i++){
+                        gameObject = config.gameObjects[i];
+                        gameObject.newObject = thisObj.createGameObject(gameObject);
+                        mappingUidToObject[gameObject.uid] = gameObject.newObject;
+                    }
+                })();
+
+                var createConfigWithReferences = function (config){
+                    var configCopy = {};
+                    for (var name in config){
+                        if (hasProperty(config,name)){
+                            var value = config[name];
+                            if (value){
+                                if (value && value.ref && value.reftype){
+                                    if (value.reftype === "project"){
+                                        value = engine.project.load(value.ref);
+                                    }
+                                }
+                            }
+                            configCopy[name] = value;
+                        }
+                    }
+                    return configCopy;
+                };
+
+                (function createComponents(){
+                    var component,
+                        componentObj,
+                        type,
+                        gameObjectConfig;
+                    var gameObjects = config.gameObjects;
+
+                    for (var j=0;j<gameObjects.length;j++){
+                        gameObjectConfig = config.gameObjects[j];
+                        gameObject = gameObjectConfig.newObject;
+                        // build components
+                        for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
+                            component = gameObjectConfig.components[i];
+                            if (component.type === "KICK.scene.Transform"){
+                                componentObj = gameObject.transform;
+                            } else {
+                                type = KICK.namespace(component.type);
+                                componentObj = new type(gameObject);
+                                gameObject.addComponent(componentObj);
+                            }
+                            mappingUidToObject[component.uid] = componentObj;
+                            configs[component.uid] = component.config;
+                        }
+                    }
+
+                    // apply config
+                    for (var uid in mappingUidToObject){
+                        if (hasProperty(mappingUidToObject,uid)){
+                            var originalConf = configs[uid];
+                            if (originalConf){
+                                var conf = createConfigWithReferences(originalConf);
+                                var obj = mappingUidToObject[uid];
+                                applyConfig(obj,conf);
+                            }
+                        }
+                    }
+                })();
             }
         })();
     };
@@ -11114,7 +11153,7 @@ KICK.namespace = function (ns_string) {
                 geometry = geometries[k];
                 if (geometry.getAttribute("id") === meshid){
                     var meshData = buildMeshData(colladaDOM, engine, geometry);
-                    mesh = new KICK.mesh.Mesh(engine, {},meshData);
+                    mesh = new KICK.mesh.Mesh(engine, {meshData:meshData});
                     break;
                 }
             }
@@ -11322,7 +11361,8 @@ KICK.namespace = function (ns_string) {
             }
             
             if (meshDataObj){
-                return new mesh.Mesh(engine,config, meshDataObj);
+                config.meshData = meshDataObj;
+                return new mesh.Mesh(engine,config);
             }
         };
 
