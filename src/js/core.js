@@ -77,12 +77,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @return {KICK.texture.Texture}
          */
-        /**
-         * @method getScene
-         * @param {String} url
-         * @return {KICK.scene.Scene}
-         */
-
+        
 
     /**
      * Responsible for allocation and deallocation of resources.
@@ -101,8 +96,7 @@ KICK.namespace = function (ns_string) {
             meshCache = buildCache(),
             shaderCache = buildCache(),
             textureCache = buildCache(),
-            sceneCache = buildCache(),
-            allCaches = [meshCache,shaderCache,textureCache,sceneCache],
+            allCaches = [meshCache,shaderCache,textureCache],
             getFromCache = function(cache, url){
                 var res = cache.ref[url];
                 if (res){
@@ -181,14 +175,6 @@ KICK.namespace = function (ns_string) {
          * @deprecated
          */
         this.getTexture = buildGetFunc(textureCache,"getTexture");
-        /**
-         * @method getScene
-         * @param {String} url
-         * @return {KICK.scene.Scene}
-         * @deprecated
-         */
-        this.getScene = buildGetFunc(sceneCache,"getScene");
-
         /**
          * Release a reference to the resource.
          * If reference count is 0, then the reference is deleted and the destroy method on the

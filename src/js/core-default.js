@@ -240,14 +240,5 @@ KICK.namespace = function (ns_string) {
             texture.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,data, url);
             return texture;
         };
-
-        /**
-         * @method getScene
-         * @param {String} url
-         * @return {KICK.scene.Scene} or null if scene cannot be initialized
-         */
-        this.getScene = function(url){
-            return null;
-        };
     };
 })();
