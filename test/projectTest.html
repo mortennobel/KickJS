@@ -176,6 +176,7 @@ void main(void)
             // A simple way to test that the project can be serialized and reloaded (without loosing data)
             project.loadProject(project.toJSON());
             engine.activeScene = project.load("SimpleScene");
+            console.log(project.toJSON());
         }
     </script>
 </body>

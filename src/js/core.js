@@ -663,7 +663,6 @@ KICK.namespace = function (ns_string) {
         var _config = config || {},
             type = _config.type,
             resourceConfig = _config.config,
-            source = _config.source,
             hasProperty = core.Util.hasProperty,
             createConfigInitialized = function(engine,config){
                 var res = {};
@@ -710,13 +709,6 @@ KICK.namespace = function (ns_string) {
              */
             config:{
                 value: resourceConfig
-            },
-            /**
-             * @property source
-             * @type String
-             */
-            source:{
-                value:source
             }
         });
         /**
@@ -743,8 +735,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 type:type,
-                config:resourceConfig,
-                source:source
+                config:resourceConfig
             };
         };
     };
