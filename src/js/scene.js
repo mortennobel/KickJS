@@ -316,8 +316,6 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @class Transform
      * @extends KICK.scene.Component
-     * @constructor
-     * @param {KICK.scene.GameObject} gameObject
      */
     scene.Transform = function (gameObject) {
         var localMatrix = mat4.identity(mat4.create()),
