@@ -43,7 +43,8 @@ KICK.namespace = function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         mesh = KICK.namespace("KICK.mesh"),
         material = KICK.namespace("KICK.material"),
-        constants = core.Constants;
+        constants = core.Constants,
+        debug = constants._DEBUG;
 
     /**
      * The default resource manager
@@ -69,7 +70,6 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
-         *
          * <ul>
          * <li><b>Triangle</b> Url: kickjs://meshdata/triangle/</li>
          * <li><b>Plane</b> Url: kickjs://meshdata/plane/<br></li>
@@ -99,7 +99,15 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("No meshdata found for "+url);
                 return;
             }
-            fnOnload(meshDataObj);
+            if (debug){
+                // simulate network traffic
+                setTimeout(function(){
+                    fnOnload(meshDataObj);
+                },250);
+            }
+            else {
+                fnOnload(meshDataObj);
+            }
         };
 
         /**

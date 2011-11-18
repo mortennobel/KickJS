@@ -858,7 +858,7 @@ KICK.namespace = function (ns_string) {
             if (ASSERT){
                 for (var i = shader.activeAttributes.length-1;i>=0;i--){
                     var activeAttribute = shader.activeAttributes[i];
-                    if (!(interleavedArrayFormat[activeAttribute.name])){
+                    if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])){
                         KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
                         attributeIndex = shader.lookupAttribute[activeAttribute.name];
                         gl.disableVertexAttribArray(attributeIndex);
