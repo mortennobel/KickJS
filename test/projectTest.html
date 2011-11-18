@@ -84,10 +84,11 @@ void main(void)
                     gameObjects:[
                         {
                             name:"MainCamera",
-                            uid:123,
+                            uid:5,
                             components:[
                                 {
                                     type:"KICK.scene.Transform",
+                                    uid:6,
                                     config: {
                                         localPosition: [1,2,3],
                                         localRotationQuat: [4,5,6,1],
@@ -97,32 +98,35 @@ void main(void)
                                 },
                                 {
                                     type:"KICK.scene.Camera",
+                                    uid:7,
                                     config:{
-                                        clearColor: [0,0,0,1],
+                                        clearColor: [1,0,0,1],
                                         fieldOfView: 60
                                     }
                                 },
                                 {
                                     type:"Rotator",
+                                    uid:8,
                                     config:{}
                                 }
                             ]
                         },
                         {
                             name:"Cube",
-                            uid:1237,
+                            uid:9,
                             components:[
                                 {
                                     type:"KICK.scene.MeshRenderer",
+                                    uid:10,
                                     config:{
                                         material:{
-                                            ref:"Some material",
-                                            type:"project"
-                                        }
-                                        /*,
+                                            ref:2,
+                                            reftype:"project"
+                                        }/*
+                                        ,
                                         mesh:{
-                                            ref:"",
-                                            type:"project"
+                                            ref:3,
+                                            reftype:"project"
                                         }*/
                                     }
                                 }
@@ -192,7 +196,7 @@ void main(void)
             meshRenderer = engine.activeScene.findComponentsOfType(KICK.scene.MeshRenderer)[0];
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            // meshRenderer.material = project.load("Some material");
+            meshRenderer.material = project.load("Some material");
         }
     </script>
 </body>

@@ -941,6 +941,13 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        /**
+         * @method hasProperty
+         * @param {Object} obj
+         * @param {String} prop
+         * @return {Boolean}
+         * @static
+         */
         hasProperty:function (obj, prop)
         {
             return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -951,6 +958,7 @@ KICK.namespace = function (ns_string) {
          * @param {Object} object
          * @param {Object} config
          * @param {Array[String]} excludeFilter
+         * @static
          */
         applyConfig: function(object,config,excludeFilter){
             var contains = core.Util.contains,
@@ -969,6 +977,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @param {String} parameterName
          * @return {String} parameter value or null if not found.
+         * @static
          */
         getParameter: function(url, parameterName){
             var regexpStr = "[\\?&]"+parameterName+"=([^&#]*)",
@@ -985,6 +994,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @param {String} parameterName
          * @return {String} parameter value or null if not found.
+         * @static
          */
         getParameterInt: function(url, parameterName, notFoundValue){
             var res = core.Util.getParameter(url,parameterName);
@@ -999,6 +1009,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @param {String} parameterName
          * @return {String} parameter value or null if not found.
+         * @static
          */
         getParameterFloat: function(url, parameterName, notFoundValue){
             var res = core.Util.getParameter(url,parameterName);
@@ -1014,6 +1025,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} newWidth
          * @param {Number} newHeight
          * @return {Canvas} return a Canvas object (acts as a image)
+         * @static
          */
         scaleImage: function(imageObj, newWidth, newHeight){
             // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences

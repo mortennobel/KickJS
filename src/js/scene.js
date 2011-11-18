@@ -520,14 +520,16 @@ KICK.namespace = function (ns_string) {
                     if (newParent === this) {
                         KICK.core.Util.fail('Cannot assign parent to self');
                     }
-                    if (newParent === null){
-                        parentTransform = null;
-                        core.Util.removeElementFromArray(newParent.children,this);
-                    } else {
-                        parentTransform = newParent;
-                        newParent.children.push(this);
+                    if (newParent !== parentTransform){
+                        if (newParent === null){
+                            parentTransform = null;
+                            core.Util.removeElementFromArray(newParent.children,this);
+                        } else {
+                            parentTransform = newParent;
+                            newParent.children.push(this);
+                        }
+                        markGlobalDirty();
                     }
-                    markGlobalDirty();
                 }
             }
         });
@@ -794,38 +796,6 @@ KICK.namespace = function (ns_string) {
                 engine.gl.flush();
             };
 
-        this.init = function(){
-            var component,
-                componentObj,
-                type,
-                gameObjectConfig,
-                gameObject;
-            config = config || {};
-            var gameObjects = config.gameObjects;
-            for (var j=0;j<gameObjects.length;j++){
-                gameObjectConfig = config.gameObjects[j];
-                gameObject = gameObjectConfig.newObject;
-                // build components
-                for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
-                    component = gameObjectConfig.components[i];
-                    if (component.type === "KICK.scene.Transform"){
-                        componentObj = gameObject.transform;
-                        componentObj.localPosition = component.config.localPosition;
-                        componentObj.localRotationQuat = component.config.localRotationQuat;
-                        componentObj.localScale = component.config.localScale;
-                        if (component.config.parent){
-                            console.log("Implement finding parent"); // todo implement
-                            componentObj.parent = component.config.parent;
-                        }
-                    } else {
-                        type = KICK.namespace(component.type);
-                        componentObj = new type(gameObject,component.config);
-                        gameObject.addComponent(componentObj);
-                    }
-                }
-            }
-        };
-
         /**
          * Add a component listener to the scene. A component listener should contain two functions:
          * {componentsAdded(components) and componentsRemoved(components)}.
@@ -985,14 +955,77 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            var gameObject;
+            var gameObject,
+                hasProperty = KICK.core.Util.hasProperty,
+                applyConfig = KICK.core.Util.applyConfig;
             if (config){
                 var gameObjects = config.gameObjects;
-                for (var i=0;i<gameObjects.length;i++){
-                    gameObject = config.gameObjects[i];
-                    // save a reference to the newly created object (used in the init function to resolve references to other game objects)
-                    gameObject.newObject = thisObj.createGameObject(gameObject);
-                }
+                var mappingUidToObject = {};
+                var configs = {};
+                // create game objects
+                (function createGameObjects(){
+                    for (var i=0;i<gameObjects.length;i++){
+                        gameObject = config.gameObjects[i];
+                        gameObject.newObject = thisObj.createGameObject(gameObject);
+                        mappingUidToObject[gameObject.uid] = gameObject.newObject;
+                    }
+                })();
+
+                var createConfigWithReferences = function (config){
+                    var configCopy = {};
+                    for (var name in config){
+                        if (hasProperty(config,name)){
+                            var value = config[name];
+                            if (value){
+                                if (value && value.ref && value.reftype){
+                                    if (value.reftype === "project"){
+                                        value = engine.project.load(value.ref);
+                                    }
+                                }
+                            }
+                            configCopy[name] = value;
+                        }
+                    }
+                    return configCopy;
+                };
+
+                (function createComponents(){
+                    var component,
+                        componentObj,
+                        type,
+                        gameObjectConfig;
+                    var gameObjects = config.gameObjects;
+
+                    for (var j=0;j<gameObjects.length;j++){
+                        gameObjectConfig = config.gameObjects[j];
+                        gameObject = gameObjectConfig.newObject;
+                        // build components
+                        for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
+                            component = gameObjectConfig.components[i];
+                            if (component.type === "KICK.scene.Transform"){
+                                componentObj = gameObject.transform;
+                            } else {
+                                type = KICK.namespace(component.type);
+                                componentObj = new type(gameObject);
+                                gameObject.addComponent(componentObj);
+                            }
+                            mappingUidToObject[component.uid] = componentObj;
+                            configs[component.uid] = component.config;
+                        }
+                    }
+
+                    // apply config
+                    for (var uid in mappingUidToObject){
+                        if (hasProperty(mappingUidToObject,uid)){
+                            var originalConf = configs[uid];
+                            if (originalConf){
+                                var conf = createConfigWithReferences(originalConf);
+                                var obj = mappingUidToObject[uid];
+                                applyConfig(obj,conf);
+                            }
+                        }
+                    }
+                })();
             }
         })();
     };
