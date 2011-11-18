@@ -136,30 +136,56 @@ KICK.namespace = function (ns_string) {
                     }
                     return res;
                 };
+            },
+            /**
+             * Create a callback function
+             * @method buildCallbackFunc
+             * @private
+             */
+            buildCallbackFunc = function(methodName){
+                return function(url,fnOnload){
+                    for (var i=resourceProviders.length-1;i>=0;i--){
+                        var resourceProvider = resourceProviders[i];
+                        var protocol = resourceProvider.protocol;
+                        if (url.indexOf(protocol)===0){
+                            resourceProvider[methodName](url,fnOnload);
+                            return;
+                        }
+                    }
+                };
             };
-
+        /**
+         * @method getMesh
+         * @param {String} url
+         * @param {function(meshData)} fnOnload
+         */
+        this.getMeshData = buildCallbackFunc("getMeshData");
         /**
          * @method getMesh
          * @param {String} url
          * @return {KICK.mesh.Mesh}
+         * @deprecated
          */
         this.getMesh = buildGetFunc(meshCache,"getMesh");
         /**
          * @method getShader
          * @param {String} url
          * @return {KICK.material.Shader}
+         * @deprecated
          */
         this.getShader = buildGetFunc(shaderCache,"getShader");
         /**
          * @method getTexture
          * @param {String} url
          * @return {KICK.texture.Texture}
+         * @deprecated
          */
         this.getTexture = buildGetFunc(textureCache,"getTexture");
         /**
          * @method getScene
          * @param {String} url
          * @return {KICK.scene.Scene}
+         * @deprecated
          */
         this.getScene = buildGetFunc(sceneCache,"getScene");
 
@@ -651,7 +677,23 @@ KICK.namespace = function (ns_string) {
         var _config = config || {},
             type = _config.type,
             resourceConfig = _config.config,
-            source = _config.source;
+            source = _config.source,
+            hasProperty = core.Util.hasProperty,
+            createConfigInitialized = function(engine,config){
+                var res = {};
+                for (var name in config){
+                    if (hasProperty(config,name)){
+                        var value = config[name];
+                        if (value && value.ref && value.reftype){
+                            if (value.reftype === "resource"){
+                                value = engine.resourceManager[value.refMethod](value.ref);
+                            }
+                        }
+                        res[name] = value;
+                    }
+                }
+                return res;
+            };
         Object.defineProperties(this,{
             /**
              * The name may contain '/' as folder separator. The name property is a shorthand for config.name
@@ -701,7 +743,7 @@ KICK.namespace = function (ns_string) {
          */
         this.instantiate = function(engine){
             var resourceClass = KICK.namespace(type);
-            var resource = new resourceClass(engine,resourceConfig);
+            var resource = new resourceClass(engine,createConfigInitialized(engine,resourceConfig));
             if (typeof resource.init === 'function'){
                 resource.init();
             }

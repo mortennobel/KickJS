@@ -69,6 +69,40 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         *
+         * <ul>
+         * <li><b>Triangle</b> Url: kickjs://meshdata/triangle/</li>
+         * <li><b>Plane</b> Url: kickjs://meshdata/plane/<br></li>
+         * <li><b>UVSphere</b> Url: kickjs://meshdata/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Cube</b> Url: kickjs://meshdata/cube/?length=1.0<br>Note that the parameters is optional</li>
+         * </ul>
+         * @param {String} url
+         * @param {function(meshData)} fnOnload
+         */
+        this.getMeshData = function(url,fnOnload){
+            var meshDataObj,
+                getParameterInt = core.Util.getParameterInt,
+                getParameterFloat = core.Util.getParameterFloat;
+            if (url.indexOf("kickjs://meshdata/triangle/")==0){
+                meshDataObj = mesh.MeshFactory.createTriangleData();
+            } else if (url.indexOf("kickjs://meshdata/plane/")==0){
+                meshDataObj = mesh.MeshFactory.createPlaneData();
+            } else if (url.indexOf("kickjs://meshdata/uvsphere/")==0){
+                var slices = getParameterInt(url, "slices"),
+                    stacks = getParameterInt(url, "stacks"),
+                    radius = getParameterFloat(url, "radius");
+                meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
+            } else if (url.indexOf("kickjs://meshdata/cube/")==0){
+                var length = getParameterFloat(url, "length");
+                meshDataObj = mesh.MeshFactory.createCubeData(length);
+            } else {
+                KICK.core.Util.fail("No meshdata found for "+url);
+                return;
+            }
+            fnOnload(meshDataObj);
+        };
+
+        /**
          * Creates a Mesh object based on a url.<br>
          * The following resources can be created:<br>
          * <ul>

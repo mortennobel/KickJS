@@ -718,11 +718,12 @@ KICK.namespace = function (ns_string) {
             meshVertexIndexBuffer,
             _name,
             _meshData,
+            _urlResource,
+            thisObj = this,
             c = KICK.core.Constants,
             vertexAttrLength = 0,
             meshType,
             meshElements,
-            meshData = config.meshData,
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
@@ -767,12 +768,6 @@ KICK.namespace = function (ns_string) {
 
         engine.addContextListener(contextListener);
 
-        if (ASSERT){
-            if (!(meshData instanceof mesh.MeshData)){
-                fail("meshData constructor parameter must be defined");
-            }
-        }
-
         Object.defineProperties(this,{
             /**
              * @property name
@@ -799,6 +794,19 @@ KICK.namespace = function (ns_string) {
                 set:function(newValue){
                     _meshData = newValue;
                     updateData();
+                }
+            },
+            urlResource:{
+                get:function(){
+                    return _urlResource;
+                },
+                set:function(newValue){
+                    if (newValue !== _urlResource){
+                        engine.resourceManager.getMeshData(newValue,function(meshData){
+                            thisObj.meshData = meshData;
+                        });
+                    }
+                    _urlResource = newValue;
                 }
             }
         });
@@ -893,6 +901,17 @@ KICK.namespace = function (ns_string) {
         this.destroy = function(){
             deleteBuffers();
             engine.removeContextListener(contextListener);
+        };
+
+        /**
+         * @method toJSON
+         * @return {Object} data object
+         */
+        this.toJSON = function(){
+            return {
+                name:_name,
+                urlResource:_urlResource
+            };
         };
     };
 })();

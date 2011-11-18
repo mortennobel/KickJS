@@ -75,10 +75,7 @@ void main(void)
                 type:"KICK.mesh.Mesh",
                 config: {
                     name:"CubeMesh",
-                    meshData:{
-                        ref:"CubeMeshData",
-                        reftype:"project"
-                    }
+                    urlResource:"kickjs://meshdata/cube/?length=0.5"
                 }
             },
             {
@@ -126,31 +123,15 @@ void main(void)
                                         material:{
                                             ref:"Some material",
                                             reftype:"project"
-                                        }/*,
+                                        },
                                         mesh:{
                                             ref:"CubeMesh",
                                             reftype:"project"
-                                        }*/
+                                        }
                                     }
                                 }
                             ]
                         }
-                        /*,
-                        {
-                            name:"MainCameraChild",
-                            uid:120,
-                            components:[
-                                {
-                                    type:"KICK.scene.Transform",
-                                    config: {
-                                        localPosition: [1,2,3],
-                                        localRotationQuat: [4,5,6,1],
-                                        localScale:[1,1,1],
-                                        parent:null
-                                    }
-                                }
-                            ]
-                        } */
                     ]
                 }
             }
@@ -195,10 +176,6 @@ void main(void)
             // A simple way to test that the project can be serialized and reloaded (without loosing data)
             project.loadProject(project.toJSON());
             engine.activeScene = project.load("SimpleScene");
-
-            meshRenderer = engine.activeScene.findComponentsOfType(KICK.scene.MeshRenderer)[0];
-
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
         }
     </script>
 </body>
