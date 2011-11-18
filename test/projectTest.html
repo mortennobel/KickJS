@@ -74,7 +74,11 @@ void main(void)
             {
                 type:"KICK.mesh.Mesh",
                 config: {
-                    name:"CubeMesh"
+                    name:"CubeMesh",
+                    meshData:{
+                        ref:"CubeMeshData",
+                        reftype:"project"
+                    }
                 }
             },
             {
@@ -120,12 +124,11 @@ void main(void)
                                     uid:10,
                                     config:{
                                         material:{
-                                            ref:2,
+                                            ref:"Some material",
                                             reftype:"project"
-                                        }/*
-                                        ,
+                                        }/*,
                                         mesh:{
-                                            ref:3,
+                                            ref:"CubeMesh",
                                             reftype:"project"
                                         }*/
                                     }
@@ -196,7 +199,6 @@ void main(void)
             meshRenderer = engine.activeScene.findComponentsOfType(KICK.scene.MeshRenderer)[0];
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            meshRenderer.material = project.load("Some material");
         }
     </script>
 </body>

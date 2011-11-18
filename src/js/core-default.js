@@ -115,7 +115,8 @@ KICK.namespace = function (ns_string) {
             }
             
             if (meshDataObj){
-                return new mesh.Mesh(engine,config, meshDataObj);
+                config.meshData = meshDataObj;
+                return new mesh.Mesh(engine,config);
             }
         };
 

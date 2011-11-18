@@ -710,9 +710,8 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
-     * @param {MeshData} data
      */
-    mesh.Mesh = function (engine,config,meshData) {
+    mesh.Mesh = function (engine,config) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
@@ -720,9 +719,10 @@ KICK.namespace = function (ns_string) {
             _name,
             _meshData,
             c = KICK.core.Constants,
-            vertexAttrLength,
+            vertexAttrLength = 0,
             meshType,
             meshElements,
+            meshData = config.meshData,
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
@@ -803,13 +803,7 @@ KICK.namespace = function (ns_string) {
             }
         });
 
-
-        if (!config) {
-            config = {};
-        }
-
-        this.name = config.name;
-        this.meshData = meshData;
+        KICK.core.Util.applyConfig(this,config);
         
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
