@@ -5142,12 +5142,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} url
          * @return {KICK.texture.Texture}
          */
-        /**
-         * @method getScene
-         * @param {String} url
-         * @return {KICK.scene.Scene}
-         */
-
+        
 
     /**
      * Responsible for allocation and deallocation of resources.
@@ -5166,8 +5161,7 @@ KICK.namespace = function (ns_string) {
             meshCache = buildCache(),
             shaderCache = buildCache(),
             textureCache = buildCache(),
-            sceneCache = buildCache(),
-            allCaches = [meshCache,shaderCache,textureCache,sceneCache],
+            allCaches = [meshCache,shaderCache,textureCache],
             getFromCache = function(cache, url){
                 var res = cache.ref[url];
                 if (res){
@@ -5201,33 +5195,51 @@ KICK.namespace = function (ns_string) {
                     }
                     return res;
                 };
+            },
+            /**
+             * Create a callback function
+             * @method buildCallbackFunc
+             * @private
+             */
+            buildCallbackFunc = function(methodName){
+                return function(url,destination){
+                    for (var i=resourceProviders.length-1;i>=0;i--){
+                        var resourceProvider = resourceProviders[i];
+                        var protocol = resourceProvider.protocol;
+                        if (url.indexOf(protocol)===0){
+                            resourceProvider[methodName](url,destination);
+                            return;
+                        }
+                    }
+                };
             };
-
+        /**
+         * @method getMesh
+         * @param {String} url
+         * @param {KICK.mesh.Mesh} meshDestination
+         */
+        this.getMeshData = buildCallbackFunc("getMeshData");
         /**
          * @method getMesh
          * @param {String} url
          * @return {KICK.mesh.Mesh}
+         * @deprecated
          */
         this.getMesh = buildGetFunc(meshCache,"getMesh");
         /**
          * @method getShader
          * @param {String} url
          * @return {KICK.material.Shader}
+         * @deprecated
          */
         this.getShader = buildGetFunc(shaderCache,"getShader");
         /**
          * @method getTexture
          * @param {String} url
          * @return {KICK.texture.Texture}
+         * @deprecated
          */
         this.getTexture = buildGetFunc(textureCache,"getTexture");
-        /**
-         * @method getScene
-         * @param {String} url
-         * @return {KICK.scene.Scene}
-         */
-        this.getScene = buildGetFunc(sceneCache,"getScene");
-
         /**
          * Release a reference to the resource.
          * If reference count is 0, then the reference is deleted and the destroy method on the
@@ -5716,7 +5728,22 @@ KICK.namespace = function (ns_string) {
         var _config = config || {},
             type = _config.type,
             resourceConfig = _config.config,
-            source = _config.source;
+            hasProperty = core.Util.hasProperty,
+            createConfigInitialized = function(engine,config){
+                var res = {};
+                for (var name in config){
+                    if (hasProperty(config,name)){
+                        var value = config[name];
+                        if (value && value.ref && value.reftype){
+                            if (value.reftype === "resource"){
+                                value = engine.resourceManager[value.refMethod](value.ref);
+                            }
+                        }
+                        res[name] = value;
+                    }
+                }
+                return res;
+            };
         Object.defineProperties(this,{
             /**
              * The name may contain '/' as folder separator. The name property is a shorthand for config.name
@@ -5747,13 +5774,6 @@ KICK.namespace = function (ns_string) {
              */
             config:{
                 value: resourceConfig
-            },
-            /**
-             * @property source
-             * @type String
-             */
-            source:{
-                value:source
             }
         });
         /**
@@ -5766,7 +5786,7 @@ KICK.namespace = function (ns_string) {
          */
         this.instantiate = function(engine){
             var resourceClass = KICK.namespace(type);
-            var resource = new resourceClass(engine,resourceConfig);
+            var resource = new resourceClass(engine,createConfigInitialized(engine,resourceConfig));
             if (typeof resource.init === 'function'){
                 resource.init();
             }
@@ -5780,8 +5800,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 type:type,
-                config:resourceConfig,
-                source:source
+                config:resourceConfig
             };
         };
     };
@@ -6982,11 +7001,12 @@ KICK.namespace = function (ns_string) {
             meshVertexIndexBuffer,
             _name,
             _meshData,
+            _urlResource,
+            thisObj = this,
             c = KICK.core.Constants,
             vertexAttrLength = 0,
             meshType,
             meshElements,
-            meshData = config.meshData,
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
@@ -7031,12 +7051,6 @@ KICK.namespace = function (ns_string) {
 
         engine.addContextListener(contextListener);
 
-        if (ASSERT){
-            if (!(meshData instanceof mesh.MeshData)){
-                fail("meshData constructor parameter must be defined");
-            }
-        }
-
         Object.defineProperties(this,{
             /**
              * @property name
@@ -7063,6 +7077,17 @@ KICK.namespace = function (ns_string) {
                 set:function(newValue){
                     _meshData = newValue;
                     updateData();
+                }
+            },
+            urlResource:{
+                get:function(){
+                    return _urlResource;
+                },
+                set:function(newValue){
+                    if (newValue !== _urlResource){
+                        engine.resourceManager.getMeshData(newValue,thisObj);
+                    }
+                    _urlResource = newValue;
                 }
             }
         });
@@ -7114,7 +7139,7 @@ KICK.namespace = function (ns_string) {
             if (ASSERT){
                 for (var i = shader.activeAttributes.length-1;i>=0;i--){
                     var activeAttribute = shader.activeAttributes[i];
-                    if (!(interleavedArrayFormat[activeAttribute.name])){
+                    if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])){
                         KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
                         attributeIndex = shader.lookupAttribute[activeAttribute.name];
                         gl.disableVertexAttribArray(attributeIndex);
@@ -7157,6 +7182,17 @@ KICK.namespace = function (ns_string) {
         this.destroy = function(){
             deleteBuffers();
             engine.removeContextListener(contextListener);
+        };
+
+        /**
+         * @method toJSON
+         * @return {Object} data object
+         */
+        this.toJSON = function(){
+            return {
+                name:_name,
+                urlResource:_urlResource
+            };
         };
     };
 })();/*!
@@ -9190,7 +9226,7 @@ KICK.namespace = function (ns_string) {
             var width, height;
             _dataURI = dataURI;
             recreateTextureIfDifferentType();
-            this.bind(0); // bind to texture slot 0
+            thisObj.bind(0); // bind to texture slot 0
             if (_textureType === 3553){
                 if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
                     width = nextHighestPowerOfTwo(imageObj.width);
@@ -9272,7 +9308,7 @@ KICK.namespace = function (ns_string) {
             vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
-            this.bind(0); // bind to texture slot 0
+            thisObj.bind(0); // bind to texture slot 0
             gl.pixelStorei(3317, 1);
             gl.texImage2D(3553, 0, _intFormat, width, height, border, _intFormat, type, pixels);
             gl.texParameteri(3553, 10240, _magFilter);
@@ -9530,6 +9566,261 @@ KICK.namespace = function (ns_string) {
                 flipY:_flipY,
                 internalFormat:_intFormat,
                 textureType:_textureType
+            };
+        }
+    };
+
+    /**
+     * A movie texture associated with a video element (or canvas tag) will update the content every frame (when it is bound).
+     * Note that the texture will not be mipmapped (since this is too expensive to do on the fly).
+     * @class MovieTexture
+     * @namespace KICK.texture
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config Optional
+     */
+    texture.MovieTexture = function (engine, config) {
+        var gl = engine.gl,
+            _uid = engine.createUID(), // note uid is always
+            texture0 = 33984,
+            thisConfig = config || {},
+            _videoElement = thisConfig.videoElement,
+            _textureId = gl.createTexture(),
+            _wrapS = thisConfig.wrapS ||  33071,
+            _wrapT = thisConfig.wrapT || 33071,
+            _minFilter = thisConfig.minFilter || 9728,
+            _magFilter = thisConfig.magFilter || 9728,
+            _intFormat = thisConfig.internalFormat || 6408,
+            _skipFrames = thisConfig.skipFrames || 0,
+            timer = engine.time,
+            thisObj = this,
+            lastGrappedFrame = -1,
+            currentTexture;
+
+        (function init(){
+            // create active texture component on glContext
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
+            }
+            currentTexture = gl.currentTexture;
+        })();
+
+        /**
+         * Bind the current texture
+         * And update the texture from the video element (unless it has already been updated in this frame)
+         * @method bind
+         */
+        this.bind = function(textureSlot){
+            // todo reintroduce optimization
+//            if (currentTexture[textureSlot] !== this){
+                gl.activeTexture(texture0+textureSlot);
+                gl.bindTexture(3553, _textureId);
+                currentTexture[textureSlot] = this;
+            if (lastGrappedFrame < timer.frameCount && _videoElement){
+                lastGrappedFrame = timer.frameCount+_skipFrames;
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                    gl.UNSIGNED_BYTE, _videoElement);
+            }
+//            }
+        };
+
+        /**
+         * Deallocates the texture from memory
+         * @method destroy
+         */
+        this.destroy = function(){
+            if (_textureId !== null){
+                gl.deleteTexture(_textureId);
+                _textureId = null;
+            }
+        };
+
+        /**
+         * Creates a 2x2 temporary image (checkerboard)
+         * @method setTemporaryTexture
+         */
+        this.setTemporaryTexture = function(){
+            var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,0,0,0,0,0,0,255, 255, 255]);
+            thisObj.bind(0); // bind to texture slot 0
+            gl.pixelStorei(3317, 1);
+            gl.texImage2D(3553, 0, _intFormat, 2, 2, 0, 6407, 5121, blackWhiteCheckerboard);
+            gl.texParameteri(3553, 10240, _magFilter);
+            gl.texParameteri(3553, 10241, _minFilter);
+            gl.texParameteri(3553, 10242, _wrapS);
+            gl.texParameteri(3553, 10243, _wrapT);
+        };
+
+        Object.defineProperties(this,{
+            /**
+             * Default value is 0 (update movie texture every frame). 1 skip one frame update, 2 skips two frames etc.
+             * @property skipFrames
+             * @type {Number}
+             */
+            skipFrames:{
+                get:function(){
+                    return _skipFrames;
+                },
+                set:function(newValue){
+                    _skipFrames = newValue;
+                }
+            },
+            /**
+             * @property videoElement
+             * @type {VideoElement}
+             */
+            videoElement:{
+                get:function(){
+                    return _videoElement;
+                },
+                set:function(newValue){
+                    _videoElement = newValue;
+                }
+            },
+            /**
+             * @property textureId
+             * @type {Number}
+             */
+            textureId:{
+                value:_textureId
+            },
+            /**
+             * Unique identifier of the texture
+             * @property uid
+             * @type {Number}
+             */
+            uid:{
+                value:_uid
+            },
+            /**
+             * Texture.wrapS should be either 33071 or 10497<br>
+             * Default: 10497
+             * @property wrapS
+             * @type Object
+             */
+            wrapS:{
+                get: function(){
+                    return _wrapS;
+                },
+                set: function(value){
+                    if (true){
+                        if (value !== 33071 &&
+                            value !== 10497){
+                            KICK.core.Util.fail("Texture.wrapS should be either 33071 or 10497");
+                        }
+                    }
+                    _wrapS = value;
+                }
+            },
+            /**
+             * Texture.wrapT should be either 33071 or 10497<br>
+             * Default: 10497
+             * @property wrapT
+             * @type Object
+             */
+            wrapT:{
+                get: function(){
+                    return _wrapT;
+                },
+                set: function(value){
+                    if (true){
+                        if (value !== 33071 &&
+                            value !== 10497){
+                            KICK.core.Util.fail("Texture.wrapT should be either 33071 or 10497");
+                        }
+                    }
+                    _wrapT = value;
+                }
+            },
+            /**
+             * Texture.minFilter should be either 9728, 9729, 9984, <br>
+             * 9985, 9986, 9987<br>
+             * Default: 9729
+             * @property minFilter
+             * @type Object
+             */
+            minFilter:{
+                get: function(){
+                    return _minFilter;
+                },
+                set: function(value){
+                    if (true){
+                        if (value !== 9728 &&
+                            value !== 9729 &&
+                            value !== 9984 &&
+                            value !== 9985 &&
+                            value !== 9986 &&
+                            value !== 9987){
+                            KICK.core.Util.fail("Texture.minFilter should be either 9728, 9729, 9984, 9985, 9986, 9987");
+                        }
+                    }
+                    _minFilter = value;
+                }
+            },
+            /**
+             * Texture.magFilter should be either 9728 or 9729. <br>
+             * Default: 9729
+             * @property magFilter
+             * @type Object
+             */
+            magFilter:{
+                get: function(){
+                    return _magFilter;
+                },
+                set: function(value){
+                    if (true){
+                        if (value !== 9728 &&
+                            value !== 9729){
+                            KICK.core.Util.fail("Texture.magFilter should be either 9728 or 9729");
+                        }
+                    }
+                    _magFilter = value;
+                }
+            },
+            /**
+             * Specifies the internal format of the image (format on GPU)<br>
+             * Default is 6408<br>
+             * Must be one of the following:
+             * 6406,
+             * 6407,
+             * 6408,
+             * 6409,
+             * 6410
+             * @property internalFormat
+             * @type Number
+             */
+            internalFormat:{
+                get:function(){
+                    return _intFormat;
+                },
+                set:function(value){
+                    if (value !== 6406 &&
+                        value !== 6407  &&
+                        value !== 6408 &&
+                        value !== 6409 &&
+                        value !== 6410){
+                        KICK.core.Util.fail("Texture.internalFormat should be either 6406, 6407, 6408, 6409, or LUMINANCE_ALPHA");
+                    }
+                    _intFormat = value;
+                }
+            }
+        });
+
+        /**
+         * Serializes the data into a JSON object (that can be used as a config parameter in the constructor)<br>
+         * Note that the texture data is not serialized in the json format. <br>
+         * This means that either setImage() or setImageData() must be called before the texture can be bound<br>
+         * @method toJSON
+         * @return {Object} config element
+         */
+        this.toJSON = function(){
+            return {
+                uid:_uid,
+                wrapS:_wrapS,
+                wrapT:_wrapT,
+                minFilter:_minFilter,
+                magFilter:_magFilter,
+                internalFormat:_intFormat
             };
         }
     };
@@ -11289,7 +11580,8 @@ KICK.namespace = function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         mesh = KICK.namespace("KICK.mesh"),
         material = KICK.namespace("KICK.material"),
-        constants = core.Constants;
+        constants = core.Constants,
+        debug = true;
 
     /**
      * The default resource manager
@@ -11313,6 +11605,47 @@ KICK.namespace = function (ns_string) {
                 value:"kickjs"
             }
         });
+
+        /**
+         * <ul>
+         * <li><b>Triangle</b> Url: kickjs://meshdata/triangle/</li>
+         * <li><b>Plane</b> Url: kickjs://meshdata/plane/<br></li>
+         * <li><b>UVSphere</b> Url: kickjs://meshdata/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Cube</b> Url: kickjs://meshdata/cube/?length=1.0<br>Note that the parameters is optional</li>
+         * </ul>
+         * @param {String} url
+         * @param {KICK.mesh.Mesh} meshDestination
+         */
+        this.getMeshData = function(url,meshDestination){
+            var meshDataObj,
+                getParameterInt = core.Util.getParameterInt,
+                getParameterFloat = core.Util.getParameterFloat;
+            if (url.indexOf("kickjs://meshdata/triangle/")==0){
+                meshDataObj = mesh.MeshFactory.createTriangleData();
+            } else if (url.indexOf("kickjs://meshdata/plane/")==0){
+                meshDataObj = mesh.MeshFactory.createPlaneData();
+            } else if (url.indexOf("kickjs://meshdata/uvsphere/")==0){
+                var slices = getParameterInt(url, "slices"),
+                    stacks = getParameterInt(url, "stacks"),
+                    radius = getParameterFloat(url, "radius");
+                meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
+            } else if (url.indexOf("kickjs://meshdata/cube/")==0){
+                var length = getParameterFloat(url, "length");
+                meshDataObj = mesh.MeshFactory.createCubeData(length);
+            } else {
+                KICK.core.Util.fail("No meshdata found for "+url);
+                return;
+            }
+            if (debug){
+                // simulate asynchronous
+                setTimeout(function(){
+                    meshDestination.meshData = meshDataObj;
+                },250);
+            }
+            else {
+                meshDestination.meshData = meshDataObj;
+            }
+        };
 
         /**
          * Creates a Mesh object based on a url.<br>
@@ -11443,15 +11776,6 @@ KICK.namespace = function (ns_string) {
 
             texture.setImageData( 2, 2, 0, 5121,data, url);
             return texture;
-        };
-
-        /**
-         * @method getScene
-         * @param {String} url
-         * @return {KICK.scene.Scene} or null if scene cannot be initialized
-         */
-        this.getScene = function(url){
-            return null;
         };
     };
 })();

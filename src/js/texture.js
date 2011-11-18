@@ -243,7 +243,7 @@ KICK.namespace = function (ns_string) {
             var width, height;
             _dataURI = dataURI;
             recreateTextureIfDifferentType();
-            this.bind(0); // bind to texture slot 0
+            thisObj.bind(0); // bind to texture slot 0
             if (_textureType === constants.GL_TEXTURE_2D){
                 if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
                     width = nextHighestPowerOfTwo(imageObj.width);
@@ -325,7 +325,7 @@ KICK.namespace = function (ns_string) {
             vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
-            this.bind(0); // bind to texture slot 0
+            thisObj.bind(0); // bind to texture slot 0
             gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
             gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, width, height, border, _intFormat, type, pixels);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
@@ -583,6 +583,261 @@ KICK.namespace = function (ns_string) {
                 flipY:_flipY,
                 internalFormat:_intFormat,
                 textureType:_textureType
+            };
+        }
+    };
+
+    /**
+     * A movie texture associated with a video element (or canvas tag) will update the content every frame (when it is bound).
+     * Note that the texture will not be mipmapped (since this is too expensive to do on the fly).
+     * @class MovieTexture
+     * @namespace KICK.texture
+     * @constructor
+     * @param {KICK.core.Engine} engine
+     * @param {Object} config Optional
+     */
+    texture.MovieTexture = function (engine, config) {
+        var gl = engine.gl,
+            _uid = engine.createUID(), // note uid is always
+            texture0 = constants.GL_TEXTURE0,
+            thisConfig = config || {},
+            _videoElement = thisConfig.videoElement,
+            _textureId = gl.createTexture(),
+            _wrapS = thisConfig.wrapS ||  constants.GL_CLAMP_TO_EDGE,
+            _wrapT = thisConfig.wrapT || constants.GL_CLAMP_TO_EDGE,
+            _minFilter = thisConfig.minFilter || constants.GL_NEAREST,
+            _magFilter = thisConfig.magFilter || constants.GL_NEAREST,
+            _intFormat = thisConfig.internalFormat || constants.GL_RGBA,
+            _skipFrames = thisConfig.skipFrames || 0,
+            timer = engine.time,
+            thisObj = this,
+            lastGrappedFrame = -1,
+            currentTexture;
+
+        (function init(){
+            // create active texture component on glContext
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
+            }
+            currentTexture = gl.currentTexture;
+        })();
+
+        /**
+         * Bind the current texture
+         * And update the texture from the video element (unless it has already been updated in this frame)
+         * @method bind
+         */
+        this.bind = function(textureSlot){
+            // todo reintroduce optimization
+//            if (currentTexture[textureSlot] !== this){
+                gl.activeTexture(texture0+textureSlot);
+                gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
+                currentTexture[textureSlot] = this;
+            if (lastGrappedFrame < timer.frameCount && _videoElement){
+                lastGrappedFrame = timer.frameCount+_skipFrames;
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                    gl.UNSIGNED_BYTE, _videoElement);
+            }
+//            }
+        };
+
+        /**
+         * Deallocates the texture from memory
+         * @method destroy
+         */
+        this.destroy = function(){
+            if (_textureId !== null){
+                gl.deleteTexture(_textureId);
+                _textureId = null;
+            }
+        };
+
+        /**
+         * Creates a 2x2 temporary image (checkerboard)
+         * @method setTemporaryTexture
+         */
+        this.setTemporaryTexture = function(){
+            var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,0,0,0,0,0,0,255, 255, 255]);
+            thisObj.bind(0); // bind to texture slot 0
+            gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
+            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, 2, 2, 0, constants.GL_RGB, constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
+            gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
+        };
+
+        Object.defineProperties(this,{
+            /**
+             * Default value is 0 (update movie texture every frame). 1 skip one frame update, 2 skips two frames etc.
+             * @property skipFrames
+             * @type {Number}
+             */
+            skipFrames:{
+                get:function(){
+                    return _skipFrames;
+                },
+                set:function(newValue){
+                    _skipFrames = newValue;
+                }
+            },
+            /**
+             * @property videoElement
+             * @type {VideoElement}
+             */
+            videoElement:{
+                get:function(){
+                    return _videoElement;
+                },
+                set:function(newValue){
+                    _videoElement = newValue;
+                }
+            },
+            /**
+             * @property textureId
+             * @type {Number}
+             */
+            textureId:{
+                value:_textureId
+            },
+            /**
+             * Unique identifier of the texture
+             * @property uid
+             * @type {Number}
+             */
+            uid:{
+                value:_uid
+            },
+            /**
+             * Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
+             * Default: GL_REPEAT
+             * @property wrapS
+             * @type Object
+             */
+            wrapS:{
+                get: function(){
+                    return _wrapS;
+                },
+                set: function(value){
+                    if (constants._ASSERT){
+                        if (value !== constants.GL_CLAMP_TO_EDGE &&
+                            value !== constants.GL_REPEAT){
+                            KICK.core.Util.fail("Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
+                        }
+                    }
+                    _wrapS = value;
+                }
+            },
+            /**
+             * Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
+             * Default: GL_REPEAT
+             * @property wrapT
+             * @type Object
+             */
+            wrapT:{
+                get: function(){
+                    return _wrapT;
+                },
+                set: function(value){
+                    if (constants._ASSERT){
+                        if (value !== constants.GL_CLAMP_TO_EDGE &&
+                            value !== constants.GL_REPEAT){
+                            KICK.core.Util.fail("Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
+                        }
+                    }
+                    _wrapT = value;
+                }
+            },
+            /**
+             * Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, <br>
+             * GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR<br>
+             * Default: GL_LINEAR
+             * @property minFilter
+             * @type Object
+             */
+            minFilter:{
+                get: function(){
+                    return _minFilter;
+                },
+                set: function(value){
+                    if (constants._ASSERT){
+                        if (value !== constants.GL_NEAREST &&
+                            value !== constants.GL_LINEAR &&
+                            value !== constants.GL_NEAREST_MIPMAP_NEAREST &&
+                            value !== constants.GL_LINEAR_MIPMAP_NEAREST &&
+                            value !== constants.GL_NEAREST_MIPMAP_LINEAR &&
+                            value !== constants.GL_LINEAR_MIPMAP_LINEAR){
+                            KICK.core.Util.fail("Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR");
+                        }
+                    }
+                    _minFilter = value;
+                }
+            },
+            /**
+             * Texture.magFilter should be either GL_NEAREST or GL_LINEAR. <br>
+             * Default: GL_LINEAR
+             * @property magFilter
+             * @type Object
+             */
+            magFilter:{
+                get: function(){
+                    return _magFilter;
+                },
+                set: function(value){
+                    if (constants._ASSERT){
+                        if (value !== constants.GL_NEAREST &&
+                            value !== constants.GL_LINEAR){
+                            KICK.core.Util.fail("Texture.magFilter should be either GL_NEAREST or GL_LINEAR");
+                        }
+                    }
+                    _magFilter = value;
+                }
+            },
+            /**
+             * Specifies the internal format of the image (format on GPU)<br>
+             * Default is GL_RGBA<br>
+             * Must be one of the following:
+             * GL_ALPHA,
+             * GL_RGB,
+             * GL_RGBA,
+             * GL_LUMINANCE,
+             * GL_LUMINANCE_ALPHA
+             * @property internalFormat
+             * @type Number
+             */
+            internalFormat:{
+                get:function(){
+                    return _intFormat;
+                },
+                set:function(value){
+                    if (value !== constants.GL_ALPHA &&
+                        value !== constants.GL_RGB  &&
+                        value !== constants.GL_RGBA &&
+                        value !== constants.GL_LUMINANCE &&
+                        value !== constants.GL_LUMINANCE_ALPHA){
+                        KICK.core.Util.fail("Texture.internalFormat should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
+                    }
+                    _intFormat = value;
+                }
+            }
+        });
+
+        /**
+         * Serializes the data into a JSON object (that can be used as a config parameter in the constructor)<br>
+         * Note that the texture data is not serialized in the json format. <br>
+         * This means that either setImage() or setImageData() must be called before the texture can be bound<br>
+         * @method toJSON
+         * @return {Object} config element
+         */
+        this.toJSON = function(){
+            return {
+                uid:_uid,
+                wrapS:_wrapS,
+                wrapT:_wrapT,
+                minFilter:_minFilter,
+                magFilter:_magFilter,
+                internalFormat:_intFormat
             };
         }
     };

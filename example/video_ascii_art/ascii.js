@@ -22,28 +22,6 @@ window.onload = function(){
             });
         }
 
-    var UpdateTextureComponent = function(texture, videoElement){
-        var gl = engine.gl,
-            keyInput = engine.keyInput;
-        this.update = function(){
-            if (!videoElement.isPaused){
-                gl.bindTexture(gl.TEXTURE_2D, texture.textureId);
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                    gl.UNSIGNED_BYTE, videoElement);
-            }
-            if (keyInput.isKeyDown(65)){
-                if (videoElement.isPaused){
-                    videoElement.isPaused = false;
-                    videoElement.play();
-                } else {
-                    videoElement.pause();
-                    videoElement.isPaused = true;
-                }
-            }
-        }
-    };
-
     var engine;
     var camera;
     function initKick(videoElement) {
@@ -63,12 +41,8 @@ window.onload = function(){
         var gameObject = activeScene.createGameObject();
         var meshRenderer = new KICK.scene.MeshRenderer();
 
-        var texture = new KICK.texture.Texture(engine,{
-            generateMipmaps: false,
-            magFilter: KICK.core.Constants.GL_NEAREST,
-            minFilter:  KICK.core.Constants.GL_NEAREST,
-            wrapS: KICK.core.Constants.GL_CLAMP_TO_EDGE,
-            wrapT: KICK.core.Constants.GL_CLAMP_TO_EDGE
+        var texture = new KICK.texture.MovieTexture(engine,{
+            videoElement:videoElement
         });
         var asciiTexture = new KICK.texture.Texture(engine,{
             generateMipmaps: false,
@@ -99,7 +73,6 @@ window.onload = function(){
                     }
                 });
         gameObject.addComponent(meshRenderer);
-        gameObject.addComponent(new UpdateTextureComponent(texture,videoElement));
 
         gameObject = activeScene.createGameObject();
         meshRenderer = new KICK.scene.MeshRenderer();
@@ -114,7 +87,6 @@ window.onload = function(){
         gameObject.transform.position = [.9,.9,0.1];
         gameObject.transform.localScale = [0.1,0.1,0.1];
     }
-
 
     // initKick();
     window.YUI().use("panel",function(Y) {
@@ -159,9 +131,12 @@ window.onload = function(){
                 var reader = new window.FileReader();
                 reader.onload = function(e){
                     var video = document.createElement("video");
+                    video.style.display = "none";
                     video.autoplay = true;
                     video.addEventListener('ended', onEnd, false);
                     video.src = e.target.result;
+                    document.body.appendChild(video);
+                    video.play();
                     initKick(video);
                 };
                 reader.readAsDataURL(this.files[0]);
@@ -177,9 +152,11 @@ window.onload = function(){
             button.onclick = function(){
                 window.currentDialog.hide();
                 var video = document.createElement("video");
+                video.style.display = "none";
                 video.autoplay = true;
                 video.addEventListener('ended', onEnd, false);
                 video.src = "BigBuckBunny.m4v";
+                document.body.appendChild(video);
                 video.play();
                 initKick(video);
             };
@@ -190,8 +167,9 @@ window.onload = function(){
 
     function documentResized(){
         var canvas = document.getElementById('canvas');
-        canvas.width = document.width;
-        canvas.height = document.height-canvas.offsetTop;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight-canvas.offsetTop;
+        
         if (engine){
             engine.canvasResized();
         }
