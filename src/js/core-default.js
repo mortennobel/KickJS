@@ -168,6 +168,8 @@ KICK.namespace = function (ns_string) {
          *  <ul>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
+         *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
+         *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShader
@@ -177,20 +179,31 @@ KICK.namespace = function (ns_string) {
         this.getShader = function(url,errorLog){
             var vertexShaderSrc,
                 fragmentShaderSrc,
+                blend = false,
                 glslConstants = KICK.material.GLSLConstants;
             if (url.indexOf("kickjs://shader/phong/")==0){
                 vertexShaderSrc = glslConstants["phong_vs.glsl"];
                 fragmentShaderSrc = glslConstants["phong_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/transparent_phong/")==0){
+                vertexShaderSrc = glslConstants["transparent_phong_vs.glsl"];
+                fragmentShaderSrc = glslConstants["transparent_phong_fs.glsl"];
+                blend = true;
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
             } else if (url.indexOf("kickjs://shader/unlit/")==0){
                 vertexShaderSrc = glslConstants["unlit_vs.glsl"];
                 fragmentShaderSrc = glslConstants["unlit_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/transparent_unlit/")==0){
+                vertexShaderSrc = glslConstants["transparent_unlit_vs.glsl"];
+                fragmentShaderSrc = glslConstants["transparent_unlit_fs.glsl"];
+                blend = true;
             } else {
                 return null;
             }
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader(engine, {
+                blend:blend
+            });
             shader.vertexShaderSrc = vertexShaderSrc;
             shader.fragmentShaderSrc = fragmentShaderSrc;
             shader.errorLog = errorLog;
@@ -212,21 +225,22 @@ KICK.namespace = function (ns_string) {
          */
         this.getTexture = function(url){
             var data;
+
             if (url.indexOf("kickjs://texture/black/")==0){
-                data = new Uint8Array([0, 0, 0,
-                                         0,   0,   0,
-                                         0,   0,   0,
-                                         0,   0,   0]);
+                data = new Uint8Array([0, 0, 0, 255,
+                                         0,   0,   0,255,
+                                         0,   0,   0,255,
+                                         0,   0,   0,255]);
             } else if (url.indexOf("kickjs://texture/white/")==0){
-                data = new Uint8Array([255, 255, 255,
-                                         255,   255,   255,
-                                         255,   255,   255,
-                                         255,   255,   255]);
+                data = new Uint8Array([255, 255, 255,255,
+                                         255,   255,   255,255,
+                                         255,   255,   255,255,
+                                         255,   255,   255,255]);
             } else if (url.indexOf("kickjs://texture/gray/")==0){
-                data = new Uint8Array([127, 127, 127,
-                                         127,   127,   127,
-                                         127,   127,   127,
-                                         127,   127,   127]);
+                data = new Uint8Array([127, 127, 127,255,
+                                         127,   127,   127,255,
+                                         127,   127,   127,255,
+                                         127,   127,   127,255]);
             } else {
                 return null;
             }
@@ -234,7 +248,7 @@ KICK.namespace = function (ns_string) {
                 minFilter: constants.GL_NEAREST,
                 magFilter: constants.GL_NEAREST,
                 generateMipmaps: false,
-                internalFormat: constants.GL_RGB
+                internalFormat: constants.GL_RGBA
             });
 
             texture.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,data, url);
