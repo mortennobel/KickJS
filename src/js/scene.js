@@ -1153,6 +1153,11 @@ KICK.namespace = function (ns_string) {
             _scene.removeComponentListener(thisObj);
         };
 
+        /**
+         * Add components that implements the render function and match the camera layerMask to cameras renderable components
+         * @method componentsAdded
+         * @param {Array[KICK.scene.Component]} components
+         */
         this.componentsAdded = function( components ){
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
@@ -1162,6 +1167,10 @@ KICK.namespace = function (ns_string) {
             }
         };
 
+        /**
+         * @method componentsRemoved
+         * @param {Array[KICK.scene.Component]} components
+         */
         this.componentsRemoved = function ( components ){
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
