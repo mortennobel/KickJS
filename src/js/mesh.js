@@ -796,6 +796,11 @@ KICK.namespace = function (ns_string) {
                     updateData();
                 }
             },
+            /**
+             * The resource url of the mesh. Setting this property will try to load the meshData.
+             * @property urlResource
+             * @type String
+             */
             urlResource:{
                 get:function(){
                     return _urlResource;
