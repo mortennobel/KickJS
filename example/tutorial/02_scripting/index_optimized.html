@@ -18,6 +18,7 @@
         var transform,
                 time,
                 rotationEuler = [0,0,0];
+        // Get references to objects used in the update method performs better
         this.activated = function(){
             transform = this.gameObject.transform;
             time = this.gameObject.engine.time;
