@@ -1,10 +1,10 @@
 <html>
 <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>KickJS | Tutorial | 02 - Scripting triangle world</title>
+    <title>KickJS | Tutorial | 02 - Scripting triangle world - Optimized code</title>
 </head>
 <body>
-<h1>KickJS | Tutorial | 02 - Scripting triangle world</h1>
+<h1>KickJS | Tutorial | 02 - Scripting triangle world - Optimized code</h1>
 
 <!-- Tutorial start -->
 <!--<script type="text/javascript" src="../../js/kick-min-0.1.0.js"></script>-->
@@ -15,14 +15,16 @@
 <script type="text/javascript">
 
     var RotatorComponent = function(rotationSpeed){
-        var rotationEuler = [0,0,0];
+        var transform,
+                time,
+                rotationEuler = [0,0,0];
+        this.activated = function(){
+            transform = this.gameObject.transform;
+            time = this.gameObject.engine.time;
+        };
 
         this.update = function(){
-            var gameObject = this.gameObject,
-                    transform = gameObject.transform,
-                    time = gameObject.engine.time,
-                    deltaTime = time.deltaTime;
-            rotationEuler[2]+=deltaTime*rotationSpeed;
+            rotationEuler[2]+=time.deltaTime*rotationSpeed;
             transform.localRotationEuler = rotationEuler;
         };
     };
