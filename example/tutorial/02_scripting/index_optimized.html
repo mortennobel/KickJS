@@ -69,7 +69,8 @@
         meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
-        gameObject.addComponent(new RotatorComponent(i-0.4));
+        var rotationSpeed = i-0.4;
+        gameObject.addComponent(new RotatorComponent(rotationSpeed));
     }
 </script>
 <!-- Tutorial end -->
