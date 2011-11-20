@@ -7079,6 +7079,11 @@ KICK.namespace = function (ns_string) {
                     updateData();
                 }
             },
+            /**
+             * The resource url of the mesh. Setting this property will try to load the meshData.
+             * @property urlResource
+             * @type String
+             */
             urlResource:{
                 get:function(){
                     return _urlResource;
@@ -7259,7 +7264,8 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config configuration for gameObject (components will not be initialized)
      */
     scene.GameObject = function (scene, config) {
-        var _components = [],
+        var _transform = new KICK.scene.Transform(this),
+            _components = [_transform],
             _layer = 1,
             _name,
             _uid = scene.engine.createUID(),
@@ -7288,7 +7294,7 @@ KICK.namespace = function (ns_string) {
                  * @type KICK.scene.Transform
                  */
                 transform:{
-                    value:new KICK.scene.Transform(this)
+                    value:_transform
                 },
                 /**
                  * Layer bit flag. The default value is 1.
@@ -7346,7 +7352,7 @@ KICK.namespace = function (ns_string) {
         );
 
         /**
-         * Get component by index (note the Transform component will not be returned this way).
+         * Get component by index.
          * @method getComponent
          * @param {Number} index
          * @return {KICK.scene.Component}
@@ -7361,6 +7367,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.addComponent = function (component) {
+            if (component instanceof KICK.scene.Transform){
+                if (ASSERT){
+                    KICK.core.Util.fail("Cannot add another Transform to a GameObject");
+                }
+                return;
+            }
             if (component.gameObject) {
                 throw {
                     name: "Error",
@@ -7381,6 +7393,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.removeComponent =  function (component) {
+            if (component instanceof KICK.scene.Transform){
+                if (ASSERT){
+                    KICK.core.Util.fail("Cannot remove Transform to a GameObject");
+                }
+                return;
+            }
             delete component.gameObject;
             core.Util.removeElementFromArray(_components,component);
             this.scene.removeComponent(component);
@@ -7418,9 +7436,6 @@ KICK.namespace = function (ns_string) {
                     return component;
                 }
             }
-            if (type === scene.Transform){
-                return this.transform;
-            }
             return null;
         };
 
@@ -7446,9 +7461,6 @@ KICK.namespace = function (ns_string) {
                 if (component instanceof type){
                     res.push(component);
                 }
-            }
-            if (type === scene.Transform){
-                res.push(this.transform);
             }
             return res;
         };
@@ -8350,6 +8362,11 @@ KICK.namespace = function (ns_string) {
             _scene.removeComponentListener(thisObj);
         };
 
+        /**
+         * Add components that implements the render function and match the camera layerMask to cameras renderable components
+         * @method componentsAdded
+         * @param {Array[KICK.scene.Component]} components
+         */
         this.componentsAdded = function( components ){
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
@@ -8359,6 +8376,10 @@ KICK.namespace = function (ns_string) {
             }
         };
 
+        /**
+         * @method componentsRemoved
+         * @param {Array[KICK.scene.Component]} components
+         */
         this.componentsRemoved = function ( components ){
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
@@ -9572,7 +9593,6 @@ KICK.namespace = function (ns_string) {
 
     /**
      * A movie texture associated with a video element (or canvas tag) will update the content every frame (when it is bound).
-     * Note that the texture will not be mipmapped (since this is too expensive to do on the fly).
      * @class MovieTexture
      * @namespace KICK.texture
      * @constructor
@@ -9592,6 +9612,7 @@ KICK.namespace = function (ns_string) {
             _magFilter = thisConfig.magFilter || 9728,
             _intFormat = thisConfig.internalFormat || 6408,
             _skipFrames = thisConfig.skipFrames || 0,
+            _generateMipmaps = thisConfig.generateMipmaps || false,
             timer = engine.time,
             thisObj = this,
             lastGrappedFrame = -1,
@@ -9621,6 +9642,9 @@ KICK.namespace = function (ns_string) {
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
                     gl.UNSIGNED_BYTE, _videoElement);
+                if (_generateMipmaps){
+                    gl.generateMipmap(3553);
+                }
             }
 //            }
         };
@@ -9675,6 +9699,26 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     _videoElement = newValue;
+                }
+            },
+            /**
+             * Autogenerate mipmap levels<br>
+             * Note that enabling auto mipmap on movie textures uses a lot of resources.
+             * (Default false)
+             * @property generateMipmaps
+             * @type Boolean
+             */
+            generateMipmaps:{
+                get: function(){
+                    return _generateMipmaps;
+                },
+                set: function(value){
+                    if (true){
+                        if (typeof value !== 'boolean'){
+                            KICK.core.Util.fail("MovieTexture.generateMipmaps was not a boolean");
+                        }
+                    }
+                    _generateMipmaps = value;
                 }
             },
             /**

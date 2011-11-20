@@ -62,7 +62,8 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config configuration for gameObject (components will not be initialized)
      */
     scene.GameObject = function (scene, config) {
-        var _components = [],
+        var _transform = new KICK.scene.Transform(this),
+            _components = [_transform],
             _layer = 1,
             _name,
             _uid = scene.engine.createUID(),
@@ -91,7 +92,7 @@ KICK.namespace = function (ns_string) {
                  * @type KICK.scene.Transform
                  */
                 transform:{
-                    value:new KICK.scene.Transform(this)
+                    value:_transform
                 },
                 /**
                  * Layer bit flag. The default value is 1.
@@ -149,7 +150,7 @@ KICK.namespace = function (ns_string) {
         );
 
         /**
-         * Get component by index (note the Transform component will not be returned this way).
+         * Get component by index.
          * @method getComponent
          * @param {Number} index
          * @return {KICK.scene.Component}
@@ -164,6 +165,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.addComponent = function (component) {
+            if (component instanceof KICK.scene.Transform){
+                if (ASSERT){
+                    KICK.core.Util.fail("Cannot add another Transform to a GameObject");
+                }
+                return;
+            }
             if (component.gameObject) {
                 throw {
                     name: "Error",
@@ -184,6 +191,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.removeComponent =  function (component) {
+            if (component instanceof KICK.scene.Transform){
+                if (ASSERT){
+                    KICK.core.Util.fail("Cannot remove Transform to a GameObject");
+                }
+                return;
+            }
             delete component.gameObject;
             core.Util.removeElementFromArray(_components,component);
             this.scene.removeComponent(component);
@@ -221,9 +234,6 @@ KICK.namespace = function (ns_string) {
                     return component;
                 }
             }
-            if (type === scene.Transform){
-                return this.transform;
-            }
             return null;
         };
 
@@ -249,9 +259,6 @@ KICK.namespace = function (ns_string) {
                 if (component instanceof type){
                     res.push(component);
                 }
-            }
-            if (type === scene.Transform){
-                res.push(this.transform);
             }
             return res;
         };
