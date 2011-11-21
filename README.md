@@ -7,8 +7,8 @@ A WebGL game engine for modern web-browsers.
 
 ## Examples
 
-![alt text](http://www.kickjs.org/images/example_glsl_editor.jpg "GLSL Editor")
-![alt text](http://www.kickjs.org/images/example_video_ascii_art.jpg "Video ascii art")
+<a href="http://www.kickjs.org/example/shader_editor/shader_editor.html" title="GLSL Editor"><img src="http://www.kickjs.org/images/example_glsl_editor.jpg"></a>
+<a href="http://www.kickjs.org/example/video_ascii_art/Video_Ascii_Art.html" title="Video ascii art"><img src="http://www.kickjs.org/images/example_video_ascii_art.jpg"></a>
 
 ## Documentation
 
