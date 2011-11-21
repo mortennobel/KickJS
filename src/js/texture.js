@@ -354,9 +354,9 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             *
              * @property textureId
              * @type {Number}
+             * @protected
              */
             textureId:{
                 value:_textureId
@@ -720,6 +720,7 @@ KICK.namespace = function (ns_string) {
             /**
              * @property textureId
              * @type {Number}
+             * @protected
              */
             textureId:{
                 value:_textureId

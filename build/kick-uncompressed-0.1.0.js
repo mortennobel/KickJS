@@ -9485,9 +9485,9 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             *
              * @property textureId
              * @type {Number}
+             * @protected
              */
             textureId:{
                 value:_textureId
@@ -9851,6 +9851,7 @@ KICK.namespace = function (ns_string) {
             /**
              * @property textureId
              * @type {Number}
+             * @protected
              */
             textureId:{
                 value:_textureId
@@ -10276,7 +10277,7 @@ KICK.namespace = function (ns_string) {
              * Render order. Default value 1000. The following ranges are predefined:<br>
              * 0-999: Background. Mainly for skyboxes etc<br>
              * 1000-1999 Opaque geometry  (default)<br>
-             * 2000-2999 Transparent. This queue is sorted in a back to front order before rendering.
+             * 2000-2999 Transparent. This queue is sorted in a back to front order before rendering.<br>
              * 3000-3999 Overlay
              * @property renderOrder
              * @type Number
@@ -10657,22 +10658,23 @@ KICK.namespace = function (ns_string) {
      */
     material.Shader.getPrecompiledSource = function(sourcecode){
         // todo optimize with regular expression search
-        // insert #line nn after each #pragma include
-        var linebreakPosition = [];
-        var position = sourcecode.indexOf('\n');
-        while (position != -1){
-            position++;
-            linebreakPosition.push(position);
-            position = sourcecode.indexOf('\n',position);
-        }
-        for (var i=linebreakPosition.length-2;i>=0;i--){
-            position = linebreakPosition[i];
-            var nextPosition = linebreakPosition[i+1];
-            if (sourcecode.substring(position).indexOf("#pragma include")==0){
-                sourcecode = sourcecode.substring(0,nextPosition)+("#line  "+(i+2)+"\n")+sourcecode.substring(nextPosition);
+        if (true){
+            // insert #line nn after each #pragma include to give meaning full lines in error console
+            var linebreakPosition = [];
+            var position = sourcecode.indexOf('\n');
+            while (position != -1){
+                position++;
+                linebreakPosition.push(position);
+                position = sourcecode.indexOf('\n',position);
+            }
+            for (var i=linebreakPosition.length-2;i>=0;i--){
+                position = linebreakPosition[i];
+                var nextPosition = linebreakPosition[i+1];
+                if (sourcecode.substring(position).indexOf("#pragma include")==0){
+                    sourcecode = sourcecode.substring(0,nextPosition)+("#line  "+(i+2)+"\n")+sourcecode.substring(nextPosition);
+                }
             }
         }
-
         for (var name in material.GLSLConstants){
             if (typeof (name) === "string"){
                 var source = material.GLSLConstants[name];
