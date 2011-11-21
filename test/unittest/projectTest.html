@@ -97,7 +97,14 @@ YUI().use('node', 'console', 'test', function (Y) {
                 config: materialConfig
             };
             var materialDescriptor = new ProjectResourceDescriptor(resourceDescriptorConfig);
-            var materialObject = materialDescriptor.instantiate(null);
+            var engineStubImpl = {
+                project:{
+                    load:function(){
+                        return {};
+                    }
+                }
+            };
+            var materialObject = materialDescriptor.instantiate(engineStubImpl);
             Assert.isTrue(materialObject instanceof KICK.material.Material, "object is Material");
             materialDescriptor.toJSON()
         }
