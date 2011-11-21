@@ -74,6 +74,7 @@ KICK.namespace = function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        _epsilon = KICK.core.Constants._EPSILON,
         wrapArray = function(array, length){
             var i,
                 index=0,
@@ -189,6 +190,26 @@ KICK.namespace = function (ns_string) {
         dest[0] = vec[0] - vec2[0];
         dest[1] = vec[1] - vec2[1];
         return dest;
+    };
+
+    /**
+     * Test to see if vectors are equal (difference is less than epsilon)
+     * @method equal
+     * @param {KICK.math.vec2} vec first operand
+     * @param {KICK.math.vec2} vec2 second operand
+     * @param {Number} epsilon Optional - default value is
+     * @return {Boolean} true if two vectors are equals
+     */
+    vec2.equal = function(vec, vec2, epsilon) {
+        if (!epsilon){
+            epsilon = _epsilon;
+        }
+        for (var i=0;i<2;i++){
+            if (Math.abs(vec[i]-vec2[i])>epsilon){
+                return false;
+            }
+        }
+        return true;
     };
 
     /**
@@ -345,6 +366,26 @@ KICK.namespace = function (ns_string) {
         dest[1] = vec[1] - vec2[1];
         dest[2] = vec[2] - vec2[2];
         return dest;
+    };
+
+    /**
+     * Test to see if vectors are equal (difference is less than epsilon)
+     * @method equal
+     * @param {KICK.math.vec3} vec first operand
+     * @param {KICK.math.vec3} vec2 second operand
+     * @param {Number} epsilon Optional - default value is
+     * @return {Boolean} true if two vectors are equals
+     */
+    vec3.equal = function(vec, vec2, epsilon) {
+        if (!epsilon){
+            epsilon = _epsilon;
+        }
+        for (var i=0;i<3;i++){
+            if (Math.abs(vec[i]-vec2[i])>epsilon){
+                return false;
+            }
+        }
+        return true;
     };
 
     /**
@@ -578,7 +619,7 @@ KICK.namespace = function (ns_string) {
             z = cartesian[2],
             sphericalX;
         if (x == 0)
-            x = KICK.core.Constants._EPSILON;
+            x = _epsilon;
         if (!spherical){
             spherical = vec3.create();
         }
@@ -746,6 +787,26 @@ KICK.namespace = function (ns_string) {
         dest[2] = vec[2] - vec2[2];
         dest[3] = vec[3] - vec2[3];
         return dest;
+    };
+
+    /**
+     * Test to see if vectors are equal (difference is less than epsilon)
+     * @method equal
+     * @param {KICK.math.vec4} vec first operand
+     * @param {KICK.math.vec4} vec2 second operand
+     * @param {Number} epsilon Optional - default value is
+     * @return {Boolean} true if two vectors are equals
+     */
+    vec4.equal = function(vec, vec2, epsilon) {
+        if (!epsilon){
+            epsilon = _epsilon;
+        }
+        for (var i=0;i<2;i++){
+            if (Math.abs(vec[i]-vec2[i])>epsilon){
+                return false;
+            }
+        }
+        return true;
     };
 
     /**

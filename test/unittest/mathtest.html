@@ -302,8 +302,20 @@ YUI().use('node', 'console', 'test', function (Y) {
                 message = "Expected "+KICK.math.vec3.str(expected)+" Actual "+KICK.math.vec3.str(actual);
             }
         }
-        for (var i=0;i<expected.length;i++){
-            Y.Assert.compareFloat(expected[i],actual[i],message);
+        var vectorType;
+        if (expected.length==2){
+            vectorType = KICK.math.vec2;
+        } else if (expected.length==3){
+            vectorType = KICK.math.vec3;
+        } else if (expected.length==4){
+            vectorType = KICK.math.vec4;
+        }
+        if (vectorType){
+            Y.Assert.isTrue(vectorType.equal(expected,actual,0.001),message);
+        } else {
+            for (var i=0;i<expected.length;i++){
+                Y.Assert.compareFloat(expected[i],actual[i],message);
+            }
         }
     };
     Y.Assert.compareFloat = function(f1,f2,message){
