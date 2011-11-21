@@ -50,6 +50,7 @@ KICK.namespace = function (ns_string) {
         DEBUG = constants._DEBUG,
         ASSERT = constants._ASSERT,
         applyConfig = KICK.core.Util.applyConfig,
+        insertSorted = KICK.core.Util.insertSorted,
         thisObj = this;
 
     /**
@@ -1070,7 +1071,10 @@ KICK.namespace = function (ns_string) {
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
             modelViewProjectionMatrix = mat4.create(),
-            renderableComponents = [],
+            renderableComponentsBackGroundAndGeometry = [],
+            renderableComponentsTransparent = [],
+            renderableComponentsOverlay = [],
+            renderableComponentsArray = [renderableComponentsBackGroundAndGeometry,renderableComponentsTransparent,renderableComponentsOverlay],
             _normalizedViewportRect = vec4.create([0,0,1,1]),
             isNumber = function (o) {
                 return typeof (o) === "number";
@@ -1136,6 +1140,11 @@ KICK.namespace = function (ns_string) {
                 mat4.set(globalMatrixInv, modelViewMatrix);
 
                 mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+            },
+            compareRenderOrder = function(a,b){
+                var aRenderOrder = a.renderOrder || 1000,
+                    bRenderOrder = b.renderOrder || 1000;
+                return aRenderOrder-bRenderOrder;
             };
 
         /**
@@ -1169,7 +1178,14 @@ KICK.namespace = function (ns_string) {
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
                 if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
-                    renderableComponents.push(component);
+                    var renderOrder = component.renderOrder || 1000;
+                    if (renderOrder < 2000){
+                        insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
+                    } else if (renderOrder >= 3000){
+                        renderableComponentsOverlay.push(component);
+                    } else {
+                        insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
+                    }
                 }
             }
         };
@@ -1182,7 +1198,9 @@ KICK.namespace = function (ns_string) {
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
                 if (typeof(component.render) === "function") {
-                    core.Util.removeElementFromArray(renderableComponents,component);
+                    for (var j=renderableComponentsArray.length-1;j>=0;j--){
+                        core.Util.removeElementFromArray(renderableComponentsArray[j],component);
+                    }
                 }
             }
         };
@@ -1194,7 +1212,13 @@ KICK.namespace = function (ns_string) {
         this.renderScene = function(sceneLightObj){
             setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
-            _renderer.render(renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+
+            _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            if (renderableComponentsTransparent.length>0){
+                // todo sort object back-to-front order
+                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            }
+            _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
                 gl.bindTexture(gl.TEXTURE_2D, textureId);
@@ -1519,7 +1543,8 @@ KICK.namespace = function (ns_string) {
     scene.MeshRenderer = function (config) {
         var transform,
             _material,
-            _mesh;
+            _mesh,
+            _renderOrder;
 
         /**
          * @method activated
@@ -1529,6 +1554,15 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property renderOrder
+             * @type Number
+             */
+            renderOrder:{
+                get:function(){
+                    return _renderOrder;
+                }
+            },
             /**
              * @property material
              * @type KICK.material.Material
@@ -1544,6 +1578,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _material = newValue;
+                    _renderOrder = _material.renderOrder;
                 }
             },
             /**

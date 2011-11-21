@@ -22,27 +22,15 @@
     <script type="text/javascript">
         var engine;
         var meshRenderer;
-        
-        var log = function (output) {
-            var element = document.getElementById("output");
-            element.innerHTML = element.innerHTML+output+"<br>";
-        };
 
-        var clearLog = function(){
-            var element = document.getElementById("output");
-            element.innerHTML = "";
-        }
-
-
-
-        function setMaterial(vertexShaderId, fragmentShaderId){
-            clearLog();
+        function setMaterial(vertexShaderId, fragmentShaderId,renderOrder){
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
             var shader = new KICK.material.Shader(engine);
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
+            shader.errorLog = console.log;
+            shader.renderOrder = renderOrder;
             shader.updateShader();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
@@ -54,20 +42,6 @@
                 name:"Some material",
                 shader:shader
             });
-        }
-
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
         }
 
         function addRotatorComponent(gameObject){
@@ -89,9 +63,7 @@
                     rotVec[1] = rot*radianToDegree;
                     transform.localPosition = translation;
 
-                    //new Date().getMilliseconds();
                     transform.localRotationEuler = rotVec;
-                    res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
                 }
             });
         }
@@ -107,56 +79,48 @@
             });
             cameraObject.addComponent(camera);
 
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-
-            var gameObjectSphere = engine.activeScene.createGameObject();
-            var meshRendererSphere = new KICK.scene.MeshRenderer();
-            meshRendererSphere.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
-            meshRendererSphere.material = new KICK.material.Material(engine,{
-                shader:engine.resourceManager.getShader("kickjs://shader/transparent_unlit/"),
-                uniforms:{
-                    mainTexture:{
-                        value:engine.resourceManager.getTexture("kickjs://texture/white/"),
-                        type:KICK.core.Constants.GL_SAMPLER_2D
-                    },
-                    mainColor:{
-                        value:[1,1,1,0.2],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
+            var createSphereObject = function (position, color){
+                var gameObjectSphere = engine.activeScene.createGameObject();
+                gameObjectSphere.transform.position = position;
+                var meshRendererSphere = new KICK.scene.MeshRenderer();
+                meshRendererSphere.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
+                meshRendererSphere.material = new KICK.material.Material(engine,{
+                    shader:engine.resourceManager.getShader("kickjs://shader/transparent_unlit/"),
+                    uniforms:{
+                        mainTexture:{
+                            value:engine.resourceManager.getTexture("kickjs://texture/white/"),
+                            type:KICK.core.Constants.GL_SAMPLER_2D
+                        },
+                        mainColor:{
+                            value:color,
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        }
                     }
-                }
-            });
-            gameObjectSphere.addComponent(meshRendererSphere);
+                });
+                gameObjectSphere.addComponent(meshRendererSphere);
+            };
+            createSphereObject([1,0,0], [1,0,0,0.8]);
+            createSphereObject([0,0,1.5], [0,1,0,0.8]);
 
+            function createCube(position, renderOrder){
+                var gameObject = engine.activeScene.createGameObject();
+                gameObject.transform.position = position;
+                meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+                setMaterial('vertexShaderColor','fragmentShader',renderOrder);
+                gameObject.addComponent(meshRenderer);
+            }
+            createCube([-1,0,0],1000);
+            createCube([0,-1.5,0],1001);
 
             addRotatorComponent(cameraObject);
-        }
-
-        function UVSphere(){
-            // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
         }
     </script>
 </head>
 <body onload="initKick();">
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example shows how a cube is rotated.
-  <br>
-
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Show data</h2>
-  [<a href="#" onclick="refreshData();">Refresh</a>]
-  [<a href="#" onclick="UVSphere();">UVSphere</a>]<br>
-  <textarea style="width: 500px;height:100px" id="res">
-  </textarea>
-  <div id="example" class="yui3-skin-sam"></div>
-
+  This example test how renderOrder is used.
+  
   <div style="display:none;">
   <textarea style="width:500px;height:150px;" id="vertexShaderColor">
 attribute vec3 vertex;

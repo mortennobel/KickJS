@@ -180,6 +180,8 @@ KICK.namespace = function (ns_string) {
             var vertexShaderSrc,
                 fragmentShaderSrc,
                 blend = false,
+                depthMask = true,
+                renderOrder = 1000,
                 glslConstants = KICK.material.GLSLConstants;
             if (url.indexOf("kickjs://shader/phong/")==0){
                 vertexShaderSrc = glslConstants["phong_vs.glsl"];
@@ -188,6 +190,8 @@ KICK.namespace = function (ns_string) {
                 vertexShaderSrc = glslConstants["transparent_phong_vs.glsl"];
                 fragmentShaderSrc = glslConstants["transparent_phong_fs.glsl"];
                 blend = true;
+                depthMask = false;
+                renderOrder = 2000;
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
@@ -197,12 +201,16 @@ KICK.namespace = function (ns_string) {
             } else if (url.indexOf("kickjs://shader/transparent_unlit/")==0){
                 vertexShaderSrc = glslConstants["transparent_unlit_vs.glsl"];
                 fragmentShaderSrc = glslConstants["transparent_unlit_fs.glsl"];
+                renderOrder = 2000;
                 blend = true;
+                depthMask = false;
             } else {
                 return null;
             }
             var shader = new KICK.material.Shader(engine, {
-                blend:blend
+                blend:blend,
+                depthMask:depthMask,
+                renderOrder:renderOrder
             });
             shader.vertexShaderSrc = vertexShaderSrc;
             shader.fragmentShaderSrc = fragmentShaderSrc;

@@ -43,6 +43,7 @@ KICK.namespace = function (ns_string) {
         mat3 = math.mat3,
         mat4 = math.mat4,
         core = KICK.namespace("KICK.core"),
+        applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants;
 
     /**
@@ -67,6 +68,7 @@ KICK.namespace = function (ns_string) {
             _blend = thisConfig.blend || false,
             _blendSFactor = thisConfig.blendSFactor || core.Constants.GL_SRC_ALPHA,
             _blendDFactor = thisConfig.blendDFactor || core.Constants.GL_ONE_MINUS_SRC_ALPHA,
+            _renderOrder = thisConfig.renderOrder || 0,
             blendKey,
             glslConstants = material.GLSLConstants,
             _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["error_vs.glsl"],
@@ -186,6 +188,24 @@ KICK.namespace = function (ns_string) {
                         KICK.core.Util.fail("Shader.fragmentShaderSrc must be a string");
                     }
                     _fragmentShaderSrc = value;
+                }
+            },
+            /**
+             * Render order. Default value 1000. The following ranges are predefined:<br>
+             * 0-999: Background. Mainly for skyboxes etc<br>
+             * 1000-1999 Opaque geometry  (default)<br>
+             * 2000-2999 Transparent. This queue is sorted in a back to front order before rendering.
+             * 3000-3999 Overlay
+             * @property renderOrder
+             * @type Number
+             */
+            renderOrder:{
+                get:function(){ return _renderOrder; },
+                set:function(value){
+                    if (typeof value !== "number"){
+                        KICK.core.Util.fail("Shader.renderOrder must be a number");
+                    }
+                    _renderOrder = value;
                 }
             },
             /**
@@ -716,11 +736,11 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      */
     material.Material = function (engine,config) {
-        var configObj = config || {},
-            _name = configObj.name || "Material",
-            _shader = configObj.shader,
-            _uniforms = configObj.uniforms || {},
-            thisObj = this;
+        var _name = "Material",
+            _shader = null,
+            _uniforms = {},
+            thisObj = this,
+            _renderOrder;
         Object.defineProperties(this,{
              /**
               * @property name
@@ -752,8 +772,21 @@ KICK.namespace = function (ns_string) {
              * @type Object
              */
             uniforms:{
-                value:_uniforms,
-                writeable:true
+                get:function(){
+                    return _uniforms;
+                },
+                set:function(newValue){
+                    _uniforms = newValue;
+                }
+            },
+            /**
+             * @property renderOrder
+             * @type Number
+             */
+            renderOrder:{
+                get:function(){
+                    return _renderOrder;
+                }
             }
         });
 
@@ -768,9 +801,10 @@ KICK.namespace = function (ns_string) {
                 _shader = engine.project.load(_shader);
             }
             if (!_shader){
-                // todo replace with default shader
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
+                _shader = engine.project.load("kickjs://shader/error/");
             }
+            _renderOrder = _shader.renderOrder;
         };
 
         /**
@@ -819,6 +853,7 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
+            applyConfig(thisObj,config);
             material.Material.verifyUniforms(_uniforms);
         })();
     };
