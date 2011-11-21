@@ -194,7 +194,7 @@ KICK.namespace = function (ns_string) {
              * Render order. Default value 1000. The following ranges are predefined:<br>
              * 0-999: Background. Mainly for skyboxes etc<br>
              * 1000-1999 Opaque geometry  (default)<br>
-             * 2000-2999 Transparent. This queue is sorted in a back to front order before rendering.
+             * 2000-2999 Transparent. This queue is sorted in a back to front order before rendering.<br>
              * 3000-3999 Overlay
              * @property renderOrder
              * @type Number
