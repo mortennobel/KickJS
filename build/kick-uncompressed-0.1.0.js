@@ -2751,6 +2751,7 @@ KICK.namespace = function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        _epsilon = 0.00001,
         wrapArray = function(array, length){
             var i,
                 index=0,
@@ -2866,6 +2867,26 @@ KICK.namespace = function (ns_string) {
         dest[0] = vec[0] - vec2[0];
         dest[1] = vec[1] - vec2[1];
         return dest;
+    };
+
+    /**
+     * Test to see if vectors are equal (difference is less than epsilon)
+     * @method equal
+     * @param {KICK.math.vec2} vec first operand
+     * @param {KICK.math.vec2} vec2 second operand
+     * @param {Number} epsilon Optional - default value is
+     * @return {Boolean} true if two vectors are equals
+     */
+    vec2.equal = function(vec, vec2, epsilon) {
+        if (!epsilon){
+            epsilon = _epsilon;
+        }
+        for (var i=0;i<2;i++){
+            if (Math.abs(vec[i]-vec2[i])>epsilon){
+                return false;
+            }
+        }
+        return true;
     };
 
     /**
@@ -3022,6 +3043,26 @@ KICK.namespace = function (ns_string) {
         dest[1] = vec[1] - vec2[1];
         dest[2] = vec[2] - vec2[2];
         return dest;
+    };
+
+    /**
+     * Test to see if vectors are equal (difference is less than epsilon)
+     * @method equal
+     * @param {KICK.math.vec3} vec first operand
+     * @param {KICK.math.vec3} vec2 second operand
+     * @param {Number} epsilon Optional - default value is
+     * @return {Boolean} true if two vectors are equals
+     */
+    vec3.equal = function(vec, vec2, epsilon) {
+        if (!epsilon){
+            epsilon = _epsilon;
+        }
+        for (var i=0;i<3;i++){
+            if (Math.abs(vec[i]-vec2[i])>epsilon){
+                return false;
+            }
+        }
+        return true;
     };
 
     /**
@@ -3255,7 +3296,7 @@ KICK.namespace = function (ns_string) {
             z = cartesian[2],
             sphericalX;
         if (x == 0)
-            x = 0.00001;
+            x = _epsilon;
         if (!spherical){
             spherical = vec3.create();
         }
@@ -3423,6 +3464,26 @@ KICK.namespace = function (ns_string) {
         dest[2] = vec[2] - vec2[2];
         dest[3] = vec[3] - vec2[3];
         return dest;
+    };
+
+    /**
+     * Test to see if vectors are equal (difference is less than epsilon)
+     * @method equal
+     * @param {KICK.math.vec4} vec first operand
+     * @param {KICK.math.vec4} vec2 second operand
+     * @param {Number} epsilon Optional - default value is
+     * @return {Boolean} true if two vectors are equals
+     */
+    vec4.equal = function(vec, vec2, epsilon) {
+        if (!epsilon){
+            epsilon = _epsilon;
+        }
+        for (var i=0;i<2;i++){
+            if (Math.abs(vec[i]-vec2[i])>epsilon){
+                return false;
+            }
+        }
+        return true;
     };
 
     /**
@@ -7272,6 +7333,7 @@ KICK.namespace = function (ns_string) {
         DEBUG = true,
         ASSERT = true,
         applyConfig = KICK.core.Util.applyConfig,
+        insertSorted = KICK.core.Util.insertSorted,
         thisObj = this;
 
     /**
@@ -8292,7 +8354,10 @@ KICK.namespace = function (ns_string) {
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
             modelViewProjectionMatrix = mat4.create(),
-            renderableComponents = [],
+            renderableComponentsBackGroundAndGeometry = [],
+            renderableComponentsTransparent = [],
+            renderableComponentsOverlay = [],
+            renderableComponentsArray = [renderableComponentsBackGroundAndGeometry,renderableComponentsTransparent,renderableComponentsOverlay],
             _normalizedViewportRect = vec4.create([0,0,1,1]),
             isNumber = function (o) {
                 return typeof (o) === "number";
@@ -8317,12 +8382,9 @@ KICK.namespace = function (ns_string) {
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
              * @method setupCamera
-             * @param {KICK.math.mat4} projectionMatrix Projection of the camera
-             * @param {KICK.math.mat4} modelViewMatrix Modelview of the camera (the inverse global transform matrix of the camera)
-             * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
              * @private
              */
-            setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
+            setupCamera = function () {
                 var viewportDimension = _renderTarget?_renderTarget.dimension:gl.viewportSize,
                     viewPortWidth = viewportDimension[0],
                     viewPortHeight = viewportDimension[1],
@@ -8358,6 +8420,25 @@ KICK.namespace = function (ns_string) {
                 mat4.set(globalMatrixInv, modelViewMatrix);
 
                 mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+            },
+            compareRenderOrder = function(a,b){
+                var aRenderOrder = a.renderOrder || 1000,
+                    bRenderOrder = b.renderOrder || 1000;
+                return aRenderOrder-bRenderOrder;
+            },
+            sortTransparentBackToFront = function(){
+                // calculate distances
+                var temp = vec3.create();
+                var cameraPosition = transform.position;
+                for (var i=renderableComponentsTransparent.length-1;i>=0;i--){
+                    var object = renderableComponentsTransparent[i];
+                    var objectPosition = object.gameObject.transform.position;
+                    object.distanceToCamera = vec3.lengthSqr(vec3.subtract(objectPosition, cameraPosition, temp));
+                }
+                function compareDistanceToCamera(a,b){
+                    return b.distanceToCamera-a.distanceToCamera;
+                }
+                renderableComponentsTransparent.sort(compareDistanceToCamera);
             };
 
         /**
@@ -8391,7 +8472,14 @@ KICK.namespace = function (ns_string) {
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
                 if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
-                    renderableComponents.push(component);
+                    var renderOrder = component.renderOrder || 1000;
+                    if (renderOrder < 2000){
+                        insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
+                    } else if (renderOrder >= 3000){
+                        insertSorted(component,renderableComponentsOverlay,compareRenderOrder);
+                    } else {
+                        renderableComponentsTransparent.push(component);
+                    }
                 }
             }
         };
@@ -8404,7 +8492,9 @@ KICK.namespace = function (ns_string) {
             for (var i=components.length-1; i>=0; i--) {
                 var component = components[i];
                 if (typeof(component.render) === "function") {
-                    core.Util.removeElementFromArray(renderableComponents,component);
+                    for (var j=renderableComponentsArray.length-1;j>=0;j--){
+                        core.Util.removeElementFromArray(renderableComponentsArray[j],component);
+                    }
                 }
             }
         };
@@ -8414,9 +8504,15 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+            setupCamera();
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
-            _renderer.render(renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+
+            _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            if (renderableComponentsTransparent.length>0){
+                sortTransparentBackToFront();
+                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            }
+            _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
                 gl.bindTexture(gl.TEXTURE_2D, textureId);
@@ -8741,7 +8837,8 @@ KICK.namespace = function (ns_string) {
     scene.MeshRenderer = function (config) {
         var transform,
             _material,
-            _mesh;
+            _mesh,
+            _renderOrder;
 
         /**
          * @method activated
@@ -8751,6 +8848,15 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property renderOrder
+             * @type Number
+             */
+            renderOrder:{
+                get:function(){
+                    return _renderOrder;
+                }
+            },
             /**
              * @property material
              * @type KICK.material.Material
@@ -8766,6 +8872,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _material = newValue;
+                    _renderOrder = _material.renderOrder;
                 }
             },
             /**
@@ -10018,6 +10125,7 @@ KICK.namespace = function (ns_string) {
         mat3 = math.mat3,
         mat4 = math.mat4,
         core = KICK.namespace("KICK.core"),
+        applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants;
 
     /**
@@ -10036,12 +10144,13 @@ KICK.namespace = function (ns_string) {
             thisConfig = config || {},
             _uid = engine.createUID(),
             _shaderProgramId = -1,
-            _depthMask = true,
+            _depthMask = typeof (thisConfig.depthMask) === 'boolean'?thisConfig.depthMask:true,
             _faceCulling = thisConfig.faceCulling || 1029,
             _zTest = thisConfig.zTest || 513,
             _blend = thisConfig.blend || false,
             _blendSFactor = thisConfig.blendSFactor || 770,
             _blendDFactor = thisConfig.blendDFactor || 771,
+            _renderOrder = thisConfig.renderOrder || 0,
             blendKey,
             glslConstants = material.GLSLConstants,
             _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["error_vs.glsl"],
@@ -10104,9 +10213,9 @@ KICK.namespace = function (ns_string) {
                     gl.depthFunc(_zTest);
                     gl.zTest = _zTest;
                 }
-                if (gl.depthMask !== _depthMask){
+                if (gl.depthMaskCache !== _depthMask){
                     gl.depthMask(_depthMask);
-                    gl.depthMask = _depthMask;
+                    gl.depthMaskCache = _depthMask;
                 }
             },
             updateBlending = function () {
@@ -10161,6 +10270,24 @@ KICK.namespace = function (ns_string) {
                         KICK.core.Util.fail("Shader.fragmentShaderSrc must be a string");
                     }
                     _fragmentShaderSrc = value;
+                }
+            },
+            /**
+             * Render order. Default value 1000. The following ranges are predefined:<br>
+             * 0-999: Background. Mainly for skyboxes etc<br>
+             * 1000-1999 Opaque geometry  (default)<br>
+             * 2000-2999 Transparent. This queue is sorted in a back to front order before rendering.
+             * 3000-3999 Overlay
+             * @property renderOrder
+             * @type Number
+             */
+            renderOrder:{
+                get:function(){ return _renderOrder; },
+                set:function(value){
+                    if (typeof value !== "number"){
+                        KICK.core.Util.fail("Shader.renderOrder must be a number");
+                    }
+                    _renderOrder = value;
                 }
             },
             /**
@@ -10219,6 +10346,11 @@ KICK.namespace = function (ns_string) {
                     _faceCulling = newValue;
                 }
             },
+            /**
+             * Enable or disable writing into the depth buffer
+             * @property depthMask
+             * @type Boolean
+             */
             depthMask:{
                 get:function(){return _depthMask},
                 set:function(newValue){
@@ -10510,6 +10642,7 @@ KICK.namespace = function (ns_string) {
             if (uidMapping && thisConfig.uid){
                 uidMapping[thisConfig.uid] = _uid;
             }
+
             updateBlendKey();
             thisObj.updateShader();
         })();
@@ -10685,11 +10818,11 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      */
     material.Material = function (engine,config) {
-        var configObj = config || {},
-            _name = configObj.name || "Material",
-            _shader = configObj.shader,
-            _uniforms = configObj.uniforms || {},
-            thisObj = this;
+        var _name = "Material",
+            _shader = null,
+            _uniforms = {},
+            thisObj = this,
+            _renderOrder;
         Object.defineProperties(this,{
              /**
               * @property name
@@ -10721,8 +10854,21 @@ KICK.namespace = function (ns_string) {
              * @type Object
              */
             uniforms:{
-                value:_uniforms,
-                writeable:true
+                get:function(){
+                    return _uniforms;
+                },
+                set:function(newValue){
+                    _uniforms = newValue;
+                }
+            },
+            /**
+             * @property renderOrder
+             * @type Number
+             */
+            renderOrder:{
+                get:function(){
+                    return _renderOrder;
+                }
             }
         });
 
@@ -10737,9 +10883,10 @@ KICK.namespace = function (ns_string) {
                 _shader = engine.project.load(_shader);
             }
             if (!_shader){
-                // todo replace with default shader
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
+                _shader = engine.project.load("kickjs://shader/error/");
             }
+            _renderOrder = _shader.renderOrder;
         };
 
         /**
@@ -10788,6 +10935,7 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
+            applyConfig(thisObj,config);
             material.Material.verifyUniforms(_uniforms);
         })();
     };
@@ -11781,6 +11929,8 @@ KICK.namespace = function (ns_string) {
             var vertexShaderSrc,
                 fragmentShaderSrc,
                 blend = false,
+                depthMask = true,
+                renderOrder = 1000,
                 glslConstants = KICK.material.GLSLConstants;
             if (url.indexOf("kickjs://shader/phong/")==0){
                 vertexShaderSrc = glslConstants["phong_vs.glsl"];
@@ -11789,6 +11939,8 @@ KICK.namespace = function (ns_string) {
                 vertexShaderSrc = glslConstants["transparent_phong_vs.glsl"];
                 fragmentShaderSrc = glslConstants["transparent_phong_fs.glsl"];
                 blend = true;
+                depthMask = false;
+                renderOrder = 2000;
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
@@ -11798,12 +11950,16 @@ KICK.namespace = function (ns_string) {
             } else if (url.indexOf("kickjs://shader/transparent_unlit/")==0){
                 vertexShaderSrc = glslConstants["transparent_unlit_vs.glsl"];
                 fragmentShaderSrc = glslConstants["transparent_unlit_fs.glsl"];
+                renderOrder = 2000;
                 blend = true;
+                depthMask = false;
             } else {
                 return null;
             }
             var shader = new KICK.material.Shader(engine, {
-                blend:blend
+                blend:blend,
+                depthMask:depthMask,
+                renderOrder:renderOrder
             });
             shader.vertexShaderSrc = vertexShaderSrc;
             shader.fragmentShaderSrc = fragmentShaderSrc;
