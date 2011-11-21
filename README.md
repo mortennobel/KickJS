@@ -5,21 +5,20 @@ KickJS
 
 A WebGL game engine for modern web-browsers.
 
+## Examples
+
+![alt text](http://www.kickjs.org/images/example_glsl_editor.jpg "GLSL Editor")
+![alt text](http://www.kickjs.org/images/example_video_ascii_art.jpg "Video ascii art")
+
 ## Documentation
 
 Available here:
 http://www.kickjs.org/api/
 
-## Installation
+## Bugs
 
-xxxx
-
-## Usage
-
-xxxx
-
-## Known issues
-
+Checkout the bug section at GitHub
+https://github.com/mortennobel/KickJS/issues
 
 ## License
 
