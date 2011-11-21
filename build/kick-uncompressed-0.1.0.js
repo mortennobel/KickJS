@@ -10657,6 +10657,22 @@ KICK.namespace = function (ns_string) {
      */
     material.Shader.getPrecompiledSource = function(sourcecode){
         // todo optimize with regular expression search
+        // insert #line nn after each #pragma include
+        var linebreakPosition = [];
+        var position = sourcecode.indexOf('\n');
+        while (position != -1){
+            position++;
+            linebreakPosition.push(position);
+            position = sourcecode.indexOf('\n',position);
+        }
+        for (var i=linebreakPosition.length-2;i>=0;i--){
+            position = linebreakPosition[i];
+            var nextPosition = linebreakPosition[i+1];
+            if (sourcecode.substring(position).indexOf("#pragma include")==0){
+                sourcecode = sourcecode.substring(0,nextPosition)+("#line  "+(i+2)+"\n")+sourcecode.substring(nextPosition);
+            }
+        }
+
         for (var name in material.GLSLConstants){
             if (typeof (name) === "string"){
                 var source = material.GLSLConstants[name];
