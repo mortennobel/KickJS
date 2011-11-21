@@ -1099,12 +1099,9 @@ KICK.namespace = function (ns_string) {
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
              * @method setupCamera
-             * @param {KICK.math.mat4} projectionMatrix Projection of the camera
-             * @param {KICK.math.mat4} modelViewMatrix Modelview of the camera (the inverse global transform matrix of the camera)
-             * @param {KICK.math.mat4} modelViewProjectionMatrix modelview multiplied with projection
              * @private
              */
-            setupCamera = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix) {
+            setupCamera = function () {
                 var viewportDimension = _renderTarget?_renderTarget.dimension:gl.viewportSize,
                     viewPortWidth = viewportDimension[0],
                     viewPortHeight = viewportDimension[1],
@@ -1145,6 +1142,20 @@ KICK.namespace = function (ns_string) {
                 var aRenderOrder = a.renderOrder || 1000,
                     bRenderOrder = b.renderOrder || 1000;
                 return aRenderOrder-bRenderOrder;
+            },
+            sortTransparentBackToFront = function(){
+                // calculate distances
+                var temp = vec3.create();
+                var cameraPosition = transform.position;
+                for (var i=renderableComponentsTransparent.length-1;i>=0;i--){
+                    var object = renderableComponentsTransparent[i];
+                    var objectPosition = object.gameObject.transform.position;
+                    object.distanceToCamera = vec3.lengthSqr(vec3.subtract(objectPosition, cameraPosition, temp));
+                }
+                function compareDistanceToCamera(a,b){
+                    return b.distanceToCamera-a.distanceToCamera;
+                }
+                renderableComponentsTransparent.sort(compareDistanceToCamera);
             };
 
         /**
@@ -1182,9 +1193,9 @@ KICK.namespace = function (ns_string) {
                     if (renderOrder < 2000){
                         insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
                     } else if (renderOrder >= 3000){
-                        renderableComponentsOverlay.push(component);
+                        insertSorted(component,renderableComponentsOverlay,compareRenderOrder);
                     } else {
-                        insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
+                        renderableComponentsTransparent.push(component);
                     }
                 }
             }
@@ -1210,12 +1221,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            setupCamera(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+            setupCamera();
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
 
             _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             if (renderableComponentsTransparent.length>0){
-                // todo sort object back-to-front order
+                sortTransparentBackToFront();
                 _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             }
             _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
