@@ -61,7 +61,7 @@ KICK.namespace = function (ns_string) {
             thisConfig = config || {},
             _uid = engine.createUID(),
             _shaderProgramId = -1,
-            _depthMask = true,
+            _depthMask = typeof (thisConfig.depthMask) === 'boolean'?thisConfig.depthMask:true,
             _faceCulling = thisConfig.faceCulling || core.Constants.GL_BACK,
             _zTest = thisConfig.zTest || core.Constants.GL_LESS,
             _blend = thisConfig.blend || false,
@@ -129,9 +129,9 @@ KICK.namespace = function (ns_string) {
                     gl.depthFunc(_zTest);
                     gl.zTest = _zTest;
                 }
-                if (gl.depthMask !== _depthMask){
+                if (gl.depthMaskCache !== _depthMask){
                     gl.depthMask(_depthMask);
-                    gl.depthMask = _depthMask;
+                    gl.depthMaskCache = _depthMask;
                 }
             },
             updateBlending = function () {
@@ -244,6 +244,11 @@ KICK.namespace = function (ns_string) {
                     _faceCulling = newValue;
                 }
             },
+            /**
+             * Enable or disable writing into the depth buffer
+             * @property depthMask
+             * @type Boolean
+             */
             depthMask:{
                 get:function(){return _depthMask},
                 set:function(newValue){
@@ -535,6 +540,7 @@ KICK.namespace = function (ns_string) {
             if (uidMapping && thisConfig.uid){
                 uidMapping[thisConfig.uid] = _uid;
             }
+
             updateBlendKey();
             thisObj.updateShader();
         })();
