@@ -138,6 +138,7 @@ KICK.namespace = function (ns_string) {
             },
             updateBlending = function () {
                 if (gl.blendKey !== blendKey){
+                    gl.blendKey = blendKey;
                     if (_blend){
                         gl.enable(KICK.core.Constants.GL_BLEND);
                     } else {
@@ -537,7 +538,6 @@ KICK.namespace = function (ns_string) {
             updateCullFace();
             updateDepthProperties();
             updateBlending();
-
         };
 
         /**
