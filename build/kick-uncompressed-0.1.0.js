@@ -9433,9 +9433,8 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config Optional
-     * @param {Object} uidMapping Optional Maps from old uid to new uid
      */
-    texture.Texture = function (engine, config, uidMapping) {
+    texture.Texture = function (engine, config) {
         var gl = engine.gl,
             _uid = engine.createUID(), // note uid is always
             texture0 = 33984,
@@ -9465,10 +9464,6 @@ KICK.namespace = function (ns_string) {
                 }
                 _boundTextureType = _textureType;
             };
-
-        if (uidMapping && thisConfig.uid){
-            uidMapping[thisConfig.uid] = _uid;
-        }
 
         (function init(){
             // create active texture component on glContext
