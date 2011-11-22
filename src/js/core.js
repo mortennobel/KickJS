@@ -396,6 +396,19 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Get the uid of a component (or creates the uid if not defined)
+         * @method getUID
+         * @param {Object} object
+         * @return {String}
+         */
+        this.getUID = function(object){
+            if (!object.uid){
+                object.uid = thisObj.createUID();
+            }
+            return object.uid;
+        }
+
+        /**
          * This method should be invoked when the canvas is resized.<br>
          * This will change the viewport size of the WebGL context.<br>
          * Instead of calling this method explicit, the configuration parameter
@@ -967,9 +980,68 @@ KICK.namespace = function (ns_string) {
          * @return {Boolean}
          * @static
          */
-        hasProperty:function (obj, prop)
-        {
+        hasProperty:function (obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
+        },
+        /**
+         * @method getJSONReference
+         * @param {KICK.core.Engine} engine
+         * @param {Object} object
+         * @return {JSON}
+         */
+        getJSONReference: function(engine,object){
+            var isGameObjectOrComponent = object.gameObject;
+            if (isGameObjectOrComponent){
+                var isGameObject = object instanceof KICK.scene.GameObject;
+                return {
+                    ref: engine.getUID(object),
+                    reftype: isGameObject?"component":"gameobject"
+                }
+
+            } else {
+                // project type
+                return {
+                    ref:object.name,
+                    reftype:"project"
+                };
+            }
+        },
+        /**
+         * @method componentToJSON
+         * @param {KICK.core.Engine} engine
+         * @param {KICK.scene.Component} component
+         * @param {String} componentType Optional defaults to component.constructor.name
+         * @return {JSON}
+         */
+        componentToJSON: function(engine, component,componentType){
+            var name,
+                config = {},
+                res = {
+                    type: componentType || component.constructor.name,
+                    uid: engine.getUID(component),
+                    config:config
+                };
+            if (res.type === ""){
+                core.Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
+            }
+            // init config object
+            for (name in component){
+                if (core.Util.hasProperty(component,name) && name !== "gameObject"){
+                    var o = component[name],
+                        typeofO = typeof o;
+                    if (typeofO !== 'function'){
+                        if (o && o.buffer instanceof ArrayBuffer){
+                            // is typed array
+                            config[name] = core.Util.typedArrayToArray(o);
+                        } else if (typeofO === 'object'){
+                            config[name] = core.Util.getJSONReference(engine,o);
+                        } else {
+                            config[name] = o;
+                        }
+                    }
+                }
+            }
+            return res;
         },
         /**
          * For each non function attribute in config, set the attribute on object
