@@ -453,6 +453,7 @@ KICK.namespace = function (ns_string) {
             }
 
             gl.useProgram(_shaderProgramId);
+            gl.boundShader = _shaderProgramId;
             activeUniforms = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             /**
              * Array of Object with size,type, name and index properties
@@ -527,17 +528,19 @@ KICK.namespace = function (ns_string) {
         /**
          * @method bind
          */
-        // todo: refactor this
         this.bind = function () {
             if (KICK.core.Constants._ASSERT){
                 if (!(this.isValid)){
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
             }
-            gl.useProgram(_shaderProgramId);
-            updateCullFace();
-            updateDepthProperties();
-            updateBlending();
+            if (gl.boundShader !== _shaderProgramId){
+                gl.boundShader = _shaderProgramId;
+                gl.useProgram(_shaderProgramId);
+                updateCullFace();
+                updateDepthProperties();
+                updateBlending();
+            }
         };
 
         /**
