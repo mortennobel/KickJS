@@ -138,7 +138,7 @@ KICK.namespace = function (ns_string) {
                     }
                 },
                 /**
-                 * Number of components (excluding transform)
+                 * Number of components
                  * @property numberOfComponents
                  * @type Number
                  */
@@ -262,6 +262,30 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return res;
+        };
+
+        /**
+         * @method toJSON
+         * @return JSON object
+         */
+        this.toJSON = function(){
+            var componentsJSON = [],
+                component;
+            for (var i=0;i<_components.length;i++){
+                component = _components[i];
+                if (!component.toJSON){
+                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,_components[i]));
+                } else {
+                    componentsJSON.push(_components[i].toJSON());
+                }
+
+            }
+            return {
+                name: _name,
+                layer: _layer,
+                uid:_uid,
+                components:componentsJSON
+            };
         };
 
         (function init(){
@@ -620,10 +644,14 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             var typedArrayToArray = KICK.core.Util.typedArrayToArray;
             return {
-                localPosition: typedArrayToArray(localPosition),
-                localRotationQuat: typedArrayToArray(localRotationQuat),
-                localScale: typedArrayToArray(localScale),
-                parent: parentTransform ? parentTransform.gameObject.uid : null // todo
+                type:"KICK.scene.Transform",
+                uid: gameObject.engine.getUID(thisObj),
+                config:{
+                    localPosition: typedArrayToArray(localPosition),
+                    localRotationQuat: typedArrayToArray(localRotationQuat),
+                    localScale: typedArrayToArray(localScale),
+                    parent: parentTransform ? KICK.core.Util.getJSONReference(parentTransform): null // todo
+                }
             };
         };
 
@@ -952,12 +980,12 @@ KICK.namespace = function (ns_string) {
          * @return {Object}
          */
         this.toJSON = function (){
-            var gameObjects = [];
+            var gameObjectsCopy = [];
             for (var i=0;i<gameObjects.length;i++){
-                gameObjects.push(gameObjects[i].toJSON());
+                gameObjectsCopy.push(gameObjects[i].toJSON());
             }
             return {
-                gameObjects: gameObjects,
+                gameObjects: gameObjectsCopy,
                 name: _name
             };
         };
@@ -1238,6 +1266,10 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property renderer
+             * @type KICK.renderer.Renderer
+             */
             renderer:{
                 get:function(){ return _renderer;},
                 set:function(newValue){
@@ -1496,6 +1528,32 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
+
+        this.toJSON = function(){
+            return {
+                type:"KICK.scene.Camera",
+                uid:7,
+                config:{
+                    renderer:_renderer, // todo add reference
+                    layerMask:_layerMask,
+                    renderTarget:_renderTarget, // todo add reference
+                    fieldOfView:_fieldOfView,
+                    near:_near,
+                    far:_far,
+                    perspective:_perspective,
+                    left:_left,
+                    right:_right,
+                    bottom:_bottom,
+                    top:_top,
+                    cameraIndex:_cameraIndex,
+                    clearColor:_clearColor,
+                    clearFlagColor:_clearFlagColor,
+                    clearFlagDepth:_clearFlagDepth,
+                    normalizedViewportRect:KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
+                }
+            };
+        };
+
         applyConfig(this,config);
         computeClearFlag();
     };
@@ -1555,13 +1613,15 @@ KICK.namespace = function (ns_string) {
         var transform,
             _material,
             _mesh,
-            _renderOrder;
+            _renderOrder,
+            gl;
 
         /**
          * @method activated
          */
         this.activated = function(){
             transform = this.gameObject.transform;
+            gl = this.gameObject.engine.gl
         };
 
         Object.defineProperties(this,{
@@ -1624,6 +1684,14 @@ KICK.namespace = function (ns_string) {
             _mesh.bind(shader);
             _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
             _mesh.render();
+        };
+
+        /**
+         * @method toJSON
+         * @return {JSON}
+         */
+        this.toJSON = function(){
+            return KICK.core.Util.componentToJSON(engine, this, "KICK.scene.MeshRenderer");
         };
 
         applyConfig(this,config);

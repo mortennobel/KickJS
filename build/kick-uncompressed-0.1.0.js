@@ -5542,6 +5542,19 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Get the uid of a component (or creates the uid if not defined)
+         * @method getUID
+         * @param {Object} object
+         * @return {String}
+         */
+        this.getUID = function(object){
+            if (!object.uid){
+                object.uid = thisObj.createUID();
+            }
+            return object.uid;
+        }
+
+        /**
          * This method should be invoked when the canvas is resized.<br>
          * This will change the viewport size of the WebGL context.<br>
          * Instead of calling this method explicit, the configuration parameter
@@ -6113,9 +6126,68 @@ KICK.namespace = function (ns_string) {
          * @return {Boolean}
          * @static
          */
-        hasProperty:function (obj, prop)
-        {
+        hasProperty:function (obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
+        },
+        /**
+         * @method getJSONReference
+         * @param {KICK.core.Engine} engine
+         * @param {Object} object
+         * @return {JSON}
+         */
+        getJSONReference: function(engine,object){
+            var isGameObjectOrComponent = object.gameObject;
+            if (isGameObjectOrComponent){
+                var isGameObject = object instanceof KICK.scene.GameObject;
+                return {
+                    ref: engine.getUID(object),
+                    reftype: isGameObject?"component":"gameobject"
+                }
+
+            } else {
+                // project type
+                return {
+                    ref:object.name,
+                    reftype:"project"
+                };
+            }
+        },
+        /**
+         * @method componentToJSON
+         * @param {KICK.core.Engine} engine
+         * @param {KICK.scene.Component} component
+         * @param {String} componentType Optional defaults to component.constructor.name
+         * @return {JSON}
+         */
+        componentToJSON: function(engine, component,componentType){
+            var name,
+                config = {},
+                res = {
+                    type: componentType || component.constructor.name,
+                    uid: engine.getUID(component),
+                    config:config
+                };
+            if (res.type === ""){
+                core.Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
+            }
+            // init config object
+            for (name in component){
+                if (core.Util.hasProperty(component,name) && name !== "gameObject"){
+                    var o = component[name],
+                        typeofO = typeof o;
+                    if (typeofO !== 'function'){
+                        if (o && o.buffer instanceof ArrayBuffer){
+                            // is typed array
+                            config[name] = core.Util.typedArrayToArray(o);
+                        } else if (typeofO === 'object'){
+                            config[name] = core.Util.getJSONReference(engine,o);
+                        } else {
+                            config[name] = o;
+                        }
+                    }
+                }
+            }
+            return res;
         },
         /**
          * For each non function attribute in config, set the attribute on object
@@ -7211,45 +7283,49 @@ KICK.namespace = function (ns_string) {
         this.bind = function (shader) {
             shader.bind();
 
-            gl.bindBuffer(34962, meshVertexAttBuffer);
+            if (gl.meshBuffer !== meshVertexAttBuffer || gl.meshShader !== shader){
+                gl.meshBuffer = meshVertexAttBuffer;
+                gl.meshShader = shader;
+                gl.bindBuffer(34962, meshVertexAttBuffer);
 
-            for (var descName in interleavedArrayFormat) {
-                if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
-                    var desc = interleavedArrayFormat[descName];
-                    var attributeIndex = shader.lookupAttribute[descName];
-                    gl.enableVertexAttribArray(attributeIndex);
-                    gl.vertexAttribPointer(attributeIndex, desc.size,
-                       desc.type, false, vertexAttrLength, desc.pointer);
+                for (var descName in interleavedArrayFormat) {
+                    if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
+                        var desc = interleavedArrayFormat[descName];
+                        var attributeIndex = shader.lookupAttribute[descName];
+                        gl.enableVertexAttribArray(attributeIndex);
+                        gl.vertexAttribPointer(attributeIndex, desc.size,
+                           desc.type, false, vertexAttrLength, desc.pointer);
+                    }
                 }
-            }
-            if (ASSERT){
-                for (var i = shader.activeAttributes.length-1;i>=0;i--){
-                    var activeAttribute = shader.activeAttributes[i];
-                    if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])){
-                        KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
-                        attributeIndex = shader.lookupAttribute[activeAttribute.name];
-                        gl.disableVertexAttribArray(attributeIndex);
-                        switch(activeAttribute.type){
-                            case 5126:
-                                gl.vertexAttrib1f(attributeIndex,0.0);
-                            break;
-                            case 35664:
-                                gl.vertexAttrib2f(attributeIndex,0.0,0.0);
-                            break;
-                            case 35665:
-                                gl.vertexAttrib3f(attributeIndex,0.0,0.0,0.0);
-                            break;
-                            case 35666:
-                                gl.vertexAttrib4f(attributeIndex,0.0,0.0,0.0,0.0);
-                            break;
-                            default:
-                                KICK.core.Util.fail("Shader wants "+activeAttribute.name+" no default value for type.");
-                            break;
+                if (ASSERT){
+                    for (var i = shader.activeAttributes.length-1;i>=0;i--){
+                        var activeAttribute = shader.activeAttributes[i];
+                        if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])){
+                            KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
+                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
+                            gl.disableVertexAttribArray(attributeIndex);
+                            switch(activeAttribute.type){
+                                case 5126:
+                                    gl.vertexAttrib1f(attributeIndex,0.0);
+                                break;
+                                case 35664:
+                                    gl.vertexAttrib2f(attributeIndex,0.0,0.0);
+                                break;
+                                case 35665:
+                                    gl.vertexAttrib3f(attributeIndex,0.0,0.0,0.0);
+                                break;
+                                case 35666:
+                                    gl.vertexAttrib4f(attributeIndex,0.0,0.0,0.0,0.0);
+                                break;
+                                default:
+                                    KICK.core.Util.fail("Shader wants "+activeAttribute.name+" no default value for type.");
+                                break;
+                            }
                         }
                     }
                 }
+                gl.bindBuffer(34963, meshVertexIndexBuffer);
             }
-            gl.bindBuffer(34963, meshVertexIndexBuffer);
         };
 
         /**
@@ -7421,7 +7497,7 @@ KICK.namespace = function (ns_string) {
                     }
                 },
                 /**
-                 * Number of components (excluding transform)
+                 * Number of components
                  * @property numberOfComponents
                  * @type Number
                  */
@@ -7545,6 +7621,30 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return res;
+        };
+
+        /**
+         * @method toJSON
+         * @return JSON object
+         */
+        this.toJSON = function(){
+            var componentsJSON = [],
+                component;
+            for (var i=0;i<_components.length;i++){
+                component = _components[i];
+                if (!component.toJSON){
+                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,_components[i]));
+                } else {
+                    componentsJSON.push(_components[i].toJSON());
+                }
+
+            }
+            return {
+                name: _name,
+                layer: _layer,
+                uid:_uid,
+                components:componentsJSON
+            };
         };
 
         (function init(){
@@ -7903,10 +8003,14 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             var typedArrayToArray = KICK.core.Util.typedArrayToArray;
             return {
-                localPosition: typedArrayToArray(localPosition),
-                localRotationQuat: typedArrayToArray(localRotationQuat),
-                localScale: typedArrayToArray(localScale),
-                parent: parentTransform ? parentTransform.gameObject.uid : null // todo
+                type:"KICK.scene.Transform",
+                uid: gameObject.engine.getUID(thisObj),
+                config:{
+                    localPosition: typedArrayToArray(localPosition),
+                    localRotationQuat: typedArrayToArray(localRotationQuat),
+                    localScale: typedArrayToArray(localScale),
+                    parent: parentTransform ? KICK.core.Util.getJSONReference(parentTransform): null // todo
+                }
             };
         };
 
@@ -8235,12 +8339,12 @@ KICK.namespace = function (ns_string) {
          * @return {Object}
          */
         this.toJSON = function (){
-            var gameObjects = [];
+            var gameObjectsCopy = [];
             for (var i=0;i<gameObjects.length;i++){
-                gameObjects.push(gameObjects[i].toJSON());
+                gameObjectsCopy.push(gameObjects[i].toJSON());
             }
             return {
-                gameObjects: gameObjects,
+                gameObjects: gameObjectsCopy,
                 name: _name
             };
         };
@@ -8521,6 +8625,10 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property renderer
+             * @type KICK.renderer.Renderer
+             */
             renderer:{
                 get:function(){ return _renderer;},
                 set:function(newValue){
@@ -8779,6 +8887,32 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
+
+        this.toJSON = function(){
+            return {
+                type:"KICK.scene.Camera",
+                uid:7,
+                config:{
+                    renderer:_renderer, // todo add reference
+                    layerMask:_layerMask,
+                    renderTarget:_renderTarget, // todo add reference
+                    fieldOfView:_fieldOfView,
+                    near:_near,
+                    far:_far,
+                    perspective:_perspective,
+                    left:_left,
+                    right:_right,
+                    bottom:_bottom,
+                    top:_top,
+                    cameraIndex:_cameraIndex,
+                    clearColor:_clearColor,
+                    clearFlagColor:_clearFlagColor,
+                    clearFlagDepth:_clearFlagDepth,
+                    normalizedViewportRect:KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
+                }
+            };
+        };
+
         applyConfig(this,config);
         computeClearFlag();
     };
@@ -8838,13 +8972,15 @@ KICK.namespace = function (ns_string) {
         var transform,
             _material,
             _mesh,
-            _renderOrder;
+            _renderOrder,
+            gl;
 
         /**
          * @method activated
          */
         this.activated = function(){
             transform = this.gameObject.transform;
+            gl = this.gameObject.engine.gl
         };
 
         Object.defineProperties(this,{
@@ -8907,6 +9043,14 @@ KICK.namespace = function (ns_string) {
             _mesh.bind(shader);
             _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
             _mesh.render();
+        };
+
+        /**
+         * @method toJSON
+         * @return {JSON}
+         */
+        this.toJSON = function(){
+            return KICK.core.Util.componentToJSON(engine, this, "KICK.scene.MeshRenderer");
         };
 
         applyConfig(this,config);
@@ -10221,6 +10365,7 @@ KICK.namespace = function (ns_string) {
             },
             updateBlending = function () {
                 if (gl.blendKey !== blendKey){
+                    gl.blendKey = blendKey;
                     if (_blend){
                         gl.enable(3042);
                     } else {
@@ -10535,6 +10680,7 @@ KICK.namespace = function (ns_string) {
             }
 
             gl.useProgram(_shaderProgramId);
+            gl.boundShader = _shaderProgramId;
             activeUniforms = gl.getProgramParameter( _shaderProgramId, 35718);
             /**
              * Array of Object with size,type, name and index properties
@@ -10609,18 +10755,19 @@ KICK.namespace = function (ns_string) {
         /**
          * @method bind
          */
-        // todo: refactor this
         this.bind = function () {
             if (true){
                 if (!(this.isValid)){
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
             }
-            gl.useProgram(_shaderProgramId);
-            updateCullFace();
-            updateDepthProperties();
-            updateBlending();
-
+            if (gl.boundShader !== _shaderProgramId){
+                gl.boundShader = _shaderProgramId;
+                gl.useProgram(_shaderProgramId);
+                updateCullFace();
+                updateDepthProperties();
+                updateBlending();
+            }
         };
 
         /**
