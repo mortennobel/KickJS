@@ -373,7 +373,8 @@ KICK.namespace = function (ns_string) {
         var resourceDescriptors = {},
             resourceCache = {},
             resourceReferenceCount = {},
-            thisObj = this;
+            thisObj = this,
+            maxProjectId = 0;
 
         /**
          * @method loadProject
