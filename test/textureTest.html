@@ -9,7 +9,7 @@
     <script type="text/javascript" src="../src/js/constants.js"></script>
     <script type="text/javascript" src="../src/js/glslconstants.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/core-default.js"></script>
+    <script type="text/javascript" src="../src/js/resource.js"></script>
     <script type="text/javascript" src="../src/js/math.js"></script>
     <script type="text/javascript" src="../src/js/mesh.js"></script>
     <script type="text/javascript" src="../src/js/scene.js"></script>
@@ -26,6 +26,23 @@
         var texture;
 
         var materials = [];
+
+         var projectData = [
+            {
+                type:"KICK.texture.Texture",
+                config:{
+                    name:"CORS_TEST",
+                    dataURI:"http://khm0.googleapis.com/kh?v=95&x=0&y=0&z=0"
+                }
+            },
+            {
+                type:"KICK.texture.Texture",
+                config:{
+                    name:"ProjectWhite",
+                    dataURI:"kickjs://texture/white/"
+                }
+            }
+        ];
 
         function initMaterials(vertexShaderId, fragmentShaderId){
             var shader = engine.resourceManager.getShader("kickjs://shader/unlit/");
@@ -73,6 +90,8 @@
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true
             });
+            var project = engine.project;
+            project.loadProject(projectData);
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0.5,1,1,1],
@@ -118,6 +137,12 @@
             var uniforms = material.uniforms;
             uniforms.mainTexture.value = texture;
         }
+
+        function loadTextureFromProject(name){
+            texture = engine.project.load(name);
+            var uniforms = material.uniforms;
+            uniforms.mainTexture.value = texture;
+        }
     </script>
 </head>
 <body onload="initKick();">
@@ -127,9 +152,11 @@
   <h2>Load texture</h2>
   <a href="#" onclick="setTmpTexture(); return false;">TemporaryTexture</a>
   <a href="#" onclick="setGIF(); return false;">Test.jpeg (RGB 25x40)</a>
-  <a href="#" onclick="setPNG(); return false;">webgl.png (RGBA 128x128)</a>
+  <a href="#" onclick="setPNG(); return false;">webgl.png (RGBA 128x128)</a> |
   <a href="#" onclick="setURL('kickjs://texture/black/'); return false;">Black</a>
   <a href="#" onclick="setURL('kickjs://texture/white/'); return false;">White</a>
-  <a href="#" onclick="setURL('kickjs://texture/gray/'); return false;">Gray</a>
+  <a href="#" onclick="setURL('kickjs://texture/gray/'); return false;">Gray</a> |
+  <a href="#" onclick="loadTextureFromProject('ProjectWhite'); return false;">ProjectWhite</a>
+  <a href="#" onclick="loadTextureFromProject('CORS_TEST'); return false;">Cors test (Google api)</a>
 </body>
 </html>

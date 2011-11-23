@@ -49,157 +49,6 @@ KICK.namespace = function (ns_string) {
         ASSERT = constants._ASSERT;
 
     /**
-     * Responsible for creating or loading a resource using a given url
-     * @class ResourceProvider
-     * @namespace KICK.core
-     * @constructor
-     * @param {String} protocol
-     */
-        /**
-         * Protocol of the resource, such as http, kickjs<br>
-         * The protocol must uniquely identify a resource provider
-         * @property protocol
-         * @type String
-         */
-
-        /**
-         * @method getMesh
-         * @param {String} url
-         * @return {KICK.mesh.Mesh}
-         */
-        /**
-         * @method getShader
-         * @param {String} url
-         * @return {KICK.material.Shader}
-         */
-        /**
-         * @method getTexture
-         * @param {String} url
-         * @return {KICK.texture.Texture}
-         */
-        
-
-    /**
-     * Responsible for allocation and deallocation of resources.
-     * @class ResourceManager
-     * @namespace KICK.core
-     * @constructor
-     */
-    core.ResourceManager = function (engine) {
-        var resourceProviders = [new core.DefaultResourceProvider(engine)],
-            buildCache = function(){
-                return {
-                    ref: {},
-                    refCount: {}
-                }
-            },
-            meshCache = buildCache(),
-            shaderCache = buildCache(),
-            textureCache = buildCache(),
-            allCaches = [meshCache,shaderCache,textureCache],
-            getFromCache = function(cache, url){
-                var res = cache.ref[url];
-                if (res){
-                    cache.refCount[url]++;
-                }
-                return res;
-            },
-            addToCache = function(cache, url, resource){
-                cache.ref[url] = resource;
-                cache.refCount[url] = 1;
-            },
-            /**
-             * @method buildGetFunc
-             * @param {Object} cache
-             * @param {String} methodName
-             * @return {Function} getter function with the signature function(url)
-             * @private
-             */
-            buildGetFunc = function(cache,methodName){
-                return function(url){
-                    var res = getFromCache(cache,url),
-                        i;
-                    if (res){
-                        return res;
-                    }
-                    for (i=resourceProviders.length-1;i>=0;i--){
-                        res = resourceProviders[i][methodName](url);
-                    }
-                    if (res){
-                        addToCache(cache,url,res);
-                    }
-                    return res;
-                };
-            },
-            /**
-             * Create a callback function
-             * @method buildCallbackFunc
-             * @private
-             */
-            buildCallbackFunc = function(methodName){
-                return function(url,destination){
-                    for (var i=resourceProviders.length-1;i>=0;i--){
-                        var resourceProvider = resourceProviders[i];
-                        var protocol = resourceProvider.protocol;
-                        if (url.indexOf(protocol)===0){
-                            resourceProvider[methodName](url,destination);
-                            return;
-                        }
-                    }
-                };
-            };
-        /**
-         * @method getMesh
-         * @param {String} url
-         * @param {KICK.mesh.Mesh} meshDestination
-         */
-        this.getMeshData = buildCallbackFunc("getMeshData");
-        /**
-         * @method getMesh
-         * @param {String} url
-         * @return {KICK.mesh.Mesh}
-         * @deprecated
-         */
-        this.getMesh = buildGetFunc(meshCache,"getMesh");
-        /**
-         * @method getShader
-         * @param {String} url
-         * @return {KICK.material.Shader}
-         * @deprecated
-         */
-        this.getShader = buildGetFunc(shaderCache,"getShader");
-        /**
-         * @method getTexture
-         * @param {String} url
-         * @return {KICK.texture.Texture}
-         * @deprecated
-         */
-        this.getTexture = buildGetFunc(textureCache,"getTexture");
-        /**
-         * Release a reference to the resource.
-         * If reference count is 0, then the reference is deleted and the destroy method on the
-         * resource object are invoked.
-         * @method release
-         * @param {String} url
-         */
-        this.release = function(url){
-            for (var i=allCaches.length-1;i>=0;i--){
-                if (allCaches[i].refCount[url]){
-                    allCaches[i].refCount[url]--;
-                    if (allCaches[i].refCount[url]<=0){
-                        if (allCaches[i].ref[url].destroy){
-                            allCaches[i].ref[url].destroy();
-                        }
-                        delete allCaches[i].refCount[url];
-                        delete allCaches[i].ref[url];
-                    }
-                }
-            }
-        };
-    };
-
-
-    /**
      * Game engine object
      * @class Engine
      * @namespace KICK.core
@@ -990,6 +839,9 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         getJSONReference: function(engine,object){
+            if (object == null){
+                return null;
+            }
             var isGameObjectOrComponent = object.gameObject;
             if (isGameObjectOrComponent){
                 var isGameObject = object instanceof KICK.scene.GameObject;

@@ -1650,7 +1650,8 @@ KICK.namespace = function (ns_string) {
                     }
                     _material = newValue;
                     _renderOrder = _material.renderOrder;
-                }
+                },
+                enumerable: true
             },
             /**
              * @property mesh
@@ -1667,7 +1668,8 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _mesh = newValue;
-                }
+                },
+                enumerable: true
             }
         });
 

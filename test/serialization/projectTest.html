@@ -1,22 +1,20 @@
 <html>
 <head>
     <title></title>
-
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-
     <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/core-default.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/material.js"></script>
-    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
 </head>
 <body onload="initKick();">
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
@@ -53,9 +51,27 @@ void main(void)
         var meshRenderer;
         var projectData = [
             {
+                type:"KICK.texture.Texture",
+                config:{
+                    name:"Some texture",
+                    dataURI:"http://khm0.googleapis.com/kh?v=95&x=0&y=0&z=0"
+                }
+            },
+            {
+                type:"KICK.texture.Texture",
+                config:{
+                    name:"White texture",
+                    dataURI:"kickjs://texture/white/",
+                    vertexShaderSrc: document.getElementById("vertexShaderColor").value,
+                    fragmentShaderSrc: document.getElementById("fragmentShader").value
+
+                }
+            },
+            {
                 type:"KICK.material.Shader",
                 config:{
-                    name:"UVShader",
+                    name:"UnlitShader",
+                    dataURI:"kickjs://shader/unlit/",
                     vertexShaderSrc: document.getElementById("vertexShaderColor").value,
                     fragmentShaderSrc: document.getElementById("fragmentShader").value
                 }
@@ -63,11 +79,33 @@ void main(void)
             {
                 type:"KICK.material.Material",
                 config: {
-                    name:"Some material",
-                    shader:"UVShader",
+                    name:"BlueMaterial",
+                    shader:"UnlitShader",
                     uniforms: {
-                        value:42,
-                        type: KICK.core.Constants.GL_FLOAT
+                        mainTexture:{
+                            value:{
+                                ref:"White texture",
+                                reftype:"project"
+                            },
+                            type:35678
+                        },
+                        mainColor:{
+                            value:[0,0,1],
+                            type:35666
+                        }
+                    }
+                }
+            },
+            {
+                type:"KICK.material.Material",
+                config: {
+                    name:"SphereMaterial",
+                    shader:"UnlitShader",
+                    uniforms: {
+                        mainColor:{
+                            value:[1,0,0],
+                            type:35666
+                        }
                     }
                 }
             },
@@ -76,6 +114,13 @@ void main(void)
                 config: {
                     name:"CubeMesh",
                     urlResource:"kickjs://meshdata/cube/?length=0.5"
+                }
+            },
+            {
+                type:"KICK.mesh.Mesh",
+                config: {
+                    name:"SphereMesh",
+                    urlResource:"kickjs://meshdata/uvsphere/?radius=0.6"
                 }
             },
             {
@@ -121,11 +166,41 @@ void main(void)
                                     uid:10,
                                     config:{
                                         material:{
-                                            ref:"Some material",
+                                            ref:"BlueMaterial",
                                             reftype:"project"
                                         },
                                         mesh:{
                                             ref:"CubeMesh",
+                                            reftype:"project"
+                                        }
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            name:"Cube2",
+                            uid:11,
+                            components:[
+                                {
+                                    type:"KICK.scene.Transform",
+                                    uid:12,
+                                    config: {
+                                        localPosition: [0,1,0],
+                                        localRotationQuat: [0,0,0,1],
+                                        localScale:[1,1,1],
+                                        parent:null
+                                    }
+                                },
+                                {
+                                    type:"KICK.scene.MeshRenderer",
+                                    uid:13,
+                                    config:{
+                                        material:{
+                                            ref:"SphereMaterial",
+                                            reftype:"project"
+                                        },
+                                        mesh:{
+                                            ref:"SphereMesh",
                                             reftype:"project"
                                         }
                                     }
@@ -173,10 +248,21 @@ void main(void)
             });
             var project = engine.project;
             project.loadProject(projectData);
+            console.log(project.load("White texture"));
+            console.log(project.load("BlueMaterial"));
             // A simple way to test that the project can be serialized and reloaded (without loosing data)
             project.loadProject(project.toJSON());
             engine.activeScene = project.load("SimpleScene");
-            console.log(project.toJSON());
+            var sceneCopy = engine.activeScene.toJSON();
+            sceneCopy.name ="SerializedScene";
+            project.addResourceDescriptor(new KICK.core.ResourceDescriptor({
+                type: "KICK.scene.Scene",
+                config:sceneCopy
+            }));
+            console.dir(sceneCopy);
+            console.dir(project.load("SerializedScene"));
+            console.log(project.load("BlueMaterial"));
+            engine.activeScene = project.load("SerializedScene");
         }
     </script>
 </body>

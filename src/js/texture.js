@@ -52,7 +52,8 @@ KICK.namespace = function (ns_string) {
                 x = x | x >> i;
             }
             return x + 1;
-        };
+        },
+        applyConfig = KICK.core.Util.applyConfig;
 
     /**
      * Render texture (used for camera's render target)
@@ -161,21 +162,19 @@ KICK.namespace = function (ns_string) {
      */
     texture.Texture = function (engine, config) {
         var gl = engine.gl,
-            _uid = engine.createUID(), // note uid is always
             texture0 = constants.GL_TEXTURE0,
-            thisConfig = config || {},
             _textureId = gl.createTexture(),
-            _wrapS = thisConfig.wrapS ||  constants.GL_REPEAT,
-            _wrapT = thisConfig.wrapT || constants.GL_REPEAT,
-            _minFilter = thisConfig.minFilter || constants.GL_LINEAR,
-            _magFilter = thisConfig.magFilter || constants.GL_LINEAR,
-            _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
-            _dataURI = thisConfig.dataURI || null,
-            _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
-            _intFormat = thisConfig.internalFormat || constants.GL_RGBA,
-            _textureType = thisConfig.textureType || constants.GL_TEXTURE_2D,
+            _name = "Texture #"+new Date().getTime(), // define unique name
+            _wrapS =  constants.GL_REPEAT,
+            _wrapT = constants.GL_REPEAT,
+            _minFilter = constants.GL_LINEAR,
+            _magFilter = constants.GL_LINEAR,
+            _generateMipmaps = true,
+            _dataURI = null,
+            _flipY =  true,
+            _intFormat = constants.GL_RGBA,
+            _textureType = constants.GL_TEXTURE_2D,
             _boundTextureType = null,
-            currentTexture,
             thisObj = this,
             _dimension = vec2.create(),
             /**
@@ -190,24 +189,21 @@ KICK.namespace = function (ns_string) {
                 _boundTextureType = _textureType;
             };
 
-        (function init(){
-            // create active texture component on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
+        this.init = function(){
+            if (_dataURI){
+                engine.resourceManager.getImageData(_dataURI,thisObj);
             }
-            currentTexture = gl.currentTexture;
-        })();
+        };
 
         /**
          * Bind the current texture
          * @method bind
          */
         this.bind = function(textureSlot){
-            // todo reintroduce optimization 
-//            if (currentTexture[textureSlot] !== this){
+//            if (gl.currentTexture[textureSlot] !== _textureId){
+//                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
-                currentTexture[textureSlot] = this;
 //            }
         };
 
@@ -357,6 +353,18 @@ KICK.namespace = function (ns_string) {
                 value:_textureId
             },
             /**
+             * @property name
+             * @type {String}
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                     _name = newValue;
+                }
+            },
+            /**
              * Dimension of texture [width,height].<br>
              * Note for cube maps the size is for one face
              * @property dimension
@@ -368,21 +376,16 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Unique identifier of the texture
-             * @property uid
-             * @type {Number}
-             */
-            uid:{
-                value:_uid
-            },
-            /**
-             * Identifier of the texture
+             * URI of the texture.
              * @property dataURI
              * @type String
              */
             dataURI:{
                 get:function(){
                     return _dataURI;
+                },
+                set:function(newValue){
+                    _dataURI = newValue;
                 }
             },
             /**
@@ -568,18 +571,28 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
-                uid:_uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
                 magFilter:_magFilter,
+                name:_name,
                 generateMipmaps:_generateMipmaps,
-                dataURI:_dataURI,
                 flipY:_flipY,
                 internalFormat:_intFormat,
-                textureType:_textureType
+                textureType:_textureType,
+                dataURI:_dataURI
             };
-        }
+        };
+
+        (function init(){
+            // apply
+            applyConfig(thisObj, config);
+
+            // create active texture cache on glContext
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
+            }
+        })();
     };
 
     /**
@@ -592,30 +605,20 @@ KICK.namespace = function (ns_string) {
      */
     texture.MovieTexture = function (engine, config) {
         var gl = engine.gl,
-            _uid = engine.createUID(), // note uid is always
             texture0 = constants.GL_TEXTURE0,
-            thisConfig = config || {},
-            _videoElement = thisConfig.videoElement,
+            _name = "MovieTexture",
+            _videoElement = null,
             _textureId = gl.createTexture(),
-            _wrapS = thisConfig.wrapS ||  constants.GL_CLAMP_TO_EDGE,
-            _wrapT = thisConfig.wrapT || constants.GL_CLAMP_TO_EDGE,
-            _minFilter = thisConfig.minFilter || constants.GL_NEAREST,
-            _magFilter = thisConfig.magFilter || constants.GL_NEAREST,
-            _intFormat = thisConfig.internalFormat || constants.GL_RGBA,
-            _skipFrames = thisConfig.skipFrames || 0,
-            _generateMipmaps = thisConfig.generateMipmaps || false,
+            _wrapS = constants.GL_CLAMP_TO_EDGE,
+            _wrapT = constants.GL_CLAMP_TO_EDGE,
+            _minFilter = constants.GL_NEAREST,
+            _magFilter = constants.GL_NEAREST,
+            _intFormat = constants.GL_RGBA,
+            _skipFrames = 0,
+            _generateMipmaps = false,
             timer = engine.time,
             thisObj = this,
-            lastGrappedFrame = -1,
-            currentTexture;
-
-        (function init(){
-            // create active texture component on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
-            }
-            currentTexture = gl.currentTexture;
-        })();
+            lastGrappedFrame = -1;
 
         /**
          * Bind the current texture
@@ -623,20 +626,20 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            // todo reintroduce optimization
-//            if (currentTexture[textureSlot] !== this){
+//            if (gl.currentTexture[textureSlot] !== _textureId){
+//                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
-                currentTexture[textureSlot] = this;
-            if (lastGrappedFrame < timer.frameCount && _videoElement){
-                lastGrappedFrame = timer.frameCount+_skipFrames;
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                    gl.UNSIGNED_BYTE, _videoElement);
-                if (_generateMipmaps){
-                    gl.generateMipmap(constants.GL_TEXTURE_2D);
+
+                if (lastGrappedFrame < timer.frameCount && _videoElement){
+                    lastGrappedFrame = timer.frameCount+_skipFrames;
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                        gl.UNSIGNED_BYTE, _videoElement);
+                    if (_generateMipmaps){
+                        gl.generateMipmap(constants.GL_TEXTURE_2D);
+                    }
                 }
-            }
 //            }
         };
 
@@ -667,6 +670,18 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property name
+             * @type {String}
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                     _name = newValue;
+                }
+            },
             /**
              * Default value is 0 (update movie texture every frame). 1 skip one frame update, 2 skips two frames etc.
              * @property skipFrames
@@ -719,14 +734,6 @@ KICK.namespace = function (ns_string) {
              */
             textureId:{
                 value:_textureId
-            },
-            /**
-             * Unique identifier of the texture
-             * @property uid
-             * @type {Number}
-             */
-            uid:{
-                value:_uid
             },
             /**
              * Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
@@ -851,13 +858,23 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
-                uid:_uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
+                name:_name,
                 magFilter:_magFilter,
                 internalFormat:_intFormat
             };
-        }
+        };
+
+        (function init(){
+            // apply
+            applyConfig(thisObj, config);
+
+            // create active texture cache on glContext
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
+            }
+        })();
     };
 })();

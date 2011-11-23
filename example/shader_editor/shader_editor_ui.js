@@ -87,6 +87,7 @@
                 }
             }
         }
+        return null;
     }
 
     function setRadioValue(elementName,value){
@@ -172,7 +173,6 @@
         var t = new KICK.texture.Texture(shaderEditor.engine),
             currentTextures = document.getElementById('currentTextures'),
             newOption = document.createElement('option');
-        newOption.text = "New texture #"+currentTextures.options.length;
         newOption.value = currentTextures.options.length;
         currentTextures.add(newOption,null);
         currentTextures.selectedIndex = currentTextures.options.length-1;
@@ -225,6 +225,7 @@
         if (selectedIndex<0){
             return;
         }
+        currentTextures.options[selectedIndex].text = imgSrc.length<40?imgSrc:imgSrc.substr(0,40)+'...';
         var texture = shaderEditor.textures[selectedIndex];
         var textureConf = {
             internalFormat: getSelectedGLConstant('textureFormat'),
@@ -404,7 +405,6 @@
             uniformTypeObj = getUniformType(uniform),
             uniformType = uniformTypeObj.type,
             uniformGroup = uniformTypeObj.group,
-            uniformLength = uniformTypeObj.length,
             materialUniform;
 
         uniformDetail.style.display = 'block';

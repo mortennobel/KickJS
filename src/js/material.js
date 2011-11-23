@@ -53,27 +53,26 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
-     * @param {Object} uidMapping Optional Maps from old uid to new uid
      */
-    material.Shader = function (engine, config, uidMapping) {
+    material.Shader = function (engine, config) {
         //todo add support for polygon offset
         var gl = engine.gl,
             thisObj = this,
-            thisConfig = config || {},
-            _uid = engine.createUID(),
             _shaderProgramId = -1,
-            _depthMask = typeof (thisConfig.depthMask) === 'boolean'?thisConfig.depthMask:true,
-            _faceCulling = thisConfig.faceCulling || core.Constants.GL_BACK,
-            _zTest = thisConfig.zTest || core.Constants.GL_LESS,
-            _blend = thisConfig.blend || false,
-            _blendSFactor = thisConfig.blendSFactor || core.Constants.GL_SRC_ALPHA,
-            _blendDFactor = thisConfig.blendDFactor || core.Constants.GL_ONE_MINUS_SRC_ALPHA,
-            _renderOrder = thisConfig.renderOrder || 0,
+            _depthMask = true,
+            _faceCulling = core.Constants.GL_BACK,
+            _zTest = core.Constants.GL_LESS,
+            _blend = false,
+            _blendSFactor = core.Constants.GL_SRC_ALPHA,
+            _blendDFactor = core.Constants.GL_ONE_MINUS_SRC_ALPHA,
+            _renderOrder = 1000,
+            _dataURI = null,
+            _name = "",
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["error_vs.glsl"],
-            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["error_fs.glsl"],
-            _errorLog = thisConfig.errorLog,
+            _vertexShaderSrc = glslConstants["error_vs.glsl"],
+            _fragmentShaderSrc = glslConstants["error_fs.glsl"],
+            _errorLog = KICK.core.Util.fail,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
              * The key is used to fast determine if the blend settings needs to be updated
@@ -150,12 +149,22 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             * Unique identifier of the shader
-             * @property uid
-             * @type {Number}
+             * @property name
+             * @type String
              */
-            uid:{
-                value:_uid
+            name:{
+                get:function(){ return _name; },
+                set:function(newValue){ _name = newValue; }
+            },
+            /**
+             * When dataURI is specified the shader is expected to have its content from the dataURI.
+             * This means when serializing the object only dataURI and name will be saved
+             * @property dataURI
+             * @type String
+             */
+            dataURI:{
+                get:function(){ return _dataURI; },
+                set:function(newValue){ _dataURI = newValue; }
             },
             /**
              * Get the gl context of the shader
@@ -438,15 +447,12 @@ KICK.namespace = function (ns_string) {
                 fragmentShader = compileShader(glslConstants["error_fs.glsl"], true, errorLog);
             }
 
-            //thisObj.destroy();
             _shaderProgramId = gl.createProgram();
 
             gl.attachShader(_shaderProgramId, vertexShader);
             gl.attachShader(_shaderProgramId, fragmentShader);
             gl.linkProgram(_shaderProgramId);
-            // remove reference to shader code (no longer needed, since code is compiled to shader)
-            //gl.deleteShader(vertexShader);
-            //gl.deleteShader(fragmentShader);
+
             if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
                 return false;
@@ -550,7 +556,15 @@ KICK.namespace = function (ns_string) {
          * @return {Object} config element
          */
         this.toJSON = function(){
+            if (_dataURI){
+                return {
+                    name:_name,
+                    dataURI:_dataURI
+                }
+            }
+            // todo fill in missing attributes
             return {
+                name:_name,
                 faceCulling:_faceCulling,
                 zTest:_zTest,
                 depthMask: _depthMask,
@@ -560,12 +574,13 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            if (uidMapping && thisConfig.uid){
-                uidMapping[thisConfig.uid] = _uid;
+            applyConfig(thisObj,config);
+            if (_dataURI){
+                engine.resourceManager.getShaderData(_dataURI,thisObj);
+            } else {
+                updateBlendKey();
+                thisObj.updateShader();
             }
-
-            updateBlendKey();
-            thisObj.updateShader();
         })();
     };
 
@@ -856,7 +871,7 @@ KICK.namespace = function (ns_string) {
                                 KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                             }
                         }
-                        value = value.uid;
+                        value = KICK.core.Util.getJSONReference(engine,value);
                     }
 
                     filteredUniforms[name] = {
@@ -867,13 +882,21 @@ KICK.namespace = function (ns_string) {
             }
             return {
                 name:_name,
-                shader: _shader?_shader.uid:0,
                 uniforms: filteredUniforms
             };
         };
 
         (function init(){
             applyConfig(thisObj,config);
+            // replace references to images with references
+            for (var name in _uniforms){
+                var uniformType = _uniforms[name].type;
+                var uniformValue = _uniforms[name].value;
+                if ((uniformType === KICK.core.Constants.GL_SAMPLER_2D ||
+                    uniformType === KICK.core.Constants.GL_SAMPLER_CUBE ) && uniformValue && typeof uniformValue.ref === 'string'){
+                    _uniforms[name].value = engine.project.load(uniformValue.ref);
+                }
+            }
             material.Material.verifyUniforms(_uniforms);
         })();
     };
