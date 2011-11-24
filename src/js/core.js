@@ -46,7 +46,8 @@ KICK.namespace = function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
-        ASSERT = constants._ASSERT;
+        ASSERT = constants._ASSERT,
+        DEBUG = constants._DEBUG;
 
     /**
      * Game engine object
@@ -447,6 +448,10 @@ KICK.namespace = function (ns_string) {
                 resourceReferenceCount[resourceUID] = 1;
                 return resourceObject;
             }
+            if (DEBUG){
+                core.Util.warn("Cannot find "+resourceUID);
+                debugger;
+            }
             return null;
         };
 
@@ -464,6 +469,10 @@ KICK.namespace = function (ns_string) {
                 if (resource.name === name){
                     return thisObj.load(resource.uid);
                 }
+            }
+            if (DEBUG){
+                core.Util.warn("Cannot find "+name);
+                debugger;
             }
             return null;
         };
@@ -571,9 +580,12 @@ KICK.namespace = function (ns_string) {
                 for (var name in config){
                     if (hasProperty(config,name)){
                         var value = config[name];
-                        if (value && value.ref && value.reftype){
-                            if (value.reftype === "resource"){
+                        var reftype = value.reftype;
+                        if (value && value.ref && reftype){
+                            if (reftype === "resource"){
                                 value = engine.resourceManager[value.refMethod](value.ref);
+                            } else if (reftype === "project"){
+                                value = engine.project.load(value.ref);
                             }
                         }
                         res[name] = value;
@@ -894,10 +906,9 @@ KICK.namespace = function (ns_string) {
             var isGameObjectOrComponent = object.gameObject;
             if (isGameObjectOrComponent){
                 var isGameObject = object instanceof KICK.scene.GameObject;
-
                 return {
                     ref: engine.getUID(object),
-                    name: isGameObject ? object.name : "",
+                    name: typeof object.name === 'string'? object.name : "",
                     reftype: isGameObject?"gameobject":"component"
                 }
 
@@ -964,6 +975,10 @@ KICK.namespace = function (ns_string) {
                 if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
                     object[name] = config[name];
                 }
+            }
+            // force setting uid
+            if (config.uid && config.uid !== object.uid){
+                object.uid = config.uid;
             }
         },
         /**
@@ -1033,9 +1048,17 @@ KICK.namespace = function (ns_string) {
                 0, 0, canvas.width, canvas.height);
             return canvas;
         },
-
         /**
-         * Invokes debugger and throws an error
+         * Invokes debugger and logs a warning
+         * @method warn
+         * @static
+         */
+        warn:function(message){
+            debugger;
+            console.log(message);
+        },
+        /**
+         * Invokes debugger and logs an error
          * @method fail
          * @static
          */
