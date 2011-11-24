@@ -862,8 +862,7 @@ KICK.namespace = function (ns_string) {
                 if (typeof name === 'string'){
                     var uniform = _uniforms[name],
                         value = uniform.value;
-                    if (value instanceof Float32Array || value instanceof Int32Array)
-                    {
+                    if (value instanceof Float32Array || value instanceof Int32Array) {
                         value = core.Util.typedArrayToArray(value);
                     } else {
                         if (KICK.core.Constants._ASSERT){
@@ -893,7 +892,7 @@ KICK.namespace = function (ns_string) {
                 var uniformType = _uniforms[name].type;
                 var uniformValue = _uniforms[name].value;
                 if ((uniformType === KICK.core.Constants.GL_SAMPLER_2D ||
-                    uniformType === KICK.core.Constants.GL_SAMPLER_CUBE ) && uniformValue && typeof uniformValue.ref === 'string'){
+                    uniformType === KICK.core.Constants.GL_SAMPLER_CUBE ) && uniformValue && typeof uniformValue.ref === 'number'){
                     _uniforms[name].value = engine.project.load(uniformValue.ref);
                 }
             }
