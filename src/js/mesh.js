@@ -792,6 +792,11 @@ KICK.namespace = function (ns_string) {
                     return _meshData;
                 },
                 set:function(newValue){
+                    if (ASSERT){
+                        if (newValue && !(newValue instanceof mesh.MeshData)){
+                            KICK.core.Util.fail("Mesh.meshData must be instanceof KICK.mesh.MeshData");
+                        }
+                    }
                     _meshData = newValue;
                     updateData();
                 }
