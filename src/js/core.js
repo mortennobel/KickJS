@@ -894,15 +894,18 @@ KICK.namespace = function (ns_string) {
             var isGameObjectOrComponent = object.gameObject;
             if (isGameObjectOrComponent){
                 var isGameObject = object instanceof KICK.scene.GameObject;
+
                 return {
                     ref: engine.getUID(object),
-                    reftype: isGameObject?"component":"gameobject"
+                    name: isGameObject ? object.name : "",
+                    reftype: isGameObject?"gameobject":"component"
                 }
 
             } else {
                 // project type
                 return {
                     ref:object.uid,
+                    name:object.name,
                     reftype:"project"
                 };
             }
