@@ -672,7 +672,8 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      */
     scene.Scene = function (engine, config) {
-        var gameObjects = [],
+        var objectsById = [],
+            gameObjects = [],
             activeGameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
@@ -893,6 +894,16 @@ KICK.namespace = function (ns_string) {
          */
         this.addComponent = function (component) {
             core.Util.insertSorted(component,componentsNew,sortByScriptPriority);
+            objectsById[engine.getUID(component)] = component;
+        };
+
+        /**
+         * @method getObjectByUID
+         * @param uid
+         * @return {Object} GameObject or component
+         */
+        this.getObjectByUID = function(uid){
+            return objectsById[uid];
         };
 
         /**
@@ -902,6 +913,7 @@ KICK.namespace = function (ns_string) {
         this.removeComponent = function (component) {
             core.Util.removeElementFromArray(componentsNew,component);
             componentsDelete.push(component);
+            delete objectsById[component.uid];
         };
 
         Object.defineProperties(this,{
@@ -938,6 +950,7 @@ KICK.namespace = function (ns_string) {
             var gameObject = new scene.GameObject(this,config);
             gameObjectsNew.push(gameObject);
             gameObjects.push(gameObject);
+            objectsById[gameObject.uid] = gameObject;
             return gameObject;
         };
 
@@ -947,6 +960,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroyObject = function (gameObject) {
             gameObjectsDelete.push(gameObject);
+            delete objectsById[gameObject.uid];
         };
 
         /**
@@ -1016,6 +1030,8 @@ KICK.namespace = function (ns_string) {
                                 if (value && value.ref && value.reftype){
                                     if (value.reftype === "project"){
                                         value = engine.project.load(value.ref);
+                                    } else if (value.reftype === "gameobject" || value.reftype === "component"){
+                                        value = thisObj.getObjectByUID(value.ref);
                                     }
                                 }
                             }
