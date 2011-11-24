@@ -75,7 +75,6 @@ KICK.namespace = function (ns_string) {
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
-            uniqIdCounter = 1,
             vec2 = KICK.math.vec2;
 
         Object.defineProperties(this,{
@@ -241,7 +240,7 @@ KICK.namespace = function (ns_string) {
          * @return {Number} uniq id
          */
         this.createUID = function(){
-            return uniqIdCounter++;
+            return ++project.maxUID;
         };
 
         /**
@@ -370,20 +369,48 @@ KICK.namespace = function (ns_string) {
      * @param {JSON} json project data
      */
     core.Project = function(engine){
-        var resourceDescriptors = {},
+        var resourceDescriptorsByUID = {},
             resourceCache = {},
             resourceReferenceCount = {},
             thisObj = this,
-            maxProjectId = 0;
+            _maxUID = 0;
+
+        Object.defineProperties(this, {
+            /**
+             * The maximum UID used in the project
+             * @property maxUID
+             * @type Number
+             */
+            maxUID:{
+                get:function(){
+                    return _maxUID;
+                },
+                set:function(newValue){
+                    _maxUID = newValue;
+                }
+            }
+        });
 
         /**
-         * @method loadProject
-         * @param {Array[KICK.core.ResourceDescriptor]} resourceDescriptors
+         * Creates a new empty project.
+         * @method newProject
          */
-        this.loadProject = function(resourceDescriptors){
-            if (thisObj.getResourceDescriptorNames().length>0){
+        this.newProject = function(){
+            thisObj.loadProject({maxUID:0,resourceDescriptors:[]});
+        };
+
+        /**
+         * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor]}
+         * @method loadProject
+         * @param {object} config
+         */
+        this.loadProject = function(config){
+            config = config || {};
+            var resourceDescriptors = config.resourceDescriptors || [];
+            if (_maxUID>0){
                 thisObj.closeProject();
             }
+            _maxUID = config.maxUID || 0;
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
             }
@@ -394,9 +421,9 @@ KICK.namespace = function (ns_string) {
          * @method closeProject
          */
         this.closeProject = function(){
-            var resourceNames = thisObj.getResourceDescriptorNames();
-            for (var i=resourceNames.length;i>=0;i--){
-                thisObj.removeResourceDescriptor(resourceNames[i]);
+            for (var uid in resourceDescriptorsByUID){
+                var resourceDescriptor = resourceDescriptorsByUID[uid];
+                thisObj.removeResourceDescriptor(resourceDescriptor);
             }
         };
 
@@ -404,37 +431,56 @@ KICK.namespace = function (ns_string) {
          * Load a resource from the configuration (or cache).
          * Also increases the resource reference counter.
          * @method load
-         * @param {String} resourceName
-         * @return {Object} resource or undefined if resource is not found
+         * @param {String} uid
+         * @return {Object} resource or null if resource is not found
          */
-        this.load = function(resourceName){
-            var resourceObject = resourceCache[resourceName];
+        this.load = function(resourceUID){
+            var resourceObject = resourceCache[resourceUID];
             if (resourceObject){
-                resourceReferenceCount[resourceName]++;
+                resourceReferenceCount[resourceUID]++;
                 return resourceObject;
             }
-            var resourceConfig = resourceDescriptors[resourceName];
+            var resourceConfig = resourceDescriptorsByUID[resourceUID];
             if (resourceConfig){
                 resourceObject = resourceConfig.instantiate(engine);
-                resourceCache[resourceName] = resourceObject;
-                resourceReferenceCount[resourceName] = 1;
+                resourceCache[resourceUID] = resourceObject;
+                resourceReferenceCount[resourceUID] = 1;
+                return resourceObject;
             }
-            return resourceObject;
+            return null;
+        };
+
+        /**
+         * Load a resource from the configuration (or cache).
+         * Also increases the resource reference counter.
+         * If more objects exist with the same name, the first object is returned
+         * @method loadByName
+         * @param {String} name
+         * @return {Object} resource or null if resource is not found
+         */
+        this.loadByName = function(name){
+            for (var uid in resourceDescriptorsByUID){
+                var resource = resourceDescriptorsByUID[uid];
+                if (resource.name === name){
+                    return thisObj.load(resource.uid);
+                }
+            }
+            return null;
         };
 
         /**
          * Decreases the resource reference counter. If resource is no longer
          * used it's destroy method will be invoked (if available).
          * @method release
-         * @param resourceName
+         * @param resourceUID
          */
-        this.release = function(resourceName){
-            var resourceObject = resourceCache[resourceName];
+        this.release = function(resourceUID){
+            var resourceObject = resourceCache[resourceUID];
             if (resourceObject){
-                resourceReferenceCount[resourceName]--;
-                if (resourceReferenceCount[resourceName] <= 0){
-                    delete resourceCache[resourceName];
-                    delete resourceReferenceCount[resourceName];
+                resourceReferenceCount[resourceUID]--;
+                if (resourceReferenceCount[resourceUID] <= 0){
+                    delete resourceCache[resourceUID];
+                    delete resourceReferenceCount[resourceUID];
                     if (resourceObject.destroy){
                         resourceObject.destroy();
                     }
@@ -445,44 +491,32 @@ KICK.namespace = function (ns_string) {
         /**
          * @method addResourceDescriptor
          * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
+         * @return {KICK.core.ResourceDescriptor}
          */
         this.addResourceDescriptor = function(resourceDescriptor){
             if (!(resourceDescriptor instanceof core.ResourceDescriptor)){
                 resourceDescriptor = new core.ResourceDescriptor(resourceDescriptor);
             }
-            resourceDescriptors[resourceDescriptor.name] = resourceDescriptor;
+
+            resourceDescriptorsByUID[resourceDescriptor.uid] = resourceDescriptor;
+            return resourceDescriptor;
         };
 
         /**
          * Remove resource descriptor and destroy the resource if already allocated.
          * @method removeResourceDescriptor
-         * @param {String} resourceName
+         * @param {String} resourceUID
          */
-        this.removeResourceDescriptor = function(resourceName){
+        this.removeResourceDescriptor = function(resourceUID){
             // destroy the resource
-            var resource = resourceCache[resourceName];
+            var resource = resourceCache[resourceUID];
             if (resource && resource.detroy){
                 resource.destroy();
             }
             // remove references
-            delete resourceCache[resourceName];
-            delete resourceReferenceCount[resourceName];
-            delete resourceDescriptors[resourceName];
-        };
-
-        /**
-         * @method getResourceDescriptorNames
-         * @return {Array[String]} resource names
-         */
-        this.getResourceDescriptorNames = function(){
-            var array = [];
-            for (var name in resourceDescriptors){
-                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
-                    array.push(name);
-                }
-            }
-            array.sort();
-            return array;
+            delete resourceCache[resourceUID];
+            delete resourceReferenceCount[resourceUID];
+            delete resourceDescriptorsByUID[resourceUID];
         };
 
         /**
@@ -490,12 +524,15 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             var res = [];
-            for (var name in resourceDescriptors){
-                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
-                    res.push(resourceDescriptors[name].toJSON());
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    res.push(resourceDescriptorsByUID[uid].toJSON());
                 }
             }
-            return res;
+            return {
+                maxUID:_maxUID,
+                resourceDescriptors:res
+            };
         };
     };
 
@@ -513,7 +550,8 @@ KICK.namespace = function (ns_string) {
      *      };
      *      var resourceDescriptorConfig = {
      *          type: "KICK.material.Material",
-     *          config: materialConfig
+     *          config: materialConfig,
+     *          uid: 132
      *      };
      *      var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
      * </pre>
@@ -525,6 +563,7 @@ KICK.namespace = function (ns_string) {
     core.ResourceDescriptor = function(config){
         var _config = config || {},
             type = _config.type,
+            uid = _config.uid,
             resourceConfig = _config.config,
             hasProperty = core.Util.hasProperty,
             createConfigInitialized = function(engine,config){
@@ -572,6 +611,13 @@ KICK.namespace = function (ns_string) {
              */
             config:{
                 value: resourceConfig
+            },
+            /**
+             * @property uid
+             * @type Number
+             */
+            uid:{
+                value: uid
             }
         });
         /**
@@ -598,6 +644,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 type:type,
+                uid:uid,
                 config:resourceConfig
             };
         };
