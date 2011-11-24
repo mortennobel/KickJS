@@ -423,8 +423,7 @@ KICK.namespace = function (ns_string) {
          */
         this.closeProject = function(){
             for (var uid in resourceDescriptorsByUID){
-                var resourceDescriptor = resourceDescriptorsByUID[uid];
-                thisObj.removeResourceDescriptor(resourceDescriptor);
+                thisObj.removeResourceDescriptor(uid);
             }
         };
 
@@ -514,7 +513,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Remove resource descriptor and destroy the resource if already allocated.
          * @method removeResourceDescriptor
-         * @param {String} resourceUID
+         * @param {Number} resourceUID
          */
         this.removeResourceDescriptor = function(resourceUID){
             // destroy the resource
