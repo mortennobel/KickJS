@@ -2333,7 +2333,34 @@ KICK.namespace = function (ns_string) {
         return dest;
     };
 
-
+    /**
+     * Compute the lookAt rotation
+     * @method lookAt
+     * @param {KICK.math.vec3} position
+     * @param {KICK.math.vec3} target
+     * @param {KICK.math.vec3} up
+     * @param {KICK.math.quat4} dest
+     * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     */
+    quat4.lookAt = function(position,target,up,dest){
+        // idea create mat3 rotation and transform into quaternion
+        var upVector = vec3.create(),
+            rightVector = vec3.create(),
+            forwardVector = vec3.create(),
+            matrix;
+        vec3.subtract(position,target, forwardVector);
+        vec3.normalize(forwardVector);
+        vec3.cross(up,forwardVector,rightVector);
+        vec3.normalize(rightVector); // needed?
+        vec3.cross(forwardVector,rightVector,upVector);
+        vec3.normalize(upVector); // needed?
+        matrix = [
+            rightVector[0],rightVector[1],rightVector[2],
+            upVector[0],upVector[1],upVector[2],
+            forwardVector[0],forwardVector[1],forwardVector[2]
+        ];
+        return mat3.toQuat(matrix,dest);
+    };
 
     /**
      * Set the rotation based on eulers angles.
