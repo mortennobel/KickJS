@@ -579,6 +579,7 @@ KICK.namespace = function (ns_string) {
                         res[name] = value;
                     }
                 }
+                res.uid = uid;
                 return res;
             };
         Object.defineProperties(this,{
@@ -901,7 +902,7 @@ KICK.namespace = function (ns_string) {
             } else {
                 // project type
                 return {
-                    ref:object.name,
+                    ref:object.uid,
                     reftype:"project"
                 };
             }
