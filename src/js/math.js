@@ -74,6 +74,16 @@ KICK.namespace = function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        sqrt = Math.sqrt,
+        cos = Math.cos,
+        acos = Math.acos,
+        sin = Math.sin,
+        asin = Math.asin,
+        abs = Math.abs,
+        tan = Math.tan,
+        atan = Math.atan,
+        atan2 = Math.atan2,
+        PI = Math.PI,
         _epsilon = KICK.core.Constants._EPSILON,
         wrapArray = function(array, length){
             var i,
@@ -205,7 +215,7 @@ KICK.namespace = function (ns_string) {
             epsilon = _epsilon;
         }
         for (var i=0;i<2;i++){
-            if (Math.abs(vec[i]-vec2[i])>epsilon){
+            if (abs(vec[i]-vec2[i])>epsilon){
                 return false;
             }
         }
@@ -224,7 +234,7 @@ KICK.namespace = function (ns_string) {
         if(!dest) { dest = vec; }
 
         var x = vec[0], y = vec[1];
-        var len = Math.sqrt(x*x + y*y);
+        var len = sqrt(x*x + y*y);
 
         if (!len) {
             dest[0] = 0;
@@ -381,7 +391,7 @@ KICK.namespace = function (ns_string) {
             epsilon = _epsilon;
         }
         for (var i=0;i<3;i++){
-            if (Math.abs(vec[i]-vec2[i])>epsilon){
+            if (abs(vec[i]-vec2[i])>epsilon){
                 return false;
             }
         }
@@ -460,7 +470,7 @@ KICK.namespace = function (ns_string) {
         if(!dest) { dest = vec; }
 
         var x = vec[0], y = vec[1], z = vec[2];
-        var len = Math.sqrt(x*x + y*y + z*z);
+        var len = sqrt(x*x + y*y + z*z);
 
         if (!len) {
             dest[0] = 0;
@@ -509,7 +519,7 @@ KICK.namespace = function (ns_string) {
      */
     vec3.length = function(vec){
         var x = vec[0], y = vec[1], z = vec[2];
-        return Math.sqrt(x*x + y*y + z*z);
+        return sqrt(x*x + y*y + z*z);
     };
 
     /**
@@ -549,7 +559,7 @@ KICK.namespace = function (ns_string) {
         var y = vec[1] - vec2[1];
         var z = vec[2] - vec2[2];
 
-        var len = Math.sqrt(x*x + y*y + z*z);
+        var len = sqrt(x*x + y*y + z*z);
         if (!len) {
             dest[0] = 0;
             dest[1] = 0;
@@ -595,13 +605,13 @@ KICK.namespace = function (ns_string) {
         var radius = spherical[0],
             polar = -spherical[1],
             elevation = spherical[2],
-            a = radius * Math.cos(elevation);
+            a = radius * cos(elevation);
         if (!cartesian){
             cartesian = vec3.create();
         }
-        cartesian[0] = a * Math.cos(polar);
-        cartesian[1] = radius * Math.sin(elevation);
-        cartesian[2] = a * Math.sin(polar);
+        cartesian[0] = a * cos(polar);
+        cartesian[1] = radius * sin(elevation);
+        cartesian[2] = a * sin(polar);
         return cartesian;
     };
 
@@ -624,12 +634,12 @@ KICK.namespace = function (ns_string) {
             spherical = vec3.create();
         }
 
-        spherical[0] = sphericalX = Math.sqrt(x*x+y*y+z*z);
-        spherical[1] = -Math.atan(z/x);
+        spherical[0] = sphericalX = sqrt(x*x+y*y+z*z);
+        spherical[1] = -atan(z/x);
         if (x < 0){
-            spherical[1] += Math.PI;
+            spherical[1] += PI;
         }
-        spherical[2] = Math.asin(y/sphericalX);
+        spherical[2] = asin(y/sphericalX);
         return spherical;
     };
 
@@ -802,7 +812,7 @@ KICK.namespace = function (ns_string) {
             epsilon = _epsilon;
         }
         for (var i=0;i<2;i++){
-            if (Math.abs(vec[i]-vec2[i])>epsilon){
+            if (abs(vec[i]-vec2[i])>epsilon){
                 return false;
             }
         }
@@ -858,7 +868,7 @@ KICK.namespace = function (ns_string) {
      */
     vec4.length = function(vec){
         var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
-        return Math.sqrt(x*x + y*y + z*z + w*w);
+        return sqrt(x*x + y*y + z*z + w*w);
     };
 
     /**
@@ -1031,6 +1041,53 @@ KICK.namespace = function (ns_string) {
         dest[14] = 0;
         dest[15] = 1;
 
+        return dest;
+    }
+
+    /**
+     * Transform a mat3 into a rotation (quaternion).
+     * @param {KICK.math.mat3} mat
+     * @param {KICK.math.quat4} rotation
+     * @return {KICK.math.quat4}
+     */
+    mat3.toQuat = function(mat,dest){
+        // Code based on http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+        var m00 = mat[0],m10 = mat[1],m20 = mat[2],
+            m01 = mat[3],m11 = mat[4],m21 = mat[5],
+            m02 = mat[6],m12 = mat[7],m22 = mat[8],
+            trace = m00 + m11 + m22,  // trace of matrix
+            s;
+
+        if(!dest) {
+            dest = quat4.create();
+        }
+        if( trace > 0 ) {
+            s = 0.5 / sqrt(trace+ 1.0);
+            dest[0] = ( m21 - m12 ) * s;
+            dest[1] = ( m02 - m20 ) * s;
+            dest[2] = ( m10 - m01 ) * s;
+            dest[3] = 0.25 / s;
+        } else {
+            if ( m00 > m11 && m00 > m22 ) {
+                s = 2.0 * sqrt( 1.0 + m00 - m11 - m22);
+                dest[0] = 0.25 * s;
+                dest[1] = (m01 + m10 ) / s;
+                dest[2] = (m02 + m20 ) / s;
+                dest[3] = (m21 - m12 ) / s;
+            } else if (m11 > m22) {
+                s = 2.0 * sqrt( 1.0 + m11 - m00 - m22);
+                dest[0] = (m01 + m10 ) / s;
+                dest[1] = 0.25 * s;
+                dest[2] = (m12 + m21 ) / s;
+                dest[3] = (m02 - m20 ) / s;
+            } else {
+                s = 2.0 * sqrt( 1.0 + m22 - m00 - m11 );
+                dest[0] = (m02 + m20 ) / s;
+                dest[1] = (m12 + m21 ) / s;
+                dest[2] = 0.25 * s;
+                dest[3] = (m10 - m01 ) / s;
+            }
+        }
         return dest;
     }
 
@@ -1675,7 +1732,7 @@ KICK.namespace = function (ns_string) {
      */
     mat4.rotate = function(mat, angle, axis, dest) {
         var x = axis[0], y = axis[1], z = axis[2];
-        var len = Math.sqrt(x*x + y*y + z*z);
+        var len = sqrt(x*x + y*y + z*z);
         if (!len) { return null; }
         if (len != 1) {
             len = 1 / len;
@@ -1684,8 +1741,8 @@ KICK.namespace = function (ns_string) {
             z *= len;
         }
 
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
         var t = 1-c;
 
         // Cache the matrix values (makes for huge speed increases!)
@@ -1734,8 +1791,8 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateX = function(mat, angle, dest) {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
 
         // Cache the matrix values (makes for huge speed increases!)
         var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
@@ -1777,8 +1834,8 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateY = function(mat, angle, dest) {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
 
         // Cache the matrix values (makes for huge speed increases!)
         var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
@@ -1820,8 +1877,8 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateZ = function(mat, angle, dest) {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
 
         // Cache the matrix values (makes for huge speed increases!)
         var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
@@ -1902,7 +1959,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
      */
     mat4.perspective = function(fovy, aspect, near, far, dest) {
-        var top = near*Math.tan(fovy*Math.PI / 360.0);
+        var top = near*tan(fovy*PI / 360.0);
         var right = top*aspect;
         return mat4.frustum(-right, right, -top, top, near, far, dest);
     };
@@ -1977,7 +2034,7 @@ KICK.namespace = function (ns_string) {
         z2 = eyez - center[2];
 
         // normalize (no check needed for 0 because of early return)
-        len = 1/Math.sqrt(z0*z0 + z1*z1 + z2*z2);
+        len = 1/sqrt(z0*z0 + z1*z1 + z2*z2);
         z0 *= len;
         z1 *= len;
         z2 *= len;
@@ -1986,7 +2043,7 @@ KICK.namespace = function (ns_string) {
         x0 = upy*z2 - upz*z1;
         x1 = upz*z0 - upx*z2;
         x2 = upx*z1 - upy*z0;
-        len = Math.sqrt(x0*x0 + x1*x1 + x2*x2);
+        len = sqrt(x0*x0 + x1*x1 + x2*x2);
         if (!len) {
             x0 = 0;
             x1 = 0;
@@ -2003,7 +2060,7 @@ KICK.namespace = function (ns_string) {
         y1 = z2*x0 - z0*x2;
         y2 = z0*x1 - z1*x0;
 
-        len = Math.sqrt(y0*y0 + y1*y1 + y2*y2);
+        len = sqrt(y0*y0 + y1*y1 + y2*y2);
         if (!len) {
             y0 = 0;
             y1 = 0;
@@ -2099,13 +2156,13 @@ KICK.namespace = function (ns_string) {
         var x = quat[0], y = quat[1], z = quat[2];
 
         if(!dest || quat == dest) {
-            quat[3] = -Math.sqrt(Math.abs(1.0 - x*x - y*y - z*z));
+            quat[3] = -sqrt(abs(1.0 - x*x - y*y - z*z));
             return quat;
         }
         dest[0] = x;
         dest[1] = y;
         dest[2] = z;
-        dest[3] = -Math.sqrt(Math.abs(1.0 - x*x - y*y - z*z));
+        dest[3] = -sqrt(abs(1.0 - x*x - y*y - z*z));
         return dest;
     }
 
@@ -2151,7 +2208,7 @@ KICK.namespace = function (ns_string) {
         if(!dest) { dest = quat; }
 
         var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
-        var len = Math.sqrt(x*x + y*y + z*z + w*w);
+        var len = sqrt(x*x + y*y + z*z + w*w);
         if(len == 0) {
             dest[0] = 0;
             dest[1] = 0;
@@ -2247,9 +2304,9 @@ KICK.namespace = function (ns_string) {
 
         if(!dest) { dest = vec3.create(); }
 
-        dest[0] = Math.atan2(2*(w*x+y*z),1-2*(x*x+yy))*radianToDegree;
-        dest[1] = Math.asin(2*(w*y-z*x))*radianToDegree;
-        dest[2] = Math.atan2(2*(w*z+x*y),1-2*(yy+z*z))*radianToDegree;
+        dest[0] = atan2(2*(w*x+y*z),1-2*(x*x+yy))*radianToDegree;
+        dest[1] = asin(2*(w*y-z*x))*radianToDegree;
+        dest[2] = atan2(2*(w*z+x*y),1-2*(yy+z*z))*radianToDegree;
 
         return dest;
     };
@@ -2265,16 +2322,18 @@ KICK.namespace = function (ns_string) {
     quat4.angleAxis = function(angle,vec, dest) {
         var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN,
             angleRadiansHalf = degreeToRadian*0.5*angle,
-            s = Math.sin(angleRadiansHalf);
+            s = sin(angleRadiansHalf);
         if(!dest) { dest = quat4.create(); }
 
-        dest[3] = Math.cos(angleRadiansHalf);
+        dest[3] = cos(angleRadiansHalf);
         dest[2] = vec[2]*s;
         dest[1] = vec[1]*s;
         dest[0] = vec[0]*s;
 
         return dest;
     };
+
+
 
     /**
      * Set the rotation based on eulers angles.
@@ -2398,7 +2457,7 @@ KICK.namespace = function (ns_string) {
 
         var cosHalfTheta =  quat[0]*quat2[0] + quat[1]*quat2[1] + quat[2]*quat2[2] + quat[3]*quat2[3];
 
-        if (Math.abs(cosHalfTheta) >= 1.0){
+        if (abs(cosHalfTheta) >= 1.0){
             if(dest != quat) {
                 dest[0] = quat[0];
                 dest[1] = quat[1];
@@ -2408,10 +2467,10 @@ KICK.namespace = function (ns_string) {
             return dest;
         }
 
-        var halfTheta = Math.acos(cosHalfTheta),
-            sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta*cosHalfTheta);
+        var halfTheta = acos(cosHalfTheta),
+            sinHalfTheta = sqrt(1.0 - cosHalfTheta*cosHalfTheta);
 
-        if (Math.abs(sinHalfTheta) < 0.001){
+        if (abs(sinHalfTheta) < 0.001){
             dest[0] = (quat[0]*0.5 + quat2[0]*0.5);
             dest[1] = (quat[1]*0.5 + quat2[1]*0.5);
             dest[2] = (quat[2]*0.5 + quat2[2]*0.5);
@@ -2419,8 +2478,8 @@ KICK.namespace = function (ns_string) {
             return dest;
         }
 
-        var ratioA = Math.sin((1 - slerp)*halfTheta) / sinHalfTheta,
-            ratioB = Math.sin(slerp*halfTheta) / sinHalfTheta;
+        var ratioA = sin((1 - slerp)*halfTheta) / sinHalfTheta,
+            ratioB = sin(slerp*halfTheta) / sinHalfTheta;
 
         dest[0] = (quat[0]*ratioA + quat2[0]*ratioB);
         dest[1] = (quat[1]*ratioA + quat2[1]*ratioB);
