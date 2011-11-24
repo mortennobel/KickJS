@@ -15,7 +15,7 @@
 <script src="../../src/js/math.js"></script>
 <script src="../../src/js/core.js"></script>
 <script src="../../src/js/mesh.js"></script>
-<script src="../../src/js/meshFactory.js"></script>
+<script src="../../src/js/resource.js"></script>
 <script src="../../src/js/material.js"></script>
 <script src="../../src/js/scene.js"></script>
     <!-- allows to use random seed -->
@@ -107,6 +107,19 @@ YUI().use('node', 'console', 'test', function (Y) {
             var materialObject = materialDescriptor.instantiate(engineStubImpl);
             Assert.isTrue(materialObject instanceof KICK.material.Material, "object is Material");
             materialDescriptor.toJSON()
+        },
+        testUniqueIdCounter: function(){
+            Assert = Y.Assert;
+            var engine = new KICK.core.Engine('canvas3d');
+            var one = engine.createUID()
+            var two = engine.createUID();
+            Assert.areSame(1,one);
+            Assert.areSame(2,two);
+            engine.project.newProject();
+            one = engine.createUID()
+            two = engine.createUID();
+            Assert.areSame(1,one);
+            Assert.areSame(2,two);
         }
     });
 
@@ -155,7 +168,7 @@ YUI().use('node', 'console', 'test', function (Y) {
 
 });
 </script>
-
+<canvas id="canvas3d" width="1" height=1></canvas>
 </div>
 
 </body>
