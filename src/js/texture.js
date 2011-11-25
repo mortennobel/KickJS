@@ -57,20 +57,73 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Render texture (used for camera's render target)
-     * @todo - currently incomplete
      * @class RenderTexture
      * @namespace KICK.texture
      * @constructor
      * @param {KICK.core.Engine} engine
-     * @param {KICK.texture.Texture} _colorTexture Optional (may be null)
-     * @param {KICK.texture.Texture} _depthTexture Optional (may be null)
+     * @param {Object} config Optional
      */
-    texture.RenderTexture = function (engine, _colorTexture, _depthTexture){
+    texture.RenderTexture = function (engine, config){
         var gl = engine.gl,
+            _config = config || {},
             framebuffer = gl.createFramebuffer(),
-            validTexture = _colorTexture || _depthTexture,
-            _dimension = validTexture.dimension,
-            renderBuffers = [];
+            colorTexture = _config.colorTexture,
+            depthTexture = _config.depthTexture,
+            _dimension,
+            renderBuffers = [],
+            thisObj = this,
+            cleanUpRenderBuffers = function(){
+                for (var i=0;i<cleanUpRenderBuffers.length;i++){
+                    gl.deleteRenderbuffer(cleanUpRenderBuffers[i]);
+                }
+            },
+            initFBO = function (){
+                var validTexture = colorTexture || depthTexture,
+                    renderbuffer;
+                _dimension = validTexture ? validTexture.dimension: [256,256];
+                cleanUpRenderBuffers();
+                gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
+
+                if (colorTexture){
+                    gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_TEXTURE_2D, colorTexture.textureId, 0);
+                } else {
+                    renderbuffer = gl.createRenderbuffer();
+                    gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+                    gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_RGBA4, _dimension[0], _dimension[1]);
+                    gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_RENDERBUFFER, renderbuffer);
+                    renderBuffers.push(renderbuffer);
+                }
+
+                if (depthTexture){
+                    gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_TEXTURE_2D, depthTexture.textureId, 0);
+                } else {
+                    renderbuffer = gl.createRenderbuffer();
+                    gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+                    gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_DEPTH_COMPONENT16, _dimension[0], _dimension[1]);
+                    gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_RENDERBUFFER, renderbuffer);
+                    renderBuffers.push(renderbuffer);
+                }
+                if (constants._ASSERT){
+                    var frameBufferStatus = gl.checkFramebufferStatus( constants.GL_FRAMEBUFFER );
+                    if (frameBufferStatus !== constants.GL_FRAMEBUFFER_COMPLETE){
+                        switch (frameBufferStatus){
+                            case constants.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                                break;
+                            case constants.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                                break;
+                            case constants.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+                                break;
+                            case constants.GL_FRAMEBUFFER_UNSUPPORTED:
+                                KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
+                                break;
+                        }
+                    }
+                }
+                gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
+            };
 
         /**
          * @method bind
@@ -81,74 +134,61 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             * Read only
+             * Read only. Computed the the active texture(s)
              * @property dimension
              * @type KICK.math.vec2
              */
             dimension:{
-                value:_dimension
+                get:function(){
+                    return _dimension;
+                }
             },
             /**
-             * Read only
              * @property colorTexture
              * @type KICK.texture.Texture
              */
             colorTexture:{
-                value: _colorTexture
+                get: function(){ return colorTexture; },
+                set: function(newValue){ colorTexture = newValue; initFBO(); }
             },
             /**
-             * Read only
              * @property depthTexture
              * @type KICK.texture.Texture
              */
             depthTexture:{
-                value: _depthTexture
+                get: function(){ return depthTexture; },
+                set: function(newValue){ depthTexture = newValue; initFBO(); }
             }
         });
-            
+
+        /**
+         * @method destroy
+         */
+        this.destroy = function(){
+            if (framebuffer !== null){
+                cleanUpRenderBuffers();
+                gl.deleteFramebuffer(framebuffer);
+                framebuffer = null;
+            }
+        };
+
+        /**
+         * @method toJSON
+         */
+        this.toJSON = function(){
+            return {
+                colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture),
+                depthTexture: KICK.core.Util.getJSONReference(engine, depthTexture)
+            };
+        };
+
         (function init(){
-            var renderbuffer;
-            gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
-
-            if (_colorTexture){
-                gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_TEXTURE_2D, _colorTexture.textureId, 0);
-            } else {
-                renderbuffer = gl.createRenderbuffer();
-                gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
-                gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_RGBA4, _dimension[0], _dimension[1]);
-                gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_RENDERBUFFER, renderbuffer);
-                renderBuffers.push(renderbuffer);
+            if (!colorTexture && !depthTexture){
+                colorTexture = new KICK.texture.Texture(engine);
+                colorTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
             }
-
-            if (_depthTexture){
-                gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_TEXTURE_2D, _depthTexture.textureId, 0);
-            } else {
-                renderbuffer = gl.createRenderbuffer();
-                gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
-                gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_DEPTH_COMPONENT16, _dimension[0], _dimension[1]);
-                gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_RENDERBUFFER, renderbuffer);
-                renderBuffers.push(renderbuffer);
-            }
-            if (constants._ASSERT){
-                var frameBufferStatus = gl.checkFramebufferStatus( constants.GL_FRAMEBUFFER );
-                if (frameBufferStatus !== constants.GL_FRAMEBUFFER_COMPLETE){
-                    switch (frameBufferStatus){
-                        case constants.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-                            break;
-                        case constants.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-                            break;
-                        case constants.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-                            break;
-                        case constants.GL_FRAMEBUFFER_UNSUPPORTED:
-                            KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
-                            break;
-                    }
-                }
-            }
-            gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
+            initFBO();
+            engine.project.registerObject(thisObj, "KICK.core.RenderTexture");
         })();
     };
 
@@ -164,7 +204,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             texture0 = constants.GL_TEXTURE0,
             _textureId = gl.createTexture(),
-            _name = "Texture #"+new Date().getTime(), // define unique name
+            _name = "Texture", // define unique name
             _wrapS =  constants.GL_REPEAT,
             _wrapT = constants.GL_REPEAT,
             _minFilter = constants.GL_LINEAR,
@@ -189,6 +229,10 @@ KICK.namespace = function (ns_string) {
                 _boundTextureType = _textureType;
             };
 
+        /**
+         * Trigger getImageData if dataURI is defined
+         * @method init
+         */
         this.init = function(){
             if (_dataURI){
                 engine.resourceManager.getImageData(_dataURI,thisObj);
@@ -592,6 +636,7 @@ KICK.namespace = function (ns_string) {
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
+            engine.project.registerObject(thisObj, "KICK.core.Texture");
         })();
     };
 
@@ -875,6 +920,7 @@ KICK.namespace = function (ns_string) {
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
+            engine.project.registerObject(thisObj, "KICK.core.MovieTexture");
         })();
     };
 })();
