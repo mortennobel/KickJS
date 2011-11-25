@@ -7,7 +7,6 @@
 <h1>KickJS | Tutorial | 02 - Scripting triangle world - Optimized code</h1>
 
 <!-- Tutorial start -->
-<!--<script type="text/javascript" src="../../js/kick-min-0.1.0.js"></script>-->
 <!--<script type="text/javascript" src="../../js/webgl-debug.js"></script>-->
     <!--<script type="text/javascript" src="../../js/kick-uncompressed-0.1.0.js"></script>-->
 <script type="text/javascript" src="../../js/kick-min-0.1.0.js"></script>
@@ -24,8 +23,8 @@
 
         // Get references to objects used in the update method performs better
         this.activated = function(){
-            transform = this.gameObject.transform;
-            time = this.gameObject.engine.time;
+            transform = thisObj.gameObject.transform;
+            time = thisObj.gameObject.engine.time;
         };
 
         this.update = function(){
