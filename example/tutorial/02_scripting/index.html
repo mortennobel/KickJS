@@ -14,15 +14,18 @@
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 <script type="text/javascript">
 
-    var RotatorComponent = function(rotationSpeed){
-        var rotationEuler = [0,0,0];
+    var RotatorComponent = function(config){
+        var rotationEuler = [0,0,0],
+                thisObj = this;
+
+        this.rotationSpeed = config.rotationSpeed;
 
         this.update = function(){
             var gameObject = this.gameObject,
                     transform = gameObject.transform,
                     time = gameObject.engine.time,
                     deltaTime = time.deltaTime;
-            rotationEuler[2]+=deltaTime*rotationSpeed;
+            rotationEuler[2] += deltaTime*thisObj.rotationSpeed;
             transform.localRotationEuler = rotationEuler;
         };
     };
@@ -68,7 +71,7 @@
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
         var rotationSpeed = i-0.4;
-        gameObject.addComponent(new RotatorComponent(rotationSpeed));
+        gameObject.addComponent(new RotatorComponent({rotationSpeed:rotationSpeed}));
     }
 </script>
 <!-- Tutorial end -->
