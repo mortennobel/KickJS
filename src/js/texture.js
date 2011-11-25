@@ -188,7 +188,7 @@ KICK.namespace = function (ns_string) {
                 colorTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
             }
             initFBO();
-            engine.project.registerObject(thisObj, "KICK.core.RenderTexture");
+            engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
         })();
     };
 
@@ -636,7 +636,7 @@ KICK.namespace = function (ns_string) {
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
-            engine.project.registerObject(thisObj, "KICK.core.Texture");
+            engine.project.registerObject(thisObj, "KICK.texture.Texture");
         })();
     };
 
@@ -920,7 +920,7 @@ KICK.namespace = function (ns_string) {
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
-            engine.project.registerObject(thisObj, "KICK.core.MovieTexture");
+            engine.project.registerObject(thisObj, "KICK.texture.MovieTexture");
         })();
     };
 })();
