@@ -528,6 +528,36 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Updates the resourceDescriptors with data from the initialized objects
+         * @method refreshResourceDescriptors
+         */
+        this.refreshResourceDescriptors = function(){
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    var liveObject = resourceCache[uid];
+                    if (liveObject){
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
+                    }
+                }
+            }
+        };
+
+        /**
+         * @method getResourceDescriptorByType
+         * @param {String} type
+         * @return {Array[KICK.core.ResourceDescriptor]}
+         */
+        this.getResourceDescriptorByType = function(type){
+            var res = [];
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid].type === type){
+                    res.push(resourceDescriptorsByUID[uid]);
+                }
+            }
+            return res;
+        };
+
+        /**
          * @method addResourceDescriptor
          * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
          * @return {KICK.core.ResourceDescriptor}
@@ -563,12 +593,9 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             var res = [];
+            thisObj.refreshResourceDescriptors();
             for (var uid in resourceDescriptorsByUID){
                 if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
-                    var liveObject = resourceCache[uid];
-                    if (liveObject){
-                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
-                    }
                     res.push(resourceDescriptorsByUID[uid].toJSON());
                 }
             }
