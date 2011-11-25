@@ -120,7 +120,7 @@
             
             var texture = new KICK.texture.Texture(engine);
             texture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
-            var renderTexture = new KICK.texture.RenderTexture(engine,texture,null);
+            var renderTexture = new KICK.texture.RenderTexture(engine,{colorTexture:texture});
             camera.renderTarget = renderTexture;
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
