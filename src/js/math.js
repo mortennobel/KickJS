@@ -1042,12 +1042,12 @@ KICK.namespace = function (ns_string) {
         dest[15] = 1;
 
         return dest;
-    }
+    };
 
     /**
      * Transform a mat3 into a rotation (quaternion).
      * @param {KICK.math.mat3} mat
-     * @param {KICK.math.quat4} rotation
+     * @param {KICK.math.quat4} dest
      * @return {KICK.math.quat4}
      */
     mat3.toQuat = function(mat,dest){
@@ -1217,7 +1217,7 @@ KICK.namespace = function (ns_string) {
         mat4.multiply(dest,quat4.toMat4(quat4.inverse(rotateQuat)));
         mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
         return dest;
-    }
+    };
 
     /**
      * Sets a mat4 to an identity matrix
@@ -1695,11 +1695,11 @@ KICK.namespace = function (ns_string) {
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
      * @method rotateEuler
      * @param {KICK.math.mat4} mat mat4 to rotate
-     * @param {KICK.math.vec3} angle angle (in degrees) to rotate
+     * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
-    mat4.rotateEuler = function(mat, euler, dest) {
+    mat4.rotateEuler = function(mat, eulerAngle, dest) {
         var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN;
         if (dest) {
             mat4.set(mat,dest);
@@ -1707,14 +1707,14 @@ KICK.namespace = function (ns_string) {
         }
 
         // todo: Optimized code!!!
-        if (euler[2] !== 0){
-            mat4.rotateZ(mat, euler[2]*degreeToRadian);
+        if (eulerAngle[2] !== 0){
+            mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
         }
-        if (euler[1] !== 0){
-            mat4.rotateY(mat, euler[1]*degreeToRadian);
+        if (eulerAngle[1] !== 0){
+            mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
         }
-        if (euler[0] !== 0){
-            mat4.rotateX(mat, euler[0]*degreeToRadian);
+        if (eulerAngle[0] !== 0){
+            mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
         }
         return mat;
     };
@@ -2185,7 +2185,7 @@ KICK.namespace = function (ns_string) {
         dest[2] = -quat[2];
         dest[3] = quat[3];
         return dest;
-    }
+    };
 
     /**
      * Calculates the length of a quat4
@@ -2223,7 +2223,7 @@ KICK.namespace = function (ns_string) {
         dest[3] = w * len;
 
         return dest;
-    }
+    };
 
     /**
      * Performs a quaternion multiplication
@@ -2245,7 +2245,7 @@ KICK.namespace = function (ns_string) {
         dest[3] = qaw*qbw - qax*qbx - qay*qby - qaz*qbz;
 
         return dest;
-    }
+    };
 
     /**
      * Transforms a vec3 with the given quaternion
@@ -2278,7 +2278,7 @@ KICK.namespace = function (ns_string) {
     /**
      * Set the identity to the quaternion (0,0,0,1)
      * @method identity
-     * @param {KICK.math.quat4} quat Optional, quat4 to set the identity to
+     * @param {KICK.math.quat4} dest Optional, quat4 to set the identity to
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
     quat4.identity = function(dest){
@@ -2339,10 +2339,11 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} position
      * @param {KICK.math.vec3} target
      * @param {KICK.math.vec3} up
-     * @param {KICK.math.quat4} dest
+     * @param {KICK.math.quat4} dest optional
+     * @param {KICK.math.mat4} destMatrix optional - rotation matrix used to calculate the quaternion. Using this also avoids memory allocation
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
-    quat4.lookAt = function(position,target,up,dest){
+    quat4.lookAt = function(position,target,up,dest,destMatrix){
         // idea create mat3 rotation and transform into quaternion
         var upVector = vec3.create(),
             rightVector = vec3.create(),
@@ -2354,12 +2355,20 @@ KICK.namespace = function (ns_string) {
         vec3.normalize(rightVector); // needed?
         vec3.cross(forwardVector,rightVector,upVector);
         vec3.normalize(upVector); // needed?
-        matrix = [
-            rightVector[0],rightVector[1],rightVector[2],
-            upVector[0],upVector[1],upVector[2],
-            forwardVector[0],forwardVector[1],forwardVector[2]
-        ];
-        return mat3.toQuat(matrix,dest);
+        if (!destMatrix){
+            destMatrix = mat3.create();
+        }
+        destMatrix[0] = rightVector[0];
+        destMatrix[1] = rightVector[1];
+        destMatrix[2] = rightVector[2];
+        destMatrix[3] = upVector[0];
+        destMatrix[4] = upVector[1];
+        destMatrix[5] = upVector[2];
+        destMatrix[6] = forwardVector[0];
+        destMatrix[7] = forwardVector[1];
+        destMatrix[8] = forwardVector[2];
+        
+        return mat3.toQuat(destMatrix,dest);
     };
 
     /**
@@ -2381,7 +2390,7 @@ KICK.namespace = function (ns_string) {
         quat4.multiply(axisZ,axisY,dest);
         quat4.multiply(dest,axisX,dest);
         return dest;
-    }
+    };
 
 
     /**
@@ -2421,7 +2430,7 @@ KICK.namespace = function (ns_string) {
         dest[8] = 1 - xx - yy;
 
         return dest;
-    }
+    };
 
     /**
      * Calculates a 4x4 matrix from the given quat4
@@ -2468,7 +2477,7 @@ KICK.namespace = function (ns_string) {
         dest[15] = 1;
 
         return dest;
-    }
+    };
 
     /**
      * Performs a spherical linear interpolation between two quat4
