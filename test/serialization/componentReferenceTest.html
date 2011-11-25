@@ -1,0 +1,281 @@
+<html>
+<head>
+    <title></title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
+</head>
+<body onload="initKick();">
+<h1>Component reference serialization test</h1>
+<br>
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This test shows how component can reference each other<br>
+<button onclick="testSerialization()">Test Serialization</button>
+
+  <div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vColor = vec3(uv1.x,uv1.y,0.0);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+</div>
+  <script type="text/javascript">
+      var projectData =
+        {
+            maxUID:100,
+            resourceDescriptors: [
+                {
+                    type:"KICK.texture.Texture",
+                    uid:2,
+                    config:{
+                        name:"White texture",
+                        dataURI:"kickjs://texture/white/"
+
+                    }
+                },
+                {
+                    type:"KICK.material.Shader",
+                    uid:3,
+                    config:{
+                        name:"UnlitShader",
+                        dataURI:"kickjs://shader/unlit/"
+                    }
+                },
+                {
+                    type:"KICK.material.Material",
+                    uid:4,
+                    config: {
+                        name:"WhiteMaterial",
+                        shader:{
+                            name:"UnlitShader",
+                            ref:3,
+                            reftype:"project"
+                        },
+                        uniforms: {
+                            mainTexture:{
+                                value:{
+                                    ref:2,
+                                    name:"White texture",
+                                    reftype:"project"
+                                },
+                                type:35678
+                            },
+                            mainColor:{
+                                value:[1,1,1],
+                                type:35666
+                            }
+                        }
+                    }
+                },
+                {
+                    type:"KICK.mesh.Mesh",
+                    uid:6,
+                    config: {
+                        name:"CubeMesh",
+                        urlResource:"kickjs://meshdata/cube/"
+                    }
+                },
+                {
+                    type:"KICK.mesh.Mesh",
+                    uid:7,
+                    config: {
+                        name:"TriangleMesh",
+                        urlResource:"kickjs://meshdata/triangle/"
+                    }
+                },
+                {
+                    type:"KICK.scene.Scene",
+                    uid:8,
+                    config:{
+                        name:"SimpleScene",
+                        gameObjects:[
+                            {
+                                name:"MainCamera",
+                                uid:9,
+                                components:[
+                                    {
+                                        type:"KICK.scene.Transform",
+                                        uid:10,
+                                        config: {
+                                            localPosition: [0,0,5],
+                                            parent:null
+                                        }
+                                    },
+                                    {
+                                        type:"KICK.scene.Camera",
+                                        uid:11,
+                                        config:{
+                                            perspective: false,
+                                            left:-5,
+                                            right:5,
+                                            top:5,
+                                            bottom:-5
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                name:"Cube",
+                                uid:13,
+                                components:[
+                                    {
+                                        type:"KICK.scene.MeshRenderer",
+                                        uid:14,
+                                        config:{
+                                            material:{
+                                                ref:4,
+                                                reftype:"project"
+                                            },
+                                            mesh:{
+                                                ref:6,
+                                                reftype:"project"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        type:"KICK.scene.Transform",
+                                        uid:15,
+                                        config: {
+                                            localPosition:  [-2.0,0,0]
+                                        }
+                                    } ,
+                                    {
+                                        type:"RotatorComponent",
+                                        uid:20,
+                                        config:{
+                                            rotationSpeed:-.15,
+                                            rotationTransform:{
+                                                ref:17,
+                                                reftype:"component"
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                name:"Cube2",
+                                uid:16,
+                                components:[
+                                    {
+                                        type:"KICK.scene.Transform",
+                                        uid:17,
+                                        config: {
+                                            localPosition: [2.0,0,0]
+                                        }
+                                    },
+                                    {
+                                        type:"KICK.scene.MeshRenderer",
+                                        uid:18,
+                                        config:{
+                                            material:{
+                                                ref:4,
+                                                reftype:"project"
+                                            },
+                                            mesh:{
+                                                ref:7,
+                                                reftype:"project"
+                                            }
+                                        }
+                                    }
+                                    ,
+                                    {
+                                        type:"RotatorComponent",
+                                        uid:19,
+                                        config:{
+                                            rotationSpeed:.5,
+                                            rotationTransform:{
+                                                ref:15,
+                                                reftype:"component"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+  </script>
+
+
+  <script type="text/javascript">
+        "use strict";
+        var engine;
+        var meshRenderer;
+
+        function RotatorComponent(config){
+            var rotationEuler = [0,0,0],
+                    thisObj = this;
+
+            this.rotationSpeed = config.rotationSpeed || 0.1;
+            this.rotationTransform = config.rotationTransform;
+
+            this.update = function(){
+                var gameObject = thisObj.gameObject,
+                        transform = thisObj.rotationTransform || gameObject.transform,
+                        time = gameObject.engine.time,
+                        deltaTime = time.deltaTime;
+                rotationEuler[2] += deltaTime*thisObj.rotationSpeed;
+                transform.localRotationEuler = rotationEuler;
+            };
+        };
+
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
+            var project = engine.project;
+            project.loadProject(projectData);
+            engine.activeScene = project.loadByName("SimpleScene");
+        }
+
+      function testSerialization(){
+          var sceneCopy = engine.activeScene.toJSON();
+
+            sceneCopy.name ="SerializedScene";
+            var uid = engine.createUID();
+            engine.project.addResourceDescriptor(new KICK.core.ResourceDescriptor({
+                type: "KICK.scene.Scene",
+                uid: uid,
+                config:sceneCopy
+            }));
+
+            var newScene = engine.project.loadByName("SerializedScene");
+            var camera = newScene.findComponentsOfType(KICK.scene.Camera)[0];
+            camera.clearColor = [0.2,0.4,0,1];
+            engine.activeScene = newScene;
+      }
+    </script>
+</body>
+</html>
