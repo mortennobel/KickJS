@@ -192,12 +192,6 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.removeComponent =  function (component) {
-            if (component instanceof KICK.scene.Transform){
-                if (ASSERT){
-                    KICK.core.Util.fail("Cannot remove Transform to a GameObject");
-                }
-                return;
-            }
             delete component.gameObject;
             core.Util.removeElementFromArray(_components,component);
             this.scene.removeComponent(component);
@@ -672,7 +666,7 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      */
     scene.Scene = function (engine, config) {
-        var objectsById = [],
+        var objectsById = {},
             gameObjects = [],
             activeGameObjects = [],
             gameObjectsNew = [],
@@ -831,6 +825,13 @@ KICK.namespace = function (ns_string) {
                     cameras[i].renderScene(sceneLightObj);
                 }
                 engine.gl.flush();
+            },
+            createGameObjectPrivate = function(config){
+                var gameObject = new scene.GameObject(thisObj,config);
+                gameObjectsNew.push(gameObject);
+                gameObjects.push(gameObject);
+                objectsById[gameObject.uid] = gameObject;
+                return gameObject;
             };
 
         /**
@@ -947,10 +948,9 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.scene.GameObject}
          */
         this.createGameObject = function (config) {
-            var gameObject = new scene.GameObject(this,config);
-            gameObjectsNew.push(gameObject);
-            gameObjects.push(gameObject);
-            objectsById[gameObject.uid] = gameObject;
+            var gameObject = createGameObjectPrivate(config),
+                transform = gameObject.transform;
+            objectsById[transform.uid] = transform;
             return gameObject;
         };
 
@@ -1016,7 +1016,7 @@ KICK.namespace = function (ns_string) {
                 (function createGameObjects(){
                     for (var i=0;i<gameObjects.length;i++){
                         gameObject = config.gameObjects[i];
-                        gameObject.newObject = thisObj.createGameObject(gameObject);
+                        gameObject.newObject = createGameObjectPrivate(gameObject);
                         mappingUidToObject[gameObject.uid] = gameObject.newObject;
                     }
                 })();
@@ -1056,9 +1056,12 @@ KICK.namespace = function (ns_string) {
                             component = gameObjectConfig.components[i];
                             if (component.type === "KICK.scene.Transform"){
                                 componentObj = gameObject.transform;
+                                componentObj.uid = component.uid;
+                                // register transform object to objectsById
+                                objectsById[componentObj.uid] = componentObj;
                             } else {
                                 type = KICK.namespace(component.type);
-                                componentObj = new type(gameObject);
+                                componentObj = new type(gameObject,{uid:component.uid});
                                 gameObject.addComponent(componentObj);
                             }
                             mappingUidToObject[component.uid] = componentObj;
