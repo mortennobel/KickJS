@@ -820,7 +820,8 @@ KICK.namespace = function (ns_string) {
         });
 
         KICK.core.Util.applyConfig(this,config);
-        
+        engine.project.registerObject(this, "KICK.mesh.Mesh");
+
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
          * @method verify

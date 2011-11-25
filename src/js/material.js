@@ -575,6 +575,7 @@ KICK.namespace = function (ns_string) {
 
         (function init(){
             applyConfig(thisObj,config);
+            engine.project.registerObject(thisObj, "KICK.material.Shader");
             if (_dataURI){
                 engine.resourceManager.getShaderData(_dataURI,thisObj);
             } else {
@@ -781,10 +782,10 @@ KICK.namespace = function (ns_string) {
               * @property name
               * @type String
               */
-            name:{
-                value:_name,
-                writable:true
-            },
+             name:{
+                 get:function(){return _name;},
+                 set:function(newValue){_name = newValue;}
+             },
             /**
              * Also allows string - this will be used to lookup the shader in engine.project 
              * @property shader
@@ -887,6 +888,7 @@ KICK.namespace = function (ns_string) {
 
         (function init(){
             applyConfig(thisObj,config);
+            engine.project.registerObject(thisObj, "KICK.material.Material");
             // replace references to images with references
             for (var name in _uniforms){
                 var uniformType = _uniforms[name].type;
