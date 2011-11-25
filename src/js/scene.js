@@ -1083,6 +1083,7 @@ KICK.namespace = function (ns_string) {
                     }
                 })();
             }
+            engine.project.registerObject(thisObj, "KICK.scene.Scene");
         })();
     };
 
