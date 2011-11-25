@@ -268,9 +268,9 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<_components.length;i++){
                 component = _components[i];
                 if (!component.toJSON){
-                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,_components[i]));
+                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,component));
                 } else {
-                    componentsJSON.push(_components[i].toJSON());
+                    componentsJSON.push(component.toJSON());
                 }
 
             }
@@ -1062,6 +1062,7 @@ KICK.namespace = function (ns_string) {
                             } else {
                                 type = KICK.namespace(component.type);
                                 componentObj = new type(gameObject,{uid:component.uid});
+                                componentObj.uid = component.uid;
                                 gameObject.addComponent(componentObj);
                             }
                             mappingUidToObject[component.uid] = componentObj;
