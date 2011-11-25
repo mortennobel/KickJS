@@ -80,6 +80,14 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
+             * The current version of KickJS
+             * @property version
+             * @type String
+             */
+            version:{
+                value:"0.1.0"
+            },
+            /**
              * Resource manager of the engine. Loads and cache resources.
              * @property resourceManager
              * @type KICK.core.ResourceManager
@@ -497,6 +505,27 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Registers an asset in a Project.
+         * @method registerObject
+         * @param {Object} object
+         * @param {String} type
+         */
+        this.registerObject = function(object, type){
+            var uid = engine.getUID(object);
+            if (resourceCache[uid]){
+                return;
+            }
+            resourceCache[uid] = object;
+            resourceReferenceCount[uid] = 1;
+            resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
+                uid:uid,
+                name:object.name,
+                type:type,
+                config:{} // will be generated on serialization
+            });
+        };
+
+        /**
          * @method addResourceDescriptor
          * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
          * @return {KICK.core.ResourceDescriptor}
@@ -534,6 +563,10 @@ KICK.namespace = function (ns_string) {
             var res = [];
             for (var uid in resourceDescriptorsByUID){
                 if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    var liveObject = resourceCache[uid];
+                    if (liveObject){
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
+                    }
                     res.push(resourceDescriptorsByUID[uid].toJSON());
                 }
             }
@@ -622,7 +655,7 @@ KICK.namespace = function (ns_string) {
              * @type Object
              */
             config:{
-                value: resourceConfig
+                get: function(){return resourceConfig;}
             },
             /**
              * @property uid
@@ -632,6 +665,16 @@ KICK.namespace = function (ns_string) {
                 value: uid
             }
         });
+
+        /**
+         * Updates the configuration with the one from object
+         * @method updateConfig
+         * @param {Object} object
+         */
+        this.updateConfig = function(object){
+            resourceConfig = object.toJSON();
+        };
+
         /**
          * Create a instance of the resource by calling the constructor function with
          * (engine,config) parameters.<br>
