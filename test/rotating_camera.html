@@ -35,7 +35,7 @@
 
 
 
-        function setMaterial(vertexShaderId, fragmentShaderId){
+        function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer){
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
@@ -91,10 +91,21 @@
 
                     //new Date().getMilliseconds();
                     transform.localRotationEuler = rotVec;
+                    if (useMat3ToQuat){
+                        var rotationQuat = transform.localRotation;
+                        var rotationMat3 = KICK.math.quat4.toMat3(rotationQuat);
+                        transform.localRotation = KICK.math.mat3.toQuat(rotationMat3);
+                    }
+                    if (useQuatLookAt){
+                        transform.localRotation = KICK.math.quat4.lookAt(translation,[0,0,0],[0,1,0]);
+                    }
                     res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
                 }
             });
         }
+
+        var useMat3ToQuat = true;
+        var useQuatLookAt = true;
 
         function initKick() {
             engine = new KICK.core.Engine('canvas',{
@@ -111,8 +122,16 @@
             meshRenderer = new KICK.scene.MeshRenderer();
 
             meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            setMaterial('vertexShaderColor','fragmentShader');
+            setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
             gameObject.addComponent(meshRenderer);
+
+            var gameObject2 = engine.activeScene.createGameObject();
+            gameObject2.transform.position = [0,0.5,0];
+            var meshRenderer2 = new KICK.scene.MeshRenderer();
+
+            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/?radius=0.6");
+            setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
+            gameObject2.addComponent(meshRenderer2);
 
             addRotatorComponent(cameraObject);
         }
