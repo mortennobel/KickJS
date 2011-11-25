@@ -71,7 +71,7 @@ KICK.namespace = function (ns_string) {
             frameListeners = [],
             project = new core.Project(this),
             keyInput = null,
-            activeScene = new scene.Scene(this),
+            activeScene,
             animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
@@ -362,6 +362,8 @@ KICK.namespace = function (ns_string) {
             });
             Object.freeze(timeObj);
 
+            activeScene = new scene.Scene(thisObj);
+
             timeSinceStart = 0;
             frameCount = 0;
 
@@ -571,6 +573,7 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return {
+                engineVersion:engine.version,
                 maxUID:_maxUID,
                 resourceDescriptors:res
             };
