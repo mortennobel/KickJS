@@ -902,9 +902,9 @@ KICK.namespace = function (ns_string) {
             if (object == null){
                 return null;
             }
-            var isGameObjectOrComponent = object.gameObject;
-            if (isGameObjectOrComponent){
-                var isGameObject = object instanceof KICK.scene.GameObject;
+            var isGameObject = object instanceof KICK.scene.GameObject;
+            var isComponent = !isGameObject && object.gameObject instanceof KICK.scene.GameObject;
+            if (isComponent || isGameObject){
                 return {
                     ref: engine.getUID(object),
                     name: typeof object.name === 'string'? object.name : "",
