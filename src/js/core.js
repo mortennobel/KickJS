@@ -70,6 +70,7 @@ KICK.namespace = function (ns_string) {
             contextListeners = [],
             frameListeners = [],
             project = new core.Project(this),
+            mouseInput = null,
             keyInput = null,
             activeScene,
             animationFrameObj = {},
@@ -130,6 +131,18 @@ KICK.namespace = function (ns_string) {
                         activeScene = new KICK.scene.Scene(engine);
                     } else {
                         activeScene = value;
+                    }
+                }
+            },
+            /**
+             * Returns a mouseInput object. This object is used to detect mouse input.
+             * @property mouseInput
+             * @type KICK.core.MouseInput
+             */
+            mouseInput:{
+                get:function(){
+                    if (!mouseInput){
+                        mouseInput = new core.MouseInput();
                     }
                 }
             },
