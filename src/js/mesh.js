@@ -736,9 +736,11 @@ KICK.namespace = function (ns_string) {
             deleteBuffers = function(){
                 if (typeof meshVertexIndexBuffer === "number"){
                     gl.deleteBuffer(meshVertexIndexBuffer);
+                    meshVertexIndexBuffer = null;
                 }
                 if (typeof meshVertexAttBuffer === "number"){
                     gl.deleteBuffer(meshVertexAttBuffer);
+                    meshVertexAttBuffer = null;
                 }
             },
             /**
@@ -912,8 +914,11 @@ KICK.namespace = function (ns_string) {
          * @method destroy
          */
         this.destroy = function(){
-            deleteBuffers();
-            engine.removeContextListener(contextListener);
+            if (meshVertexAttBuffer !== null){
+                deleteBuffers();
+                engine.removeContextListener(contextListener);
+                engine.project.removeResourceDescriptor(thisObj.uid);
+            }
         };
 
         /**
