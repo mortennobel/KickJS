@@ -835,6 +835,16 @@ KICK.namespace = function (ns_string) {
             };
 
         /**
+         * @method destroy
+         */
+        this.destroy = function(){
+            engine.project.removeResourceDescriptor(thisObj.uid);
+            if (thisObj === engine.activeScene){
+                engine.activeScene = null;
+            }
+        };
+
+        /**
          * Add a component listener to the scene. A component listener should contain two functions:
          * {componentsAdded(components) and componentsRemoved(components)}.
          * Throws an exception if the two required functions does not exist.

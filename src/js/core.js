@@ -125,7 +125,13 @@ KICK.namespace = function (ns_string) {
              */
             activeScene:{
                 get: function(){ return activeScene},
-                set: function(value){activeScene = value;}
+                set: function(value){
+                    if (value === null){
+                        activeScene = new KICK.scene.Scene(engine);
+                    } else {
+                        activeScene = value;
+                    }
+                }
             },
             /**
              * Returns a keyInput object. This object is used to detect key input.

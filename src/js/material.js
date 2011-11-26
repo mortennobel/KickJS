@@ -519,6 +519,7 @@ KICK.namespace = function (ns_string) {
             if (_shaderProgramId!==-1){
                 gl.deleteProgram(_shaderProgramId);
                 _shaderProgramId = -1;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
@@ -825,6 +826,13 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
+
+        /**
+         * @method destroy
+         */
+        this.destroy = function(){
+            engine.project.removeResourceDescriptor(thisObj.uid);
+        };
 
         /**
          * Initialize the material

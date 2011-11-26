@@ -17,16 +17,30 @@
     <script type="text/javascript" src="../../src/js/material.js"></script>
     <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
     <script type="text/javascript" src="../../src/js/texture.js"></script>
+    <style type="text/css">
+        button{
+            width:120px;
+        }
+    </style>
 </head>
 <body onload="initKick();">
 <h1>Project and scene serialization test</h1>
 <br>
 <button onclick="showProjectJSON();">showProjectJSON</button>
 <button onclick="showSceneJSON();">showSceneJSON</button><br>
+
 <button onclick="addTexture();">addTexture</button>
 <button onclick="addMesh();">addMesh</button>
 <button onclick="addMaterial();">addMaterial</button>
-<button onclick="addShader();">addShader</button><br>
+<button onclick="addShader();">addShader</button>
+<button onclick="addScene();">addScene</button><br>
+
+<button onclick="removeTexture();">removeTexture</button>
+<button onclick="removeMesh();">removeMesh</button>
+<button onclick="removeMaterial();">removeMaterial</button>
+<button onclick="removeShader();">removeShader</button>
+<button onclick="removeScene();">removeScene</button><br>
+
 <button onclick="listTextures();">listTextures</button>
 <button onclick="listMeshes();">listMeshes</button>
 <button onclick="listMaterials();">listMaterials</button>
@@ -84,6 +98,43 @@
             var shader = new KICK.material.Shader(engine);
             shader.name = "Some shader "+new Date().getTime();
         }
+
+        function addScene(){
+            var shader = new KICK.scene.Scene(engine);
+            shader.name = "Some scene "+new Date().getTime();
+        }
+
+
+
+        function removeByType(type){
+            var project = engine.project;
+            var resourceList = engine.project.getResourceDescriptorByType(type);
+            if (resourceList.length>0){
+                var resource = project.load(resourceList[0].uid);
+                resource.destroy();
+            }
+        }
+
+        function removeTexture(){
+            removeByType("KICK.texture.Texture");
+        }
+
+        function removeMesh(){
+            removeByType("KICK.mesh.Mesh");
+        }
+
+        function removeMaterial(){
+            removeByType("KICK.material.Material");
+        }
+
+        function removeShader(){
+            removeByType("KICK.material.Shader");
+        }
+
+        function removeScene(){
+            removeByType("KICK.scene.Scene");
+        }
+
 
         function listTypes(type){
             engine.project.refreshResourceDescriptors();
