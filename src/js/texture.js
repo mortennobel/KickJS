@@ -169,6 +169,7 @@ KICK.namespace = function (ns_string) {
                 cleanUpRenderBuffers();
                 gl.deleteFramebuffer(framebuffer);
                 framebuffer = null;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
@@ -223,7 +224,7 @@ KICK.namespace = function (ns_string) {
              */
             recreateTextureIfDifferentType = function(){
                 if (_boundTextureType !== null && _boundTextureType !== _textureType){
-                    thisObj.destroy();
+                    gl.deleteTexture(_textureId);
                     _textureId = gl.createTexture();
                 }
                 _boundTextureType = _textureType;
@@ -259,6 +260,7 @@ KICK.namespace = function (ns_string) {
             if (_textureId !== null){
                 gl.deleteTexture(_textureId);
                 _textureId = null;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
@@ -696,6 +698,7 @@ KICK.namespace = function (ns_string) {
             if (_textureId !== null){
                 gl.deleteTexture(_textureId);
                 _textureId = null;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
