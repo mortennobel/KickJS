@@ -2751,6 +2751,16 @@ KICK.namespace = function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        sqrt = Math.sqrt,
+        cos = Math.cos,
+        acos = Math.acos,
+        sin = Math.sin,
+        asin = Math.asin,
+        abs = Math.abs,
+        tan = Math.tan,
+        atan = Math.atan,
+        atan2 = Math.atan2,
+        PI = Math.PI,
         _epsilon = 0.00001,
         wrapArray = function(array, length){
             var i,
@@ -2882,7 +2892,7 @@ KICK.namespace = function (ns_string) {
             epsilon = _epsilon;
         }
         for (var i=0;i<2;i++){
-            if (Math.abs(vec[i]-vec2[i])>epsilon){
+            if (abs(vec[i]-vec2[i])>epsilon){
                 return false;
             }
         }
@@ -2901,7 +2911,7 @@ KICK.namespace = function (ns_string) {
         if(!dest) { dest = vec; }
 
         var x = vec[0], y = vec[1];
-        var len = Math.sqrt(x*x + y*y);
+        var len = sqrt(x*x + y*y);
 
         if (!len) {
             dest[0] = 0;
@@ -3058,7 +3068,7 @@ KICK.namespace = function (ns_string) {
             epsilon = _epsilon;
         }
         for (var i=0;i<3;i++){
-            if (Math.abs(vec[i]-vec2[i])>epsilon){
+            if (abs(vec[i]-vec2[i])>epsilon){
                 return false;
             }
         }
@@ -3137,7 +3147,7 @@ KICK.namespace = function (ns_string) {
         if(!dest) { dest = vec; }
 
         var x = vec[0], y = vec[1], z = vec[2];
-        var len = Math.sqrt(x*x + y*y + z*z);
+        var len = sqrt(x*x + y*y + z*z);
 
         if (!len) {
             dest[0] = 0;
@@ -3186,7 +3196,7 @@ KICK.namespace = function (ns_string) {
      */
     vec3.length = function(vec){
         var x = vec[0], y = vec[1], z = vec[2];
-        return Math.sqrt(x*x + y*y + z*z);
+        return sqrt(x*x + y*y + z*z);
     };
 
     /**
@@ -3226,7 +3236,7 @@ KICK.namespace = function (ns_string) {
         var y = vec[1] - vec2[1];
         var z = vec[2] - vec2[2];
 
-        var len = Math.sqrt(x*x + y*y + z*z);
+        var len = sqrt(x*x + y*y + z*z);
         if (!len) {
             dest[0] = 0;
             dest[1] = 0;
@@ -3272,13 +3282,13 @@ KICK.namespace = function (ns_string) {
         var radius = spherical[0],
             polar = -spherical[1],
             elevation = spherical[2],
-            a = radius * Math.cos(elevation);
+            a = radius * cos(elevation);
         if (!cartesian){
             cartesian = vec3.create();
         }
-        cartesian[0] = a * Math.cos(polar);
-        cartesian[1] = radius * Math.sin(elevation);
-        cartesian[2] = a * Math.sin(polar);
+        cartesian[0] = a * cos(polar);
+        cartesian[1] = radius * sin(elevation);
+        cartesian[2] = a * sin(polar);
         return cartesian;
     };
 
@@ -3301,12 +3311,12 @@ KICK.namespace = function (ns_string) {
             spherical = vec3.create();
         }
 
-        spherical[0] = sphericalX = Math.sqrt(x*x+y*y+z*z);
-        spherical[1] = -Math.atan(z/x);
+        spherical[0] = sphericalX = sqrt(x*x+y*y+z*z);
+        spherical[1] = -atan(z/x);
         if (x < 0){
-            spherical[1] += Math.PI;
+            spherical[1] += PI;
         }
-        spherical[2] = Math.asin(y/sphericalX);
+        spherical[2] = asin(y/sphericalX);
         return spherical;
     };
 
@@ -3479,7 +3489,7 @@ KICK.namespace = function (ns_string) {
             epsilon = _epsilon;
         }
         for (var i=0;i<2;i++){
-            if (Math.abs(vec[i]-vec2[i])>epsilon){
+            if (abs(vec[i]-vec2[i])>epsilon){
                 return false;
             }
         }
@@ -3535,7 +3545,7 @@ KICK.namespace = function (ns_string) {
      */
     vec4.length = function(vec){
         var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
-        return Math.sqrt(x*x + y*y + z*z + w*w);
+        return sqrt(x*x + y*y + z*z + w*w);
     };
 
     /**
@@ -3709,6 +3719,53 @@ KICK.namespace = function (ns_string) {
         dest[15] = 1;
 
         return dest;
+    };
+
+    /**
+     * Transform a mat3 into a rotation (quaternion).
+     * @param {KICK.math.mat3} mat
+     * @param {KICK.math.quat4} dest
+     * @return {KICK.math.quat4}
+     */
+    mat3.toQuat = function(mat,dest){
+        // Code based on http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+        var m00 = mat[0],m10 = mat[1],m20 = mat[2],
+            m01 = mat[3],m11 = mat[4],m21 = mat[5],
+            m02 = mat[6],m12 = mat[7],m22 = mat[8],
+            trace = m00 + m11 + m22,  // trace of matrix
+            s;
+
+        if(!dest) {
+            dest = quat4.create();
+        }
+        if( trace > 0 ) {
+            s = 0.5 / sqrt(trace+ 1.0);
+            dest[0] = ( m21 - m12 ) * s;
+            dest[1] = ( m02 - m20 ) * s;
+            dest[2] = ( m10 - m01 ) * s;
+            dest[3] = 0.25 / s;
+        } else {
+            if ( m00 > m11 && m00 > m22 ) {
+                s = 2.0 * sqrt( 1.0 + m00 - m11 - m22);
+                dest[0] = 0.25 * s;
+                dest[1] = (m01 + m10 ) / s;
+                dest[2] = (m02 + m20 ) / s;
+                dest[3] = (m21 - m12 ) / s;
+            } else if (m11 > m22) {
+                s = 2.0 * sqrt( 1.0 + m11 - m00 - m22);
+                dest[0] = (m01 + m10 ) / s;
+                dest[1] = 0.25 * s;
+                dest[2] = (m12 + m21 ) / s;
+                dest[3] = (m02 - m20 ) / s;
+            } else {
+                s = 2.0 * sqrt( 1.0 + m22 - m00 - m11 );
+                dest[0] = (m02 + m20 ) / s;
+                dest[1] = (m12 + m21 ) / s;
+                dest[2] = 0.25 * s;
+                dest[3] = (m10 - m01 ) / s;
+            }
+        }
+        return dest;
     }
 
     /**
@@ -3837,7 +3894,7 @@ KICK.namespace = function (ns_string) {
         mat4.multiply(dest,quat4.toMat4(quat4.inverse(rotateQuat)));
         mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
         return dest;
-    }
+    };
 
     /**
      * Sets a mat4 to an identity matrix
@@ -4315,11 +4372,11 @@ KICK.namespace = function (ns_string) {
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
      * @method rotateEuler
      * @param {KICK.math.mat4} mat mat4 to rotate
-     * @param {KICK.math.vec3} angle angle (in degrees) to rotate
+     * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
-    mat4.rotateEuler = function(mat, euler, dest) {
+    mat4.rotateEuler = function(mat, eulerAngle, dest) {
         var degreeToRadian = 0.01745329251994;
         if (dest) {
             mat4.set(mat,dest);
@@ -4327,14 +4384,14 @@ KICK.namespace = function (ns_string) {
         }
 
         // todo: Optimized code!!!
-        if (euler[2] !== 0){
-            mat4.rotateZ(mat, euler[2]*degreeToRadian);
+        if (eulerAngle[2] !== 0){
+            mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
         }
-        if (euler[1] !== 0){
-            mat4.rotateY(mat, euler[1]*degreeToRadian);
+        if (eulerAngle[1] !== 0){
+            mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
         }
-        if (euler[0] !== 0){
-            mat4.rotateX(mat, euler[0]*degreeToRadian);
+        if (eulerAngle[0] !== 0){
+            mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
         }
         return mat;
     };
@@ -4352,7 +4409,7 @@ KICK.namespace = function (ns_string) {
      */
     mat4.rotate = function(mat, angle, axis, dest) {
         var x = axis[0], y = axis[1], z = axis[2];
-        var len = Math.sqrt(x*x + y*y + z*z);
+        var len = sqrt(x*x + y*y + z*z);
         if (!len) { return null; }
         if (len != 1) {
             len = 1 / len;
@@ -4361,8 +4418,8 @@ KICK.namespace = function (ns_string) {
             z *= len;
         }
 
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
         var t = 1-c;
 
         // Cache the matrix values (makes for huge speed increases!)
@@ -4411,8 +4468,8 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateX = function(mat, angle, dest) {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
 
         // Cache the matrix values (makes for huge speed increases!)
         var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
@@ -4454,8 +4511,8 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateY = function(mat, angle, dest) {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
 
         // Cache the matrix values (makes for huge speed increases!)
         var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
@@ -4497,8 +4554,8 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotateZ = function(mat, angle, dest) {
-        var s = Math.sin(angle);
-        var c = Math.cos(angle);
+        var s = sin(angle);
+        var c = cos(angle);
 
         // Cache the matrix values (makes for huge speed increases!)
         var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
@@ -4579,7 +4636,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
      */
     mat4.perspective = function(fovy, aspect, near, far, dest) {
-        var top = near*Math.tan(fovy*Math.PI / 360.0);
+        var top = near*tan(fovy*PI / 360.0);
         var right = top*aspect;
         return mat4.frustum(-right, right, -top, top, near, far, dest);
     };
@@ -4654,7 +4711,7 @@ KICK.namespace = function (ns_string) {
         z2 = eyez - center[2];
 
         // normalize (no check needed for 0 because of early return)
-        len = 1/Math.sqrt(z0*z0 + z1*z1 + z2*z2);
+        len = 1/sqrt(z0*z0 + z1*z1 + z2*z2);
         z0 *= len;
         z1 *= len;
         z2 *= len;
@@ -4663,7 +4720,7 @@ KICK.namespace = function (ns_string) {
         x0 = upy*z2 - upz*z1;
         x1 = upz*z0 - upx*z2;
         x2 = upx*z1 - upy*z0;
-        len = Math.sqrt(x0*x0 + x1*x1 + x2*x2);
+        len = sqrt(x0*x0 + x1*x1 + x2*x2);
         if (!len) {
             x0 = 0;
             x1 = 0;
@@ -4680,7 +4737,7 @@ KICK.namespace = function (ns_string) {
         y1 = z2*x0 - z0*x2;
         y2 = z0*x1 - z1*x0;
 
-        len = Math.sqrt(y0*y0 + y1*y1 + y2*y2);
+        len = sqrt(y0*y0 + y1*y1 + y2*y2);
         if (!len) {
             y0 = 0;
             y1 = 0;
@@ -4776,13 +4833,13 @@ KICK.namespace = function (ns_string) {
         var x = quat[0], y = quat[1], z = quat[2];
 
         if(!dest || quat == dest) {
-            quat[3] = -Math.sqrt(Math.abs(1.0 - x*x - y*y - z*z));
+            quat[3] = -sqrt(abs(1.0 - x*x - y*y - z*z));
             return quat;
         }
         dest[0] = x;
         dest[1] = y;
         dest[2] = z;
-        dest[3] = -Math.sqrt(Math.abs(1.0 - x*x - y*y - z*z));
+        dest[3] = -sqrt(abs(1.0 - x*x - y*y - z*z));
         return dest;
     }
 
@@ -4805,7 +4862,7 @@ KICK.namespace = function (ns_string) {
         dest[2] = -quat[2];
         dest[3] = quat[3];
         return dest;
-    }
+    };
 
     /**
      * Calculates the length of a quat4
@@ -4828,7 +4885,7 @@ KICK.namespace = function (ns_string) {
         if(!dest) { dest = quat; }
 
         var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
-        var len = Math.sqrt(x*x + y*y + z*z + w*w);
+        var len = sqrt(x*x + y*y + z*z + w*w);
         if(len == 0) {
             dest[0] = 0;
             dest[1] = 0;
@@ -4843,7 +4900,7 @@ KICK.namespace = function (ns_string) {
         dest[3] = w * len;
 
         return dest;
-    }
+    };
 
     /**
      * Performs a quaternion multiplication
@@ -4865,7 +4922,7 @@ KICK.namespace = function (ns_string) {
         dest[3] = qaw*qbw - qax*qbx - qay*qby - qaz*qbz;
 
         return dest;
-    }
+    };
 
     /**
      * Transforms a vec3 with the given quaternion
@@ -4898,7 +4955,7 @@ KICK.namespace = function (ns_string) {
     /**
      * Set the identity to the quaternion (0,0,0,1)
      * @method identity
-     * @param {KICK.math.quat4} quat Optional, quat4 to set the identity to
+     * @param {KICK.math.quat4} dest Optional, quat4 to set the identity to
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
     quat4.identity = function(dest){
@@ -4924,9 +4981,9 @@ KICK.namespace = function (ns_string) {
 
         if(!dest) { dest = vec3.create(); }
 
-        dest[0] = Math.atan2(2*(w*x+y*z),1-2*(x*x+yy))*radianToDegree;
-        dest[1] = Math.asin(2*(w*y-z*x))*radianToDegree;
-        dest[2] = Math.atan2(2*(w*z+x*y),1-2*(yy+z*z))*radianToDegree;
+        dest[0] = atan2(2*(w*x+y*z),1-2*(x*x+yy))*radianToDegree;
+        dest[1] = asin(2*(w*y-z*x))*radianToDegree;
+        dest[2] = atan2(2*(w*z+x*y),1-2*(yy+z*z))*radianToDegree;
 
         return dest;
     };
@@ -4942,15 +4999,53 @@ KICK.namespace = function (ns_string) {
     quat4.angleAxis = function(angle,vec, dest) {
         var degreeToRadian = 0.01745329251994,
             angleRadiansHalf = degreeToRadian*0.5*angle,
-            s = Math.sin(angleRadiansHalf);
+            s = sin(angleRadiansHalf);
         if(!dest) { dest = quat4.create(); }
 
-        dest[3] = Math.cos(angleRadiansHalf);
+        dest[3] = cos(angleRadiansHalf);
         dest[2] = vec[2]*s;
         dest[1] = vec[1]*s;
         dest[0] = vec[0]*s;
 
         return dest;
+    };
+
+    /**
+     * Compute the lookAt rotation
+     * @method lookAt
+     * @param {KICK.math.vec3} position
+     * @param {KICK.math.vec3} target
+     * @param {KICK.math.vec3} up
+     * @param {KICK.math.quat4} dest optional
+     * @param {KICK.math.mat4} destMatrix optional - rotation matrix used to calculate the quaternion. Using this also avoids memory allocation
+     * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     */
+    quat4.lookAt = function(position,target,up,dest,destMatrix){
+        // idea create mat3 rotation and transform into quaternion
+        var upVector = vec3.create(),
+            rightVector = vec3.create(),
+            forwardVector = vec3.create(),
+            matrix;
+        vec3.subtract(position,target, forwardVector);
+        vec3.normalize(forwardVector);
+        vec3.cross(up,forwardVector,rightVector);
+        vec3.normalize(rightVector); // needed?
+        vec3.cross(forwardVector,rightVector,upVector);
+        vec3.normalize(upVector); // needed?
+        if (!destMatrix){
+            destMatrix = mat3.create();
+        }
+        destMatrix[0] = rightVector[0];
+        destMatrix[1] = rightVector[1];
+        destMatrix[2] = rightVector[2];
+        destMatrix[3] = upVector[0];
+        destMatrix[4] = upVector[1];
+        destMatrix[5] = upVector[2];
+        destMatrix[6] = forwardVector[0];
+        destMatrix[7] = forwardVector[1];
+        destMatrix[8] = forwardVector[2];
+        
+        return mat3.toQuat(destMatrix,dest);
     };
 
     /**
@@ -4972,7 +5067,7 @@ KICK.namespace = function (ns_string) {
         quat4.multiply(axisZ,axisY,dest);
         quat4.multiply(dest,axisX,dest);
         return dest;
-    }
+    };
 
 
     /**
@@ -5012,7 +5107,7 @@ KICK.namespace = function (ns_string) {
         dest[8] = 1 - xx - yy;
 
         return dest;
-    }
+    };
 
     /**
      * Calculates a 4x4 matrix from the given quat4
@@ -5059,7 +5154,7 @@ KICK.namespace = function (ns_string) {
         dest[15] = 1;
 
         return dest;
-    }
+    };
 
     /**
      * Performs a spherical linear interpolation between two quat4
@@ -5075,7 +5170,7 @@ KICK.namespace = function (ns_string) {
 
         var cosHalfTheta =  quat[0]*quat2[0] + quat[1]*quat2[1] + quat[2]*quat2[2] + quat[3]*quat2[3];
 
-        if (Math.abs(cosHalfTheta) >= 1.0){
+        if (abs(cosHalfTheta) >= 1.0){
             if(dest != quat) {
                 dest[0] = quat[0];
                 dest[1] = quat[1];
@@ -5085,10 +5180,10 @@ KICK.namespace = function (ns_string) {
             return dest;
         }
 
-        var halfTheta = Math.acos(cosHalfTheta),
-            sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta*cosHalfTheta);
+        var halfTheta = acos(cosHalfTheta),
+            sinHalfTheta = sqrt(1.0 - cosHalfTheta*cosHalfTheta);
 
-        if (Math.abs(sinHalfTheta) < 0.001){
+        if (abs(sinHalfTheta) < 0.001){
             dest[0] = (quat[0]*0.5 + quat2[0]*0.5);
             dest[1] = (quat[1]*0.5 + quat2[1]*0.5);
             dest[2] = (quat[2]*0.5 + quat2[2]*0.5);
@@ -5096,8 +5191,8 @@ KICK.namespace = function (ns_string) {
             return dest;
         }
 
-        var ratioA = Math.sin((1 - slerp)*halfTheta) / sinHalfTheta,
-            ratioB = Math.sin(slerp*halfTheta) / sinHalfTheta;
+        var ratioA = sin((1 - slerp)*halfTheta) / sinHalfTheta,
+            ratioB = sin(slerp*halfTheta) / sinHalfTheta;
 
         dest[0] = (quat[0]*ratioA + quat2[0]*ratioB);
         dest[1] = (quat[1]*ratioA + quat2[1]*ratioB);
@@ -5192,158 +5287,8 @@ KICK.namespace = function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
-        ASSERT = true;
-
-    /**
-     * Responsible for creating or loading a resource using a given url
-     * @class ResourceProvider
-     * @namespace KICK.core
-     * @constructor
-     * @param {String} protocol
-     */
-        /**
-         * Protocol of the resource, such as http, kickjs<br>
-         * The protocol must uniquely identify a resource provider
-         * @property protocol
-         * @type String
-         */
-
-        /**
-         * @method getMesh
-         * @param {String} url
-         * @return {KICK.mesh.Mesh}
-         */
-        /**
-         * @method getShader
-         * @param {String} url
-         * @return {KICK.material.Shader}
-         */
-        /**
-         * @method getTexture
-         * @param {String} url
-         * @return {KICK.texture.Texture}
-         */
-        
-
-    /**
-     * Responsible for allocation and deallocation of resources.
-     * @class ResourceManager
-     * @namespace KICK.core
-     * @constructor
-     */
-    core.ResourceManager = function (engine) {
-        var resourceProviders = [new core.DefaultResourceProvider(engine)],
-            buildCache = function(){
-                return {
-                    ref: {},
-                    refCount: {}
-                }
-            },
-            meshCache = buildCache(),
-            shaderCache = buildCache(),
-            textureCache = buildCache(),
-            allCaches = [meshCache,shaderCache,textureCache],
-            getFromCache = function(cache, url){
-                var res = cache.ref[url];
-                if (res){
-                    cache.refCount[url]++;
-                }
-                return res;
-            },
-            addToCache = function(cache, url, resource){
-                cache.ref[url] = resource;
-                cache.refCount[url] = 1;
-            },
-            /**
-             * @method buildGetFunc
-             * @param {Object} cache
-             * @param {String} methodName
-             * @return {Function} getter function with the signature function(url)
-             * @private
-             */
-            buildGetFunc = function(cache,methodName){
-                return function(url){
-                    var res = getFromCache(cache,url),
-                        i;
-                    if (res){
-                        return res;
-                    }
-                    for (i=resourceProviders.length-1;i>=0;i--){
-                        res = resourceProviders[i][methodName](url);
-                    }
-                    if (res){
-                        addToCache(cache,url,res);
-                    }
-                    return res;
-                };
-            },
-            /**
-             * Create a callback function
-             * @method buildCallbackFunc
-             * @private
-             */
-            buildCallbackFunc = function(methodName){
-                return function(url,destination){
-                    for (var i=resourceProviders.length-1;i>=0;i--){
-                        var resourceProvider = resourceProviders[i];
-                        var protocol = resourceProvider.protocol;
-                        if (url.indexOf(protocol)===0){
-                            resourceProvider[methodName](url,destination);
-                            return;
-                        }
-                    }
-                };
-            };
-        /**
-         * @method getMesh
-         * @param {String} url
-         * @param {KICK.mesh.Mesh} meshDestination
-         */
-        this.getMeshData = buildCallbackFunc("getMeshData");
-        /**
-         * @method getMesh
-         * @param {String} url
-         * @return {KICK.mesh.Mesh}
-         * @deprecated
-         */
-        this.getMesh = buildGetFunc(meshCache,"getMesh");
-        /**
-         * @method getShader
-         * @param {String} url
-         * @return {KICK.material.Shader}
-         * @deprecated
-         */
-        this.getShader = buildGetFunc(shaderCache,"getShader");
-        /**
-         * @method getTexture
-         * @param {String} url
-         * @return {KICK.texture.Texture}
-         * @deprecated
-         */
-        this.getTexture = buildGetFunc(textureCache,"getTexture");
-        /**
-         * Release a reference to the resource.
-         * If reference count is 0, then the reference is deleted and the destroy method on the
-         * resource object are invoked.
-         * @method release
-         * @param {String} url
-         */
-        this.release = function(url){
-            for (var i=allCaches.length-1;i>=0;i--){
-                if (allCaches[i].refCount[url]){
-                    allCaches[i].refCount[url]--;
-                    if (allCaches[i].refCount[url]<=0){
-                        if (allCaches[i].ref[url].destroy){
-                            allCaches[i].ref[url].destroy();
-                        }
-                        delete allCaches[i].refCount[url];
-                        delete allCaches[i].ref[url];
-                    }
-                }
-            }
-        };
-    };
-
+        ASSERT = true,
+        DEBUG = true;
 
     /**
      * Game engine object
@@ -5367,15 +5312,22 @@ KICK.namespace = function (ns_string) {
             frameListeners = [],
             project = new core.Project(this),
             keyInput = null,
-            activeScene = new scene.Scene(this),
+            activeScene,
             animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
-            uniqIdCounter = 1,
             vec2 = KICK.math.vec2;
 
         Object.defineProperties(this,{
+            /**
+             * The current version of KickJS
+             * @property version
+             * @type String
+             */
+            version:{
+                value:"0.1.0"
+            },
             /**
              * Resource manager of the engine. Loads and cache resources.
              * @property resourceManager
@@ -5414,7 +5366,13 @@ KICK.namespace = function (ns_string) {
              */
             activeScene:{
                 get: function(){ return activeScene},
-                set: function(value){activeScene = value;}
+                set: function(value){
+                    if (value === null){
+                        activeScene = new KICK.scene.Scene(engine);
+                    } else {
+                        activeScene = value;
+                    }
+                }
             },
             /**
              * Returns a keyInput object. This object is used to detect key input.
@@ -5538,7 +5496,7 @@ KICK.namespace = function (ns_string) {
          * @return {Number} uniq id
          */
         this.createUID = function(){
-            return uniqIdCounter++;
+            return ++project.maxUID;
         };
 
         /**
@@ -5651,6 +5609,8 @@ KICK.namespace = function (ns_string) {
             });
             Object.freeze(timeObj);
 
+            activeScene = new scene.Scene(thisObj);
+
             timeSinceStart = 0;
             frameCount = 0;
 
@@ -5667,19 +5627,48 @@ KICK.namespace = function (ns_string) {
      * @param {JSON} json project data
      */
     core.Project = function(engine){
-        var resourceDescriptors = {},
+        var resourceDescriptorsByUID = {},
             resourceCache = {},
             resourceReferenceCount = {},
-            thisObj = this;
+            thisObj = this,
+            _maxUID = 0;
+
+        Object.defineProperties(this, {
+            /**
+             * The maximum UID used in the project
+             * @property maxUID
+             * @type Number
+             */
+            maxUID:{
+                get:function(){
+                    return _maxUID;
+                },
+                set:function(newValue){
+                    _maxUID = newValue;
+                }
+            }
+        });
 
         /**
-         * @method loadProject
-         * @param {Array[KICK.core.ResourceDescriptor]} resourceDescriptors
+         * Creates a new empty project.
+         * @method newProject
          */
-        this.loadProject = function(resourceDescriptors){
-            if (thisObj.getResourceDescriptorNames().length>0){
+        this.newProject = function(){
+            thisObj.loadProject({maxUID:0,resourceDescriptors:[]});
+        };
+
+        /**
+         * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor]}
+         * @method loadProject
+         * @param {object} config
+         */
+        this.loadProject = function(config){
+            config = config || {};
+            var resourceDescriptors = config.resourceDescriptors || [];
+            if (_maxUID>0){
                 thisObj.closeProject();
             }
+            _maxUID = config.maxUID || 0;
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
             }
@@ -5690,9 +5679,8 @@ KICK.namespace = function (ns_string) {
          * @method closeProject
          */
         this.closeProject = function(){
-            var resourceNames = thisObj.getResourceDescriptorNames();
-            for (var i=resourceNames.length;i>=0;i--){
-                thisObj.removeResourceDescriptor(resourceNames[i]);
+            for (var uid in resourceDescriptorsByUID){
+                thisObj.removeResourceDescriptor(uid);
             }
         };
 
@@ -5700,37 +5688,64 @@ KICK.namespace = function (ns_string) {
          * Load a resource from the configuration (or cache).
          * Also increases the resource reference counter.
          * @method load
-         * @param {String} resourceName
-         * @return {Object} resource or undefined if resource is not found
+         * @param {String} uid
+         * @return {Object} resource or null if resource is not found
          */
-        this.load = function(resourceName){
-            var resourceObject = resourceCache[resourceName];
+        this.load = function(resourceUID){
+            var resourceObject = resourceCache[resourceUID];
             if (resourceObject){
-                resourceReferenceCount[resourceName]++;
+                resourceReferenceCount[resourceUID]++;
                 return resourceObject;
             }
-            var resourceConfig = resourceDescriptors[resourceName];
+            var resourceConfig = resourceDescriptorsByUID[resourceUID];
             if (resourceConfig){
                 resourceObject = resourceConfig.instantiate(engine);
-                resourceCache[resourceName] = resourceObject;
-                resourceReferenceCount[resourceName] = 1;
+                resourceCache[resourceUID] = resourceObject;
+                resourceReferenceCount[resourceUID] = 1;
+                return resourceObject;
             }
-            return resourceObject;
+            if (DEBUG){
+                core.Util.warn("Cannot find "+resourceUID);
+                debugger;
+            }
+            return null;
+        };
+
+        /**
+         * Load a resource from the configuration (or cache).
+         * Also increases the resource reference counter.
+         * If more objects exist with the same name, the first object is returned
+         * @method loadByName
+         * @param {String} name
+         * @return {Object} resource or null if resource is not found
+         */
+        this.loadByName = function(name){
+            for (var uid in resourceDescriptorsByUID){
+                var resource = resourceDescriptorsByUID[uid];
+                if (resource.name === name){
+                    return thisObj.load(resource.uid);
+                }
+            }
+            if (DEBUG){
+                core.Util.warn("Cannot find "+name);
+                debugger;
+            }
+            return null;
         };
 
         /**
          * Decreases the resource reference counter. If resource is no longer
          * used it's destroy method will be invoked (if available).
          * @method release
-         * @param resourceName
+         * @param resourceUID
          */
-        this.release = function(resourceName){
-            var resourceObject = resourceCache[resourceName];
+        this.release = function(resourceUID){
+            var resourceObject = resourceCache[resourceUID];
             if (resourceObject){
-                resourceReferenceCount[resourceName]--;
-                if (resourceReferenceCount[resourceName] <= 0){
-                    delete resourceCache[resourceName];
-                    delete resourceReferenceCount[resourceName];
+                resourceReferenceCount[resourceUID]--;
+                if (resourceReferenceCount[resourceUID] <= 0){
+                    delete resourceCache[resourceUID];
+                    delete resourceReferenceCount[resourceUID];
                     if (resourceObject.destroy){
                         resourceObject.destroy();
                     }
@@ -5739,46 +5754,85 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Registers an asset in a Project.
+         * @method registerObject
+         * @param {Object} object
+         * @param {String} type
+         */
+        this.registerObject = function(object, type){
+            var uid = engine.getUID(object);
+            if (resourceCache[uid]){
+                return;
+            }
+            resourceCache[uid] = object;
+            resourceReferenceCount[uid] = 1;
+            resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
+                uid:uid,
+                name:object.name,
+                type:type,
+                config:{} // will be generated on serialization
+            });
+        };
+
+        /**
+         * Updates the resourceDescriptors with data from the initialized objects
+         * @method refreshResourceDescriptors
+         */
+        this.refreshResourceDescriptors = function(){
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    var liveObject = resourceCache[uid];
+                    if (liveObject){
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
+                    }
+                }
+            }
+        };
+
+        /**
+         * @method getResourceDescriptorByType
+         * @param {String} type
+         * @return {Array[KICK.core.ResourceDescriptor]}
+         */
+        this.getResourceDescriptorByType = function(type){
+            var res = [];
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid].type === type){
+                    res.push(resourceDescriptorsByUID[uid]);
+                }
+            }
+            return res;
+        };
+
+        /**
          * @method addResourceDescriptor
          * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
+         * @return {KICK.core.ResourceDescriptor}
          */
         this.addResourceDescriptor = function(resourceDescriptor){
             if (!(resourceDescriptor instanceof core.ResourceDescriptor)){
                 resourceDescriptor = new core.ResourceDescriptor(resourceDescriptor);
             }
-            resourceDescriptors[resourceDescriptor.name] = resourceDescriptor;
+
+            resourceDescriptorsByUID[resourceDescriptor.uid] = resourceDescriptor;
+            return resourceDescriptor;
         };
 
         /**
          * Remove resource descriptor and destroy the resource if already allocated.
          * @method removeResourceDescriptor
-         * @param {String} resourceName
+         * @param {Number} resourceUID
          */
-        this.removeResourceDescriptor = function(resourceName){
+        this.removeResourceDescriptor = function(resourceUID){
             // destroy the resource
-            var resource = resourceCache[resourceName];
+            var resource = resourceCache[resourceUID];
             if (resource && resource.detroy){
                 resource.destroy();
             }
             // remove references
-            delete resourceCache[resourceName];
-            delete resourceReferenceCount[resourceName];
-            delete resourceDescriptors[resourceName];
-        };
-
-        /**
-         * @method getResourceDescriptorNames
-         * @return {Array[String]} resource names
-         */
-        this.getResourceDescriptorNames = function(){
-            var array = [];
-            for (var name in resourceDescriptors){
-                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
-                    array.push(name);
-                }
-            }
-            array.sort();
-            return array;
+            delete resourceCache[resourceUID];
+            delete resourceReferenceCount[resourceUID];
+            delete resourceDescriptorsByUID[resourceUID];
         };
 
         /**
@@ -5786,12 +5840,17 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             var res = [];
-            for (var name in resourceDescriptors){
-                if (resourceDescriptors[name] instanceof core.ResourceDescriptor){
-                    res.push(resourceDescriptors[name].toJSON());
+            thisObj.refreshResourceDescriptors();
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    res.push(resourceDescriptorsByUID[uid].toJSON());
                 }
             }
-            return res;
+            return {
+                engineVersion:engine.version,
+                maxUID:_maxUID,
+                resourceDescriptors:res
+            };
         };
     };
 
@@ -5809,7 +5868,8 @@ KICK.namespace = function (ns_string) {
      *      };
      *      var resourceDescriptorConfig = {
      *          type: "KICK.material.Material",
-     *          config: materialConfig
+     *          config: materialConfig,
+     *          uid: 132
      *      };
      *      var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
      * </pre>
@@ -5821,6 +5881,7 @@ KICK.namespace = function (ns_string) {
     core.ResourceDescriptor = function(config){
         var _config = config || {},
             type = _config.type,
+            uid = _config.uid,
             resourceConfig = _config.config,
             hasProperty = core.Util.hasProperty,
             createConfigInitialized = function(engine,config){
@@ -5828,14 +5889,18 @@ KICK.namespace = function (ns_string) {
                 for (var name in config){
                     if (hasProperty(config,name)){
                         var value = config[name];
-                        if (value && value.ref && value.reftype){
-                            if (value.reftype === "resource"){
+                        var reftype = value.reftype;
+                        if (value && value.ref && reftype){
+                            if (reftype === "resource"){
                                 value = engine.resourceManager[value.refMethod](value.ref);
+                            } else if (reftype === "project"){
+                                value = engine.project.load(value.ref);
                             }
                         }
                         res[name] = value;
                     }
                 }
+                res.uid = uid;
                 return res;
             };
         Object.defineProperties(this,{
@@ -5867,9 +5932,26 @@ KICK.namespace = function (ns_string) {
              * @type Object
              */
             config:{
-                value: resourceConfig
+                get: function(){return resourceConfig;}
+            },
+            /**
+             * @property uid
+             * @type Number
+             */
+            uid:{
+                value: uid
             }
         });
+
+        /**
+         * Updates the configuration with the one from object
+         * @method updateConfig
+         * @param {Object} object
+         */
+        this.updateConfig = function(object){
+            resourceConfig = object.toJSON();
+        };
+
         /**
          * Create a instance of the resource by calling the constructor function with
          * (engine,config) parameters.<br>
@@ -5894,6 +5976,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 type:type,
+                uid:uid,
                 config:resourceConfig
             };
         };
@@ -6136,18 +6219,23 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         getJSONReference: function(engine,object){
-            var isGameObjectOrComponent = object.gameObject;
-            if (isGameObjectOrComponent){
-                var isGameObject = object instanceof KICK.scene.GameObject;
+            if (object == null){
+                return null;
+            }
+            var isGameObject = object instanceof KICK.scene.GameObject;
+            var isComponent = !isGameObject && object.gameObject instanceof KICK.scene.GameObject;
+            if (isComponent || isGameObject){
                 return {
                     ref: engine.getUID(object),
-                    reftype: isGameObject?"component":"gameobject"
+                    name: typeof object.name === 'string'? object.name : "",
+                    reftype: isGameObject?"gameobject":"component"
                 }
 
             } else {
                 // project type
                 return {
-                    ref:object.name,
+                    ref:object.uid,
+                    name:object.name,
                     reftype:"project"
                 };
             }
@@ -6206,6 +6294,10 @@ KICK.namespace = function (ns_string) {
                 if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
                     object[name] = config[name];
                 }
+            }
+            // force setting uid
+            if (config.uid && config.uid !== object.uid){
+                object.uid = config.uid;
             }
         },
         /**
@@ -6275,9 +6367,17 @@ KICK.namespace = function (ns_string) {
                 0, 0, canvas.width, canvas.height);
             return canvas;
         },
-
         /**
-         * Invokes debugger and throws an error
+         * Invokes debugger and logs a warning
+         * @method warn
+         * @static
+         */
+        warn:function(message){
+            debugger;
+            console.log(message);
+        },
+        /**
+         * Invokes debugger and logs an error
          * @method fail
          * @static
          */
@@ -6434,7 +6534,8 @@ KICK.namespace = function (ns_string) {
             alert (v);
         }
     }
-})();/*!
+})();
+/*!
  * New BSD License
  *
  * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
@@ -7172,9 +7273,11 @@ KICK.namespace = function (ns_string) {
             deleteBuffers = function(){
                 if (typeof meshVertexIndexBuffer === "number"){
                     gl.deleteBuffer(meshVertexIndexBuffer);
+                    meshVertexIndexBuffer = null;
                 }
                 if (typeof meshVertexAttBuffer === "number"){
                     gl.deleteBuffer(meshVertexAttBuffer);
+                    meshVertexAttBuffer = null;
                 }
             },
             /**
@@ -7228,6 +7331,11 @@ KICK.namespace = function (ns_string) {
                     return _meshData;
                 },
                 set:function(newValue){
+                    if (ASSERT){
+                        if (newValue && !(newValue instanceof mesh.MeshData)){
+                            KICK.core.Util.fail("Mesh.meshData must be instanceof KICK.mesh.MeshData");
+                        }
+                    }
                     _meshData = newValue;
                     updateData();
                 }
@@ -7251,7 +7359,8 @@ KICK.namespace = function (ns_string) {
         });
 
         KICK.core.Util.applyConfig(this,config);
-        
+        engine.project.registerObject(this, "KICK.mesh.Mesh");
+
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
          * @method verify
@@ -7342,8 +7451,11 @@ KICK.namespace = function (ns_string) {
          * @method destroy
          */
         this.destroy = function(){
-            deleteBuffers();
-            engine.removeContextListener(contextListener);
+            if (meshVertexAttBuffer !== null){
+                deleteBuffers();
+                engine.removeContextListener(contextListener);
+                engine.project.removeResourceDescriptor(thisObj.uid);
+            }
         };
 
         /**
@@ -7551,12 +7663,6 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.removeComponent =  function (component) {
-            if (component instanceof KICK.scene.Transform){
-                if (ASSERT){
-                    KICK.core.Util.fail("Cannot remove Transform to a GameObject");
-                }
-                return;
-            }
             delete component.gameObject;
             core.Util.removeElementFromArray(_components,component);
             this.scene.removeComponent(component);
@@ -7633,9 +7739,9 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<_components.length;i++){
                 component = _components[i];
                 if (!component.toJSON){
-                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,_components[i]));
+                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,component));
                 } else {
-                    componentsJSON.push(_components[i].toJSON());
+                    componentsJSON.push(component.toJSON());
                 }
 
             }
@@ -8031,7 +8137,8 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      */
     scene.Scene = function (engine, config) {
-        var gameObjects = [],
+        var objectsById = {},
+            gameObjects = [],
             activeGameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
@@ -8189,7 +8296,24 @@ KICK.namespace = function (ns_string) {
                     cameras[i].renderScene(sceneLightObj);
                 }
                 engine.gl.flush();
+            },
+            createGameObjectPrivate = function(config){
+                var gameObject = new scene.GameObject(thisObj,config);
+                gameObjectsNew.push(gameObject);
+                gameObjects.push(gameObject);
+                objectsById[gameObject.uid] = gameObject;
+                return gameObject;
             };
+
+        /**
+         * @method destroy
+         */
+        this.destroy = function(){
+            engine.project.removeResourceDescriptor(thisObj.uid);
+            if (thisObj === engine.activeScene){
+                engine.activeScene = null;
+            }
+        };
 
         /**
          * Add a component listener to the scene. A component listener should contain two functions:
@@ -8252,6 +8376,16 @@ KICK.namespace = function (ns_string) {
          */
         this.addComponent = function (component) {
             core.Util.insertSorted(component,componentsNew,sortByScriptPriority);
+            objectsById[engine.getUID(component)] = component;
+        };
+
+        /**
+         * @method getObjectByUID
+         * @param uid
+         * @return {Object} GameObject or component
+         */
+        this.getObjectByUID = function(uid){
+            return objectsById[uid];
         };
 
         /**
@@ -8261,6 +8395,7 @@ KICK.namespace = function (ns_string) {
         this.removeComponent = function (component) {
             core.Util.removeElementFromArray(componentsNew,component);
             componentsDelete.push(component);
+            delete objectsById[component.uid];
         };
 
         Object.defineProperties(this,{
@@ -8294,9 +8429,9 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.scene.GameObject}
          */
         this.createGameObject = function (config) {
-            var gameObject = new scene.GameObject(this,config);
-            gameObjectsNew.push(gameObject);
-            gameObjects.push(gameObject);
+            var gameObject = createGameObjectPrivate(config),
+                transform = gameObject.transform;
+            objectsById[transform.uid] = transform;
             return gameObject;
         };
 
@@ -8306,6 +8441,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroyObject = function (gameObject) {
             gameObjectsDelete.push(gameObject);
+            delete objectsById[gameObject.uid];
         };
 
         /**
@@ -8361,7 +8497,7 @@ KICK.namespace = function (ns_string) {
                 (function createGameObjects(){
                     for (var i=0;i<gameObjects.length;i++){
                         gameObject = config.gameObjects[i];
-                        gameObject.newObject = thisObj.createGameObject(gameObject);
+                        gameObject.newObject = createGameObjectPrivate(gameObject);
                         mappingUidToObject[gameObject.uid] = gameObject.newObject;
                     }
                 })();
@@ -8375,6 +8511,8 @@ KICK.namespace = function (ns_string) {
                                 if (value && value.ref && value.reftype){
                                     if (value.reftype === "project"){
                                         value = engine.project.load(value.ref);
+                                    } else if (value.reftype === "gameobject" || value.reftype === "component"){
+                                        value = thisObj.getObjectByUID(value.ref);
                                     }
                                 }
                             }
@@ -8399,9 +8537,13 @@ KICK.namespace = function (ns_string) {
                             component = gameObjectConfig.components[i];
                             if (component.type === "KICK.scene.Transform"){
                                 componentObj = gameObject.transform;
+                                componentObj.uid = component.uid;
+                                // register transform object to objectsById
+                                objectsById[componentObj.uid] = componentObj;
                             } else {
                                 type = KICK.namespace(component.type);
-                                componentObj = new type(gameObject);
+                                componentObj = new type(gameObject,{uid:component.uid});
+                                componentObj.uid = component.uid;
                                 gameObject.addComponent(componentObj);
                             }
                             mappingUidToObject[component.uid] = componentObj;
@@ -8422,6 +8564,7 @@ KICK.namespace = function (ns_string) {
                     }
                 })();
             }
+            engine.project.registerObject(thisObj, "KICK.scene.Scene");
         })();
     };
 
@@ -9009,7 +9152,8 @@ KICK.namespace = function (ns_string) {
                     }
                     _material = newValue;
                     _renderOrder = _material.renderOrder;
-                }
+                },
+                enumerable: true
             },
             /**
              * @property mesh
@@ -9026,7 +9170,8 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _mesh = newValue;
-                }
+                },
+                enumerable: true
             }
         });
 
@@ -9273,7 +9418,8 @@ KICK.namespace = function (ns_string) {
             }
         };
     };
- })();/*!
+ })();
+/*!
  * New BSD License
  *
  * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
@@ -9327,24 +9473,78 @@ KICK.namespace = function (ns_string) {
                 x = x | x >> i;
             }
             return x + 1;
-        };
+        },
+        applyConfig = KICK.core.Util.applyConfig;
 
     /**
      * Render texture (used for camera's render target)
-     * @todo - currently incomplete
      * @class RenderTexture
      * @namespace KICK.texture
      * @constructor
      * @param {KICK.core.Engine} engine
-     * @param {KICK.texture.Texture} _colorTexture Optional (may be null)
-     * @param {KICK.texture.Texture} _depthTexture Optional (may be null)
+     * @param {Object} config Optional
      */
-    texture.RenderTexture = function (engine, _colorTexture, _depthTexture){
+    texture.RenderTexture = function (engine, config){
         var gl = engine.gl,
+            _config = config || {},
             framebuffer = gl.createFramebuffer(),
-            validTexture = _colorTexture || _depthTexture,
-            _dimension = validTexture.dimension,
-            renderBuffers = [];
+            colorTexture = _config.colorTexture,
+            depthTexture = _config.depthTexture,
+            _dimension,
+            renderBuffers = [],
+            thisObj = this,
+            cleanUpRenderBuffers = function(){
+                for (var i=0;i<cleanUpRenderBuffers.length;i++){
+                    gl.deleteRenderbuffer(cleanUpRenderBuffers[i]);
+                }
+            },
+            initFBO = function (){
+                var validTexture = colorTexture || depthTexture,
+                    renderbuffer;
+                _dimension = validTexture ? validTexture.dimension: [256,256];
+                cleanUpRenderBuffers();
+                gl.bindFramebuffer(36160, framebuffer);
+
+                if (colorTexture){
+                    gl.framebufferTexture2D(36160, 36064, 3553, colorTexture.textureId, 0);
+                } else {
+                    renderbuffer = gl.createRenderbuffer();
+                    gl.bindRenderbuffer(36161, renderbuffer);
+                    gl.renderbufferStorage(36161, 32854, _dimension[0], _dimension[1]);
+                    gl.framebufferRenderbuffer(36160, 36064, 36161, renderbuffer);
+                    renderBuffers.push(renderbuffer);
+                }
+
+                if (depthTexture){
+                    gl.framebufferTexture2D(36160, 36096, 3553, depthTexture.textureId, 0);
+                } else {
+                    renderbuffer = gl.createRenderbuffer();
+                    gl.bindRenderbuffer(36161, renderbuffer);
+                    gl.renderbufferStorage(36161, 33189, _dimension[0], _dimension[1]);
+                    gl.framebufferRenderbuffer(36160, 36096, 36161, renderbuffer);
+                    renderBuffers.push(renderbuffer);
+                }
+                if (true){
+                    var frameBufferStatus = gl.checkFramebufferStatus( 36160 );
+                    if (frameBufferStatus !== 36053){
+                        switch (frameBufferStatus){
+                            case 36054:
+                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                                break;
+                            case 36055:
+                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                                break;
+                            case 36057:
+                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+                                break;
+                            case 36061:
+                                KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
+                                break;
+                        }
+                    }
+                }
+                gl.bindFramebuffer(36160, null);
+            };
 
         /**
          * @method bind
@@ -9355,74 +9555,62 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             * Read only
+             * Read only. Computed the the active texture(s)
              * @property dimension
              * @type KICK.math.vec2
              */
             dimension:{
-                value:_dimension
+                get:function(){
+                    return _dimension;
+                }
             },
             /**
-             * Read only
              * @property colorTexture
              * @type KICK.texture.Texture
              */
             colorTexture:{
-                value: _colorTexture
+                get: function(){ return colorTexture; },
+                set: function(newValue){ colorTexture = newValue; initFBO(); }
             },
             /**
-             * Read only
              * @property depthTexture
              * @type KICK.texture.Texture
              */
             depthTexture:{
-                value: _depthTexture
+                get: function(){ return depthTexture; },
+                set: function(newValue){ depthTexture = newValue; initFBO(); }
             }
         });
-            
+
+        /**
+         * @method destroy
+         */
+        this.destroy = function(){
+            if (framebuffer !== null){
+                cleanUpRenderBuffers();
+                gl.deleteFramebuffer(framebuffer);
+                framebuffer = null;
+                engine.project.removeResourceDescriptor(thisObj.uid);
+            }
+        };
+
+        /**
+         * @method toJSON
+         */
+        this.toJSON = function(){
+            return {
+                colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture),
+                depthTexture: KICK.core.Util.getJSONReference(engine, depthTexture)
+            };
+        };
+
         (function init(){
-            var renderbuffer;
-            gl.bindFramebuffer(36160, framebuffer);
-
-            if (_colorTexture){
-                gl.framebufferTexture2D(36160, 36064, 3553, _colorTexture.textureId, 0);
-            } else {
-                renderbuffer = gl.createRenderbuffer();
-                gl.bindRenderbuffer(36161, renderbuffer);
-                gl.renderbufferStorage(36161, 32854, _dimension[0], _dimension[1]);
-                gl.framebufferRenderbuffer(36160, 36064, 36161, renderbuffer);
-                renderBuffers.push(renderbuffer);
+            if (!colorTexture && !depthTexture){
+                colorTexture = new KICK.texture.Texture(engine);
+                colorTexture.setImageData(512,512,0,5121,null,"");
             }
-
-            if (_depthTexture){
-                gl.framebufferTexture2D(36160, 36096, 3553, _depthTexture.textureId, 0);
-            } else {
-                renderbuffer = gl.createRenderbuffer();
-                gl.bindRenderbuffer(36161, renderbuffer);
-                gl.renderbufferStorage(36161, 33189, _dimension[0], _dimension[1]);
-                gl.framebufferRenderbuffer(36160, 36096, 36161, renderbuffer);
-                renderBuffers.push(renderbuffer);
-            }
-            if (true){
-                var frameBufferStatus = gl.checkFramebufferStatus( 36160 );
-                if (frameBufferStatus !== 36053){
-                    switch (frameBufferStatus){
-                        case 36054:
-                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-                            break;
-                        case 36055:
-                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-                            break;
-                        case 36057:
-                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-                            break;
-                        case 36061:
-                            KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
-                            break;
-                    }
-                }
-            }
-            gl.bindFramebuffer(36160, null);
+            initFBO();
+            engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
         })();
     };
 
@@ -9436,21 +9624,19 @@ KICK.namespace = function (ns_string) {
      */
     texture.Texture = function (engine, config) {
         var gl = engine.gl,
-            _uid = engine.createUID(), // note uid is always
             texture0 = 33984,
-            thisConfig = config || {},
             _textureId = gl.createTexture(),
-            _wrapS = thisConfig.wrapS ||  10497,
-            _wrapT = thisConfig.wrapT || 10497,
-            _minFilter = thisConfig.minFilter || 9729,
-            _magFilter = thisConfig.magFilter || 9729,
-            _generateMipmaps = typeof (thisConfig.generateMipmaps) === 'boolean'? thisConfig.generateMipmaps : true,
-            _dataURI = thisConfig.dataURI || null,
-            _flipY =  typeof (thisConfig.flipY )==='boolean'? thisConfig.flipY : true,
-            _intFormat = thisConfig.internalFormat || 6408,
-            _textureType = thisConfig.textureType || 3553,
+            _name = "Texture", // define unique name
+            _wrapS =  10497,
+            _wrapT = 10497,
+            _minFilter = 9729,
+            _magFilter = 9729,
+            _generateMipmaps = true,
+            _dataURI = null,
+            _flipY =  true,
+            _intFormat = 6408,
+            _textureType = 3553,
             _boundTextureType = null,
-            currentTexture,
             thisObj = this,
             _dimension = vec2.create(),
             /**
@@ -9459,30 +9645,31 @@ KICK.namespace = function (ns_string) {
              */
             recreateTextureIfDifferentType = function(){
                 if (_boundTextureType !== null && _boundTextureType !== _textureType){
-                    thisObj.destroy();
+                    gl.deleteTexture(_textureId);
                     _textureId = gl.createTexture();
                 }
                 _boundTextureType = _textureType;
             };
 
-        (function init(){
-            // create active texture component on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
+        /**
+         * Trigger getImageData if dataURI is defined
+         * @method init
+         */
+        this.init = function(){
+            if (_dataURI){
+                engine.resourceManager.getImageData(_dataURI,thisObj);
             }
-            currentTexture = gl.currentTexture;
-        })();
+        };
 
         /**
          * Bind the current texture
          * @method bind
          */
         this.bind = function(textureSlot){
-            // todo reintroduce optimization 
-//            if (currentTexture[textureSlot] !== this){
+//            if (gl.currentTexture[textureSlot] !== _textureId){
+//                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
-                currentTexture[textureSlot] = this;
 //            }
         };
 
@@ -9494,6 +9681,7 @@ KICK.namespace = function (ns_string) {
             if (_textureId !== null){
                 gl.deleteTexture(_textureId);
                 _textureId = null;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
@@ -9632,6 +9820,18 @@ KICK.namespace = function (ns_string) {
                 value:_textureId
             },
             /**
+             * @property name
+             * @type {String}
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                     _name = newValue;
+                }
+            },
+            /**
              * Dimension of texture [width,height].<br>
              * Note for cube maps the size is for one face
              * @property dimension
@@ -9643,21 +9843,16 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Unique identifier of the texture
-             * @property uid
-             * @type {Number}
-             */
-            uid:{
-                value:_uid
-            },
-            /**
-             * Identifier of the texture
+             * URI of the texture.
              * @property dataURI
              * @type String
              */
             dataURI:{
                 get:function(){
                     return _dataURI;
+                },
+                set:function(newValue){
+                    _dataURI = newValue;
                 }
             },
             /**
@@ -9843,18 +10038,29 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
-                uid:_uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
                 magFilter:_magFilter,
+                name:_name,
                 generateMipmaps:_generateMipmaps,
-                dataURI:_dataURI,
                 flipY:_flipY,
                 internalFormat:_intFormat,
-                textureType:_textureType
+                textureType:_textureType,
+                dataURI:_dataURI
             };
-        }
+        };
+
+        (function init(){
+            // apply
+            applyConfig(thisObj, config);
+
+            // create active texture cache on glContext
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
+            }
+            engine.project.registerObject(thisObj, "KICK.texture.Texture");
+        })();
     };
 
     /**
@@ -9867,30 +10073,20 @@ KICK.namespace = function (ns_string) {
      */
     texture.MovieTexture = function (engine, config) {
         var gl = engine.gl,
-            _uid = engine.createUID(), // note uid is always
             texture0 = 33984,
-            thisConfig = config || {},
-            _videoElement = thisConfig.videoElement,
+            _name = "MovieTexture",
+            _videoElement = null,
             _textureId = gl.createTexture(),
-            _wrapS = thisConfig.wrapS ||  33071,
-            _wrapT = thisConfig.wrapT || 33071,
-            _minFilter = thisConfig.minFilter || 9728,
-            _magFilter = thisConfig.magFilter || 9728,
-            _intFormat = thisConfig.internalFormat || 6408,
-            _skipFrames = thisConfig.skipFrames || 0,
-            _generateMipmaps = thisConfig.generateMipmaps || false,
+            _wrapS = 33071,
+            _wrapT = 33071,
+            _minFilter = 9728,
+            _magFilter = 9728,
+            _intFormat = 6408,
+            _skipFrames = 0,
+            _generateMipmaps = false,
             timer = engine.time,
             thisObj = this,
-            lastGrappedFrame = -1,
-            currentTexture;
-
-        (function init(){
-            // create active texture component on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
-            }
-            currentTexture = gl.currentTexture;
-        })();
+            lastGrappedFrame = -1;
 
         /**
          * Bind the current texture
@@ -9898,20 +10094,20 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            // todo reintroduce optimization
-//            if (currentTexture[textureSlot] !== this){
+//            if (gl.currentTexture[textureSlot] !== _textureId){
+//                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(3553, _textureId);
-                currentTexture[textureSlot] = this;
-            if (lastGrappedFrame < timer.frameCount && _videoElement){
-                lastGrappedFrame = timer.frameCount+_skipFrames;
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                    gl.UNSIGNED_BYTE, _videoElement);
-                if (_generateMipmaps){
-                    gl.generateMipmap(3553);
+
+                if (lastGrappedFrame < timer.frameCount && _videoElement){
+                    lastGrappedFrame = timer.frameCount+_skipFrames;
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                        gl.UNSIGNED_BYTE, _videoElement);
+                    if (_generateMipmaps){
+                        gl.generateMipmap(3553);
+                    }
                 }
-            }
 //            }
         };
 
@@ -9923,6 +10119,7 @@ KICK.namespace = function (ns_string) {
             if (_textureId !== null){
                 gl.deleteTexture(_textureId);
                 _textureId = null;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
@@ -9942,6 +10139,18 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property name
+             * @type {String}
+             */
+            name:{
+                get:function(){
+                    return _name;
+                },
+                set:function(newValue){
+                     _name = newValue;
+                }
+            },
             /**
              * Default value is 0 (update movie texture every frame). 1 skip one frame update, 2 skips two frames etc.
              * @property skipFrames
@@ -9994,14 +10203,6 @@ KICK.namespace = function (ns_string) {
              */
             textureId:{
                 value:_textureId
-            },
-            /**
-             * Unique identifier of the texture
-             * @property uid
-             * @type {Number}
-             */
-            uid:{
-                value:_uid
             },
             /**
              * Texture.wrapS should be either 33071 or 10497<br>
@@ -10126,14 +10327,25 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
-                uid:_uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
+                name:_name,
                 magFilter:_magFilter,
                 internalFormat:_intFormat
             };
-        }
+        };
+
+        (function init(){
+            // apply
+            applyConfig(thisObj, config);
+
+            // create active texture cache on glContext
+            if (!gl.currentTexture){
+                gl.currentTexture = {};
+            }
+            engine.project.registerObject(thisObj, "KICK.texture.MovieTexture");
+        })();
     };
 })();/*!
  * New BSD License
@@ -10275,27 +10487,26 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
-     * @param {Object} uidMapping Optional Maps from old uid to new uid
      */
-    material.Shader = function (engine, config, uidMapping) {
+    material.Shader = function (engine, config) {
         //todo add support for polygon offset
         var gl = engine.gl,
             thisObj = this,
-            thisConfig = config || {},
-            _uid = engine.createUID(),
             _shaderProgramId = -1,
-            _depthMask = typeof (thisConfig.depthMask) === 'boolean'?thisConfig.depthMask:true,
-            _faceCulling = thisConfig.faceCulling || 1029,
-            _zTest = thisConfig.zTest || 513,
-            _blend = thisConfig.blend || false,
-            _blendSFactor = thisConfig.blendSFactor || 770,
-            _blendDFactor = thisConfig.blendDFactor || 771,
-            _renderOrder = thisConfig.renderOrder || 0,
+            _depthMask = true,
+            _faceCulling = 1029,
+            _zTest = 513,
+            _blend = false,
+            _blendSFactor = 770,
+            _blendDFactor = 771,
+            _renderOrder = 1000,
+            _dataURI = null,
+            _name = "",
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = thisConfig.vertexShaderSrc || glslConstants["error_vs.glsl"],
-            _fragmentShaderSrc = thisConfig.fragmentShaderSrc || glslConstants["error_fs.glsl"],
-            _errorLog = thisConfig.errorLog,
+            _vertexShaderSrc = glslConstants["error_vs.glsl"],
+            _fragmentShaderSrc = glslConstants["error_fs.glsl"],
+            _errorLog = KICK.core.Util.fail,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
              * The key is used to fast determine if the blend settings needs to be updated
@@ -10372,12 +10583,22 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             * Unique identifier of the shader
-             * @property uid
-             * @type {Number}
+             * @property name
+             * @type String
              */
-            uid:{
-                value:_uid
+            name:{
+                get:function(){ return _name; },
+                set:function(newValue){ _name = newValue; }
+            },
+            /**
+             * When dataURI is specified the shader is expected to have its content from the dataURI.
+             * This means when serializing the object only dataURI and name will be saved
+             * @property dataURI
+             * @type String
+             */
+            dataURI:{
+                get:function(){ return _dataURI; },
+                set:function(newValue){ _dataURI = newValue; }
             },
             /**
              * Get the gl context of the shader
@@ -10660,15 +10881,12 @@ KICK.namespace = function (ns_string) {
                 fragmentShader = compileShader(glslConstants["error_fs.glsl"], true, errorLog);
             }
 
-            //thisObj.destroy();
             _shaderProgramId = gl.createProgram();
 
             gl.attachShader(_shaderProgramId, vertexShader);
             gl.attachShader(_shaderProgramId, fragmentShader);
             gl.linkProgram(_shaderProgramId);
-            // remove reference to shader code (no longer needed, since code is compiled to shader)
-            //gl.deleteShader(vertexShader);
-            //gl.deleteShader(fragmentShader);
+
             if (!gl.getProgramParameter(_shaderProgramId, 35714)) {
                 errorLog("Could not initialise shaders");
                 return false;
@@ -10735,6 +10953,7 @@ KICK.namespace = function (ns_string) {
             if (_shaderProgramId!==-1){
                 gl.deleteProgram(_shaderProgramId);
                 _shaderProgramId = -1;
+                engine.project.removeResourceDescriptor(thisObj.uid);
             }
         };
 
@@ -10772,7 +10991,15 @@ KICK.namespace = function (ns_string) {
          * @return {Object} config element
          */
         this.toJSON = function(){
+            if (_dataURI){
+                return {
+                    name:_name,
+                    dataURI:_dataURI
+                }
+            }
+            // todo fill in missing attributes
             return {
+                name:_name,
                 faceCulling:_faceCulling,
                 zTest:_zTest,
                 depthMask: _depthMask,
@@ -10782,12 +11009,14 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            if (uidMapping && thisConfig.uid){
-                uidMapping[thisConfig.uid] = _uid;
+            applyConfig(thisObj,config);
+            engine.project.registerObject(thisObj, "KICK.material.Shader");
+            if (_dataURI){
+                engine.resourceManager.getShaderData(_dataURI,thisObj);
+            } else {
+                updateBlendKey();
+                thisObj.updateShader();
             }
-
-            updateBlendKey();
-            thisObj.updateShader();
         })();
     };
 
@@ -10988,10 +11217,10 @@ KICK.namespace = function (ns_string) {
               * @property name
               * @type String
               */
-            name:{
-                value:_name,
-                writable:true
-            },
+             name:{
+                 get:function(){return _name;},
+                 set:function(newValue){_name = newValue;}
+             },
             /**
              * Also allows string - this will be used to lookup the shader in engine.project 
              * @property shader
@@ -11033,6 +11262,13 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         * @method destroy
+         */
+        this.destroy = function(){
+            engine.project.removeResourceDescriptor(thisObj.uid);
+        };
+
+        /**
          * Initialize the material
          * If the shader property is a string the shader is found in the engine.project.
          * If shader is invalid, the error shader is used
@@ -11069,8 +11305,7 @@ KICK.namespace = function (ns_string) {
                 if (typeof name === 'string'){
                     var uniform = _uniforms[name],
                         value = uniform.value;
-                    if (value instanceof Float32Array || value instanceof Int32Array)
-                    {
+                    if (value instanceof Float32Array || value instanceof Int32Array) {
                         value = core.Util.typedArrayToArray(value);
                     } else {
                         if (true){
@@ -11078,7 +11313,7 @@ KICK.namespace = function (ns_string) {
                                 KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                             }
                         }
-                        value = value.uid;
+                        value = KICK.core.Util.getJSONReference(engine,value);
                     }
 
                     filteredUniforms[name] = {
@@ -11089,13 +11324,22 @@ KICK.namespace = function (ns_string) {
             }
             return {
                 name:_name,
-                shader: _shader?_shader.uid:0,
                 uniforms: filteredUniforms
             };
         };
 
         (function init(){
             applyConfig(thisObj,config);
+            engine.project.registerObject(thisObj, "KICK.material.Material");
+            // replace references to images with references
+            for (var name in _uniforms){
+                var uniformType = _uniforms[name].type;
+                var uniformValue = _uniforms[name].value;
+                if ((uniformType === 35678 ||
+                    uniformType === 35680 ) && uniformValue && typeof uniformValue.ref === 'number'){
+                    _uniforms[name].value = engine.project.load(uniformValue.ref);
+                }
+            }
             material.Material.verifyUniforms(_uniforms);
         })();
     };
@@ -11127,7 +11371,8 @@ KICK.namespace = function (ns_string) {
             }
         }
     };
-})();/*!
+})();
+/*!
  * New BSD License
  *
  * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
@@ -11929,7 +12174,10 @@ KICK.namespace = function (ns_string) {
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+/**
+ * description _
+ * @module KICK
+ */
 var KICK = KICK || {};
 KICK.namespace = function (ns_string) {
     var parts = ns_string.split("."),
@@ -11951,25 +12199,265 @@ KICK.namespace = function (ns_string) {
 
     var core = KICK.namespace("KICK.core"),
         mesh = KICK.namespace("KICK.mesh"),
-        material = KICK.namespace("KICK.material"),
         constants = core.Constants,
-        debug = true;
+        scene = KICK.namespace("KICK.scene"),
+        ASSERT = true,
+        debug = true,
+        fail = core.Util.fail;
+    
+    /**
+     * Responsible for allocation and deallocation of resources.
+     * @class ResourceManager
+     * @namespace KICK.core
+     * @constructor
+     */
+    core.ResourceManager = function (engine) {
+        var resourceProviders = [
+            new core.URLResourceProvider(engine),
+            new core.BuiltInResourceProvider(engine)],
+            buildCache = function(){
+                return {
+                    ref: {},
+                    refCount: {}
+                }
+            },
+            meshCache = buildCache(),
+            shaderCache = buildCache(),
+            textureCache = buildCache(),
+            allCaches = [meshCache,shaderCache,textureCache],
+            getFromCache = function(cache, url){
+                var res = cache.ref[url];
+                if (res){
+                    cache.refCount[url]++;
+                }
+                return res;
+            },
+            addToCache = function(cache, url, resource){
+                cache.ref[url] = resource;
+                cache.refCount[url] = 1;
+            },
+            /**
+             * @method buildGetFunc
+             * @param {Object} cache
+             * @param {String} methodName
+             * @return {Function} getter function with the signature function(url)
+             * @private
+             */
+            buildGetFunc = function(cache,methodName){
+                return function(url){
+                    var res = getFromCache(cache,url),
+                        i;
+                    if (res){
+                        return res;
+                    }
+                    for (i=resourceProviders.length-1;i>=0;i--){
+                        var resourceProvider = resourceProviders[i];
+                        var protocol = resourceProvider.protocol;
+                        if (url.indexOf(protocol) === 0){
+                            res = resourceProvider[methodName](url);
+                            break;
+                        }
+                    }
+                    if (res){
+                        addToCache(cache,url,res);
+                    }
+                    return res;
+                };
+            },
+            /**
+             * Create a callback function
+             * @method buildCallbackFunc
+             * @private
+             */
+            buildCallbackFunc = function(methodName){
+                return function(url,destination){
+                    for (var i=resourceProviders.length-1;i>=0;i--){
+                        var resourceProvider = resourceProviders[i];
+                        var protocol = resourceProvider.protocol;
+                        if (url.indexOf(protocol)===0){
+                            resourceProvider[methodName](url,destination);
+                            return;
+                        }
+                    }
+                };
+            };
+        /**
+         * @method getMeshData
+         * @param {String} uri
+         * @param {KICK.mesh.Mesh} meshDestination
+         */
+        this.getMeshData = buildCallbackFunc("getMeshData");
+        /**
+         * @method getImageData
+         * @param {String} uri
+         * @param {KICK.texture.Texture} textureDestination
+         */
+        this.getImageData = buildCallbackFunc("getImageData");
+
+        /**
+         * @method getShaderData
+         * @param {String} uri
+         * @param {KICK.material.Shader} shaderDestination
+         */
+        this.getShaderData = buildCallbackFunc("getShaderData");
+
+
+        /**
+         * @method getMesh
+         * @param {String} uri
+         * @return {KICK.mesh.Mesh}
+         * @deprecated
+         */
+        this.getMesh = buildGetFunc(meshCache,"getMesh");
+        /**
+         * @method getShader
+         * @param {String} uri
+         * @return {KICK.material.Shader}
+         * @deprecated
+         */
+        this.getShader = buildGetFunc(shaderCache,"getShader");
+        /**
+         * @method getTexture
+         * @param {String} uri
+         * @return {KICK.material.Shader}
+         * @deprecated
+         */
+        this.getTexture = buildGetFunc(textureCache,"getTexture");
+
+        /**
+         * Release a reference to the resource.
+         * If reference count is 0, then the reference is deleted and the destroy method on the
+         * resource object are invoked.
+         * @method release
+         * @param {String} url
+         */
+        this.release = function(url){
+            for (var i=allCaches.length-1;i>=0;i--){
+                if (allCaches[i].refCount[url]){
+                    allCaches[i].refCount[url]--;
+                    if (allCaches[i].refCount[url]<=0){
+                        if (allCaches[i].ref[url].destroy){
+                            allCaches[i].ref[url].destroy();
+                        }
+                        delete allCaches[i].refCount[url];
+                        delete allCaches[i].ref[url];
+                    }
+                }
+            }
+        };
+    };
 
     /**
-     * The default resource manager
-     * @class DefaultResourceProvider
+     * Responsible for creating or loading a resource using a given url
+     * @class ResourceProvider
+     * @namespace KICK.core
+     * @constructor
+     * @param {String} protocol
+     * @private
+     */
+    /**
+     * Protocol of the resource, such as http, kickjs<br>
+     * The protocol must uniquely identify a resource provider
+     * @property protocol
+     * @type String
+     */
+
+    /**
+     * @method getMeshData
+     * @param {String} uri
+     * @param {KICK.mesh.Mesh} meshDestination
+     */
+    /**
+     * @method getImageData
+     * @param {String} uri
+     * @param {KICK.texture.Texture} textureDestination
+     */
+    /**
+     * @method getShaderData
+     * @param {String} uri
+     * @param {KICK.material.Shader} shaderDestination
+     */
+    /**
+     * @method getMesh
+     * @param {String} url
+     * @return {KICK.mesh.Mesh}
+     * @deprecated
+     */
+    /**
+     * @method getShader
+     * @param {String} url
+     * @return {KICK.material.Shader}
+     * @deprecated
+     */
+    /**
+     * @method getTexture
+     * @param {String} url
+     * @return {KICK.texture.Texture}
+     * @deprecated
+     */
+
+
+    /**
+     * Fall back handler of resources
+     * @class URLResourceProvider
      * @namespace KICK.core
      * @constructor
      * @extends KICK.core.ResourceProvider
      * @param {KICK.core.Engine} engine
+     * @private
      */
-    core.DefaultResourceProvider = function(engine){
-        var gl = engine.gl;
-
+    core.URLResourceProvider = function(engine){
+        var gl = engine.gl,
+            thisObj = this;
         Object.defineProperties(this,{
             /**
-             * Protocol of the resource, such as http, kickjs<br>
-             * The protocol must uniquely identify a resource provider
+             * Returns empty string (match all)
+             * @property protocol
+             * @type String
+             */
+            protocol:{
+                value:""
+            }
+        });
+
+        this.getMeshData = function(url,meshDestination){
+            fail("Not implemented yet");
+        };
+
+        this.getImageData = function(uri,textureDestination){
+            var img = new Image();
+            img.onload = function(){
+                try{
+                    textureDestination.setImage(img,uri);
+                } catch (e){
+                    fail("Exception when loading image "+uri);
+                }
+            };
+            img.onerror = function(e){
+                fail(e);
+                fail("Exception when loading image "+uri);
+            };
+            img.crossOrigin = "anonymous"; // Ask for a CORS image
+            img.src = uri;
+        };
+    };
+
+    /**
+     * Responsible for providing the built-in resources (such as textures, shaders and mesh data).
+     * All build-in resources have the prefix kickjs
+     * @class BuiltInResourceProvider
+     * @namespace KICK.core
+     * @constructor
+     * @extends KICK.core.ResourceProvider
+     * @param {KICK.core.Engine} engine
+     * @private
+     */
+    core.BuiltInResourceProvider = function(engine){
+        var gl = engine.gl,
+            thisObj = this;
+        Object.defineProperties(this,{
+            /**
+             * Returns kickjs
              * @property protocol
              * @type String
              */
@@ -12064,7 +12552,7 @@ KICK.namespace = function (ns_string) {
             } else {
                 return null;
             }
-            
+
             if (meshDataObj){
                 config.meshData = meshDataObj;
                 return new mesh.Mesh(engine,config);
@@ -12072,7 +12560,7 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Create a default shader based on a URL<br>
+         * Create a default shader config based on a URL<br>
          * The following shaders are available:
          *  <ul>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
@@ -12081,11 +12569,11 @@ KICK.namespace = function (ns_string) {
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
-         * @method getShader
+         * @method getShaderData
          * @param {String} url
-         * @return {KICK.material.Shader} Shader or null if not found
+         * @param {KICK.material.Shader} shaderDestination
          */
-        this.getShader = function(url,errorLog){
+        this.getShaderData = function(url,shaderDestination){
             var vertexShaderSrc,
                 fragmentShaderSrc,
                 blend = false,
@@ -12116,16 +12604,73 @@ KICK.namespace = function (ns_string) {
             } else {
                 return null;
             }
-            var shader = new KICK.material.Shader(engine, {
+            var config = {
                 blend:blend,
                 depthMask:depthMask,
-                renderOrder:renderOrder
-            });
-            shader.vertexShaderSrc = vertexShaderSrc;
-            shader.fragmentShaderSrc = fragmentShaderSrc;
-            shader.errorLog = errorLog;
-            shader.updateShader();
+                renderOrder:renderOrder,
+                vertexShaderSrc: vertexShaderSrc,
+                fragmentShaderSrc: fragmentShaderSrc
+            };
+            KICK.core.Util.applyConfig(shaderDestination,config);
+
+            shaderDestination.updateShader();
+        };
+
+        /**
+         * Create a default shader based on a URL<br>
+         * The following shaders are available:
+         *  <ul>
+         *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
+         *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
+         *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
+         *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
+         *  </ul>
+         * @method getShader
+         * @param {String} url
+         * @return {KICK.material.Shader} Shader or null if not found
+         */
+        this.getShader = function(url,errorLog){
+
+            var shader = new KICK.material.Shader(engine);
+            this.getShaderData(url,shader);
             return shader;
+        };
+
+        /**
+         * Create a default texture based on a URL.<br>
+         * The following default textures exists:
+         *  <ul>
+         *  <li><b>Black</b> Url: kickjs://texture/black/</li>
+         *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
+         *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
+         *  </ul>
+         * @param uri
+         * @param textureDestination
+         */
+        this.getImageData = function(uri,textureDestination){
+            var data;
+
+            if (uri.indexOf("kickjs://texture/black/")==0){
+                data = new Uint8Array([0, 0, 0, 255,
+                                         0,   0,   0,255,
+                                         0,   0,   0,255,
+                                         0,   0,   0,255]);
+            } else if (uri.indexOf("kickjs://texture/white/")==0){
+                data = new Uint8Array([255, 255, 255,255,
+                                         255,   255,   255,255,
+                                         255,   255,   255,255,
+                                         255,   255,   255,255]);
+            } else if (uri.indexOf("kickjs://texture/gray/")==0){
+                data = new Uint8Array([127, 127, 127,255,
+                                         127,   127,   127,255,
+                                         127,   127,   127,255,
+                                         127,   127,   127,255]);
+            } else {
+                KICK.core.Util.fail("Unknown uri "+uri);
+                return null;
+            }
+            textureDestination.setImageData( 2, 2, 0, 5121,data, uri);
         };
 
         /**
@@ -12141,34 +12686,14 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.texture.Texture} Texture object - or null if no texture is found for the specified url
          */
         this.getTexture = function(url){
-            var data;
-
-            if (url.indexOf("kickjs://texture/black/")==0){
-                data = new Uint8Array([0, 0, 0, 255,
-                                         0,   0,   0,255,
-                                         0,   0,   0,255,
-                                         0,   0,   0,255]);
-            } else if (url.indexOf("kickjs://texture/white/")==0){
-                data = new Uint8Array([255, 255, 255,255,
-                                         255,   255,   255,255,
-                                         255,   255,   255,255,
-                                         255,   255,   255,255]);
-            } else if (url.indexOf("kickjs://texture/gray/")==0){
-                data = new Uint8Array([127, 127, 127,255,
-                                         127,   127,   127,255,
-                                         127,   127,   127,255,
-                                         127,   127,   127,255]);
-            } else {
-                return null;
-            }
             var texture = new KICK.texture.Texture(engine,{
                 minFilter: 9728,
                 magFilter: 9728,
                 generateMipmaps: false,
                 internalFormat: 6408
             });
+            thisObj.getImageData(url,texture);
 
-            texture.setImageData( 2, 2, 0, 5121,data, url);
             return texture;
         };
     };
