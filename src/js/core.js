@@ -888,6 +888,22 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Provides an easy-to-use mouse input interface.
+     * Example:<br>
+     * <pre class="brush: js">
+     * function SimpleMouseComponent(){
+     * &nbsp;var mouseInput,
+     * &nbsp;&nbsp;thisObj = this;
+     * &nbsp;this.activated = function(){
+     * &nbsp;&nbsp;mouseInput = thisObj.gameObject.engine.mouseInput;
+     * &nbsp;};
+     * &nbsp;this.update = function(){
+     * &nbsp;&nbsp;if (mouseInput.isButtonDown(0)){
+     * &nbsp;&nbsp;&nbsp;var str = "Left mouse down at position "+mouseInput.mousePosition[0]+","+mouseInput.mousePosition[1];
+     * &nbsp;&nbsp;&nbsp;console.log(str);
+     * &nbsp;&nbsp;}
+     * &nbsp;}
+     * }
+     * </pre>
      * @class MouseInput
      * @namespace KICK.core
      */

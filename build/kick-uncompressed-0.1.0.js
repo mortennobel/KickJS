@@ -6033,6 +6033,23 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Provides an easy-to-use mouse input interface.
+     * Example:<br>
+     * <pre class="brush: js">
+     * function SimpleMouseComponent(){
+     * &nbsp;var mouseInput,
+     * &nbsp;&nbsp;thisObj = this;
+     * &nbsp;this.activated = function(){
+     * &nbsp;&nbsp;mouseInput = thisObj.gameObject.engine.mouseInput;
+     * &nbsp;};
+     * &nbsp;this.update = function(){
+     * &nbsp;&nbsp;if (mouseInput.isButtonDown(0)){
+     * &nbsp;&nbsp;&nbsp;var str = "Left mouse down at position "+mouseInput.mousePosition[0]+","+mouseInput.mousePosition[1];
+     * &nbsp;&nbsp;&nbsp;console.log(str);
+     * &nbsp;&nbsp;}
+     * &nbsp;}
+     * }
+     * </pre>
      * @class MouseInput
      * @namespace KICK.core
      */
@@ -6096,7 +6113,7 @@ KICK.namespace = function (ns_string) {
             },
             mouseUpHandler = function(e){
                 var mouseButton = e.button;
-                mouseDown.push(mouseButton);
+                mouseUp.push(mouseButton);
                 removeElementFromArray(mouse,mouseButton);
                 if (!mouseMovementListening){ // also update mouse position if not listening for mouse movement
                     mouseMovementHandler();
@@ -6106,7 +6123,7 @@ KICK.namespace = function (ns_string) {
              * Calculates an object with the x and y coordinates of the given object.
              * Updates the objectPosition variable
              */
-            updateObjectPosition = function () {
+            updateCanvasElementPosition = function () {
                 var object = canvas,
                     left = 0,
                     top = 0;
@@ -6127,6 +6144,7 @@ KICK.namespace = function (ns_string) {
             };
         Object.defineProperties(this,{
             /**
+             * Returns the mouse position of the canvas element, where 0,0 is in the upper left corner.
              * @property mousePosition
              * @type KICK.math.vec2
              */
@@ -6136,6 +6154,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Returns the delta movement (relative mouse movement since last frame)
              * @property deltaMovement
              * @type KICK.math.vec2
              */
@@ -6145,6 +6164,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Mouse scroll wheel input in two dimensions (horizontal and vertical)
              * @property deltaWheel
              * @type KICK.math.vec2
              */
@@ -6189,9 +6209,10 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         *
          * @method isButtonDown
          * @param {Number} mouseButton
-         * @return {boolean} true if key is pressed down in this frame
+         * @return {boolean} true if mouse button is pressed down in this frame
          */
         this.isButtonDown = function(mouseButton){
             return contains(mouseDown,mouseButton);
@@ -6210,13 +6231,14 @@ KICK.namespace = function (ns_string) {
          *
          * @method isKey
          * @param {Number} mouseButton
-         * @return {boolean} true if key is down
+         * @return {boolean} true if mouseButton is down
          */
         this.isButton = function(mouseButton){
             return contains(mouse,mouseButton);
         };
 
         /**
+         * Resets the mouse position each frame (mouse buttons down and delta values)
          * @method update
          * @private
          */
@@ -6232,12 +6254,14 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * @method updateObjectPosition
+         * Update the mouseInput with the relative position of the canvas element.
+         * This method should be called whenever the canvas element is moved in the document.
+         * @method updateCanvasElementPosition
          */
-        this.updateObjectPosition = updateObjectPosition;
+        this.updateCanvasElementPosition = updateCanvasElementPosition;
 
         (function init(){
-            updateObjectPosition();
+            updateCanvasElementPosition();
             var canvas = engine.canvas;
             canvas.addEventListener( "mousedown", mouseDownHandler, true);
             canvas.addEventListener( "mouseup", mouseUpHandler, true);
@@ -6250,8 +6274,6 @@ KICK.namespace = function (ns_string) {
             } else {
                 canvas.addEventListener( 'DOMMouseScroll', mouseWheelHandler, true); // Firefox
             }
-
-
         })();
     };
 
