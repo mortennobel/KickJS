@@ -148,7 +148,7 @@ window.shaderEditor = new (function(){
                 if (textureConf.name === "Texture"){
                     textureConf.name = "Texture"+(new Date()).getMilliseconds()+""+i; // make unique name
                 }
-                textureMapping[textureConf.name] = t;
+                textureMapping[textureConf.uid] = t;
                 thisObj.updateTexture(t,textureConf);
                 thisObj.textures.push(t);
             })();
@@ -160,6 +160,8 @@ window.shaderEditor = new (function(){
             if (type === KICK.core.Constants.GL_SAMPLER_2D || type === KICK.core.Constants.GL_SAMPLER_CUBE){
                 if (uniform.value.ref){
                     uniform.value = textureMapping[uniform.value.ref];
+                } else {
+                    uniform.value = textureMapping[uniform.value];
                 }
                 if (!uniform.value){
                     uniform.value = thisObj.textures[0];
