@@ -1083,7 +1083,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          *
-         * @method isKey
+         * @method isButton
          * @param {Number} mouseButton
          * @return {boolean} true if mouseButton is down
          */
@@ -1137,10 +1137,11 @@ KICK.namespace = function (ns_string) {
      * test for key input.<br>
      * Example code:
      * <pre class="brush: js">
-     * function KeyTestComponent(engine){
-     * &nbsp;var keyInput;
+     * function KeyTestComponent(){
+     * &nbsp;var keyInput, thisObj = this;
      * &nbsp;// registers listener (invoked when component is registered)
      * &nbsp;this.activated = function (){
+     * &nbsp;&nbsp;var engine = thisObj.gameObject.engine;
      * &nbsp;&nbsp;keyInput = engine.keyInput;
      * &nbsp;};
      * &nbsp;this.update = function(){
