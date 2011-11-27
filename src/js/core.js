@@ -928,9 +928,9 @@ KICK.namespace = function (ns_string) {
                     mouseWheelDelta[1] += e.wheelDeltaY;
                 } else {
                     if (e.axis===1){ // horizontal
-                        mouseWheelDelta[0] += e.detail;
+                        mouseWheelDelta[0] -= e.detail;
                     } else {
-                        mouseWheelDelta[1] += e.detail;
+                        mouseWheelDelta[1] -= e.detail;
                     }
                 }
                 if (mouseWheelPreventDefaultAction){
