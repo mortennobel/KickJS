@@ -1061,6 +1061,7 @@ KICK.namespace = function (ns_string) {
                            canvas.addEventListener( "mousemove", mouseMovementHandler, false);
                        } else {
                            canvas.removeEventListener( "mousemove", mouseMovementHandler, false);
+                           deltaMovement = null;
                        }
                    }
                }
@@ -1087,7 +1088,6 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         *
          * @method isButton
          * @param {Number} mouseButton
          * @return {boolean} true if mouseButton is down
