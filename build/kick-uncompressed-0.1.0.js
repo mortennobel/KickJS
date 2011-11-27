@@ -5311,6 +5311,7 @@ KICK.namespace = function (ns_string) {
             contextListeners = [],
             frameListeners = [],
             project = new core.Project(this),
+            mouseInput = null,
             keyInput = null,
             activeScene,
             animationFrameObj = {},
@@ -5372,6 +5373,20 @@ KICK.namespace = function (ns_string) {
                     } else {
                         activeScene = value;
                     }
+                }
+            },
+            /**
+             * Returns a mouseInput object. This object is used to detect mouse input.
+             * @property mouseInput
+             * @type KICK.core.MouseInput
+             */
+            mouseInput:{
+                get:function(){
+                    if (!mouseInput){
+                        mouseInput = new core.MouseInput(thisObj);
+                        this.addFrameListener(mouseInput);
+                    }
+                    return mouseInput;
                 }
             },
             /**
@@ -6098,6 +6113,229 @@ KICK.namespace = function (ns_string) {
          * @property avarageFramesPerSecond
          * @type Number
          */
+    };
+
+    /**
+     * @class MouseInput
+     * @namespace KICK.core
+     */
+    core.MouseInput = function(engine){
+        var vec2 = KICK.math.vec2,
+            mouse = [],
+            mouseUp = [],
+            mouseDown = [],
+            mousePosition = vec2.create(),
+            lastMousePosition = vec2.create(),
+            deltaMovement = null,
+            objectPosition = vec2.create(),
+            mouseWheelDelta = vec2.create(),
+            mouseWheelPreventDefaultAction = false,
+            canvas = engine.canvas,
+            removeElementFromArray = core.Util.removeElementFromArray,
+            contains = core.Util.contains,
+            mouseMovementListening = true,
+            body = document.body,
+            isFirefox = navigator.userAgent.indexOf("Firefox") !== -1,
+            isChrome = navigator.userAgent.indexOf("Chrome") !== -1,
+            mouseContextMenuHandler = function(e){
+                e.preventDefault();
+                return false;
+            },
+            mouseMovementHandler = function(e){
+                mousePosition[0] = e.clientX - objectPosition[0] + body.scrollLeft;
+                mousePosition[1] = e.clientY - objectPosition[1] + body.scrollTop;
+                if (deltaMovement){
+                    vec2.subtract(mousePosition,lastMousePosition,deltaMovement);
+                } else {
+                    deltaMovement = vec2.create();
+                }
+                vec2.set(mousePosition,lastMousePosition);
+            },
+            mouseWheelHandler = function(e){
+                if (isChrome){
+                    mouseWheelDelta[0] += e.wheelDeltaX;
+                    mouseWheelDelta[1] += e.wheelDeltaY;
+                } else {
+                    if (e.axis===1){ // horizontal
+                        mouseWheelDelta[0] -= e.detail;
+                    } else {
+                        mouseWheelDelta[1] -= e.detail;
+                    }
+                }
+                if (mouseWheelPreventDefaultAction){
+                    e.preventDefault();
+                    return false;
+                }
+            },
+            mouseDownHandler = function(e){
+                var mouseButton = e.button;
+                if (!contains(mouse,mouseButton)){
+                    mouseDown.push(mouseButton);
+                    mouse.push(mouseButton);
+                }
+                if (!mouseMovementListening){  // also update mouse position if not listening for mouse movement
+                    mouseMovementHandler();
+                }
+            },
+            mouseUpHandler = function(e){
+                var mouseButton = e.button;
+                mouseDown.push(mouseButton);
+                removeElementFromArray(mouse,mouseButton);
+                if (!mouseMovementListening){ // also update mouse position if not listening for mouse movement
+                    mouseMovementHandler();
+                }
+            },
+            /**
+             * Calculates an object with the x and y coordinates of the given object.
+             * Updates the objectPosition variable
+             */
+            updateObjectPosition = function () {
+                var object = canvas,
+                    left = 0,
+                    top = 0;
+
+                while (object.offsetParent) {
+
+                    left += object.offsetLeft;
+                    top += object.offsetTop;
+
+                    object = object.offsetParent;
+                }
+
+                left += object.offsetLeft;
+                top += object.offsetTop;
+
+                objectPosition[0] = left;
+                objectPosition[1] = top;
+            };
+        Object.defineProperties(this,{
+            /**
+             * @property mousePosition
+             * @type KICK.math.vec2
+             */
+            mousePosition:{
+                get:function(){
+                    return mousePosition;
+                }
+            },
+            /**
+             * @property deltaMovement
+             * @type KICK.math.vec2
+             */
+            deltaMovement:{
+                get:function(){
+                    return deltaMovement || vec2.create();
+                }
+            },
+            /**
+             * @property deltaWheel
+             * @type KICK.math.vec2
+             */
+            deltaWheel:{
+                get:function(){
+                    return mouseWheelDelta;
+                }
+            },
+            /**
+             * If set to true, the engine will prevent screen from scrolling when mouse wheel is used when mouse pointer
+             * is over the canvas.<br>
+             * Default value is false
+             * @property mouseWheelPreventDefaultAction
+             * @type Boolean
+             */
+            mouseWheelPreventDefaultAction:{
+                get:function(){
+                    return mouseWheelPreventDefaultAction;
+                },
+                set:function(newValue){
+                    mouseWheelPreventDefaultAction = newValue;
+                }
+            },
+            /**
+             * Default value is true
+             * @property mouseMovementEventsEnabled
+             * @type Boolean
+             */
+            mouseMovementEventsEnabled:{
+               get:function(){ return mouseMovementListening; },
+               set:function(value){
+                   if (mouseMovementListening !== value){
+                       mouseMovementListening = value;
+                       if (mouseMovementListening){
+                           canvas.addEventListener( "mousemove", mouseMovementHandler, false);
+                       } else {
+                           canvas.removeEventListener( "mousemove", mouseMovementHandler, false);
+                       }
+                   }
+               }
+            }
+        });
+
+        /**
+         * @method isButtonDown
+         * @param {Number} mouseButton
+         * @return {boolean} true if key is pressed down in this frame
+         */
+        this.isButtonDown = function(mouseButton){
+            return contains(mouseDown,mouseButton);
+        };
+
+        /**
+         * @method isButtonUp
+         * @param {Number} mouseButton
+         * @return {boolean} true if mouseButton is released in this frame
+         */
+        this.isButtonUp = function(mouseButton){
+            return contains(mouseUp,mouseButton);
+        };
+
+        /**
+         *
+         * @method isKey
+         * @param {Number} mouseButton
+         * @return {boolean} true if key is down
+         */
+        this.isButton = function(mouseButton){
+            return contains(mouse,mouseButton);
+        };
+
+        /**
+         * @method update
+         * @private
+         */
+        this.frameUpdated = function(){
+            mouseDown.length = 0;
+            mouseUp.length = 0;
+            mouseWheelDelta[0] = 0;
+            mouseWheelDelta[1] = 0;
+            if (deltaMovement){
+                deltaMovement[0] = 0;
+                deltaMovement[1] = 0;
+            }
+        };
+
+        /**
+         * @method updateObjectPosition
+         */
+        this.updateObjectPosition = updateObjectPosition;
+
+        (function init(){
+            updateObjectPosition();
+            var canvas = engine.canvas;
+            canvas.addEventListener( "mousedown", mouseDownHandler, true);
+            canvas.addEventListener( "mouseup", mouseUpHandler, true);
+            canvas.addEventListener( "mousemove", mouseMovementHandler, true);
+            canvas.addEventListener( "contextmenu", mouseContextMenuHandler, true);
+            if (isFirefox){
+                canvas.addEventListener( 'MozMousePixelScroll', mouseWheelHandler, true); // Firefox
+            } else if (isChrome){
+                canvas.addEventListener( 'mousewheel', mouseWheelHandler, true); // Chrome
+            } else {
+                canvas.addEventListener( 'DOMMouseScroll', mouseWheelHandler, true); // Firefox
+            }
+
+
+        })();
     };
 
     /**
