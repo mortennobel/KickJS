@@ -5578,6 +5578,9 @@ KICK.namespace = function (ns_string) {
          */
         this.canvasResized = function(){
             gl.viewportSize = vec2.create([canvas.width,canvas.height]);
+            if (mouseInput){
+                mouseInput.updateCanvasElementPosition();
+            }
         };
 
         /**
@@ -6122,8 +6125,10 @@ KICK.namespace = function (ns_string) {
             /**
              * Calculates an object with the x and y coordinates of the given object.
              * Updates the objectPosition variable
+             * @method updateCanvasElementPositionPrivate
+             * @private
              */
-            updateCanvasElementPosition = function () {
+            updateCanvasElementPositionPrivate = function () {
                 var object = canvas,
                     left = 0,
                     top = 0;
@@ -6239,7 +6244,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Resets the mouse position each frame (mouse buttons down and delta values)
-         * @method update
+         * @method frameUpdated
          * @private
          */
         this.frameUpdated = function(){
@@ -6255,13 +6260,15 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Update the mouseInput with the relative position of the canvas element.
-         * This method should be called whenever the canvas element is moved in the document.
+         * This method should be called whenever the canvas element is moved in the document. <br>
+         * This method is automatically called when Engine.canvasResized() is invoked.
+         * 
          * @method updateCanvasElementPosition
          */
-        this.updateCanvasElementPosition = updateCanvasElementPosition;
+        this.updateCanvasElementPosition = updateCanvasElementPositionPrivate;
 
         (function init(){
-            updateCanvasElementPosition();
+            updateCanvasElementPositionPrivate();
             var canvas = engine.canvas;
             canvas.addEventListener( "mousedown", mouseDownHandler, true);
             canvas.addEventListener( "mouseup", mouseUpHandler, true);
