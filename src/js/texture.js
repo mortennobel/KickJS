@@ -178,6 +178,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture),
                 depthTexture: KICK.core.Util.getJSONReference(engine, depthTexture)
             };
@@ -617,6 +618,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
@@ -906,6 +908,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,

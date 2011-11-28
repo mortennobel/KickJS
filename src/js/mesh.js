@@ -927,6 +927,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 name:_name,
                 urlResource:_urlResource
             };

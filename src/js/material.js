@@ -559,12 +559,14 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             if (_dataURI){
                 return {
+                    uid: thisObj.uid,
                     name:_name,
                     dataURI:_dataURI
                 }
             }
             // todo fill in missing attributes
             return {
+                uid: thisObj.uid,
                 name:_name,
                 faceCulling:_faceCulling,
                 zTest:_zTest,
@@ -889,6 +891,7 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return {
+                uid: thisObj.uid,
                 name:_name,
                 uniforms: filteredUniforms
             };

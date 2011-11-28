@@ -1009,6 +1009,7 @@ KICK.namespace = function (ns_string) {
                 gameObjectsCopy.push(gameObjects[i].toJSON());
             }
             return {
+                uid: thisObj.uid,
                 gameObjects: gameObjectsCopy,
                 name: _name
             };
