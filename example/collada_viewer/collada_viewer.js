@@ -1,3 +1,6 @@
+var vec3 = KICK.math.vec3,
+    quat4 = KICK.math.quat4;
+
 function destroyAllMeshRenderersInScene(){
     var scene = engine.activeScene;
     for (var i=scene.getNumberOfGameObjects()-1;i>=0;i--){
@@ -46,7 +49,6 @@ function loadCollada(url){
 
 var material;
 var duckMaterial;
-var radius = 5;
 
 function duckClicked(){
     loadCollada("duck.dae");
@@ -124,32 +126,47 @@ function recalculateNormals(){
     }
 }
 
-function addRotatorComponent(gameObject){
-    var time = engine.time,
-        transform = gameObject.transform,
+function RotatorComponent(){
+    var thisObj = this,
+        time,
+        transform,
         rotationSpeed = 0.001,
-        translation = transform.localPosition,
-        rotVec = transform.localRotationEuler,
-        radianToDegree = KICK.core.Constants._RADIAN_TO_DEGREE,
-        res = document.getElementById("res");
-    gameObject.addComponent({
-        update: function(){
-            var timeTotal = time.time,
-                rot = timeTotal*rotationSpeed;
-            if (window.rot){ // todo remove - let you easily control rotation from console
-                rot = window.rot*KICK.core.Constants._RADIAN_TO_DEGREE;
-                transform.localRotationEuler = window.rot;
-                transform.localPosition = window.pos;
-            } else {
-                translation[0] = Math.sin(rot)*radius;
-                translation[1] = Math.sin(rot*3);
-                translation[2] = Math.cos(rot)*radius;
-                rotVec[1] = rot*radianToDegree;
-                transform.localRotationEuler = rotVec;
-                transform.localPosition = translation;
-            }
+        upDownSpeed = 0.0001,
+        wheelSpeed = 0.0001,
+        mouseRotationSpeed = 0.01,
+        mouseInput,
+        sphericalCoordinates = vec3.create([10,0,0]); // radius, polar, elevation
+        cartesianCoordinates = vec3.create();
+
+    this.activated = function(){
+        var gameObject = thisObj.gameObject,
+            engine = gameObject.engine;
+        transform = gameObject.transform;
+        time = engine.time;
+        mouseInput = engine.mouseInput;
+        mouseInput.mouseWheelPreventDefaultAction = true;
+    };
+
+    this.update = function(){
+        if (mouseInput.isButton(0)){
+            var mouseDelta = mouseInput.deltaMovement;
+            sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
+            sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
+            sphericalCoordinates[2] = Math.max(-Math.PI*0.499,sphericalCoordinates[2]);
+            sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
+        } else {
+            sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
+            sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
         }
-    });
+        var wheelY = mouseInput.deltaWheel[1];
+        if (wheelY){
+            var delta = wheelY*wheelSpeed;
+            sphericalCoordinates[0] *= 1+delta;
+        }
+        vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+        transform.position = cartesianCoordinates;
+        transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0]);
+    };
 }
 
 function loadTexture(url){
@@ -177,7 +194,6 @@ function initLights(){
     ambientLight.color = [0.1,0.1,0.1,1];
     ambientlightGameObject.addComponent(ambientLight);
 
-
     var lightGameObject = engine.activeScene.createGameObject();
     lightGameObject.name = "directional light";
     var light = new KICK.scene.Light(
@@ -203,7 +219,7 @@ function initKick() {
     });
     cameraObject.addComponent(camera);
 
-    addRotatorComponent(cameraObject);
+    cameraObject.addComponent(new RotatorComponent());
 
     var gameObject = engine.activeScene.createGameObject();
     gameObject.name = "Mesh";
@@ -224,16 +240,11 @@ function pauseResume(){
     this.innerHTML = engine.paused? "Play":"Pause";
 }
 
-function updateCameraRadius(){
-    radius = Number(document.getElementById("radius").value);
-}
-
 window.addEventListener("load",function(){
     initKick();
     document.getElementById("duckButton").addEventListener("click", duckClicked,false);
     document.getElementById("cubeButton").addEventListener("click", cubeClicked,false);
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
-    document.getElementById("radius").addEventListener("change", updateCameraRadius,false);
     document.getElementById("file").onchange = function() {
           loadClicked(this.files);
         };
