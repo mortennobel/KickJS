@@ -10,10 +10,17 @@ A WebGL game engine for modern web-browsers.
 <a href="http://www.kickjs.org/example/shader_editor/shader_editor.html" title="GLSL Editor"><img src="http://www.kickjs.org/images/example_glsl_editor.jpg"></a>
 <a href="http://www.kickjs.org/example/video_ascii_art/Video_Ascii_Art.html" title="Video ascii art"><img src="http://www.kickjs.org/images/example_video_ascii_art.jpg"></a>
 
-## Documentation
+## Website and Documentation
 
-Available here:
+Project website is:
+http://www.kickjs.org/
+
+API documentation:
 http://www.kickjs.org/api/
+
+## Getting started
+
+Take a look at the files in the <a href="https://github.com/mortennobel/KickJS/tree/master/example/tutorial">tutorial folder</a>. Each of these files contains code that uses a single or a few features.
 
 ## Bugs
 

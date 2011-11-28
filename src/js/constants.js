@@ -58,6 +58,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     Object.defineProperties(core.Constants,{
         /**
+         * The current version of the library
+         * @property _VERSION
+         * @type String
+         * @static
+         * @final
+         */
+        _VERSION: { value: "0.0.0",configurable:true,enumerable:true},
+        /**
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
          * Example usage:
@@ -74,7 +82,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @static
          * @final
          */
-        _ASSERT: { value: true,enumerable:true},
+        _ASSERT: { value: true,enumerable:true,configurable:true},
         /**
          * Allows usage of debugging in the script code. The flag can be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
@@ -90,7 +98,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @static
          * @final
          */
-        _DEBUG: { value: true,enumerable:true},
+        _DEBUG: { value: true,enumerable:true,configurable:true},
         /**
          * Value 0.01745329251994
          * @property _DEGREE_TO_RADIAN

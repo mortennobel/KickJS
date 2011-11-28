@@ -107,6 +107,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
 
     Object.defineProperties(core.Constants,{
         /**
+         * The current version of the library
+         * @property _VERSION
+         * @type String
+         * @static
+         * @final
+         */
+        _VERSION: { value: "0.0.0",configurable:true,enumerable:true},
+        /**
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
          * Example usage:
@@ -123,7 +131,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @static
          * @final
          */
-        _ASSERT: { value: true,enumerable:true},
+        _ASSERT: { value: true,enumerable:true,configurable:true},
         /**
          * Allows usage of debugging in the script code. The flag can be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
@@ -139,7 +147,7 @@ KICK.namespace = KICK.namespace || function (ns_string) {
          * @static
          * @final
          */
-        _DEBUG: { value: true,enumerable:true},
+        _DEBUG: { value: true,enumerable:true,configurable:true},
         /**
          * Value 0.01745329251994
          * @property _DEGREE_TO_RADIAN
@@ -5287,8 +5295,8 @@ KICK.namespace = function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
-        ASSERT = true,
-        DEBUG = true;
+        ASSERT = false,
+        DEBUG = false;
 
     /**
      * Game engine object
@@ -5327,7 +5335,7 @@ KICK.namespace = function (ns_string) {
              * @type String
              */
             version:{
-                value:"0.1.0"
+                value:"0.2.0"
             },
             /**
              * Resource manager of the engine. Loads and cache resources.
@@ -5525,7 +5533,7 @@ KICK.namespace = function (ns_string) {
                 object.uid = thisObj.createUID();
             }
             return object.uid;
-        }
+        };
 
         /**
          * This method should be invoked when the canvas is resized.<br>
@@ -6853,8 +6861,8 @@ KICK.namespace = function (ns_string) {
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         constants = KICK.core.Constants,
-        DEBUG = true,
-        ASSERT = true,
+        DEBUG = false,
+        ASSERT = false,
         fail = KICK.core.Util.fail;
 
     /**
@@ -7786,8 +7794,8 @@ KICK.namespace = function (ns_string) {
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         constants = KICK.core.Constants,
-        DEBUG = true,
-        ASSERT = true,
+        DEBUG = false,
+        ASSERT = false,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
         thisObj = this;
@@ -9043,7 +9051,7 @@ KICK.namespace = function (ns_string) {
             renderer:{
                 get:function(){ return _renderer;},
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         if (typeof newValue.render !== "function"){
                             KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
                         }
@@ -9060,7 +9068,7 @@ KICK.namespace = function (ns_string) {
             layerMask:{
                 get:function(){ return _layerMask;},
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         if (!isNumber(newValue)){
                             KICK.core.Util.fail("Camera.layerMask should be a number");
                         }
@@ -9076,7 +9084,7 @@ KICK.namespace = function (ns_string) {
             renderTarget:{
                 get:function(){ return _renderTarget;},
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         if (newValue != null && !(newValue instanceof KICK.texture.RenderTexture)){
                             KICK.core.Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
                         }
@@ -9093,7 +9101,7 @@ KICK.namespace = function (ns_string) {
             fieldOfView:{
                 get:function(){ return _fieldOfView;},
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"fieldOfView");
                     }
                     _fieldOfView = newValue;
@@ -9111,7 +9119,7 @@ KICK.namespace = function (ns_string) {
                     return _near;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"near");
                     }
                     _near = newValue;
@@ -9129,7 +9137,7 @@ KICK.namespace = function (ns_string) {
                     return _far;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"far");
                     }
                     _far = newValue;
@@ -9146,7 +9154,7 @@ KICK.namespace = function (ns_string) {
                     return _perspective;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         if (!isBoolean(newValue)){
                             KICK.core.Util.fail("Camera.perspective must be a boolean");
                         }
@@ -9164,7 +9172,7 @@ KICK.namespace = function (ns_string) {
                     return _left;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"left");
                     }
                     _left = newValue;
@@ -9180,7 +9188,7 @@ KICK.namespace = function (ns_string) {
                     return _right;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"right");
                     }
                     _right= newValue;
@@ -9196,7 +9204,7 @@ KICK.namespace = function (ns_string) {
                     return _bottom;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"bottom");
                     }
                     _bottom = newValue;
@@ -9212,7 +9220,7 @@ KICK.namespace = function (ns_string) {
                     return _top;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"top");
                     }
                     _top = newValue;
@@ -9229,7 +9237,7 @@ KICK.namespace = function (ns_string) {
                     return _cameraIndex;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         assertNumber(newValue,"cameraIndex");
                     }
                     _cameraIndex = newValue;
@@ -9289,7 +9297,7 @@ KICK.namespace = function (ns_string) {
                     return _normalizedViewportRect;
                 },
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         if (newValue.length !== 4){
                             KICK.core.Util.fail("Camera.normalizedViewportRect must be Float32Array of length 4");
                         }
@@ -9792,7 +9800,7 @@ KICK.namespace = function (ns_string) {
                     gl.framebufferRenderbuffer(36160, 36096, 36161, renderbuffer);
                     renderBuffers.push(renderbuffer);
                 }
-                if (true){
+                if (false){
                     var frameBufferStatus = gl.checkFramebufferStatus( 36160 );
                     if (frameBufferStatus !== 36053){
                         switch (frameBufferStatus){
@@ -9867,6 +9875,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture),
                 depthTexture: KICK.core.Util.getJSONReference(engine, depthTexture)
             };
@@ -10035,7 +10044,7 @@ KICK.namespace = function (ns_string) {
         this.setImageData = function(width, height, border, type, pixels, dataURI){
             recreateTextureIfDifferentType();
 
-            if (true){
+            if (false){
                 if (type !== 5121 &&
                     type !== 32819  &&
                     type !== 32820 &&
@@ -10134,7 +10143,7 @@ KICK.namespace = function (ns_string) {
                     return _wrapS;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 33071 &&
                             value !== 10497){
                             KICK.core.Util.fail("Texture.wrapS should be either 33071 or 10497");
@@ -10154,7 +10163,7 @@ KICK.namespace = function (ns_string) {
                     return _wrapT;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 33071 &&
                             value !== 10497){
                             KICK.core.Util.fail("Texture.wrapT should be either 33071 or 10497");
@@ -10175,7 +10184,7 @@ KICK.namespace = function (ns_string) {
                     return _minFilter;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 9728 &&
                             value !== 9729 &&
                             value !== 9984 &&
@@ -10199,7 +10208,7 @@ KICK.namespace = function (ns_string) {
                     return _magFilter;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 9728 &&
                             value !== 9729){
                             KICK.core.Util.fail("Texture.magFilter should be either 9728 or 9729");
@@ -10219,7 +10228,7 @@ KICK.namespace = function (ns_string) {
                     return _generateMipmaps;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (typeof value !== 'boolean'){
                             KICK.core.Util.fail("Texture.generateMipmaps was not a boolean");
                         }
@@ -10239,7 +10248,7 @@ KICK.namespace = function (ns_string) {
                     return _flipY;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (typeof value !== 'boolean'){
                             KICK.core.Util.fail("Texture.flipY was not a boolean");
                         }
@@ -10306,6 +10315,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
@@ -10456,7 +10466,7 @@ KICK.namespace = function (ns_string) {
                     return _generateMipmaps;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (typeof value !== 'boolean'){
                             KICK.core.Util.fail("MovieTexture.generateMipmaps was not a boolean");
                         }
@@ -10483,7 +10493,7 @@ KICK.namespace = function (ns_string) {
                     return _wrapS;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 33071 &&
                             value !== 10497){
                             KICK.core.Util.fail("Texture.wrapS should be either 33071 or 10497");
@@ -10503,7 +10513,7 @@ KICK.namespace = function (ns_string) {
                     return _wrapT;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 33071 &&
                             value !== 10497){
                             KICK.core.Util.fail("Texture.wrapT should be either 33071 or 10497");
@@ -10524,7 +10534,7 @@ KICK.namespace = function (ns_string) {
                     return _minFilter;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 9728 &&
                             value !== 9729 &&
                             value !== 9984 &&
@@ -10548,7 +10558,7 @@ KICK.namespace = function (ns_string) {
                     return _magFilter;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (value !== 9728 &&
                             value !== 9729){
                             KICK.core.Util.fail("Texture.magFilter should be either 9728 or 9729");
@@ -10595,6 +10605,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 wrapS:_wrapS,
                 wrapT:_wrapT,
                 minFilter:_minFilter,
@@ -10930,7 +10941,7 @@ KICK.namespace = function (ns_string) {
                     return _errorLog;
                 },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if ( value && typeof value !== 'function'){
                             KICK.core.Util.fail("Shader.errorLog should be a function (or null)");
                         }
@@ -10964,7 +10975,7 @@ KICK.namespace = function (ns_string) {
             faceCulling: {
                 get: function(){ return _faceCulling; },
                 set: function(newValue){
-                    if (true){
+                    if (false){
                         if (newValue !== 1028 &&
                             newValue !== 1032 &&
                             newValue !== 1029 &&
@@ -10984,7 +10995,7 @@ KICK.namespace = function (ns_string) {
             depthMask:{
                 get:function(){return _depthMask},
                 set:function(newValue){
-                    if (true){
+                    if (false){
                         if (typeof newValue !== 'boolean'){
                             KICK.core.Util.fail("Shader.depthMask must be a boolean. Was "+(typeof newValue));
                         }
@@ -11008,7 +11019,7 @@ KICK.namespace = function (ns_string) {
             zTest:{
                 get: function(){ return _zTest; },
                 set: function(newValue){
-                    if (true){
+                    if (false){
                         if (newValue !== 512 &&
                             newValue !== 513 &&
                             newValue !== 514 &&
@@ -11037,7 +11048,7 @@ KICK.namespace = function (ns_string) {
             blend:{
                 get: function(){ return _blend; },
                 set: function(value){
-                    if (true){
+                    if (false){
                         if (typeof value !== 'boolean'){
                             KICK.core.Util.fail("Shader.blend must be a boolean");
                         }
@@ -11060,7 +11071,7 @@ KICK.namespace = function (ns_string) {
             blendSFactor:{
                 get: function(){ return _blendSFactor;},
                 set: function(value) {
-                    if (true){
+                    if (false){
                         var c = KICK.core.Constants;
                         if (value !== 0 &&
                             value !== 1 &&
@@ -11102,7 +11113,7 @@ KICK.namespace = function (ns_string) {
             blendDFactor:{
                 get: function(){ return _blendDFactor; },
                 set: function(value){
-                    if (true){
+                    if (false){
                         var c = KICK.core.Constants;
                         if (value !== 0 &&
                             value !== 1 &&
@@ -11238,7 +11249,7 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function () {
-            if (true){
+            if (false){
                 if (!(this.isValid)){
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
@@ -11297,7 +11308,7 @@ KICK.namespace = function (ns_string) {
      */
     material.Shader.getPrecompiledSource = function(sourcecode){
         // todo optimize with regular expression search
-        if (true){
+        if (false){
             // insert #line nn after each #pragma include to give meaning full lines in error console
             var linebreakPosition = [];
             var position = sourcecode.indexOf('\n');
@@ -11576,7 +11587,7 @@ KICK.namespace = function (ns_string) {
                     if (value instanceof Float32Array || value instanceof Int32Array) {
                         value = core.Util.typedArrayToArray(value);
                     } else {
-                        if (true){
+                        if (false){
                             if (!value instanceof KICK.texture.Texture){
                                 KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                             }
@@ -11628,7 +11639,7 @@ KICK.namespace = function (ns_string) {
                 if (type === 5124 || type===35667 || type===35668 || type===35669){
                     uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
                 } else if (type === 35678 || type ===35680 ){
-                    if (true){
+                    if (false){
                         if (typeof uniforms[uniform].value !== KICK.texture.Texture){
                             KICK.core.Util.fail("Uniform value should be a texture object but was "+uniforms[uniform].value);
                         }
@@ -12469,8 +12480,8 @@ KICK.namespace = function (ns_string) {
         mesh = KICK.namespace("KICK.mesh"),
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
-        ASSERT = true,
-        debug = true,
+        ASSERT = false,
+        debug = false,
         fail = core.Util.fail;
     
     /**

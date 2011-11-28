@@ -86,7 +86,7 @@ KICK.namespace = function (ns_string) {
              * @type String
              */
             version:{
-                value:"0.1.0"
+                value:constants._VERSION
             },
             /**
              * Resource manager of the engine. Loads and cache resources.
@@ -284,7 +284,7 @@ KICK.namespace = function (ns_string) {
                 object.uid = thisObj.createUID();
             }
             return object.uid;
-        }
+        };
 
         /**
          * This method should be invoked when the canvas is resized.<br>

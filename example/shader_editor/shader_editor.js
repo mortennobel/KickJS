@@ -141,17 +141,11 @@ window.shaderEditor = new (function(){
         var textureMapping = {};
         thisObj.textures = [];
         for (var i=0;i<textures.length;i++){
-
-            (function newScope(){
-                var textureConf = textures[i],
-                    t = new KICK.texture.Texture(_engine);
-                if (textureConf.name === "Texture"){
-                    textureConf.name = "Texture"+(new Date()).getMilliseconds()+""+i; // make unique name
-                }
-                textureMapping[textureConf.uid] = t;
-                thisObj.updateTexture(t,textureConf);
-                thisObj.textures.push(t);
-            })();
+            var textureConf = textures[i],
+                t = new KICK.texture.Texture(_engine);
+            textureMapping[textureConf.uid] = t;
+            thisObj.updateTexture(t,textureConf);
+            thisObj.textures.push(t);
         }
 
         for (var name in materialUniforms){

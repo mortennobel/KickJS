@@ -25,7 +25,11 @@ function replaceConstants(obj, sourcecode){
     for (var i=0;i<names.length;i++){
         var name = names[i];
         var re = new RegExp("[\\w.\\._]*"+name);
-        sourcecode = replaceAll(sourcecode,re,obj[name]);
+        var value = obj[name];
+        if (typeof value === "string"){
+            value = '"'+value+'"';
+        }
+        sourcecode = replaceAll(sourcecode,re,value);
     }
     return sourcecode;
 }
