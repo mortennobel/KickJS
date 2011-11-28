@@ -9898,7 +9898,8 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Encapsulate a texture object and its configuration.
+     * Encapsulate a texture object and its configuration. Note that the texture configuration
+     * must be set prior to assigning the texture (using either init, setImage or setImageData)
      * @class Texture
      * @namespace KICK.texture
      * @constructor
@@ -10126,7 +10127,10 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * URI of the texture.
+             * URI of the texture. This property does not load any texture. To load a texture, set this property and
+             * call the init function (or load the image manually and call the setImage() function).<br>
+             * If texture is not on same server, then the web server must support CORS<br>
+             * See http://hacks.mozilla.org/2011/11/using-cors-to-load-webgl-textures-from-cross-domain-images/
              * @property dataURI
              * @type String
              */
@@ -11722,17 +11726,18 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.core.MeshData} triangle mesh
          */
         createTriangleData : function () {
+            var sqrt75 = Math.sqrt(0.75);
             return new mesh.MeshData( {
                 name: "Triangle",
                 vertex: [
                     0,1,0,
-                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                    0.866025403784439,-0.5,0
+                    -sqrt75,-0.5,0, // 0.866025403784439 = sqrt(.75)
+                    sqrt75,-0.5,0
                 ],
                 uv1: [
-                    0,1,
-                    -0.866025403784439,-0.5,
-                    0.866025403784439,-0.5
+                    0.5,1,
+                    0.125,0.25,
+                    1-0.125,0.25
                 ],
                 normal: [
                     0,0,1,
