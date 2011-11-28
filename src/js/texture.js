@@ -195,7 +195,8 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Encapsulate a texture object and its configuration.
+     * Encapsulate a texture object and its configuration. Note that the texture configuration
+     * must be set prior to assigning the texture (using either init, setImage or setImageData)
      * @class Texture
      * @namespace KICK.texture
      * @constructor
@@ -423,7 +424,10 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * URI of the texture.
+             * URI of the texture. This property does not load any texture. To load a texture, set this property and
+             * call the init function (or load the image manually and call the setImage() function).<br>
+             * If texture is not on same server, then the web server must support CORS<br>
+             * See http://hacks.mozilla.org/2011/11/using-cors-to-load-webgl-textures-from-cross-domain-images/
              * @property dataURI
              * @type String
              */
