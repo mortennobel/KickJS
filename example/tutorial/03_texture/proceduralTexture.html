@@ -1,10 +1,10 @@
 <html>
 <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>KickJS | Tutorial | 03 - Texture</title>
+    <title>KickJS | Tutorial | 03 - Texture procedural</title>
 </head>
 <body>
-<h1>KickJS | Tutorial | 03 - Texture</h1>
+<h1>KickJS | Tutorial | 03 - Texture procedural</h1>
 
 <!-- Tutorial start -->
 <!--<script type="text/javascript" src="../../js/webgl-debug.js"></script>-->
@@ -39,7 +39,7 @@
             var floorX = Math.floor(x/(checkerboardWidth/8));
             var floorY = Math.floor(y/(checkerboardHeight/8));
             var r,g,b;
-            if (floorX === 1 && floorY ===3){
+            if (floorX === 1 && floorY ===3){ // one brick should be red
                 r = 255;
                 g = b = 0;
             } else if ((floorX + floorY)%2 === 0){
