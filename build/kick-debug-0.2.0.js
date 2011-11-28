@@ -7740,6 +7740,7 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             return {
+                uid: thisObj.uid,
                 name:_name,
                 urlResource:_urlResource
             };
@@ -7939,7 +7940,11 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.removeComponent =  function (component) {
-            delete component.gameObject;
+            try {
+                delete component.gameObject;
+            } catch (e){
+                // ignore if gameObject cannot be deleted
+            }
             core.Util.removeElementFromArray(_components,component);
             this.scene.removeComponent(component);
         };
@@ -7951,7 +7956,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             var i;
-            for (i=0; i < _components.length; i++) {
+            for (i = _components.length-1; i >= 0 ; i--) {
                 this.removeComponent(_components[i]);
             }
             this.scene.destroyObject(this);
@@ -8526,6 +8531,7 @@ KICK.namespace = function (ns_string) {
                     component;
                 if (gameObjectsDelete.length > 0) {
                     core.Util.removeElementsFromArray(activeGameObjects,gameObjectsDelete);
+                    core.Util.removeElementsFromArray(gameObjects,gameObjectsDelete);
                     gameObjectsDelete.length = 0;
                 }
                 if (componentsDelete.length > 0) {
@@ -8548,7 +8554,6 @@ KICK.namespace = function (ns_string) {
                         } else if (component instanceof scene.Light){
                             removeLight(component);
                         }
-                        core.Util.removeElementFromArray(gameObjects,component);
                     }
                     for (i=componentListenes.length-1; i >= 0; i--) {
                         componentListenes[i].componentsRemoved(componentsDeleteCopy);
@@ -8756,6 +8761,7 @@ KICK.namespace = function (ns_string) {
                 gameObjectsCopy.push(gameObjects[i].toJSON());
             }
             return {
+                uid: thisObj.uid,
                 gameObjects: gameObjectsCopy,
                 name: _name
             };
@@ -11272,12 +11278,14 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             if (_dataURI){
                 return {
+                    uid: thisObj.uid,
                     name:_name,
                     dataURI:_dataURI
                 }
             }
             // todo fill in missing attributes
             return {
+                uid: thisObj.uid,
                 name:_name,
                 faceCulling:_faceCulling,
                 zTest:_zTest,
@@ -11602,6 +11610,7 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return {
+                uid: thisObj.uid,
                 name:_name,
                 uniforms: filteredUniforms
             };
