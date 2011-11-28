@@ -5316,6 +5316,7 @@ KICK.namespace = function (ns_string) {
             timeObj = new core.Time(),
             timeSinceStart = 0,
             frameCount = 0,
+            timeScale = 1,
             contextListeners = [],
             frameListeners = [],
             project = new core.Project(this),
@@ -5463,6 +5464,7 @@ KICK.namespace = function (ns_string) {
             }
             deltaTime = time-lastTime;
             lastTime = time;
+            deltaTime *= timeScale;
             timeSinceStart += deltaTime;
             frameCount += 1;
             if (animationFrameObj !== null){
@@ -5627,9 +5629,12 @@ KICK.namespace = function (ns_string) {
                 frameCount:{
                     get: function(){return frameCount;}
                 },
-                avarageFramesPerSecond:{
+                scale:{
                     get: function(){
-                        return frameCount/(timeSinceStart*0.001);
+                        return timeScale;
+                    },
+                    set:function(newValue){
+                        timeScale = newValue;
                     }
                 }
             });
@@ -5650,7 +5655,8 @@ KICK.namespace = function (ns_string) {
      * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
      * The config parameter is used to initialize the object and the content should match the output of the
      * toJSON method<br>
-     * A toJSON method should exist on the object. This method should as a minimum write out the object's uid property
+     * A toJSON method should exist on the object. This method should as a minimum write out the object's uid property.<br>
+     * ProjectAsset objects may reference other ProjectAsset objects, however cyclic references are not allowed.
      * @class ProjectAsset
      * @namespace KICK.core
      */
@@ -6116,25 +6122,26 @@ KICK.namespace = function (ns_string) {
      */
     core.Time = function(){
         /**
-         * Time since start in millis
+         * Time since start in milliseconds. Read only
          * @property time
          * @type Number
          */
         /**
-         * Millis between this frame and last frame
+         * Millis between this frame and last frame. Read only
          * @property deltaTime
          * @type Number
          */
         /**
-         * Number of frames since start
+         * Number of frames since start. Read only
          * @property frameCount
          * @type Number
          */
         /**
-         * fps since start
-         * @property avarageFramesPerSecond
+         * Default value is 1.0. Can be used for implementing pause or slow-motion sequences
+         * @property scale
          * @type Number
          */
+
     };
 
     /**
