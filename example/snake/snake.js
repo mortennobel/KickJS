@@ -258,7 +258,7 @@ window.onload = function(){
         init();
     }
 
-    function SnakeLevelComponent(engine){
+    function SnakeLevelComponent(){
         var meshRenderer,
             shader,
             material,
@@ -298,7 +298,7 @@ window.onload = function(){
             meshData = meshData.combine(tallCube.transform(translateLeftMatrix));
             meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level"},meshData);
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
         };
 
         this.isIntersecting = function(position){
@@ -427,7 +427,7 @@ window.onload = function(){
         cameraTransform.localRotationEuler = [-90,0,0];
 
         var levelGameObject = activeScene.createGameObject();
-        var levelComponent = new SnakeLevelComponent(engine);
+        var levelComponent = new SnakeLevelComponent();
         levelGameObject.addComponent(new KICK.scene.MeshRenderer());
         levelGameObject.addComponent(levelComponent);
 
