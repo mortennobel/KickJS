@@ -710,6 +710,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
+     * @extends KICK.core.ProjectAsset
      */
     mesh.Mesh = function (engine,config) {
         var gl = engine.gl,

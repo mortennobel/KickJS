@@ -62,6 +62,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config Optional
+     * @extends KICK.core.ProjectAsset
      */
     texture.RenderTexture = function (engine, config){
         var gl = engine.gl,
@@ -202,6 +203,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config Optional
+     * @extends KICK.core.ProjectAsset
      */
     texture.Texture = function (engine, config) {
         var gl = engine.gl,
@@ -655,6 +657,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config Optional
+     * @extends KICK.core.ProjectAsset
      */
     texture.MovieTexture = function (engine, config) {
         var gl = engine.gl,

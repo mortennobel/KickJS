@@ -53,6 +53,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
+     * @extends KICK.core.ProjectAsset
      */
     material.Shader = function (engine, config) {
         //todo add support for polygon offset
@@ -773,6 +774,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {KICK.core.Engine} engine
      * @param {Object} config
+     * @extends KICK.core.ProjectAsset
      */
     material.Material = function (engine,config) {
         var _name = "Material",

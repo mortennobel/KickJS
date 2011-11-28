@@ -396,6 +396,17 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * A project asset is a object that can be serialized into a project and restored at a later state.<br>
+     * The class only exist in documentation and is used to describe the behavior any project asset must implement.<br>
+     * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
+     * The config parameter is used to initialize the object and the content should match the output of the
+     * toJSON method<br>
+     * A toJSON method should exist on the object. This method should as a minimum write out the object's uid property
+     * @class ProjectAsset
+     * @namespace KICK.core
+     */
+
+    /**
      * A project is a container of all resources and assets used in a game.
      * @class Project
      * @namespace KICK.core
@@ -466,7 +477,7 @@ KICK.namespace = function (ns_string) {
          * Also increases the resource reference counter.
          * @method load
          * @param {String} uid
-         * @return {Object} resource or null if resource is not found
+         * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
         this.load = function(resourceUID){
             var resourceObject = resourceCache[resourceUID];
@@ -494,7 +505,7 @@ KICK.namespace = function (ns_string) {
          * If more objects exist with the same name, the first object is returned
          * @method loadByName
          * @param {String} name
-         * @return {Object} resource or null if resource is not found
+         * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
         this.loadByName = function(name){
             for (var uid in resourceDescriptorsByUID){
