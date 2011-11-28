@@ -60,17 +60,18 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.core.MeshData} triangle mesh
          */
         createTriangleData : function () {
+            var sqrt75 = Math.sqrt(0.75);
             return new mesh.MeshData( {
                 name: "Triangle",
                 vertex: [
                     0,1,0,
-                    -0.866025403784439,-0.5,0, // 0.866025403784439 = sqrt(.75)
-                    0.866025403784439,-0.5,0
+                    -sqrt75,-0.5,0,
+                    sqrt75,-0.5,0
                 ],
                 uv1: [
-                    0,1,
-                    -0.866025403784439,-0.5,
-                    0.866025403784439,-0.5
+                    0.5,1,
+                    0.125,0.25,
+                    1-0.125,0.25
                 ],
                 normal: [
                     0,0,1,
