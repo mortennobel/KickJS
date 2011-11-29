@@ -560,12 +560,13 @@ KICK.namespace = function (ns_string) {
             }
             resourceCache[uid] = object;
             resourceReferenceCount[uid] = 1;
-            resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
-                uid:uid,
-                name:object.name,
-                type:type,
-                config:{} // will be generated on serialization
-            });
+            if (!resourceDescriptorsByUID[uid]){ // only update if new object
+                resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
+                    uid:uid,
+                    type:type,
+                    config:{name:object.name} // will be generated on serialization
+                });
+            }
         };
 
         /**

@@ -5809,12 +5809,13 @@ KICK.namespace = function (ns_string) {
             }
             resourceCache[uid] = object;
             resourceReferenceCount[uid] = 1;
-            resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
-                uid:uid,
-                name:object.name,
-                type:type,
-                config:{} // will be generated on serialization
-            });
+//            if (!resourceDescriptorsByUID[uid]){
+                resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
+                    uid:uid,
+                    type:type,
+                    config:{name:object.name} // will be generated on serialization
+                });
+//            }
         };
 
         /**
@@ -9932,7 +9933,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             texture0 = 33984,
             _textureId = gl.createTexture(),
-            _name = "Texture", // define unique name
+            _name = "Texture",
             _wrapS =  10497,
             _wrapT = 10497,
             _minFilter = 9729,
@@ -10119,7 +10120,7 @@ KICK.namespace = function (ns_string) {
         Object.defineProperties(this,{
             /**
              * @property textureId
-             * @type {Number}
+             * @type Number
              * @protected
              */
             textureId:{
@@ -10127,7 +10128,7 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * @property name
-             * @type {String}
+             * @type String
              */
             name:{
                 get:function(){
@@ -10452,7 +10453,7 @@ KICK.namespace = function (ns_string) {
         Object.defineProperties(this,{
             /**
              * @property name
-             * @type {String}
+             * @type String
              */
             name:{
                 get:function(){
@@ -11176,6 +11177,8 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         * Flush the current shader bound - this force the shader to be reloaded (and its uniforms and vertex attributes
+         * are reassigned)
          * @method markUniformUpdated
          */
         this.markUniformUpdated = function(){
@@ -11565,7 +11568,9 @@ KICK.namespace = function (ns_string) {
             /**
              * Object with of uniforms.
              * The object has a number of named properties one for each uniform. The uniform object contains value and type.
-             * The value is always an array
+             * The value is always an array<br>
+             * Note when updating the uniform value, it is important to call the material.shader.markUniformUpdated().
+             * When the material.uniform is set to something the markUniformUpdated function is implicit called.
              * @property uniforms
              * @type Object
              */
