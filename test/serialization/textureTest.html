@@ -5,19 +5,19 @@
     <title></title>
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/resource.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
-    <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/material.js"></script>
-    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
     <script type="text/javascript">
         "use strict";
         var engine;
@@ -27,9 +27,13 @@
 
         var materials = [];
 
-         var projectData = [
+         var projectData =
+                 {
+            maxUID:100,
+            resourceDescriptors:[
             {
                 type:"KICK.texture.Texture",
+                uid:1,
                 config:{
                     name:"CORS_TEST",
                     dataURI:"http://khm0.googleapis.com/kh?v=95&x=0&y=0&z=0"
@@ -37,12 +41,13 @@
             },
             {
                 type:"KICK.texture.Texture",
+                uid:2,
                 config:{
                     name:"ProjectWhite",
                     dataURI:"kickjs://texture/white/"
                 }
             }
-        ];
+        ]};
 
         function initMaterials(vertexShaderId, fragmentShaderId){
             var shader = engine.resourceManager.getShader("kickjs://shader/unlit/");
@@ -139,7 +144,8 @@
         }
 
         function loadTextureFromProject(name){
-            texture = engine.project.load(name);
+            texture = engine.project.loadByName(name);
+            console.log(texture.name);
             var uniforms = material.uniforms;
             uniforms.mainTexture.value = texture;
         }
