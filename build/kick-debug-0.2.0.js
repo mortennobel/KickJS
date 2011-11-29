@@ -11176,6 +11176,14 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         * @method markUniformUpdated
+         */
+        this.markUniformUpdated = function(){
+            gl.boundShader = -1;
+            gl.meshShader = -1;
+        };
+
+        /**
          * @method updateShader
          * @return {Boolean} shader created successfully
          */
@@ -11253,6 +11261,8 @@ KICK.namespace = function (ns_string) {
                 };
                 this.lookupAttribute[attribute.name] = i;
             }
+
+            thisObj.markUniformUpdated();
 
             return !compileError;
         };
@@ -11527,7 +11537,8 @@ KICK.namespace = function (ns_string) {
             _shader = null,
             _uniforms = {},
             thisObj = this,
-            _renderOrder;
+            _renderOrder,
+            gl = engine.gl;
         Object.defineProperties(this,{
              /**
               * @property name
@@ -11564,6 +11575,9 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     _uniforms = newValue;
+                    if (_shader){
+                        _shader.markUniformUpdated();
+                    }
                 }
             },
             /**
@@ -11606,7 +11620,6 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
-            // todo
             _shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 

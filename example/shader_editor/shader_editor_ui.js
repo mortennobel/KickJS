@@ -548,6 +548,7 @@
             value: selectedTexture,
             type: selectedTexture.textureType === c.GL_TEXTURE_2D ? c.GL_SAMPLER_2D : c.GL_SAMPLER_CUBE
         };
+        material.shader.markUniformUpdated();
     }
 
     function updateUniformNumber(){
@@ -564,6 +565,7 @@
             value: getUniformNumberValue(uniform),
             type: uniform.type
         };
+        material.shader.markUniformUpdated();
     }
 
 
