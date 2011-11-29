@@ -209,7 +209,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             texture0 = constants.GL_TEXTURE0,
             _textureId = gl.createTexture(),
-            _name = "Texture", // define unique name
+            _name = "Texture",
             _wrapS =  constants.GL_REPEAT,
             _wrapT = constants.GL_REPEAT,
             _minFilter = constants.GL_LINEAR,
@@ -396,7 +396,7 @@ KICK.namespace = function (ns_string) {
         Object.defineProperties(this,{
             /**
              * @property textureId
-             * @type {Number}
+             * @type Number
              * @protected
              */
             textureId:{
@@ -404,7 +404,7 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * @property name
-             * @type {String}
+             * @type String
              */
             name:{
                 get:function(){
@@ -729,7 +729,7 @@ KICK.namespace = function (ns_string) {
         Object.defineProperties(this,{
             /**
              * @property name
-             * @type {String}
+             * @type String
              */
             name:{
                 get:function(){
