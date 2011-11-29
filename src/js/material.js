@@ -430,6 +430,16 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         * Flush the current shader bound - this force the shader to be reloaded (and its uniforms and vertex attributes
+         * are reassigned)
+         * @method markUniformUpdated
+         */
+        this.markUniformUpdated = function(){
+            gl.boundShader = -1;
+            gl.meshShader = -1;
+        };
+
+        /**
          * @method updateShader
          * @return {Boolean} shader created successfully
          */
@@ -507,6 +517,8 @@ KICK.namespace = function (ns_string) {
                 };
                 this.lookupAttribute[attribute.name] = i;
             }
+
+            thisObj.markUniformUpdated();
 
             return !compileError;
         };
@@ -781,7 +793,8 @@ KICK.namespace = function (ns_string) {
             _shader = null,
             _uniforms = {},
             thisObj = this,
-            _renderOrder;
+            _renderOrder,
+            gl = engine.gl;
         Object.defineProperties(this,{
              /**
               * @property name
@@ -808,7 +821,9 @@ KICK.namespace = function (ns_string) {
             /**
              * Object with of uniforms.
              * The object has a number of named properties one for each uniform. The uniform object contains value and type.
-             * The value is always an array
+             * The value is always an array<br>
+             * Note when updating the uniform value, it is important to call the material.shader.markUniformUpdated().
+             * When the material.uniform is set to something the markUniformUpdated function is implicit called.
              * @property uniforms
              * @type Object
              */
@@ -818,6 +833,9 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     _uniforms = newValue;
+                    if (_shader){
+                        _shader.markUniformUpdated();
+                    }
                 }
             },
             /**
@@ -860,7 +878,6 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
-            // todo
             _shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 
