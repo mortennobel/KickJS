@@ -5303,12 +5303,12 @@ KICK.namespace = function (ns_string) {
      * @class Engine
      * @namespace KICK.core
      * @constructor
-     * @param {String} id elementid of canvas tag
+     * @param {String} idOrElement elementid of canvas tag or the canvas element
      * @param {KICK.core.Config} config Optional, configuration object
      */
-    core.Engine = function (id, config) {
+    core.Engine = function (idOrElement, config) {
         var gl = null,
-            canvas = document.getElementById(id),
+            canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
             webGlContextNames = ["experimental-webgl","webgl"],
             thisObj = this,
             lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
@@ -5809,13 +5809,13 @@ KICK.namespace = function (ns_string) {
             }
             resourceCache[uid] = object;
             resourceReferenceCount[uid] = 1;
-//            if (!resourceDescriptorsByUID[uid]){
+            if (!resourceDescriptorsByUID[uid]){ // only update if new object
                 resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
                     uid:uid,
                     type:type,
                     config:{name:object.name} // will be generated on serialization
                 });
-//            }
+            }
         };
 
         /**
