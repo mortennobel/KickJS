@@ -70,6 +70,7 @@ KICK.namespace = function (ns_string) {
             timeScale = 1,
             contextListeners = [],
             frameListeners = [],
+            eventQueue,
             project = new core.Project(this),
             mouseInput = null,
             keyInput = null,
@@ -164,6 +165,15 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * @property eventQueue
+             * @type KICK.core.EventQueue
+             */
+            eventQueue:{
+                get:function(){
+                    return eventQueue;
+                }
+            },
+            /**
              * Time object of the engine. Is updated every frame
              * @property time
              * @type KICK.core.Time
@@ -209,15 +219,19 @@ KICK.namespace = function (ns_string) {
          * @private
          */
         this._gameLoop = function (time) {
-            this.activeScene.updateAndRender();
-            for (var i=frameListeners.length-1;i>=0;i--){
-                frameListeners[i].frameUpdated();
-            }
             deltaTime = time-lastTime;
             lastTime = time;
             deltaTime *= timeScale;
             timeSinceStart += deltaTime;
             frameCount += 1;
+            
+            eventQueue.run();
+
+            this.activeScene.updateAndRender();
+            for (var i=frameListeners.length-1;i>=0;i--){
+                frameListeners[i].frameUpdated();
+            }
+
             if (animationFrameObj !== null){
                 animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
             }
@@ -394,12 +408,83 @@ KICK.namespace = function (ns_string) {
             Object.freeze(timeObj);
 
             activeScene = new scene.Scene(thisObj);
+            eventQueue = new core.EventQueue(thisObj);
 
             timeSinceStart = 0;
             frameCount = 0;
 
             thisObj._gameLoop(lastTime);
         }());
+    };
+
+    /**
+     * Event queue let you schedule future events in the game engine. Events are invoked just before the
+     * Component.update() methods.<br>
+     * An event can run for either a single frame or for multiple frames.
+     * @class EventQueue
+     * @namespace KICK.core
+     * @param {KICK.core.Engine} engine
+     */
+    core.EventQueue = function(engine){
+        var queue = [],
+            queueSortFn = function(a,b){
+                return a.timeStart - b.timeStart;
+            },
+            time = engine.time;
+
+        /**
+         * @mehtod add
+         * @param {function} task
+         * @param {Number} timeStart Number of milliseconds from current time
+         * @param {Number} timeEnd Optional (defaults to timeStart). Number of milliseconds from current time
+         * @return {Object} event object (used for 'cancel' event)
+         */
+        this.add = function(task, timeStart, timeEnd){
+            var currentTime = time.time,
+                queueElement = {
+                task:task,
+                timeStart: timeStart+currentTime,
+                timeEnd: timeEnd+currentTime
+            };
+            core.Util.insertSorted(queueElement,queue,queueSortFn);
+            return queueElement;
+        };
+
+        /**
+         * Removes an event object from the queue.
+         * @method cancel
+         * @param {Object} eventObject (should be the object returned from the EventQueue.add method
+         */
+        this.cancel = function(eventObject){
+            core.Util.removeElementFromArray(queue,eventObject);
+        };
+
+        /**
+         * Run the event queue. This method is invoked by the Engine object just before the components are updated.
+         * @protected
+         * @method run
+         */
+        this.run = function(){
+            var i=0,
+                currentTime = time.time,
+                queueLength = queue.length,
+                queueElement;
+            for (;i<queueLength && (queueElement = queue[i]).timeStart<currentTime;i++){
+                queueElement.task();
+                if (queueElement.timeEnd<currentTime){
+                    queue.splice(i,1);
+                    queueLength--;
+                }
+            }
+        };
+
+        /**
+         * Clears the queue
+         * @method clear
+         */
+        this.clear = function(){
+            queue = [];
+        };
     };
 
     /**
