@@ -433,6 +433,7 @@ KICK.namespace = function (ns_string) {
             time = engine.time;
 
         /**
+         * Add a event to the event queue. Using timeStart = 0 will make the event run in the next frame.
          * @mehtod add
          * @param {function} task
          * @param {Number} timeStart Number of milliseconds from current time
@@ -440,7 +441,7 @@ KICK.namespace = function (ns_string) {
          * @return {Object} event object (used for 'cancel' event)
          */
         this.add = function(task, timeStart, timeEnd){
-            var currentTime = time.time,
+            var currentTime = time.time+1, // schedule for one millisecond in the future - this makes it legal for event call backs to schedule new events
                 queueElement = {
                 task:task,
                 timeStart: timeStart+currentTime,
