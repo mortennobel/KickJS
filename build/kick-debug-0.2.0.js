@@ -5572,10 +5572,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     if (!gl) {
-                        throw {
-                            name: "Error",
-                            message: "Cannot create gl-context"
-                        };
+                        return false;
                     }
                     if (thisObj.config.enableDebugContext){
                         if (window["WebGLDebugUtils"]){
@@ -5586,8 +5583,13 @@ KICK.namespace = function (ns_string) {
                     }
                     gl.enable(2929);
                     gl.enable(3089);
+                    return true;
                 };
-            initGL();
+            var success = initGL();
+            if (!success){
+                thisObj.config.webglNotFoundFn(canvas);
+                return;
+            }
 
             canvas.addEventListener("webglcontextlost", function(event) {
                 wasPaused = thisObj.paused;
@@ -6114,6 +6116,25 @@ KICK.namespace = function (ns_string) {
          * @type Number
          */
         this.checkCanvasResizeInterval = config.checkCanvasResizeInterval || 0;
+
+        /**
+         * function (or function name) with the signature function(domElement) called when WebGL cannot be initialized.
+         * Default function replaces the canvas element with an error description with a link to
+         * http://get.webgl.org/troubleshooting/
+         * @property webglNotFoundFn
+         * @type Function_or_String
+         */
+        this.webglNotFoundFn = config.webglNotFoundFn ?
+            (typeof (config.webglNotFoundFn) === "string"?
+                KICK.namespace(config.webglNotFoundFn):
+                config.webglNotFoundFn) :
+            function(domElement){
+                domElement.innerHTML = "";
+                var errorMessage = document.createElement("div");
+                errorMessage.style.cssText = domElement.style.cssText+";width:"+domElement.width+"px;height:"+domElement.height+"px;display: table-cell;vertical-align: middle;background:#ffeeee;";
+                errorMessage.innerHTML = "<div style='padding:12px;text-align: center;'><img src='http://www.khronos.org/assets/images/api_logos/webgl.png' style='width:74px;35px;margin-bottom: 10px;margin-left: auto;'><br clear='all'>It doesn't appear your computer can support WebGL.<br><br><a href=\"http://get.webgl.org/troubleshooting/\">Click here for more information.</a></div>";
+                domElement.parentNode.replaceChild(errorMessage, domElement);
+            };
     };
 
     /**
