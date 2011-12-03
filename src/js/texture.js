@@ -74,8 +74,8 @@ KICK.namespace = function (ns_string) {
             renderBuffers = [],
             thisObj = this,
             cleanUpRenderBuffers = function(){
-                for (var i=0;i<cleanUpRenderBuffers.length;i++){
-                    gl.deleteRenderbuffer(cleanUpRenderBuffers[i]);
+                for (var i=0;i<renderBuffers.length;i++){
+                    gl.deleteRenderbuffer(renderBuffers[i]);
                 }
             },
             initFBO = function (){
@@ -130,6 +130,7 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(){
+            gl.renderTarget = thisObj;
             gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
         };
 
