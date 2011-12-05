@@ -18,7 +18,10 @@
 </head>
 <body>
 <h1>Event queue test</h1>
-This test will schedule future events using a simple event queue approach.
+This test will schedule future events using a simple event queue approach.<br>
+Press '1' or '2' to start rotating. The same will schedule a 5 second flicker scheduled on second in the future.
+Releasing the '1' or '2' will aboard the flicker.
+
 <br>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 
@@ -32,7 +35,9 @@ This test will schedule future events using a simple event queue approach.
                 material,
                 eventQueue,
                 currentSpeed = 0,
-                uniforms;
+                uniforms,
+                flickerEvent,
+                flickerEventPost;
 
         this.rotationSpeed = config.rotationSpeed;
         this.keyCode = config.keyCode;
@@ -55,19 +60,24 @@ This test will schedule future events using a simple event queue approach.
                     flip = false;
 
             if (keyInput.isKeyDown(thisObj.keyCode)){ // test if key has been pressed down in this frame
-                console.log("Key down event at frame "+time.time+" frame "+time.frame);
-                eventQueue.add(function(){
+                console.log("Key down event at time "+time.time+" frame "+time.frame);
+                flickerEvent = eventQueue.add(function(){
                     if (flip ){
                         uniforms.mainColor.value = [0,0,0];
                     } else {
                         uniforms.mainColor.value = thisObj.rotationColor;
                     }
                     flip = !flip;
-                },1000,2000);
-                eventQueue.add(function(){
+                },1000,6000);
+                flickerEventPost = eventQueue.add(function(){
                     uniforms.mainColor.value = [1,1,1];
-                },2000);
-
+                },6000);
+            }
+            if (keyInput.isKeyUp(thisObj.keyCode)){
+                eventQueue.cancel(flickerEvent);
+                eventQueue.cancel(flickerEventPost);
+                uniforms.mainColor.value = [1,1,1];
+                console.log("Key up at time "+time.time+" frame "+time.frame);
             }
 
             if (keyInput.isKey(thisObj.keyCode)){ // test if key is being pressed
@@ -84,7 +94,9 @@ This test will schedule future events using a simple event queue approach.
     };
 
     // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas');
+    var engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
 
     // create a game object in [0,0,0] facing down the -z axis
     var cameraObject = engine.activeScene.createGameObject();

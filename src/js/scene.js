@@ -51,7 +51,7 @@ KICK.namespace = function (ns_string) {
         ASSERT = constants._ASSERT,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
-        thisObj = this;
+        vec4uint8ToUint32 = KICK.core.Util.vec4uint8ToUint32;
 
     /**
      * Game objects. (Always attached to a given scene).
@@ -910,7 +910,13 @@ KICK.namespace = function (ns_string) {
          */
         this.addComponent = function (component) {
             core.Util.insertSorted(component,componentsNew,sortByScriptPriority);
-            objectsById[engine.getUID(component)] = component;
+            var uid = engine.getUID(component);
+            if (ASSERT){
+                if (objectsById[uid]){
+                    core.Util.fail("Component with uid "+uid+" already exist");
+                }
+            }
+            objectsById[uid] = component;
         };
 
         /**
@@ -1133,6 +1139,10 @@ KICK.namespace = function (ns_string) {
             _layerMask = 0xffffffff,
             _renderer = new KICK.renderer.ForwardRenderer(),
             _scene,
+            pickingQueue = null,
+            pickingShader = null,
+            pickingRenderTarget = null,
+            pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
             modelViewProjectionMatrix = mat4.create(),
@@ -1150,10 +1160,10 @@ KICK.namespace = function (ns_string) {
             computeClearFlag = function(){
                 _currentClearFlags = (_clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) | (_clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
             },
-            setupClearColor = function () {
-                if (gl.currentClearColor !== _clearColor) {
-                    gl.currentClearColor = _clearColor;
-                    gl.clearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
+            setupClearColor = function (color) {
+                if (gl.currentClearColor !== color) {
+                    gl.currentClearColor = color;
+                    gl.clearColor(color[0], color[1], color[2], color[3]);
                 }
             },
             assertNumber = function(newValue,name){
@@ -1179,7 +1189,6 @@ KICK.namespace = function (ns_string) {
                 
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
-                    gl.renderTarget = _renderTarget;
                     if (_renderTarget){
                         _renderTarget.bind();
                     } else {
@@ -1187,7 +1196,7 @@ KICK.namespace = function (ns_string) {
                     }
                 }
 
-                setupClearColor();
+                setupClearColor(_clearColor);
                 gl.clear(_currentClearFlags);
 
                 if (_perspective) {
@@ -1222,6 +1231,35 @@ KICK.namespace = function (ns_string) {
                 }
                 renderableComponentsTransparent.sort(compareDistanceToCamera);
             };
+
+        /**
+         * Schedules a camera picking session. During next repaint a picking session is done. If the pick hits some
+         * game objects, then a callback is added to the event queue (and will run in next frame).
+         * @method pick
+         * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
+         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width)
+         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height)
+         * @param {Number} width Optional (default 1)
+         * @param {Number} height Optional (default 1)
+         */
+        this.pick = function(gameObjectPickedFn,x,y,width,height){
+            width = width || 1;
+            height = height || 1;
+            if (!pickingQueue){
+                pickingQueue = [];
+                pickingShader = engine.resourceManager.getShader("kickjs://shader/pick/");
+                pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
+                    dimension: gl.viewportSize
+                });
+            }
+            pickingQueue.push({
+                gameObjectPickedFn:gameObjectPickedFn,
+                x:x,
+                y:gl.viewportSize[1]-y,
+                width:width,
+                height:height
+            });
+        };
 
         /**
          * Handles the camera setup (get fast reference to transform and glcontext).
@@ -1288,17 +1326,61 @@ KICK.namespace = function (ns_string) {
         this.renderScene = function(sceneLightObj){
             setupCamera();
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
-
-            _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
-                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             }
-            _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            var renderSceneObjects = function(shader){
+                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+            };
+            renderSceneObjects();
+
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
                 gl.bindTexture(gl.TEXTURE_2D, textureId);
                 gl.generateMipmap(gl.TEXTURE_2D);
+            }
+            if (pickingQueue && pickingQueue.length>0){
+                pickingRenderTarget.bind();
+                setupClearColor(pickingClearColor);
+                gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
+                renderSceneObjects(pickingShader);
+                for (var i=pickingQueue.length-1;i>=0;i--){
+                    // create clojure
+                    (function(){
+                        var pick = pickingQueue[i],
+                            pickArrayLength = pick.width*pick.width*4,
+                            array = new Uint8Array(pickArrayLength);
+                        gl.readPixels( pick.x, pick.y, pick.width,pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE,array);
+                        var objects = [];
+                        var objectCount = {};
+                        for (var j = 0;j<pickArrayLength;j+=4){
+                            var subArray = array.subarray(j,j+4),
+                                uid = vec4uint8ToUint32(subArray);
+                            if (uid>0){
+                                if (objectCount[uid]){
+                                    objectCount[uid]++;
+                                } else {
+                                    var foundObj = _scene.getObjectByUID(uid);
+                                    if (foundObj){
+                                        objects.push(foundObj);
+                                        objectCount[uid] = 1;
+                                    }
+                                }
+                            }
+                        }
+                        if (objects.length){
+                            engine.eventQueue.add(function(){
+                                for (var i=0;i<objects.length;i++){
+                                    var obj = objects[i];
+                                    pick.gameObjectPickedFn(obj, objectCount[obj.uid]);
+                                }
+                            },0);
+                        }
+                    })();
+                }
+                pickingQueue.length = 0;
             }
         };
 
@@ -1509,10 +1591,10 @@ KICK.namespace = function (ns_string) {
              */
             clearColor:{
                 get:function(){
-                    return _clearColor;
+                    return vec4.create(_clearColor);
                 },
                 set:function(newValue){
-                    _clearColor = newValue;
+                    _clearColor = vec4.create(newValue);
                 }
             },
             /**
@@ -1717,11 +1799,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.math.mat4} modelViewMatrix
          * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
          * @param {KICK.scene.SceneLights} sceneLights
+         * @param {KICK.material.Shader} overwriteShader Optional
          */
-        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights) {
-            var shader = _material.shader;
+        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights,overwriteShader) {
+            var shader = overwriteShader || _material.shader;
             _mesh.bind(shader);
-            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
+            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights,shader);
             _mesh.render();
         };
 

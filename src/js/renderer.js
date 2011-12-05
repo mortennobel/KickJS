@@ -65,7 +65,7 @@ KICK.namespace = function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {};
+    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {};
     
     /**
      * Forward renderer
@@ -75,10 +75,10 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.renderer.Renderer
      */
     renderer.ForwardRenderer = function () {
-        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {
+        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {
             var length = renderableComponents.length;
             for (var j=0;j<length;j++){
-                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader);
             }
         };
     };

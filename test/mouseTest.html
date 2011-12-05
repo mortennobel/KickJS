@@ -47,7 +47,7 @@
 
 
             this.update = function(){
-                var frame = time.frameCount;
+                var frame = time.frame;
                 for (var i=0;i<3;i++){
                     if (mouseInput.isButtonDown(i)){
                         console.log("Mouse "+i+" down "+frame+mousePosition ());

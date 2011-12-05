@@ -1,0 +1,97 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../src/js/constants.js"></script>
+    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/resource.js"></script>
+    <script type="text/javascript" src="../src/js/math.js"></script>
+    <script type="text/javascript" src="../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../src/js/scene.js"></script>
+    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript" src="../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../src/js/material.js"></script>
+    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <h1>Picking test</h1>
+    Click on the objects to enlarge them.
+    <br>
+<canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+<script type="text/javascript">
+    // init engine (create 3d context)
+    var engine = new KICK.core.Engine('canvas');
+
+    var ClickListener = function(){
+        this.update = function(){
+            var mouseInput = this.gameObject.engine.mouseInput;
+            if (mouseInput.isButtonDown(0)){
+                function callback(gameObject, count){
+                    console.log("gameObject "+gameObject.name+" count "+count);
+                    var transform = gameObject.transform;
+                    var scale = transform.localScale;
+                    for (var i=0;i<3;i++){
+                        scale[i] += 0.1;
+                    }
+                    transform.localScale = scale;
+                }
+                camera.pick(callback,mouseInput.mousePosition[0],mouseInput.mousePosition[1],3,3);
+            }
+        }
+    };
+
+    // create a game object in [0,0,0] facing down the -z axis
+    var cameraObject = engine.activeScene.createGameObject();
+    cameraObject.transform.position = [0,0,5];
+    // create a perspective camera
+    var camera = new KICK.scene.Camera({
+        perspective: false,
+        left:-5,
+        right:5,
+        top:5,
+        bottom:-5
+    });
+    cameraObject.addComponent(camera);
+    cameraObject.addComponent(new ClickListener());
+
+    // create meshes
+    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/","kickjs://mesh/triangle/","kickjs://mesh/cube/"];
+    var colors = [[1,1,0],[1,0,0],[0,1,0],[0,0,1]];
+    for (var i=0;i<meshes.length;i++){
+        var gameObject = engine.activeScene.createGameObject();
+        gameObject.name = "Object "+(i+1);
+        var x = -2.0+4*(i%2);
+        var y = -2.0+4*Math.floor(i/2);
+        // create material
+        var material = new KICK.material.Material(engine,{
+            shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+            uniforms:{
+                mainColor: {
+                    value: colors[i],
+                    type: KICK.core.Constants.GL_FLOAT_VEC3
+                },
+                mainTexture: {
+                    value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                    type: KICK.core.Constants.GL_SAMPLER_2D
+                }
+            }
+        });
+        gameObject.transform.position = [x,y,0];
+        var meshRenderer = new KICK.scene.MeshRenderer();
+        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
+        meshRenderer.material = material;
+        gameObject.addComponent(meshRenderer);
+
+        // spawn unused ids
+        for (var j=0;j<30;j++){
+            var someObj = engine.activeScene.createGameObject();
+            someObj.name = "Random object "+j+" - "+i;
+        }
+    }
+</script>
+</body>
+</html>

@@ -3,7 +3,8 @@ KickJS
 
 ## Description
 
-A WebGL game engine for modern web-browsers.
+A WebGL game engine for modern web-browsers. KickJS provides a game oriented abstraction of WebGL and makes game
+programming in a browser easy.
 
 ## Examples
 

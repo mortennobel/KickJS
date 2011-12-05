@@ -2654,6 +2654,16 @@ KICK.namespace = function (ns_string) {
 */
 /**
 * GLSL file content
+* @property pick_fs.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property pick_vs.glsl
+* @type String
+*/
+/**
+* GLSL file content
 * @property transparent_phong_fs.glsl
 * @type String
 */
@@ -2682,7 +2692,7 @@ KICK.namespace = function (ns_string) {
 * @property unlit_vs.glsl
 * @type String
 */
-{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 color = max(diffuse,_ambient.xyz)*mainColor;\n    \n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n    vNormal= normalize(_norm * normal);\n} ","transparent_phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec4 color = vec4(max(diffuse,_ambient.xyz),1.0)*mainColor;\n\n    gl_FragColor = texture2D(mainTexture,vUv)*color+vec4(specular*specularColor,0.0);\n}\n ","transparent_phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nvoid main(void) {\n // compute position\n gl_Position = _mvProj * vec4(vertex, 1.0);\n\n vUv = uv1;\n // compute light info\n vNormal= normalize(_norm * normal);\n} ","transparent_unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n ","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}"};
+{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 color = max(diffuse,_ambient.xyz)*mainColor;\n    \n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n    vNormal= normalize(_norm * normal);\n} ","pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\n\nvoid main(void)\n{\n    gl_FragColor = gameObjectUID;\n}","pick_vs.glsl":"attribute vec3 vertex;\n\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\n\nvarying vec4 gameObjectUID;\n\nvoid main(void) {\n    // compute position\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n\n    gameObjectUID = _gameObjectUID;\n}","transparent_phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec4 color = vec4(max(diffuse,_ambient.xyz),1.0)*mainColor;\n\n    gl_FragColor = texture2D(mainTexture,vUv)*color+vec4(specular*specularColor,0.0);\n}\n ","transparent_phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nvoid main(void) {\n // compute position\n gl_Position = _mvProj * vec4(vertex, 1.0);\n\n vUv = uv1;\n // compute light info\n vNormal= normalize(_norm * normal);\n} ","transparent_unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n ","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}"};
 })();/*!
  * New BSD License
  *
@@ -5296,7 +5306,10 @@ KICK.namespace = function (ns_string) {
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
         ASSERT = false,
-        DEBUG = false;
+        DEBUG = false,
+        packIntToFloatArrayBuffer = new ArrayBuffer(4),
+        packIntToFloatInt32Buffer = new Uint32Array(packIntToFloatArrayBuffer),
+        packIntToFloatUint8Buffer = new Uint8Array(packIntToFloatArrayBuffer);
 
     /**
      * Game engine object
@@ -5315,7 +5328,7 @@ KICK.namespace = function (ns_string) {
             deltaTime = 0,
             timeObj = new core.Time(),
             timeSinceStart = 0,
-            frameCount = 0,
+            frame = 0,
             timeScale = 1,
             contextListeners = [],
             frameListeners = [],
@@ -5472,7 +5485,7 @@ KICK.namespace = function (ns_string) {
             lastTime = time;
             deltaTime *= timeScale;
             timeSinceStart += deltaTime;
-            frameCount += 1;
+            frame += 1;
             
             eventQueue.run();
 
@@ -5642,8 +5655,8 @@ KICK.namespace = function (ns_string) {
                 deltaTime:{
                     get: function(){return deltaTime;}
                 },
-                frameCount:{
-                    get: function(){return frameCount;}
+                frame:{
+                    get: function(){return frame;}
                 },
                 scale:{
                     get: function(){
@@ -5660,7 +5673,7 @@ KICK.namespace = function (ns_string) {
             eventQueue = new core.EventQueue(thisObj);
 
             timeSinceStart = 0;
-            frameCount = 0;
+            frame = 0;
 
             thisObj._gameLoop(lastTime);
         }());
@@ -5682,6 +5695,7 @@ KICK.namespace = function (ns_string) {
             time = engine.time;
 
         /**
+         * Add a event to the event queue. Using timeStart = 0 will make the event run in the next frame.
          * @mehtod add
          * @param {function} task
          * @param {Number} timeStart Number of milliseconds from current time
@@ -5689,11 +5703,11 @@ KICK.namespace = function (ns_string) {
          * @return {Object} event object (used for 'cancel' event)
          */
         this.add = function(task, timeStart, timeEnd){
-            var currentTime = time.time,
+            var currentTime = time.time+1, // schedule for one millisecond in the future - this makes it legal for event call backs to schedule new events
                 queueElement = {
                 task:task,
                 timeStart: timeStart+currentTime,
-                timeEnd: timeEnd+currentTime
+                timeEnd: (timeEnd || timeStart)+currentTime
             };
             core.Util.insertSorted(queueElement,queue,queueSortFn);
             return queueElement;
@@ -6240,7 +6254,7 @@ KICK.namespace = function (ns_string) {
          */
         /**
          * Number of frames since start. Read only
-         * @property frameCount
+         * @property frame
          * @type Number
          */
         /**
@@ -6844,6 +6858,7 @@ KICK.namespace = function (ns_string) {
         },
         /**
          * Insert the element into a sorted array
+         * @static
          * @method insertSorted
          * @param {Object} element
          * @param {Array} sortedArray
@@ -6865,6 +6880,7 @@ KICK.namespace = function (ns_string) {
         },
         /**
          * Returns a-b
+         * @static
          * @method numberSortFunction
          * @param {Number} a
          * @param {Number} b
@@ -6876,6 +6892,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Loops through array and return true if any array element strict equals the element.
          * This uses the === to compare the two elements.
+         * @static
          * @param {Array} array
          * @param {Object} element
          * @return {boolean} array contains element
@@ -6887,6 +6904,48 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return false;
+        },
+        /**
+         * Packs a Uint32 into a KICK.math.vec4
+         * @static
+         * @method uint32ToVec4
+         * @param {Number} uint32
+         * @param {KICK.math.vec4} dest
+         * @return {KICK.math.vec4}
+         */
+        uint32ToVec4 : function(uint32, dest){
+            if (!dest){
+                dest = new Float32Array(4);
+            }
+            packIntToFloatInt32Buffer[0] = uint32;
+            for (var i=0;i<4;i++){
+                dest[i] = packIntToFloatUint8Buffer[i]/255;
+            }
+            return dest;
+        },
+        /**
+         * Unpacks a KICK.math.vec4 into a Uint32
+         * @static
+         * @method vec4ToUint32
+         * @param {KICK.math.vec4} vec4
+         */
+        vec4ToUint32 : function(vec4){
+            for (var i=0;i<4;i++){
+                packIntToFloatUint8Buffer[i] = vec4[i]*255;
+            }
+            return packIntToFloatInt32Buffer[0];
+        },
+        /**
+         * Unpacks an array of uint8 into a Uint32
+         * @static
+         * @method vec4uint8ToUint32
+         * @param {Array[Number]}
+         */
+        vec4uint8ToUint32 : function(vec4uint8){
+            for (var i=0;i<4;i++){
+                packIntToFloatUint8Buffer[i] = vec4uint8[i];
+            }
+            return packIntToFloatInt32Buffer[0];
         }
     };
 
@@ -7925,7 +7984,7 @@ KICK.namespace = function (ns_string) {
         ASSERT = false,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
-        thisObj = this;
+        vec4uint8ToUint32 = KICK.core.Util.vec4uint8ToUint32;
 
     /**
      * Game objects. (Always attached to a given scene).
@@ -8784,7 +8843,13 @@ KICK.namespace = function (ns_string) {
          */
         this.addComponent = function (component) {
             core.Util.insertSorted(component,componentsNew,sortByScriptPriority);
-            objectsById[engine.getUID(component)] = component;
+            var uid = engine.getUID(component);
+            if (ASSERT){
+                if (objectsById[uid]){
+                    core.Util.fail("Component with uid "+uid+" already exist");
+                }
+            }
+            objectsById[uid] = component;
         };
 
         /**
@@ -9007,6 +9072,9 @@ KICK.namespace = function (ns_string) {
             _layerMask = 0xffffffff,
             _renderer = new KICK.renderer.ForwardRenderer(),
             _scene,
+            pickingQueue = null,
+            pickingShader = null,
+            pickingRenderTarget = null,
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
             modelViewProjectionMatrix = mat4.create(),
@@ -9024,10 +9092,10 @@ KICK.namespace = function (ns_string) {
             computeClearFlag = function(){
                 _currentClearFlags = (_clearFlagColor ? 16384 : 0) | (_clearFlagDepth ? 256 : 0);
             },
-            setupClearColor = function () {
-                if (gl.currentClearColor !== _clearColor) {
-                    gl.currentClearColor = _clearColor;
-                    gl.clearColor(_clearColor[0], _clearColor[1], _clearColor[2], _clearColor[3]);
+            setupClearColor = function (color) {
+                if (gl.currentClearColor !== color) {
+                    gl.currentClearColor = color;
+                    gl.clearColor(color[0], color[1], color[2], color[3]);
                 }
             },
             assertNumber = function(newValue,name){
@@ -9053,7 +9121,6 @@ KICK.namespace = function (ns_string) {
                 
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
-                    gl.renderTarget = _renderTarget;
                     if (_renderTarget){
                         _renderTarget.bind();
                     } else {
@@ -9061,7 +9128,7 @@ KICK.namespace = function (ns_string) {
                     }
                 }
 
-                setupClearColor();
+                setupClearColor(_clearColor);
                 gl.clear(_currentClearFlags);
 
                 if (_perspective) {
@@ -9096,6 +9163,35 @@ KICK.namespace = function (ns_string) {
                 }
                 renderableComponentsTransparent.sort(compareDistanceToCamera);
             };
+
+        /**
+         * Schedules a camera picking session. During next repaint a picking session is done. If the pick hits some
+         * game objects, then a callback is added to the event queue (and will run in next frame).
+         * @method pick
+         * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
+         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width)
+         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height)
+         * @param {Number} width Optional (default 1)
+         * @param {Number} height Optional (default 1)
+         */
+        this.pick = function(gameObjectPickedFn,x,y,width,height){
+            width = width || 1;
+            height = height || 1;
+            if (!pickingQueue){
+                pickingQueue = [];
+                pickingShader = engine.resourceManager.getShader("kickjs://shader/pick/");
+                pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
+                    dimension: gl.viewportSize
+                });
+            }
+            pickingQueue.push({
+                gameObjectPickedFn:gameObjectPickedFn,
+                x:x,
+                y:gl.viewportSize[1]-y,
+                width:width,
+                height:height
+            });
+        };
 
         /**
          * Handles the camera setup (get fast reference to transform and glcontext).
@@ -9162,17 +9258,61 @@ KICK.namespace = function (ns_string) {
         this.renderScene = function(sceneLightObj){
             setupCamera();
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
-
-            _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
-                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
             }
-            _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+            var renderSceneObjects = function(shader){
+                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+            };
+            renderSceneObjects();
+
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
                 gl.bindTexture(gl.TEXTURE_2D, textureId);
                 gl.generateMipmap(gl.TEXTURE_2D);
+            }
+            if (pickingQueue && pickingQueue.length>0){
+                pickingRenderTarget.bind();
+                setupClearColor([0,0,0,0]);
+                gl.clear(16384 | 256);
+                renderSceneObjects(pickingShader);
+                for (var i=pickingQueue.length-1;i>=0;i--){
+                    // create clojure
+                    (function(){
+                        var pick = pickingQueue[i],
+                            pickArrayLength = pick.width*pick.width*4,
+                            array = new Uint8Array(pickArrayLength);
+                        gl.readPixels( pick.x, pick.y, pick.width,pick.height, 6408, 5121,array);
+                        var objects = [];
+                        var objectCount = {};
+                        for (var j = 0;j<pickArrayLength;j+=4){
+                            var subArray = array.subarray(j,j+4),
+                                uid = vec4uint8ToUint32(subArray);
+                            if (uid>0){
+                                if (objectCount[uid]){
+                                    objectCount[uid]++;
+                                } else {
+                                    var foundObj = _scene.getObjectByUID(uid);
+                                    if (foundObj){
+                                        objects.push(foundObj);
+                                        objectCount[uid] = 1;
+                                    }
+                                }
+                            }
+                        }
+                        if (objects.length){
+                            engine.eventQueue.add(function(){
+                                for (var i=0;i<objects.length;i++){
+                                    var obj = objects[i];
+                                    pick.gameObjectPickedFn(obj, objectCount[obj.uid]);
+                                }
+                            },0);
+                        }
+                    })();
+                }
+                pickingQueue.length = 0;
             }
         };
 
@@ -9591,11 +9731,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.math.mat4} modelViewMatrix
          * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
          * @param {KICK.scene.SceneLights} sceneLights
+         * @param {KICK.material.Shader} overwriteShader Optional
          */
-        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights) {
-            var shader = _material.shader;
+        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights,overwriteShader) {
+            var shader = overwriteShader || _material.shader;
             _mesh.bind(shader);
-            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights);
+            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights,shader);
             _mesh.render();
         };
 
@@ -9900,18 +10041,18 @@ KICK.namespace = function (ns_string) {
             framebuffer = gl.createFramebuffer(),
             colorTexture = _config.colorTexture,
             depthTexture = _config.depthTexture,
-            _dimension,
+            _dimension = config.dimension,
             renderBuffers = [],
             thisObj = this,
             cleanUpRenderBuffers = function(){
-                for (var i=0;i<cleanUpRenderBuffers.length;i++){
-                    gl.deleteRenderbuffer(cleanUpRenderBuffers[i]);
+                for (var i=0;i<renderBuffers.length;i++){
+                    gl.deleteRenderbuffer(renderBuffers[i]);
                 }
             },
             initFBO = function (){
                 var validTexture = colorTexture || depthTexture,
                     renderbuffer;
-                _dimension = validTexture ? validTexture.dimension: [256,256];
+                _dimension = validTexture ? validTexture.dimension : _dimension;
                 cleanUpRenderBuffers();
                 gl.bindFramebuffer(36160, framebuffer);
 
@@ -9960,6 +10101,7 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(){
+            gl.renderTarget = thisObj;
             gl.bindFramebuffer(36160, framebuffer);
         };
 
@@ -10016,10 +10158,6 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            if (!colorTexture && !depthTexture){
-                colorTexture = new KICK.texture.Texture(engine);
-                colorTexture.setImageData(512,512,0,5121,null,"");
-            }
             initFBO();
             engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
         })();
@@ -10517,8 +10655,8 @@ KICK.namespace = function (ns_string) {
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(3553, _textureId);
 
-                if (lastGrappedFrame < timer.frameCount && _videoElement){
-                    lastGrappedFrame = timer.frameCount+_skipFrames;
+                if (lastGrappedFrame < timer.frame && _videoElement){
+                    lastGrappedFrame = timer.frame+_skipFrames;
                     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
                         gl.UNSIGNED_BYTE, _videoElement);
@@ -10833,7 +10971,7 @@ KICK.namespace = function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {};
+    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {};
     
     /**
      * Forward renderer
@@ -10843,10 +10981,10 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.renderer.Renderer
      */
     renderer.ForwardRenderer = function () {
-        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj) {
+        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {
             var length = renderableComponents.length;
             for (var j=0;j<length;j++){
-                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj);
+                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader);
             }
         };
     };
@@ -10895,9 +11033,14 @@ KICK.namespace = function (ns_string) {
         math = KICK.namespace("KICK.math"),
         mat3 = math.mat3,
         mat4 = math.mat4,
+        vec4 = math.vec4,
         core = KICK.namespace("KICK.core"),
         applyConfig = core.Util.applyConfig,
-        c = KICK.core.Constants;
+        c = KICK.core.Constants,
+        uint32ToVec4 = KICK.core.Util.uint32ToVec4,
+        tempMat4 = mat4.create(),
+        tempMat3 = mat3.create(),
+        tmpVec4 = vec4.create();
 
     /**
      * GLSL Shader object
@@ -11500,7 +11643,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {KICK.math.mat4} modelViewProjectionMatrix
-     * @param {KICK.math.mat4) transform
+     * @param {KICK.scene.Transform) transform
      * @param {KICK.scene.SceneLights} sceneLights
      */
     material.Shader.prototype.bindUniform = function(material, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
@@ -11518,13 +11661,13 @@ KICK.namespace = function (ns_string) {
             mvProj = this.lookupUniform["_mvProj"],
             norm = this.lookupUniform["_norm"],
             lightUniform,
+            gameObjectUID = this.lookupUniform["_gameObjectUID"],
             time = this.lookupUniform["_time"],
             viewport = this.lookupUniform["_viewport"],
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             otherLights = sceneLights.otherLights,
             globalTransform,
-            c = KICK.core.Constants,
             i,
             currentTexture = 0;
 
@@ -11586,7 +11729,7 @@ KICK.namespace = function (ns_string) {
         if (mv || norm){
             // todo optimize
             globalTransform = transform.getGlobalMatrix();
-            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,mat4.create());
+            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,tempMat4);
             if (mv){
                 gl.uniformMatrix4fv(mv.location,false,finalModelView);
             }
@@ -11595,13 +11738,13 @@ KICK.namespace = function (ns_string) {
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
 //                var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(finalModelView);
+                var normalMatrix = mat4.toNormalMat3(finalModelView,tempMat3);
                 gl.uniformMatrix3fv(norm.location,false,normalMatrix);
             }
         }
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,mat4.create())); // todo remove new mat4 here (make local variable?)
+            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,tempMat4));
         }
         if (ambientLight !== null){
             lightUniform =  this.lookupUniform["_ambient"];
@@ -11628,6 +11771,13 @@ KICK.namespace = function (ns_string) {
         }
         if (viewport){
             gl.uniform2fv(viewport.location, gl.viewportSize);
+        }
+        if (gameObjectUID){
+            var uidAsVec4 = uint32ToVec4(transform.gameObject.uid,tmpVec4);
+            if (this.engine.time.frame < 3){
+                console.log("transform.gameObject.uid "+transform.gameObject.uid);
+            }
+            gl.uniform4fv(gameObjectUID.location, uidAsVec4);
         }
     };
 
@@ -11729,9 +11879,15 @@ KICK.namespace = function (ns_string) {
         /**
          * Binds textures and uniforms
          * @method bind
+         * @param {KICK.math.mat4} projectionMatrix
+         * @param {KICK.math.mat4} modelViewMatrix
+         * @param {KICK.math.mat4} modelViewProjectionMatrix
+         * @param {KICK.scene.Transform} transform
+         * @param {KICK.scene.SceneLights} sceneLights
+         * @param {KICK.material.Shader} shader
          */
-        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
-            _shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
+        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights, shader){
+            shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 
         /**
@@ -13005,6 +13161,7 @@ KICK.namespace = function (ns_string) {
          * Create a default shader config based on a URL<br>
          * The following shaders are available:
          *  <ul>
+         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
@@ -13034,6 +13191,9 @@ KICK.namespace = function (ns_string) {
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/pick/")==0){
+                vertexShaderSrc = glslConstants["pick_vs.glsl"];
+                fragmentShaderSrc = glslConstants["pick_fs.glsl"];
             } else if (url.indexOf("kickjs://shader/unlit/")==0){
                 vertexShaderSrc = glslConstants["unlit_vs.glsl"];
                 fragmentShaderSrc = glslConstants["unlit_fs.glsl"];

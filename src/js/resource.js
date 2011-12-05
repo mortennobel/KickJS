@@ -409,6 +409,7 @@ KICK.namespace = function (ns_string) {
          * Create a default shader config based on a URL<br>
          * The following shaders are available:
          *  <ul>
+         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
@@ -438,6 +439,9 @@ KICK.namespace = function (ns_string) {
             } else if (url.indexOf("kickjs://shader/error/")==0){
                 vertexShaderSrc = glslConstants["error_vs.glsl"];
                 fragmentShaderSrc = glslConstants["error_fs.glsl"];
+            } else if (url.indexOf("kickjs://shader/pick/")==0){
+                vertexShaderSrc = glslConstants["pick_vs.glsl"];
+                fragmentShaderSrc = glslConstants["pick_fs.glsl"];
             } else if (url.indexOf("kickjs://shader/unlit/")==0){
                 vertexShaderSrc = glslConstants["unlit_vs.glsl"];
                 fragmentShaderSrc = glslConstants["unlit_fs.glsl"];

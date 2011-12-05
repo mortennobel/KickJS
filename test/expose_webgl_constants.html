@@ -17,7 +17,9 @@
 
 
         function initKick() {
-            engine = new KICK.core.Engine('canvas');
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
             var gl = engine.gl;
             for (var g in gl){
                 if (typeof gl[g] !== "function" && g.charCodeAt(0)<"a".charCodeAt(0)){

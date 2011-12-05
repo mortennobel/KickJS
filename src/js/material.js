@@ -42,9 +42,14 @@ KICK.namespace = function (ns_string) {
         math = KICK.namespace("KICK.math"),
         mat3 = math.mat3,
         mat4 = math.mat4,
+        vec4 = math.vec4,
         core = KICK.namespace("KICK.core"),
         applyConfig = core.Util.applyConfig,
-        c = KICK.core.Constants;
+        c = KICK.core.Constants,
+        uint32ToVec4 = KICK.core.Util.uint32ToVec4,
+        tempMat4 = mat4.create(),
+        tempMat3 = mat3.create(),
+        tmpVec4 = vec4.create();
 
     /**
      * GLSL Shader object
@@ -647,7 +652,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {KICK.math.mat4} modelViewProjectionMatrix
-     * @param {KICK.math.mat4) transform
+     * @param {KICK.scene.Transform) transform
      * @param {KICK.scene.SceneLights} sceneLights
      */
     material.Shader.prototype.bindUniform = function(material, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
@@ -665,13 +670,13 @@ KICK.namespace = function (ns_string) {
             mvProj = this.lookupUniform["_mvProj"],
             norm = this.lookupUniform["_norm"],
             lightUniform,
+            gameObjectUID = this.lookupUniform["_gameObjectUID"],
             time = this.lookupUniform["_time"],
             viewport = this.lookupUniform["_viewport"],
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             otherLights = sceneLights.otherLights,
             globalTransform,
-            c = KICK.core.Constants,
             i,
             currentTexture = 0;
 
@@ -733,7 +738,7 @@ KICK.namespace = function (ns_string) {
         if (mv || norm){
             // todo optimize
             globalTransform = transform.getGlobalMatrix();
-            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,mat4.create());
+            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,tempMat4);
             if (mv){
                 gl.uniformMatrix4fv(mv.location,false,finalModelView);
             }
@@ -742,13 +747,13 @@ KICK.namespace = function (ns_string) {
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
 //                var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(finalModelView);
+                var normalMatrix = mat4.toNormalMat3(finalModelView,tempMat3);
                 gl.uniformMatrix3fv(norm.location,false,normalMatrix);
             }
         }
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,mat4.create())); // todo remove new mat4 here (make local variable?)
+            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,tempMat4));
         }
         if (ambientLight !== null){
             lightUniform =  this.lookupUniform["_ambient"];
@@ -775,6 +780,13 @@ KICK.namespace = function (ns_string) {
         }
         if (viewport){
             gl.uniform2fv(viewport.location, gl.viewportSize);
+        }
+        if (gameObjectUID){
+            var uidAsVec4 = uint32ToVec4(transform.gameObject.uid,tmpVec4);
+            if (this.engine.time.frame < 3){
+                console.log("transform.gameObject.uid "+transform.gameObject.uid);
+            }
+            gl.uniform4fv(gameObjectUID.location, uidAsVec4);
         }
     };
 
@@ -876,9 +888,15 @@ KICK.namespace = function (ns_string) {
         /**
          * Binds textures and uniforms
          * @method bind
+         * @param {KICK.math.mat4} projectionMatrix
+         * @param {KICK.math.mat4} modelViewMatrix
+         * @param {KICK.math.mat4} modelViewProjectionMatrix
+         * @param {KICK.scene.Transform} transform
+         * @param {KICK.scene.SceneLights} sceneLights
+         * @param {KICK.material.Shader} shader
          */
-        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
-            _shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
+        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights, shader){
+            shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 
         /**

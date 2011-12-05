@@ -47,7 +47,10 @@ KICK.namespace = function (ns_string) {
         constants = core.Constants,
         scene = KICK.namespace("KICK.scene"),
         ASSERT = constants._ASSERT,
-        DEBUG = constants._DEBUG;
+        DEBUG = constants._DEBUG,
+        packIntToFloatArrayBuffer = new ArrayBuffer(4),
+        packIntToFloatInt32Buffer = new Uint32Array(packIntToFloatArrayBuffer),
+        packIntToFloatUint8Buffer = new Uint8Array(packIntToFloatArrayBuffer);
 
     /**
      * Game engine object
@@ -66,7 +69,7 @@ KICK.namespace = function (ns_string) {
             deltaTime = 0,
             timeObj = new core.Time(),
             timeSinceStart = 0,
-            frameCount = 0,
+            frame = 0,
             timeScale = 1,
             contextListeners = [],
             frameListeners = [],
@@ -223,7 +226,7 @@ KICK.namespace = function (ns_string) {
             lastTime = time;
             deltaTime *= timeScale;
             timeSinceStart += deltaTime;
-            frameCount += 1;
+            frame += 1;
             
             eventQueue.run();
 
@@ -393,8 +396,8 @@ KICK.namespace = function (ns_string) {
                 deltaTime:{
                     get: function(){return deltaTime;}
                 },
-                frameCount:{
-                    get: function(){return frameCount;}
+                frame:{
+                    get: function(){return frame;}
                 },
                 scale:{
                     get: function(){
@@ -411,7 +414,7 @@ KICK.namespace = function (ns_string) {
             eventQueue = new core.EventQueue(thisObj);
 
             timeSinceStart = 0;
-            frameCount = 0;
+            frame = 0;
 
             thisObj._gameLoop(lastTime);
         }());
@@ -445,7 +448,7 @@ KICK.namespace = function (ns_string) {
                 queueElement = {
                 task:task,
                 timeStart: timeStart+currentTime,
-                timeEnd: timeEnd+currentTime
+                timeEnd: (timeEnd || timeStart)+currentTime
             };
             core.Util.insertSorted(queueElement,queue,queueSortFn);
             return queueElement;
@@ -992,7 +995,7 @@ KICK.namespace = function (ns_string) {
          */
         /**
          * Number of frames since start. Read only
-         * @property frameCount
+         * @property frame
          * @type Number
          */
         /**
@@ -1596,6 +1599,7 @@ KICK.namespace = function (ns_string) {
         },
         /**
          * Insert the element into a sorted array
+         * @static
          * @method insertSorted
          * @param {Object} element
          * @param {Array} sortedArray
@@ -1617,6 +1621,7 @@ KICK.namespace = function (ns_string) {
         },
         /**
          * Returns a-b
+         * @static
          * @method numberSortFunction
          * @param {Number} a
          * @param {Number} b
@@ -1628,6 +1633,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Loops through array and return true if any array element strict equals the element.
          * This uses the === to compare the two elements.
+         * @static
          * @param {Array} array
          * @param {Object} element
          * @return {boolean} array contains element
@@ -1639,6 +1645,48 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return false;
+        },
+        /**
+         * Packs a Uint32 into a KICK.math.vec4
+         * @static
+         * @method uint32ToVec4
+         * @param {Number} uint32
+         * @param {KICK.math.vec4} dest
+         * @return {KICK.math.vec4}
+         */
+        uint32ToVec4 : function(uint32, dest){
+            if (!dest){
+                dest = new Float32Array(4);
+            }
+            packIntToFloatInt32Buffer[0] = uint32;
+            for (var i=0;i<4;i++){
+                dest[i] = packIntToFloatUint8Buffer[i]/255;
+            }
+            return dest;
+        },
+        /**
+         * Unpacks a KICK.math.vec4 into a Uint32
+         * @static
+         * @method vec4ToUint32
+         * @param {KICK.math.vec4} vec4
+         */
+        vec4ToUint32 : function(vec4){
+            for (var i=0;i<4;i++){
+                packIntToFloatUint8Buffer[i] = vec4[i]*255;
+            }
+            return packIntToFloatInt32Buffer[0];
+        },
+        /**
+         * Unpacks an array of uint8 into a Uint32
+         * @static
+         * @method vec4uint8ToUint32
+         * @param {Array[Number]}
+         */
+        vec4uint8ToUint32 : function(vec4uint8){
+            for (var i=0;i<4;i++){
+                packIntToFloatUint8Buffer[i] = vec4uint8[i];
+            }
+            return packIntToFloatInt32Buffer[0];
         }
     };
 

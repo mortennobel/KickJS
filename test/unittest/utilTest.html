@@ -11,8 +11,8 @@
 
         <link rel="stylesheet" href="/vendor/prettify/prettify-min.css">
         <link rel="stylesheet" href="/css/docs-min.css">
-<script src="../../src/js/math.js"></script>
 <script src="../../src/js/constants.js"></script>
+<script src="../../src/js/math.js"></script>
 <script src="../../src/js/core.js"></script>
 <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
 </head>
@@ -140,6 +140,33 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.isTrue(AObj.a === AConf.a);
             Assert.isTrue(AObj.b === AConf.b);
             Assert.isTrue(AObj.c !== AConf.c);
+        },
+        testPackIntToFloat : function(){
+            var Assert = Y.Assert,
+                    vec4,
+                    res;
+            for (var i=1;i<500000;i++){
+                vec4 = KICK.core.Util.uint32ToVec4(i);
+                res = KICK.core.Util.vec4ToUint32(vec4);
+                Assert.isTrue(i === res);
+            }
+            vec4 = new Float32Array(4);
+            for (var i=1;i<500000;i++){
+                KICK.core.Util.uint32ToVec4(i,vec4);
+                res = KICK.core.Util.vec4ToUint32(vec4);
+                Assert.isTrue(i === res);
+            }
+            var uint8 = new Uint8Array(4);
+            for (var i=1;i<500000;i++){
+                KICK.core.Util.uint32ToVec4(i,vec4);
+                for (var j=0;j<4;j++){
+                    uint8[j] = vec4[j]*255;
+                }
+                res = KICK.core.Util.vec4uint8ToUint32(uint8);
+                Assert.isTrue(i === res);
+            }
+
+
         }
     });
 

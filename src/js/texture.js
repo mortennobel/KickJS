@@ -70,7 +70,7 @@ KICK.namespace = function (ns_string) {
             framebuffer = gl.createFramebuffer(),
             colorTexture = _config.colorTexture,
             depthTexture = _config.depthTexture,
-            _dimension,
+            _dimension = config.dimension,
             renderBuffers = [],
             thisObj = this,
             cleanUpRenderBuffers = function(){
@@ -81,7 +81,7 @@ KICK.namespace = function (ns_string) {
             initFBO = function (){
                 var validTexture = colorTexture || depthTexture,
                     renderbuffer;
-                _dimension = validTexture ? validTexture.dimension: [256,256];
+                _dimension = validTexture ? validTexture.dimension : _dimension;
                 cleanUpRenderBuffers();
                 gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
 
@@ -187,10 +187,6 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            if (!colorTexture && !depthTexture){
-                colorTexture = new KICK.texture.Texture(engine);
-                colorTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
-            }
             initFBO();
             engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
         })();
@@ -688,8 +684,8 @@ KICK.namespace = function (ns_string) {
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
 
-                if (lastGrappedFrame < timer.frameCount && _videoElement){
-                    lastGrappedFrame = timer.frameCount+_skipFrames;
+                if (lastGrappedFrame < timer.frame && _videoElement){
+                    lastGrappedFrame = timer.frame+_skipFrames;
                     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
                         gl.UNSIGNED_BYTE, _videoElement);

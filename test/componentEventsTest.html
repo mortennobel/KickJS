@@ -27,14 +27,14 @@
             var time = engine.time;
             var gameObject = engine.activeScene.createGameObject();
             var component = {
-                activated: function () {log("Component 1 activated(). Frame "+time.frameCount);},
-                update: function () {log("Component 1 update(). Frame "+time.frameCount);},
+                activated: function () {log("Component 1 activated(). Frame "+time.frame);},
+                update: function () {log("Component 1 update(). Frame "+time.frame);},
                 lateUpdate: function () {
-                    log("Component 1 lateUpdate(). Calling removeComponent. Frame "+time.frameCount);
+                    log("Component 1 lateUpdate(). Calling removeComponent. Frame "+time.frame);
                     gameObject.removeComponent(this);
                 },
-                deactivated: function () {log("Component 1 deactivated(). Frame "+time.frameCount);},
-                render: function (gl) {log("Component 1 render(). Frame "+time.frameCount);}
+                deactivated: function () {log("Component 1 deactivated(). Frame "+time.frame);},
+                render: function (gl) {log("Component 1 render(). Frame "+time.frame);}
             };
             gameObject.addComponent(component);
         }
@@ -45,14 +45,14 @@
             var time = engine.time;
             var gameObject = engine.activeScene.createGameObject();
             var component = {
-                activated: function () {log("Component 1 activated(). Frame "+time.frameCount);},
-                update: function () {log("Component 1 update(). Frame "+time.frameCount);},
+                activated: function () {log("Component 1 activated(). Frame "+time.frame);},
+                update: function () {log("Component 1 update(). Frame "+time.frame);},
                 lateUpdate: function () {
-                    log("Component 1 lateUpdate(). Calling removeComponent. Frame "+time.frameCount);
+                    log("Component 1 lateUpdate(). Calling removeComponent. Frame "+time.frame);
                     gameObject.destroy();
                 },
-                deactivated: function () {log("Component 1 deactivated(). Frame "+time.frameCount);},
-                render: function (gl) {log("Component 1 render(). Frame "+time.frameCount);}
+                deactivated: function () {log("Component 1 deactivated(). Frame "+time.frame);},
+                render: function (gl) {log("Component 1 render(). Frame "+time.frame);}
             };
             gameObject.addComponent(component);
         }
@@ -72,25 +72,25 @@
             var gameObject = engine.activeScene.createGameObject();
             var componentA = {
                 scriptPriority:1,
-                activated: function () {log("Component A activated(). Frame "+time.frameCount);},
-                update: function () {log("Component A update(). Frame "+time.frameCount);},
+                activated: function () {log("Component A activated(). Frame "+time.frame);},
+                update: function () {log("Component A update(). Frame "+time.frame);},
                 lateUpdate: function () {
-                    log("Component A lateUpdate(). Calling removeComponent. Frame "+time.frameCount);
+                    log("Component A lateUpdate(). Calling removeComponent. Frame "+time.frame);
                     gameObject.removeComponent(this);
                 },
-                deactivated: function () {log("Component A deactivated(). Frame "+time.frameCount);},
-                render: function (gl) {log("Component A render(). Frame "+time.frameCount);}
+                deactivated: function () {log("Component A deactivated(). Frame "+time.frame);},
+                render: function (gl) {log("Component A render(). Frame "+time.frame);}
             };
             var componentB = {
                 scriptPriority:2,
-                activated: function () {log("Component B activated(). Frame "+time.frameCount);},
-                update: function () {log("Component B update(). Frame "+time.frameCount);},
+                activated: function () {log("Component B activated(). Frame "+time.frame);},
+                update: function () {log("Component B update(). Frame "+time.frame);},
                 lateUpdate: function () {
-                    log("Component B lateUpdate(). Calling removeComponent. Frame "+time.frameCount);
+                    log("Component B lateUpdate(). Calling removeComponent. Frame "+time.frame);
                     gameObject.removeComponent(this);
                 },
-                deactivated: function () {log("Component B deactivated(). Frame "+time.frameCount);},
-                render: function (gl) {log("Component B render(). Frame "+time.frameCount);}
+                deactivated: function () {log("Component B deactivated(). Frame "+time.frame);},
+                render: function (gl) {log("Component B render(). Frame "+time.frame);}
             };
             if (isAB) {
                 gameObject.addComponent(componentA);
