@@ -216,11 +216,18 @@ KICK.namespace = function (ns_string) {
             }
         });
 
-
+        /**
+         * @method isFullScreenSupported
+         * @return Boolean
+         */
         this.isFullScreenSupported = function(){
             return canvas.requestFullscreen || canvas.webkitRequestFullScreen || canvas.mozRequestFullScreen;
         };
 
+        /**
+         * @method setFullscreen
+         * @param {Boolean} fullscreen
+         */
         this.setFullscreen = function(fullscreen){
             if (this.isFullScreenSupported()){
                 if (fullscreen){
@@ -254,8 +261,7 @@ KICK.namespace = function (ns_string) {
                     }
                 }
             }
-
-        }
+        };
 
         /**
          * @method _gameLoop
@@ -319,6 +325,10 @@ KICK.namespace = function (ns_string) {
             contextListeners.push(contextLostListener);
         };
 
+        /**
+         * @method removeContextListener
+         * @param contextLostListener
+         */
         this.removeContextListener = function(contextLostListener){
             return core.Util.removeElementFromArray(contextListeners,contextLostListener);
         };
