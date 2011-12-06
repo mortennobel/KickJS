@@ -225,6 +225,8 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Note that fullscreen needs to be invoked directly from a keyboard event or a mouse event from outside the
+         * gameLoop. This means it is currently not possible to set fullscreen from a Component's update method.
          * @method setFullscreen
          * @param {Boolean} fullscreen
          */
