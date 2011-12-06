@@ -6,6 +6,7 @@ uniform mat4 _mvProj;
 uniform mat3 _norm;
 
 varying vec2 vUv;
+varying vec3 vNormal;
 
 void main(void) {
     gl_Position = _mvProj * vec4(vertex, 1.0);
