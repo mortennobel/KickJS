@@ -1121,6 +1121,7 @@ KICK.namespace = function (ns_string) {
         var gl,
             thisObj = this,
             transform,
+            engine,
             c = KICK.core.Constants,
             _renderTarget = null,
             _fieldOfView = 60,
@@ -1267,8 +1268,8 @@ KICK.namespace = function (ns_string) {
          * @method activated
          */
         this.activated = function(){
-            var gameObject = this.gameObject,
-                engine = gameObject.engine;
+            var gameObject = this.gameObject;
+            engine = gameObject.engine;
             transform = gameObject.transform;
             gl = engine.gl;
             _scene = gameObject.scene;

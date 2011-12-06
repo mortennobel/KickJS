@@ -9054,6 +9054,7 @@ KICK.namespace = function (ns_string) {
         var gl,
             thisObj = this,
             transform,
+            engine,
             c = KICK.core.Constants,
             _renderTarget = null,
             _fieldOfView = 60,
@@ -9075,6 +9076,7 @@ KICK.namespace = function (ns_string) {
             pickingQueue = null,
             pickingShader = null,
             pickingRenderTarget = null,
+            pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
             modelViewMatrix = mat4.create(),
             modelViewProjectionMatrix = mat4.create(),
@@ -9199,8 +9201,8 @@ KICK.namespace = function (ns_string) {
          * @method activated
          */
         this.activated = function(){
-            var gameObject = this.gameObject,
-                engine = gameObject.engine;
+            var gameObject = this.gameObject;
+            engine = gameObject.engine;
             transform = gameObject.transform;
             gl = engine.gl;
             _scene = gameObject.scene;
@@ -9275,7 +9277,7 @@ KICK.namespace = function (ns_string) {
             }
             if (pickingQueue && pickingQueue.length>0){
                 pickingRenderTarget.bind();
-                setupClearColor([0,0,0,0]);
+                setupClearColor(pickingClearColor);
                 gl.clear(16384 | 256);
                 renderSceneObjects(pickingShader);
                 for (var i=pickingQueue.length-1;i>=0;i--){
@@ -9523,10 +9525,10 @@ KICK.namespace = function (ns_string) {
              */
             clearColor:{
                 get:function(){
-                    return _clearColor;
+                    return vec4.create(_clearColor);
                 },
                 set:function(newValue){
-                    _clearColor = newValue;
+                    _clearColor = vec4.create(newValue);
                 }
             },
             /**
