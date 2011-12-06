@@ -5,7 +5,8 @@
 </head>
 <body>
 <h1>KickJS | Tutorial | 01 - Hello triangle world</h1>
-
+This example shows how to create a scene using script. The scene is composed of two mesh objects (triangle and cube) and
+a camera.
 <!-- Tutorial start -->
 <!--<script type="text/javascript" src="../../js/webgl-debug.js"></script>-->
     <!--<script type="text/javascript" src="../../js/kick-debug-0.2.0.js"></script>-->
@@ -48,7 +49,7 @@
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer(gameObject);
+        var meshRenderer = new KICK.scene.MeshRenderer();
         meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);

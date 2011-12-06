@@ -116,7 +116,7 @@ Pressing '3' will activate slow motion time (10% of actual time)<br><br>
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer(gameObject);
+        var meshRenderer = new KICK.scene.MeshRenderer();
         meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
