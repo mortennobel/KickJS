@@ -24,7 +24,9 @@
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 <script type="text/javascript">
     // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas');
+    var engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
 
     var ClickListener = function(){
         this.update = function(){
