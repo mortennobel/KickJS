@@ -2022,7 +2022,7 @@ KICK.namespace = function (ns_string) {
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
                 // compute light direction (note direction from surface towards camera)
-                vec4.set([0,0,1],directionalLightDirection);
+                vec4.set([0,0,-1],directionalLightDirection);
                 quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
 
                 // transform to eye space
