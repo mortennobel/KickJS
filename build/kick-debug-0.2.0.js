@@ -5475,6 +5475,47 @@ KICK.namespace = function (ns_string) {
             }
         });
 
+
+        this.isFullScreenSupported = function(){
+            return canvas.requestFullscreen || canvas.webkitRequestFullScreen || canvas.mozRequestFullScreen;
+        };
+
+        this.setFullscreen = function(fullscreen){
+            if (this.isFullScreenSupported()){
+                if (fullscreen){
+                    if (canvas.requestFullscreen){
+                        canvas.requestFullscreen();
+                    } else if (canvas.webkitRequestFullScreen){
+                        canvas.onwebkitfullscreenchange = function() {
+                            if(document.webkitIsFullScreen) {
+                                canvas.originalWidth = canvas.width;
+                                canvas.originalHeight = canvas.height;
+                                canvas.width = screen.width;
+                                canvas.height = screen.height;
+
+                            } else {
+                                canvas.width = canvas.originalWidth;
+                                canvas.height = canvas.originalHeight;
+                            }
+                            thisObj.canvasResized();
+                        }
+                        canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+                    } else if (canvas.mozRequestFullScreen){
+                        canvas.mozRequestFullScreen();
+                    }
+                } else {
+                    if (document.exitFullscreen){
+                        document.exitFullscreen();
+                    } else if (document.webkitCancelFullScreen){
+                        document.webkitCancelFullScreen();
+                    } else if (document.webkitCancelFullScreen){
+                        document.webkitCancelFullScreen();
+                    }
+                }
+            }
+
+        }
+
         /**
          * @method _gameLoop
          * @param {Number} time current time in milliseconds
