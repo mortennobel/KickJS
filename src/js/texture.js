@@ -69,7 +69,6 @@ KICK.namespace = function (ns_string) {
             _config = config || {},
             framebuffer = gl.createFramebuffer(),
             colorTexture = _config.colorTexture,
-            depthTexture = _config.depthTexture,
             _dimension = config.dimension,
             renderBuffers = [],
             thisObj = this,
@@ -79,9 +78,8 @@ KICK.namespace = function (ns_string) {
                 }
             },
             initFBO = function (){
-                var validTexture = colorTexture || depthTexture,
-                    renderbuffer;
-                _dimension = validTexture ? validTexture.dimension : _dimension;
+                var renderbuffer;
+                _dimension = colorTexture ? colorTexture.dimension : _dimension;
                 cleanUpRenderBuffers();
                 gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
 
@@ -95,15 +93,12 @@ KICK.namespace = function (ns_string) {
                     renderBuffers.push(renderbuffer);
                 }
 
-                if (depthTexture){
-                    gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_TEXTURE_2D, depthTexture.textureId, 0);
-                } else {
-                    renderbuffer = gl.createRenderbuffer();
-                    gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
-                    gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_DEPTH_COMPONENT16, _dimension[0], _dimension[1]);
-                    gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_RENDERBUFFER, renderbuffer);
-                    renderBuffers.push(renderbuffer);
-                }
+                renderbuffer = gl.createRenderbuffer();
+                gl.bindRenderbuffer(constants.GL_RENDERBUFFER, renderbuffer);
+                gl.renderbufferStorage(constants.GL_RENDERBUFFER, constants.GL_DEPTH_COMPONENT16, _dimension[0], _dimension[1]);
+                gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_RENDERBUFFER, renderbuffer);
+                renderBuffers.push(renderbuffer);
+
                 if (constants._ASSERT){
                     var frameBufferStatus = gl.checkFramebufferStatus( constants.GL_FRAMEBUFFER );
                     if (frameBufferStatus !== constants.GL_FRAMEBUFFER_COMPLETE){
@@ -152,14 +147,6 @@ KICK.namespace = function (ns_string) {
             colorTexture:{
                 get: function(){ return colorTexture; },
                 set: function(newValue){ colorTexture = newValue; initFBO(); }
-            },
-            /**
-             * @property depthTexture
-             * @type KICK.texture.Texture
-             */
-            depthTexture:{
-                get: function(){ return depthTexture; },
-                set: function(newValue){ depthTexture = newValue; initFBO(); }
             }
         });
 
@@ -181,8 +168,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 uid: thisObj.uid,
-                colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture),
-                depthTexture: KICK.core.Util.getJSONReference(engine, depthTexture)
+                colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture)
             };
         };
 
@@ -333,22 +319,43 @@ KICK.namespace = function (ns_string) {
                 gl.generateMipmap(_textureType);
             }
         };
-        
+
         /**
-         * Set a image using a raw bytearray in a specified format
+         * @method isFPTexturesSupported
+         * @return {Boolean}
+         */
+        this.isFPTexturesSupported = function(){
+            var res = gl.isTexFloatEnabled;
+            if (typeof res !== 'boolean'){
+                res = gl.getExtension("OES_texture_float"); // this has the side effect of enabling the extension
+                gl.isTexFloatEnabled = res;
+            }
+            return res;
+        };
+
+        /**
+         * Set a image using a raw bytearray in a specified format.
+         * GL_FLOAT should only be used if floating point textures is supported (See Texture.isFPTexturesSupported() ).
          * @method setImageData
          * @param {Number} width image width in pixels
          * @param {Number} height image height in pixels
          * @param {Number} border image border in pixels
-         * @param {Object} type GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5
+         * @param {Object} type GL_FLOAT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5
          * @param {Array} pixels array of pixels (may be null)
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function(width, height, border, type, pixels, dataURI){
             recreateTextureIfDifferentType();
-
+            if (type === constants.GL_FLOAT && !gl.isTexFloatEnabled){
+                var res = thisObj.isFPTexturesSupported(); // enable extension
+                if (!res){
+                    KICK.core.Util.fail("OES_texture_float unsupported on the platform. Using GL_UNSIGNED_BYTE instead of GL_FLOAT.");
+                    type = constants.GL_UNSIGNED_BYTE;
+                }
+            }
             if (constants._ASSERT){
-                if (type !== constants.GL_UNSIGNED_BYTE &&
+                if (type !== constants.GL_FLOAT &&
+                    type !== constants.GL_UNSIGNED_BYTE &&
                     type !== constants.GL_UNSIGNED_SHORT_4_4_4_4  &&
                     type !== constants.GL_UNSIGNED_SHORT_5_5_5_1 &&
                     type !== constants.GL_UNSIGNED_SHORT_5_6_5 ){
@@ -359,13 +366,14 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("Texture.setImageData only supported by TEXTURE_2D");
                 return;
             }
+            var format = _intFormat;
 
             vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
             thisObj.bind(0); // bind to texture slot 0
             gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
-            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, width, height, border, _intFormat, type, pixels);
+            gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, width, height, border, format, type, pixels);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
