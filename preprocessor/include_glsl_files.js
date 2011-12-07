@@ -23,6 +23,11 @@ if (index === -1){
 }
 index += searchString.length;
 
+function trimStrings(str){
+    return str.replace(/[ \t]{2,}/g, ' ') // remove double whitespaces
+        .replace(/[ \n]{2,}/g, '\n');  // remove double line breaks
+}
+
 function modifyString(srcString, index, jsonObj){
     var str = srcString.substr(0,index)+"\n";
     for (var name in jsonObj){
@@ -31,7 +36,9 @@ function modifyString(srcString, index, jsonObj){
         str += "* @property "+name+"\n";
         str += "* @type String\n";
         str += "*/\n";
+        jsonObj[name] = trimStrings(jsonObj[name]);
     }
+
     str += JSON.stringify(jsonObj);
     str += ";\n";
     str += "})();";
