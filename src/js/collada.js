@@ -42,6 +42,7 @@ KICK.namespace = function (ns_string) {
     var importer = KICK.namespace("KICK.importer"),
         math = KICK.namespace("KICK.math"),
         quat4 = math.quat4,
+        mat4 = math.mat4,
         getXMLElementById = function(doc, id){
             return doc.querySelector("[id=" + id + "]");
         };
@@ -289,7 +290,8 @@ KICK.namespace = function (ns_string) {
                     tagName,
                     meshChild,
                     name = geometry.getAttribute('name'),
-                    destMeshData = new KICK.mesh.MeshData({name:name}),
+                    destMeshDataArray = [],
+                    destMeshData,
                     mesh = geometry.getElementsByTagName("mesh");
                 if (mesh.length==0){
                     return null;
@@ -297,23 +299,26 @@ KICK.namespace = function (ns_string) {
                 mesh = mesh[0];
                 meshChild = mesh.firstChild;
                 while (meshChild !== null){
+                    destMeshData = new KICK.mesh.MeshData({name:name});
                     tagName = meshChild.tagName;
                     if (tagName === "lines"){
-                        console.log("lines");
-                    } else if (tagName === "linestrips"){
+                        console.log("lines - unsupported");
+                    } else if (tagName === "linestrips - unsupported"){
                         console.log("linestrips");
                     } else if (tagName === "polygons"){
-                        console.log("polygons");
+                        console.log("polygons  - unsupported");
                     } else if (tagName === "polylist" || tagName === "triangles"){
                         buildFromPolyList(meshChild,destMeshData);
+                        destMeshDataArray.push(destMeshData);
                     } else if (tagName === "trifans"){
                         console.log("trifans unsupported");
                     } else if (tagName === "tristrips"){
-                        buildFromTrianglestrips(meshChild);
+                        buildFromTrianglestrips(meshChild,destMeshData);
+                        destMeshDataArray.push(destMeshData);
                     }
                     meshChild = meshChild.nextSibling;
                 }
-                return destMeshData;
+                return destMeshDataArray;
             };
 
 
@@ -333,8 +338,8 @@ KICK.namespace = function (ns_string) {
         geometries = libraryGeometries.getElementsByTagName("geometry");
         var gameObjectsCreated = [];
         var meshCache = {};
-        var getMeshById = function(engine, meshid){
-            var mesh,
+        var getMeshesById = function(engine, meshid){
+            var meshArray = [],
                 k,
                 geometry;
             if (meshCache[meshid]){
@@ -346,13 +351,15 @@ KICK.namespace = function (ns_string) {
             for (k=0;k<geometries.length;k++){
                 geometry = geometries[k];
                 if (geometry.getAttribute("id") === meshid){
-                    var meshData = buildMeshData(colladaDOM, engine, geometry);
-                    mesh = new KICK.mesh.Mesh(engine, {meshData:meshData});
+                    var meshDataArray = buildMeshData(colladaDOM, engine, geometry);
+                    for (var i=0;i<meshDataArray.length;i++){
+                        meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshDataArray[i]}));
+                    }
                     break;
                 }
             }
-            meshCache[meshid] = mesh;
-            return mesh;
+            meshCache[meshid] = meshArray;
+            return meshArray;
         };
 
         var updateTransform = function(transform, node){
@@ -370,32 +377,39 @@ KICK.namespace = function (ns_string) {
                 }
             } else if (tagName === "scale"){
                 transform.localScale = stringToArray(node.textContent);
+            } else if (tagName === "matrix"){
+                var matrix = stringToArray(node.textContent);
+                var decomposedMatrix = mat4.decompose(matrix);
+                transform.localPosition = decomposedMatrix[0];
+                transform.localRotation = decomposedMatrix[1];
+                transform.localScale = decomposedMatrix[2];
             }
         };
 
         var createMeshRenderer = function(gameObject, node){
             var url = node.getAttribute("url"),
-                meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer;
             if (url){
                 url = url.substring(1);
             }
             var shader = new KICK.material.Shader(engine);
 
             shader.updateShader();
-            var url = node.getAttribute("url");
+            var meshes = getMeshesById(engine,url);
+            for (var i=0;i<meshes.length;i++){
+                meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer.mesh = meshes[i];
+                console.log("Mesh",meshRenderer.mesh);
+                meshRenderer.material = new KICK.material.Material(engine,{
+                    name:"Some material",
+                    shader:shader
+                });
+                console.log("Getting mesh by id "+url);
+                console.log("meshRenderer.material name "+meshRenderer.material.name);
+                console.log("meshRenderer.material shader "+meshRenderer.material.shader);
 
-            meshRenderer.mesh = getMeshById(engine,url);
-            console.log("Mesh",meshRenderer.mesh);
-            meshRenderer.material = new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader
-            });
-            console.log("Getting mesh by id "+url);
-            console.log("meshRenderer.material name "+meshRenderer.material.name);
-            console.log("meshRenderer.material shader "+meshRenderer.material.shader);
-
-            gameObject.addComponent(meshRenderer);
-
+                gameObject.addComponent(meshRenderer);
+            }
         };
 
         var addNode = function(node, parent){
@@ -411,7 +425,8 @@ KICK.namespace = function (ns_string) {
                 var tagName = childNode.tagName;
                 if (tagName === "translate" ||
                     tagName === "rotate" ||
-                    tagName === "scale"){
+                    tagName === "scale" ||
+                    tagName === "matrix"){
                     updateTransform(transform, childNode);
                 }
                 else if (tagName === "instance_geometry"){
@@ -423,6 +438,8 @@ KICK.namespace = function (ns_string) {
                     }*/
                 } else if (tagName === "node"){
                     addNode(childNode,transform);
+                } else {
+                    console.log("Unknown tagName '"+tagName+"'");
                 }
                 childNode = childNode.nextElementSibling;
             }
