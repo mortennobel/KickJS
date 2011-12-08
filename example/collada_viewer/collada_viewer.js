@@ -14,7 +14,7 @@ function destroyAllMeshRenderersInScene(){
 function load(xmlDom,url){
     destroyAllMeshRenderersInScene();
 
-    var gameObjectsCreated = KICK.importer.ColladaImporter.loadCollada(xmlDom,engine,null,true);
+    var gameObjectsCreated = KICK.importer.ColladaImporter.import(xmlDom,engine,null,true);
     for (var i=0;i<gameObjectsCreated.length;i++){
         var gameObject = gameObjectsCreated[i];
         var isDuck = url==="duck.dae" || url==="duck_triangulate.dae";
@@ -93,6 +93,7 @@ function loadClicked(files){
 }
 
 var engine;
+var camera;
 var meshRenderer;
 var texture;
 
@@ -213,9 +214,10 @@ function initKick() {
     });
     var cameraObject = engine.activeScene.createGameObject();
     cameraObject.name = "Camera";
-    var camera = new KICK.scene.Camera({
+    camera = new KICK.scene.Camera({
         clearColor: [0,0,0,1],
-        fieldOfView:60
+        fieldOfView:60,
+        far:100000
     });
     cameraObject.addComponent(camera);
 
@@ -240,11 +242,28 @@ function pauseResume(){
     this.innerHTML = engine.paused? "Play":"Pause";
 }
 
+function toogleBackground(){
+    var background = window.background || 0;
+    background++;
+    if (background===3){
+        background = 0;
+    }
+    window.background = background;
+    if (background===0){
+        camera.clearColor = [0,0,0,1];
+    } else if (background===1){
+        camera.clearColor = [1,1,1,1];
+    } else if (background===2){
+        camera.clearColor = [0,0,0,0];
+    } 
+}
+
 window.addEventListener("load",function(){
     initKick();
     document.getElementById("duckButton").addEventListener("click", duckClicked,false);
     document.getElementById("cubeButton").addEventListener("click", cubeClicked,false);
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
+    document.getElementById("backgroundButton").addEventListener("click", toogleBackground,false);
     document.getElementById("file").onchange = function() {
           loadClicked(this.files);
         };

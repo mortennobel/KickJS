@@ -55,7 +55,7 @@ KICK.namespace = function (ns_string) {
     importer.ColladaImporter = {};
 
     /**
-     * @method loadCollada
+     * @method import
      * @param {XMLDom} colladaDOM
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
@@ -63,7 +63,7 @@ KICK.namespace = function (ns_string) {
      * @return {Array[KICK.scene.GameObject]}
      * @static
      */
-    importer.ColladaImporter.loadCollada = function (colladaDOM, engine, scene, rotate90x){
+    importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
         var dataCache = {},
             constants = KICK.core.Constants,
             /**
