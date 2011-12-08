@@ -74,6 +74,9 @@ KICK.namespace = function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        aabb = KICK.namespace("KICK.math.aabb"),
+        min = Math.min,
+        max = Math.max,
         sqrt = Math.sqrt,
         cos = Math.cos,
         acos = Math.acos,
@@ -2093,6 +2096,60 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * @method decompose
+     * @param {KICK.math.mat4} mat mat4 to decompose
+     * @param {KICK.math.vec3} translate Optional
+     * @param {KICK.math.quat4} rotate Optional
+     * @param {KICK.math.vec3} scale Optional
+     * @return Array[tranlate,rotate,scale]
+     */
+    mat4.decompose = function(mat,tranlate,rotate,scale){
+        var x = [mat[0],mat[1],mat[2]],
+            y = [mat[4],mat[5],mat[6]],
+            z = [mat[8],mat[9],mat[10]],
+            scaleX,
+            scaleY,
+            scaleZ;
+
+        if (!tranlate){
+            tranlate = vec3.create();
+        }
+        if (!rotate){
+            rotate = quat4.create();
+        }
+        if (!scale){
+            scale = vec3.create();
+        }
+
+		tranlate[0] = mat[12];
+		tranlate[1] = mat[13];
+		tranlate[2] = mat[14];
+
+		scale[0] = scaleX = vec3.length(x);
+		scale[1] = scaleY = vec3.length(y);
+		scale[2] = scaleZ = vec3.length(z);
+
+        var copy = mat4.create(mat);
+
+		copy[0] /= scaleX;
+		copy[1] /= scaleX;
+		copy[2] /= scaleX;
+
+		copy[4] /= scaleY;
+		copy[5] /= scaleY;
+		copy[6] /= scaleY;
+
+		copy[8] /= scaleZ;
+		copy[9] /= scaleZ;
+		copy[10] /= scaleZ;
+
+        
+		quat4.setFromRotationMatrix(copy,rotate);
+
+        return [tranlate, rotate, scale];
+    };
+
+    /**
      * Returns a string representation of a mat4
      * @method str
      * @param {KICK.math.mat4} mat mat4 to represent as a string
@@ -2394,6 +2451,39 @@ KICK.namespace = function (ns_string) {
 
 
     /**
+     * @method setFromRotationMatrix
+     * @param {KICK.math.mat4} mat
+     * @param {KICK.math.quat4} dest Optional
+     * @return {KICK.math.quat4}
+     */
+    quat4.setFromRotationMatrix = function(mat,dest){
+        var x,y,z,w,
+            m11 = mat[0],
+            m22 = mat[5],
+            m33 = mat[10];
+        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+		function copySign(a, b) {
+			return b < 0 ? -Math.abs(a) : Math.abs(a);
+		}
+        var absQ = Math.pow(mat4.determinant(mat), 1.0 / 3.0);
+		w = Math.sqrt( Math.max( 0, absQ + m11  + m22 + m33 ) ) / 2;
+		x = Math.sqrt( Math.max( 0, absQ + m11  - m22 - m33 ) ) / 2;
+		y = Math.sqrt( Math.max( 0, absQ - m11  + m22 - m33 ) ) / 2;
+		z = Math.sqrt( Math.max( 0, absQ - m11  - m22 + m33 ) ) / 2;
+		x = copySign( x, ( mat[2+1*4] - mat[1+2*4] ) ); // m32 - m23
+		y = copySign( y, ( mat[0+2*4] - mat[2+0*4] ) ); // m13 - m31
+		z = copySign( z, ( mat[1+0*4] - mat[0+1*4] ) ); // m21 - m12
+        var destArray = [x,y,z,w];
+        if (!dest){
+            dest = quat4.create(destArray);
+        } else {
+            quat4.set(destArray,dest);
+        }
+		quat4.normalize(dest);
+		return dest;
+    };
+
+    /**
      * Calculates a 3x3 matrix from the given quat4
      * @method toMat3
      * @param {KICK.math.quat4} quat quat4 to create matrix from
@@ -2561,5 +2651,105 @@ KICK.namespace = function (ns_string) {
     };
 
     // glMatrix end
+
+
+
+    /**
+     * Axis-Aligned Bounding Box. A rectangle or box with the restriction that it's sides or faces are parallel to the axes of the system.
+     * @class aabb
+     * @namespace KICK.math
+     */
+    math.aabb = quat4;
+
+    /**
+     * Default value is min=MAX, max=MIN (meaning that it has a negative size)
+     * @method create
+     * @param {Array[Number] | KICK.math.aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
+     * @param {Array[Number]} vec3Max Optional, vec3Max containing values to initialize maximum values with
+     * @return {KICK.math.aabb} New aabb
+     */
+    aabb.create = function(vec3Min, vec3Max){
+        var dest = new Float32Array(6);
+
+        if(vec3Min) {
+            dest[0] = vec3Min[0];
+            dest[1] = vec3Min[1];
+            dest[2] = vec3Min[2];
+            if (vec3Min.length==6){
+                dest[3] = vec3Min[3];
+                dest[4] = vec3Min[4];
+                dest[5] = vec3Min[5];
+            } else if (vec3Max){
+                dest[3] = vec3Max[0];
+                dest[4] = vec3Max[1];
+                dest[5] = vec3Max[2];
+            } else {
+                dest[3] = dest[0];
+                dest[4] = dest[1];
+                dest[5] = dest[2];
+            }
+        } else {
+            dest[0] = Number.MAX_VALUE;
+            dest[1] = Number.MAX_VALUE;
+            dest[2] = Number.MAX_VALUE;
+            dest[3] = Number.MIN_VALUE;
+            dest[4] = Number.MIN_VALUE;
+            dest[5] = Number.MIN_VALUE;
+        }
+        return dest;
+    };
+
+    /**
+     * Copies the values of one aabb to another
+     * @method set
+     * @param {KICK.math.aabb} aabb containing values to copy
+     * @param {KICK.math.aabb} dest receiving copied values
+     * @return {KICK.math.aabb} dest
+     */
+    aabb.set = function(aabb,dest){
+        dest[0] = aabb[0];
+        dest[1] = aabb[1];
+        dest[2] = aabb[2];
+        dest[3] = aabb[3];
+        dest[4] = aabb[4];
+        dest[5] = aabb[5];
+        return dest;
+    };
+
+    /**
+     * @method merge
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.aabb} aabb2
+     * @param {KICK.math.aabb} dest Optional, receiving copied values
+     * @return {KICK.math.aabb} dest if specified - otherwise a new value is returned
+     */
+    aabb.merge = function(aabb,aabb2,dest){
+        if (!dest){
+            dest = new Float32Array(6);
+        }
+        dest[0] = min(aabb[0],aabb2[0]);
+        dest[1] = min(aabb[1],aabb2[1]);
+        dest[2] = min(aabb[2],aabb2[2]);
+        dest[3] = max(aabb[3],aabb2[3]);
+        dest[4] = max(aabb[4],aabb2[4]);
+        dest[5] = max(aabb[5],aabb2[5]);
+        return dest;
+    };
+
+    /**
+     * @method addPoint
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.vec3} vec3Point
+     * @return {KICK.math.aabb} aabb (same object as input)
+     */
+    aabb.addPoint = function(aabb,vec3Point){
+        aabb[0] = min(aabb[0],vec3Point[0]);
+        aabb[1] = min(aabb[1],vec3Point[1]);
+        aabb[2] = min(aabb[2],vec3Point[2]);
+        aabb[3] = max(aabb[3],vec3Point[0]);
+        aabb[4] = max(aabb[4],vec3Point[1]);
+        aabb[5] = max(aabb[5],vec3Point[2]);
+        return aabb;
+    };
 
 })();
