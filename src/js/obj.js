@@ -138,11 +138,9 @@ KICK.namespace = function (ns_string) {
                     }
                 }
                 meshData.vertex = meshDataVertices;
-                console.log("Using normals: "+meshDataNormals.length);
                 if (meshDataNormals.length){
                     meshData.normal = meshDataNormals;
                 }
-                console.log("Using uvs: "+meshDataTextureCoordinates.length);
                 if (meshDataTextureCoordinates.length){
                     meshData.uv1 = meshDataTextureCoordinates;
                 }
@@ -150,10 +148,10 @@ KICK.namespace = function (ns_string) {
                 mesh.meshData = meshData;
                 var meshRenderer = new KICK.scene.MeshRenderer();
                 meshRenderer.mesh = mesh;
-                var shader = new KICK.material.Shader(engine); // todo replace with default shader
-                meshRenderer.shader = shader;
-                shader.updateShader();
-                meshRenderer.shader = shader;
+                meshRenderer.material = new KICK.material.Material(engine,{
+                    name:"Some material",
+                    shader:engine.resourceManager.getShader("kickjs://shader/default/")
+                });
                 gameObject.name = objectName;
                 gameObject.addComponent(meshRenderer);
                 objects.push(gameObject);

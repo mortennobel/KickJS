@@ -367,9 +367,7 @@ KICK.namespace = function (ns_string) {
                 if (url){
                     url = url.substring(1);
                 }
-                var shader = new KICK.material.Shader(engine); // todo use default shader instead
 
-                shader.updateShader();
                 var meshes = getMeshesById(engine,url);
                 for (var i=0;i<meshes.length;i++){
                     meshRenderer = new KICK.scene.MeshRenderer();
@@ -377,7 +375,7 @@ KICK.namespace = function (ns_string) {
                     console.log("Mesh",meshRenderer.mesh);
                     meshRenderer.material = new KICK.material.Material(engine,{
                         name:"Some material",
-                        shader:shader
+                        shader:engine.resourceManager.getShader("kickjs://shader/default/")
                     });
                     console.log("Getting mesh by id "+url);
                     console.log("meshRenderer.material name "+meshRenderer.material.name);
