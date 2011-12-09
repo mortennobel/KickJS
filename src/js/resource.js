@@ -409,11 +409,13 @@ KICK.namespace = function (ns_string) {
          * Create a default shader config based on a URL<br>
          * The following shaders are available:
          *  <ul>
-         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
+         *  <li><b>Default</b> Url: kickjs://shader/default/</li>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
+         *  <li><b>Shadowmap</b> Url: kickjs://shader/shadowmap/</li>
+         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShaderData
@@ -426,33 +428,33 @@ KICK.namespace = function (ns_string) {
                 blend = false,
                 depthMask = true,
                 renderOrder = 1000,
-                glslConstants = KICK.material.GLSLConstants;
-            if (url.indexOf("kickjs://shader/phong/")==0){
-                vertexShaderSrc = glslConstants["phong_vs.glsl"];
-                fragmentShaderSrc = glslConstants["phong_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/transparent_phong/")==0){
-                vertexShaderSrc = glslConstants["transparent_phong_vs.glsl"];
-                fragmentShaderSrc = glslConstants["transparent_phong_fs.glsl"];
-                blend = true;
-                depthMask = false;
-                renderOrder = 2000;
-            } else if (url.indexOf("kickjs://shader/error/")==0){
-                vertexShaderSrc = glslConstants["error_vs.glsl"];
-                fragmentShaderSrc = glslConstants["error_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/pick/")==0){
-                vertexShaderSrc = glslConstants["pick_vs.glsl"];
-                fragmentShaderSrc = glslConstants["pick_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/unlit/")==0){
-                vertexShaderSrc = glslConstants["unlit_vs.glsl"];
-                fragmentShaderSrc = glslConstants["unlit_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/transparent_unlit/")==0){
-                vertexShaderSrc = glslConstants["transparent_unlit_vs.glsl"];
-                fragmentShaderSrc = glslConstants["transparent_unlit_fs.glsl"];
-                renderOrder = 2000;
-                blend = true;
-                depthMask = false;
-            } else {
-                return null;
+                glslConstants = KICK.material.GLSLConstants,
+                compareAndSetShader = function(shaderName){
+                    var res = url.indexOf("kickjs://shader/"+shaderName+"/")===0;
+                    if (res){
+                        vertexShaderSrc = glslConstants[shaderName+"_vs.glsl"];
+                        fragmentShaderSrc = glslConstants[shaderName+"_fs.glsl"];
+                        if (shaderName.indexOf("transparent_")===0){
+                            blend = true;
+                            depthMask = false;
+                            renderOrder = 2000;
+                        }
+                    }
+                    return res;
+                },
+                shaderTypes = ["phong","shadowmap","error","pick","transparent_phong","unlit","transparent_unlit"];
+            if (url === "kickjs://shader/default/"){
+                url === "kickjs://shader/phong/";
+            }
+            for (var i=0;i<shaderTypes.length;i++){
+                if (compareAndSetShader(shaderTypes[i])){
+                    break;
+                }
+            }
+            if (ASSERT){
+                if (!vertexShaderSrc){
+                    KICK.core.Util.fail("Cannot find shader url '"+url+"'");
+                }
             }
             var config = {
                 blend:blend,
@@ -470,10 +472,13 @@ KICK.namespace = function (ns_string) {
          * Create a default shader based on a URL<br>
          * The following shaders are available:
          *  <ul>
+         *  <li><b>Default</b> Url: kickjs://shader/default/</li>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
+         *  <li><b>Shadowmap</b> Url: kickjs://shader/shadowmap/</li>
+         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShader
@@ -481,7 +486,6 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.material.Shader} Shader or null if not found
          */
         this.getShader = function(url,errorLog){
-
             var shader = new KICK.material.Shader(engine);
             this.getShaderData(url,shader);
             return shader;
