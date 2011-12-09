@@ -74,12 +74,9 @@ KICK.namespace = function (ns_string) {
              * @param {Object} type Optional - valid types are Array (default), and typed arrays classes
              * @private
              */
-            stringToArray = function(numberString,count,type){
+            stringToArray = function(numberString,type){
                 if (!type){
                     type = Array;
-                }
-                if (!count){
-                    count = 0;
                 }
                 numberString = numberString.replace(/^\s+|\s+$/g,""); // trim
                 numberString = numberString.replace(/\s{2,}/g, ' '); // remove double white spaces
@@ -114,8 +111,7 @@ KICK.namespace = function (ns_string) {
                 } else {
                     type = Int32Array;
                 }
-                var count = Number(arrayElement.getAttribute("count"));
-                var res = stringToArray(arrayElement.textContent,count,type);
+                var res = stringToArray(arrayElement.textContent,type);
                 dataCache[id] = res;
                 return res;
             },
@@ -183,17 +179,12 @@ KICK.namespace = function (ns_string) {
                             offsetSet.push(offset);
                         }
                     } else if (tagName === "vcount"){
-                        var vCount = stringToArray(polylistChild.textContent,count,Int32Array);
+                        var vCount = stringToArray(polylistChild.textContent,Int32Array);
                         vertexCount = function(i){ return vCount[i];}
                     } else if (tagName === "p"){
-                        var numberOfVertexIndices = 0,
-                            offsetCount = offsetSet.length;
-                        for (i=count-1;i>=0;i--){
-                            numberOfVertexIndices += vertexCount(i);
-                        }
+                        var offsetCount = offsetSet.length;
 
-                        var numberOfVertexIndicesWithOffset = numberOfVertexIndices*offsetCount;
-                        var vertexIndices = stringToArray(polylistChild.textContent,numberOfVertexIndicesWithOffset,Int32Array);
+                        var vertexIndices = stringToArray(polylistChild.textContent,Int32Array);
 
                         // initialize data container
                         var outVertexAttributes = {};
@@ -376,7 +367,7 @@ KICK.namespace = function (ns_string) {
                 if (url){
                     url = url.substring(1);
                 }
-                var shader = new KICK.material.Shader(engine);
+                var shader = new KICK.material.Shader(engine); // todo use default shader instead
 
                 shader.updateShader();
                 var meshes = getMeshesById(engine,url);
