@@ -1,11 +1,11 @@
+// https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/sdk/debug/webgl-debug.js
 //Copyright (c) 2009 The Chromium Authors. All rights reserved.
 //Use of this source code is governed by a BSD-style license that can be
 //found in the LICENSE file.
 
 // Various functions for helping debug WebGL apps.
 
-
-var WebGLDebugUtils = function() {
+WebGLDebugUtils = function() {
 
 /**
  * Wrapped logging function.
@@ -137,7 +137,7 @@ function checkInit() {
  */
 function mightBeEnum(value) {
   checkInit();
-  return (typeof(glEnums[value]) !== 'undefined');
+  return (glEnums[value] !== undefined);
 }
 
 /**
@@ -152,7 +152,7 @@ function mightBeEnum(value) {
 function glEnumToString(value) {
   checkInit();
   var name = glEnums[value];
-  return (typeof(name) !== 'undefined') ? name :
+  return (name !== undefined) ? name :
       ("*UNKNOWN WebGL ENUM (0x" + value.toString(16) + ")");
 }
 
@@ -166,7 +166,7 @@ function glEnumToString(value) {
  */
 function glFunctionArgToString(functionName, argumentIndex, value) {
   var funcInfo = glValidEnumContexts[functionName];
-  if (typeof(funcInfo) !== 'undefined') {
+  if (funcInfo !== undefined) {
     if (funcInfo[argumentIndex]) {
       return glEnumToString(value);
     }
@@ -215,13 +215,9 @@ function makeDebugContext(ctx, opt_onErrorFunc) {
   opt_onErrorFunc = opt_onErrorFunc || function(err, functionName, args) {
         // apparently we can't do args.join(",");
         var argStr = "";
-        try{
-            for (var ii = 0; ii < args.length; ++ii) {
-              argStr += ((ii == 0) ? '' : ', ') +
-                  glFunctionArgToString(functionName, ii, args[ii]);
-            }
-        } catch (e){
-            // ignore
+        for (var ii = 0; ii < args.length; ++ii) {
+          argStr += ((ii == 0) ? '' : ', ') +
+              glFunctionArgToString(functionName, ii, args[ii]);
         }
         log("WebGL error "+ glEnumToString(err) + " in "+ functionName +
             "(" + argStr + ")");
@@ -326,7 +322,7 @@ function resetToInitialState(ctx) {
   ctx.stencilFunc(ctx.ALWAYS, 0, 0xFFFFFFFF);
   ctx.stencilMask(0xFFFFFFFF);
   ctx.stencilOp(ctx.KEEP, ctx.KEEP, ctx.KEEP);
-  ctx.viewport(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+  ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT | ctx.STENCIL_BUFFER_BIT);
 
   // TODO: This should NOT be needed but Firefox fails with 'hint'
@@ -462,6 +458,10 @@ function makeLostContextSimulatingCanvas(canvas) {
 
   canvas.getNumCalls = function() {
     return numCalls_;
+  };
+
+  canvas.setRestoreTimeout = function(timeout) {
+    restoreTimeout_ = timeout;
   };
 
   function isWebGLObject(obj) {
