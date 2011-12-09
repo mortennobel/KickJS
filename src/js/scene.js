@@ -1195,6 +1195,7 @@ KICK.namespace = function (ns_string) {
                     } else {
                         gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
                     }
+                    gl.renderTarget = _renderTarget;
                 }
 
                 setupClearColor(_clearColor);
