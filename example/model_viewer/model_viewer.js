@@ -11,10 +11,10 @@ function destroyAllMeshRenderersInScene(){
     }
 }
 
-function load(xmlDom,url){
+function load(content,url,func){
     destroyAllMeshRenderersInScene();
 
-    var gameObjectsCreated = KICK.importer.ColladaImporter.import(xmlDom,engine,null,true);
+    var gameObjectsCreated = func(content,engine,engine.activeScene,true);
     for (var i=0;i<gameObjectsCreated.length;i++){
         var gameObject = gameObjectsCreated[i];
         var isDuck = url==="duck.dae" || url==="duck_triangulate.dae";
@@ -38,7 +38,7 @@ function loadCollada(url){
         if (oReq.readyState == 4 /* complete */) {
             if (oReq.status == 200) {
                 var xmlDom = oReq.responseXML;
-                load(xmlDom,url);
+                load(xmlDom,url,KICK.importer.ColladaImporter.import);
             }
         }
     }
@@ -58,14 +58,18 @@ function cubeClicked(){
     loadCollada("cube.dae");
 }
 
-function loadColladaFile(file){
+function loadModelFile(file){
     var reader = new FileReader();
 
     reader.onload = function(event) {
-        var txt = event.target.result;
-        var parser=new DOMParser();
-
-        load(parser.parseFromString(txt,"text/xml"),file.fileName);
+        var txt = event.target.result,
+            fileName = file.fileName;
+        if (fileName.toLowerCase().lastIndexOf(".obj") === fileName.length-4){
+            load(txt,fileName,KICK.importer.ObjImporter.import);
+        } else {
+            var parser=new DOMParser();
+            load(parser.parseFromString(txt,"text/xml"),fileName,KICK.importer.ColladaImporter.import);
+        }
     };
 
     reader.onerror = function() {
@@ -78,10 +82,14 @@ function loadColladaFile(file){
 function loadClicked(files){
     for (var i=0;i<files.length;i++){
         var file = files[i];
-        var fileLowerCase = file.fileName.toLowerCase();
-        if (fileLowerCase.indexOf(".dae") !== -1){
-            loadColladaFile(file);
-        } else if (fileLowerCase.indexOf(".jpg") > 0 || fileLowerCase.indexOf(".jpeg") > 0 || fileLowerCase.indexOf(".png") > 0){
+        var fileLowerCase = file.fileName.toLowerCase(),
+            fileLengthMinus4 = fileLowerCase.length-4;
+        if (fileLowerCase.lastIndexOf(".dae") ===  fileLengthMinus4 ||
+            fileLowerCase.lastIndexOf(".obj") === fileLengthMinus4 ){
+            loadModelFile(file);
+        } else if (fileLowerCase.lastIndexOf(".jpg") === fileLengthMinus4 ||
+            fileLowerCase.lastIndexOf(".jpeg") === fileLengthMinus4-1 ||
+            fileLowerCase.lastIndexOf(".png") === fileLengthMinus4){
             var reader = new FileReader();
             reader.onload = function(e) {
                 loadTexture(e.target.result);
