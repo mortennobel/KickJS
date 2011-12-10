@@ -332,7 +332,7 @@ mixkey(math.random(), pool);
                 shader:shader
             });
         }
-
+        var transforms = [];
         function addObject(pos){
             var gameObject = engine.activeScene.createGameObject(),
                     transform = gameObject.transform;
@@ -343,6 +343,7 @@ mixkey(math.random(), pool);
             transform.localScale = [0.8*Math.random(),0.8*Math.random(),0.8*Math.random()];
             transform.localRotationEuler = [360*Math.random(),360*Math.random(),360*Math.random()];
             transform.localPosition = pos;
+            transforms.push(transform);
         }
 
         function initKick() {
@@ -364,6 +365,22 @@ mixkey(math.random(), pool);
             }
             console.log("Created "+count+" cubes");
         }
+        function flipQuat(){
+            for (var j=0;j<transforms.length;j++){
+                var t = transforms[j];
+                var q = t.localRotation;
+                for (var i=0;i<4;i++){
+                    q[i] *= -1;
+                }
+                t.localRotation = q;
+            }
+        }
+        function randomizeRotation(){
+            for (var j=0;j<transforms.length;j++){
+                var t = transforms[j];
+                t.localRotationEuler = [360*Math.random(),360*Math.random(),360*Math.random()];
+            }
+        }
 
     </script>
 </head>
@@ -378,7 +395,8 @@ mixkey(math.random(), pool);
   <h2>Show data</h2>
   [<a href="#" onclick="refreshData();">Refresh</a>]
   <div id="example" class="yui3-skin-sam"></div>
-
+  <button onclick="flipQuat();">Flip quaternions</button>
+  <button onclick="randomizeRotation();">Randomize rotation</button>
   <div style="display:none;">
   <textarea style="width:500px;height:150px;" id="vertexShaderColor">
 attribute vec3 vertex;
