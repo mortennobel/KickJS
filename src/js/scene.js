@@ -1232,6 +1232,20 @@ KICK.namespace = function (ns_string) {
                     return b.distanceToCamera-a.distanceToCamera;
                 }
                 renderableComponentsTransparent.sort(compareDistanceToCamera);
+            },
+            /**
+             * @method renderSceneObjects
+             * @param sceneLightObj
+             * @param shader
+             * @private
+             */
+            renderSceneObjects = function(sceneLightObj,shader){
+                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+            },
+            renderShadowMap = function(){
+                console.log("Render shadow map");
             };
 
         /**
@@ -1327,16 +1341,14 @@ KICK.namespace = function (ns_string) {
          */
         this.renderScene = function(sceneLightObj){
             setupCamera();
+            if (sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+                renderShadowMap();
+            }
             sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
             }
-            var renderSceneObjects = function(shader){
-                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-            };
-            renderSceneObjects();
+            renderSceneObjects(sceneLightObj);
 
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
@@ -1347,7 +1359,7 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
-                renderSceneObjects(pickingShader);
+                renderSceneObjects(sceneLightObj,pickingShader);
                 for (var i=pickingQueue.length-1;i>=0;i--){
                     // create clojure
                     (function(){
@@ -1832,33 +1844,104 @@ KICK.namespace = function (ns_string) {
      * @final
      */
     scene.Light = function (config) {
-        var color = vec3.create([1.0,1.0,1.0]),
-            type,
-            intensity,
+        var thisObj = this,
+            color = vec3.create([1.0,1.0,1.0]),
+            engine,
+            type = core.Constants._LIGHT_TYPE_POINT,
+            _shadow,
+            _shadowStrength = 1.0,
+            _shadowBias = 0.05,
+            _shadowTexture = null,
+            _shadowRenderTexture = null,
+            intensity = 1,
             colorIntensity = vec3.create(),
             updateIntensity = function(){
                 vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
             },
             gameObject,
-            scriptPriority;
-        config = config || {};
-        if (config.color){
-            vec3.set(config.color,color);
-        }
-        intensity = config.intensity || 1;
-        updateIntensity();
-        if (ASSERT){
-            if (config.type){
-                if (config.type !== core.Constants._LIGHT_TYPE_POINT &&
-                    config.type !== core.Constants._LIGHT_TYPE_DIRECTIONAL &&
-                    config.type !== core.Constants._LIGHT_TYPE_AMBIENT){
-                    KICK.core.Util.fail("Light type must be KICK.core.Constants._LIGHT_TYPE_POINT, " +
-                        "KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL or KICK.core.Constants._LIGHT_TYPE_AMBIENT");
+            scriptPriority,
+            updateShadowTexture = function(){
+                if (_shadow){
+                    _shadowTexture = new KICK.texture.Texture(engine,{
+                        minFilter:KICK.core.Constants.GL_NEAREST,
+                        magFilter:KICK.core.Constants.GL_NEAREST,
+                        generateMipmaps:false
+                    });
+                    _shadowTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                    _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
+                        colorTexture:_shadowTexture
+                    });
+
+                } else if (_shadowRenderTexture){
+                    _shadowRenderTexture.destroy();
+                    _shadowTexture.destroy();
                 }
-            }
-        }
-        type = config.type ||  core.Constants._LIGHT_TYPE_POINT;
+            };
         Object.defineProperties(this,{
+            /**
+             * @property shadowRenderTexture
+             * @type KICK.texture.RenderTexture
+             */
+            shadowRenderTexture:{
+                get:function(){
+                    return _shadowRenderTexture;
+                }
+            },
+            /**
+             * @property KICK.texture.Texture
+             * @type KICK.texture.Texture
+             */
+            shadowTexture:{
+                get:function(){
+                    return _shadowTexture;
+                }
+            },
+            /**
+             * Default value is false.
+             * Only directional light supports shadows.
+             * @property shadow
+             * @type boolean
+             */
+            shadow: {
+                get: function(){
+                    return _shadow;
+                },
+                set: function(value){
+                    if (value !== _shadow){
+                        _shadow = value;
+                        if (engine){
+                            updateShadowTexture();
+                        }
+                    }
+                }
+            },
+            /**
+             * Shadow strength (between 0.0 and 1.0). Default value is 1.0
+             * @property shadowStrength
+             * @type Number
+             */
+            shadowStrength:{
+                get: function(){
+                    return _shadowStrength;
+                },
+                set: function(value){
+                    _shadowStrength = value;
+                }
+
+            },
+            /**
+             * Shadow bias. Default value is 0.05
+             * @property shadowBias
+             * @type Number
+             */
+            shadowBias:{
+                get:function(){
+                    return _shadowBias;
+                },
+                set:function(value){
+                    _shadowBias = value;
+                }
+            },
             /**
              * Color intensity of the light (RGBA)
              * @property color
@@ -1878,7 +1961,7 @@ KICK.namespace = function (ns_string) {
              * KICK.core.Constants._LIGHT_TYPE_AMBIENT,
              * KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
              * KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL <br>
-             * Note that this value is readonly. To change it create a new Light component and replace the current light
+             * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
              * component of its gameObject
              * @property type
              * @type Enum
@@ -1887,6 +1970,23 @@ KICK.namespace = function (ns_string) {
             type: {
                 get: function(){
                     return type;
+                },
+                set: function(newValue){
+                    if (ASSERT){
+                        if (config.type !== core.Constants._LIGHT_TYPE_POINT &&
+                            config.type !== core.Constants._LIGHT_TYPE_DIRECTIONAL &&
+                            config.type !== core.Constants._LIGHT_TYPE_AMBIENT){
+                            KICK.core.Util.fail("Light type must be KICK.core.Constants._LIGHT_TYPE_POINT, " +
+                                "KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL or KICK.core.Constants._LIGHT_TYPE_AMBIENT");
+                        }
+                    }
+                    if (!engine){
+                        type = newValue;
+                    } else {
+                        if (ASSERT){
+                            KICK.core.Util.fail("Light type cannot be changed after initialization");
+                        }
+                    }
                 }
             },
             /**
@@ -1912,7 +2012,12 @@ KICK.namespace = function (ns_string) {
              * @final
              */
             colorIntensity: {
-                value:colorIntensity
+                get: function(){
+                    return colorIntensity;
+                },
+                set:function(newValue){
+                    colorIntensity = newValue;
+                }
             },
             // inherited interface from component
             gameObject:{
@@ -1933,6 +2038,13 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
+
+        this.activated = function(){
+            engine = thisObj.gameObject.engine;
+            updateShadowTexture();
+        };
+
+        applyConfig(this,config);
     };
     Object.freeze(scene.Light);
 

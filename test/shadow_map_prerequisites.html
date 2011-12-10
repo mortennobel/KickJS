@@ -1,0 +1,270 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../src/js/constants.js"></script>
+    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/resource.js"></script>
+    <script type="text/javascript" src="../src/js/math.js"></script>
+    <script type="text/javascript" src="../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../src/js/scene.js"></script>
+    <script type="text/javascript" src="../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../src/js/material.js"></script>
+    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript">
+        var engine;
+        var meshRenderer;
+
+        function setMaterial(meshRenderer, shaderName){
+            var getValueBetweenHalfAndOne = function(){
+                return 0.5+Math.random()*0.5;
+            };
+            // create material
+            var material = new KICK.material.Material(engine,{
+                name:"Some material",
+                shader: engine.resourceManager.getShader(shaderName || "kickjs://shader/phong/"),
+                uniforms:{
+                    mainColor: {
+                        value: [getValueBetweenHalfAndOne(),getValueBetweenHalfAndOne(),getValueBetweenHalfAndOne()],
+                        type: KICK.core.Constants.GL_FLOAT_VEC3
+                    },
+                    mainTexture: {
+                        value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                        type: KICK.core.Constants.GL_SAMPLER_2D
+                    }
+                }
+            });
+            meshRenderer.material = material;
+        }
+
+        function recalculateNormals(){
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateNormals();
+            mesh.updateData();
+        }
+
+        function recalculateTangents(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateTangents();
+            mesh.updateData();
+        }
+
+        function addRotatorComponent(gameObject){
+            var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = 0.05,
+                    position = transform.localPosition,
+                    positionY = position[1],
+                    rotation = transform.localRotationEuler;
+            gameObject.addComponent({
+                update: function(){
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                    position[1] = positionY+Math.sin(time.time*0.001)*3.5;
+                    transform.localPosition = position;
+                }
+            });
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
+            var cameraObject = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0,0,0,1],
+                perspective: true,
+                normalizedViewportRect:[0,0,0.5,1],
+                layerMask:1
+            });
+            cameraObject.addComponent(camera);
+            cameraObject.transform.localPosition = [0,1,5];
+
+            var gameObject = engine.activeScene.createGameObject();
+            gameObject.layer = 1;
+            gameObject.transform.localPosition = [0,3,0];
+            meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            setMaterial(meshRenderer, "kickjs://shader/shadowmap/"
+            );
+            gameObject.addComponent(meshRenderer);
+            addRotatorComponent(gameObject);
+
+            // add light components
+            var lightObj = engine.activeScene.createGameObject();
+            var directionalLight = new KICK.scene.Light({
+                type : KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+                shadow: true
+            });
+            lightObj.addComponent(directionalLight);
+            lightObj.transform.position = [0,10,0];
+            lightObj.transform.rotationEuler = [-80,-10,-10];
+            lightObj.addComponent(new KICK.scene.Light({
+                type : KICK.core.Constants._LIGHT_TYPE_AMBIENT,
+                color: [0.2,0.2,0.2,1]
+            }));
+
+            
+            // add shadow receiver
+            var plane = engine.activeScene.createGameObject();
+            plane.layer = 1;
+            plane.transform.rotationEuler = [-90,0,0];
+            plane.transform.localScale = [5,5,5];
+            var planeMeshRenderer = new KICK.scene.MeshRenderer();
+
+            planeMeshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+            setMaterial(planeMeshRenderer, "kickjs://shader/shadowmap/"
+            );
+            plane.addComponent(planeMeshRenderer);
+            
+            var camera2 = new KICK.scene.Camera({
+                clearColor: [0,1,1,0.5],
+                perspective: false,
+                layerMask:1,
+                left:-10,
+                right:10,
+                top:10,
+                bottom:-10,
+                far:25,
+                near:3
+            });
+            console.log(camera2.renderTarget);
+            lightObj.addComponent({
+                scriptPriority:-100,
+                activated:function(){
+                    camera2.renderTarget = directionalLight.shadowRenderTexture;
+                }
+            });
+            lightObj.addComponent(camera2);
+
+            (function visualizeDepthTexture(){
+                var shader = new KICK.material.Shader(engine);
+                shader.vertexShaderSrc = document.getElementById('vertexShader').innerHTML;
+                shader.fragmentShaderSrc = document.getElementById('fragmentShader').innerHTML;
+                shader.errorLog = console.log;
+                shader.updateShader();
+                var cam3GameObject = engine.activeScene.createGameObject();
+                var camera3 = new KICK.scene.Camera({
+                    clearColor: [0,0,1,1],
+                    normalizedViewportRect:[.5,0,0.5,1],
+                    perspective: false,
+                    near:-1,
+                    far:1,
+                    layerMask:2
+                });
+                cam3GameObject.addComponent(camera3);
+
+                var plane2 = engine.activeScene.createGameObject();
+                plane2.transform.localScale = [1,.5,1];
+                plane2.transform.localPosition = [0,.5,0];
+                plane2.layer = 2;
+                var planeMeshRenderer2 = new KICK.scene.MeshRenderer();
+
+                planeMeshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+
+                planeMeshRenderer2.material = new KICK.material.Material(engine,{
+                    name:"Some material",
+                    shader: shader,
+                    uniforms:{
+                        mainColor: {
+                            value: [1,1,1],
+                            type: KICK.core.Constants.GL_FLOAT_VEC3
+                        },
+                        mainTexture: {
+                            value: null,
+                            type: KICK.core.Constants.GL_SAMPLER_2D
+                        }
+                    }
+                });
+
+                plane2.addComponent({
+                    scriptPriority:-100,
+                    activated:function(){
+                        planeMeshRenderer2.material.uniforms.mainTexture.value = directionalLight.shadowTexture;
+                    }
+                });
+                plane2.addComponent(planeMeshRenderer2);
+/*
+                var plane3 = engine.activeScene.createGameObject();
+                plane3.transform.localScale = [1,-.5,1];
+                plane3.transform.localPosition = [0,.5,0];
+                plane3.layer = 2;
+                var planeMeshRenderer3 = new KICK.scene.MeshRenderer();
+
+                planeMeshRenderer3.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+                planeMeshRenderer3.material = new KICK.material.Material(engine,{
+                    name:"Some material",
+                    shader: shader,
+                    uniforms:{
+                        mainColor: {
+                            value: [1,1,1],
+                            type: KICK.core.Constants.GL_FLOAT_VEC3
+                        },
+                        mainTexture: {
+                            value: colorTexture,
+                            type: KICK.core.Constants.GL_SAMPLER_2D
+                        }
+                    }
+                });
+
+                plane3.addComponent(planeMeshRenderer3);*/
+            })();
+        }
+    </script>
+</head>
+<body onload="initKick();">
+    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
+    <script language="vertexShader" id="vertexShader">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec2 vUv;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vUv = uv1;
+} 
+    </script>
+<script language="fragmentShader" id="fragmentShader">
+    #ifdef GL_ES
+    precision highp float;
+    #endif
+    varying vec2 vUv;
+
+    uniform sampler2D mainTexture;
+
+    float unpackDepth( const in vec4 rgba_depth ) {
+        const vec4 bit_shift = vec4( 1.0 / ( 16777216.0 ), 1.0 / ( 65536.0 ), 1.0 / 256.0, 1.0 );
+        return dot( rgba_depth, bit_shift );
+    }
+
+    float linearizedDepth(float f, float n, float z){
+            return (2.0 * n) / (f + n - z * (f - n));
+    }
+
+    void main(void)
+    {
+        vec4 sample = texture2D(mainTexture,vUv);
+        float depth = unpackDepth( sample );
+        float lDepth = linearizedDepth(10.0,0.1,depth);
+        gl_FragColor = vec4(depth,depth,depth,1.0);
+    }
+
+    </script>
+  <canvas id="canvas" style="border: none;" width="512" height="512"></canvas> <br>
+</div>
+  <br/>
+</body>
+</html>
