@@ -10,14 +10,16 @@ uniform vec3 specularColor;
 uniform sampler2D mainTexture;
 
 #pragma include "light.glsl"
+#pragma include "shadowmap.glsl"
 
 void main(void)
 {
     vec3 diffuse;
     float specular;
     getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);
-    vec3 color = max(diffuse,_ambient.xyz)*mainColor;
-    
+    float visibility = computeLightVisibility();
+    vec3 color = max(diffuse*visibility,_ambient.xyz)*mainColor;
+
     gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);
 }
  

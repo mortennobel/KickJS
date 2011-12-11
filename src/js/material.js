@@ -46,10 +46,17 @@ KICK.namespace = function (ns_string) {
         core = KICK.namespace("KICK.core"),
         applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants,
+        ASSERT = c._ASSERT,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
-        tmpVec4 = vec4.create();
+        tmpVec4 = vec4.create(),
+        offsetMatrix = mat4.create([
+            0.5,0  ,0  ,0.5,
+            0  ,0.5,0  ,0.5,
+            0  ,0  ,0.5,0.5,
+            0  ,0  ,0  ,1
+        ]);
 
     /**
      * GLSL Shader object
@@ -61,7 +68,6 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Shader = function (engine, config) {
-        //todo add support for polygon offset
         var gl = engine.gl,
             thisObj = this,
             _shaderProgramId = -1,
@@ -71,6 +77,9 @@ KICK.namespace = function (ns_string) {
             _blend = false,
             _blendSFactor = core.Constants.GL_SRC_ALPHA,
             _blendDFactor = core.Constants.GL_ONE_MINUS_SRC_ALPHA,
+            _polygonOffsetEnabled = false,
+            _polygonOffsetFactor = 2.5,
+            _polygonOffsetUnits = 10.0,
             _renderOrder = 1000,
             _dataURI = null,
             _name = "",
@@ -150,6 +159,19 @@ KICK.namespace = function (ns_string) {
                         gl.disable(KICK.core.Constants.GL_BLEND);
                     }
                     gl.blendFunc(_blendSFactor,_blendDFactor);
+                }
+            },
+            updatePolygonOffset = function(){
+                if (gl.polygonOffsetEnabled !== _polygonOffsetEnabled){
+                    gl.polygonOffsetEnabled = _polygonOffsetEnabled;
+                    if (_polygonOffsetEnabled){
+                        gl.enable(KICK.core.Constants.GL_POLYGON_OFFSET_FILL);
+                    } else {
+                        gl.disable(KICK.core.Constants.GL_POLYGON_OFFSET_FILL);
+                    }
+                }
+                if (_polygonOffsetEnabled){
+                    gl.polygonOffset(_polygonOffsetFactor,_polygonOffsetUnits);
                 }
             };
 
@@ -256,6 +278,57 @@ KICK.namespace = function (ns_string) {
              */
             shaderProgramId:{
                 get: function(){ return _shaderProgramId;}
+            },
+            /**
+             * (From http://www.opengl.org/)<br>
+             * When GL_POLYGON_OFFSET_FILL, GL_POLYGON_OFFSET_LINE, or GL_POLYGON_OFFSET_POINT is enabled, each
+             * fragment's depth value will be offset after it is interpolated from the depth values of the appropriate
+             * vertices. The value of the offset is factor × DZ + r × units , where DZ is a measurement of the change
+             * in depth relative to the screen area of the polygon, and r is the smallest value that is guaranteed to
+             * produce a resolvable offset for a given implementation. The offset is added before the depth test is
+             * performed and before the value is written into the depth buffer.<br><br>
+             *
+             * glPolygonOffset is useful for rendering hidden-line images, for applying decals to surfaces, and for
+             * rendering solids with highlighted edges.<br><br>
+             * Possible values:<br>
+             * true or false<br>
+             * Default false
+             * @property polygonOffsetEnabled
+             * @type boolean
+             */
+            polygonOffsetEnabled: {
+                get: function(){
+                    return _polygonOffsetEnabled;
+                },
+                set: function(value){
+                    _polygonOffsetEnabled = value;
+                }
+            },
+            /**
+             * Default 2.5
+             * @property polygonOffsetFactor
+             * @type Number
+             */
+            polygonOffsetFactor:{
+                get:function(){
+                    return _polygonOffsetFactor;
+                },
+                set:function(value){
+                    _polygonOffsetFactor = value;
+                }
+            },
+            /**
+             * Default 10.0
+             * @property polygonOffsetUnits
+             * @type Number
+             */
+            polygonOffsetUnits:{
+                get:function(){
+                    return _polygonOffsetUnits;
+                },
+                set:function(value){
+                    _polygonOffsetUnits = value;
+                }
             },
             /**
              * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default),
@@ -565,6 +638,7 @@ KICK.namespace = function (ns_string) {
                 updateCullFace();
                 updateDepthProperties();
                 updateBlending();
+                updatePolygonOffset();
             }
         };
 
@@ -582,15 +656,21 @@ KICK.namespace = function (ns_string) {
                     dataURI:_dataURI
                 }
             }
-            // todo fill in missing attributes
             return {
                 uid: thisObj.uid,
                 name:_name,
+                blend:_blend,
+                blendSFactor:_blendSFactor,
+                dataURI:_dataURI,
+                depthMask:_depthMask,
                 faceCulling:_faceCulling,
-                zTest:_zTest,
-                depthMask: _depthMask,
+                fragmentShaderSrc:_fragmentShaderSrc,
                 vertexShaderSrc:_vertexShaderSrc,
-                fragmentShaderSrc:_fragmentShaderSrc
+                polygonOffsetEnabled:_polygonOffsetEnabled,
+                polygonOffsetFactor:_polygonOffsetFactor,
+                polygonOffsetUnits:_polygonOffsetUnits,
+                renderOrder:_renderOrder,
+                zTest:_zTest
             };
         };
 
@@ -649,13 +729,10 @@ KICK.namespace = function (ns_string) {
      * The uniforms is expected to be in a valid format
      * @method bindUniform
      * @param {KICK.material.Material} material
-     * @param {KICK.math.mat4} projectionMatrix
-     * @param {KICK.math.mat4} modelViewMatrix
-     * @param {KICK.math.mat4} modelViewProjectionMatrix
+     * @param {Object} engineUniforms
      * @param {KICK.scene.Transform) transform
-     * @param {KICK.scene.SceneLights} sceneLights
      */
-    material.Shader.prototype.bindUniform = function(material, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
+    material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
         // todo optimize this code
         var gl = this.gl,
             materialUniforms = material.uniforms,
@@ -673,6 +750,9 @@ KICK.namespace = function (ns_string) {
             gameObjectUID = this.lookupUniform["_gameObjectUID"],
             time = this.lookupUniform["_time"],
             viewport = this.lookupUniform["_viewport"],
+            shadowMapTexture = this.lookupUniform["_shadowMapTexture"],
+            _lightMat = this.lookupUniform["_lightMat"],
+            sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             otherLights = sceneLights.otherLights,
@@ -733,27 +813,27 @@ KICK.namespace = function (ns_string) {
             }
         }
         if (proj){
-            gl.uniformMatrix4fv(proj.location,false,projectionMatrix);
+            gl.uniformMatrix4fv(proj.location,false,engineUniforms.projectionMatrix);
         }
         if (mv || norm){
             // todo optimize
             globalTransform = transform.getGlobalMatrix();
-            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,tempMat4);
+            var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
             if (mv){
-                gl.uniformMatrix4fv(mv.location,false,finalModelView);
+                gl.uniformMatrix4fv(mv.location,false,modelView);
             }
             if (norm){
                 // note this can be simplified to
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
-//                var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(finalModelView,tempMat3);
+                //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
+                var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
                 gl.uniformMatrix3fv(norm.location,false,normalMatrix);
             }
         }
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
         }
         if (ambientLight !== null){
             lightUniform =  this.lookupUniform["_ambient"];
@@ -787,6 +867,16 @@ KICK.namespace = function (ns_string) {
                 console.log("transform.gameObject.uid "+transform.gameObject.uid);
             }
             gl.uniform4fv(gameObjectUID.location, uidAsVec4);
+        }
+        if (shadowMapTexture){
+            directionalLight.shadowTexture.bind(currentTexture);
+            gl.uniform1i(shadowMapTexture.location,currentTexture);
+            currentTexture ++;
+        }
+        if (_lightMat){
+            globalTransform = globalTransform || transform.getGlobalMatrix();
+            var lightModelViewProjection = mat4.multiply(engineUniforms.lightViewProjectionMatrix,globalTransform,tempMat4);
+            gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(offsetMatrix,lightModelViewProjection,tempMat4));
         }
     };
 
@@ -883,20 +973,6 @@ KICK.namespace = function (ns_string) {
                 _shader = engine.project.load("kickjs://shader/error/");
             }
             _renderOrder = _shader.renderOrder;
-        };
-
-        /**
-         * Binds textures and uniforms
-         * @method bind
-         * @param {KICK.math.mat4} projectionMatrix
-         * @param {KICK.math.mat4} modelViewMatrix
-         * @param {KICK.math.mat4} modelViewProjectionMatrix
-         * @param {KICK.scene.Transform} transform
-         * @param {KICK.scene.SceneLights} sceneLights
-         * @param {KICK.material.Shader} shader
-         */
-        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights, shader){
-            shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 
         /**

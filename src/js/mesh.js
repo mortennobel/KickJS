@@ -202,6 +202,27 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
+             * Note that this property is not cached. Use KICK.mesh.Mesh.aabb for a cached version.
+             * Readonly
+             * @property aabb
+             * @type KICK.math.aabb
+             */
+            aabb:{
+                get:function(){
+                    var vertex = thisObj.vertex;
+                    if (!vertex){
+                        return null;
+                    }
+                    var vertexLength = vertex.length;
+                    var aabb = KICK.math.aabb.create();
+                    for (var i=0;i<vertexLength;i += 3){
+                        var point = vertex.subarray(i,i+3);
+                        KICK.math.aabb.addPoint(point);
+                    }
+                    return aabb;
+                }
+            },
+            /**
              * @property name
              * @type string
              */
@@ -720,6 +741,7 @@ KICK.namespace = function (ns_string) {
             _name,
             _meshData,
             _urlResource,
+            _aabb = null,
             thisObj = this,
             c = KICK.core.Constants,
             vertexAttrLength = 0,
@@ -773,6 +795,20 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
+             * Axis aligned bounding box.
+             * Readonly.
+             * @property aabb
+             * @type KICK.math.aabb
+             */
+            aabb:{
+                get:function(){
+                    if (!_aabb && _meshData){
+                        _aabb = _meshData.aabb;
+                    }
+                    return _aabb;
+                }
+            },
+            /**
              * @property name
              * @type String
              */
@@ -801,6 +837,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _meshData = newValue;
+                    _aabb = null;
                     updateData();
                 }
             },

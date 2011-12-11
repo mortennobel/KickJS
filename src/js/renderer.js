@@ -51,9 +51,10 @@ KICK.namespace = function (ns_string) {
      * @constructor
      */
     /**
-     * Called each frame to render the components
-     * @method render
-     * @param {KICK.scene.Component} renderableComponents
+     * @method
+     * @param renderableComponents
+     * @param engineUniforms
+     * @param overwriteShader
      */
 
     /**
@@ -65,7 +66,8 @@ KICK.namespace = function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {};
+
+    renderer.NullRenderer.prototype.render = function (renderableComponents,engineUniforms,overwriteShader) {};
     
     /**
      * Forward renderer
@@ -75,10 +77,16 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.renderer.Renderer
      */
     renderer.ForwardRenderer = function () {
-        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {
+        /**
+         *
+         * @param renderableComponents
+         * @param engineUniforms
+         * @param overwriteShader
+         */
+        this.render = function (renderableComponents,engineUniforms,overwriteShader) {
             var length = renderableComponents.length;
             for (var j=0;j<length;j++){
-                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader);
+                renderableComponents[j].render(engineUniforms,overwriteShader);
             }
         };
     };

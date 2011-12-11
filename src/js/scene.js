@@ -1139,14 +1139,22 @@ KICK.namespace = function (ns_string) {
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
             _renderer = new KICK.renderer.ForwardRenderer(),
+            _shadowmapShader,
             _scene,
             pickingQueue = null,
             pickingShader = null,
             pickingRenderTarget = null,
             pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
-            modelViewMatrix = mat4.create(),
-            modelViewProjectionMatrix = mat4.create(),
+            viewMatrix = mat4.create(),
+            viewProjectionMatrix = mat4.create(),
+            lightViewProjectionMatrix = mat4.create(),
+            engineUniforms = {
+                    viewMatrix: viewMatrix,
+                    projectionMatrix: projectionMatrix,
+                    viewProjectionMatrix:viewProjectionMatrix,
+                    lightViewProjectionMatrix:lightViewProjectionMatrix
+                },
             renderableComponentsBackGroundAndGeometry = [],
             renderableComponentsTransparent = [],
             renderableComponentsOverlay = [],
@@ -1210,9 +1218,9 @@ KICK.namespace = function (ns_string) {
                 }
 
                 var globalMatrixInv = transform.getGlobalTRSInverse();
-                mat4.set(globalMatrixInv, modelViewMatrix);
+                mat4.set(globalMatrixInv, viewMatrix);
 
-                mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
             },
             compareRenderOrder = function(a,b){
                 var aRenderOrder = a.renderOrder || 1000,
@@ -1240,12 +1248,28 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             renderSceneObjects = function(sceneLightObj,shader){
-                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
+                engineUniforms.sceneLights=sceneLightObj;
+                _renderer.render(renderableComponentsBackGroundAndGeometry,engineUniforms,shader);
+                _renderer.render(renderableComponentsTransparent,engineUniforms,shader);
+                _renderer.render(renderableComponentsOverlay,engineUniforms,shader);
             },
-            renderShadowMap = function(){
-                console.log("Render shadow map");
+            renderShadowMap = function(sceneLightObj){
+                var directionalLight = sceneLightObj.directionalLight,
+                    directionalLightTransform = directionalLight.gameObject.transform;
+                directionalLight.shadowRenderTexture.bind();
+                setupClearColor([0,0,0,0]);
+                gl.clear(c.GL_COLOR_BUFFER_BIT + c.GL_DEPTH_BUFFER_BIT);
+
+                mat4.ortho(-10, 10, -10, 10, // todo replace with fitting
+                    3, 25, projectionMatrix);
+
+                var globalMatrixInv = directionalLightTransform.getGlobalTRSInverse(); // // todo replace with fitting
+                mat4.set(globalMatrixInv, viewMatrix);
+
+                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
+                renderSceneObjects(sceneLightObj,_shadowmapShader);
+
+                mat4.set(viewProjectionMatrix,lightViewProjectionMatrix);
             };
 
         /**
@@ -1289,6 +1313,7 @@ KICK.namespace = function (ns_string) {
             gl = engine.gl;
             _scene = gameObject.scene;
             _scene.addComponentListener(thisObj);
+            _shadowmapShader = engine.resourceManager.getShader("kickjs://shader/shadowmap/");
         };
 
         /**
@@ -1340,11 +1365,12 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            setupCamera();
             if (sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
-                renderShadowMap();
+                renderShadowMap(sceneLightObj);
             }
-            sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
+            setupCamera();
+
+            sceneLightObj.recomputeDirectionalLight(viewMatrix);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
             }
@@ -1809,16 +1835,13 @@ KICK.namespace = function (ns_string) {
         /**
          * This method may not be called (the renderer could make the same calls)
          * @method render
-         * @param (KICK.math.mat4) projectionMatrix
-         * @param {KICK.math.mat4} modelViewMatrix
-         * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
-         * @param {KICK.scene.SceneLights} sceneLights
+         * @param engineUniforms
          * @param {KICK.material.Shader} overwriteShader Optional
          */
-        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights,overwriteShader) {
+        this.render = function (engineUniforms,overwriteShader) {
             var shader = overwriteShader || _material.shader;
             _mesh.bind(shader);
-            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights,shader);
+            shader.bindUniform(_material,engineUniforms,transform);
             _mesh.render();
         };
 
@@ -1888,7 +1911,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * @property KICK.texture.Texture
+             * @property shadowTexture
              * @type KICK.texture.Texture
              */
             shadowTexture:{

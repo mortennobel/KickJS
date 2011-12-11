@@ -426,6 +426,7 @@ KICK.namespace = function (ns_string) {
             var vertexShaderSrc,
                 fragmentShaderSrc,
                 blend = false,
+                polygonOffsetEnabled = false,
                 depthMask = true,
                 renderOrder = 1000,
                 glslConstants = KICK.material.GLSLConstants,
@@ -439,12 +440,15 @@ KICK.namespace = function (ns_string) {
                             depthMask = false;
                             renderOrder = 2000;
                         }
+                        if (shaderName==="shadowmap"){
+                            polygonOffsetEnabled = true;
+                        }
                     }
                     return res;
                 },
                 shaderTypes = ["phong","shadowmap","error","pick","transparent_phong","unlit","transparent_unlit"];
             if (url === "kickjs://shader/default/"){
-                url === "kickjs://shader/phong/";
+                url = "kickjs://shader/phong/";
             }
             for (var i=0;i<shaderTypes.length;i++){
                 if (compareAndSetShader(shaderTypes[i])){
@@ -460,6 +464,7 @@ KICK.namespace = function (ns_string) {
                 blend:blend,
                 depthMask:depthMask,
                 renderOrder:renderOrder,
+                polygonOffsetEnabled:polygonOffsetEnabled,
                 vertexShaderSrc: vertexShaderSrc,
                 fragmentShaderSrc: fragmentShaderSrc
             };
