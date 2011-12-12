@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../src/js/constants.js"></script>
+    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/resource.js"></script>
+    <script type="text/javascript" src="../src/js/math.js"></script>
+    <script type="text/javascript" src="../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../src/js/scene.js"></script>
+    <script type="text/javascript" src="../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../src/js/material.js"></script>
+    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript" src="../src/js/obj.js"></script>
+    <script type="text/javascript">
+        var engine;
+        var meshRenderer;
+
+        var log = function (output) {
+            var element = document.getElementById("output");
+            element.innerHTML = element.innerHTML+output+"<br>";
+        };
+
+        var clearLog = function(){
+            var element = document.getElementById("output");
+            element.innerHTML = "";
+        };
+
+        var createMaterials = function(){
+            var vs = document.getElementById("vertexShaderColor").value;
+            var fs = document.getElementById("fragmentShader").value;
+            var shader = new KICK.material.Shader(engine);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.updateShader();
+            
+            new KICK.material.Material(engine,{
+                name:"Material.002",
+                shader:shader,
+                uniforms:{
+                     color: {
+                         value: [1,0,0],
+                         type: KICK.core.Constants.FLOAT_VEC3
+                     }
+                }
+            });
+            new KICK.material.Material(engine,{
+                name:"Material.003",
+                shader:shader,
+                uniforms:{
+                     color: {
+                         value: [0,1,0],
+                         type: KICK.core.Constants.FLOAT_VEC3
+                     }
+                }
+            });
+        };
+
+        function recalculateNormals(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateNormals();
+            mesh.updateData();
+        }
+
+        function recalculateTangents(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateTangents();
+            mesh.updateData();
+        }
+
+        function addRotatorComponent(gameObject){
+            var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = 0.05,
+                    rotation = transform.localRotationEuler;
+            gameObject.addComponent({
+                update: function(){
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                }
+            });
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
+            var cameraObject = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0,0,0,1],
+                perspective: false,
+                near:-2,
+                far:2,
+                left:-2,
+                right:2,
+                top:2,
+                bottom:-2
+            });
+            cameraObject.addComponent(camera);
+            cameraObject.addComponent(new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL}));
+
+            createMaterials();
+
+            var gameObjects = KICK.importer.ObjImporter.import( document.getElementById("objFileContent").value , engine , engine.activeScene);
+            console.log("Imported "+gameObjects.length+" gameObjects");
+            for (var i=0;i<gameObjects.length;i++){
+                var gameObject = gameObjects[i];
+                var meshRenderers = gameObject.getComponentsOfType(KICK.scene.MeshRenderer);
+                console.log("Number of mesh renderers "+meshRenderers.length);
+                for (var j=0;j<meshRenderers.length;j++){
+                    meshRenderer = meshRenderers[j];
+                    var meshData = meshRenderer.mesh.meshData;
+                    meshData.recalculateNormals();
+                    meshRenderer.mesh.meshData = meshData;
+                    console.log("Number of subMeshes"+meshData.subMeshes.length);
+                    for (var k=0;k<meshData.subMeshes.length;k++){
+                        console.log("Number of subMeshes length "+meshData.subMeshes[k].length);
+                    }
+                }
+                addRotatorComponent(gameObject);
+            }
+        }
+
+    </script>
+</head>
+<body onload="initKick();">
+    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
+
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example shows how a cube is rotated.
+  <br>
+
+  <h2>Output</h2>
+  <div id="output" style="color: red;">
+  </div>
+  <h2>Show data</h2>
+  [<a href="#" onclick="refreshData();">Refresh</a>]
+  <div id="example" class="yui3-skin-sam"></div>
+
+  <div style="display:none;">
+
+  <textarea style="width:500px;height:150px;" id="objFileContent">
+# Blender v2.60 (sub 0) OBJ File: ''
+# www.blender.org
+mtllib multimaterial_cube.mtl
+o Cube
+v 1.000000 -1.000000 -1.000000
+v 1.000000 -1.000000 1.000000
+v -1.000000 -1.000000 1.000000
+v -1.000000 -1.000000 -1.000000
+v 1.000000 1.000000 -0.999999
+v 0.999999 1.000000 1.000001
+v -1.000000 1.000000 1.000000
+v -1.000000 1.000000 -1.000000
+usemtl Material.002
+s off
+f 1 5 6 2
+usemtl Material.003
+f 1 2 3 4
+f 5 8 7 6
+f 2 6 7 3
+f 3 7 8 4
+f 5 1 4 8
+
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+
+uniform mat4 _mvProj;
+uniform vec3 color;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vColor = color;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+</div>
+  <br/>
+</body>
+</html>
