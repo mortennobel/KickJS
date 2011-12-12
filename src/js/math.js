@@ -2659,7 +2659,7 @@ KICK.namespace = function (ns_string) {
      * @class aabb
      * @namespace KICK.math
      */
-    math.aabb = quat4;
+    math.aabb = aabb;
 
     /**
      * Default value is min=MAX, max=MIN (meaning that it has a negative size)
