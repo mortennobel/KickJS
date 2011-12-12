@@ -1180,6 +1180,10 @@ KICK.namespace = function (ns_string) {
                     KICK.core.Util.fail("Camera."+name+" must be number");
                 }
             },
+            setupViewport = function(offsetX,offsetY,width,height){
+                gl.viewport(offsetX,offsetY,width,height);
+                gl.scissor(offsetX,offsetY,width,height);
+            },
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
              * @method setupCamera
@@ -1193,8 +1197,7 @@ KICK.namespace = function (ns_string) {
                     offsetY = viewPortWidth*_normalizedViewportRect[1],
                     width = viewPortWidth*_normalizedViewportRect[2],
                     height = viewPortHeight*_normalizedViewportRect[3];
-                gl.viewport(offsetX,offsetY,width,height);
-                gl.scissor(offsetX,offsetY,width,height);
+                setupViewport(offsetX,offsetY,width,height);
                 
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
@@ -1254,14 +1257,21 @@ KICK.namespace = function (ns_string) {
                 _renderer.render(renderableComponentsOverlay,engineUniforms,shader);
             },
             renderShadowMap = function(sceneLightObj){
+                if (!thisObj.isShadowDisabled){
                 var directionalLight = sceneLightObj.directionalLight,
-                    directionalLightTransform = directionalLight.gameObject.transform;
-                directionalLight.shadowRenderTexture.bind();
-                setupClearColor([0,0,0,0]);
-                gl.clear(c.GL_COLOR_BUFFER_BIT + c.GL_DEPTH_BUFFER_BIT);
+                    directionalLightTransform = directionalLight.gameObject.transform,
+                    shadowRenderTexture = directionalLight.shadowRenderTexture,
+                    renderTextureDimension = shadowRenderTexture.dimension,
+                    renderTextureWidth = renderTextureDimension[0],
+                    renderTextureHeight = renderTextureDimension[1];
+                setupViewport(0,0,renderTextureWidth,renderTextureHeight);
 
-                mat4.ortho(-10, 10, -10, 10, // todo replace with fitting
-                    3, 25, projectionMatrix);
+                shadowRenderTexture.bind();
+                setupClearColor([0,0,0,0]);
+                gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
+
+                mat4.ortho(-5, 5, -5, 5, // todo replace with fitting
+                    -10, 10, projectionMatrix);
 
                 var globalMatrixInv = directionalLightTransform.getGlobalTRSInverse(); // // todo replace with fitting
                 mat4.set(globalMatrixInv, viewMatrix);
@@ -1270,6 +1280,12 @@ KICK.namespace = function (ns_string) {
                 renderSceneObjects(sceneLightObj,_shadowmapShader);
 
                 mat4.set(viewProjectionMatrix,lightViewProjectionMatrix);
+
+                // debug
+                directionalLight.shadowRenderTextureDebug.bind();
+                gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
+                renderSceneObjects(sceneLightObj);
+                }
             };
 
         /**
@@ -1876,6 +1892,8 @@ KICK.namespace = function (ns_string) {
             _shadowBias = 0.05,
             _shadowTexture = null,
             _shadowRenderTexture = null,
+            _shadowTextureDebug = null,
+            _shadowRenderTextureDebug = null,
             intensity = 1,
             colorIntensity = vec3.create(),
             updateIntensity = function(){
@@ -1888,11 +1906,28 @@ KICK.namespace = function (ns_string) {
                     _shadowTexture = new KICK.texture.Texture(engine,{
                         minFilter:KICK.core.Constants.GL_NEAREST,
                         magFilter:KICK.core.Constants.GL_NEAREST,
+                        wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        flipY: false,
                         generateMipmaps:false
                     });
                     _shadowTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
                     _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
                         colorTexture:_shadowTexture
+                    });
+
+                    // debug info
+                    _shadowTextureDebug = new KICK.texture.Texture(engine,{
+                        minFilter:KICK.core.Constants.GL_NEAREST,
+                        magFilter:KICK.core.Constants.GL_NEAREST,
+                        wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        flipY: false,
+                        generateMipmaps:false
+                    });
+                    _shadowTextureDebug.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                    _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
+                        colorTexture:_shadowTextureDebug
                     });
 
                 } else if (_shadowRenderTexture){
@@ -1901,6 +1936,16 @@ KICK.namespace = function (ns_string) {
                 }
             };
         Object.defineProperties(this,{
+            shadowRenderTextureDebug:{
+                get:function(){
+                    return _shadowRenderTextureDebug;
+                }
+            },
+            shadowTextureDebug:{
+                get:function(){
+                    return _shadowTextureDebug;
+                }
+            },
             /**
              * @property shadowRenderTexture
              * @type KICK.texture.RenderTexture
