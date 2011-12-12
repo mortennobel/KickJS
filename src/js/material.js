@@ -869,6 +869,11 @@ KICK.namespace = function (ns_string) {
             gl.uniform4fv(gameObjectUID.location, uidAsVec4);
         }
         if (shadowMapTexture){
+            if (ASSERT){
+                if (!directionalLight){
+                    KICK.core.Util.fail("No directional light found in scene - but shader needs it");
+                }
+            }
             directionalLight.shadowTexture.bind(currentTexture);
             gl.uniform1i(shadowMapTexture.location,currentTexture);
             currentTexture ++;
