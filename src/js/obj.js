@@ -67,6 +67,8 @@ KICK.namespace = function (ns_string) {
             normals = [],
             textureCoordinates = [],
             triangles = [],
+            materialNames = [],
+            submeshes = [triangles],
             objects = [],
             objectName = "MeshObject",
             trim = function (str){ return str.replace(/^\s+|\s+$/g, ""); },
@@ -113,27 +115,33 @@ KICK.namespace = function (ns_string) {
                     meshDataVertices = [],
                     meshDataNormals = [],
                     meshDataTextureCoordinates = [],
-                    meshDataIndices = [],
+                    meshDataIndices,
+                    meshDataSubmeshes = [],
                     cache = {},
                     count = 0;
-                for (var i=0;i<triangles.length;i++){
-                    var vertexUvsNormalStrArray = triangles[i]; // has the value such as ["1//1", "2//2", "3//3"]
-                    var idx = getIndices(vertexUvsNormalStrArray);
-                    for (var j=0;j<3;j++){
-                        var vertexUvsNormalStr = vertexUvsNormalStrArray[j]; // has the value such as "1//1"
-                        if (typeof cache[vertexUvsNormalStr] === 'number'){ // if index is in the cache, reuse index
-                            meshDataIndices.push(cache[vertexUvsNormalStr]);
-                        } else {
-                            pushVertexData(vertices,idx[j][0],meshDataVertices);
-                            if (textureCoordinates.length){
-                                pushVertexData(textureCoordinates,idx[j][1],meshDataTextureCoordinates);
+                for (var k=0;k<submeshes.length;k++){
+                    triangles = submeshes[k];
+                    meshDataIndices = [];
+                    meshDataSubmeshes.push(meshDataIndices);
+                    for (var i=0;i<triangles.length;i++){
+                        var vertexUvsNormalStrArray = triangles[i]; // has the value such as ["1//1", "2//2", "3//3"]
+                        var idx = getIndices(vertexUvsNormalStrArray);
+                        for (var j=0;j<3;j++){
+                            var vertexUvsNormalStr = vertexUvsNormalStrArray[j]; // has the value such as "1//1"
+                            if (typeof cache[vertexUvsNormalStr] === 'number'){ // if index is in the cache, reuse index
+                                meshDataIndices.push(cache[vertexUvsNormalStr]);
+                            } else {
+                                pushVertexData(vertices,idx[j][0],meshDataVertices);
+                                if (textureCoordinates.length){
+                                    pushVertexData(textureCoordinates,idx[j][1],meshDataTextureCoordinates);
+                                }
+                                if (normals.length){
+                                    pushVertexData(normals,idx[j][2],meshDataNormals);
+                                }
+                                meshDataIndices.push(count);
+                                cache[vertexUvsNormalStr] = count;
+                                count ++;
                             }
-                            if (normals.length){
-                                pushVertexData(normals,idx[j][2],meshDataNormals);
-                            }
-                            meshDataIndices.push(count);
-                            cache[vertexUvsNormalStr] = count;
-                            count ++;
                         }
                     }
                 }
@@ -144,14 +152,35 @@ KICK.namespace = function (ns_string) {
                 if (meshDataTextureCoordinates.length){
                     meshData.uv1 = meshDataTextureCoordinates;
                 }
-                meshData.indices = meshDataIndices;
+                meshData.subMeshes = meshDataSubmeshes;
                 mesh.meshData = meshData;
                 var meshRenderer = new KICK.scene.MeshRenderer();
                 meshRenderer.mesh = mesh;
-                meshRenderer.material = new KICK.material.Material(engine,{
-                    name:"Some material",
-                    shader:engine.resourceManager.getShader("kickjs://shader/default/")
-                });
+
+                var materials = [];
+
+                var addDefaultMaterial = function(name){
+                    materials.push(new KICK.material.Material(engine,{
+                        name:name,
+                        shader:engine.resourceManager.getShader("kickjs://shader/default/")
+                    }));
+                };
+
+                for (var i=0;i < meshDataSubmeshes.length;i++){
+                    if (i<materialNames.length){
+                        var materialName = materialNames[i];
+                        var projectMaterial = engine.project.loadByName(materialName,"KICK.material.Material");
+                        if (projectMaterial){
+                            materials.push(projectMaterial);
+                        } else {
+                            addDefaultMaterial(materialName);
+                        }
+                    } else {
+                        addDefaultMaterial("material");
+                    }
+                }
+
+                meshRenderer.materials = materials;
                 gameObject.name = objectName;
                 gameObject.addComponent(meshRenderer);
                 objects.push(gameObject);
@@ -168,6 +197,14 @@ KICK.namespace = function (ns_string) {
             if (token === "o"){
                 addObject();
                 objectName = value;
+                materialNames.length = 0;
+            } else if (token === "usemtl"){
+                materialNames.push(value);
+                // create material with name value is not exist
+                if (triangles.length>0){
+                    triangles = [];
+                    submeshes[submeshes.length] = triangles;
+                }
             } else if (token === "v"){
                 vertices.push(strAsArray(value));
             } else if (token === "vn"){

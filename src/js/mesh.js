@@ -758,7 +758,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
-            meshVertexIndexBuffer,
+            meshVertexIndexBuffers = [],
             _name,
             _meshData,
             _urlResource,
@@ -767,25 +767,26 @@ KICK.namespace = function (ns_string) {
             c = KICK.core.Constants,
             vertexAttrLength = 0,
             meshType,
-            meshElements,
+            meshElements = [],
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
-                    meshVertexIndexBuffer = null;
+                    meshVertexIndexBuffers = null;
                     meshVertexAttBuffer = null;
                     gl = newGl;
                     updateData();
                 }
             },
             deleteBuffers = function(){
-                if (typeof meshVertexIndexBuffer === "number"){
-                    gl.deleteBuffer(meshVertexIndexBuffer);
-                    meshVertexIndexBuffer = null;
+                for (var i=0;i<meshVertexIndexBuffers.length;i++){
+                    gl.deleteBuffer(meshVertexIndexBuffers[i]);
                 }
                 if (typeof meshVertexAttBuffer === "number"){
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
+                meshElements.length = 0;
+                meshVertexIndexBuffers.length = 0;
             },
             /**
              * Copy data to the vertex buffer object (VBO)
@@ -793,23 +794,27 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             updateData = function () {
-                var indices = _meshData.indices;
+                var subMeshes = _meshData.subMeshes;
                 // delete current buffers
                 deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 vertexAttrLength = _meshData.vertexAttrLength;
                 meshType = _meshData.meshType;
-                meshElements = indices.length;
 
 
                 meshVertexAttBuffer = gl.createBuffer();
                 gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
                 gl.bufferData(c.GL_ARRAY_BUFFER, _meshData.interleavedArray, c.GL_STATIC_DRAW);
 
-                meshVertexIndexBuffer = gl.createBuffer();
-                gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
-                gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
+                for (var i=0;i<subMeshes.length;i++){
+                    var indices = subMeshes[i];
+                    var meshVertexIndexBuffer = gl.createBuffer();
+                    meshElements[i] = indices.length;
+                    meshVertexIndexBuffers.push(meshVertexIndexBuffer);
+                    gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+                    gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
+                }
             };
 
         engine.addContextListener(contextListener);
@@ -955,16 +960,18 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                 }
-                gl.bindBuffer(constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+
             }
         };
 
         /**
          * Renders the current mesh
          * @method render
+         * @param {Number} submeshIndex
          */
-        this.render = function () {
-            gl.drawElements(meshType, meshElements, c.GL_UNSIGNED_SHORT, 0);
+        this.render = function (submeshIndex) {
+            gl.bindBuffer(constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffers[submeshIndex]);
+            gl.drawElements(meshType, meshElements[submeshIndex], c.GL_UNSIGNED_SHORT, 0);
         };
 
         /**

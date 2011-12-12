@@ -642,10 +642,6 @@ KICK.namespace = function (ns_string) {
                 resourceReferenceCount[resourceUID] = 1;
                 return resourceObject;
             }
-            if (DEBUG){
-                core.Util.warn("Cannot find "+resourceUID);
-                debugger;
-            }
             return null;
         };
 
@@ -655,18 +651,17 @@ KICK.namespace = function (ns_string) {
          * If more objects exist with the same name, the first object is returned
          * @method loadByName
          * @param {String} name
+         * @param {String} type Optional: limit the search to a specific type
          * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
-        this.loadByName = function(name){
+        this.loadByName = function(name,type){
             for (var uid in resourceDescriptorsByUID){
                 var resource = resourceDescriptorsByUID[uid];
                 if (resource.name === name){
-                    return thisObj.load(resource.uid);
+                    if (!type || resource.type === type){
+                        return thisObj.load(resource.uid);
+                    }
                 }
-            }
-            if (DEBUG){
-                core.Util.warn("Cannot find "+name);
-                debugger;
             }
             return null;
         };
@@ -675,7 +670,7 @@ KICK.namespace = function (ns_string) {
          * Decreases the resource reference counter. If resource is no longer
          * used it's destroy method will be invoked (if available).
          * @method release
-         * @param resourceUID
+         * @param {Number} resourceUID
          */
         this.release = function(resourceUID){
             var resourceObject = resourceCache[resourceUID];
@@ -929,6 +924,13 @@ KICK.namespace = function (ns_string) {
      * @param {Config} config defines one or more properties
      */
     core.Config = function(config){
+        /**
+         * Use shadow maps to generate realtime shadows.<br>
+         * Default value is false.
+         * @property shadows
+         * @type Boolean
+         */
+        this.shadows = config.shadows || false;
          /**
          * Maximum number of lights in scene. Default value is 1
          * @property maxNumerOfLights

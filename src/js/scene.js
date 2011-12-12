@@ -1786,7 +1786,7 @@ KICK.namespace = function (ns_string) {
      */
     scene.MeshRenderer = function (config) {
         var transform,
-            _material,
+            _materials = [],
             _mesh,
             _renderOrder,
             gl;
@@ -1810,12 +1810,16 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Shortcut for materials[0]
              * @property material
              * @type KICK.material.Material
              */
             material:{
                 get:function(){
-                    return _material;
+                    if (_materials.length === 0){
+                        return null;
+                    }
+                    return _materials[0];
                 },
                 set:function(newValue){
                     if (ASSERT){
@@ -1823,8 +1827,31 @@ KICK.namespace = function (ns_string) {
                             KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
                         }
                     }
-                    _material = newValue;
-                    _renderOrder = _material.renderOrder;
+                    _materials[0] = newValue;
+                    _renderOrder = _materials[0].renderOrder;
+                },
+                enumerable: true
+            },
+            /**
+             *
+             * @property materias
+             * @type Array[KICK.material.Material]
+             */
+            materials:{
+                get:function(){
+                    return _materials;
+                },
+                set:function(newValue){
+                    _materials = [];
+                    for (var i=0;i<newValue.length;i++){
+                        if (ASSERT){
+                            if (!(newValue[i] instanceof KICK.material.Material)){
+                                KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
+                            }
+                        }
+                        _materials[i] = newValue[i];
+                        _renderOrder = _materials[i].renderOrder;
+                    }
                 },
                 enumerable: true
             },
@@ -1855,10 +1882,13 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.material.Shader} overwriteShader Optional
          */
         this.render = function (engineUniforms,overwriteShader) {
-            var shader = overwriteShader || _material.shader;
-            _mesh.bind(shader);
-            shader.bindUniform(_material,engineUniforms,transform);
-            _mesh.render();
+            var length = _materials.length;
+            for (var i=0;i<length;i++){
+                var shader = overwriteShader || _materials[i].shader;
+                _mesh.bind(shader);
+                shader.bindUniform(_materials[i],engineUniforms,transform);
+                _mesh.render(i);
+            }
         };
 
         /**

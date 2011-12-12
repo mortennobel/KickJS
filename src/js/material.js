@@ -719,6 +719,8 @@ KICK.namespace = function (ns_string) {
                 sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
             }
         }
+
+        sourcecode = "#define SHADOWS "+(engine.config.shadows===true)+"\n#line 1\n"+sourcecode;
         return sourcecode;
     };
 
