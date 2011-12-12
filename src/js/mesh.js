@@ -64,7 +64,7 @@ KICK.namespace = function (ns_string) {
     mesh.MeshData = function(config){
         var data = {},
             thisObj = this,
-            _indices,
+            _indices = [],
             _interleavedArray,
             _interleavedArrayFormat,
             _vertexAttrLength,
@@ -395,20 +395,39 @@ KICK.namespace = function (ns_string) {
              */
             int4:createGetterSetter(constants.GL_INT, "int4"),
             /**
-             * indices (integer)
+             * indices (integer).
+             * indices is shortcut for subMeshes[0]
              * @property indices
              * @type Array[Number]
              */
             indices:{
                 get:function(){
-                    return _indices;
+                    return _indices[0];
                 },
                 set:function(newValue){
                     if (newValue && !(newValue instanceof Uint16Array)){
                         newValue = new Uint16Array(newValue);
                     }
-                    if (_indices && isVertexDataInitialized()){
+                    if (_indices[0] && isVertexDataInitialized()){
                         clearInterleavedData();
+                    }
+                    _indices[0] = newValue;
+                }
+            },
+            /**
+             * indices (integer)
+             * @property subMeshes
+             * @type Array[Array[Number]]
+             */
+            subMeshes:{
+                get:function(){
+                    return _indices;
+                },
+                set:function(newValue){
+                    for (var i=0;i<newValue.length;i++){
+                        if (newValue[i] && !(newValue[i] instanceof Uint16Array)){
+                            newValue[i] = new Uint16Array(newValue[i]);
+                        }
                     }
                     _indices = newValue;
                 }
@@ -444,10 +463,12 @@ KICK.namespace = function (ns_string) {
                 createVertexDataFromInterleavedData();
             }
             var vertexCount = data.vertex.length/3;
-            for (var i=_indices.length-1;i>=0;i--){
-                if (_indices[i]<0 || _indices[i] >= vertexCount){
-                    debugger;
-                    return false;
+            for (var j=0;j<_indices.length;j++){
+                for (var i=_indices[j].length-1;i>=0;i--){
+                    if (_indices[j][i]<0 || _indices[j][i] >= vertexCount){
+                        debugger;
+                        return false;
+                    }
                 }
             }
             return true;
