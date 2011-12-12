@@ -24,7 +24,11 @@ function load(content,url,func){
         }
         var meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
         if (meshRendererNew){
-            meshRendererNew.material = duckMaterial;
+            var materials = [];
+            for (var j = meshRendererNew.mesh.meshData.subMeshes.length-1;j>=0;j--){
+                materials[j] = duckMaterial;
+            }
+            meshRendererNew.materials = materials;
             meshRenderer = meshRendererNew;
             recalculateNormals();
         }
