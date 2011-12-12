@@ -217,7 +217,7 @@ KICK.namespace = function (ns_string) {
                     var aabb = KICK.math.aabb.create();
                     for (var i=0;i<vertexLength;i += 3){
                         var point = vertex.subarray(i,i+3);
-                        KICK.math.aabb.addPoint(point);
+                        KICK.math.aabb.addPoint(aabb,point);
                     }
                     return aabb;
                 }
