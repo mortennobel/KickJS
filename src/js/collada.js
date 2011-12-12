@@ -56,7 +56,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * @method import
-     * @param {XMLDom} colladaDOM
+     * @param {XMLDom_or_String} colladaDOM
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
      * @param {boolean} rotate90x rotate -90 degrees around x axis
@@ -64,13 +64,16 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
+        if (typeof colladaDOM === 'string'){
+            var parser=new DOMParser();
+            colladaDOM = parser.parseFromString(colladaDOM,"text/xml");
+        }
         var dataCache = {},
             constants = KICK.core.Constants,
             /**
              * Converts a string to an array
              * @method stringToArray
              * @param {String} numberString
-             * @param {Number} count Optional
              * @param {Object} type Optional - valid types are Array (default), and typed arrays classes
              * @private
              */
@@ -156,7 +159,7 @@ KICK.namespace = function (ns_string) {
              * @param {XMLDomElement} polylist
              * @param {KICK.mesh.MeshData} destMeshData
              */
-            buildFromPolyList = function(polylist, destMeshData){
+            buildFromPolyList = function(polylist, destMeshData, vertexAttributeCache){
                 var polylistChild = polylist.firstChild,
                     tagName,
                     i,j,
@@ -165,6 +168,8 @@ KICK.namespace = function (ns_string) {
                     dataAccessor = {names:[],offset:{},accessors:{},length:{}},
                     offsetSet = [],
                     contains = KICK.core.Util.contains;
+
+                var numberOfVertices = vertexAttributeCache.numberOfVertices || 0;
 
                 while (polylistChild !== null){
                     tagName = polylistChild.tagName;
@@ -191,8 +196,7 @@ KICK.namespace = function (ns_string) {
                         for (i=0;i<dataAccessor.names.length;i++){
                             outVertexAttributes[dataAccessor.names[i]] = [];
                         }
-                        var vertexAttributeCache = {};
-                        var numberOfVertices = 0;
+
                         /**
                          * This method adds vertex attributes to the result index and
                          * @method addVertexAttributes
@@ -214,7 +218,6 @@ KICK.namespace = function (ns_string) {
                                 vertexIndex = vertexIndices[offset+indexInVertexIndices];
                                 cacheKey += index+"#"+vertexIndex+"#";
                             }
-
                             var cacheLookupRes = vertexAttributeCache[cacheKey];
                             var foundInCache = typeof cacheLookupRes === 'number';
                             if (foundInCache){
@@ -260,41 +263,45 @@ KICK.namespace = function (ns_string) {
                             if (nameMeshData === "texcoord"){
                                 nameMeshData = "uv1";
                             }
-                            destMeshData[nameMeshData] = outVertexAttributes[name];
+                            if (destMeshData[nameMeshData] && destMeshData[nameMeshData].length){
+                                // array already exist - append data
+                                var toArray = KICK.core.Util.typedArrayToArray;
+                                var source = toArray(destMeshData[nameMeshData]);
+                                var append = toArray(outVertexAttributes[name]);
+                                source.push.apply(source,append); // short way to append one array to another
+                                destMeshData[nameMeshData] = source;
+                            } else {
+                                destMeshData[nameMeshData] = outVertexAttributes[name];
+                            }
                         }
                         destMeshData.meshType = constants.GL_TRIANGLES;
-                        destMeshData.indices = triangleIndices;
+                        var subMeshes = destMeshData.subMeshes;
+                        subMeshes.push(triangleIndices);
+                        destMeshData.subMeshes = subMeshes;
+                        console.log("pushing new sub mesh with "+triangleIndices.length+" as # "+destMeshData.subMeshes.length);
                     }
                     polylistChild = polylistChild .nextSibling;
                 }
-            },
-            /**
-             * @method buildFromTrianglestrips
-             * @private
-             */
-            buildFromTrianglestrips = function(meshChild, destMeshData){
-                // todo: implement
-                KICK.core.Util.fail("buildFromTrianglestrips not implemented");
+
+                vertexAttributeCache.numberOfVertices = numberOfVertices ;
             },
             /**
              * Builds meshdata component (based on a <mesh> node)
              * @method buildMeshData
              */
-                buildMeshData = function (colladaDOM, engine, geometry){
-                var i,
-                    tagName,
+            buildMeshData = function (colladaDOM, engine, geometry){
+                var tagName,
                     meshChild,
                     name = geometry.getAttribute('name'),
-                    destMeshDataArray = [],
                     destMeshData,
                     mesh = geometry.getElementsByTagName("mesh");
                 if (mesh.length==0){
                     return null;
                 }
+                var vertexAttributeCache = {};
                 mesh = mesh[0];
                 meshChild = mesh.firstChild;
                 while (meshChild !== null){
-                    destMeshData = new KICK.mesh.MeshData({name:name});
                     tagName = meshChild.tagName;
                     if (tagName === "lines"){
                         console.log("lines - unsupported");
@@ -303,17 +310,18 @@ KICK.namespace = function (ns_string) {
                     } else if (tagName === "polygons"){
                         console.log("polygons  - unsupported");
                     } else if (tagName === "polylist" || tagName === "triangles"){
-                        buildFromPolyList(meshChild,destMeshData);
-                        destMeshDataArray.push(destMeshData);
+                        if (!destMeshData){
+                            destMeshData = new KICK.mesh.MeshData({name:name});
+                        }
+                        buildFromPolyList(meshChild,destMeshData,vertexAttributeCache);
                     } else if (tagName === "trifans"){
                         console.log("trifans unsupported");
                     } else if (tagName === "tristrips"){
-                        buildFromTrianglestrips(meshChild,destMeshData);
-                        destMeshDataArray.push(destMeshData);
+                        console.log("tristrips - unsupported");
                     }
                     meshChild = meshChild.nextSibling;
                 }
-                return destMeshDataArray;
+                return destMeshData;
             },
             getMeshesById = function(engine, meshid){
                 var meshArray = [],
@@ -328,9 +336,9 @@ KICK.namespace = function (ns_string) {
                 for (k=0;k<geometries.length;k++){
                     geometry = geometries[k];
                     if (geometry.getAttribute("id") === meshid){
-                        var meshDataArray = buildMeshData(colladaDOM, engine, geometry);
-                        for (var i=0;i<meshDataArray.length;i++){
-                            meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshDataArray[i]}));
+                        var meshData = buildMeshData(colladaDOM, engine, geometry);
+                        if (meshData){
+                            meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshData}));
                         }
                         break;
                     }
@@ -433,7 +441,6 @@ KICK.namespace = function (ns_string) {
         geometries = libraryGeometries.getElementsByTagName("geometry");
         var gameObjectsCreated = [];
         var meshCache = {};
-
 
         for (i=0;i<visualScenes.length;i++){
             var visualScene = visualScenes[i];
