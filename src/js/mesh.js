@@ -402,6 +402,9 @@ KICK.namespace = function (ns_string) {
              */
             indices:{
                 get:function(){
+                    if (_indices==0){
+                        return null;
+                    }
                     return _indices[0];
                 },
                 set:function(newValue){
@@ -411,7 +414,9 @@ KICK.namespace = function (ns_string) {
                     if (_indices[0] && isVertexDataInitialized()){
                         clearInterleavedData();
                     }
-                    _indices[0] = newValue;
+                    if (newValue){
+                        _indices[0] = newValue;
+                    }
                 }
             },
             /**
@@ -465,7 +470,7 @@ KICK.namespace = function (ns_string) {
             var vertexCount = data.vertex.length/3;
             for (var j=0;j<_indices.length;j++){
                 for (var i=_indices[j].length-1;i>=0;i--){
-                    if (_indices[j][i]<0 || _indices[j][i] >= vertexCount){
+                    if (_indices[j][i] >= vertexCount){
                         debugger;
                         return false;
                     }
