@@ -95,7 +95,7 @@
             checked = null,
             isElementChecked,
             firstInputElement = null;
-        for (i=0;i<elem.children.length;i++){
+        for (var i=0;i<elem.children.length;i++){
             var childElem =elem.children[i];
             if (childElem.nodeName === 'INPUT'){
                 isElementChecked = childElem.value === value;
