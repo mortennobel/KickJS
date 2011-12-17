@@ -3023,11 +3023,11 @@ KICK.namespace = function (ns_string) {
     vec3.create = function(vec) {
         var dest = new Float32Array(3);
 
-        if(vec) {
+        if (vec) {
             dest[0] = vec[0];
             dest[1] = vec[1];
             dest[2] = vec[2];
-        }
+        } 
 
         return dest;
     };
@@ -3056,7 +3056,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     vec3.add = function(vec, vec2, dest) {
-        if(!dest || vec == dest) {
+        if (!dest || vec === dest) {
             vec[0] += vec2[0];
             vec[1] += vec2[1];
             vec[2] += vec2[2];
@@ -3078,7 +3078,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     vec3.subtract = function(vec, vec2, dest) {
-        if(!dest || vec == dest) {
+        if (!dest || vec === dest) {
             vec[0] -= vec2[0];
             vec[1] -= vec2[1];
             vec[2] -= vec2[2];
@@ -3141,7 +3141,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     vec3.negate = function(vec, dest) {
-        if(!dest) { dest = vec; }
+        if (!dest) { dest = vec; }
 
         dest[0] = -vec[0];
         dest[1] = -vec[1];
@@ -3158,16 +3158,16 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     vec3.scale = function(vec, val, dest) {
-        if(!dest || vec == dest) {
+        if (!dest || vec === dest) {
             vec[0] *= val;
             vec[1] *= val;
             vec[2] *= val;
             return vec;
         }
 
-        dest[0] = vec[0]*val;
-        dest[1] = vec[1]*val;
-        dest[2] = vec[2]*val;
+        dest[0] = vec[0] * val;
+        dest[1] = vec[1] * val;
+        dest[2] = vec[2] * val;
         return dest;
     };
 
@@ -3180,17 +3180,17 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     vec3.normalize = function(vec, dest) {
-        if(!dest) { dest = vec; }
+        if (!dest) { dest = vec; }
 
-        var x = vec[0], y = vec[1], z = vec[2];
-        var len = sqrt(x*x + y*y + z*z);
+        var x = vec[0], y = vec[1], z = vec[2],
+            len = Math.sqrt(x * x + y * y + z * z);
 
         if (!len) {
             dest[0] = 0;
             dest[1] = 0;
             dest[2] = 0;
             return dest;
-        } else if (len == 1) {
+        } else if (len === 1) {
             dest[0] = x;
             dest[1] = y;
             dest[2] = z;
@@ -3198,9 +3198,9 @@ KICK.namespace = function (ns_string) {
         }
 
         len = 1 / len;
-        dest[0] = x*len;
-        dest[1] = y*len;
-        dest[2] = z*len;
+        dest[0] = x * len;
+        dest[1] = y * len;
+        dest[2] = z * len;
         return dest;
     };
 
@@ -3266,13 +3266,13 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     vec3.direction = function(vec, vec2, dest) {
-        if(!dest) { dest = vec; }
+        if (!dest) { dest = vec; }
 
-        var x = vec[0] - vec2[0];
-        var y = vec[1] - vec2[1];
-        var z = vec[2] - vec2[2];
+        var x = vec[0] - vec2[0],
+            y = vec[1] - vec2[1],
+            z = vec[2] - vec2[2],
+            len = sqrt(x * x + y * y + z * z);
 
-        var len = sqrt(x*x + y*y + z*z);
         if (!len) {
             dest[0] = 0;
             dest[1] = 0;
@@ -3302,6 +3302,59 @@ KICK.namespace = function (ns_string) {
         dest[0] = vec[0] + lerp * (vec2[0] - vec[0]);
         dest[1] = vec[1] + lerp * (vec2[1] - vec[1]);
         dest[2] = vec[2] + lerp * (vec2[2] - vec[2]);
+
+        return dest;
+    };
+
+    /*
+     * Calculates the euclidian distance between two vec3
+     *
+     * @method dist
+     * @param {KICK.math.vec3} vec first vector
+     * @param {KICK.math.vec3} vec2 second vector
+     * @return {Number} distance between vec and vec2
+     */
+    vec3.dist = function (vec, vec2) {
+        var x = vec2[0] - vec[0],
+            y = vec2[1] - vec[1],
+            z = vec2[2] - vec[2];
+
+        return Math.sqrt(x*x + y*y + z*z);
+    };
+
+    /*
+     * Projects the specified vec3 from screen space into object space
+     * Based on Mesa gluUnProject implementation at:
+     * http://webcvs.freedesktop.org/mesa/Mesa/src/glu/mesa/project.c?revision=1.4&view=markup
+     *
+     * @method unproject
+     * @param {KICK.math.vec3} vec screen-space vector to project
+     * @param {KICK.math.mat4} modelView Model-View matrix
+     * @param {KICK.math.mat4} proj Projection matrix
+     * @param {KICK.math.vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
+     * @param {KICK.math.vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
+     * @return {KICK.math.vec3} dest if specified, vec otherwise
+     */
+    vec3.unproject = function (vec, modelView, proj, viewport, dest) {
+        if (!dest) { dest = vec; }
+
+        var m = mat4.create();
+        var v = new Float32Array(4);
+
+        v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
+        v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
+        v[2] = 2.0 * vec[2] - 1.0;
+        v[3] = 1.0;
+
+        mat4.multiply(proj, modelView, m);
+        if(!mat4.inverse(m)) { return null; }
+
+        mat4.multiplyVec4(m, v);
+        if(v[3] === 0.0) { return null; }
+
+        dest[0] = v[0] / v[3];
+        dest[1] = v[1] / v[3];
+        dest[2] = v[2] / v[3];
 
         return dest;
     };
@@ -3585,6 +3638,17 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Calculates the dot product of two vec3s
+     * @method dot
+     * @param {KICK.math.vec4} vec first operand
+     * @param {KICK.math.vec4} vec2 second operand
+     * @return {Number} Dot product of vec and vec2
+     */
+    vec4.dot = function(vec, vec2){
+        return vec[0]*vec2[0] + vec[1]*vec2[1] + vec[2]*vec2[2] + vec[3]*vec2[3];
+    };
+
+    /**
      * Multiplies the components of a vec4 by a scalar value
      * @method scale
      * @param {KICK.math.vec4} vec vec4 to scale
@@ -3636,7 +3700,7 @@ KICK.namespace = function (ns_string) {
     mat3.create = function(mat) {
         var dest = new Float32Array(9);
 
-        if(mat) {
+        if (mat) {
             dest[0] = mat[0];
             dest[1] = mat[1];
             dest[2] = mat[2];
@@ -3678,6 +3742,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat3} dest
      */
     mat3.identity = function(dest) {
+        if (!dest) { dest = mat3.create(); }
         dest[0] = 1;
         dest[1] = 0;
         dest[2] = 0;
@@ -3699,9 +3764,9 @@ KICK.namespace = function (ns_string) {
      */
     mat3.transpose = function(mat, dest) {
         // If we are transposing ourselves we can skip a few steps but have to cache some values
-        if(!dest || mat == dest) {
-            var a01 = mat[1], a02 = mat[2];
-            var a12 = mat[5];
+        if (!dest || mat === dest) {
+            var a01 = mat[1], a02 = mat[2],
+                a12 = mat[5];
 
             mat[1] = mat[3];
             mat[2] = mat[6];
@@ -3732,27 +3797,27 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
      */
     mat3.toMat4 = function(mat, dest) {
-        if(!dest) { dest = mat4.create(); }
+        if (!dest) { dest = mat4.create(); }
 
-        dest[0] = mat[0];
-        dest[1] = mat[1];
-        dest[2] = mat[2];
-        dest[3] = 0;
-
-        dest[4] = mat[3];
-        dest[5] = mat[4];
-        dest[6] = mat[5];
-        dest[7] = 0;
-
-        dest[8] = mat[6];
-        dest[9] = mat[7];
-        dest[10] = mat[8];
-        dest[11] = 0;
-
-        dest[12] = 0;
-        dest[13] = 0;
-        dest[14] = 0;
         dest[15] = 1;
+        dest[14] = 0;
+        dest[13] = 0;
+        dest[12] = 0;
+
+        dest[11] = 0;
+        dest[10] = mat[8];
+        dest[9] = mat[7];
+        dest[8] = mat[6];
+
+        dest[7] = 0;
+        dest[6] = mat[5];
+        dest[5] = mat[4];
+        dest[4] = mat[3];
+
+        dest[3] = 0;
+        dest[2] = mat[2];
+        dest[1] = mat[1];
+        dest[0] = mat[0];
 
         return dest;
     };
@@ -3967,10 +4032,10 @@ KICK.namespace = function (ns_string) {
      */
     mat4.transpose = function(mat, dest) {
         // If we are transposing ourselves we can skip a few steps but have to cache some values
-        if(!dest || mat == dest) {
-            var a01 = mat[1], a02 = mat[2], a03 = mat[3];
-            var a12 = mat[6], a13 = mat[7];
-            var a23 = mat[11];
+        if (!dest || mat === dest) {
+            var a01 = mat[1], a02 = mat[2], a03 = mat[3],
+                a12 = mat[6], a13 = mat[7],
+                a23 = mat[11];
 
             mat[1] = mat[4];
             mat[2] = mat[8];
@@ -4014,17 +4079,17 @@ KICK.namespace = function (ns_string) {
      */
     mat4.determinant = function(mat) {
         // Cache the matrix values (makes for huge speed increases!)
-        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
-        var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
-        var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
-        var a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15];
+        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
+            a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7],
+            a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11],
+            a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15];
 
-        return  a30*a21*a12*a03 - a20*a31*a12*a03 - a30*a11*a22*a03 + a10*a31*a22*a03 +
-            a20*a11*a32*a03 - a10*a21*a32*a03 - a30*a21*a02*a13 + a20*a31*a02*a13 +
-            a30*a01*a22*a13 - a00*a31*a22*a13 - a20*a01*a32*a13 + a00*a21*a32*a13 +
-            a30*a11*a02*a23 - a10*a31*a02*a23 - a30*a01*a12*a23 + a00*a31*a12*a23 +
-            a10*a01*a32*a23 - a00*a11*a32*a23 - a20*a11*a02*a33 + a10*a21*a02*a33 +
-            a20*a01*a12*a33 - a00*a21*a12*a33 - a10*a01*a22*a33 + a00*a11*a22*a33;
+        return (a30 * a21 * a12 * a03 - a20 * a31 * a12 * a03 - a30 * a11 * a22 * a03 + a10 * a31 * a22 * a03 +
+            a20 * a11 * a32 * a03 - a10 * a21 * a32 * a03 - a30 * a21 * a02 * a13 + a20 * a31 * a02 * a13 +
+            a30 * a01 * a22 * a13 - a00 * a31 * a22 * a13 - a20 * a01 * a32 * a13 + a00 * a21 * a32 * a13 +
+            a30 * a11 * a02 * a23 - a10 * a31 * a02 * a23 - a30 * a01 * a12 * a23 + a00 * a31 * a12 * a23 +
+            a10 * a01 * a32 * a23 - a00 * a11 * a32 * a23 - a20 * a11 * a02 * a33 + a10 * a21 * a02 * a33 +
+            a20 * a01 * a12 * a33 - a00 * a21 * a12 * a33 - a10 * a01 * a22 * a33 + a00 * a11 * a22 * a33);
     };
 
     /**
@@ -4035,46 +4100,50 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest is specified, mat otherwise
      */
     mat4.inverse = function(mat, dest) {
-        if(!dest) { dest = mat; }
+        if (!dest) { dest = mat; }
 
         // Cache the matrix values (makes for huge speed increases!)
-        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
-        var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
-        var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
-        var a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15];
+        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
+            a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7],
+            a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11],
+            a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15],
 
-        var b00 = a00*a11 - a01*a10;
-        var b01 = a00*a12 - a02*a10;
-        var b02 = a00*a13 - a03*a10;
-        var b03 = a01*a12 - a02*a11;
-        var b04 = a01*a13 - a03*a11;
-        var b05 = a02*a13 - a03*a12;
-        var b06 = a20*a31 - a21*a30;
-        var b07 = a20*a32 - a22*a30;
-        var b08 = a20*a33 - a23*a30;
-        var b09 = a21*a32 - a22*a31;
-        var b10 = a21*a33 - a23*a31;
-        var b11 = a22*a33 - a23*a32;
+            b00 = a00 * a11 - a01 * a10,
+            b01 = a00 * a12 - a02 * a10,
+            b02 = a00 * a13 - a03 * a10,
+            b03 = a01 * a12 - a02 * a11,
+            b04 = a01 * a13 - a03 * a11,
+            b05 = a02 * a13 - a03 * a12,
+            b06 = a20 * a31 - a21 * a30,
+            b07 = a20 * a32 - a22 * a30,
+            b08 = a20 * a33 - a23 * a30,
+            b09 = a21 * a32 - a22 * a31,
+            b10 = a21 * a33 - a23 * a31,
+            b11 = a22 * a33 - a23 * a32,
 
-        // Calculate the determinant (inlined to avoid double-caching)
-        var invDet = 1/(b00*b11 - b01*b10 + b02*b09 + b03*b08 - b04*b07 + b05*b06);
+            d = (b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06),
+            invDet;
 
-        dest[0] = (a11*b11 - a12*b10 + a13*b09)*invDet;
-        dest[1] = (-a01*b11 + a02*b10 - a03*b09)*invDet;
-        dest[2] = (a31*b05 - a32*b04 + a33*b03)*invDet;
-        dest[3] = (-a21*b05 + a22*b04 - a23*b03)*invDet;
-        dest[4] = (-a10*b11 + a12*b08 - a13*b07)*invDet;
-        dest[5] = (a00*b11 - a02*b08 + a03*b07)*invDet;
-        dest[6] = (-a30*b05 + a32*b02 - a33*b01)*invDet;
-        dest[7] = (a20*b05 - a22*b02 + a23*b01)*invDet;
-        dest[8] = (a10*b10 - a11*b08 + a13*b06)*invDet;
-        dest[9] = (-a00*b10 + a01*b08 - a03*b06)*invDet;
-        dest[10] = (a30*b04 - a31*b02 + a33*b00)*invDet;
-        dest[11] = (-a20*b04 + a21*b02 - a23*b00)*invDet;
-        dest[12] = (-a10*b09 + a11*b07 - a12*b06)*invDet;
-        dest[13] = (a00*b09 - a01*b07 + a02*b06)*invDet;
-        dest[14] = (-a30*b03 + a31*b01 - a32*b00)*invDet;
-        dest[15] = (a20*b03 - a21*b01 + a22*b00)*invDet;
+        // Calculate the determinant
+        if (!d) { return null; }
+        invDet = 1 / d;
+
+        dest[0] = (a11 * b11 - a12 * b10 + a13 * b09) * invDet;
+        dest[1] = (-a01 * b11 + a02 * b10 - a03 * b09) * invDet;
+        dest[2] = (a31 * b05 - a32 * b04 + a33 * b03) * invDet;
+        dest[3] = (-a21 * b05 + a22 * b04 - a23 * b03) * invDet;
+        dest[4] = (-a10 * b11 + a12 * b08 - a13 * b07) * invDet;
+        dest[5] = (a00 * b11 - a02 * b08 + a03 * b07) * invDet;
+        dest[6] = (-a30 * b05 + a32 * b02 - a33 * b01) * invDet;
+        dest[7] = (a20 * b05 - a22 * b02 + a23 * b01) * invDet;
+        dest[8] = (a10 * b10 - a11 * b08 + a13 * b06) * invDet;
+        dest[9] = (-a00 * b10 + a01 * b08 - a03 * b06) * invDet;
+        dest[10] = (a30 * b04 - a31 * b02 + a33 * b00) * invDet;
+        dest[11] = (-a20 * b04 + a21 * b02 - a23 * b00) * invDet;
+        dest[12] = (-a10 * b09 + a11 * b07 - a12 * b06) * invDet;
+        dest[13] = (a00 * b09 - a01 * b07 + a02 * b06) * invDet;
+        dest[14] = (-a30 * b03 + a31 * b01 - a32 * b00) * invDet;
+        dest[15] = (a20 * b03 - a21 * b01 + a22 * b00) * invDet;
 
         return dest;
     };
@@ -4087,7 +4156,7 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest is specified, a new mat4 otherwise
      */
     mat4.toRotationMat = function(mat, dest) {
-        if(!dest) { dest = mat4.create(); }
+        if (!dest) { dest = mat4.create(); }
 
         dest[0] = mat[0];
         dest[1] = mat[1];
@@ -4117,7 +4186,7 @@ KICK.namespace = function (ns_string) {
      * return {KICK.math.mat3} dest is specified, a new mat3 otherwise
      */
     mat4.toMat3 = function(mat, dest) {
-        if(!dest) { dest = mat3.create(); }
+        if (!dest) { dest = mat3.create(); }
 
         dest[0] = mat[0];
         dest[1] = mat[1];
@@ -4181,29 +4250,31 @@ KICK.namespace = function (ns_string) {
      */
     mat4.toInverseMat3 = function(mat, dest) {
         // Cache the matrix values (makes for huge speed increases!)
-        var a00 = mat[0], a01 = mat[1], a02 = mat[2];
-        var a10 = mat[4], a11 = mat[5], a12 = mat[6];
-        var a20 = mat[8], a21 = mat[9], a22 = mat[10];
+        var a00 = mat[0], a01 = mat[1], a02 = mat[2],
+            a10 = mat[4], a11 = mat[5], a12 = mat[6],
+            a20 = mat[8], a21 = mat[9], a22 = mat[10],
 
-        var b01 = a22*a11-a12*a21;
-        var b11 = -a22*a10+a12*a20;
-        var b21 = a21*a10-a11*a20;
+            b01 = a22 * a11 - a12 * a21,
+            b11 = -a22 * a10 + a12 * a20,
+            b21 = a21 * a10 - a11 * a20,
 
-        var d = a00*b01 + a01*b11 + a02*b21;
+            d = a00 * b01 + a01 * b11 + a02 * b21,
+            id;
+
         if (!d) { return null; }
-        var id = 1/d;
+        id = 1 / d;
 
-        if(!dest) { dest = mat3.create(); }
+        if (!dest) { dest = mat3.create(); }
 
-        dest[0] = b01*id;
-        dest[1] = (-a22*a01 + a02*a21)*id;
-        dest[2] = (a12*a01 - a02*a11)*id;
-        dest[3] = b11*id;
-        dest[4] = (a22*a00 - a02*a20)*id;
-        dest[5] = (-a12*a00 + a02*a10)*id;
-        dest[6] = b21*id;
-        dest[7] = (-a21*a00 + a01*a20)*id;
-        dest[8] = (a11*a00 - a01*a10)*id;
+        dest[0] = b01 * id;
+        dest[1] = (-a22 * a01 + a02 * a21) * id;
+        dest[2] = (a12 * a01 - a02 * a11) * id;
+        dest[3] = b11 * id;
+        dest[4] = (a22 * a00 - a02 * a20) * id;
+        dest[5] = (-a12 * a00 + a02 * a10) * id;
+        dest[6] = b21 * id;
+        dest[7] = (-a21 * a00 + a01 * a20) * id;
+        dest[8] = (a11 * a00 - a01 * a10) * id;
 
         return dest;
     };
@@ -4217,35 +4288,35 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.multiply = function(mat, mat2, dest) {
-        if(!dest) { dest = mat }
+        if (!dest) { dest = mat; }
 
         // Cache the matrix values (makes for huge speed increases!)
-        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
-        var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
-        var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
-        var a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15];
+        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3],
+            a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7],
+            a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11],
+            a30 = mat[12], a31 = mat[13], a32 = mat[14], a33 = mat[15],
 
-        var b00 = mat2[0], b01 = mat2[1], b02 = mat2[2], b03 = mat2[3];
-        var b10 = mat2[4], b11 = mat2[5], b12 = mat2[6], b13 = mat2[7];
-        var b20 = mat2[8], b21 = mat2[9], b22 = mat2[10], b23 = mat2[11];
-        var b30 = mat2[12], b31 = mat2[13], b32 = mat2[14], b33 = mat2[15];
+            b00 = mat2[0], b01 = mat2[1], b02 = mat2[2], b03 = mat2[3],
+            b10 = mat2[4], b11 = mat2[5], b12 = mat2[6], b13 = mat2[7],
+            b20 = mat2[8], b21 = mat2[9], b22 = mat2[10], b23 = mat2[11],
+            b30 = mat2[12], b31 = mat2[13], b32 = mat2[14], b33 = mat2[15];
 
-        dest[0] = b00*a00 + b01*a10 + b02*a20 + b03*a30;
-        dest[1] = b00*a01 + b01*a11 + b02*a21 + b03*a31;
-        dest[2] = b00*a02 + b01*a12 + b02*a22 + b03*a32;
-        dest[3] = b00*a03 + b01*a13 + b02*a23 + b03*a33;
-        dest[4] = b10*a00 + b11*a10 + b12*a20 + b13*a30;
-        dest[5] = b10*a01 + b11*a11 + b12*a21 + b13*a31;
-        dest[6] = b10*a02 + b11*a12 + b12*a22 + b13*a32;
-        dest[7] = b10*a03 + b11*a13 + b12*a23 + b13*a33;
-        dest[8] = b20*a00 + b21*a10 + b22*a20 + b23*a30;
-        dest[9] = b20*a01 + b21*a11 + b22*a21 + b23*a31;
-        dest[10] = b20*a02 + b21*a12 + b22*a22 + b23*a32;
-        dest[11] = b20*a03 + b21*a13 + b22*a23 + b23*a33;
-        dest[12] = b30*a00 + b31*a10 + b32*a20 + b33*a30;
-        dest[13] = b30*a01 + b31*a11 + b32*a21 + b33*a31;
-        dest[14] = b30*a02 + b31*a12 + b32*a22 + b33*a32;
-        dest[15] = b30*a03 + b31*a13 + b32*a23 + b33*a33;
+        dest[0] = b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30;
+        dest[1] = b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31;
+        dest[2] = b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32;
+        dest[3] = b00 * a03 + b01 * a13 + b02 * a23 + b03 * a33;
+        dest[4] = b10 * a00 + b11 * a10 + b12 * a20 + b13 * a30;
+        dest[5] = b10 * a01 + b11 * a11 + b12 * a21 + b13 * a31;
+        dest[6] = b10 * a02 + b11 * a12 + b12 * a22 + b13 * a32;
+        dest[7] = b10 * a03 + b11 * a13 + b12 * a23 + b13 * a33;
+        dest[8] = b20 * a00 + b21 * a10 + b22 * a20 + b23 * a30;
+        dest[9] = b20 * a01 + b21 * a11 + b22 * a21 + b23 * a31;
+        dest[10] = b20 * a02 + b21 * a12 + b22 * a22 + b23 * a32;
+        dest[11] = b20 * a03 + b21 * a13 + b22 * a23 + b23 * a33;
+        dest[12] = b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30;
+        dest[13] = b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31;
+        dest[14] = b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32;
+        dest[15] = b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33;
 
         return dest;
     };
@@ -4260,13 +4331,13 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     mat4.multiplyVec3 = function(mat, vec, dest) {
-        if(!dest) { dest = vec }
+        if (!dest) { dest = vec; }
 
         var x = vec[0], y = vec[1], z = vec[2];
 
-        dest[0] = mat[0]*x + mat[4]*y + mat[8]*z + mat[12];
-        dest[1] = mat[1]*x + mat[5]*y + mat[9]*z + mat[13];
-        dest[2] = mat[2]*x + mat[6]*y + mat[10]*z + mat[14];
+        dest[0] = mat[0] * x + mat[4] * y + mat[8] * z + mat[12];
+        dest[1] = mat[1] * x + mat[5] * y + mat[9] * z + mat[13];
+        dest[2] = mat[2] * x + mat[6] * y + mat[10] * z + mat[14];
 
         return dest;
     };
@@ -4302,14 +4373,14 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec4} dest if specified, vec otherwise
      */
     mat4.multiplyVec4 = function(mat, vec, dest) {
-        if(!dest) { dest = vec }
+        if (!dest) { dest = vec; }
 
         var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
 
-        dest[0] = mat[0]*x + mat[4]*y + mat[8]*z + mat[12]*w;
-        dest[1] = mat[1]*x + mat[5]*y + mat[9]*z + mat[13]*w;
-        dest[2] = mat[2]*x + mat[6]*y + mat[10]*z + mat[14]*w;
-        dest[3] = mat[3]*x + mat[7]*y + mat[11]*z + mat[15]*w;
+        dest[0] = mat[0] * x + mat[4] * y + mat[8] * z + mat[12] * w;
+        dest[1] = mat[1] * x + mat[5] * y + mat[9] * z + mat[13] * w;
+        dest[2] = mat[2] * x + mat[6] * y + mat[10] * z + mat[14] * w;
+        dest[3] = mat[3] * x + mat[7] * y + mat[11] * z + mat[15] * w;
 
         return dest;
     };
@@ -4323,37 +4394,31 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.translate = function(mat, vec, dest) {
-        var x = vec[0], y = vec[1], z = vec[2];
+        var x = vec[0], y = vec[1], z = vec[2],
+            a00, a01, a02, a03,
+            a10, a11, a12, a13,
+            a20, a21, a22, a23;
 
-        if(!dest || mat == dest) {
-            mat[12] = mat[0]*x + mat[4]*y + mat[8]*z + mat[12];
-            mat[13] = mat[1]*x + mat[5]*y + mat[9]*z + mat[13];
-            mat[14] = mat[2]*x + mat[6]*y + mat[10]*z + mat[14];
-            mat[15] = mat[3]*x + mat[7]*y + mat[11]*z + mat[15];
+        if (!dest || mat === dest) {
+            mat[12] = mat[0] * x + mat[4] * y + mat[8] * z + mat[12];
+            mat[13] = mat[1] * x + mat[5] * y + mat[9] * z + mat[13];
+            mat[14] = mat[2] * x + mat[6] * y + mat[10] * z + mat[14];
+            mat[15] = mat[3] * x + mat[7] * y + mat[11] * z + mat[15];
             return mat;
         }
 
-        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
-        var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
-        var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
+        a00 = mat[0]; a01 = mat[1]; a02 = mat[2]; a03 = mat[3];
+        a10 = mat[4]; a11 = mat[5]; a12 = mat[6]; a13 = mat[7];
+        a20 = mat[8]; a21 = mat[9]; a22 = mat[10]; a23 = mat[11];
 
-        dest[0] = a00;
-        dest[1] = a01;
-        dest[2] = a02;
-        dest[3] = a03;
-        dest[4] = a10;
-        dest[5] = a11;
-        dest[6] = a12;
-        dest[7] = a13;
-        dest[8] = a20;
-        dest[9] = a21;
-        dest[10] = a22;
-        dest[11] = a23;
+        dest[0] = a00; dest[1] = a01; dest[2] = a02; dest[3] = a03;
+        dest[4] = a10; dest[5] = a11; dest[6] = a12; dest[7] = a13;
+        dest[8] = a20; dest[9] = a21; dest[10] = a22; dest[11] = a23;
 
-        dest[12] = a00*x + a10*y + a20*z + mat[12];
-        dest[13] = a01*x + a11*y + a21*z + mat[13];
-        dest[14] = a02*x + a12*y + a22*z + mat[14];
-        dest[15] = a03*x + a13*y + a23*z + mat[15];
+        dest[12] = a00 * x + a10 * y + a20 * z + mat[12];
+        dest[13] = a01 * x + a11 * y + a21 * z + mat[13];
+        dest[14] = a02 * x + a12 * y + a22 * z + mat[14];
+        dest[15] = a03 * x + a13 * y + a23 * z + mat[15];
         return dest;
     };
 
@@ -4368,7 +4433,7 @@ KICK.namespace = function (ns_string) {
     mat4.scale = function(mat, vec, dest) {
         var x = vec[0], y = vec[1], z = vec[2];
 
-        if(!dest || mat == dest) {
+        if(!dest || mat === dest) {
             mat[0] *= x;
             mat[1] *= x;
             mat[2] *= x;
@@ -4406,6 +4471,7 @@ KICK.namespace = function (ns_string) {
     /**
      * Rotates a matrix by three rotations given in eulers angles<br>
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
+     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
      * @method rotateEuler
      * @param {KICK.math.mat4} mat mat4 to rotate
      * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
@@ -4444,33 +4510,40 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, mat otherwise
      */
     mat4.rotate = function(mat, angle, axis, dest) {
-        var x = axis[0], y = axis[1], z = axis[2];
+        var x = axis[0], y = axis[1], z = axis[2],
+            s,c,t,
+            a00,a01,a02,a03,
+            a10,a11,a12,a13,
+            a20,a21,a22,a23,
+            b00,b01,b02,
+            b10,b11,b12,
+            b20,b21,b22;
         var len = sqrt(x*x + y*y + z*z);
         if (!len) { return null; }
-        if (len != 1) {
+        if (len !== 1) {
             len = 1 / len;
             x *= len;
             y *= len;
             z *= len;
         }
 
-        var s = sin(angle);
-        var c = cos(angle);
-        var t = 1-c;
+        s = sin(angle);
+        c = cos(angle);
+        t = 1-c;
 
         // Cache the matrix values (makes for huge speed increases!)
-        var a00 = mat[0], a01 = mat[1], a02 = mat[2], a03 = mat[3];
-        var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
-        var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
+        a00 = mat[0]; a01 = mat[1]; a02 = mat[2]; a03 = mat[3];
+        a10 = mat[4]; a11 = mat[5]; a12 = mat[6]; a13 = mat[7];
+        a20 = mat[8]; a21 = mat[9]; a22 = mat[10]; a23 = mat[11];
 
         // Construct the elements of the rotation matrix
-        var b00 = x*x*t + c, b01 = y*x*t + z*s, b02 = z*x*t - y*s;
-        var b10 = x*y*t - z*s, b11 = y*y*t + c, b12 = z*y*t + x*s;
-        var b20 = x*z*t + y*s, b21 = y*z*t - x*s, b22 = z*z*t + c;
+        b00 = x*x*t + c; b01 = y*x*t + z*s; b02 = z*x*t - y*s;
+        b10 = x*y*t - z*s; b11 = y*y*t + c; b12 = z*y*t + x*s;
+        b20 = x*z*t + y*s; b21 = y*z*t - x*s; b22 = z*z*t + c;
 
         if(!dest) {
-            dest = mat
-        } else if(mat != dest) { // If the source and destination differ, copy the unchanged last row
+            dest = mat;
+        } else if(mat !== dest) { // If the source and destination differ, copy the unchanged last row
             dest[12] = mat[12];
             dest[13] = mat[13];
             dest[14] = mat[14];
@@ -4512,8 +4585,8 @@ KICK.namespace = function (ns_string) {
         var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
 
         if(!dest) {
-            dest = mat
-        } else if(mat != dest) { // If the source and destination differ, copy the unchanged rows
+            dest = mat;
+        } else if(mat !== dest) { // If the source and destination differ, copy the unchanged rows
             dest[0] = mat[0];
             dest[1] = mat[1];
             dest[2] = mat[2];
@@ -4555,8 +4628,8 @@ KICK.namespace = function (ns_string) {
         var a20 = mat[8], a21 = mat[9], a22 = mat[10], a23 = mat[11];
 
         if(!dest) {
-            dest = mat
-        } else if(mat != dest) { // If the source and destination differ, copy the unchanged rows
+            dest = mat;
+        } else if(mat !== dest) { // If the source and destination differ, copy the unchanged rows
             dest[4] = mat[4];
             dest[5] = mat[5];
             dest[6] = mat[6];
@@ -4598,8 +4671,8 @@ KICK.namespace = function (ns_string) {
         var a10 = mat[4], a11 = mat[5], a12 = mat[6], a13 = mat[7];
 
         if(!dest) {
-            dest = mat
-        } else if(mat != dest) { // If the source and destination differ, copy the unchanged last row
+            dest = mat;
+        } else if(mat !== dest) { // If the source and destination differ, copy the unchanged last row
             dest[8] = mat[8];
             dest[9] = mat[9];
             dest[10] = mat[10];
@@ -4859,6 +4932,63 @@ KICK.namespace = function (ns_string) {
         return [tranlate, rotate, scale];
     };
 
+    /*
+     * mat4.fromRotationTranslation
+     * Creates a matrix from a quaternion rotation and vector translation
+     * This is equivalent to (but much faster than):
+     *
+     *     mat4.identity(dest);
+     *     mat4.translate(dest, vec);
+     *     var quatMat = mat4.create();
+     *     quat4.toMat4(quat, quatMat);
+     *     mat4.multiply(dest, quatMat);
+     *
+     *
+     * @method fromRotationTranslation
+     * @param {KICK.math.quat4} quat specifying the rotation by
+     * @param {KICK.math.vec3} vec specifying the translation
+     * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to a new mat4
+     * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     */
+    mat4.fromRotationTranslation = function (quat, vec, dest) {
+        if (!dest) { dest = mat4.create(); }
+
+        // Quaternion math
+        var x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+            x2 = x + x,
+            y2 = y + y,
+            z2 = z + z,
+
+            xx = x * x2,
+            xy = x * y2,
+            xz = x * z2,
+            yy = y * y2,
+            yz = y * z2,
+            zz = z * z2,
+            wx = w * x2,
+            wy = w * y2,
+            wz = w * z2;
+
+        dest[0] = 1 - (yy + zz);
+        dest[1] = xy + wz;
+        dest[2] = xz - wy;
+        dest[3] = 0;
+        dest[4] = xy - wz;
+        dest[5] = 1 - (xx + zz);
+        dest[6] = yz + wx;
+        dest[7] = 0;
+        dest[8] = xz + wy;
+        dest[9] = yz - wx;
+        dest[10] = 1 - (xx + yy);
+        dest[11] = 0;
+        dest[12] = vec[0];
+        dest[13] = vec[1];
+        dest[14] = vec[2];
+        dest[15] = 1;
+
+        return dest;
+    };
+
     /**
      * Returns a string representation of a mat4
      * @method str
@@ -4920,18 +5050,19 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, quat otherwise
      */
     quat4.calculateW = function(quat, dest) {
-        var x = quat[0], y = quat[1], z = quat[2];
+        var x = quat[0], y = quat[1], z = quat[2],
+            w = -sqrt(abs(1.0 - x*x - y*y - z*z));
 
         if(!dest || quat == dest) {
-            quat[3] = -sqrt(abs(1.0 - x*x - y*y - z*z));
+            quat[3] = w;
             return quat;
         }
         dest[0] = x;
         dest[1] = y;
         dest[2] = z;
-        dest[3] = -sqrt(abs(1.0 - x*x - y*y - z*z));
+        dest[3] = w;
         return dest;
-    }
+    };
 
     /**
      * Calculates the inverse of a quat4
@@ -4941,6 +5072,30 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, quat otherwise
      */
     quat4.inverse = function(quat, dest) {
+        var dot = quat4.dot(quat,quat),
+            invDot = 1.0/dot;
+        if(!dest || quat == dest) {
+            quat[0] *= -invDot;
+            quat[1] *= -invDot;
+            quat[2] *= -invDot;
+            quat[3] *= invDot;
+            return quat;
+        }
+        dest[0] = -quat[0]*invDot;
+        dest[1] = -quat[1]*invDot;
+        dest[2] = -quat[2]*invDot;
+        dest[3] = quat[3]*invDot;
+        return dest;
+    };
+
+    /**
+     * Calculates the inverse of a quat4
+     * @method conjugate
+     * @param {KICK.math.quat4} quat quat4 to calculate inverse of
+     * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
+     * @return {KICK.math.quat4} dest if specified, quat otherwise
+     */
+    quat4.conjugate = function(quat, dest) {
         if(!dest || quat == dest) {
             quat[0] *= -1;
             quat[1] *= -1;
@@ -4964,6 +5119,15 @@ KICK.namespace = function (ns_string) {
     quat4.length = vec4.length;
 
     /**
+     * Returns dot product of q1 and q1
+     * @method dot
+     * @param {KICK.math.quat4} q1
+     * @param {KICK.math.quat4} q2
+     * @return {Number}
+     */
+    quat4.dot = vec4.dot;
+
+    /**
      * Generates a unit quaternion of the same direction as the provided quat4<br>
      * If quaternion length is 0, returns [0, 0, 0, 0]
      * @method normalize
@@ -4972,18 +5136,18 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, quat otherwise
      */
     quat4.normalize = function(quat, dest) {
-        if(!dest) { dest = quat; }
+        if (!dest) { dest = quat; }
 
-        var x = quat[0], y = quat[1], z = quat[2], w = quat[3];
-        var len = sqrt(x*x + y*y + z*z + w*w);
-        if(len == 0) {
+        var x = quat[0], y = quat[1], z = quat[2], w = quat[3],
+            len = Math.sqrt(x * x + y * y + z * z + w * w);
+        if (len === 0) {
             dest[0] = 0;
             dest[1] = 0;
             dest[2] = 0;
             dest[3] = 0;
             return dest;
         }
-        len = 1/len;
+        len = 1 / len;
         dest[0] = x * len;
         dest[1] = y * len;
         dest[2] = z * len;
@@ -5001,15 +5165,15 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, quat otherwise
      */
     quat4.multiply = function(quat, quat2, dest) {
-        if(!dest) { dest = quat; }
+        if (!dest) { dest = quat; }
 
-        var qax = quat[0], qay = quat[1], qaz = quat[2], qaw = quat[3];
-        var qbx = quat2[0], qby = quat2[1], qbz = quat2[2], qbw = quat2[3];
+        var qax = quat[0], qay = quat[1], qaz = quat[2], qaw = quat[3],
+            qbx = quat2[0], qby = quat2[1], qbz = quat2[2], qbw = quat2[3];
 
-        dest[0] = qax*qbw + qaw*qbx + qay*qbz - qaz*qby;
-        dest[1] = qay*qbw + qaw*qby + qaz*qbx - qax*qbz;
-        dest[2] = qaz*qbw + qaw*qbz + qax*qby - qay*qbx;
-        dest[3] = qaw*qbw - qax*qbx - qay*qby - qaz*qbz;
+        dest[0] = qax * qbw + qaw * qbx + qay * qbz - qaz * qby;
+        dest[1] = qay * qbw + qaw * qby + qaz * qbx - qax * qbz;
+        dest[2] = qaz * qbw + qaw * qbz + qax * qby - qay * qbx;
+        dest[3] = qaw * qbw - qax * qbx - qay * qby - qaz * qbz;
 
         return dest;
     };
@@ -5023,21 +5187,21 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
     quat4.multiplyVec3 = function(quat, vec, dest) {
-        if(!dest) { dest = vec; }
+        if (!dest) { dest = vec; }
 
-        var x = vec[0], y = vec[1], z = vec[2];
-        var qx = quat[0], qy = quat[1], qz = quat[2], qw = quat[3];
+        var x = vec[0], y = vec[1], z = vec[2],
+            qx = quat[0], qy = quat[1], qz = quat[2], qw = quat[3],
 
-        // calculate quat * vec
-        var ix = qw*x + qy*z - qz*y;
-        var iy = qw*y + qz*x - qx*z;
-        var iz = qw*z + qx*y - qy*x;
-        var iw = -qx*x - qy*y - qz*z;
+            // calculate quat * vec
+            ix = qw * x + qy * z - qz * y,
+            iy = qw * y + qz * x - qx * z,
+            iz = qw * z + qx * y - qy * x,
+            iw = -qx * x - qy * y - qz * z;
 
         // calculate result * inverse quat
-        dest[0] = ix*qw + iw*-qx + iy*-qz - iz*-qy;
-        dest[1] = iy*qw + iw*-qy + iz*-qx - ix*-qz;
-        dest[2] = iz*qw + iw*-qz + ix*-qy - iy*-qx;
+        dest[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+        dest[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+        dest[2] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
 
         return dest;
     };
@@ -5059,6 +5223,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Calculates a rotation represented in eulers angles (in degrees)
+     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
      * @method toEuler
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
@@ -5079,7 +5244,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Set the rotation based on eulers angles.
+     * Set the rotation based on an angle and a axis
      * @method angleAxis
      * @param {Number} angle rotation angle in degrees
      * @param {KICK.math.vec3} vec normalized axis
@@ -5140,22 +5305,26 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Set the rotation based on eulers angles.
+     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
      * @method setEuler
      * @param {KICK.math.vec3} vec vec3 eulers angles (degrees)
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
     quat4.setEuler = function(vec, dest) {
-        var axisX = quat4.angleAxis(vec[0],[1,0,0]),
-            axisY = quat4.angleAxis(vec[1],[0,1,0]),
-            axisZ = quat4.angleAxis(vec[2],[0,0,1]);
+        // code based on GLM
+        var degreeToRadian = 0.01745329251994,
+            halfDTR = degreeToRadian * 0.5,
+            x = vec[0] * halfDTR,y=vec[1] * halfDTR,z=vec[2] * halfDTR,
+            cx = cos(x), cy = cos(y), cz = cos(z),
+            sx = sin(x), sy = sin(y), sz = sin(z);
         if(!dest) {
             dest = quat4.create();
         }
-
-        // todo optimize this method. It should basically inline all three multiplications like the code below
-        quat4.multiply(axisZ,axisY,dest);
-        quat4.multiply(dest,axisX,dest);
+        dest[3] = cx * cy * cz + sx * sy * sz;
+        dest[0] = sx * cy * cz - cx * sy * sz;
+        dest[1] = cx * sy * cz + sx * cy * sz;
+        dest[2] = cx * cy * sz - sx * sy * cz;
         return dest;
     };
 
@@ -5201,33 +5370,34 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat3} dest if specified, a new mat3 otherwise
      */
     quat4.toMat3 = function(quat, dest) {
-        if(!dest) { dest = mat3.create(); }
+        if (!dest) { dest = mat3.create(); }
 
         var x = quat[0], y = quat[1], z = quat[2], w = quat[3],
-            x2 = 2*x,
-            y2 = 2*y,
-            z2 = 2*z,
-            yy = y2*y,
-            zz = z2*z,
-            xy = x2*y,
-            wz = z2*w,
-            xz = x2*z,
-            wy = y2*w,
-            xx = x2*x,
-            yz = y2*z,
-            wx = x2*w;
+            x2 = x + x,
+            y2 = y + y,
+            z2 = z + z,
 
-        dest[0] = 1 - yy - zz;
+            xx = x * x2,
+            xy = x * y2,
+            xz = x * z2,
+            yy = y * y2,
+            yz = y * z2,
+            zz = z * z2,
+            wx = w * x2,
+            wy = w * y2,
+            wz = w * z2;
+
+        dest[0] = 1 - (yy + zz);
         dest[1] = xy + wz;
         dest[2] = xz - wy;
 
         dest[3] = xy - wz;
-        dest[4] = 1 - xx - zz;
+        dest[4] = 1 - (xx + zz);
         dest[5] = yz + wx;
 
         dest[6] = xz + wy;
         dest[7] = yz - wx;
-        dest[8] = 1 - xx - yy;
+        dest[8] = 1 - (xx + yy);
 
         return dest;
     };
@@ -5240,35 +5410,36 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
      */
     quat4.toMat4 = function(quat, dest) {
-        if(!dest) { dest = mat4.create(); }
+        if (!dest) { dest = mat4.create(); }
 
         var x = quat[0], y = quat[1], z = quat[2], w = quat[3],
-            x2 = 2*x,
-            y2 = 2*y,
-            z2 = 2*z,
-            yy = y2*y,
-            zz = z2*z,
-            xy = x2*y,
-            wz = z2*w,
-            xz = x2*z,
-            wy = y2*w,
-            xx = x2*x,
-            yz = y2*z,
-            wx = x2*w;
+            x2 = x + x,
+            y2 = y + y,
+            z2 = z + z,
 
-        dest[0] = 1 - yy - zz;
+            xx = x * x2,
+            xy = x * y2,
+            xz = x * z2,
+            yy = y * y2,
+            yz = y * z2,
+            zz = z * z2,
+            wx = w * x2,
+            wy = w * y2,
+            wz = w * z2;
+
+        dest[0] = 1 - (yy + zz);
         dest[1] = xy + wz;
         dest[2] = xz - wy;
         dest[3] = 0;
 
         dest[4] = xy - wz;
-        dest[5] = 1 - xx - zz;
+        dest[5] = 1 - (xx + zz);
         dest[6] = yz + wx;
         dest[7] = 0;
 
         dest[8] = xz + wy;
         dest[9] = yz - wx;
-        dest[10] = 1 - xx - yy;
+        dest[10] = 1 - (xx + yy);
         dest[11] = 0;
 
         dest[12] = 0;
