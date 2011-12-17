@@ -2380,7 +2380,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Calculates the inverse of a quat4
+     * Calculates the conjugate of a quat4
      * @method conjugate
      * @param {KICK.math.quat4} quat quat4 to calculate inverse of
      * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
