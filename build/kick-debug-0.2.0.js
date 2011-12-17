@@ -5823,14 +5823,14 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * This method should be invoked when the canvas is resized (using clientWidth and clientHeight).<br>
+         * This method should be invoked when the canvas is resized.<br>
          * This will change the viewport size of the WebGL context.<br>
          * Instead of calling this method explicit, the configuration parameter
          * checkCanvasResizeInterval can also be set to support automatically checks
          * @method canvasResized
          */
         this.canvasResized = function(){
-            gl.viewportSize = vec2.create([canvas.clientWidth,canvas.clientHeight]);
+            gl.viewportSize = vec2.create([canvas.width,canvas.height]);
             if (mouseInput){
                 mouseInput.updateCanvasElementPosition();
             }
