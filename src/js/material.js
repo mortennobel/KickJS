@@ -106,7 +106,7 @@ KICK.namespace = function (ns_string) {
             compileShader = function (str, isFragmentShader) {
                 var shader,
                     c = KICK.core.Constants;
-                str = material.Shader.getPrecompiledSource(str);
+                str = material.Shader.getPrecompiledSource(engine,str);
                 if (isFragmentShader) {
                     shader = gl.createShader(c.GL_FRAGMENT_SHADER);
                 } else {
@@ -689,11 +689,12 @@ KICK.namespace = function (ns_string) {
 
     /**
      * @method getPrecompiledSource
+     * @param {KICK.core.Engine} engine
      * @param {String} sourcecode
      * @return {String} sourcecode after precompiler
      * @static
      */
-    material.Shader.getPrecompiledSource = function(sourcecode){
+    material.Shader.getPrecompiledSource = function(engine,sourcecode){
         // todo optimize with regular expression search
         if (c._DEBUG){
             // insert #line nn after each #pragma include to give meaning full lines in error console
