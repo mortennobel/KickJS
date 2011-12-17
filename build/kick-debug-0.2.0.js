@@ -2664,6 +2664,21 @@ KICK.namespace = function (ns_string) {
 */
 /**
 * GLSL file content
+* @property shadowmap.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property shadowmap_fs.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property shadowmap_vs.glsl
+* @type String
+*/
+/**
+* GLSL file content
 * @property transparent_phong_fs.glsl
 * @type String
 */
@@ -2692,7 +2707,7 @@ KICK.namespace = function (ns_string) {
 * @property unlit_vs.glsl
 * @type String
 */
-{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\n    gl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\n  gl_Position = _mvProj * vec4(vertex, 1.0);\n}  ","light.glsl":"struct DirectionalLight {\n   vec3 lDir;\n   vec3 colInt;\n   vec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\n    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\n    specular =  pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec3 color = max(diffuse,_ambient.xyz)*mainColor;\n    \n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n ","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n    vNormal= normalize(_norm * normal);\n} ","pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\n\nvoid main(void)\n{\n    gl_FragColor = gameObjectUID;\n}","pick_vs.glsl":"attribute vec3 vertex;\n\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\n\nvarying vec4 gameObjectUID;\n\nvoid main(void) {\n    // compute position\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n\n    gameObjectUID = _gameObjectUID;\n}","transparent_phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n\n#pragma include \"light.glsl\"\n\nvoid main(void)\n{\n    vec3 diffuse;\n    float specular;\n    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\n    vec4 color = vec4(max(diffuse,_ambient.xyz),1.0)*mainColor;\n\n    gl_FragColor = texture2D(mainTexture,vUv)*color+vec4(specular*specularColor,0.0);\n}\n ","transparent_phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\nuniform mat3 _norm;\n\nvarying vec2 vUv;\nvarying vec3 vNormal;\n\nvoid main(void) {\n // compute position\n gl_Position = _mvProj * vec4(vertex, 1.0);\n\n vUv = uv1;\n // compute light info\n vNormal= normalize(_norm * normal);\n} ","transparent_unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\n\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n ","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\n\nuniform mat4 _mvProj;\n\nvarying vec2 vUv;\n\nvoid main(void) {\n    gl_Position = _mvProj * vec4(vertex, 1.0);\n    vUv = uv1;\n}"};
+{"error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\ngl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","light.glsl":"struct DirectionalLight {\nvec3 lDir;\nvec3 colInt;\nvec3 halfV;\n};\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){\nfloat diffuseContribution = max(dot(normal, dLight.lDir), 0.0);\n\tfloat specularContribution = max(dot(normal, dLight.halfV), 0.0);\nspecular = pow(specularContribution, specularExponent);\n\tdiffuse = (dLight.colInt * diffuseContribution);\n}\nuniform DirectionalLight _dLight;\nuniform vec3 _ambient;","phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\nuniform vec3 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\nfloat visibility;\nif (SHADOWS){\ncomputeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max(diffuse*visibility,_ambient.xyz)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);\n}\n","phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec4 vShadowMapCoord;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvUv = uv1;\nvNormal= normalize(_norm * normal);\nvShadowMapCoord = _lightMat * v;\n} ","pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\nvoid main(void)\n{\ngl_FragColor = gameObjectUID;\n}","pick_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\nvarying vec4 gameObjectUID;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\ngameObjectUID = _gameObjectUID;\n}","shadowmap.glsl":"varying vec4 vShadowMapCoord;\nuniform sampler2D _shadowMapTexture;\nfloat unpackDepth( const in vec4 rgba_depth ) {\nconst vec4 bit_shift = vec4( 1.0 / ( 16777216.0 ), 1.0 / ( 65536.0 ), 1.0 / 256.0, 1.0 );\nreturn dot( rgba_depth, bit_shift );\n}\nfloat computeLightVisibility(){\nvec3 shadowCoord = vShadowMapCoord.xyz / vShadowMapCoord.w;\nvec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);\nfloat shadowDepth = unpackDepth(packedShadowDepth);\nif (shadowDepth < shadowCoord.z){\nreturn 1.0;\n}\nreturn 0.0;\n}","shadowmap_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvec4 packDepth( const in float depth ) {\nconst vec4 bitShift = vec4( 16777216.0, 65536.0, 256.0, 1.0 );\nconst vec4 bitMask = vec4( 0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0 );\nvec4 res = fract( depth * bitShift );\nres -= res.xxyz * bitMask;\nreturn res;\n}\nvoid main() {\ngl_FragColor = packDepth( gl_FragCoord.z );\n}\n","shadowmap_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","transparent_phong_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nvarying vec3 vNormal;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec3 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);\nvec4 color = vec4(max(diffuse,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color+vec4(specular*specularColor,0.0);\n}\n","transparent_phong_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n// compute light info\nvNormal= normalize(_norm * normal);\n} ","transparent_unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nuniform vec3 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = texture2D(mainTexture,vUv)*vec4(mainColor,1.0);\n}\n","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}"};
 })();/*!
  * New BSD License
  *
@@ -2769,6 +2784,9 @@ KICK.namespace = function (ns_string) {
         mat3 = KICK.namespace("KICK.math.mat3"),
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
+        aabb = KICK.namespace("KICK.math.aabb"),
+        min = Math.min,
+        max = Math.max,
         sqrt = Math.sqrt,
         cos = Math.cos,
         acos = Math.acos,
@@ -4788,6 +4806,60 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * @method decompose
+     * @param {KICK.math.mat4} mat mat4 to decompose
+     * @param {KICK.math.vec3} translate Optional
+     * @param {KICK.math.quat4} rotate Optional
+     * @param {KICK.math.vec3} scale Optional
+     * @return Array[tranlate,rotate,scale]
+     */
+    mat4.decompose = function(mat,tranlate,rotate,scale){
+        var x = [mat[0],mat[1],mat[2]],
+            y = [mat[4],mat[5],mat[6]],
+            z = [mat[8],mat[9],mat[10]],
+            scaleX,
+            scaleY,
+            scaleZ;
+
+        if (!tranlate){
+            tranlate = vec3.create();
+        }
+        if (!rotate){
+            rotate = quat4.create();
+        }
+        if (!scale){
+            scale = vec3.create();
+        }
+
+		tranlate[0] = mat[12];
+		tranlate[1] = mat[13];
+		tranlate[2] = mat[14];
+
+		scale[0] = scaleX = vec3.length(x);
+		scale[1] = scaleY = vec3.length(y);
+		scale[2] = scaleZ = vec3.length(z);
+
+        var copy = mat4.create(mat);
+
+		copy[0] /= scaleX;
+		copy[1] /= scaleX;
+		copy[2] /= scaleX;
+
+		copy[4] /= scaleY;
+		copy[5] /= scaleY;
+		copy[6] /= scaleY;
+
+		copy[8] /= scaleZ;
+		copy[9] /= scaleZ;
+		copy[10] /= scaleZ;
+
+        
+		quat4.setFromRotationMatrix(copy,rotate);
+
+        return [tranlate, rotate, scale];
+    };
+
+    /**
      * Returns a string representation of a mat4
      * @method str
      * @param {KICK.math.mat4} mat mat4 to represent as a string
@@ -5089,6 +5161,39 @@ KICK.namespace = function (ns_string) {
 
 
     /**
+     * @method setFromRotationMatrix
+     * @param {KICK.math.mat4} mat
+     * @param {KICK.math.quat4} dest Optional
+     * @return {KICK.math.quat4}
+     */
+    quat4.setFromRotationMatrix = function(mat,dest){
+        var x,y,z,w,
+            m11 = mat[0],
+            m22 = mat[5],
+            m33 = mat[10];
+        // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
+		function copySign(a, b) {
+			return b < 0 ? -Math.abs(a) : Math.abs(a);
+		}
+        var absQ = Math.pow(mat4.determinant(mat), 1.0 / 3.0);
+		w = Math.sqrt( Math.max( 0, absQ + m11  + m22 + m33 ) ) / 2;
+		x = Math.sqrt( Math.max( 0, absQ + m11  - m22 - m33 ) ) / 2;
+		y = Math.sqrt( Math.max( 0, absQ - m11  + m22 - m33 ) ) / 2;
+		z = Math.sqrt( Math.max( 0, absQ - m11  - m22 + m33 ) ) / 2;
+		x = copySign( x, ( mat[2+1*4] - mat[1+2*4] ) ); // m32 - m23
+		y = copySign( y, ( mat[0+2*4] - mat[2+0*4] ) ); // m13 - m31
+		z = copySign( z, ( mat[1+0*4] - mat[0+1*4] ) ); // m21 - m12
+        var destArray = [x,y,z,w];
+        if (!dest){
+            dest = quat4.create(destArray);
+        } else {
+            quat4.set(destArray,dest);
+        }
+		quat4.normalize(dest);
+		return dest;
+    };
+
+    /**
      * Calculates a 3x3 matrix from the given quat4
      * @method toMat3
      * @param {KICK.math.quat4} quat quat4 to create matrix from
@@ -5256,6 +5361,106 @@ KICK.namespace = function (ns_string) {
     };
 
     // glMatrix end
+
+
+
+    /**
+     * Axis-Aligned Bounding Box. A rectangle or box with the restriction that it's sides or faces are parallel to the axes of the system.
+     * @class aabb
+     * @namespace KICK.math
+     */
+    math.aabb = aabb;
+
+    /**
+     * Default value is min=MAX, max=MIN (meaning that it has a negative size)
+     * @method create
+     * @param {Array[Number] | KICK.math.aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
+     * @param {Array[Number]} vec3Max Optional, vec3Max containing values to initialize maximum values with
+     * @return {KICK.math.aabb} New aabb
+     */
+    aabb.create = function(vec3Min, vec3Max){
+        var dest = new Float32Array(6);
+
+        if(vec3Min) {
+            dest[0] = vec3Min[0];
+            dest[1] = vec3Min[1];
+            dest[2] = vec3Min[2];
+            if (vec3Min.length==6){
+                dest[3] = vec3Min[3];
+                dest[4] = vec3Min[4];
+                dest[5] = vec3Min[5];
+            } else if (vec3Max){
+                dest[3] = vec3Max[0];
+                dest[4] = vec3Max[1];
+                dest[5] = vec3Max[2];
+            } else {
+                dest[3] = dest[0];
+                dest[4] = dest[1];
+                dest[5] = dest[2];
+            }
+        } else {
+            dest[0] = Number.MAX_VALUE;
+            dest[1] = Number.MAX_VALUE;
+            dest[2] = Number.MAX_VALUE;
+            dest[3] = Number.MIN_VALUE;
+            dest[4] = Number.MIN_VALUE;
+            dest[5] = Number.MIN_VALUE;
+        }
+        return dest;
+    };
+
+    /**
+     * Copies the values of one aabb to another
+     * @method set
+     * @param {KICK.math.aabb} aabb containing values to copy
+     * @param {KICK.math.aabb} dest receiving copied values
+     * @return {KICK.math.aabb} dest
+     */
+    aabb.set = function(aabb,dest){
+        dest[0] = aabb[0];
+        dest[1] = aabb[1];
+        dest[2] = aabb[2];
+        dest[3] = aabb[3];
+        dest[4] = aabb[4];
+        dest[5] = aabb[5];
+        return dest;
+    };
+
+    /**
+     * @method merge
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.aabb} aabb2
+     * @param {KICK.math.aabb} dest Optional, receiving copied values
+     * @return {KICK.math.aabb} dest if specified - otherwise a new value is returned
+     */
+    aabb.merge = function(aabb,aabb2,dest){
+        if (!dest){
+            dest = new Float32Array(6);
+        }
+        dest[0] = min(aabb[0],aabb2[0]);
+        dest[1] = min(aabb[1],aabb2[1]);
+        dest[2] = min(aabb[2],aabb2[2]);
+        dest[3] = max(aabb[3],aabb2[3]);
+        dest[4] = max(aabb[4],aabb2[4]);
+        dest[5] = max(aabb[5],aabb2[5]);
+        return dest;
+    };
+
+    /**
+     * @method addPoint
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.vec3} vec3Point
+     * @return {KICK.math.aabb} aabb (same object as input)
+     */
+    aabb.addPoint = function(aabb,vec3Point){
+        aabb[0] = min(aabb[0],vec3Point[0]);
+        aabb[1] = min(aabb[1],vec3Point[1]);
+        aabb[2] = min(aabb[2],vec3Point[2]);
+        aabb[3] = max(aabb[3],vec3Point[0]);
+        aabb[4] = max(aabb[4],vec3Point[1]);
+        aabb[5] = max(aabb[5],vec3Point[2]);
+        return aabb;
+    };
 
 })();/*!
  * New BSD License
@@ -5618,14 +5823,14 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * This method should be invoked when the canvas is resized.<br>
+         * This method should be invoked when the canvas is resized (using clientWidth and clientHeight).<br>
          * This will change the viewport size of the WebGL context.<br>
          * Instead of calling this method explicit, the configuration parameter
          * checkCanvasResizeInterval can also be set to support automatically checks
          * @method canvasResized
          */
         this.canvasResized = function(){
-            gl.viewportSize = vec2.create([canvas.width,canvas.height]);
+            gl.viewportSize = vec2.create([canvas.clientWidth,canvas.clientHeight]);
             if (mouseInput){
                 mouseInput.updateCanvasElementPosition();
             }
@@ -5901,10 +6106,6 @@ KICK.namespace = function (ns_string) {
                 resourceReferenceCount[resourceUID] = 1;
                 return resourceObject;
             }
-            if (DEBUG){
-                core.Util.warn("Cannot find "+resourceUID);
-                debugger;
-            }
             return null;
         };
 
@@ -5914,18 +6115,17 @@ KICK.namespace = function (ns_string) {
          * If more objects exist with the same name, the first object is returned
          * @method loadByName
          * @param {String} name
+         * @param {String} type Optional: limit the search to a specific type
          * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
-        this.loadByName = function(name){
+        this.loadByName = function(name,type){
             for (var uid in resourceDescriptorsByUID){
                 var resource = resourceDescriptorsByUID[uid];
                 if (resource.name === name){
-                    return thisObj.load(resource.uid);
+                    if (!type || resource.type === type){
+                        return thisObj.load(resource.uid);
+                    }
                 }
-            }
-            if (DEBUG){
-                core.Util.warn("Cannot find "+name);
-                debugger;
             }
             return null;
         };
@@ -5934,7 +6134,7 @@ KICK.namespace = function (ns_string) {
          * Decreases the resource reference counter. If resource is no longer
          * used it's destroy method will be invoked (if available).
          * @method release
-         * @param resourceUID
+         * @param {Number} resourceUID
          */
         this.release = function(resourceUID){
             var resourceObject = resourceCache[resourceUID];
@@ -6188,6 +6388,13 @@ KICK.namespace = function (ns_string) {
      * @param {Config} config defines one or more properties
      */
     core.Config = function(config){
+        /**
+         * Use shadow maps to generate realtime shadows.<br>
+         * Default value is false.
+         * @property shadows
+         * @type Boolean
+         */
+        this.shadows = config.shadows || false;
          /**
          * Maximum number of lights in scene. Default value is 1
          * @property maxNumerOfLights
@@ -7114,7 +7321,7 @@ KICK.namespace = function (ns_string) {
     mesh.MeshData = function(config){
         var data = {},
             thisObj = this,
-            _indices,
+            _indices = [],
             _interleavedArray,
             _interleavedArrayFormat,
             _vertexAttrLength,
@@ -7251,6 +7458,27 @@ KICK.namespace = function (ns_string) {
             };
 
         Object.defineProperties(this,{
+            /**
+             * Note that this property is not cached. Use KICK.mesh.Mesh.aabb for a cached version.
+             * Readonly
+             * @property aabb
+             * @type KICK.math.aabb
+             */
+            aabb:{
+                get:function(){
+                    var vertex = thisObj.vertex;
+                    if (!vertex){
+                        return null;
+                    }
+                    var vertexLength = vertex.length;
+                    var aabb = KICK.math.aabb.create();
+                    for (var i=0;i<vertexLength;i += 3){
+                        var point = vertex.subarray(i,i+3);
+                        KICK.math.aabb.addPoint(aabb,point);
+                    }
+                    return aabb;
+                }
+            },
             /**
              * @property name
              * @type string
@@ -7424,20 +7652,44 @@ KICK.namespace = function (ns_string) {
              */
             int4:createGetterSetter(5124, "int4"),
             /**
-             * indices (integer)
+             * indices (integer).
+             * indices is shortcut for subMeshes[0]
              * @property indices
              * @type Array[Number]
              */
             indices:{
                 get:function(){
-                    return _indices;
+                    if (_indices==0){
+                        return null;
+                    }
+                    return _indices[0];
                 },
                 set:function(newValue){
                     if (newValue && !(newValue instanceof Uint16Array)){
                         newValue = new Uint16Array(newValue);
                     }
-                    if (_indices && isVertexDataInitialized()){
+                    if (_indices[0] && isVertexDataInitialized()){
                         clearInterleavedData();
+                    }
+                    if (newValue){
+                        _indices[0] = newValue;
+                    }
+                }
+            },
+            /**
+             * indices (integer)
+             * @property subMeshes
+             * @type Array[Array[Number]]
+             */
+            subMeshes:{
+                get:function(){
+                    return _indices;
+                },
+                set:function(newValue){
+                    for (var i=0;i<newValue.length;i++){
+                        if (newValue[i] && !(newValue[i] instanceof Uint16Array)){
+                            newValue[i] = new Uint16Array(newValue[i]);
+                        }
                     }
                     _indices = newValue;
                 }
@@ -7473,10 +7725,12 @@ KICK.namespace = function (ns_string) {
                 createVertexDataFromInterleavedData();
             }
             var vertexCount = data.vertex.length/3;
-            for (var i=_indices.length-1;i>=0;i--){
-                if (_indices[i]<0 || _indices[i] >= vertexCount){
-                    debugger;
-                    return false;
+            for (var j=0;j<_indices.length;j++){
+                for (var i=_indices[j].length-1;i>=0;i--){
+                    if (_indices[j][i] >= vertexCount){
+                        debugger;
+                        return false;
+                    }
                 }
             }
             return true;
@@ -7766,33 +8020,35 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
-            meshVertexIndexBuffer,
+            meshVertexIndexBuffers = [],
             _name,
             _meshData,
             _urlResource,
+            _aabb = null,
             thisObj = this,
             c = KICK.core.Constants,
             vertexAttrLength = 0,
             meshType,
-            meshElements,
+            meshElements = [],
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
-                    meshVertexIndexBuffer = null;
+                    meshVertexIndexBuffers = null;
                     meshVertexAttBuffer = null;
                     gl = newGl;
                     updateData();
                 }
             },
             deleteBuffers = function(){
-                if (typeof meshVertexIndexBuffer === "number"){
-                    gl.deleteBuffer(meshVertexIndexBuffer);
-                    meshVertexIndexBuffer = null;
+                for (var i=0;i<meshVertexIndexBuffers.length;i++){
+                    gl.deleteBuffer(meshVertexIndexBuffers[i]);
                 }
                 if (typeof meshVertexAttBuffer === "number"){
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
+                meshElements.length = 0;
+                meshVertexIndexBuffers.length = 0;
             },
             /**
              * Copy data to the vertex buffer object (VBO)
@@ -7800,28 +8056,46 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             updateData = function () {
-                var indices = _meshData.indices;
+                var subMeshes = _meshData.subMeshes;
                 // delete current buffers
                 deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 vertexAttrLength = _meshData.vertexAttrLength;
                 meshType = _meshData.meshType;
-                meshElements = indices.length;
 
 
                 meshVertexAttBuffer = gl.createBuffer();
                 gl.bindBuffer(34962, meshVertexAttBuffer);
                 gl.bufferData(34962, _meshData.interleavedArray, 35044);
 
-                meshVertexIndexBuffer = gl.createBuffer();
-                gl.bindBuffer(34963, meshVertexIndexBuffer);
-                gl.bufferData(34963, indices, 35044);
+                for (var i=0;i<subMeshes.length;i++){
+                    var indices = subMeshes[i];
+                    var meshVertexIndexBuffer = gl.createBuffer();
+                    meshElements[i] = indices.length;
+                    meshVertexIndexBuffers.push(meshVertexIndexBuffer);
+                    gl.bindBuffer(34963, meshVertexIndexBuffer);
+                    gl.bufferData(34963, indices, 35044);
+                }
             };
 
         engine.addContextListener(contextListener);
 
         Object.defineProperties(this,{
+            /**
+             * Axis aligned bounding box.
+             * Readonly.
+             * @property aabb
+             * @type KICK.math.aabb
+             */
+            aabb:{
+                get:function(){
+                    if (!_aabb && _meshData){
+                        _aabb = _meshData.aabb;
+                    }
+                    return _aabb;
+                }
+            },
             /**
              * @property name
              * @type String
@@ -7851,6 +8125,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _meshData = newValue;
+                    _aabb = null;
                     updateData();
                 }
             },
@@ -7947,16 +8222,18 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                 }
-                gl.bindBuffer(34963, meshVertexIndexBuffer);
+
             }
         };
 
         /**
          * Renders the current mesh
          * @method render
+         * @param {Number} submeshIndex
          */
-        this.render = function () {
-            gl.drawElements(meshType, meshElements, 5123, 0);
+        this.render = function (submeshIndex) {
+            gl.bindBuffer(34963, meshVertexIndexBuffers[submeshIndex]);
+            gl.drawElements(meshType, meshElements[submeshIndex], 5123, 0);
         };
 
         /**
@@ -9125,14 +9402,22 @@ KICK.namespace = function (ns_string) {
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
             _renderer = new KICK.renderer.ForwardRenderer(),
+            _shadowmapShader,
             _scene,
             pickingQueue = null,
             pickingShader = null,
             pickingRenderTarget = null,
             pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
-            modelViewMatrix = mat4.create(),
-            modelViewProjectionMatrix = mat4.create(),
+            viewMatrix = mat4.create(),
+            viewProjectionMatrix = mat4.create(),
+            lightViewProjectionMatrix = mat4.create(),
+            engineUniforms = {
+                    viewMatrix: viewMatrix,
+                    projectionMatrix: projectionMatrix,
+                    viewProjectionMatrix:viewProjectionMatrix,
+                    lightViewProjectionMatrix:lightViewProjectionMatrix
+                },
             renderableComponentsBackGroundAndGeometry = [],
             renderableComponentsTransparent = [],
             renderableComponentsOverlay = [],
@@ -9158,6 +9443,10 @@ KICK.namespace = function (ns_string) {
                     KICK.core.Util.fail("Camera."+name+" must be number");
                 }
             },
+            setupViewport = function(offsetX,offsetY,width,height){
+                gl.viewport(offsetX,offsetY,width,height);
+                gl.scissor(offsetX,offsetY,width,height);
+            },
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
              * @method setupCamera
@@ -9171,8 +9460,7 @@ KICK.namespace = function (ns_string) {
                     offsetY = viewPortWidth*_normalizedViewportRect[1],
                     width = viewPortWidth*_normalizedViewportRect[2],
                     height = viewPortHeight*_normalizedViewportRect[3];
-                gl.viewport(offsetX,offsetY,width,height);
-                gl.scissor(offsetX,offsetY,width,height);
+                setupViewport(offsetX,offsetY,width,height);
                 
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
@@ -9181,6 +9469,7 @@ KICK.namespace = function (ns_string) {
                     } else {
                         gl.bindFramebuffer(36160, null);
                     }
+                    gl.renderTarget = _renderTarget;
                 }
 
                 setupClearColor(_clearColor);
@@ -9195,9 +9484,9 @@ KICK.namespace = function (ns_string) {
                 }
 
                 var globalMatrixInv = transform.getGlobalTRSInverse();
-                mat4.set(globalMatrixInv, modelViewMatrix);
+                mat4.set(globalMatrixInv, viewMatrix);
 
-                mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
             },
             compareRenderOrder = function(a,b){
                 var aRenderOrder = a.renderOrder || 1000,
@@ -9217,6 +9506,49 @@ KICK.namespace = function (ns_string) {
                     return b.distanceToCamera-a.distanceToCamera;
                 }
                 renderableComponentsTransparent.sort(compareDistanceToCamera);
+            },
+            /**
+             * @method renderSceneObjects
+             * @param sceneLightObj
+             * @param shader
+             * @private
+             */
+            renderSceneObjects = function(sceneLightObj,shader){
+                engineUniforms.sceneLights=sceneLightObj;
+                _renderer.render(renderableComponentsBackGroundAndGeometry,engineUniforms,shader);
+                _renderer.render(renderableComponentsTransparent,engineUniforms,shader);
+                _renderer.render(renderableComponentsOverlay,engineUniforms,shader);
+            },
+            renderShadowMap = function(sceneLightObj){
+                if (!thisObj.isShadowDisabled){
+                var directionalLight = sceneLightObj.directionalLight,
+                    directionalLightTransform = directionalLight.gameObject.transform,
+                    shadowRenderTexture = directionalLight.shadowRenderTexture,
+                    renderTextureDimension = shadowRenderTexture.dimension,
+                    renderTextureWidth = renderTextureDimension[0],
+                    renderTextureHeight = renderTextureDimension[1];
+                setupViewport(0,0,renderTextureWidth,renderTextureHeight);
+
+                shadowRenderTexture.bind();
+                setupClearColor([0,0,0,0]);
+                gl.clear(16384 | 256);
+
+                mat4.ortho(-5, 5, -5, 5, // todo replace with fitting
+                    -10, 10, projectionMatrix);
+
+                var globalMatrixInv = directionalLightTransform.getGlobalTRSInverse(); // // todo replace with fitting
+                mat4.set(globalMatrixInv, viewMatrix);
+
+                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
+                renderSceneObjects(sceneLightObj,_shadowmapShader);
+
+                mat4.set(viewProjectionMatrix,lightViewProjectionMatrix);
+
+                // debug
+                directionalLight.shadowRenderTextureDebug.bind();
+                gl.clear(16384 | 256);
+                renderSceneObjects(sceneLightObj);
+                }
             };
 
         /**
@@ -9260,6 +9592,7 @@ KICK.namespace = function (ns_string) {
             gl = engine.gl;
             _scene = gameObject.scene;
             _scene.addComponentListener(thisObj);
+            _shadowmapShader = engine.resourceManager.getShader("kickjs://shader/shadowmap/");
         };
 
         /**
@@ -9311,17 +9644,16 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
+            if (sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+                renderShadowMap(sceneLightObj);
+            }
             setupCamera();
-            sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
+
+            sceneLightObj.recomputeDirectionalLight(viewMatrix);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
             }
-            var renderSceneObjects = function(shader){
-                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-            };
-            renderSceneObjects();
+            renderSceneObjects(sceneLightObj);
 
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
@@ -9332,7 +9664,7 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(16384 | 256);
-                renderSceneObjects(pickingShader);
+                renderSceneObjects(sceneLightObj,pickingShader);
                 for (var i=pickingQueue.length-1;i>=0;i--){
                     // create clojure
                     (function(){
@@ -9717,7 +10049,7 @@ KICK.namespace = function (ns_string) {
      */
     scene.MeshRenderer = function (config) {
         var transform,
-            _material,
+            _materials = [],
             _mesh,
             _renderOrder,
             gl;
@@ -9741,12 +10073,16 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Shortcut for materials[0]
              * @property material
              * @type KICK.material.Material
              */
             material:{
                 get:function(){
-                    return _material;
+                    if (_materials.length === 0){
+                        return null;
+                    }
+                    return _materials[0];
                 },
                 set:function(newValue){
                     if (ASSERT){
@@ -9754,8 +10090,31 @@ KICK.namespace = function (ns_string) {
                             KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
                         }
                     }
-                    _material = newValue;
-                    _renderOrder = _material.renderOrder;
+                    _materials[0] = newValue;
+                    _renderOrder = _materials[0].renderOrder;
+                },
+                enumerable: true
+            },
+            /**
+             *
+             * @property materias
+             * @type Array[KICK.material.Material]
+             */
+            materials:{
+                get:function(){
+                    return _materials;
+                },
+                set:function(newValue){
+                    _materials = [];
+                    for (var i=0;i<newValue.length;i++){
+                        if (ASSERT){
+                            if (!(newValue[i] instanceof KICK.material.Material)){
+                                KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
+                            }
+                        }
+                        _materials[i] = newValue[i];
+                        _renderOrder = _materials[i].renderOrder;
+                    }
                 },
                 enumerable: true
             },
@@ -9782,17 +10141,17 @@ KICK.namespace = function (ns_string) {
         /**
          * This method may not be called (the renderer could make the same calls)
          * @method render
-         * @param (KICK.math.mat4) projectionMatrix
-         * @param {KICK.math.mat4} modelViewMatrix
-         * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
-         * @param {KICK.scene.SceneLights} sceneLights
+         * @param engineUniforms
          * @param {KICK.material.Shader} overwriteShader Optional
          */
-        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights,overwriteShader) {
-            var shader = overwriteShader || _material.shader;
-            _mesh.bind(shader);
-            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights,shader);
-            _mesh.render();
+        this.render = function (engineUniforms,overwriteShader) {
+            var length = _materials.length;
+            for (var i=0;i<length;i++){
+                var shader = overwriteShader || _materials[i].shader;
+                _mesh.bind(shader);
+                shader.bindUniform(_materials[i],engineUniforms,transform);
+                _mesh.render(i);
+            }
         };
 
         /**
@@ -9817,33 +10176,133 @@ KICK.namespace = function (ns_string) {
      * @final
      */
     scene.Light = function (config) {
-        var color = vec3.create([1.0,1.0,1.0]),
-            type,
-            intensity,
+        var thisObj = this,
+            color = vec3.create([1.0,1.0,1.0]),
+            engine,
+            type = 3,
+            _shadow,
+            _shadowStrength = 1.0,
+            _shadowBias = 0.05,
+            _shadowTexture = null,
+            _shadowRenderTexture = null,
+            _shadowTextureDebug = null,
+            _shadowRenderTextureDebug = null,
+            intensity = 1,
             colorIntensity = vec3.create(),
             updateIntensity = function(){
                 vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
             },
             gameObject,
-            scriptPriority;
-        config = config || {};
-        if (config.color){
-            vec3.set(config.color,color);
-        }
-        intensity = config.intensity || 1;
-        updateIntensity();
-        if (ASSERT){
-            if (config.type){
-                if (config.type !== 3 &&
-                    config.type !== 2 &&
-                    config.type !== 1){
-                    KICK.core.Util.fail("Light type must be 3, " +
-                        "2 or 1");
+            scriptPriority,
+            updateShadowTexture = function(){
+                if (_shadow){
+                    _shadowTexture = new KICK.texture.Texture(engine,{
+                        minFilter:9728,
+                        magFilter:9728,
+                        wrapS:33071,
+                        wrapT:33071,
+                        flipY: false,
+                        generateMipmaps:false
+                    });
+                    _shadowTexture.setImageData(512,512,0,5121,null,"");
+                    _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
+                        colorTexture:_shadowTexture
+                    });
+
+                    // debug info
+                    _shadowTextureDebug = new KICK.texture.Texture(engine,{
+                        minFilter:9728,
+                        magFilter:9728,
+                        wrapS:33071,
+                        wrapT:33071,
+                        flipY: false,
+                        generateMipmaps:false
+                    });
+                    _shadowTextureDebug.setImageData(512,512,0,5121,null,"");
+                    _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
+                        colorTexture:_shadowTextureDebug
+                    });
+
+                } else if (_shadowRenderTexture){
+                    _shadowRenderTexture.destroy();
+                    _shadowTexture.destroy();
                 }
-            }
-        }
-        type = config.type ||  3;
+            };
         Object.defineProperties(this,{
+            shadowRenderTextureDebug:{
+                get:function(){
+                    return _shadowRenderTextureDebug;
+                }
+            },
+            shadowTextureDebug:{
+                get:function(){
+                    return _shadowTextureDebug;
+                }
+            },
+            /**
+             * @property shadowRenderTexture
+             * @type KICK.texture.RenderTexture
+             */
+            shadowRenderTexture:{
+                get:function(){
+                    return _shadowRenderTexture;
+                }
+            },
+            /**
+             * @property shadowTexture
+             * @type KICK.texture.Texture
+             */
+            shadowTexture:{
+                get:function(){
+                    return _shadowTexture;
+                }
+            },
+            /**
+             * Default value is false.
+             * Only directional light supports shadows.
+             * @property shadow
+             * @type boolean
+             */
+            shadow: {
+                get: function(){
+                    return _shadow;
+                },
+                set: function(value){
+                    if (value !== _shadow){
+                        _shadow = value;
+                        if (engine){
+                            updateShadowTexture();
+                        }
+                    }
+                }
+            },
+            /**
+             * Shadow strength (between 0.0 and 1.0). Default value is 1.0
+             * @property shadowStrength
+             * @type Number
+             */
+            shadowStrength:{
+                get: function(){
+                    return _shadowStrength;
+                },
+                set: function(value){
+                    _shadowStrength = value;
+                }
+
+            },
+            /**
+             * Shadow bias. Default value is 0.05
+             * @property shadowBias
+             * @type Number
+             */
+            shadowBias:{
+                get:function(){
+                    return _shadowBias;
+                },
+                set:function(value){
+                    _shadowBias = value;
+                }
+            },
             /**
              * Color intensity of the light (RGBA)
              * @property color
@@ -9863,7 +10322,7 @@ KICK.namespace = function (ns_string) {
              * 1,
              * 2,
              * 2 <br>
-             * Note that this value is readonly. To change it create a new Light component and replace the current light
+             * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
              * component of its gameObject
              * @property type
              * @type Enum
@@ -9872,6 +10331,23 @@ KICK.namespace = function (ns_string) {
             type: {
                 get: function(){
                     return type;
+                },
+                set: function(newValue){
+                    if (ASSERT){
+                        if (config.type !== 3 &&
+                            config.type !== 2 &&
+                            config.type !== 1){
+                            KICK.core.Util.fail("Light type must be 3, " +
+                                "2 or 1");
+                        }
+                    }
+                    if (!engine){
+                        type = newValue;
+                    } else {
+                        if (ASSERT){
+                            KICK.core.Util.fail("Light type cannot be changed after initialization");
+                        }
+                    }
                 }
             },
             /**
@@ -9897,7 +10373,12 @@ KICK.namespace = function (ns_string) {
              * @final
              */
             colorIntensity: {
-                value:colorIntensity
+                get: function(){
+                    return colorIntensity;
+                },
+                set:function(newValue){
+                    colorIntensity = newValue;
+                }
             },
             // inherited interface from component
             gameObject:{
@@ -9918,6 +10399,13 @@ KICK.namespace = function (ns_string) {
                 }
             }
         });
+
+        this.activated = function(){
+            engine = thisObj.gameObject.engine;
+            updateShadowTexture();
+        };
+
+        applyConfig(this,config);
     };
     Object.freeze(scene.Light);
 
@@ -10008,7 +10496,7 @@ KICK.namespace = function (ns_string) {
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
                 // compute light direction (note direction from surface towards camera)
-                vec4.set([0,0,1],directionalLightDirection);
+                vec4.set([0,0,-1],directionalLightDirection);
                 quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
 
                 // transform to eye space
@@ -10095,7 +10583,6 @@ KICK.namespace = function (ns_string) {
             _config = config || {},
             framebuffer = gl.createFramebuffer(),
             colorTexture = _config.colorTexture,
-            depthTexture = _config.depthTexture,
             _dimension = config.dimension,
             renderBuffers = [],
             thisObj = this,
@@ -10105,9 +10592,8 @@ KICK.namespace = function (ns_string) {
                 }
             },
             initFBO = function (){
-                var validTexture = colorTexture || depthTexture,
-                    renderbuffer;
-                _dimension = validTexture ? validTexture.dimension : _dimension;
+                var renderbuffer;
+                _dimension = colorTexture ? colorTexture.dimension : _dimension;
                 cleanUpRenderBuffers();
                 gl.bindFramebuffer(36160, framebuffer);
 
@@ -10121,15 +10607,12 @@ KICK.namespace = function (ns_string) {
                     renderBuffers.push(renderbuffer);
                 }
 
-                if (depthTexture){
-                    gl.framebufferTexture2D(36160, 36096, 3553, depthTexture.textureId, 0);
-                } else {
-                    renderbuffer = gl.createRenderbuffer();
-                    gl.bindRenderbuffer(36161, renderbuffer);
-                    gl.renderbufferStorage(36161, 33189, _dimension[0], _dimension[1]);
-                    gl.framebufferRenderbuffer(36160, 36096, 36161, renderbuffer);
-                    renderBuffers.push(renderbuffer);
-                }
+                renderbuffer = gl.createRenderbuffer();
+                gl.bindRenderbuffer(36161, renderbuffer);
+                gl.renderbufferStorage(36161, 33189, _dimension[0], _dimension[1]);
+                gl.framebufferRenderbuffer(36160, 36096, 36161, renderbuffer);
+                renderBuffers.push(renderbuffer);
+
                 if (false){
                     var frameBufferStatus = gl.checkFramebufferStatus( 36160 );
                     if (frameBufferStatus !== 36053){
@@ -10178,14 +10661,6 @@ KICK.namespace = function (ns_string) {
             colorTexture:{
                 get: function(){ return colorTexture; },
                 set: function(newValue){ colorTexture = newValue; initFBO(); }
-            },
-            /**
-             * @property depthTexture
-             * @type KICK.texture.Texture
-             */
-            depthTexture:{
-                get: function(){ return depthTexture; },
-                set: function(newValue){ depthTexture = newValue; initFBO(); }
             }
         });
 
@@ -10207,8 +10682,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 uid: thisObj.uid,
-                colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture),
-                depthTexture: KICK.core.Util.getJSONReference(engine, depthTexture)
+                colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture)
             };
         };
 
@@ -10359,22 +10833,43 @@ KICK.namespace = function (ns_string) {
                 gl.generateMipmap(_textureType);
             }
         };
-        
+
         /**
-         * Set a image using a raw bytearray in a specified format
+         * @method isFPTexturesSupported
+         * @return {Boolean}
+         */
+        this.isFPTexturesSupported = function(){
+            var res = gl.isTexFloatEnabled;
+            if (typeof res !== 'boolean'){
+                res = gl.getExtension("OES_texture_float"); // this has the side effect of enabling the extension
+                gl.isTexFloatEnabled = res;
+            }
+            return res;
+        };
+
+        /**
+         * Set a image using a raw bytearray in a specified format.
+         * 5126 should only be used if floating point textures is supported (See Texture.isFPTexturesSupported() ).
          * @method setImageData
          * @param {Number} width image width in pixels
          * @param {Number} height image height in pixels
          * @param {Number} border image border in pixels
-         * @param {Object} type 5121, 32819, 32820 or 33635
+         * @param {Object} type 5126, 5121, 32819, 32820 or 33635
          * @param {Array} pixels array of pixels (may be null)
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function(width, height, border, type, pixels, dataURI){
             recreateTextureIfDifferentType();
-
+            if (type === 5126 && !gl.isTexFloatEnabled){
+                var res = thisObj.isFPTexturesSupported(); // enable extension
+                if (!res){
+                    KICK.core.Util.fail("OES_texture_float unsupported on the platform. Using 5121 instead of 5126.");
+                    type = 5121;
+                }
+            }
             if (false){
-                if (type !== 5121 &&
+                if (type !== 5126 &&
+                    type !== 5121 &&
                     type !== 32819  &&
                     type !== 32820 &&
                     type !== 33635 ){
@@ -10385,13 +10880,14 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("Texture.setImageData only supported by TEXTURE_2D");
                 return;
             }
+            var format = _intFormat;
 
             vec2.set([width,height],_dimension);
             _dataURI = dataURI;
 
             thisObj.bind(0); // bind to texture slot 0
             gl.pixelStorei(3317, 1);
-            gl.texImage2D(3553, 0, _intFormat, width, height, border, _intFormat, type, pixels);
+            gl.texImage2D(3553, 0, _intFormat, width, height, border, format, type, pixels);
             gl.texParameteri(3553, 10240, _magFilter);
             gl.texParameteri(3553, 10241, _minFilter);
             gl.texParameteri(3553, 10242, _wrapS);
@@ -11012,9 +11508,10 @@ KICK.namespace = function (ns_string) {
      * @constructor
      */
     /**
-     * Called each frame to render the components
-     * @method render
-     * @param {KICK.scene.Component} renderableComponents
+     * @method
+     * @param renderableComponents
+     * @param engineUniforms
+     * @param overwriteShader
      */
 
     /**
@@ -11026,7 +11523,8 @@ KICK.namespace = function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-    renderer.NullRenderer.prototype.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {};
+
+    renderer.NullRenderer.prototype.render = function (renderableComponents,engineUniforms,overwriteShader) {};
     
     /**
      * Forward renderer
@@ -11036,10 +11534,16 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.renderer.Renderer
      */
     renderer.ForwardRenderer = function () {
-        this.render = function (renderableComponents,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader) {
+        /**
+         *
+         * @param renderableComponents
+         * @param engineUniforms
+         * @param overwriteShader
+         */
+        this.render = function (renderableComponents,engineUniforms,overwriteShader) {
             var length = renderableComponents.length;
             for (var j=0;j<length;j++){
-                renderableComponents[j].render(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,overwriteShader);
+                renderableComponents[j].render(engineUniforms,overwriteShader);
             }
         };
     };
@@ -11092,10 +11596,17 @@ KICK.namespace = function (ns_string) {
         core = KICK.namespace("KICK.core"),
         applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants,
+        ASSERT = false,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
-        tmpVec4 = vec4.create();
+        tmpVec4 = vec4.create(),
+        offsetMatrix = mat4.create([
+            0.5,0  ,0  ,0.5,
+            0  ,0.5,0  ,0.5,
+            0  ,0  ,0.5,0.5,
+            0  ,0  ,0  ,1
+        ]);
 
     /**
      * GLSL Shader object
@@ -11107,7 +11618,6 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Shader = function (engine, config) {
-        //todo add support for polygon offset
         var gl = engine.gl,
             thisObj = this,
             _shaderProgramId = -1,
@@ -11117,6 +11627,9 @@ KICK.namespace = function (ns_string) {
             _blend = false,
             _blendSFactor = 770,
             _blendDFactor = 771,
+            _polygonOffsetEnabled = false,
+            _polygonOffsetFactor = 2.5,
+            _polygonOffsetUnits = 10.0,
             _renderOrder = 1000,
             _dataURI = null,
             _name = "",
@@ -11143,7 +11656,7 @@ KICK.namespace = function (ns_string) {
             compileShader = function (str, isFragmentShader) {
                 var shader,
                     c = KICK.core.Constants;
-                str = material.Shader.getPrecompiledSource(str);
+                str = material.Shader.getPrecompiledSource(engine,str);
                 if (isFragmentShader) {
                     shader = gl.createShader(35632);
                 } else {
@@ -11196,6 +11709,19 @@ KICK.namespace = function (ns_string) {
                         gl.disable(3042);
                     }
                     gl.blendFunc(_blendSFactor,_blendDFactor);
+                }
+            },
+            updatePolygonOffset = function(){
+                if (gl.polygonOffsetEnabled !== _polygonOffsetEnabled){
+                    gl.polygonOffsetEnabled = _polygonOffsetEnabled;
+                    if (_polygonOffsetEnabled){
+                        gl.enable(32823);
+                    } else {
+                        gl.disable(32823);
+                    }
+                }
+                if (_polygonOffsetEnabled){
+                    gl.polygonOffset(_polygonOffsetFactor,_polygonOffsetUnits);
                 }
             };
 
@@ -11302,6 +11828,57 @@ KICK.namespace = function (ns_string) {
              */
             shaderProgramId:{
                 get: function(){ return _shaderProgramId;}
+            },
+            /**
+             * (From http://www.opengl.org/)<br>
+             * When 32823, GL_POLYGON_OFFSET_LINE, or GL_POLYGON_OFFSET_POINT is enabled, each
+             * fragment's depth value will be offset after it is interpolated from the depth values of the appropriate
+             * vertices. The value of the offset is factor × DZ + r × units , where DZ is a measurement of the change
+             * in depth relative to the screen area of the polygon, and r is the smallest value that is guaranteed to
+             * produce a resolvable offset for a given implementation. The offset is added before the depth test is
+             * performed and before the value is written into the depth buffer.<br><br>
+             *
+             * glPolygonOffset is useful for rendering hidden-line images, for applying decals to surfaces, and for
+             * rendering solids with highlighted edges.<br><br>
+             * Possible values:<br>
+             * true or false<br>
+             * Default false
+             * @property polygonOffsetEnabled
+             * @type boolean
+             */
+            polygonOffsetEnabled: {
+                get: function(){
+                    return _polygonOffsetEnabled;
+                },
+                set: function(value){
+                    _polygonOffsetEnabled = value;
+                }
+            },
+            /**
+             * Default 2.5
+             * @property polygonOffsetFactor
+             * @type Number
+             */
+            polygonOffsetFactor:{
+                get:function(){
+                    return _polygonOffsetFactor;
+                },
+                set:function(value){
+                    _polygonOffsetFactor = value;
+                }
+            },
+            /**
+             * Default 10.0
+             * @property polygonOffsetUnits
+             * @type Number
+             */
+            polygonOffsetUnits:{
+                get:function(){
+                    return _polygonOffsetUnits;
+                },
+                set:function(value){
+                    _polygonOffsetUnits = value;
+                }
             },
             /**
              * Must be set to 1028, 1029 (default),
@@ -11611,6 +12188,7 @@ KICK.namespace = function (ns_string) {
                 updateCullFace();
                 updateDepthProperties();
                 updateBlending();
+                updatePolygonOffset();
             }
         };
 
@@ -11628,15 +12206,21 @@ KICK.namespace = function (ns_string) {
                     dataURI:_dataURI
                 }
             }
-            // todo fill in missing attributes
             return {
                 uid: thisObj.uid,
                 name:_name,
+                blend:_blend,
+                blendSFactor:_blendSFactor,
+                dataURI:_dataURI,
+                depthMask:_depthMask,
                 faceCulling:_faceCulling,
-                zTest:_zTest,
-                depthMask: _depthMask,
+                fragmentShaderSrc:_fragmentShaderSrc,
                 vertexShaderSrc:_vertexShaderSrc,
-                fragmentShaderSrc:_fragmentShaderSrc
+                polygonOffsetEnabled:_polygonOffsetEnabled,
+                polygonOffsetFactor:_polygonOffsetFactor,
+                polygonOffsetUnits:_polygonOffsetUnits,
+                renderOrder:_renderOrder,
+                zTest:_zTest
             };
         };
 
@@ -11655,11 +12239,12 @@ KICK.namespace = function (ns_string) {
 
     /**
      * @method getPrecompiledSource
+     * @param {KICK.core.Engine} engine
      * @param {String} sourcecode
      * @return {String} sourcecode after precompiler
      * @static
      */
-    material.Shader.getPrecompiledSource = function(sourcecode){
+    material.Shader.getPrecompiledSource = function(engine,sourcecode){
         // todo optimize with regular expression search
         if (false){
             // insert #line nn after each #pragma include to give meaning full lines in error console
@@ -11685,6 +12270,8 @@ KICK.namespace = function (ns_string) {
                 sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
             }
         }
+
+        sourcecode = "#define SHADOWS "+(engine.config.shadows===true)+"\n#line 1\n"+sourcecode;
         return sourcecode;
     };
 
@@ -11695,13 +12282,10 @@ KICK.namespace = function (ns_string) {
      * The uniforms is expected to be in a valid format
      * @method bindUniform
      * @param {KICK.material.Material} material
-     * @param {KICK.math.mat4} projectionMatrix
-     * @param {KICK.math.mat4} modelViewMatrix
-     * @param {KICK.math.mat4} modelViewProjectionMatrix
+     * @param {Object} engineUniforms
      * @param {KICK.scene.Transform) transform
-     * @param {KICK.scene.SceneLights} sceneLights
      */
-    material.Shader.prototype.bindUniform = function(material, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
+    material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
         // todo optimize this code
         var gl = this.gl,
             materialUniforms = material.uniforms,
@@ -11719,6 +12303,9 @@ KICK.namespace = function (ns_string) {
             gameObjectUID = this.lookupUniform["_gameObjectUID"],
             time = this.lookupUniform["_time"],
             viewport = this.lookupUniform["_viewport"],
+            shadowMapTexture = this.lookupUniform["_shadowMapTexture"],
+            _lightMat = this.lookupUniform["_lightMat"],
+            sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             otherLights = sceneLights.otherLights,
@@ -11779,27 +12366,27 @@ KICK.namespace = function (ns_string) {
             }
         }
         if (proj){
-            gl.uniformMatrix4fv(proj.location,false,projectionMatrix);
+            gl.uniformMatrix4fv(proj.location,false,engineUniforms.projectionMatrix);
         }
         if (mv || norm){
             // todo optimize
             globalTransform = transform.getGlobalMatrix();
-            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,tempMat4);
+            var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
             if (mv){
-                gl.uniformMatrix4fv(mv.location,false,finalModelView);
+                gl.uniformMatrix4fv(mv.location,false,modelView);
             }
             if (norm){
                 // note this can be simplified to
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
-//                var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(finalModelView,tempMat3);
+                //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
+                var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
                 gl.uniformMatrix3fv(norm.location,false,normalMatrix);
             }
         }
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
         }
         if (ambientLight !== null){
             lightUniform =  this.lookupUniform["_ambient"];
@@ -11833,6 +12420,21 @@ KICK.namespace = function (ns_string) {
                 console.log("transform.gameObject.uid "+transform.gameObject.uid);
             }
             gl.uniform4fv(gameObjectUID.location, uidAsVec4);
+        }
+        if (shadowMapTexture){
+            if (ASSERT){
+                if (!directionalLight){
+                    KICK.core.Util.fail("No directional light found in scene - but shader needs it");
+                }
+            }
+            directionalLight.shadowTexture.bind(currentTexture);
+            gl.uniform1i(shadowMapTexture.location,currentTexture);
+            currentTexture ++;
+        }
+        if (_lightMat){
+            globalTransform = globalTransform || transform.getGlobalMatrix();
+            var lightModelViewProjection = mat4.multiply(engineUniforms.lightViewProjectionMatrix,globalTransform,tempMat4);
+            gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(offsetMatrix,lightModelViewProjection,tempMat4));
         }
     };
 
@@ -11929,20 +12531,6 @@ KICK.namespace = function (ns_string) {
                 _shader = engine.project.load("kickjs://shader/error/");
             }
             _renderOrder = _shader.renderOrder;
-        };
-
-        /**
-         * Binds textures and uniforms
-         * @method bind
-         * @param {KICK.math.mat4} projectionMatrix
-         * @param {KICK.math.mat4} modelViewMatrix
-         * @param {KICK.math.mat4} modelViewProjectionMatrix
-         * @param {KICK.scene.Transform} transform
-         * @param {KICK.scene.SceneLights} sceneLights
-         * @param {KICK.material.Shader} shader
-         */
-        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights, shader){
-            shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
         };
 
         /**
@@ -12409,6 +12997,7 @@ KICK.namespace = function (ns_string) {
     var importer = KICK.namespace("KICK.importer"),
         math = KICK.namespace("KICK.math"),
         quat4 = math.quat4,
+        mat4 = math.mat4,
         getXMLElementById = function(doc, id){
             return doc.querySelector("[id=" + id + "]");
         };
@@ -12421,31 +13010,31 @@ KICK.namespace = function (ns_string) {
     importer.ColladaImporter = {};
 
     /**
-     * @method loadCollada
-     * @param {XMLDom} colladaDOM
+     * @method import
+     * @param {XMLDom_or_String} colladaDOM
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
      * @param {boolean} rotate90x rotate -90 degrees around x axis
      * @return {Array[KICK.scene.GameObject]}
      * @static
      */
-    importer.ColladaImporter.loadCollada = function (colladaDOM, engine, scene, rotate90x){
+    importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
+        if (typeof colladaDOM === 'string'){
+            var parser=new DOMParser();
+            colladaDOM = parser.parseFromString(colladaDOM,"text/xml");
+        }
         var dataCache = {},
             constants = KICK.core.Constants,
             /**
              * Converts a string to an array
              * @method stringToArray
              * @param {String} numberString
-             * @param {Number} count Optional
              * @param {Object} type Optional - valid types are Array (default), and typed arrays classes
              * @private
              */
-            stringToArray = function(numberString,count,type){
+            stringToArray = function(numberString,type){
                 if (!type){
                     type = Array;
-                }
-                if (!count){
-                    count = 0;
                 }
                 numberString = numberString.replace(/^\s+|\s+$/g,""); // trim
                 numberString = numberString.replace(/\s{2,}/g, ' '); // remove double white spaces
@@ -12480,8 +13069,7 @@ KICK.namespace = function (ns_string) {
                 } else {
                     type = Int32Array;
                 }
-                var count = Number(arrayElement.getAttribute("count"));
-                var res = stringToArray(arrayElement.textContent,count,type);
+                var res = stringToArray(arrayElement.textContent,type);
                 dataCache[id] = res;
                 return res;
             },
@@ -12526,7 +13114,7 @@ KICK.namespace = function (ns_string) {
              * @param {XMLDomElement} polylist
              * @param {KICK.mesh.MeshData} destMeshData
              */
-            buildFromPolyList = function(polylist, destMeshData){
+            buildFromPolyList = function(polylist, destMeshData, vertexAttributeCache){
                 var polylistChild = polylist.firstChild,
                     tagName,
                     i,j,
@@ -12535,6 +13123,8 @@ KICK.namespace = function (ns_string) {
                     dataAccessor = {names:[],offset:{},accessors:{},length:{}},
                     offsetSet = [],
                     contains = KICK.core.Util.contains;
+
+                var numberOfVertices = vertexAttributeCache.numberOfVertices || 0;
 
                 while (polylistChild !== null){
                     tagName = polylistChild.tagName;
@@ -12549,25 +13139,19 @@ KICK.namespace = function (ns_string) {
                             offsetSet.push(offset);
                         }
                     } else if (tagName === "vcount"){
-                        var vCount = stringToArray(polylistChild.textContent,count,Int32Array);
+                        var vCount = stringToArray(polylistChild.textContent,Int32Array);
                         vertexCount = function(i){ return vCount[i];}
                     } else if (tagName === "p"){
-                        var numberOfVertexIndices = 0,
-                            offsetCount = offsetSet.length;
-                        for (i=count-1;i>=0;i--){
-                            numberOfVertexIndices += vertexCount(i);
-                        }
+                        var offsetCount = offsetSet.length;
 
-                        var numberOfVertexIndicesWithOffset = numberOfVertexIndices*offsetCount;
-                        var vertexIndices = stringToArray(polylistChild.textContent,numberOfVertexIndicesWithOffset,Int32Array);
+                        var vertexIndices = stringToArray(polylistChild.textContent,Int32Array);
 
                         // initialize data container
                         var outVertexAttributes = {};
                         for (i=0;i<dataAccessor.names.length;i++){
                             outVertexAttributes[dataAccessor.names[i]] = [];
                         }
-                        var vertexAttributeCache = {};
-                        var numberOfVertices = 0;
+
                         /**
                          * This method adds vertex attributes to the result index and
                          * @method addVertexAttributes
@@ -12589,7 +13173,6 @@ KICK.namespace = function (ns_string) {
                                 vertexIndex = vertexIndices[offset+indexInVertexIndices];
                                 cacheKey += index+"#"+vertexIndex+"#";
                             }
-
                             var cacheLookupRes = vertexAttributeCache[cacheKey];
                             var foundInCache = typeof cacheLookupRes === 'number';
                             if (foundInCache){
@@ -12635,54 +13218,167 @@ KICK.namespace = function (ns_string) {
                             if (nameMeshData === "texcoord"){
                                 nameMeshData = "uv1";
                             }
-                            destMeshData[nameMeshData] = outVertexAttributes[name];
+                            if (destMeshData[nameMeshData] && destMeshData[nameMeshData].length){
+                                // array already exist - append data
+                                var toArray = KICK.core.Util.typedArrayToArray;
+                                var source = toArray(destMeshData[nameMeshData]);
+                                var append = toArray(outVertexAttributes[name]);
+                                source.push.apply(source,append); // short way to append one array to another
+                                destMeshData[nameMeshData] = source;
+                            } else {
+                                destMeshData[nameMeshData] = outVertexAttributes[name];
+                            }
                         }
                         destMeshData.meshType = 4;
-                        destMeshData.indices = triangleIndices;
+                        var subMeshes = destMeshData.subMeshes;
+                        subMeshes.push(triangleIndices);
+                        destMeshData.subMeshes = subMeshes;
+                        console.log("pushing new sub mesh with "+triangleIndices.length+" as # "+destMeshData.subMeshes.length);
                     }
                     polylistChild = polylistChild .nextSibling;
                 }
+
+                vertexAttributeCache.numberOfVertices = numberOfVertices ;
             },
             /**
-             * @method buildFromTrianglestrips
-             * @private buildFromTrianglestrips
+             * Builds meshdata component (based on a <mesh> node)
+             * @method buildMeshData
              */
-            buildFromTrianglestrips = function(meshChild, destMeshData){
-                // todo: implement
-                KICK.core.Util.fail("buildFromTrianglestrips not implemented");
-            },
             buildMeshData = function (colladaDOM, engine, geometry){
-                var i,
-                    tagName,
+                var tagName,
                     meshChild,
                     name = geometry.getAttribute('name'),
-                    destMeshData = new KICK.mesh.MeshData({name:name}),
+                    destMeshData,
                     mesh = geometry.getElementsByTagName("mesh");
                 if (mesh.length==0){
                     return null;
                 }
+                var vertexAttributeCache = {};
                 mesh = mesh[0];
                 meshChild = mesh.firstChild;
                 while (meshChild !== null){
                     tagName = meshChild.tagName;
                     if (tagName === "lines"){
-                        console.log("lines");
-                    } else if (tagName === "linestrips"){
+                        console.log("lines - unsupported");
+                    } else if (tagName === "linestrips - unsupported"){
                         console.log("linestrips");
                     } else if (tagName === "polygons"){
-                        console.log("polygons");
+                        console.log("polygons  - unsupported");
                     } else if (tagName === "polylist" || tagName === "triangles"){
-                        buildFromPolyList(meshChild,destMeshData);
+                        if (!destMeshData){
+                            destMeshData = new KICK.mesh.MeshData({name:name});
+                        }
+                        buildFromPolyList(meshChild,destMeshData,vertexAttributeCache);
                     } else if (tagName === "trifans"){
                         console.log("trifans unsupported");
                     } else if (tagName === "tristrips"){
-                        buildFromTrianglestrips(meshChild);
+                        console.log("tristrips - unsupported");
                     }
                     meshChild = meshChild.nextSibling;
                 }
                 return destMeshData;
-            };
+            },
+            getMeshesById = function(engine, meshid){
+                var meshArray = [],
+                    k,
+                    geometry;
+                if (meshCache[meshid]){
+                    return meshCache[meshid];
+                }
+                if (meshid && meshid.charAt(0)==="#"){
+                    meshid = meshid.substring(1);
+                }
+                for (k=0;k<geometries.length;k++){
+                    geometry = geometries[k];
+                    if (geometry.getAttribute("id") === meshid){
+                        var meshData = buildMeshData(colladaDOM, engine, geometry);
+                        if (meshData){
+                            meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshData}));
+                        }
+                        break;
+                    }
+                }
+                meshCache[meshid] = meshArray;
+                return meshArray;
+            },
+            updateTransform = function(transform, node){
+                var tagName = node.tagName,
+                    sid = node.getAttribute('sid');
+                if (tagName === "translate"){
+                    transform.localPosition = stringToArray(node.textContent);
+                } else if (tagName === "rotate"){
+                    var angleAxis = stringToArray(node.textContent);
+                    var angle = angleAxis[3];
+                    if (angle){
+                        var rotationQuat = quat4.angleAxis(angle,angleAxis);
+                        var currentQuat = transform.localRotation;
+                        transform.localRotation = quat4.multiply(currentQuat,rotationQuat,rotationQuat);
+                    }
+                } else if (tagName === "scale"){
+                    transform.localScale = stringToArray(node.textContent);
+                } else if (tagName === "matrix"){
+                    var matrix = stringToArray(node.textContent);
+                    var decomposedMatrix = mat4.decompose(matrix);
+                    transform.localPosition = decomposedMatrix[0];
+                    transform.localRotation = decomposedMatrix[1];
+                    transform.localScale = decomposedMatrix[2];
+                }
+            },
+            createMeshRenderer = function(gameObject, node){
+                var url = node.getAttribute("url"),
+                    meshRenderer;
+                if (url){
+                    url = url.substring(1);
+                }
 
+                var meshes = getMeshesById(engine,url);
+                for (var i=0;i<meshes.length;i++){
+                    meshRenderer = new KICK.scene.MeshRenderer();
+                    meshRenderer.mesh = meshes[i];
+                    console.log("Mesh",meshRenderer.mesh);
+                    meshRenderer.material = new KICK.material.Material(engine,{
+                        name:"Some material",
+                        shader:engine.resourceManager.getShader("kickjs://shader/default/")
+                    });
+                    console.log("Getting mesh by id "+url);
+                    console.log("meshRenderer.material name "+meshRenderer.material.name);
+                    console.log("meshRenderer.material shader "+meshRenderer.material.shader);
+
+                    gameObject.addComponent(meshRenderer);
+                }
+            },
+            addNode = function(node, parent){
+                var gameObject = scene.createGameObject();
+                var transform = gameObject.transform;
+                if (parent){
+                    transform.parent = parent;
+                }
+                gameObject.name = node.getAttribute("id");
+                gameObjectsCreated.push(gameObject);
+                var childNode = node.firstElementChild;
+                while (childNode){
+                    var tagName = childNode.tagName;
+                    if (tagName === "translate" ||
+                        tagName === "rotate" ||
+                        tagName === "scale" ||
+                        tagName === "matrix"){
+                        updateTransform(transform, childNode);
+                    }
+                    else if (tagName === "instance_geometry"){
+                        createMeshRenderer(gameObject, childNode);
+                        /*if (rotate90x){
+                        var currentRotation = transform.localRotation;
+                        var rotationAroundX = quat4.angleAxis(-90,[1,0,0]);
+                        transform.localRotation = quat4.multiply(rotationAroundX,currentRotation);
+                    }*/
+                    } else if (tagName === "node"){
+                        addNode(childNode,transform);
+                    } else {
+                        console.log("Unknown tagName '"+tagName+"'");
+                    }
+                    childNode = childNode.nextElementSibling;
+                }
+            };
 
         var libraryGeometries = colladaDOM.firstChild.getElementsByTagName("library_geometries"),
             visualScenes = colladaDOM.firstChild.getElementsByTagName("visual_scene"),
@@ -12700,102 +13396,8 @@ KICK.namespace = function (ns_string) {
         geometries = libraryGeometries.getElementsByTagName("geometry");
         var gameObjectsCreated = [];
         var meshCache = {};
-        var getMeshById = function(engine, meshid){
-            var mesh,
-                k,
-                geometry;
-            if (meshCache[meshid]){
-                return meshCache[meshid];
-            }
-            if (meshid && meshid.charAt(0)==="#"){
-                meshid = meshid.substring(1);
-            }
-            for (k=0;k<geometries.length;k++){
-                geometry = geometries[k];
-                if (geometry.getAttribute("id") === meshid){
-                    var meshData = buildMeshData(colladaDOM, engine, geometry);
-                    mesh = new KICK.mesh.Mesh(engine, {meshData:meshData});
-                    break;
-                }
-            }
-            meshCache[meshid] = mesh;
-            return mesh;
-        };
 
-        var updateTransform = function(transform, node){
-            var tagName = node.tagName,
-                sid = node.getAttribute('sid');
-            if (tagName === "translate"){
-                transform.localPosition = stringToArray(node.textContent);
-            } else if (tagName === "rotate"){
-                var angleAxis = stringToArray(node.textContent);
-                var angle = angleAxis[3];
-                if (angle){
-                    var rotationQuat = quat4.angleAxis(angle,angleAxis);
-                    var currentQuat = transform.localRotation;
-                    transform.localRotation = quat4.multiply(currentQuat,rotationQuat,rotationQuat);
-                }
-            } else if (tagName === "scale"){
-                transform.localScale = stringToArray(node.textContent);
-            }
-        };
-
-        var createMeshRenderer = function(gameObject, node){
-            var url = node.getAttribute("url"),
-                meshRenderer = new KICK.scene.MeshRenderer();
-            if (url){
-                url = url.substring(1);
-            }
-            var shader = new KICK.material.Shader(engine);
-
-            shader.updateShader();
-            var url = node.getAttribute("url");
-
-            meshRenderer.mesh = getMeshById(engine,url);
-            console.log("Mesh",meshRenderer.mesh);
-            meshRenderer.material = new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader
-            });
-            console.log("Getting mesh by id "+url);
-            console.log("meshRenderer.material name "+meshRenderer.material.name);
-            console.log("meshRenderer.material shader "+meshRenderer.material.shader);
-
-            gameObject.addComponent(meshRenderer);
-
-        };
-
-        var addNode = function(node, parent){
-            var gameObject = scene.createGameObject();
-            var transform = gameObject.transform;
-            if (parent){
-                transform.parent = parent;
-            }
-            gameObject.name = node.getAttribute("id");
-            gameObjectsCreated.push(gameObject);
-            var childNode = node.firstElementChild;
-            while (childNode){
-                var tagName = childNode.tagName;
-                if (tagName === "translate" ||
-                    tagName === "rotate" ||
-                    tagName === "scale"){
-                    updateTransform(transform, childNode);
-                }
-                else if (tagName === "instance_geometry"){
-                    createMeshRenderer(gameObject, childNode);
-                    /*if (rotate90x){
-                        var currentRotation = transform.localRotation;
-                        var rotationAroundX = quat4.angleAxis(-90,[1,0,0]);
-                        transform.localRotation = quat4.multiply(rotationAroundX,currentRotation);
-                    }*/
-                } else if (tagName === "node"){
-                    addNode(childNode,transform);
-                }
-                childNode = childNode.nextElementSibling;
-            }
-        };
-
-        for (var i=0;i<visualScenes.length;i++){
+        for (i=0;i<visualScenes.length;i++){
             var visualScene = visualScenes[i];
             var node = visualScene.firstElementChild;
             while (node){
@@ -12804,6 +13406,230 @@ KICK.namespace = function (ns_string) {
             }
         }
         return gameObjectsCreated;
+    };
+})();/*!
+ * New BSD License
+ *
+ * Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+ * following conditions are met:
+ *
+ * - Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+ * disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+var KICK = KICK || {};
+KICK.namespace = function (ns_string) {
+    var parts = ns_string.split("."),
+        parent = window,
+        i;
+
+    for (i = 0; i < parts.length; i += 1) {
+        // create property if it doesn't exist
+        if (typeof parent[parts[i]] === "undefined") {
+            parent[parts[i]] = {};
+        }
+        parent = parent[parts[i]];
+    }
+    return parent;
+};
+
+(function () {
+    "use strict"; // force strict ECMAScript 5
+
+    var importer = KICK.namespace("KICK.importer"),
+        math = KICK.namespace("KICK.math"),
+        quat4 = math.quat4,
+        mat4 = math.mat4;
+
+     /**
+     * Imports an obj mesh into a scene
+     * @class ObjImporter
+     * @namespace KICK.importer
+     */
+    importer.ObjImporter = {};
+
+    /**
+     * @method import
+     * @param {String} objFileContent
+     * @param {KICK.core.Engine} engine
+     * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+     * @param {boolean} rotate90x rotate -90 degrees around x axis
+     * @return {Array[KICK.scene.GameObject]}
+     * @static
+     */
+    importer.ObjImporter.import = function (objFileContent, engine, scene, rotate90x){
+        var lines = objFileContent.split("\n"),
+            linesLength = lines.length,
+            vertices = [],
+            normals = [],
+            textureCoordinates = [],
+            triangles = [],
+            materialNames = [],
+            submeshes = [triangles],
+            objects = [],
+            objectName = "MeshObject",
+            trim = function (str){ return str.replace(/^\s+|\s+$/g, ""); },
+            strAsArray = function(numberString, type){
+                if (!type){
+                    type = Array;
+                }
+                numberString = numberString.replace(/^\s+|\s+$/g,""); // trim
+                numberString = numberString.replace(/\s{2,}/g, ' '); // remove double white spaces
+                var numberArray = numberString.split(" ").map(Number);
+                if (!type || type === Array){
+                    return numberArray;
+                } else {
+                    // typed array
+                    return new type(numberArray);
+                }
+            },
+            getIndices = function(strArray){
+                var array = [];
+                for (var i=0;i<strArray.length;i++){
+                    var str = strArray[i],
+                        splittedStr = str.split("/"),
+                        vertexIndex = parseInt(splittedStr[0]);
+                    array.push([vertexIndex,
+                        splittedStr.length>=2 ? parseInt(splittedStr[1]) : vertexIndex,
+                        splittedStr.length>=3 ? parseInt(splittedStr[2]) : vertexIndex]);
+                }
+
+                return array;
+            },
+            addObject = function(){
+                var pushVertexData = function(source, index, dest){
+                    var sourceElement = source[index-1]; // note: obj is 1 indexed - therefor -1
+                    for (var i=0;i<sourceElement.length;i++){
+                        dest.push(sourceElement[i]);
+                    }
+                };
+                if (vertices.length==0){
+                    return;
+                }
+                var gameObject = scene.createGameObject(),
+                    meshData = new KICK.mesh.MeshData(),
+                    mesh = new KICK.mesh.Mesh(engine),
+                    meshDataVertices = [],
+                    meshDataNormals = [],
+                    meshDataTextureCoordinates = [],
+                    meshDataIndices,
+                    meshDataSubmeshes = [],
+                    cache = {},
+                    count = 0;
+                for (var k=0;k<submeshes.length;k++){
+                    triangles = submeshes[k];
+                    meshDataIndices = [];
+                    meshDataSubmeshes.push(meshDataIndices);
+                    for (var i=0;i<triangles.length;i++){
+                        var vertexUvsNormalStrArray = triangles[i]; // has the value such as ["1//1", "2//2", "3//3"]
+                        var idx = getIndices(vertexUvsNormalStrArray);
+                        for (var j=0;j<3;j++){
+                            var vertexUvsNormalStr = vertexUvsNormalStrArray[j]; // has the value such as "1//1"
+                            if (typeof cache[vertexUvsNormalStr] === 'number'){ // if index is in the cache, reuse index
+                                meshDataIndices.push(cache[vertexUvsNormalStr]);
+                            } else {
+                                pushVertexData(vertices,idx[j][0],meshDataVertices);
+                                if (textureCoordinates.length){
+                                    pushVertexData(textureCoordinates,idx[j][1],meshDataTextureCoordinates);
+                                }
+                                if (normals.length){
+                                    pushVertexData(normals,idx[j][2],meshDataNormals);
+                                }
+                                meshDataIndices.push(count);
+                                cache[vertexUvsNormalStr] = count;
+                                count ++;
+                            }
+                        }
+                    }
+                }
+                meshData.vertex = meshDataVertices;
+                if (meshDataNormals.length){
+                    meshData.normal = meshDataNormals;
+                }
+                if (meshDataTextureCoordinates.length){
+                    meshData.uv1 = meshDataTextureCoordinates;
+                }
+                meshData.subMeshes = meshDataSubmeshes;
+                mesh.meshData = meshData;
+                var meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer.mesh = mesh;
+
+                var materials = [];
+
+                var addDefaultMaterial = function(name){
+                    materials.push(new KICK.material.Material(engine,{
+                        name:name,
+                        shader:engine.resourceManager.getShader("kickjs://shader/default/")
+                    }));
+                };
+
+                for (var i=0;i < meshDataSubmeshes.length;i++){
+                    if (i<materialNames.length){
+                        var materialName = materialNames[i];
+                        var projectMaterial = engine.project.loadByName(materialName,"KICK.material.Material");
+                        if (projectMaterial){
+                            materials.push(projectMaterial);
+                        } else {
+                            addDefaultMaterial(materialName);
+                        }
+                    } else {
+                        addDefaultMaterial("material");
+                    }
+                }
+
+                meshRenderer.materials = materials;
+                gameObject.name = objectName;
+                gameObject.addComponent(meshRenderer);
+                objects.push(gameObject);
+                triangles = [];
+            };
+        for (var i=0;i<linesLength;i++){
+            var line = trim(lines[i]);
+            var tokenIndex = line.indexOf(' ');
+            if (tokenIndex<0){
+                continue;
+            }
+            var token = line.substring(0,tokenIndex);
+            var value = line.substring(tokenIndex+1);
+            if (token === "o"){
+                addObject();
+                objectName = value;
+                materialNames.length = 0;
+            } else if (token === "usemtl"){
+                materialNames.push(value);
+                // create material with name value is not exist
+                if (triangles.length>0){
+                    triangles = [];
+                    submeshes[submeshes.length] = triangles;
+                }
+            } else if (token === "v"){
+                vertices.push(strAsArray(value));
+            } else if (token === "vn"){
+                normals.push(strAsArray(value));
+            } else if (token === "vt"){
+                textureCoordinates.push(strAsArray(value));
+            } else if (token === "f"){
+                var polygon = value.split(" ");
+                triangles.push(polygon.slice(0,3));
+                for (var j=3;j<polygon.length;j++){
+                    triangles.push([polygon[j-1],polygon[j],polygon[0]]);
+                }
+            }
+        }
+        addObject();
+        return objects;
     };
 })();/*!
  * New BSD License
@@ -13216,11 +14042,13 @@ KICK.namespace = function (ns_string) {
          * Create a default shader config based on a URL<br>
          * The following shaders are available:
          *  <ul>
-         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
+         *  <li><b>Default</b> Url: kickjs://shader/default/</li>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
+         *  <li><b>Shadowmap</b> Url: kickjs://shader/shadowmap/</li>
+         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShaderData
@@ -13231,40 +14059,45 @@ KICK.namespace = function (ns_string) {
             var vertexShaderSrc,
                 fragmentShaderSrc,
                 blend = false,
+                polygonOffsetEnabled = false,
                 depthMask = true,
                 renderOrder = 1000,
-                glslConstants = KICK.material.GLSLConstants;
-            if (url.indexOf("kickjs://shader/phong/")==0){
-                vertexShaderSrc = glslConstants["phong_vs.glsl"];
-                fragmentShaderSrc = glslConstants["phong_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/transparent_phong/")==0){
-                vertexShaderSrc = glslConstants["transparent_phong_vs.glsl"];
-                fragmentShaderSrc = glslConstants["transparent_phong_fs.glsl"];
-                blend = true;
-                depthMask = false;
-                renderOrder = 2000;
-            } else if (url.indexOf("kickjs://shader/error/")==0){
-                vertexShaderSrc = glslConstants["error_vs.glsl"];
-                fragmentShaderSrc = glslConstants["error_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/pick/")==0){
-                vertexShaderSrc = glslConstants["pick_vs.glsl"];
-                fragmentShaderSrc = glslConstants["pick_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/unlit/")==0){
-                vertexShaderSrc = glslConstants["unlit_vs.glsl"];
-                fragmentShaderSrc = glslConstants["unlit_fs.glsl"];
-            } else if (url.indexOf("kickjs://shader/transparent_unlit/")==0){
-                vertexShaderSrc = glslConstants["transparent_unlit_vs.glsl"];
-                fragmentShaderSrc = glslConstants["transparent_unlit_fs.glsl"];
-                renderOrder = 2000;
-                blend = true;
-                depthMask = false;
-            } else {
-                return null;
+                glslConstants = KICK.material.GLSLConstants,
+                compareAndSetShader = function(shaderName){
+                    var res = url.indexOf("kickjs://shader/"+shaderName+"/")===0;
+                    if (res){
+                        vertexShaderSrc = glslConstants[shaderName+"_vs.glsl"];
+                        fragmentShaderSrc = glslConstants[shaderName+"_fs.glsl"];
+                        if (shaderName.indexOf("transparent_")===0){
+                            blend = true;
+                            depthMask = false;
+                            renderOrder = 2000;
+                        }
+                        if (shaderName==="shadowmap"){
+                            polygonOffsetEnabled = true;
+                        }
+                    }
+                    return res;
+                },
+                shaderTypes = ["phong","shadowmap","error","pick","transparent_phong","unlit","transparent_unlit"];
+            if (url === "kickjs://shader/default/"){
+                url = "kickjs://shader/phong/";
+            }
+            for (var i=0;i<shaderTypes.length;i++){
+                if (compareAndSetShader(shaderTypes[i])){
+                    break;
+                }
+            }
+            if (ASSERT){
+                if (!vertexShaderSrc){
+                    KICK.core.Util.fail("Cannot find shader url '"+url+"'");
+                }
             }
             var config = {
                 blend:blend,
                 depthMask:depthMask,
                 renderOrder:renderOrder,
+                polygonOffsetEnabled:polygonOffsetEnabled,
                 vertexShaderSrc: vertexShaderSrc,
                 fragmentShaderSrc: fragmentShaderSrc
             };
@@ -13277,10 +14110,13 @@ KICK.namespace = function (ns_string) {
          * Create a default shader based on a URL<br>
          * The following shaders are available:
          *  <ul>
+         *  <li><b>Default</b> Url: kickjs://shader/default/</li>
          *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
+         *  <li><b>Shadowmap</b> Url: kickjs://shader/shadowmap/</li>
+         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
          *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
          *  </ul>
          * @method getShader
@@ -13288,7 +14124,6 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.material.Shader} Shader or null if not found
          */
         this.getShader = function(url,errorLog){
-
             var shader = new KICK.material.Shader(engine);
             this.getShaderData(url,shader);
             return shader;
