@@ -1750,6 +1750,7 @@ KICK.namespace = function (ns_string) {
     /**
      * Rotates a matrix by three rotations given in eulers angles<br>
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
+     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
      * @method rotateEuler
      * @param {KICK.math.mat4} mat mat4 to rotate
      * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
@@ -2468,6 +2469,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Calculates a rotation represented in eulers angles (in degrees)
+     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
      * @method toEuler
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
@@ -2488,7 +2490,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Set the rotation based on eulers angles.
+     * Set the rotation based on an angle and a axis
      * @method angleAxis
      * @param {Number} angle rotation angle in degrees
      * @param {KICK.math.vec3} vec normalized axis
@@ -2549,6 +2551,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Set the rotation based on eulers angles.
+     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
      * @method setEuler
      * @param {KICK.math.vec3} vec vec3 eulers angles (degrees)
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
