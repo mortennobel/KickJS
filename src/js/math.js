@@ -928,6 +928,17 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Calculates the dot product of two vec3s
+     * @method dot
+     * @param {KICK.math.vec4} vec first operand
+     * @param {KICK.math.vec4} vec2 second operand
+     * @return {Number} Dot product of vec and vec2
+     */
+    vec4.dot = function(vec, vec2){
+        return vec[0]*vec2[0] + vec[1]*vec2[1] + vec[2]*vec2[2] + vec[3]*vec2[3];
+    };
+
+    /**
      * Multiplies the components of a vec4 by a scalar value
      * @method scale
      * @param {KICK.math.vec4} vec vec4 to scale
@@ -2341,7 +2352,7 @@ KICK.namespace = function (ns_string) {
         dest[2] = z;
         dest[3] = w;
         return dest;
-    }
+    };
 
     /**
      * Calculates the inverse of a quat4
@@ -2351,6 +2362,30 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, quat otherwise
      */
     quat4.inverse = function(quat, dest) {
+        var dot = quat4.dot(quat,quat),
+            invDot = 1.0/dot;
+        if(!dest || quat == dest) {
+            quat[0] *= -invDot;
+            quat[1] *= -invDot;
+            quat[2] *= -invDot;
+            quat[3] *= invDot;
+            return quat;
+        }
+        dest[0] = -quat[0]*invDot;
+        dest[1] = -quat[1]*invDot;
+        dest[2] = -quat[2]*invDot;
+        dest[3] = quat[3]*invDot;
+        return dest;
+    };
+
+    /**
+     * Calculates the inverse of a quat4
+     * @method conjugate
+     * @param {KICK.math.quat4} quat quat4 to calculate inverse of
+     * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
+     * @return {KICK.math.quat4} dest if specified, quat otherwise
+     */
+    quat4.conjugate = function(quat, dest) {
         if(!dest || quat == dest) {
             quat[0] *= -1;
             quat[1] *= -1;
@@ -2372,6 +2407,15 @@ KICK.namespace = function (ns_string) {
      *
      */
     quat4.length = vec4.length;
+
+    /**
+     * Returns dot product of q1 and q1
+     * @method dot
+     * @param {KICK.math.quat4} q1
+     * @param {KICK.math.quat4} q2
+     * @return {Number}
+     */
+    quat4.dot = vec4.dot;
 
     /**
      * Generates a unit quaternion of the same direction as the provided quat4<br>
