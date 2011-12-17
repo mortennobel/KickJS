@@ -2558,16 +2558,19 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
     quat4.setEuler = function(vec, dest) {
-        var axisX = quat4.angleAxis(vec[0],[1,0,0]),
-            axisY = quat4.angleAxis(vec[1],[0,1,0]),
-            axisZ = quat4.angleAxis(vec[2],[0,0,1]);
+        // code based on GLM
+        var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN,
+            halfDTR = degreeToRadian * 0.5,
+            x = vec[0] * halfDTR,y=vec[1] * halfDTR,z=vec[2] * halfDTR,
+            cx = cos(x), cy = cos(y), cz = cos(z),
+            sx = sin(x), sy = sin(y), sz = sin(z);
         if(!dest) {
             dest = quat4.create();
         }
-
-        // todo optimize this method. It should basically inline all three multiplications like the code below
-        quat4.multiply(axisZ,axisY,dest);
-        quat4.multiply(dest,axisX,dest);
+        dest[3] = cx * cy * cz + sx * sy * sz;
+        dest[0] = sx * cy * cz - cx * sy * sz;
+        dest[1] = cx * sy * cz + sx * cy * sz;
+        dest[2] = cx * cy * sz - sx * sy * cz;
         return dest;
     };
 
