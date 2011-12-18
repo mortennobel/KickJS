@@ -3976,26 +3976,29 @@ KICK.namespace = function (ns_string) {
         mat4.multiply(dest,quat4.toMat4(rotateQuat));
         mat4.scale(dest, scale);
         return dest;
-    }
+    };
 
     /**
      * Set the inverse of translate, rotate, scale
      * @method setTRSInverse
      * @param {KICK.math.vec3} translate
-     * @param {KICK.math.quat4} rotateQuat
+     * @param {KICK.math.quat4} rotateQuat must be normalized
      * @param {KICK.math.vec3} scale
      * @param {KICK.math.mat4} dest Optinal
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
      */
-    mat4.setTRSInverse = function(translate, rotateQuat, scale, dest){
-        if(!dest) { dest = mat4.create(); }
-        // todo: optimize this code
-        mat4.identity(dest);
-        mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
-        mat4.multiply(dest,quat4.toMat4(quat4.inverse(rotateQuat)));
-        mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
-        return dest;
-    };
+    mat4.setTRSInverse = (function(){
+        var conjugateRotation = new Float32Array(4);
+        return function(translate, rotateQuat, scale, dest){
+            if(!dest) { dest = mat4.create(); }
+            mat4.identity(dest);
+            mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
+            quat4.conjugate(rotateQuat,conjugateRotation);
+            mat4.multiply(dest,quat4.toMat4(conjugateRotation));
+            mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
+            return dest;
+        };
+    })();
 
     /**
      * Sets a mat4 to an identity matrix
