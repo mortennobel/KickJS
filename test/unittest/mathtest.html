@@ -586,6 +586,12 @@ YUI().use('node', 'console', 'test', function (Y) {
                 Y.Assert.compareQuat4(rotate,decomposedRotate);
                 Y.Assert.compareVec(scale,decomposedScale);
             }
+        },
+        testRotation: function(){
+            var quat4 = KICK.math.quat4;
+            var someRotation = quat4.setEuler([0,10,1]);
+            var rotate = quat4.create([0,0,0,1]);
+            var scale = [1,2,3];
         }
     });
 
@@ -645,6 +651,36 @@ YUI().use('node', 'console', 'test', function (Y) {
 
     var ExampleSuite = new Y.Test.Suite("Example Suite");
     ExampleSuite.add(Y.KICK.math.vec3Test);
+
+    /**
+     * Rotates a matrix by three rotations given in eulers angles<br>
+     * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
+     * This method is only used to verify quaternion rotation and therefor not available in math.js
+     * @method rotateEuler
+     * @param {KICK.math.mat4} mat mat4 to rotate
+     * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
+     * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+     * @return {KICK.math.mat4} dest if specified, mat otherwise
+     */
+    KICK.math.mat4.rotateEuler = function(mat, eulerAngle, dest) {
+        var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN;
+        if (dest) {
+            mat4.set(mat,dest);
+            mat = dest;
+        }
+
+        // Note unoptimized code
+        if (eulerAngle[2] !== 0){
+            mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
+        }
+        if (eulerAngle[1] !== 0){
+            mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
+        }
+        if (eulerAngle[0] !== 0){
+            mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
+        }
+        return mat;
+    };
 
     //create the console
     var r = new Y.Console({

@@ -4469,36 +4469,6 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Rotates a matrix by three rotations given in eulers angles<br>
-     * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
-     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
-     * @method rotateEuler
-     * @param {KICK.math.mat4} mat mat4 to rotate
-     * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
-     * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-     * @return {KICK.math.mat4} dest if specified, mat otherwise
-     */
-    mat4.rotateEuler = function(mat, eulerAngle, dest) {
-        var degreeToRadian = 0.01745329251994;
-        if (dest) {
-            mat4.set(mat,dest);
-            mat = dest;
-        }
-
-        // todo: Optimized code!!!
-        if (eulerAngle[2] !== 0){
-            mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
-        }
-        if (eulerAngle[1] !== 0){
-            mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
-        }
-        if (eulerAngle[0] !== 0){
-            mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
-        }
-        return mat;
-    };
-
-    /**
      * Rotates a matrix by the given angle around the specified axis<br>
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for
      * performance
@@ -5065,7 +5035,8 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Calculates the inverse of a quat4
+     * Calculates the inverse of a quat4.
+     * Note that if the quat is normalized, it is much faster to use quat4.conjugate
      * @method inverse
      * @param {KICK.math.quat4} quat quat4 to calculate inverse of
      * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
@@ -5089,9 +5060,9 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Calculates the inverse of a quat4
+     * Calculates the conjugate of a quat4
      * @method conjugate
-     * @param {KICK.math.quat4} quat quat4 to calculate inverse of
+     * @param {KICK.math.quat4} quat quat4 to calculate conjugate of
      * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
      */
@@ -5279,8 +5250,7 @@ KICK.namespace = function (ns_string) {
         // idea create mat3 rotation and transform into quaternion
         var upVector = vec3.create(),
             rightVector = vec3.create(),
-            forwardVector = vec3.create(),
-            matrix;
+            forwardVector = vec3.create();
         vec3.subtract(position,target, forwardVector);
         vec3.normalize(forwardVector);
         vec3.cross(up,forwardVector,rightVector);
@@ -5337,21 +5307,21 @@ KICK.namespace = function (ns_string) {
      */
     quat4.setFromRotationMatrix = function(mat,dest){
         var x,y,z,w,
-            m11 = mat[0],
-            m22 = mat[5],
-            m33 = mat[10];
+            m00 = mat[0],m01 = mat[4],m02 = mat[8],
+            m10 = mat[1],m11 = mat[5],m12 = mat[9],
+            m20 = mat[2],m21 = mat[6],m22 = mat[10];
         // http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
 		function copySign(a, b) {
 			return b < 0 ? -Math.abs(a) : Math.abs(a);
 		}
         var absQ = Math.pow(mat4.determinant(mat), 1.0 / 3.0);
-		w = Math.sqrt( Math.max( 0, absQ + m11  + m22 + m33 ) ) / 2;
-		x = Math.sqrt( Math.max( 0, absQ + m11  - m22 - m33 ) ) / 2;
-		y = Math.sqrt( Math.max( 0, absQ - m11  + m22 - m33 ) ) / 2;
-		z = Math.sqrt( Math.max( 0, absQ - m11  - m22 + m33 ) ) / 2;
-		x = copySign( x, ( mat[2+1*4] - mat[1+2*4] ) ); // m32 - m23
-		y = copySign( y, ( mat[0+2*4] - mat[2+0*4] ) ); // m13 - m31
-		z = copySign( z, ( mat[1+0*4] - mat[0+1*4] ) ); // m21 - m12
+		w = Math.sqrt( Math.max( 0, absQ + m00  + m11 + m22 ) ) / 2;
+		x = Math.sqrt( Math.max( 0, absQ + m00  - m11 - m22 ) ) / 2;
+		y = Math.sqrt( Math.max( 0, absQ - m00  + m11 - m22 ) ) / 2;
+		z = Math.sqrt( Math.max( 0, absQ - m00  - m11 + m22 ) ) / 2;
+		x = copySign( x, ( m21 - m12 ) ); // m21 - m12
+		y = copySign( y, ( m02 - m20 ) ); // m02 - m20
+		z = copySign( z, ( m10 - m01 ) ); // m10 - m01
         var destArray = [x,y,z,w];
         if (!dest){
             dest = quat4.create(destArray);

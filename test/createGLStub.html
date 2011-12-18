@@ -1,0 +1,38 @@
+<html>
+<body>
+<canvas id="canvas" style="border: none;" width="1" height="1"></canvas><br>
+<script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
+<script type="text/javascript">
+    var webGlContextNames = ["experimental-webgl","webgl"];
+    var canvas = document.getElementById("canvas");
+    for (var i = webGlContextNames.length-1; i >= 0; i--) {
+        try {
+            gl = canvas.getContext(webGlContextNames[i]);
+            if (gl) {
+                break;
+            }
+        } catch (e) {
+            // ignore
+            alert(e);
+        }
+    }
+
+    if (gl) {
+        document.write("var gl = {};<br>");
+        //gl = WebGLDebugUtils.makeDebugContext(gl);
+
+        for (var name in gl){
+            if (typeof gl[name] === "function"){
+                document.write("gl."+name+"=function(){};<br>");
+            } else {
+                if (name === name.toUpperCase()){
+                    document.write("gl."+name+"="+gl[name]+";<br>");
+                }
+            }
+
+        }
+    }
+
+</script>
+</body>
+</html>
