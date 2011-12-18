@@ -1759,36 +1759,6 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Rotates a matrix by three rotations given in eulers angles<br>
-     * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for performance
-     * Pitch->X axis, Yaw->Y axis, Roll->Z axis
-     * @method rotateEuler
-     * @param {KICK.math.mat4} mat mat4 to rotate
-     * @param {KICK.math.vec3} eulerAngle angle (in degrees) to rotate
-     * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-     * @return {KICK.math.mat4} dest if specified, mat otherwise
-     */
-    mat4.rotateEuler = function(mat, eulerAngle, dest) {
-        var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN;
-        if (dest) {
-            mat4.set(mat,dest);
-            mat = dest;
-        }
-
-        // todo: Optimized code!!!
-        if (eulerAngle[2] !== 0){
-            mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
-        }
-        if (eulerAngle[1] !== 0){
-            mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
-        }
-        if (eulerAngle[0] !== 0){
-            mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
-        }
-        return mat;
-    };
-
-    /**
      * Rotates a matrix by the given angle around the specified axis<br>
      * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for
      * performance
