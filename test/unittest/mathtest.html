@@ -595,9 +595,16 @@ YUI().use('node', 'console', 'test', function (Y) {
         }
     });
 
+    /**
+     * Assumes that the quaternions is normalized
+     * @param expected
+     * @param actual
+     * @param message
+     */
     Y.Assert.compareQuat4 = function(expected,actual, message){
         var quat4 = KICK.math.quat4;
         var epsilon = 0.001;
+        var message = "Expected \n"+KICK.math.vec4.str(expected)+" \nActual \n"+KICK.math.vec4.str(actual);
         var isEqual = function(quat){
             for (var i=0;i<4;i++){
                 if (Math.abs(expected[i]-quat[i])>epsilon){
@@ -613,7 +620,6 @@ YUI().use('node', 'console', 'test', function (Y) {
         if (isEqual(actualAlternative)){
             return;
         }
-        var message = "Expected \n"+KICK.math.vec4.str(expected)+" \nActual \n"+KICK.math.vec4.str(actual);
         Y.Assert.isTrue(false,message);
     };
 
@@ -671,13 +677,13 @@ YUI().use('node', 'console', 'test', function (Y) {
 
         // Note unoptimized code
         if (eulerAngle[2] !== 0){
-            mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
+            KICK.math.mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
         }
         if (eulerAngle[1] !== 0){
-            mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
+            KICK.math.mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
         }
         if (eulerAngle[0] !== 0){
-            mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
+            KICK.math.mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
         }
         return mat;
     };
