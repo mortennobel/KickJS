@@ -272,7 +272,7 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<_components.length;i++){
                 component = _components[i];
                 if (!component.toJSON){
-                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,component));
+                    componentsJSON.push(KICK.core.Util.componentToJSON(scene.engine,component));
                 } else {
                     componentsJSON.push(component.toJSON());
                 }
