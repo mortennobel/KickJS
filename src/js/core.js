@@ -569,7 +569,15 @@ KICK.namespace = function (ns_string) {
             resourceCache = {},
             resourceReferenceCount = {},
             thisObj = this,
-            _maxUID = 0;
+            _maxUID = 0,
+            refreshResourceDescriptor = function(uid){
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    var liveObject = resourceCache[uid];
+                    if (liveObject){
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
+                    }
+                }
+            };
 
         Object.defineProperties(this, {
             /**
@@ -583,6 +591,21 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     _maxUID = newValue;
+                }
+            },
+            /**
+             * List the asset uids of project
+             * @property resourceDescriptorUIDs
+             * @type Array[Number]
+             */
+            resourceDescriptorUIDs:{
+                get:function(){
+                    var uids = [],
+                        uid;
+                    for (uid in resourceDescriptorsByUID){
+                        uids.push(uid);
+                    }
+                    return uids;
                 }
             }
         });
@@ -714,12 +737,7 @@ KICK.namespace = function (ns_string) {
          */
         this.refreshResourceDescriptors = function(){
             for (var uid in resourceDescriptorsByUID){
-                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
-                    var liveObject = resourceCache[uid];
-                    if (liveObject){
-                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
-                    }
-                }
+                refreshResourceDescriptor(uid);
             }
         };
 
@@ -736,6 +754,16 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return res;
+        };
+
+        /**
+         * @method getResourceDescriptor
+         * @param uid
+         * @return {KICK.core.ResourceDescriptor} resource descriptor (or null if not found)
+         */
+        this.getResourceDescriptor = function(uid){
+            refreshResourceDescriptor(uid);
+            return resourceDescriptorsByUID[uid];
         };
 
         /**
