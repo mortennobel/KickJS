@@ -438,7 +438,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, or GL_TRIANGLE_STRIP
+             * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, or GL_LINES
              * @property meshType
              * @type Number
              */
@@ -448,7 +448,9 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     if (ASSERT){
-                        if (newValue != constants.GL_TRIANGLES &&
+                        if (
+                            newValue != constants.GL_LINES &&
+                            newValue != constants.GL_TRIANGLES &&
                             newValue != constants.GL_TRIANGLE_FAN &&
                             newValue != constants.GL_TRIANGLE_STRIP){
                             fail("MeshData.meshType must be GL_TRIANGLES, GL_TRIANGLE_FAN or GL_TRIANGLE_STRIP");

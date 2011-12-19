@@ -3335,50 +3335,51 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
      */
-    vec3.unproject = function (vec, modelView, proj, viewport, dest) {
-        if (!dest) { dest = vec; }
-
-        var m = mat4.create();
+    vec3.unproject = (function(){
+        var m = new Float32Array(16);
         var v = new Float32Array(4);
+        return function (vec, modelView, proj, viewport, dest) {
+            if (!dest) { dest = vec; }
 
-        v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
-        v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
-        v[2] = 2.0 * vec[2] - 1.0;
-        v[3] = 1.0;
+            v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
+            v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
+            v[2] = 2.0 * vec[2] - 1.0;
+            v[3] = 1.0;
 
-        mat4.multiply(proj, modelView, m);
-        if(!mat4.inverse(m)) { return null; }
+            mat4.multiply(proj, modelView, m);
+            if(!mat4.inverse(m)) { return null; }
 
-        mat4.multiplyVec4(m, v);
-        if(v[3] === 0.0) { return null; }
+            mat4.multiplyVec4(m, v);
+            if(v[3] === 0.0) { return null; }
 
-        dest[0] = v[0] / v[3];
-        dest[1] = v[1] / v[3];
-        dest[2] = v[2] / v[3];
+            dest[0] = v[0] / v[3];
+            dest[1] = v[1] / v[3];
+            dest[2] = v[2] / v[3];
 
-        return dest;
-    };
+            return dest;
+        }
+    })();
 
     /**
      * Converts the spherical coordinates (in radians) to carterian coordinates.<br>
      * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
      * @method sphericalToCarterian
      * @param {KICK.math.vec3} spherical spherical coordinates
-     * @param {KICK.math.vec3} cartesian optionally if not specified a new vec3 is returned
+     * @param {KICK.math.vec3} dest optionally if not specified a new vec3 is returned
      * @return {KICK.math.vec3} position in cartesian angles
      */
-    vec3.sphericalToCarterian = function(spherical, cartesian){
+    vec3.sphericalToCarterian = function(spherical, dest){
         var radius = spherical[0],
             polar = -spherical[1],
             elevation = spherical[2],
             a = radius * cos(elevation);
-        if (!cartesian){
-            cartesian = vec3.create();
+        if (!dest){
+            dest = vec3.create();
         }
-        cartesian[0] = a * cos(polar);
-        cartesian[1] = radius * sin(elevation);
-        cartesian[2] = a * sin(polar);
-        return cartesian;
+        dest[0] = a * cos(polar);
+        dest[1] = radius * sin(elevation);
+        dest[2] = a * sin(polar);
+        return dest;
     };
 
     /**
@@ -3386,27 +3387,27 @@ KICK.namespace = function (ns_string) {
      * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
      * @method cartesianToSpherical
      * @param {KICK.math.vec3} cartesian
-     * @param {KICK.math.vec3} spherical Optional
+     * @param {KICK.math.vec3} dest Optional
      * @return {KICK.math.vec3}
      */
-    vec3.cartesianToSpherical = function(cartesian, spherical){
+    vec3.cartesianToSpherical = function(cartesian, dest){
         var x = cartesian[0],
             y = cartesian[1],
             z = cartesian[2],
             sphericalX;
         if (x == 0)
             x = _epsilon;
-        if (!spherical){
-            spherical = vec3.create();
+        if (!dest){
+            dest = vec3.create();
         }
 
-        spherical[0] = sphericalX = sqrt(x*x+y*y+z*z);
-        spherical[1] = -atan(z/x);
+        dest[0] = sphericalX = sqrt(x*x+y*y+z*z);
+        dest[1] = -atan(z/x);
         if (x < 0){
-            spherical[1] += PI;
+            dest[1] += PI;
         }
-        spherical[2] = asin(y/sphericalX);
-        return spherical;
+        dest[2] = asin(y/sphericalX);
+        return dest;
     };
 
     /**
@@ -3969,12 +3970,10 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
      */
     mat4.setTRS = function(translate, rotateQuat, scale, dest){
-        if(!dest) { dest = mat4.create(); }
-        // todo: optimize this code
-        mat4.identity(dest);
-        mat4.translate(dest, translate);
-        mat4.multiply(dest,quat4.toMat4(rotateQuat));
-        mat4.scale(dest, scale);
+        dest = mat4.fromRotationTranslation(rotateQuat,translate,dest);
+        if (scale[0] != 0 || scale[1] != 0 || scale[1] != 0){
+            mat4.scale(dest, scale);
+        }
         return dest;
     };
 
@@ -4812,7 +4811,7 @@ KICK.namespace = function (ns_string) {
             x0 *= len;
             x1 *= len;
             x2 *= len;
-        };
+        }
 
         //vec3.normalize(vec3.cross(z, x, y));
         y0 = z1*x2 - z2*x1;
@@ -4859,51 +4858,54 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} scale Optional
      * @return Array[tranlate,rotate,scale]
      */
-    mat4.decompose = function(mat,tranlate,rotate,scale){
-        var x = [mat[0],mat[1],mat[2]],
-            y = [mat[4],mat[5],mat[6]],
-            z = [mat[8],mat[9],mat[10]],
-            scaleX,
-            scaleY,
-            scaleZ;
+    mat4.decompose = (function(){
+        var copy = mat4.create();
+        return function(mat,tranlate,rotate,scale){
+            var x = [mat[0],mat[1],mat[2]],
+                y = [mat[4],mat[5],mat[6]],
+                z = [mat[8],mat[9],mat[10]],
+                scaleX,
+                scaleY,
+                scaleZ;
 
-        if (!tranlate){
-            tranlate = vec3.create();
-        }
-        if (!rotate){
-            rotate = quat4.create();
-        }
-        if (!scale){
-            scale = vec3.create();
-        }
+            if (!tranlate){
+                tranlate = vec3.create();
+            }
+            if (!rotate){
+                rotate = quat4.create();
+            }
+            if (!scale){
+                scale = vec3.create();
+            }
 
-		tranlate[0] = mat[12];
-		tranlate[1] = mat[13];
-		tranlate[2] = mat[14];
+            tranlate[0] = mat[12];
+            tranlate[1] = mat[13];
+            tranlate[2] = mat[14];
 
-		scale[0] = scaleX = vec3.length(x);
-		scale[1] = scaleY = vec3.length(y);
-		scale[2] = scaleZ = vec3.length(z);
+            scale[0] = scaleX = vec3.length(x);
+            scale[1] = scaleY = vec3.length(y);
+            scale[2] = scaleZ = vec3.length(z);
 
-        var copy = mat4.create(mat);
+            mat4.set(mat,copy);
 
-		copy[0] /= scaleX;
-		copy[1] /= scaleX;
-		copy[2] /= scaleX;
+            copy[0] /= scaleX;
+            copy[1] /= scaleX;
+            copy[2] /= scaleX;
 
-		copy[4] /= scaleY;
-		copy[5] /= scaleY;
-		copy[6] /= scaleY;
+            copy[4] /= scaleY;
+            copy[5] /= scaleY;
+            copy[6] /= scaleY;
 
-		copy[8] /= scaleZ;
-		copy[9] /= scaleZ;
-		copy[10] /= scaleZ;
+            copy[8] /= scaleZ;
+            copy[9] /= scaleZ;
+            copy[10] /= scaleZ;
 
-        
-		quat4.setFromRotationMatrix(copy,rotate);
 
-        return [tranlate, rotate, scale];
-    };
+            quat4.setFromRotationMatrix(copy,rotate);
+
+            return [tranlate, rotate, scale];
+        };
+    })();
 
     /*
      * mat4.fromRotationTranslation
@@ -5606,6 +5608,22 @@ KICK.namespace = function (ns_string) {
         return aabb;
     };
 
+    /**
+     * @method center
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.vec3} centerVec3 Optional
+     * @return {KICK.math.vec3} Center of aabb, (centerVec3 if specified)
+     */
+    aabb.center = function(aabb,centerVec3){
+        if (!centerVec3){
+            centerVec3 = vec3.create();
+        }
+        centerVec3[0] = aabb[3]-aabb[0];
+        centerVec3[1] = aabb[4]-aabb[1];
+        centerVec3[2] = aabb[5]-aabb[2];
+
+        return centerVec3;
+    };
 })();/*!
  * New BSD License
  *
@@ -6177,7 +6195,15 @@ KICK.namespace = function (ns_string) {
             resourceCache = {},
             resourceReferenceCount = {},
             thisObj = this,
-            _maxUID = 0;
+            _maxUID = 0,
+            refreshResourceDescriptor = function(uid){
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+                    var liveObject = resourceCache[uid];
+                    if (liveObject){
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
+                    }
+                }
+            };
 
         Object.defineProperties(this, {
             /**
@@ -6191,6 +6217,21 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     _maxUID = newValue;
+                }
+            },
+            /**
+             * List the asset uids of project
+             * @property resourceDescriptorUIDs
+             * @type Array[Number]
+             */
+            resourceDescriptorUIDs:{
+                get:function(){
+                    var uids = [],
+                        uid;
+                    for (uid in resourceDescriptorsByUID){
+                        uids.push(uid);
+                    }
+                    return uids;
                 }
             }
         });
@@ -6322,12 +6363,7 @@ KICK.namespace = function (ns_string) {
          */
         this.refreshResourceDescriptors = function(){
             for (var uid in resourceDescriptorsByUID){
-                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
-                    var liveObject = resourceCache[uid];
-                    if (liveObject){
-                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
-                    }
-                }
+                refreshResourceDescriptor(uid);
             }
         };
 
@@ -6344,6 +6380,16 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return res;
+        };
+
+        /**
+         * @method getResourceDescriptor
+         * @param uid
+         * @return {KICK.core.ResourceDescriptor} resource descriptor (or null if not found)
+         */
+        this.getResourceDescriptor = function(uid){
+            refreshResourceDescriptor(uid);
+            return resourceDescriptorsByUID[uid];
         };
 
         /**
@@ -7839,7 +7885,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Must be 4,6, or 5
+             * Must be 4,6, 5, or 1
              * @property meshType
              * @type Number
              */
@@ -7849,7 +7895,9 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     if (ASSERT){
-                        if (newValue != 4 &&
+                        if (
+                            newValue != 1 &&
+                            newValue != 4 &&
                             newValue != 6 &&
                             newValue != 5){
                             fail("MeshData.meshType must be 4, 6 or 5");
@@ -8679,7 +8727,7 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<_components.length;i++){
                 component = _components[i];
                 if (!component.toJSON){
-                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,component));
+                    componentsJSON.push(KICK.core.Util.componentToJSON(scene.engine,component));
                 } else {
                     componentsJSON.push(component.toJSON());
                 }
@@ -10196,7 +10244,8 @@ KICK.namespace = function (ns_string) {
             _materials = [],
             _mesh,
             _renderOrder,
-            gl;
+            gl,
+            thisObj = this;
 
         /**
          * @method activated
@@ -10303,7 +10352,7 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         this.toJSON = function(){
-            return KICK.core.Util.componentToJSON(engine, this, "KICK.scene.MeshRenderer");
+            return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
         };
 
         applyConfig(this,config);
