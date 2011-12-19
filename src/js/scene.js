@@ -1789,7 +1789,8 @@ KICK.namespace = function (ns_string) {
             _materials = [],
             _mesh,
             _renderOrder,
-            gl;
+            gl,
+            thisObj = this;
 
         /**
          * @method activated
@@ -1896,7 +1897,7 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         this.toJSON = function(){
-            return KICK.core.Util.componentToJSON(engine, this, "KICK.scene.MeshRenderer");
+            return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
         };
 
         applyConfig(this,config);
