@@ -31,6 +31,7 @@ function load(content,url,func){
             meshRendererNew.materials = materials;
             meshRenderer = meshRendererNew;
             recalculateNormals();
+            console.log(KICK.core.Util.typedArrayToArray(meshRendererNew.mesh.aabb));
         }
     }
 }
