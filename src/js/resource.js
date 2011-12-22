@@ -49,7 +49,17 @@ KICK.namespace = function (ns_string) {
         scene = KICK.namespace("KICK.scene"),
         ASSERT = constants._ASSERT,
         debug = constants._DEBUG,
-        fail = core.Util.fail;
+        fail = core.Util.fail,
+        getUrlAsResourceName = function(url){
+            var name = url.split('/');
+            if (name.length>2){
+                name = name[name.length-2];
+                name = name.substring(0,1).toUpperCase()+name.substring(1);
+            } else {
+                name = url;
+            }
+            return name;
+        };
     
     /**
      * Responsible for allocation and deallocation of resources.
@@ -367,32 +377,22 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.mesh.Mesh}
          */
         this.getMesh = function(url){
-            var config,
-                meshDataObj,
+            var meshDataObj,
                 getParameterInt = core.Util.getParameterInt,
-                getParameterFloat = core.Util.getParameterFloat;
-            if (url.indexOf("kickjs://mesh/triangle/")==0){
+                getParameterFloat = core.Util.getParameterFloat,
                 config = {
-                    name: "Triangle"
+                    name: getUrlAsResourceName(url)
                 };
+            if (url.indexOf("kickjs://mesh/triangle/")==0){
                 meshDataObj = mesh.MeshFactory.createTriangleData();
             } else if (url.indexOf("kickjs://mesh/plane/")==0){
-                config = {
-                    name: "Plane"
-                };
                 meshDataObj = mesh.MeshFactory.createPlaneData();
             } else if (url.indexOf("kickjs://mesh/uvsphere/")==0){
-                config = {
-                    name: "UVSphere"
-                };
                 var slices = getParameterInt(url, "slices"),
                     stacks = getParameterInt(url, "stacks"),
                     radius = getParameterFloat(url, "radius");
                 meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
             } else if (url.indexOf("kickjs://mesh/cube/")==0){
-                config = {
-                    name: "Cube"
-                };
                 var length = getParameterFloat(url, "length");
                 meshDataObj = mesh.MeshFactory.createCubeData(length);
             } else {
@@ -545,7 +545,9 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.texture.Texture} Texture object - or null if no texture is found for the specified url
          */
         this.getTexture = function(url){
+            var name = getUrlAsResourceName(url);
             var texture = new KICK.texture.Texture(engine,{
+                name:name,
                 minFilter: constants.GL_NEAREST,
                 magFilter: constants.GL_NEAREST,
                 generateMipmaps: false,
