@@ -1830,8 +1830,7 @@ KICK.namespace = function (ns_string) {
                     }
                     _materials[0] = newValue;
                     _renderOrder = _materials[0].renderOrder;
-                },
-                enumerable: true
+                }
             },
             /**
              *
