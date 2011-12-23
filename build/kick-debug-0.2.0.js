@@ -9762,6 +9762,7 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
                     dimension: gl.viewportSize
                 });
+                pickingRenderTarget.name = "__pickRenderTexture";
             }
             pickingQueue.push({
                 gameObjectPickedFn:gameObjectPickedFn,
@@ -10778,6 +10779,7 @@ KICK.namespace = function (ns_string) {
             _dimension = config.dimension,
             renderBuffers = [],
             thisObj = this,
+            _name = "",
             cleanUpRenderBuffers = function(){
                 for (var i=0;i<renderBuffers.length;i++){
                     gl.deleteRenderbuffer(renderBuffers[i]);
@@ -10853,6 +10855,14 @@ KICK.namespace = function (ns_string) {
             colorTexture:{
                 get: function(){ return colorTexture; },
                 set: function(newValue){ colorTexture = newValue; initFBO(); }
+            },
+            /**
+             * @property name
+             * @type String
+             */
+            name:{
+                get: function(){ return _name;},
+                set: function(newValue){ _name = newValue;}
             }
         });
 
@@ -10874,6 +10884,7 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 uid: thisObj.uid,
+                name: _name,
                 colorTexture: KICK.core.Util.getJSONReference(engine, colorTexture)
             };
         };

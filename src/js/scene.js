@@ -1307,6 +1307,7 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
                     dimension: gl.viewportSize
                 });
+                pickingRenderTarget.name = "__pickRenderTexture";
             }
             pickingQueue.push({
                 gameObjectPickedFn:gameObjectPickedFn,
