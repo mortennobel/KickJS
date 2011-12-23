@@ -10285,8 +10285,7 @@ KICK.namespace = function (ns_string) {
                     }
                     _materials[0] = newValue;
                     _renderOrder = _materials[0].renderOrder;
-                },
-                enumerable: true
+                }
             },
             /**
              *
@@ -14319,6 +14318,7 @@ KICK.namespace = function (ns_string) {
         this.getShader = function(url,errorLog){
             var shader = new KICK.material.Shader(engine);
             this.getShaderData(url,shader);
+            shader.name = getUrlAsResourceName(url);
             return shader;
         };
 
