@@ -493,6 +493,7 @@ KICK.namespace = function (ns_string) {
         this.getShader = function(url,errorLog){
             var shader = new KICK.material.Shader(engine);
             this.getShaderData(url,shader);
+            shader.name = getUrlAsResourceName(url);
             return shader;
         };
 
