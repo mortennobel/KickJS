@@ -85,8 +85,8 @@ KICK.namespace = function (ns_string) {
             _name = "",
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = glslConstants["error_vs.glsl"],
-            _fragmentShaderSrc = glslConstants["error_fs.glsl"],
+            _vertexShaderSrc = glslConstants["__error_vs.glsl"],
+            _fragmentShaderSrc = glslConstants["__error_fs.glsl"],
             _errorLog = KICK.core.Util.fail,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>

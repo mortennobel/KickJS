@@ -440,13 +440,13 @@ KICK.namespace = function (ns_string) {
                             depthMask = false;
                             renderOrder = 2000;
                         }
-                        if (shaderName==="shadowmap"){
+                        if (shaderName==="__shadowmap"){
                             polygonOffsetEnabled = true;
                         }
                     }
                     return res;
                 },
-                shaderTypes = ["phong","shadowmap","__error","__pick","transparent_phong","unlit","transparent_unlit"];
+                shaderTypes = ["phong","__shadowmap","__error","__pick","transparent_phong","unlit","transparent_unlit"];
             if (url === "kickjs://shader/default/"){
                 url = "kickjs://shader/phong/";
             }

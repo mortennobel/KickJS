@@ -11848,8 +11848,8 @@ KICK.namespace = function (ns_string) {
             _name = "",
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = glslConstants["error_vs.glsl"],
-            _fragmentShaderSrc = glslConstants["error_fs.glsl"],
+            _vertexShaderSrc = glslConstants["__error_vs.glsl"],
+            _fragmentShaderSrc = glslConstants["__error_fs.glsl"],
             _errorLog = KICK.core.Util.fail,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
@@ -14286,13 +14286,13 @@ KICK.namespace = function (ns_string) {
                             depthMask = false;
                             renderOrder = 2000;
                         }
-                        if (shaderName==="shadowmap"){
+                        if (shaderName==="__shadowmap"){
                             polygonOffsetEnabled = true;
                         }
                     }
                     return res;
                 },
-                shaderTypes = ["phong","shadowmap","__error","__pick","transparent_phong","unlit","transparent_unlit"];
+                shaderTypes = ["phong","__shadowmap","__error","__pick","transparent_phong","unlit","transparent_unlit"];
             if (url === "kickjs://shader/default/"){
                 url = "kickjs://shader/phong/";
             }
