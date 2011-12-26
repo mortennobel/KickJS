@@ -1257,7 +1257,6 @@ KICK.namespace = function (ns_string) {
                 _renderer.render(renderableComponentsOverlay,engineUniforms,shader);
             },
             renderShadowMap = function(sceneLightObj){
-                if (!thisObj.isShadowDisabled){
                 var directionalLight = sceneLightObj.directionalLight,
                     directionalLightTransform = directionalLight.gameObject.transform,
                     shadowRenderTexture = directionalLight.shadowRenderTexture,
@@ -1285,7 +1284,6 @@ KICK.namespace = function (ns_string) {
                 directionalLight.shadowRenderTextureDebug.bind();
                 gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
                 renderSceneObjects(sceneLightObj);
-                }
             };
 
         /**
@@ -1330,7 +1328,10 @@ KICK.namespace = function (ns_string) {
             gl = engine.gl;
             _scene = gameObject.scene;
             _scene.addComponentListener(thisObj);
-            _shadowmapShader = engine.resourceManager.getShader("kickjs://shader/shadowmap/");
+
+            if (engine.config.shadows){
+                _shadowmapShader = engine.resourceManager.getShader("kickjs://shader/shadowmap/");
+            }
         };
 
         /**
@@ -1382,7 +1383,7 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            if (sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+            if (_shadowmapShader && !thisObj.isShadowDisabled && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
@@ -1442,6 +1443,14 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * @property isShadowDisabled
+             * @type Boolean
+             */
+            isShadowDisabled:{
+                value: false,
+                writable: true
+            },
             /**
              * @property renderer
              * @type KICK.renderer.Renderer
@@ -1708,8 +1717,9 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 type:"KICK.scene.Camera",
-                uid:7,
+                uid: thisObj.uid || (engine?engine.getUID(thisObj):0),
                 config:{
+                    isShadowDisabled: thisObj.isShadowDisabled,
                     renderer:_renderer, // todo add reference
                     layerMask:_layerMask,
                     renderTarget:_renderTarget, // todo add reference
