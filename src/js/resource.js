@@ -414,9 +414,9 @@ KICK.namespace = function (ns_string) {
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
-         *  <li><b>Shadowmap</b> Url: kickjs://shader/shadowmap/</li>
-         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
-         *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
+         *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
+         *  <li><b>Pick</b> Url: kickjs://shader/__pick/</li>
+         *  <li><b>Error</b> Url: kickjs://shader/__error/<br></li>
          *  </ul>
          * @method getShaderData
          * @param {String} url
@@ -446,7 +446,7 @@ KICK.namespace = function (ns_string) {
                     }
                     return res;
                 },
-                shaderTypes = ["phong","shadowmap","error","pick","transparent_phong","unlit","transparent_unlit"];
+                shaderTypes = ["phong","shadowmap","__error","__pick","transparent_phong","unlit","transparent_unlit"];
             if (url === "kickjs://shader/default/"){
                 url = "kickjs://shader/phong/";
             }
@@ -482,9 +482,9 @@ KICK.namespace = function (ns_string) {
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
-         *  <li><b>Shadowmap</b> Url: kickjs://shader/shadowmap/</li>
-         *  <li><b>Pick</b> Url: kickjs://shader/pick/</li>
-         *  <li><b>Error</b> Url: kickjs://shader/error/<br></li>
+         *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
+         *  <li><b>Pick</b> Url: kickjs://shader/__pick/</li>
+         *  <li><b>Error</b> Url: kickjs://shader/__error/<br></li>
          *  </ul>
          * @method getShader
          * @param {String} url

@@ -978,7 +978,7 @@ KICK.namespace = function (ns_string) {
             }
             if (!_shader){
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
-                _shader = engine.project.load("kickjs://shader/error/");
+                _shader = engine.project.load("kickjs://shader/__error/");
             }
             _renderOrder = _shader.renderOrder;
         };

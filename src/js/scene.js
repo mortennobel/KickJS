@@ -1301,7 +1301,7 @@ KICK.namespace = function (ns_string) {
             height = height || 1;
             if (!pickingQueue){
                 pickingQueue = [];
-                pickingShader = engine.resourceManager.getShader("kickjs://shader/pick/");
+                pickingShader = engine.resourceManager.getShader("kickjs://shader/__pick/");
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
                     dimension: gl.viewportSize
                 });
@@ -1330,7 +1330,7 @@ KICK.namespace = function (ns_string) {
             _scene.addComponentListener(thisObj);
 
             if (engine.config.shadows){
-                _shadowmapShader = engine.resourceManager.getShader("kickjs://shader/shadowmap/");
+                _shadowmapShader = engine.resourceManager.getShader("kickjs://shader/__shadowmap/");
             }
         };
 
