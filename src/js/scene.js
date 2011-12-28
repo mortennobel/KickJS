@@ -1122,7 +1122,9 @@ KICK.namespace = function (ns_string) {
             thisObj = this,
             transform,
             engine,
+            _enabled = true,
             c = KICK.core.Constants,
+            _renderShadow = false,
             _renderTarget = null,
             _fieldOfView = 60,
             _near = 0.1,
@@ -1383,7 +1385,10 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            if (_shadowmapShader && !thisObj.isShadowDisabled && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+            if (!_enabled){
+                return;
+            }
+            if (_shadowmapShader && _renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
@@ -1444,12 +1449,22 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             * @property isShadowDisabled
+             * Default is true
+             * @property enabled
              * @type Boolean
              */
-            isShadowDisabled:{
-                value: false,
-                writable: true
+            enabled:{
+                get:function(){ return _enabled;},
+                set:function(newValue){ _enabled = newValue;}
+            },
+            /**
+             * Default false
+             * @property renderShadow
+             * @type Boolean
+             */
+            renderShadow:{
+                get:function(){return _renderShadow;},
+                set:function(newValue){_renderShadow = newValue;}
             },
             /**
              * @property renderer
@@ -1468,7 +1483,6 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Camera renders only objects where the components layer exist in the layer mask. <br>
-             * The two values a
              * @property layerMask
              * @type Number
              */
@@ -1719,7 +1733,8 @@ KICK.namespace = function (ns_string) {
                 type:"KICK.scene.Camera",
                 uid: thisObj.uid || (engine?engine.getUID(thisObj):0),
                 config:{
-                    isShadowDisabled: thisObj.isShadowDisabled,
+                    enabled: _enabled,
+                    renderShadow: _renderShadow,
                     renderer:_renderer, // todo add reference
                     layerMask:_layerMask,
                     renderTarget:_renderTarget, // todo add reference

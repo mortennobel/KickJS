@@ -9838,7 +9838,7 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
-            if (_shadowmapShader && !thisObj.isShadowDisabled && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+            if (_shadowmapShader && !thisObj.renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
@@ -9902,7 +9902,7 @@ KICK.namespace = function (ns_string) {
              * @property isShadowDisabled
              * @type Boolean
              */
-            isShadowDisabled:{
+            renderShadow:{
                 value: false,
                 writable: true
             },
@@ -10174,7 +10174,7 @@ KICK.namespace = function (ns_string) {
                 type:"KICK.scene.Camera",
                 uid: thisObj.uid || (engine?engine.getUID(thisObj):0),
                 config:{
-                    isShadowDisabled: thisObj.isShadowDisabled,
+                    renderShadow: thisObj.renderShadow,
                     renderer:_renderer, // todo add reference
                     layerMask:_layerMask,
                     renderTarget:_renderTarget, // todo add reference
