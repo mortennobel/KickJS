@@ -622,8 +622,10 @@ KICK.namespace = function (ns_string) {
          * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor]}
          * @method loadProject
          * @param {object} config
+         *
          */
         this.loadProject = function(config){
+            this.closeProject();
             config = config || {};
             var resourceDescriptors = config.resourceDescriptors || [];
             if (_maxUID>0){
@@ -632,6 +634,11 @@ KICK.namespace = function (ns_string) {
             _maxUID = config.maxUID || 0;
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
+            }
+            if (config.activeScene){
+                engine.activeScene = this.load(config.activeScene);
+            } else {
+                engine.activeScene = KICK.scene.Scene.createDefault(engine);
             }
         };
 
@@ -811,6 +818,7 @@ KICK.namespace = function (ns_string) {
             return {
                 engineVersion:engine.version,
                 maxUID:_maxUID,
+                activeScene:engine.activeScene.uid,
                 resourceDescriptors:res
             };
         };
