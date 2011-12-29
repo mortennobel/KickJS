@@ -1116,10 +1116,10 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     scene.Scene.createDefault = function(engine){
-        var scene = new scene.Scene(engine,{});
-        var gameObject = scene.createGameObject({});
-        gameObject.addComponent(new scene.Camera({}));
-        return scene;
+        var newScene = new scene.Scene(engine);
+        var gameObject = newScene.createGameObject();
+        gameObject.addComponent(new scene.Camera());
+        return newScene;
     };
 
     /**
