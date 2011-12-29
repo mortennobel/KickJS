@@ -1110,6 +1110,19 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Create empty scene with camera
+     * @method createDefault
+     * @param {KICK.core.Engine} engine
+     * @static
+     */
+    scene.Scene.createDefault = function(engine){
+        var scene = new scene.Scene(engine,{});
+        var gameObject = scene.createGameObject({});
+        gameObject.addComponent(new scene.Camera({}));
+        return scene;
+    };
+
+    /**
      * Creates a game camera
      * @class Camera
      * @namespace KICK.scene
