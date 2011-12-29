@@ -278,7 +278,7 @@ window.addEventListener("load",function(){
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
     document.getElementById("backgroundButton").addEventListener("click", toogleBackground,false);
     document.getElementById("file").onchange = function() {
-          loadClicked(this.files);
-        };
+      loadClicked(this.files);
+    };
 
 },false);
