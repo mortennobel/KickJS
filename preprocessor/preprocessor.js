@@ -9,8 +9,8 @@ if (process.argv.length !== 7){
 var inputFile = process.argv[2];
 var outputFile = process.argv[3];
 var version = process.argv[4];
-var debug = process.argv[5]==true;
-var assert = process.argv[6]==true;
+var debug = process.argv[5]==="true";
+var assert = process.argv[6]==="true";
 
 Object.defineProperties(constants.Constants,{
     _ASSERT: { value: debug,enumerable:true,configurable:true},
