@@ -93,6 +93,15 @@ YUI().use('node', 'console', 'test', function (Y) {
             for (var i=0;i<float32Array.length;i++){
                 Assert.isTrue(float32Array[i].length === float32Array2[i].length);
             }
+        },
+        testUTF8String : function () {
+            var Assert = Y.Assert;
+            var chunkData = new KICK.core.ChunkData();
+
+            chunkData.setString(1,"Hello world");
+            var res = chunkData.getString(1);
+            console.log("Converted string is :'"+res+"'");
+            Assert.isTrue("Hello world" === res);
         }
     });
 
@@ -115,18 +124,6 @@ YUI().use('node', 'console', 'test', function (Y) {
     Y.Test.Runner.run();
 
 });
-</script>
-<script>
-    var chunkData = new KICK.core.ChunkData();
-    var uint8Array = new Uint8Array([1,2,3]);
-    var float32Array = new Float32Array([1.5,2.5,3.5]);
-    chunkData.set(1,uint8Array);
-    chunkData.set(2,float32Array);
-    var serialized = chunkData.serialize();
-    var chunkData2 = new KICK.core.ChunkData();
-    chunkData2.deserialize(serialized);
-    var uint8Array2 = chunkData2.get(1);
-    var float32Array2 = chunkData2.get(2);
 </script>
 </div>
 

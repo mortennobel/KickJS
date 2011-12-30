@@ -1778,6 +1778,34 @@ KICK.namespace = function (ns_string) {
                 packIntToFloatUint8Buffer[i] = vec4uint8[i];
             }
             return packIntToFloatInt32Buffer[0];
+        },
+        /**
+         * @method utf8Encode
+         * @param {String} str
+         * @return Uint8Array
+         */
+        utf8Encode:function(str){
+            var res = [];
+            for (var i=0;i<str.length;i++){
+                var charCode = str.charCodeAt(i);
+                if (charCode < 127){
+                    res.push(charCode);
+                }
+            }
+            return new Uint8Array(res);
+        },
+        /**
+         * @method utf8Decode
+         * @param {Uint8Array} bytes
+         * @return String
+         */
+        utf8Decode:function(bytes){
+            var str = "";
+            for (var i=0;i<bytes.length;i++){
+                var byte = bytes[i];
+                str += String.fromCharCode(byte);
+            }
+            return str;
         }
     };
 

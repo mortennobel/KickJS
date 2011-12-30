@@ -44,6 +44,8 @@ KICK.namespace = function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var core = KICK.namespace("KICK.core"),
+        utf8Decode = core.Util.utf8Decode,
+        utf8Encode = core.Util.utf8Encode,
         constants = KICK.core.Constants,
         ASSERT = constants._ASSERT,
         DEBUG = constants._DEBUG,
@@ -193,6 +195,19 @@ KICK.namespace = function (ns_string) {
             }
             return null;
         };
+        /**
+         * @method getString
+         * @param {Number} chunkid
+         * @return String or null
+         */
+        this.getString = function(chunkid){
+            var value = thisObj.get(chunkid);
+            if (value){
+                return utf8Decode(value);
+            }
+            return null;
+        };
+
 
         /**
          * @method remove
@@ -207,6 +222,16 @@ KICK.namespace = function (ns_string) {
                 }
             }
             return false;
+        };
+
+        /**
+         * @method setString
+         * @param {String} str
+         * @param {TypedArrayView[Number]} array
+         */
+        this.setString = function(chunkId, str){
+            var array = utf8Encode(str);
+            thisObj.set(chunkId,array);
         };
 
         /**
