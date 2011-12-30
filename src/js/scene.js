@@ -1486,12 +1486,11 @@ KICK.namespace = function (ns_string) {
             renderer:{
                 get:function(){ return _renderer;},
                 set:function(newValue){
-                    if (c._ASSERT){
-                        if (typeof newValue.render !== "function"){
-                            KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
-                        }
+                    if (typeof newValue.render === "function"){
+                        _renderer = newValue;
+                    } else if (c._ASSERT){
+                        KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
                     }
-                    _renderer = newValue;
                 }
             },
             /**
