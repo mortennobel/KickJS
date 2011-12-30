@@ -1083,7 +1083,7 @@ KICK.namespace = function (ns_string) {
                                 objectsById[componentObj.uid] = componentObj;
                             } else {
                                 type = KICK.namespace(component.type);
-                                componentObj = new type(gameObject,{uid:component.uid});
+                                componentObj = new type({uid:component.uid});
                                 componentObj.uid = component.uid;
                                 gameObject.addComponent(componentObj);
                             }
