@@ -44,9 +44,11 @@ KICK.namespace = function (ns_string) {
     "use strict"; // force strict ECMAScript 5
 
     var core = KICK.namespace("KICK.core"),
+        constants = KICK.core.Constants,
         ASSERT = constants._ASSERT,
         DEBUG = constants._DEBUG,
-        fail = KICK.core.Util.fail;
+        fail = KICK.core.Util.fail,
+        paddingArray = new Uint8Array(4);
 
     /**
      * Chunk data format object
@@ -66,10 +68,28 @@ KICK.namespace = function (ns_string) {
             Uint32ArrayType = 7,
             Uint8ArrayType = 8,
             Chunk = function(chunkId,chunkType,chunkDataLength,data){
+                var thisObj = this;
                 this.chunkId = chunkId;
                 this.chunkType = chunkType;
                 this.chunkDataLength = chunkDataLength; // contains the actual data
                 this.data = data; // data is assumed to have the length
+                Object.defineProperties(this,{
+                    paddingSize:{
+                        get:function(){
+                            var dataSize = thisObj.data.length*thisObj.data.BYTES_PER_ELEMENT;
+                            var dataSizeMod4 = dataSize%4;
+                            if (dataSizeMod4){
+                                return 4-dataSizeMod4;
+                            }
+                            return 0;
+                        }
+                    },
+                    paddingData:{
+                        get:function(){
+                            return paddingArray.subarray(0,thisObj.paddingSize);
+                        }
+                    }
+                });
             },
             thisObj = this,
             chunks = [],
@@ -92,11 +112,13 @@ KICK.namespace = function (ns_string) {
                 var sum = 0;
                 var chunkHeaderLength = 8;
                 for (var i=0;i<chunks.length;i++){
-                    sum += chunks[i].chunkLength+chunkHeaderLength;
+                    sum += chunks[i].chunkDataLength +
+                        chunkHeaderLength +
+                        chunks[i].paddingSize;
                 }
                 return sum;
             },
-            getType = function(array){
+            getTypeEnum = function(array){
                 if (array instanceof Float32Array) return Float32ArrayType;
                 if (array instanceof Float64Array) return Float64ArrayType;
                 if (array instanceof Int16Array) return Int16ArrayType;
@@ -104,6 +126,16 @@ KICK.namespace = function (ns_string) {
                 if (array instanceof Int8Array) return Int8ArrayType;
                 if (array instanceof Uint16Array) return Uint16ArrayType;
                 if (array instanceof Uint8Array) return Uint8ArrayType;
+                return null;
+            },
+            getTypeClass = function(id){
+                if (id === Float32ArrayType) return Float32Array;
+                if (id === Float64ArrayType) return Float64Array;
+                if (id === Int16ArrayType) return Int16Array;
+                if (id === Int32ArrayType) return Int32Array;
+                if (id === Int8ArrayType) return Int8Array;
+                if (id === Uint16ArrayType) return Uint16Array;
+                if (id === Uint8ArrayType) return Uint8Array;
                 return null;
             };
         /**
@@ -114,9 +146,14 @@ KICK.namespace = function (ns_string) {
             return getHeaderSize()+getChunksSize()
         };
 
+        /**
+         * @method serialize
+         * @return ArrayBuffer
+         */
         this.serialize = function(){
             var output = new ArrayBuffer(thisObj.getSize());
             var byteOffset = 0;
+            var uint8View = new Uint8Array(output,0);
             var uint16View = new Uint16Array(output,byteOffset);
             uint16View[0] = MAGIC_NUMBER;
             uint16View[1] = VERSION_NUMBER;
@@ -130,10 +167,15 @@ KICK.namespace = function (ns_string) {
                 uint16View[1] = chunks[i].chunkType;
                 byteOffset += 4;
                 uint32View = new Uint32Array(output,byteOffset);
-                uint32View[1] = chunks[i].chunkDataLength;
+                uint32View[0] = chunks[i].chunkDataLength;
                 byteOffset += 4;
-                chunks[i].set(output,byteOffset);
-                byteOffset += chunks[i].chunkLength;
+                var viewType = getTypeClass(chunks[i].chunkType);
+                var view = new viewType(output);
+                view.set(chunks[i].data,byteOffset/view.BYTES_PER_ELEMENT);
+                byteOffset += chunks[i].chunkDataLength;
+
+                uint8View.set(chunks[i].paddingData,byteOffset); // write padding data
+                byteOffset += chunks[i].paddingSize;
             }
             return output;
         };
@@ -144,7 +186,7 @@ KICK.namespace = function (ns_string) {
          * @return TypedArrayView[Number]
          */
         this.get = function(chunkid){
-            for (var i=0;i<chunks;i++){
+            for (var i=0;i<chunks.length;i++){
                 if (chunks[i].chunkId===chunkid){
                     return chunks[i].data;
                 }
@@ -153,12 +195,12 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * @method delete
+         * @method remove
          * @param {Number} chunkid
          * @return Boolean true when deleted
          */
-        this.delete = function(chunkid){
-            for (var i=0;i<chunks;i++){
+        this.remove = function(chunkid){
+            for (var i=0;i<chunks.length;i++){
                 if (chunks[i].chunkId===chunkid){
                     chunks = chunks.splice(i,1);
                     return true;
@@ -168,13 +210,14 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Note that this method saves a reference to the array (it does not copy data)
          * @method set
          * @param {Number} chunkId
          * @param {TypedArrayView[Number]} array
          */
         this.set = function(chunkId, array){
-            thisObj.delete(chunkId);
-            var chunkType = getType(array);
+            thisObj.remove(chunkId);
+            var chunkType = getTypeEnum(array);
             if (chunkType){
                 var lengthBytes = array.length*array.BYTES_PER_ELEMENT;
                 chunks.push(new Chunk(chunkId,chunkType,lengthBytes,array));
@@ -218,42 +261,14 @@ KICK.namespace = function (ns_string) {
                 var chunkType = uint16View[1];
                 byteOffset += 4;
                 uint32View = new Uint32Array(binaryData,byteOffset);
-                var chunkDataLength = uint32View[1];
+                var chunkDataLength = uint32View[0];
                 byteOffset += 4;
-                var data;
-                switch (chunkType){
-                    case Float32ArrayType:
-                        data = new Float32Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Float64ArrayType:
-                        data = new Float64Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Int16ArrayType:
-                        data = new Int16Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Int32ArrayType:
-                        data = new Int32Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Int8ArrayType:
-                        data = new Int8Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Uint16ArrayType:
-                        data = new Uint16Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Uint32ArrayType:
-                        data = new Uint32Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    case Uint8ArrayType:
-                        data = new Uint8Array(binaryData,byteOffset,chunkDataLength);
-                        break;
-                    default:
-                        if (DEBUG){
-                            fail("Unknown chunk type "+chunkType);
-                        }
-                        return false;
-                }
-                newChunks.push(new Chunk(chunkId,chunkType,chunkDataLength,data));
+                var dataType = getTypeClass(chunkType);
+                var data = new dataType(binaryData,byteOffset,chunkDataLength/dataType.BYTES_PER_ELEMENT);
+                var chunk = new Chunk(chunkId,chunkType,chunkDataLength,data);
+                newChunks.push(chunk);
                 byteOffset += chunkDataLength;
+                byteOffset += chunk.paddingSize; // skip padding data
             }
             chunks = newChunks;
             return true;
