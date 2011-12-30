@@ -136,7 +136,7 @@ Releasing the '1' or '2' will aboard the flicker.
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer(gameObject);
+        var meshRenderer = new KICK.scene.MeshRenderer();
         meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
         meshRenderer.material = createMaterial();
         gameObject.addComponent(meshRenderer);

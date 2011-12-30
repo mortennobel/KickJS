@@ -50,9 +50,12 @@ void main(void) {
 <script>
     var sourceinput = document.getElementById('sourceinput');
     var sourceoutput = document.getElementById('sourceoutput');
+    var engine = {};
+    engine.config = {};
+    engine.config.shadows = {};
     function replace(){
         var input = sourceinput.value;
-        var newValue = KICK.material.Shader.getPrecompiledSource(input);
+        var newValue = KICK.material.Shader.getPrecompiledSource(engine,input);
         if (newValue !== sourceoutput.value){
             sourceoutput.value = newValue;
         }
