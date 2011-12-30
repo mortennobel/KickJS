@@ -255,8 +255,8 @@ window.shaderEditor = new (function(){
         var res = shader.updateShader();
         function onError(){
             previousShaderError = true;
-            console.log(KICK.material.Shader.getPrecompiledSource(vs));
-            console.log(KICK.material.Shader.getPrecompiledSource(fs));
+            console.log(KICK.material.Shader.getPrecompiledSource(_engine,vs));
+            console.log(KICK.material.Shader.getPrecompiledSource(_engine,fs));
             document.body.style.backgroundColor = 'pink';
         }
         if (!res){
