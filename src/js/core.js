@@ -1780,6 +1780,7 @@ KICK.namespace = function (ns_string) {
             return packIntToFloatInt32Buffer[0];
         },
         /**
+         * Supports up to 3 byte UTF-8 encoding (including Basic Multilingual Plane)
          * @method utf8Encode
          * @param {String} str
          * @return Uint8Array
@@ -1788,13 +1789,25 @@ KICK.namespace = function (ns_string) {
             var res = [];
             for (var i=0;i<str.length;i++){
                 var charCode = str.charCodeAt(i);
-                if (charCode < 127){
+                if (charCode < 0x007F){
                     res.push(charCode);
+                } else if (charCode <= 0x07FF){
+                    res.push(0xC0 + (charCode >> 6));
+                    res.push(0x80 + (charCode & 0x3F));
+                } else if (charCode <= 0xFFFF){
+                    res.push(0xE0 + (charCode >> 12));
+                    res.push(0x80 + ((charCode>>6) & 0x3F));
+                    res.push(0x80 + (charCode & 0x3F));
+                } else {
+                    if (ASSERT){
+                        core.Util.fail("Unsupported character. Charcode "+charCode);
+                    }
                 }
             }
             return new Uint8Array(res);
         },
         /**
+         * Supports up to 3 byte UTF-8 encoding (including Basic Multilingual Plane)
          * @method utf8Decode
          * @param {Uint8Array} bytes
          * @return String
@@ -1803,7 +1816,30 @@ KICK.namespace = function (ns_string) {
             var str = "";
             for (var i=0;i<bytes.length;i++){
                 var byte = bytes[i];
-                str += String.fromCharCode(byte);
+                if ((byte & 0x80) === 0){ // Bytes 0xxxxxxx
+                    str += String.fromCharCode(byte);
+                } else if ((byte & 0xE0) === 0xC0){ // Bytes 110xxxxx
+                    i++;
+                    var byte2 = bytes[i];
+                    byte = (byte & 0x1F) << 6;
+                    byte2 = byte2 & 0x3F;
+                    var char = byte + byte2;
+                    str += String.fromCharCode(char);
+                } else if ((byte & 0xF0) === 0xE0){ // Bytes 1110xxxx
+                    i++;
+                    var byte2 = bytes[i];
+                    i++;
+                    var byte3 = bytes[i];
+                    byte = (byte & 0x1F) << 12;
+                    byte2 = (byte2 & 0x3F) << 6;
+                    byte3 = byte3 & 0x3F;
+                    var char = byte + byte2 + byte3;
+                    str += String.fromCharCode(char);
+                } else {
+                    if (ASSERT){
+                        core.Util.fail("Unsupported encoding");
+                    }
+                }
             }
             return str;
         }

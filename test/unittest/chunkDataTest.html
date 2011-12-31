@@ -94,7 +94,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 Assert.isTrue(float32Array[i].length === float32Array2[i].length);
             }
         },
-        testUTF8String : function () {
+        testUTF8StringASCII : function () {
             var Assert = Y.Assert;
             var chunkData = new KICK.core.ChunkData();
 
@@ -102,6 +102,24 @@ YUI().use('node', 'console', 'test', function (Y) {
             var res = chunkData.getString(1);
             console.log("Converted string is :'"+res+"'");
             Assert.isTrue("Hello world" === res);
+        },
+        testUTF8StringUnicode : function () {
+            var Assert = Y.Assert;
+            var chunkData = new KICK.core.ChunkData();
+            var string = "\u00A2";
+            chunkData.setString(1,string);
+            var res = chunkData.getString(1);
+            console.log("Converted string is :'"+res+"'");
+            Assert.isTrue(string === res);
+        },
+        testUTF8StringUnicode2 : function () {
+            var Assert = Y.Assert;
+            var chunkData = new KICK.core.ChunkData();
+            var string = "\u20AC";
+            chunkData.setString(1,string);
+            var res = chunkData.getString(1);
+            console.log("Converted string is :'"+res+"'");
+            Assert.isTrue(string === res);
         }
     });
 
