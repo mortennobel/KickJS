@@ -1260,10 +1260,42 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
      */
     mat4.setTRS = function(translate, rotateQuat, scale, dest){
-        dest = mat4.fromRotationTranslation(rotateQuat,translate,dest);
-        if (scale[0] != 0 || scale[1] != 0 || scale[1] != 0){
-            mat4.scale(dest, scale);
-        }
+        if (!dest) { dest = mat4.create(); }
+
+        // Quaternion math
+        var scaleX = scale[0], scaleY = scale[1], scaleZ = scale[2],
+            x = rotateQuat[0], y = rotateQuat[1], z = rotateQuat[2], w = rotateQuat[3],
+            x2 = x + x,
+            y2 = y + y,
+            z2 = z + z,
+
+            xx = x * x2,
+            xy = x * y2,
+            xz = x * z2,
+            yy = y * y2,
+            yz = y * z2,
+            zz = z * z2,
+            wx = w * x2,
+            wy = w * y2,
+            wz = w * z2;
+
+        dest[0] = (1 - (yy + zz))*scaleX;
+        dest[1] = (xy + wz)*scaleX;
+        dest[2] = (xz - wy)*scaleX;
+        dest[3] = 0;
+        dest[4] = (xy - wz)*scaleY;
+        dest[5] = (1 - (xx + zz))*scaleY;
+        dest[6] = (yz + wx)*scaleY;
+        dest[7] = 0;
+        dest[8] = (xz + wy)*scaleZ;
+        dest[9] = (yz - wx)*scaleZ;
+        dest[10] = (1 - (xx + yy))*scaleZ;
+        dest[11] = 0;
+        dest[12] = translate[0];
+        dest[13] = translate[1];
+        dest[14] = translate[2];
+        dest[15] = 1;
+
         return dest;
     };
 

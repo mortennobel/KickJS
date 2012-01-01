@@ -565,6 +565,26 @@ YUI().use('node', 'console', 'test', function (Y) {
                 Assert.compareVec(vecCartesial,vecCartesial2,"Error in "+i);
             }
         },
+        testSetTRS:function(){
+            var mat4 = KICK.math.mat4;
+            var quat4 = KICK.math.quat4;
+            mat4.setTRSOld = function(translate, rotateQuat, scale, dest){
+                dest = mat4.fromRotationTranslation(rotateQuat,translate,dest);
+                if (scale[0] != 0 || scale[1] != 0 || scale[1] != 0){
+                    mat4.scale(dest, scale);
+                }
+                return dest;
+            };
+
+            for (var i=0;i<1000;i++){
+                var translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
+                var scale = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var oldTRSRes = mat4.setTRSOld(translate,rotate,scale);
+                var newTRSRes = mat4.setTRS(translate,rotate,scale);
+                Y.Assert.compareVec(oldTRSRes,newTRSRes);
+            }
+        },
         testDecomposeMat4:function(){
             var Assert = Y.Assert;
             var quat4 = KICK.math.quat4;
