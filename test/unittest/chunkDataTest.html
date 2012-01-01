@@ -117,7 +117,10 @@ YUI().use('node', 'console', 'test', function (Y) {
             var chunkData = new KICK.core.ChunkData();
             var string = "\u20AC";
             chunkData.setString(1,string);
-            var res = chunkData.getString(1);
+            var serializedData = chunkData.serialize();
+            var chunkData2 = new KICK.core.ChunkData();
+            chunkData2.deserialize(serializedData);
+            var res = chunkData2.getString(1);
             console.log("Converted string is :'"+res+"'");
             Assert.isTrue(string === res);
         },
@@ -126,8 +129,33 @@ YUI().use('node', 'console', 'test', function (Y) {
             var chunkData = new KICK.core.ChunkData();
             var value = -3.1415;
             chunkData.setNumber(1,value);
-            var recievedNumber = chunkData.getNumber(1);
+            var serializedData = chunkData.serialize();
+            var chunkData2 = new KICK.core.ChunkData();
+            chunkData2.deserialize(serializedData);
+            var recievedNumber = chunkData2.getNumber(1);
             Assert.isTrue(recievedNumber === value);
+        },
+        testGetSetArrayBuffer : function () {
+            var Assert = Y.Assert;
+            var chunkData = new KICK.core.ChunkData();
+            var value = new ArrayBuffer(10);
+            var valueView = new Uint8Array(value);
+            // set content of array
+            for (var i=0;i<valueView.length;i++){
+                valueView[i] = i*33;
+            }
+            chunkData.setArrayBuffer(1,value);
+            var serializedData = chunkData.serialize();
+            var chunkData2 = new KICK.core.ChunkData();
+            chunkData2.deserialize(serializedData);
+            var recievedValue = chunkData2.getArrayBuffer(1);
+            var recievedValueView = new Uint8Array(recievedValue);
+            Assert.isTrue(recievedValue.byteLength === value.byteLength, "Length is not equal");
+            // compare content of array
+
+            for (var i=0;i<valueView.length;i++){
+                Assert.isTrue(recievedValueView[i]===valueView[i], "Content is not equal");
+            }
         }
     });
 

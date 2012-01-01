@@ -221,6 +221,21 @@ KICK.namespace = function (ns_string) {
             return null;
         };
 
+        /**
+         * @method getArrayBuffer
+         * @param {Number} chunkid
+         * @return ArrayBuffer  or null if not found
+         */
+        this.getArrayBuffer = function(chunkid){
+            var value = thisObj.get(chunkid);
+            if (value){
+                var arrayBuffer = new ArrayBuffer(value.length*value.BYTES_PER_ELEMENT);
+                var res = new Uint8Array(arrayBuffer);
+                res.set(value);
+                return arrayBuffer;
+            }
+            return null;
+        };
 
         /**
          * @method remove
@@ -253,6 +268,14 @@ KICK.namespace = function (ns_string) {
         this.setNumber = function(chunkId, num){
             var array = new Float64Array([num]);
             thisObj.set(chunkId,array);
+        };
+
+        /**
+         * @method setArrayBuffer
+         * @param ArrayBuffer arrayBuffer
+         */
+        this.setArrayBuffer = function(chunkId, arrayBuffer){
+            thisObj.set(chunkId,new Uint8Array(arrayBuffer));
         };
 
         /**
