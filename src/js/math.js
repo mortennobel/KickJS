@@ -1309,8 +1309,75 @@ KICK.namespace = function (ns_string) {
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
      */
     mat4.setTRSInverse = function(translate, rotateQuat, scale, dest){
-        dest = mat4.setTRS(translate, rotateQuat, scale, dest);
-        return mat4.inverse(dest);
+        if (!dest) { dest = mat4.create(); }
+
+        // Quaternion math
+        var scaleX = scale[0], scaleY = scale[1], scaleZ = scale[2],
+            x = rotateQuat[0], y = rotateQuat[1], z = rotateQuat[2], w = rotateQuat[3],
+            x2 = x + x,
+            y2 = y + y,
+            z2 = z + z,
+
+            xx = x * x2,
+            xy = x * y2,
+            xz = x * z2,
+            yy = y * y2,
+            yz = y * z2,
+            zz = z * z2,
+            wx = w * x2,
+            wy = w * y2,
+            wz = w * z2,
+
+            // compute trs
+            a00 = (1 - (yy + zz))*scaleX,
+            a01 = (xy + wz)*scaleX,
+            a02 = (xz - wy)*scaleX,
+            a10 = (xy - wz)*scaleY,
+            a11 = (1 - (xx + zz))*scaleY,
+            a12 = (yz + wx)*scaleY,
+            a20 = (xz + wy)*scaleZ,
+            a21 = (yz - wx)*scaleZ,
+            a22 = (1 - (xx + yy))*scaleZ,
+            a30 = translate[0],
+            a31 = translate[1],
+            a32 = translate[2],
+            a33 = 1,
+            // compute inverse
+            b00 = a00 * a11 - a01 * a10,
+            b01 = a00 * a12 - a02 * a10,
+            b03 = a01 * a12 - a02 * a11,
+            b06 = a20 * a31 - a21 * a30,
+            b07 = a20 * a32 - a22 * a30,
+            b08 = a20 * a33,
+            b09 = a21 * a32 - a22 * a31,
+            b10 = a21 * a33,
+            b11 = a22 * a33,
+
+            d = (b00 * b11 - b01 * b10 + b03 * b08),
+            invDet;
+
+        // Calculate the determinant
+        if (!d) { return null; }
+        invDet = 1 / d;
+
+        dest[0] = (a11 * b11 - a12 * b10) * invDet;
+        dest[1] = (-a01 * b11 + a02 * b10) * invDet;
+        dest[2] = (a33 * b03) * invDet;
+        dest[3] = 0;
+        dest[4] = (-a10 * b11 + a12 * b08) * invDet;
+        dest[5] = (a00 * b11 - a02 * b08) * invDet;
+        dest[6] = (- a33 * b01) * invDet;
+        dest[7] = 0;
+        dest[8] = (a10 * b10 - a11 * b08) * invDet;
+        dest[9] = (-a00 * b10 + a01 * b08) * invDet;
+        dest[10] = (a33 * b00) * invDet;
+        dest[11] = 0;
+        dest[12] = (-a10 * b09 + a11 * b07 - a12 * b06) * invDet;
+        dest[13] = (a00 * b09 - a01 * b07 + a02 * b06) * invDet;
+        dest[14] = (-a30 * b03 + a31 * b01 - a32 * b00) * invDet;
+        dest[15] = (a20 * b03 - a21 * b01 + a22 * b00) * invDet;
+
+        return dest;
     };
 
     /**
