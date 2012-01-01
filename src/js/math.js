@@ -1308,18 +1308,10 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} dest Optinal
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
      */
-    mat4.setTRSInverse = (function(){
-        var conjugateRotation = new Float32Array(4);
-        return function(translate, rotateQuat, scale, dest){
-            if(!dest) { dest = mat4.create(); }
-            mat4.identity(dest);
-            mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
-            quat4.conjugate(rotateQuat,conjugateRotation);
-            mat4.multiply(dest,quat4.toMat4(conjugateRotation));
-            mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
-            return dest;
-        };
-    })();
+    mat4.setTRSInverse = function(translate, rotateQuat, scale, dest){
+        dest = mat4.setTRS(translate, rotateQuat, scale, dest);
+        return mat4.inverse(dest);
+    };
 
     /**
      * Sets a mat4 to an identity matrix

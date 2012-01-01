@@ -585,6 +585,74 @@ YUI().use('node', 'console', 'test', function (Y) {
                 Y.Assert.compareVec(oldTRSRes,newTRSRes);
             }
         },
+        testSetTRSInverse:function(){
+            var mat4 = KICK.math.mat4;
+            var quat4 = KICK.math.quat4;
+
+            mat4.setTRSInverseOld = (function(){
+                    var conjugateRotation = new Float32Array(4);
+                    return function(translate, rotateQuat, scale, dest){
+                        if(!dest) { dest = mat4.create(); }
+                        mat4.identity(dest);
+                        mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
+                        quat4.conjugate(rotateQuat,conjugateRotation);
+                        mat4.multiply(dest,quat4.toMat4(conjugateRotation));
+                        mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
+                        return dest;
+                    };
+                })();
+
+
+            for (var i=0;i<1000;i++){
+                var translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
+                var scale = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var oldTRSRes = mat4.setTRSInverseOld(translate,rotate,scale);
+                var newTRSRes = mat4.setTRSInverse(translate,rotate,scale);
+                Y.Assert.compareVec(oldTRSRes,newTRSRes);
+            }
+        },
+        /*testSetTRSInverseOld:function(){ // bench mark test
+            var mat4 = KICK.math.mat4;
+            var quat4 = KICK.math.quat4;
+
+            mat4.setTRSInverseOld = (function(){
+                    var conjugateRotation = new Float32Array(4);
+                    return function(translate, rotateQuat, scale, dest){
+                        if(!dest) { dest = mat4.create(); }
+                        mat4.identity(dest);
+                        mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
+                        quat4.conjugate(rotateQuat,conjugateRotation);
+                        mat4.multiply(dest,quat4.toMat4(conjugateRotation));
+                        mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
+                        return dest;
+                    };
+                })();
+
+
+            for (var i=0;i<100000;i++){
+                var translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
+                var scale = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var oldTRSRes = mat4.setTRSInverseOld(translate,rotate,scale);
+                var newTRSRes = mat4.setTRSInverseOld(translate,rotate,scale);
+                Y.Assert.compareVec(oldTRSRes,newTRSRes);
+            }
+        },
+        testSetTRSInverse:function(){ // bench mark test
+            var mat4 = KICK.math.mat4;
+            var quat4 = KICK.math.quat4;
+
+            for (var i=0;i<100000;i++){
+                var translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
+                var scale = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
+                var oldTRSRes = mat4.setTRSInverse(translate,rotate,scale);
+                var newTRSRes = mat4.setTRSInverse(translate,rotate,scale);
+                Y.Assert.compareVec(oldTRSRes,newTRSRes);
+            }
+        },*/
+
         testDecomposeMat4:function(){
             var Assert = Y.Assert;
             var quat4 = KICK.math.quat4;
