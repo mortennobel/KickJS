@@ -200,6 +200,52 @@ KICK.namespace = function (ns_string) {
                  _vertexAttrLength = length*4;
             };
 
+        /**
+         * Saves the MeshData into binary form (ArrayBuffer)
+         * @method serialize
+         * @return ArrayBuffer
+         */
+        this.serialize = function(){
+            var chunkData = new KICK.core.ChunkData();
+            chunkData.setArrayBuffer(1,thisObj.interleavedArray);
+            chunkData.setString(2,JSON.stringify(thisObj.interleavedArrayFormat));
+            chunkData.setString(3,thisObj.name);
+            var subMeshes = thisObj.subMeshes;
+            var numberOfSubMeshes = subMeshes.length;
+            chunkData.setNumber(4,numberOfSubMeshes);
+            chunkData.setNumber(5,thisObj.vertexAttrLength);
+            for (var i=0;i<numberOfSubMeshes;i++){
+                chunkData.set(10+i,subMeshes[i]);
+            }
+
+            return chunkData.serialize();
+        };
+
+        /**
+         * Restores the
+         * @method deserialize
+         * @param {ArrayBuffer} data
+         * @return Boolean
+         */
+        this.deserialize = function(data){
+            var chunkData = new KICK.core.ChunkData();
+            if (chunkData.deserialize(data)){
+                thisObj.interleavedArray = chunkData.getArrayBuffer(1);
+                thisObj.interleavedArrayFormat = JSON.parse(chunkData.getString(2));
+                thisObj.name = chunkData.getString(3);
+                var numberOfSubMeshes = chunkData.getNumber(4);
+                thisObj.vertexAttrLength = chunkData.getNumber(5);
+                var submeshes = [];
+                for (var i = 0;i< numberOfSubMeshes;i++){
+                    submeshes[i] = chunkData.get(10+i);
+                }
+                thisObj.subMeshes = submeshes;
+                return true;
+            }
+            return false;
+        };
+
+
         Object.defineProperties(this,{
             /**
              * Note that this property is not cached. Use KICK.mesh.Mesh.aabb for a cached version.
@@ -276,7 +322,7 @@ KICK.namespace = function (ns_string) {
              * <pre class="brush: js">
              * var vertexOffset = meshData.interleavedArrayFormat["vertex"].pointer;
              * </pre>
-             * @property description
+             * @property interleavedArrayFormat
              * @type Object
              */
             interleavedArrayFormat:{
@@ -335,66 +381,77 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Vertex attribute.
              * Vertex (vec3)
              * @property vertex
              * @type Array[Number]
              */
             vertex:createGetterSetter(constants.GL_FLOAT, "vertex"),
             /**
+             * Vertex attribute.
              * Normal (vec3)
              * @property normal
              * @type Array[Number]
              */
             normal:createGetterSetter(constants.GL_FLOAT, "normal"),
             /**
+             * Vertex attribute.
              * UV1 (vec2)
              * @property uv1
              * @type Array[Number]
              */
             uv1:createGetterSetter(constants.GL_FLOAT, "uv1"),
             /**
+             * Vertex attribute.
              * UV2 (vec2)
              * @property uv2
              * @type Array[Number]
              */
             uv2:createGetterSetter(constants.GL_FLOAT, "uv2"),
             /**
+             * Vertex attribute.
              * Tangent (vec4)
              * @property tangent
              * @type Array[Number]
              */
             tangent:createGetterSetter(constants.GL_FLOAT, "tangent"),
             /**
+             * Vertex attribute.
              * Color (vec4)
              * @property color
              * @type Array[Number]
              */
             color:createGetterSetter(constants.GL_FLOAT, "color"),
             /**
+             * Vertex attribute.
              * Integer attribute (two Int32)
              * @property int1
              * @type Array[Number]
              */
             int1:createGetterSetter(constants.GL_INT, "int1"),
             /**
+             * Vertex attribute.
              * Integer attribute (two Int32)
              * @property int2
              * @type Array[Number]
              */
             int2:createGetterSetter(constants.GL_INT, "int2"),
             /**
+             * Vertex attribute.
              * Integer attribute (two Int32)
              * @property int3
              * @type Array[Number]
              */
             int3:createGetterSetter(constants.GL_INT, "int3"),
             /**
+             * Vertex attribute.
              * Integer attribute (two Int32)
              * @property int4
              * @type Array[Number]
              */
             int4:createGetterSetter(constants.GL_INT, "int4"),
             /**
+             * Vertex attribute.
              * indices (integer).
              * indices is shortcut for subMeshes[0]
              * @property indices
