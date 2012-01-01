@@ -208,6 +208,19 @@ KICK.namespace = function (ns_string) {
             return null;
         };
 
+        /**
+         * @method getNumber
+         * @param {Number} chunkid
+         * @return String or null
+         */
+        this.getNumber = function(chunkid){
+            var value = thisObj.get(chunkid);
+            if (value){
+                return value[0];
+            }
+            return null;
+        };
+
 
         /**
          * @method remove
@@ -227,10 +240,18 @@ KICK.namespace = function (ns_string) {
         /**
          * @method setString
          * @param {String} str
-         * @param {TypedArrayView[Number]} array
          */
         this.setString = function(chunkId, str){
             var array = utf8Encode(str);
+            thisObj.set(chunkId,array);
+        };
+
+        /**
+         * @method setNumber
+         * @param {Number} num
+         */
+        this.setNumber = function(chunkId, num){
+            var array = new Float64Array([num]);
             thisObj.set(chunkId,array);
         };
 

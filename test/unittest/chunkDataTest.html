@@ -120,6 +120,14 @@ YUI().use('node', 'console', 'test', function (Y) {
             var res = chunkData.getString(1);
             console.log("Converted string is :'"+res+"'");
             Assert.isTrue(string === res);
+        },
+        testGetSetNumber : function () {
+            var Assert = Y.Assert;
+            var chunkData = new KICK.core.ChunkData();
+            var value = -3.1415;
+            chunkData.setNumber(1,value);
+            var recievedNumber = chunkData.getNumber(1);
+            Assert.isTrue(recievedNumber === value);
         }
     });
 
