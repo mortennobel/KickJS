@@ -619,18 +619,17 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor]}
+         * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor],activeScene:number}
          * @method loadProject
          * @param {object} config
          *
          */
         this.loadProject = function(config){
-            this.closeProject();
-            config = config || {};
-            var resourceDescriptors = config.resourceDescriptors || [];
             if (_maxUID>0){
                 thisObj.closeProject();
             }
+            config = config || {};
+            var resourceDescriptors = config.resourceDescriptors || [];
             _maxUID = config.maxUID || 0;
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
