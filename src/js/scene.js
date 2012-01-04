@@ -49,6 +49,7 @@ KICK.namespace = function (ns_string) {
         constants = KICK.core.Constants,
         DEBUG = constants._DEBUG,
         ASSERT = constants._ASSERT,
+        fail = KICK.core.Util.fail,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
         vec4uint8ToUint32 = KICK.core.Util.vec4uint8ToUint32;
@@ -685,7 +686,8 @@ KICK.namespace = function (ns_string) {
             cameras = [],
             renderableComponents = [],
             sceneLightObj = new KICK.scene.SceneLights(),
-            _name = config ? config.name : "Scene",
+            _name = "Scene",
+            _uid = 0,
             gl,
             i,
             thisObj = this,
@@ -921,12 +923,28 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method getObjectByUID
-         * @param uid
+         * @param {Number} uid
          * @return {Object} GameObject or component
          */
         this.getObjectByUID = function(uid){
             return objectsById[uid];
         };
+
+        /**
+         * Returns a gameobject identified by name
+         * @method getGameObjectByName
+         * @param {String} name
+         * @return {KICK.scene.GameObject} GameObject or undefined if not found
+         */
+        this.getGameObjectByName = function(name){
+            for (var i=gameObjects.length-1;i>=0;i--){
+                var gameObject = gameObjects[i];
+                if (gameObject.name === name){
+                    return gameObject;
+                }
+            }
+        };
+
 
         /**
          * @method removeComponent
@@ -960,6 +978,23 @@ KICK.namespace = function (ns_string) {
                     _name = newValue;
                 }
 
+            },
+            /**
+             * @property uid
+             * @type Number
+             */
+            uid:{
+                get:function(){
+                    return _uid;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (_uid){
+                            fail("Reassigning uid")
+                        }
+                    }
+                    _uid = newValue;
+                }
             }
         });
 
@@ -1027,10 +1062,13 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
+
             var gameObject,
                 hasProperty = KICK.core.Util.hasProperty,
                 applyConfig = KICK.core.Util.applyConfig;
             if (config){
+                _uid = config.uid;
+                _name = config.name || "Scene";
                 var gameObjects = config.gameObjects;
                 var mappingUidToObject = {};
                 var configs = {};
