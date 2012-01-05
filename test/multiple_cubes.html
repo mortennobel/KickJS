@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
     <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
+    <!--<script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>-->
     <script type="text/javascript" src="../src/js/constants.js"></script>
     <script type="text/javascript" src="../src/js/glslconstants.js"></script>
     <script type="text/javascript" src="../src/js/core.js"></script>
@@ -357,8 +357,8 @@ mixkey(math.random(), pool);
             cameraObject.transform.localPosition = [0,0,10];
             cameraObject.addComponent(camera);
             var count = 0;
-            for (var i=-1;i<=1;i+=0.1){
-                for (var j=-1;j<=1;j+=0.1){
+            for (var i=-1;i<=1;i+=0.05){
+                for (var j=-1;j<=1;j+=0.05){
                     addObject([i*10,j*10,0]);
                     count++;
                 }
