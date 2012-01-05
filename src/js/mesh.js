@@ -825,7 +825,7 @@ KICK.namespace = function (ns_string) {
             meshVertexIndexBuffers = [],
             _name,
             _meshData,
-            _urlResource,
+            _dataURI,
             _aabb = null,
             thisObj = this,
             c = KICK.core.Constants,
@@ -865,7 +865,6 @@ KICK.namespace = function (ns_string) {
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 vertexAttrLength = _meshData.vertexAttrLength;
                 meshType = _meshData.meshType;
-
 
                 meshVertexAttBuffer = gl.createBuffer();
                 gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
@@ -933,18 +932,18 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * The resource url of the mesh. Setting this property will try to load the meshData.
-             * @property urlResource
+             * @property dataURI
              * @type String
              */
-            urlResource:{
+            dataURI:{
                 get:function(){
-                    return _urlResource;
+                    return _dataURI;
                 },
                 set:function(newValue){
-                    if (newValue !== _urlResource){
+                    if (newValue !== _dataURI){
                         engine.resourceManager.getMeshData(newValue,thisObj);
                     }
-                    _urlResource = newValue;
+                    _dataURI = newValue;
                 }
             }
         });
@@ -1056,10 +1055,15 @@ KICK.namespace = function (ns_string) {
          * @return {Object} data object
          */
         this.toJSON = function(){
+            if (ASSERT){
+                if (!_dataURI){
+                    fail("_dataURI not defined");
+                }
+            }
             return {
                 uid: thisObj.uid,
                 name:_name,
-                urlResource:_urlResource
+                dataURI:_dataURI
             };
         };
     };
