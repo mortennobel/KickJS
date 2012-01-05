@@ -68,9 +68,11 @@ KICK.namespace = function (ns_string) {
      * @constructor
      */
     core.ResourceManager = function (engine) {
-        var resourceProviders = [
-            new core.URLResourceProvider(engine),
-            new core.BuiltInResourceProvider(engine)],
+        var resourceProviders =
+            [
+                new core.URLResourceProvider(engine),
+                new core.BuiltInResourceProvider(engine)
+            ],
             buildCache = function(){
                 return {
                     ref: {},
@@ -99,10 +101,20 @@ KICK.namespace = function (ns_string) {
              * @return {Function} getter function with the signature function(url)
              * @private
              */
-            buildGetFunc = function(cache,methodName){
+            buildGetFunc = function(cache,methodName,type){
                 return function(url){
-                    var res = getFromCache(cache,url),
-                        i;
+                    var i,
+                        res;
+                    if (type){
+                        var projectResources = engine.project.getResourceDescriptorByType(type);
+                        for (i=0;i<projectResources.length;i++){
+                            var projectResource = projectResources[i];
+                            if (projectResource.config.dataURI === url){
+                                return engine.project.load(projectResource.uid);
+                            }
+                        }
+                    }
+                    res = getFromCache(cache,url);
                     if (res){
                         return res;
                     }
@@ -157,7 +169,6 @@ KICK.namespace = function (ns_string) {
          */
         this.getShaderData = buildCallbackFunc("getShaderData");
 
-
         /**
          * @method getMesh
          * @param {String} uri
@@ -165,20 +176,22 @@ KICK.namespace = function (ns_string) {
          * @deprecated
          */
         this.getMesh = buildGetFunc(meshCache,"getMesh");
+
         /**
          * @method getShader
          * @param {String} uri
          * @return {KICK.material.Shader}
          * @deprecated
          */
-        this.getShader = buildGetFunc(shaderCache,"getShader");
+        this.getShader = buildGetFunc(shaderCache,"getShader", "KICK.material.Shader");
+
         /**
          * @method getTexture
          * @param {String} uri
-         * @return {KICK.material.Shader}
+         * @return {KICK.texture.Texture}
          * @deprecated
          */
-        this.getTexture = buildGetFunc(textureCache,"getTexture");
+        this.getTexture = buildGetFunc(textureCache,"getTexture","KICK.texture.Texture");
 
         /**
          * Release a reference to the resource.
@@ -494,6 +507,7 @@ KICK.namespace = function (ns_string) {
             var shader = new KICK.material.Shader(engine);
             this.getShaderData(url,shader);
             shader.name = getUrlAsResourceName(url);
+            shader.dataURI = url;
             return shader;
         };
 
