@@ -473,7 +473,7 @@ KICK.namespace = function (ns_string) {
              * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
              * GL_ONE_MINUS_SRC_ALPHA.<br>
              * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
-             * @property blendSFactor
+             * @property blendDFactor
              * @type {Number}
              */
             blendDFactor:{
@@ -661,6 +661,7 @@ KICK.namespace = function (ns_string) {
                 name:_name,
                 blend:_blend,
                 blendSFactor:_blendSFactor,
+                blendDFactor:_blendDFactor,
                 dataURI:_dataURI,
                 depthMask:_depthMask,
                 faceCulling:_faceCulling,
