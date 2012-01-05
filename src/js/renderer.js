@@ -56,6 +56,12 @@ KICK.namespace = function (ns_string) {
      * @param engineUniforms
      * @param overwriteShader
      */
+    /**
+     * Name of the class
+     * @property
+     * @name name
+     * @type String
+     */
 
     /**
      * Does not render any components
@@ -66,9 +72,9 @@ KICK.namespace = function (ns_string) {
      */
     renderer.NullRenderer = function () {};
 
-
     renderer.NullRenderer.prototype.render = function (renderableComponents,engineUniforms,overwriteShader) {};
-    
+
+    renderer.NullRenderer.prototype.name = "KICK.renderer.NullRenderer";
     /**
      * Forward renderer
      * @class ForwardRenderer
@@ -89,5 +95,7 @@ KICK.namespace = function (ns_string) {
                 renderableComponents[j].render(engineUniforms,overwriteShader);
             }
         };
+
+        this.name = "KICK.renderer.ForwardRenderer";
     };
 }());

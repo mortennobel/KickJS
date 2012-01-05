@@ -1537,7 +1537,11 @@ KICK.namespace = function (ns_string) {
             renderer:{
                 get:function(){ return _renderer;},
                 set:function(newValue){
-                    if (typeof newValue.render === "function"){
+                    if (typeof newValue === "string"){
+                        var constructor = KICK.namespace(newValue);
+                        newValue = new constructor();
+                    }
+                    if (newValue && typeof newValue.render === "function"){
                         _renderer = newValue;
                     } else if (c._ASSERT){
                         KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
@@ -1798,7 +1802,7 @@ KICK.namespace = function (ns_string) {
                 config:{
                     enabled: _enabled,
                     renderShadow: _renderShadow,
-                    renderer:_renderer, // todo add reference
+                    renderer:_renderer.name,
                     layerMask:_layerMask,
                     renderTarget:_renderTarget, // todo add reference
                     fieldOfView:_fieldOfView,
