@@ -446,11 +446,11 @@ KICK.namespace = function (ns_string) {
                             value !== c.GL_DST_COLOR &&
                             value !== c.GL_ONE_MINUS_DST_COLOR &&
                             value !== c.GL_SRC_ALPHA &&
-                            value !== c.GL_GL_ONE_MINUS_SRC_ALPHA &&
+                            value !== c.GL_ONE_MINUS_SRC_ALPHA &&
                             value !== c.GL_DST_ALPHA &&
                             value !== c.GL_ONE_MINUS_DST_ALPHA &&
                             value !== c.GL_CONSTANT_COLOR &&
-                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR,
+                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
                             value !== c.GL_CONSTANT_ALPHA &&
                             value !== c.GL_ONE_MINUS_CONSTANT_ALPHA &&
                             value !== c.GL_SRC_ALPHA_SATURATE){
@@ -488,11 +488,11 @@ KICK.namespace = function (ns_string) {
                             value !== c.GL_DST_COLOR &&
                             value !== c.GL_ONE_MINUS_DST_COLOR &&
                             value !== c.GL_SRC_ALPHA &&
-                            value !== c.GL_GL_ONE_MINUS_SRC_ALPHA &&
+                            value !== c.GL_ONE_MINUS_SRC_ALPHA &&
                             value !== c.GL_DST_ALPHA &&
                             value !== c.GL_ONE_MINUS_DST_ALPHA &&
                             value !== c.GL_CONSTANT_COLOR &&
-                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR,
+                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
                             value !== c.GL_CONSTANT_ALPHA &&
                             value !== c.GL_ONE_MINUS_CONSTANT_ALPHA){
                             KICK.core.Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
@@ -906,6 +906,13 @@ KICK.namespace = function (ns_string) {
             _renderOrder,
             gl = engine.gl;
         Object.defineProperties(this,{
+            /**
+             * @property engine
+             * @type KICK.core.Engine
+             */
+            engine:{
+                value:engine
+            },
              /**
               * @property name
               * @type String
@@ -1014,6 +1021,7 @@ KICK.namespace = function (ns_string) {
             return {
                 uid: thisObj.uid,
                 name:_name,
+                shader: KICK.core.Util.getJSONReference(engine,_shader),
                 uniforms: filteredUniforms
             };
         };
