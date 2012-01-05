@@ -570,11 +570,11 @@ KICK.namespace = function (ns_string) {
             resourceReferenceCount = {},
             thisObj = this,
             _maxUID = 0,
-            refreshResourceDescriptor = function(uid){
+            refreshResourceDescriptor = function(uid,filter){
                 if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
                     var liveObject = resourceCache[uid];
                     if (liveObject){
-                        resourceDescriptorsByUID[uid].updateConfig(liveObject);
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject,filter);
                     }
                 }
             };
@@ -743,10 +743,12 @@ KICK.namespace = function (ns_string) {
         /**
          * Updates the resourceDescriptors with data from the initialized objects
          * @method refreshResourceDescriptors
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          */
-        this.refreshResourceDescriptors = function(){
+        this.refreshResourceDescriptors = function(filter){
+            filter = filter || function(){return true;};
             for (var uid in resourceDescriptorsByUID){
-                refreshResourceDescriptor(uid);
+                refreshResourceDescriptor(uid,filter);
             }
         };
 
@@ -808,13 +810,17 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method toJSON
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
+         * @return Object
          */
-        this.toJSON = function(){
+        this.toJSON = function(filter){
             var res = [];
-            thisObj.refreshResourceDescriptors();
+            filter = filter || function(){return true;};
+            thisObj.refreshResourceDescriptors(filter);
             for (var uid in resourceDescriptorsByUID){
-                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
-                    res.push(resourceDescriptorsByUID[uid].toJSON());
+                var rd = resourceDescriptorsByUID[uid];
+                if (rd instanceof core.ResourceDescriptor && filter(rd)){
+                    res.push(rd.toJSON(filter));
                 }
             }
             return {
@@ -919,10 +925,11 @@ KICK.namespace = function (ns_string) {
         /**
          * Updates the configuration with the one from object
          * @method updateConfig
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @param {Object} object
          */
-        this.updateConfig = function(object){
-            resourceConfig = object.toJSON();
+        this.updateConfig = function(object,filter){
+            resourceConfig = object.toJSON(filter);
         };
 
         /**

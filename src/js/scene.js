@@ -1047,12 +1047,17 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method toJSON
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @return {Object}
          */
-        this.toJSON = function (){
+        this.toJSON = function (filterFn){
             var gameObjectsCopy = [];
+            filterFn = filterFn || function(){return true;}
             for (var i=0;i<gameObjects.length;i++){
-                gameObjectsCopy.push(gameObjects[i].toJSON());
+                var gameObject = gameObjects[i];
+                if (filterFn(gameObject)){
+                    gameObjectsCopy.push(gameObject.toJSON());
+                }
             }
             return {
                 uid: thisObj.uid,
