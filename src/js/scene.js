@@ -1082,19 +1082,32 @@ KICK.namespace = function (ns_string) {
                 })();
 
                 var createConfigWithReferences = function (config){
+                    // deserialize an object (recursively if the object is an array
+                    var deserialize = function(value){
+                        if (typeof value === 'number'){
+                            return value;
+                        }
+                        if (Array.isArray(value)){
+                            for (var i=0;i<value.length;i++){
+                                value[i] = deserialize(value[i]);
+                            }
+                        } else if (value){
+                            if (value && value.ref && value.reftype){
+                                if (value.reftype === "project"){
+                                    value = engine.project.load(value.ref);
+                                } else if (value.reftype === "gameobject" || value.reftype === "component"){
+                                    value = thisObj.getObjectByUID(value.ref);
+                                }
+                            }
+                        }
+                        return value;
+                    };
+
                     var configCopy = {};
                     for (var name in config){
                         if (hasProperty(config,name)){
                             var value = config[name];
-                            if (value){
-                                if (value && value.ref && value.reftype){
-                                    if (value.reftype === "project"){
-                                        value = engine.project.load(value.ref);
-                                    } else if (value.reftype === "gameobject" || value.reftype === "component"){
-                                        value = thisObj.getObjectByUID(value.ref);
-                                    }
-                                }
-                            }
+                            value = deserialize(value);
                             configCopy[name] = value;
                         }
                     }
