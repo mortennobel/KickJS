@@ -649,6 +649,9 @@ KICK.namespace = function (ns_string) {
             for (var uid in resourceDescriptorsByUID){
                 thisObj.removeResourceDescriptor(uid);
             }
+            resourceDescriptorsByUID = {};
+            resourceCache = {};
+            resourceReferenceCount = {};
         };
 
         /**
@@ -858,12 +861,13 @@ KICK.namespace = function (ns_string) {
                 for (var name in config){
                     if (hasProperty(config,name)){
                         var value = config[name];
-                        var reftype = value.reftype;
-                        if (value && value.ref && reftype){
+                        var reftype = value?value.reftype:null;
+                        var ref = value?value.ref:null;
+                        if (value && ref && reftype){
                             if (reftype === "resource"){
-                                value = engine.resourceManager[value.refMethod](value.ref);
+                                value = engine.resourceManager[value.refMethod](ref);
                             } else if (reftype === "project"){
-                                value = engine.project.load(value.ref);
+                                value = engine.project.load(ref);
                             }
                         }
                         res[name] = value;
@@ -1496,6 +1500,7 @@ KICK.namespace = function (ns_string) {
         componentToJSON: function(engine, component,componentType){
             var name,
                 config = {},
+                functionReturnType = {},
                 res = {
                     type: componentType || component.constructor.name,
                     uid: engine.getUID(component),
@@ -1504,20 +1509,35 @@ KICK.namespace = function (ns_string) {
             if (res.type === ""){
                 core.Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
             }
+            var serializeObject = function(o){
+                if (Array.isArray(o)){
+                    var result = [];
+                    for (var i=0;i<o.length;i++){
+                        var r = serializeObject(o[i]);
+                        result.push(r);
+                    }
+                    return result;
+                }
+                var typeofO = typeof o;
+                if (typeofO !== 'function'){
+                    if (o && o.buffer instanceof ArrayBuffer){
+                        // is typed array
+                        return core.Util.typedArrayToArray(o);
+                    } else if (typeofO === 'object'){
+                        return core.Util.getJSONReference(engine,o);
+                    } else {
+                        return o;
+                    }
+                }
+                return functionReturnType;
+            };
             // init config object
             for (name in component){
                 if (core.Util.hasProperty(component,name) && name !== "gameObject"){
-                    var o = component[name],
-                        typeofO = typeof o;
-                    if (typeofO !== 'function'){
-                        if (o && o.buffer instanceof ArrayBuffer){
-                            // is typed array
-                            config[name] = core.Util.typedArrayToArray(o);
-                        } else if (typeofO === 'object'){
-                            config[name] = core.Util.getJSONReference(engine,o);
-                        } else {
-                            config[name] = o;
-                        }
+                    var o = component[name];
+                    var serializedObject = serializeObject(o);
+                    if (serializedObject !== functionReturnType){
+                        config[name] = serializedObject;
                     }
                 }
             }
