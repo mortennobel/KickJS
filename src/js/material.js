@@ -678,7 +678,7 @@ KICK.namespace = function (ns_string) {
         (function init(){
             applyConfig(thisObj,config);
             engine.project.registerObject(thisObj, "KICK.material.Shader");
-            if (_dataURI){
+            if (_dataURI && _dataURI.indexOf("memory://") !== 0){
                 engine.resourceManager.getShaderData(_dataURI,thisObj);
             } else {
                 updateBlendKey();
