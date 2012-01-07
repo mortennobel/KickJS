@@ -527,13 +527,13 @@ KICK.namespace = function (ns_string) {
                     return vec3.create(localScale);
                 },
                 set: function(newValue){
+                    vec3.set(newValue,localScale);
                     // replace 0 value with epsilon to prevent a singular matrix
-                    for (var i=0;i<newValue.length;i++){
-                        if (newValue[i] === 0){
-                            newValue[i] = KICK.core.Constants._EPSILON;
+                    for (var i=0;i<localScale.length;i++){
+                        if (localScale[i] === 0){
+                            localScale[i] = KICK.core.Constants._EPSILON;
                         }
                     }
-                    vec3.set(newValue,localScale);
                     markLocalDirty();
                 }
             },
