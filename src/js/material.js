@@ -832,6 +832,11 @@ KICK.namespace = function (ns_string) {
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                 //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
                 var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
+                if (ASSERT){
+                    if (!normalMatrix){
+                        KICK.core.Util.fail("Singular matrix");
+                    }
+                }
                 gl.uniformMatrix3fv(norm.location,false,normalMatrix);
             }
         }
