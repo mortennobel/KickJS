@@ -1,6 +1,10 @@
 var vec3 = KICK.math.vec3,
     quat4 = KICK.math.quat4;
 
+if (location.href.indexOf('file')===0){
+    alert("Model viewer example must be run from a web-server due to security constrains");
+}
+
 function destroyAllMeshRenderersInScene(){
     var scene = engine.activeScene;
     for (var i=scene.getNumberOfGameObjects()-1;i>=0;i--){
@@ -14,7 +18,9 @@ function destroyAllMeshRenderersInScene(){
 function load(content,url,func){
     destroyAllMeshRenderersInScene();
 
-    var gameObjectsCreated = func(content,engine,engine.activeScene,true);
+    var createdObject = func(content,engine,engine.activeScene,true);
+    var gameObjectsCreated = createdObject.gameObjects;
+
     for (var i=0;i<gameObjectsCreated.length;i++){
         var gameObject = gameObjectsCreated[i];
         var isDuck = url==="duck.dae" || url==="duck_triangulate.dae";

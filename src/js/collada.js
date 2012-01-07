@@ -64,6 +64,7 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
+        var allMeshes,allMaterials;
         if (typeof colladaDOM === 'string'){
             var parser=new DOMParser();
             colladaDOM = parser.parseFromString(colladaDOM,"text/xml");
@@ -338,7 +339,9 @@ KICK.namespace = function (ns_string) {
                     if (geometry.getAttribute("id") === meshid){
                         var meshData = buildMeshData(colladaDOM, engine, geometry);
                         if (meshData){
-                            meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshData,name:meshData.name+" mesh"}));
+                            var newMesh = new KICK.mesh.Mesh(engine, {meshData:meshData,name:meshData.name+" mesh"});
+                            allMeshes.push(newMesh);
+                            meshArray.push(newMesh);
                         }
                         break;
                     }
@@ -380,14 +383,12 @@ KICK.namespace = function (ns_string) {
                 for (var i=0;i<meshes.length;i++){
                     meshRenderer = new KICK.scene.MeshRenderer();
                     meshRenderer.mesh = meshes[i];
-                    console.log("Mesh",meshRenderer.mesh);
-                    meshRenderer.material = new KICK.material.Material(engine,{
+                    var newMaterial = new KICK.material.Material(engine,{
                         name:"Some material",
                         shader:engine.resourceManager.getShader("kickjs://shader/default/")
                     });
-                    console.log("Getting mesh by id "+url);
-                    console.log("meshRenderer.material name "+meshRenderer.material.name);
-                    console.log("meshRenderer.material shader "+meshRenderer.material.shader);
+                    meshRenderer.material = newMaterial;
+                    allMaterials.push(newMaterial);
 
                     gameObject.addComponent(meshRenderer);
                 }
@@ -399,7 +400,7 @@ KICK.namespace = function (ns_string) {
                     transform.parent = parent;
                 }
                 gameObject.name = node.getAttribute("id");
-                gameObjectsCreated.push(gameObject);
+                allGameObjects.push(gameObject);
                 var childNode = node.firstElementChild;
                 while (childNode){
                     var tagName = childNode.tagName;
@@ -439,7 +440,7 @@ KICK.namespace = function (ns_string) {
 
         libraryGeometries = libraryGeometries[0];
         geometries = libraryGeometries.getElementsByTagName("geometry");
-        var gameObjectsCreated = [];
+        var allGameObjects = [];
         var meshCache = {};
 
         for (i=0;i<visualScenes.length;i++){
@@ -450,6 +451,6 @@ KICK.namespace = function (ns_string) {
                 node = node.nextElementSibling;
             }
         }
-        return gameObjectsCreated;
+        return {mesh:allMeshes, gameObjects:allGameObjects, materials:allMaterials};
     };
 })();

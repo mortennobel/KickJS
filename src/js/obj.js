@@ -57,7 +57,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
      * @param {boolean} rotate90x rotate -90 degrees around x axis
-     * @return {Array[KICK.scene.GameObject]}
+     * @return {Object} returns container object of the type {mesh:[], gameObjects:[], materials:[]}
      * @static
      */
     importer.ObjImporter.import = function (objFileContent, engine, scene, rotate90x){
@@ -69,7 +69,9 @@ KICK.namespace = function (ns_string) {
             triangles = [],
             materialNames = [],
             submeshes = [triangles],
-            objects = [],
+            allGameObjects = [],
+            allMaterials = [],
+            allMeshes = [],
             objectName = "MeshObject",
             trim = function (str){ return str.replace(/^\s+|\s+$/g, ""); },
             strAsArray = function(numberString, type){
@@ -119,6 +121,7 @@ KICK.namespace = function (ns_string) {
                     meshDataSubmeshes = [],
                     cache = {},
                     count = 0;
+                allMeshes.push(mesh);
                 for (var k=0;k<submeshes.length;k++){
                     triangles = submeshes[k];
                     meshDataIndices = [];
@@ -161,10 +164,12 @@ KICK.namespace = function (ns_string) {
                 var materials = [];
 
                 var addDefaultMaterial = function(name){
-                    materials.push(new KICK.material.Material(engine,{
+                    var newMaterial = new KICK.material.Material(engine,{
                         name:name,
                         shader:engine.resourceManager.getShader("kickjs://shader/default/")
-                    }));
+                    });
+                    materials.push(newMaterial);
+                    allMaterials.push(newMaterial);
                 };
 
                 for (var i=0;i < meshDataSubmeshes.length;i++){
@@ -184,7 +189,7 @@ KICK.namespace = function (ns_string) {
                 meshRenderer.materials = materials;
                 gameObject.name = objectName;
                 gameObject.addComponent(meshRenderer);
-                objects.push(gameObject);
+                allGameObjects.push(gameObject);
                 triangles = [];
             };
         for (var i=0;i<linesLength;i++){
@@ -221,6 +226,7 @@ KICK.namespace = function (ns_string) {
             }
         }
         addObject();
-        return objects;
+
+        return {mesh:allMeshes, gameObjects:allGameObjects, materials:allMaterials};
     };
 })();
