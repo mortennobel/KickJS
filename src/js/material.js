@@ -81,7 +81,7 @@ KICK.namespace = function (ns_string) {
             _polygonOffsetFactor = 2.5,
             _polygonOffsetUnits = 10.0,
             _renderOrder = 1000,
-            _dataURI = null,
+            _dataURI =  "memory://void",
             _name = "",
             blendKey,
             glslConstants = material.GLSLConstants,

@@ -825,7 +825,7 @@ KICK.namespace = function (ns_string) {
             meshVertexIndexBuffers = [],
             _name,
             _meshData,
-            _dataURI,
+            _dataURI = "memory://void",
             _aabb = null,
             thisObj = this,
             c = KICK.core.Constants,
