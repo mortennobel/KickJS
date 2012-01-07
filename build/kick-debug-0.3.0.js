@@ -13943,12 +13943,13 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
-        var allMeshes,allMaterials;
         if (typeof colladaDOM === 'string'){
             var parser=new DOMParser();
             colladaDOM = parser.parseFromString(colladaDOM,"text/xml");
         }
         var dataCache = {},
+            allMeshes = [],
+            allMaterials = [],
             constants = KICK.core.Constants,
             /**
              * Converts a string to an array
