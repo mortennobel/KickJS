@@ -338,7 +338,7 @@ KICK.namespace = function (ns_string) {
                     if (geometry.getAttribute("id") === meshid){
                         var meshData = buildMeshData(colladaDOM, engine, geometry);
                         if (meshData){
-                            meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshData}));
+                            meshArray.push(new KICK.mesh.Mesh(engine, {meshData:meshData,name:meshData.name+" mesh"}));
                         }
                         break;
                     }

@@ -154,6 +154,7 @@ KICK.namespace = function (ns_string) {
                 }
                 meshData.subMeshes = meshDataSubmeshes;
                 mesh.meshData = meshData;
+                mesh.name = objectName+" mesh";
                 var meshRenderer = new KICK.scene.MeshRenderer();
                 meshRenderer.mesh = mesh;
 
