@@ -517,7 +517,8 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Local scale
+             * Local scale.
+             * Any zero value will be replaced with an epsilon value.
              * @property localScale
              * @type KICK.math.vec3
              */
@@ -526,6 +527,12 @@ KICK.namespace = function (ns_string) {
                     return vec3.create(localScale);
                 },
                 set: function(newValue){
+                    // replace 0 value with epsilon to prevent a singular matrix
+                    for (var i=0;i<newValue.length;i++){
+                        if (newValue[i] === 0){
+                            newValue[i] = KICK.core.Constants._EPSILON;
+                        }
+                    }
                     vec3.set(newValue,localScale);
                     markLocalDirty();
                 }
