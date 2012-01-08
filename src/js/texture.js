@@ -331,6 +331,7 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Calling this function has the side effect of enabling floating point texture (in available on platform)
          * @method isFPTexturesSupported
          * @return {Boolean}
          */
