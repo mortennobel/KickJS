@@ -805,26 +805,6 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Decreases the resource reference counter. If resource is no longer
-         * used it's destroy method will be invoked (if available).
-         * @method release
-         * @param {Number} uid
-         */
-        this.release = function(uid){
-            var resourceObject = resourceCache[uid];
-            if (resourceObject){
-                /*resourceReferenceCount[uid]--;
-                if (resourceReferenceCount[uid] <= 0){
-                    delete resourceCache[uid];
-                    delete resourceReferenceCount[uid];
-                    if (resourceObject.destroy){
-                        resourceObject.destroy();
-                    }
-                }*/
-            }
-        };
-
-        /**
          * Registers an asset in a Project.
          * @method registerObject
          * @param {Object} object

@@ -73,68 +73,6 @@ KICK.namespace = function (ns_string) {
                 new core.URLResourceProvider(engine),
                 new core.BuiltInResourceProvider(engine)
             ],
-            buildCache = function(){
-                return {
-                    ref: {},
-                    refCount: {}
-                }
-            },
-            meshCache = buildCache(),
-            shaderCache = buildCache(),
-            textureCache = buildCache(),
-            allCaches = [meshCache,shaderCache,textureCache],
-            getFromCache = function(cache, url){
-                var res = cache.ref[url];
-                if (res){
-                    cache.refCount[url]++;
-                }
-                return res;
-            },
-            addToCache = function(cache, url, resource){
-                cache.ref[url] = resource;
-                cache.refCount[url] = 1;
-            },
-            /**
-             * @method buildGetFunc
-             * @param {Object} cache
-             * @param {String} methodName
-             * @return {Function} getter function with the signature function(url)
-             * @private
-             */
-            buildGetFunc = function(cache,methodName,type,deprecated){
-                return function(url){
-                    if (deprecated){
-                        console.log("Warn "+methodName+" is deprecated");
-                    }
-                    var i,
-                        res;
-                    if (type){
-                        var projectResources = engine.project.getResourceDescriptorByType(type);
-                        for (i=0;i<projectResources.length;i++){
-                            var projectResource = projectResources[i];
-                            if (projectResource.config.dataURI === url){
-                                return engine.project.load(projectResource.uid);
-                            }
-                        }
-                    }
-                    res = getFromCache(cache,url);
-                    if (res){
-                        return res;
-                    }
-                    for (i=resourceProviders.length-1;i>=0;i--){
-                        var resourceProvider = resourceProviders[i];
-                        var protocol = resourceProvider.protocol;
-                        if (url.indexOf(protocol) === 0){
-                            res = resourceProvider[methodName](url);
-                            break;
-                        }
-                    }
-                    if (res){
-                        addToCache(cache,url,res);
-                    }
-                    return res;
-                };
-            },
             /**
              * Create a callback function
              * @method buildCallbackFunc
@@ -173,30 +111,6 @@ KICK.namespace = function (ns_string) {
         this.getShaderData = buildCallbackFunc("getShaderData");
 
         /**
-         * @method getMesh
-         * @param {String} uri
-         * @return {KICK.mesh.Mesh}
-         * @deprecated
-         */
-        this.getMesh = buildGetFunc(meshCache,"getMesh",true);
-
-        /**
-         * @method getShader
-         * @param {String} uri
-         * @return {KICK.material.Shader}
-         * @deprecated
-         */
-        this.getShader = buildGetFunc(shaderCache,"getShader", "KICK.material.Shader",true);
-
-        /**
-         * @method getTexture
-         * @param {String} uri
-         * @return {KICK.texture.Texture}
-         * @deprecated
-         */
-        this.getTexture = buildGetFunc(textureCache,"getTexture","KICK.texture.Texture",true);
-
-        /**
          * @method addResourceProvider
          * @param {KICK.resource.ResourceProvider} resourceProvider
          */
@@ -212,28 +126,6 @@ KICK.namespace = function (ns_string) {
             for (var i=resourceProvider.length-1;i>=0;i--){
                 if (resourceProviders[i] === resourceProvider){
                     resourceProviders.splice(i,1);
-                }
-            }
-        };
-
-        /**
-         * Release a reference to the resource.
-         * If reference count is 0, then the reference is deleted and the destroy method on the
-         * resource object are invoked.
-         * @method release
-         * @param {String} url
-         */
-        this.release = function(url){
-            for (var i=allCaches.length-1;i>=0;i--){
-                if (allCaches[i].refCount[url]){
-                    allCaches[i].refCount[url]--;
-                    if (allCaches[i].refCount[url]<=0){
-                        if (allCaches[i].ref[url].destroy){
-                            allCaches[i].ref[url].destroy();
-                        }
-                        delete allCaches[i].refCount[url];
-                        delete allCaches[i].ref[url];
-                    }
                 }
             }
         };
