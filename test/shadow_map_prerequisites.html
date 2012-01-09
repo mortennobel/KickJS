@@ -63,7 +63,7 @@
             shader.vertexShaderSrc = document.getElementById('phong_vs').innerHTML;
             shader.fragmentShaderSrc = document.getElementById('phong_fs').innerHTML;
             shader.errorLog = function(msg){console.log(msg);}
-            shader.updateShader();
+            shader.apply();
 
             // create material
             var material = new KICK.material.Material(engine,{
@@ -203,7 +203,7 @@
                 shader.vertexShaderSrc = document.getElementById('vertexShader').innerHTML;
                 shader.fragmentShaderSrc = document.getElementById('fragmentShader').innerHTML;
                 shader.errorLog = function(msg){console.log(msg);};
-                shader.updateShader();
+                shader.apply();
                 var cam3GameObject = engine.activeScene.createGameObject();
                 var camera3 = new KICK.scene.Camera({
                     clearColor: [0,0,1,1],

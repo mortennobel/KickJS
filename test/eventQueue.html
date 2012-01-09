@@ -113,14 +113,14 @@ Releasing the '1' or '2' will aboard the flicker.
 
     function createMaterial(){
         return new KICK.material.Material(engine,{
-            shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+            shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),//engine.resourceManager.getShader("kickjs://shader/unlit/"),
             uniforms:{
                 mainColor: {
                     value: [1,1,1],
                     type: KICK.core.Constants.GL_FLOAT_VEC3
                 },
                 mainTexture: {
-                    value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                     type: KICK.core.Constants.GL_SAMPLER_2D
                 }
             }
@@ -128,7 +128,7 @@ Releasing the '1' or '2' will aboard the flicker.
     }
 
     // create meshes
-    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/"];
+    var meshes = [engine.project.ENGINE_MESH_TRIANGLE,engine.project.ENGINE_MESH_CUBE];
     var keyCodes = ["1","2"];
     var rotationAcceleration = [0.0002,0.00032];
     var rotationColor = [[1,0,0],[0,0,1]];
@@ -137,7 +137,7 @@ Releasing the '1' or '2' will aboard the flicker.
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
         var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
+        meshRenderer.mesh = engine.project.load(meshes[i]);
         meshRenderer.material = createMaterial();
         gameObject.addComponent(meshRenderer);
         gameObject.addComponent(new RotatorComponent(

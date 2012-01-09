@@ -41,7 +41,7 @@
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
-            shader.updateShader();
+            shader.apply();
             
             new KICK.material.Material(engine,{
                 name:"Material.002",

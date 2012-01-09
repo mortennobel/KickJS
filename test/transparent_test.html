@@ -31,7 +31,7 @@
             shader.fragmentShaderSrc = fs;
             shader.errorLog = console.log;
             shader.renderOrder = renderOrder;
-            shader.updateShader();
+            shader.apply();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 log("Missing attributes in mesh "+JSON.stringify(missingAttributes));

@@ -38,7 +38,7 @@
             var element = document.getElementById("output");
             element.innerHTML = "";
             var gameObject = engine.activeScene.createGameObject();
-            var mesh = engine.resourceManager.getMesh(meshURL);
+            var mesh = new KICK.mesh.Mesh(engine,{dataURI: meshURL});
             var meshRenderer = new KICK.scene.MeshRenderer();
             meshRenderer.mesh = mesh;
             var vs = document.getElementById(vertexShaderId).value;
@@ -47,7 +47,7 @@
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
-            shader.updateShader();
+            shader.apply();
             var material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
@@ -66,11 +66,11 @@
             var meshRenderer = lastGameObject.getComponentOfType(KICK.scene.MeshRenderer);
             var shader = meshRenderer.material.shader;
             shader.fragmentShaderSrc = document.getElementById("fragmentShaderGreen").value;
-            shader.updateShader();
+            shader.apply();
         }
 
         function runTestTriangle() {
-            runTest('vertexShader','fragmentShader',"kickjs://mesh/cube/?length=0.5");
+            runTest('vertexShader','fragmentShader',"kickjs://mesh/triangle/?length=0.5");
 
         }
 

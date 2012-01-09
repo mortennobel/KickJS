@@ -31,9 +31,7 @@
         var clearLog = function(){
             var element = document.getElementById("output");
             element.innerHTML = "";
-        }
-
-
+        };
 
         function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer){
             clearLog();
@@ -43,7 +41,7 @@
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
-            shader.updateShader();
+            shader.apply();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
@@ -131,14 +129,14 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
             gameObject.addComponent(meshRenderer);
 
             var gameObject2 = engine.activeScene.createGameObject();
             gameObject2.layer = 2;
             meshRenderer2 = new KICK.scene.MeshRenderer();
-            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/?radius=0.6");
+            meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
             gameObject2.addComponent(meshRenderer2);
 
@@ -147,7 +145,7 @@
 
         function UVSphere(){
             // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/");
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/"});
         }
     </script>
 </head>

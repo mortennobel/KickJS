@@ -31,7 +31,7 @@
             shader.vertexShaderSrc = document.getElementById('vs').innerText;
             shader.fragmentShaderSrc = document.getElementById('fs').innerText;
             shader.errorLog = console.log;
-            shader.updateShader();
+            shader.apply();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));

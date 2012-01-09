@@ -43,7 +43,7 @@
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
-            shader.updateShader();
+            shader.apply();
             return new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
@@ -97,7 +97,7 @@
             });
             cameraObject.addComponent(camera);
 
-            mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             material = createMaterial('vertexShaderColor','fragmentShader');
 
             var transform = null;

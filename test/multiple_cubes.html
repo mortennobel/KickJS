@@ -320,7 +320,7 @@ mixkey(math.random(), pool);
                 shader.vertexShaderSrc = vs;
                 shader.fragmentShaderSrc = fs;
                 shader.errorLog = log;
-                shader.updateShader();
+                shader.apply();
                 var missingAttributes = meshRenderer.mesh.verify(shader);
                 if (missingAttributes){
                     log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
@@ -337,7 +337,7 @@ mixkey(math.random(), pool);
             var gameObject = engine.activeScene.createGameObject(),
                     transform = gameObject.transform;
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             transform.localScale = [0.8*Math.random(),0.8*Math.random(),0.8*Math.random()];
