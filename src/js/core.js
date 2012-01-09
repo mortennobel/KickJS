@@ -1258,6 +1258,21 @@ KICK.namespace = function (ns_string) {
                 errorMessage.innerHTML = "<div style='padding:12px;text-align: center;'><img src='http://www.khronos.org/assets/images/api_logos/webgl.png' style='width:74px;35px;margin-bottom: 10px;margin-left: auto;'><br clear='all'>It doesn't appear your computer can support WebGL.<br><br><a href=\"http://get.webgl.org/troubleshooting/\">Click here for more information.</a></div>";
                 domElement.parentNode.replaceChild(errorMessage, domElement);
             };
+
+        if (core.Constants._DEBUG){
+            for (var name in config){
+                if (! this.hasOwnProperty(name)){
+                    var supportedProperties = "Supported properties for KICK.core.Config are: ";
+                    for (var n2 in this){
+                        if (this.hasOwnProperty(n2) && typeof this[n2] !== "function"){
+                            supportedProperties += "\n - "+n2;
+                        }
+                    }
+                    core.Util.warn("KICK.core.Config does not have any property "+name+"\n"+supportedProperties);
+
+                }
+            }
+        }
     };
 
     /**
