@@ -941,9 +941,9 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     if (newValue !== _dataURI){
+                        _dataURI = newValue;
                         engine.resourceManager.getMeshData(newValue,thisObj);
                     }
-                    _dataURI = newValue;
                 }
             }
         });

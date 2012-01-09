@@ -192,7 +192,12 @@ KICK.namespace = function (ns_string) {
              */
             dataURI:{
                 get:function(){ return _dataURI; },
-                set:function(newValue){ _dataURI = newValue; }
+                set:function(newValue){
+                    if (_dataURI !== newValue){
+                        _dataURI = newValue;
+                        engine.resourceManager.getShaderData(_dataURI,thisObj);
+                    }
+                }
             },
             /**
              * Get the gl context of the shader
@@ -518,10 +523,11 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * @method updateShader
+         * Updates the shader (must be called after any shader state is changed to apply changes)
+         * @method apply
          * @return {Boolean} shader created successfully
          */
-        this.updateShader = function () {
+        this.apply = function () {
             var errorLog = _errorLog || console.log,
                 vertexShader = compileShader(_vertexShaderSrc, false, errorLog),
                 fragmentShader = compileShader(_fragmentShaderSrc, true, errorLog),
@@ -682,7 +688,7 @@ KICK.namespace = function (ns_string) {
                 engine.resourceManager.getShaderData(_dataURI,thisObj);
             } else {
                 updateBlendKey();
-                thisObj.updateShader();
+                thisObj.apply();
             }
         })();
     };

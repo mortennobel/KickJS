@@ -567,7 +567,6 @@ KICK.namespace = function (ns_string) {
     core.Project = function(engine){
         var resourceDescriptorsByUID = {},
             resourceCache = {},
-            resourceReferenceCount = {},
             thisObj = this,
             _maxUID = 0,
             refreshResourceDescriptor = function(uid,filter){
@@ -577,7 +576,116 @@ KICK.namespace = function (ns_string) {
                         resourceDescriptorsByUID[uid].updateConfig(liveObject,filter);
                     }
                 }
+            },
+            getUrlAsResourceName = function(url){
+                var name = url.split('/');
+                if (name.length>2){
+                    name = name[name.length-2];
+                    name = name.substring(0,1).toUpperCase()+name.substring(1);
+                } else {
+                    name = url;
+                }
+                return name;
+            },
+            loadEngineAsset = function(uid){
+                var p = core.Project,
+                    res,
+                    url;
+                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_ERROR){
+                    switch (uid){
+                        case p.ENGINE_SHADER_DEFAULT:
+                            url = "kickjs://shader/default/";
+                            break;
+                        case p.ENGINE_SHADER_PHONG:
+                            url = "kickjs://shader/phong/";
+                            break;
+                        case p.ENGINE_SHADER_UNLIT:
+                            url = "kickjs://shader/unlit/";
+                            break;
+                        case p.ENGINE_SHADER_TRANSPARENT_PHONG:
+                            url = "kickjs://shader/transparent_phong/";
+                            break;
+                        case p.ENGINE_SHADER_TRANSPARENT_UNLIT:
+                            url = "kickjs://shader/transparent_unlit/";
+                            break;
+                        case p.ENGINE_SHADER_SHADOWMAP:
+                            url = "kickjs://shader/__shadowmap/";
+                            break;
+                        case p.ENGINE_SHADER_PICK:
+                            url = "kickjs://shader/__pick/";
+                            break;
+                        case p.ENGINE_SHADER_ERROR :
+                            url = "kickjs://shader/__error/";
+                            break;
+                        default:
+                            if (ASSERT){
+                                core.Util.fail("uid not mapped "+uid);
+                            }
+                            return null;
+                    }
+                    res = new KICK.material.Shader(engine,{dataURI:url,name:getUrlAsResourceName(url)})
+                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_GRAY){
+                    switch (uid){
+                        case p.ENGINE_TEXTURE_BLACK:
+                            url = "kickjs://texture/black/";
+                            break;
+                        case p.ENGINE_TEXTURE_WHITE:
+                            url = "kickjs://texture/white/";
+                            break;
+                        case p.ENGINE_TEXTURE_GRAY:
+                            url = "kickjs://texture/gray/";
+                            break;
+                        default:
+                            if (ASSERT){
+                                core.Util.fail("uid not mapped "+uid);
+                            }
+                            return null;
+                    }
+                    res = new KICK.texture.Texture(engine,
+                        {
+                            dataURI:url,
+                            name:getUrlAsResourceName(url),
+                            minFilter: constants.GL_NEAREST,
+                            magFilter: constants.GL_NEAREST,
+                            generateMipmaps: false
+                        });
+                } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE){
+                    switch (uid){
+                        case p.ENGINE_MESH_TRIANGLE:
+                            url = "kickjs://mesh/triangle/";
+                            break;
+                        case p.ENGINE_MESH_PLANE:
+                            url = "kickjs://mesh/plane/";
+                            break;
+                        case p.ENGINE_MESH_UVSPHERE:
+                            url = "kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0";
+                            break;
+                        case p.ENGINE_MESH_CUBE:
+                            url = "kickjs://mesh/cube/?length=1.0";
+                            break;
+                        default:
+                            if (ASSERT){
+                                core.Util.fail("uid not mapped "+uid);
+                            }
+                            return null;
+                    }
+                    res = new KICK.mesh.Mesh(engine,
+                        {
+                            dataURI:url,
+                            name:getUrlAsResourceName(url)
+                        });
+                }
+
+                resourceCache[uid] = res;
+                return res;
             };
+
+        // copy static values to object values
+        for (var name in core.Project){
+            if (core.Project.hasOwnProperty(name)){
+                thisObj[name] = core.Project[name];
+            }
+        }
 
         Object.defineProperties(this, {
             /**
@@ -651,7 +759,6 @@ KICK.namespace = function (ns_string) {
             }
             resourceDescriptorsByUID = {};
             resourceCache = {};
-            resourceReferenceCount = {};
         };
 
         /**
@@ -661,20 +768,19 @@ KICK.namespace = function (ns_string) {
          * @param {String} uid
          * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
-        this.load = function(resourceUID){
-            var resourceObject = resourceCache[resourceUID];
+        this.load = function(uid){
+            var resourceObject = resourceCache[uid];
             if (resourceObject){
-                resourceReferenceCount[resourceUID]++;
                 return resourceObject;
             }
-            var resourceConfig = resourceDescriptorsByUID[resourceUID];
+            var resourceConfig = resourceDescriptorsByUID[uid];
             if (resourceConfig){
                 resourceObject = resourceConfig.instantiate(engine);
-                resourceCache[resourceUID] = resourceObject;
-                resourceReferenceCount[resourceUID] = 1;
+                resourceCache[uid] = resourceObject;
                 return resourceObject;
             }
-            return null;
+
+            return loadEngineAsset(uid);
         };
 
         /**
@@ -702,19 +808,19 @@ KICK.namespace = function (ns_string) {
          * Decreases the resource reference counter. If resource is no longer
          * used it's destroy method will be invoked (if available).
          * @method release
-         * @param {Number} resourceUID
+         * @param {Number} uid
          */
-        this.release = function(resourceUID){
-            var resourceObject = resourceCache[resourceUID];
+        this.release = function(uid){
+            var resourceObject = resourceCache[uid];
             if (resourceObject){
-                resourceReferenceCount[resourceUID]--;
-                if (resourceReferenceCount[resourceUID] <= 0){
-                    delete resourceCache[resourceUID];
-                    delete resourceReferenceCount[resourceUID];
+                /*resourceReferenceCount[uid]--;
+                if (resourceReferenceCount[uid] <= 0){
+                    delete resourceCache[uid];
+                    delete resourceReferenceCount[uid];
                     if (resourceObject.destroy){
                         resourceObject.destroy();
                     }
-                }
+                }*/
             }
         };
 
@@ -730,7 +836,6 @@ KICK.namespace = function (ns_string) {
                 return;
             }
             resourceCache[uid] = object;
-            resourceReferenceCount[uid] = 1;
             if (!resourceDescriptorsByUID[uid]){ // only update if new object
                 resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
                     uid:uid,
@@ -794,18 +899,17 @@ KICK.namespace = function (ns_string) {
         /**
          * Remove resource descriptor and destroy the resource if already allocated.
          * @method removeResourceDescriptor
-         * @param {Number} resourceUID
+         * @param {Number} uid
          */
-        this.removeResourceDescriptor = function(resourceUID){
+        this.removeResourceDescriptor = function(uid){
             // destroy the resource
-            var resource = resourceCache[resourceUID];
+            var resource = resourceCache[uid];
             if (resource && resource.detroy){
                 resource.destroy();
             }
             // remove references
-            delete resourceCache[resourceUID];
-            delete resourceReferenceCount[resourceUID];
-            delete resourceDescriptorsByUID[resourceUID];
+            delete resourceCache[uid];
+            delete resourceDescriptorsByUID[uid];
         };
 
         /**
@@ -818,9 +922,11 @@ KICK.namespace = function (ns_string) {
             filter = filter || function(){return true;};
             thisObj.refreshResourceDescriptors(filter);
             for (var uid in resourceDescriptorsByUID){
-                var rd = resourceDescriptorsByUID[uid];
-                if (rd instanceof core.ResourceDescriptor && filter(rd)){
-                    res.push(rd.toJSON(filter));
+                if (uid>=0){ // don't serialize engine assets (since they are static)
+                    var rd = resourceDescriptorsByUID[uid];
+                    if (rd instanceof core.ResourceDescriptor && filter(rd)){
+                        res.push(rd.toJSON(filter));
+                    }
                 }
             }
             return {
@@ -831,6 +937,102 @@ KICK.namespace = function (ns_string) {
             };
         };
     };
+
+    /**
+     * @property ENGINE_SHADER_DEFAULT
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_DEFAULT = -100;
+    /**
+     * @property ENGINE_SHADER_PHONG
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_PHONG = -101;
+    /**
+     * @property ENGINE_SHADER_UNLIT
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_UNLIT = -102;
+    /**
+     * @property ENGINE_SHADER_TRANSPARENT_PHONG
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_TRANSPARENT_PHONG = -103;
+    /**
+     * @property ENGINE_SHADER_TRANSPARENT_UNLIT
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_TRANSPARENT_UNLIT = -104;
+    /**
+     * @property ENGINE_SHADER_TRANSPARENT_UNLIT
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_SHADOWMAP = -105;
+    /**
+     * @property ENGINE_SHADER_PICK
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_PICK = -106;
+    /**
+     * @property ENGINE_SHADER_ERROR
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_ERROR = -107;
+
+    /**
+     * @property ENGINE_TEXTURE_BLACK
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_TEXTURE_BLACK = -200;
+    /**
+     * @property ENGINE_TEXTURE_WHITE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_TEXTURE_WHITE = -201;
+    /**
+     * @property ENGINE_TEXTURE_GRAY
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_TEXTURE_GRAY = -202;
+
+    /**
+     * @property ENGINE_MESH_TRIANGLE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_MESH_TRIANGLE = -300;
+
+    /**
+     * @property ENGINE_MESH_PLANE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_MESH_PLANE = -301;
+
+    /**
+     * @property ENGINE_MESH_UVSPHERE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_MESH_UVSPHERE = -302;
+
+    /**
+     * @property ENGINE_MESH_CUBE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_MESH_CUBE = -303;
 
     /**
      * A project is a container of all resources and assets used in a game.<br>

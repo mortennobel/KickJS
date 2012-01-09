@@ -509,7 +509,7 @@ KICK.namespace = function (ns_string) {
             };
             KICK.core.Util.applyConfig(shaderDestination,config);
 
-            shaderDestination.updateShader();
+            shaderDestination.apply();
         };
 
         /**

@@ -64,7 +64,7 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config Optional
      * @extends KICK.core.ProjectAsset
      */
-    texture.RenderTexture = function (engine, config){
+    texture.RenderTexture = function(engine, config){
         var gl = engine.gl,
             _config = config || {},
             framebuffer = gl.createFramebuffer(),
@@ -454,7 +454,10 @@ KICK.namespace = function (ns_string) {
                     return _dataURI;
                 },
                 set:function(newValue){
-                    _dataURI = newValue;
+                    if (newValue !== _dataURI){
+                        _dataURI = newValue;
+                        engine.resourceManager.getImageData(_dataURI,thisObj);
+                    }
                 }
             },
             /**
