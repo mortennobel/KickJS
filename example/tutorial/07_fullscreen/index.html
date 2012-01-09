@@ -47,27 +47,28 @@ This example demonstrate how to use fullscreen support (if available).<br><br>
     cameraObject.addComponent(camera);
 
     // create material
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
     var material = new KICK.material.Material(engine,{
-        shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+        shader: shader,
         uniforms:{
             mainColor: {
                 value: [1,1,1],
                 type: KICK.core.Constants.GL_FLOAT_VEC3
             },
             mainTexture: {
-                value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                 type: KICK.core.Constants.GL_SAMPLER_2D
             }
         }
     });
 
     // create meshes
-    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/"];
+    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
         var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
+        meshRenderer.mesh = engine.project.load(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
         var rotationSpeed = i-0.4;

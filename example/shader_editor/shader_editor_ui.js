@@ -14,7 +14,7 @@
                 var vsNew = window.vertexShaderSession.getValue();
                 var fsNew = window.fragmentShaderSession.getValue();
                 if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
-                    shaderEditor.updateShader(vsNew,fsNew);
+                    shaderEditor.apply(vsNew,fsNew);
                     saveLocally();
                 }
             }

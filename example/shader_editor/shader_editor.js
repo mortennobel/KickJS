@@ -248,11 +248,11 @@ window.shaderEditor = new (function(){
         }
     };
 
-    this.updateShader = function(vs,fs){
+    this.apply = function(vs,fs){
         shader.vertexShaderSrc = vs;
         shader.fragmentShaderSrc = fs;
         shader.errorLog = logFn;
-        var res = shader.updateShader();
+        var res = shader.apply();
         function onError(){
             previousShaderError = true;
             console.log(KICK.material.Shader.getPrecompiledSource(_engine,vs));

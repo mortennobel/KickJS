@@ -123,7 +123,7 @@ function createMaterial(vertexShaderId, fragmentShaderId){
     shader.vertexShaderSrc = vs;
     shader.fragmentShaderSrc = fs;
     shader.errorLog = console.log;
-    shader.updateShader();
+    shader.apply();
     var missingAttributes = meshRenderer.mesh.verify(shader);
     if (missingAttributes){
         console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));

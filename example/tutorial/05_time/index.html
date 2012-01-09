@@ -95,22 +95,23 @@ Pressing '3' will activate slow motion time (10% of actual time)<br><br>
     cameraObject.addComponent(new SlowMotionTracker());
 
     // create material
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
     var material = new KICK.material.Material(engine,{
-        shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+        shader: shader,
         uniforms:{
             mainColor: {
                 value: [1,1,1],
                 type: KICK.core.Constants.GL_FLOAT_VEC3
             },
             mainTexture: {
-                value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                 type: KICK.core.Constants.GL_SAMPLER_2D
             }
         }
     });
 
     // create meshes
-    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/"];
+    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
     var keyCodes = ["1","2"];
     var rotationAcceleration = [0.0002,0.00032];
 
@@ -118,7 +119,7 @@ Pressing '3' will activate slow motion time (10% of actual time)<br><br>
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
         var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
+        meshRenderer.mesh = engine.project.load(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
         gameObject.addComponent(new RotatorComponent(
