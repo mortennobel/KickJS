@@ -1409,7 +1409,13 @@ KICK.namespace = function (ns_string) {
 
             if (engine.config.shadows){
                 _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER_SHADOWMAP);
+            } else if (_renderShadow){
+                _renderShadow = false; // disable render shadow
+                if (ASSERT){
+                    fail("engine.config.shadows must be enabled for shadows");
+                }
             }
+
         };
 
         /**
@@ -1464,7 +1470,7 @@ KICK.namespace = function (ns_string) {
             if (!_enabled){
                 return;
             }
-            if (_shadowmapShader && _renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+            if (_renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
@@ -1540,7 +1546,19 @@ KICK.namespace = function (ns_string) {
              */
             renderShadow:{
                 get:function(){return _renderShadow;},
-                set:function(newValue){_renderShadow = newValue;}
+                set:function(newValue){
+                    if (engine){ // if object is initialized
+                        if (engine.config.shadows){
+                            _renderShadow = newValue;
+                        } else if (newValue) {
+                            if (ASSERT){
+                                fail("engine.config.shadows must be enabled for shadows");
+                            }
+                        }
+                    } else {
+                        _renderShadow = newValue;
+                    }
+                }
             },
             /**
              * @property renderer

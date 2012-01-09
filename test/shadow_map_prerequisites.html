@@ -31,7 +31,6 @@
                 keyInput = this.gameObject.engine.keyInput;
                 time = this.gameObject.engine.time;
                 position = transform.localPosition;
-
             };
 
             this.update = function(){
@@ -116,7 +115,7 @@
         function initKick() {
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true,
-                shadow:true
+                shadows:true
             });
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
@@ -129,7 +128,6 @@
             cameraObject.addComponent(camera);
             cameraObject.transform.localPosition = [0,1,5];
             cameraObject.addComponent(new CameraMover());
-
 
             var gameObject = engine.activeScene.createGameObject();
             gameObject.layer = 1;
