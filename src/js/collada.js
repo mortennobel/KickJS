@@ -386,7 +386,7 @@ KICK.namespace = function (ns_string) {
                     meshRenderer.mesh = meshes[i];
                     var newMaterial = new KICK.material.Material(engine,{
                         name:"Some material",
-                        shader:engine.resourceManager.getShader("kickjs://shader/default/")
+                        shader:engine.project.load(engine.project.ENGINE_SHADER_DEFAULT)
                     });
                     meshRenderer.material = newMaterial;
                     allMaterials.push(newMaterial);

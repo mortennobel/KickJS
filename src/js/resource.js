@@ -387,15 +387,8 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("No meshdata found for "+url);
                 return;
             }
-            if (debug){
-                // simulate asynchronous
-                setTimeout(function(){
-                    meshDestination.meshData = meshDataObj;
-                },250);
-            }
-            else {
-                meshDestination.meshData = meshDataObj;
-            }
+
+            meshDestination.meshData = meshDataObj;
         };
 
         /**
@@ -507,8 +500,8 @@ KICK.namespace = function (ns_string) {
                 vertexShaderSrc: vertexShaderSrc,
                 fragmentShaderSrc: fragmentShaderSrc
             };
-            KICK.core.Util.applyConfig(shaderDestination,config);
 
+            KICK.core.Util.applyConfig(shaderDestination,config);
             shaderDestination.apply();
         };
 
@@ -528,6 +521,7 @@ KICK.namespace = function (ns_string) {
          * @method getShader
          * @param {String} url
          * @return {KICK.material.Shader} Shader or null if not found
+         * @deprecated
          */
         this.getShader = function(url,errorLog){
             console.log("getShader is deprecated");
@@ -552,17 +546,17 @@ KICK.namespace = function (ns_string) {
         this.getImageData = function(uri,textureDestination){
             var data;
 
-            if (uri.indexOf("kickjs://texture/black/")==0){
+            if (uri.indexOf("kickjs://texture/black/") == 0){
                 data = new Uint8Array([0, 0, 0, 255,
                                          0,   0,   0,255,
                                          0,   0,   0,255,
                                          0,   0,   0,255]);
-            } else if (uri.indexOf("kickjs://texture/white/")==0){
+            } else if (uri.indexOf("kickjs://texture/white/") == 0){
                 data = new Uint8Array([255, 255, 255,255,
                                          255,   255,   255,255,
                                          255,   255,   255,255,
                                          255,   255,   255,255]);
-            } else if (uri.indexOf("kickjs://texture/gray/")==0){
+            } else if (uri.indexOf("kickjs://texture/gray/") == 0){
                 data = new Uint8Array([127, 127, 127,255,
                                          127,   127,   127,255,
                                          127,   127,   127,255,
@@ -585,6 +579,7 @@ KICK.namespace = function (ns_string) {
          * @method getTexture
          * @param {String} url
          * @return {KICK.texture.Texture} Texture object - or null if no texture is found for the specified url
+         * @deprecated
          */
         this.getTexture = function(url){
             console.log("getTexture is deprecated!");

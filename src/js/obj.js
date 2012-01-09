@@ -166,7 +166,7 @@ KICK.namespace = function (ns_string) {
                 var addDefaultMaterial = function(name){
                     var newMaterial = new KICK.material.Material(engine,{
                         name:name,
-                        shader:engine.resourceManager.getShader("kickjs://shader/default/")
+                        shader:engine.project.load(engine.project.ENGINE_SHADER_DEFAULT)
                     });
                     materials.push(newMaterial);
                     allMaterials.push(newMaterial);
