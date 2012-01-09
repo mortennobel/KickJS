@@ -78,7 +78,7 @@ void main(void) {
  getDirectionalLight(n, _dLight, glowingSpecular, diffuse, vSpecular);
 
     vColor = max(diffuse,_ambient.xyz);
-} 
+}
   </textarea>
   <textarea style="width:500px;height:150px;" id="fragmentShaderImg">
       #ifdef GL_ES
@@ -94,7 +94,7 @@ void main(void) {
       {
       gl_FragColor = texture2D(tex,uv) *  vec4(vColor.x, vColor.y, vColor.z, 1.0)+ vec4(vSpecular,vSpecular,vSpecular,1.0);
       }
- 
+
   </textarea>
 <script type="text/javascript" src="/header.js"></script>
     </div>

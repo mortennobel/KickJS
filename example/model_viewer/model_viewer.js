@@ -26,7 +26,6 @@ function load(content,url,func){
         var isDuck = url==="duck.dae" || url==="duck_triangulate.dae";
         if (isDuck){
             gameObject.transform.localScale = [0.01,0.01,0.01];
-
         }
         var meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
         if (meshRendererNew){
@@ -37,7 +36,7 @@ function load(content,url,func){
             meshRendererNew.materials = materials;
             meshRenderer = meshRendererNew;
             recalculateNormals();
-            console.log(KICK.core.Util.typedArrayToArray(meshRendererNew.mesh.aabb));
+//            console.log(KICK.core.Util.typedArrayToArray(meshRendererNew.mesh.aabb));
         }
     }
 }
@@ -127,14 +126,12 @@ function createMaterial(vertexShaderId, fragmentShaderId){
     var missingAttributes = meshRenderer.mesh.verify(shader);
     if (missingAttributes){
         console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-        return;
+        return null;
     }
-
-    var material = new KICK.material.Material(engine,{
+    return new KICK.material.Material(engine, {
         name:"Some material",
         shader:shader
     });
-    return material;
 }
 
 function recalculateNormals(){
@@ -245,14 +242,16 @@ function initKick() {
     var gameObject = engine.activeScene.createGameObject();
     gameObject.name = "Mesh";
     meshRenderer = new KICK.scene.MeshRenderer();
-    meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/?radius=0.5");
+    meshRenderer.mesh = new KICK.mesh.Mesh(engine,
+        {
+            dataURI:"kickjs://mesh/uvsphere/?slices=12&stacks=6&radius=0.5",
+            name:"Default object"
+        });
     material = createMaterial('vertexShaderColor','fragmentShader');
-
     duckMaterial = createMaterial('vertexShaderColorImg','fragmentShaderImg');
     meshRenderer.material = duckMaterial;
     initDuckTexture();
     initLights();
-
     gameObject.addComponent(meshRenderer);
 }
 
@@ -286,5 +285,4 @@ window.addEventListener("load",function(){
     document.getElementById("file").onchange = function() {
       loadClicked(this.files);
     };
-
 },false);

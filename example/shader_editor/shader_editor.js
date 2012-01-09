@@ -13,7 +13,7 @@ window.shaderEditor = new (function(){
         isRotating = true,
         meshsetting,
         setMesh = function (url){
-            _meshRenderer.mesh = _engine.resourceManager.getMesh(url);
+            _meshRenderer.mesh = new KICK.mesh.Mesh(_engine,{dataURI:url});
         };
 
     this.textures = [];
@@ -36,7 +36,7 @@ window.shaderEditor = new (function(){
         _ambientLight.color = settings.lightAmbient;
         _light.intensity = settings.lightintensity;
         _light.color = settings.lightcolor;
-        _lightTransform.rotationEuler = settings.lightrot;
+        _lightTransform.rotationEuler = settings.lightrotation;
         _lightTransform.position = settings.lightpos;
         isRotating = settings.rotatemesh==="on";
         var cameraTransform = camera.gameObject.transform;

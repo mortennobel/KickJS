@@ -102,7 +102,6 @@ window.onload = function(){
             scene = engine.activeScene,
             currentMovement = 0, // limits movement to not go backwards
             shader = new KICK.material.Shader(engine),
-
             material = new KICK.material.Material(engine,{
                 shader:shader,
                 name:"Snake material"

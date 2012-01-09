@@ -25,7 +25,7 @@ Object.defineProperty(window,"defaultMaterial",{
                 "meshsetting":"sphere",
                 "rotatemesh":"on",
                 "lightpos":[1,1,1],
-                "lightrot":[0,0,0],
+                "lightrotation":[0,180,0],
                 "lightcolor":[1,1,1],
                 "lightAmbient":[0.1,0.1,0.1],
                 "lightintensity":1},
