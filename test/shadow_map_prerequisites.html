@@ -52,7 +52,7 @@
                     transform.localPosition = position;
                 }
             };
-        };
+        }
 
         function setMaterial(meshRenderer){
             var getValueBetweenHalfAndOne = function(){
@@ -123,7 +123,8 @@
                 clearColor: [0,0,0,1],
                 perspective: true,
                 normalizedViewportRect:[0,0,0.5,1],
-                layerMask:1
+                layerMask:1,
+                renderShadow:true
             });
             cameraObject.addComponent(camera);
             cameraObject.transform.localPosition = [0,1,5];
