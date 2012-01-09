@@ -121,7 +121,7 @@
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
 
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
             gameObject.addComponent(meshRenderer);
 
@@ -129,7 +129,7 @@
             gameObject2.transform.position = [0,0.5,0];
             var meshRenderer2 = new KICK.scene.MeshRenderer();
 
-            meshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/uvsphere/?radius=0.6");
+            meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
             gameObject2.addComponent(meshRenderer2);
 

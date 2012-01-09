@@ -75,7 +75,7 @@
                         type: KICK.core.Constants.GL_FLOAT_VEC3
                     },
                     mainTexture: {
-                        value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                         type: KICK.core.Constants.GL_SAMPLER_2D
                     }
                 }
@@ -135,7 +135,7 @@
             gameObject.transform.localPosition = [0,3,0];
             meshRenderer = new KICK.scene.MeshRenderer();
 
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial(meshRenderer);
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);
@@ -161,7 +161,7 @@
             plane.transform.localScale = [5,5,5];
             var planeMeshRenderer = new KICK.scene.MeshRenderer();
 
-            planeMeshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+            planeMeshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
             setMaterial(planeMeshRenderer);
             plane.addComponent(planeMeshRenderer);
 
@@ -173,7 +173,7 @@
             plane2.transform.localPosition = [0,-5,0];
             var planeMeshRenderer2 = new KICK.scene.MeshRenderer();
 
-            planeMeshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+            planeMeshRenderer2.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
             setMaterial(planeMeshRenderer2);
             plane2.addComponent(planeMeshRenderer2);
 
@@ -221,7 +221,7 @@
                 plane2.transform.localPosition = [0,.5,0];
                 plane2.layer = 2;
                 var planeMeshRenderer2 = new KICK.scene.MeshRenderer();
-                planeMeshRenderer2.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+                planeMeshRenderer2.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
                 planeMeshRenderer2.material = new KICK.material.Material(engine,{
                     name:"Some material",
                     shader: shader,
@@ -241,10 +241,10 @@
                 plane3.transform.localPosition = [0,-.5,0];
                 plane3.layer = 2;
                 var planeMeshRenderer3 = new KICK.scene.MeshRenderer();
-                planeMeshRenderer3.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+                planeMeshRenderer3.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
                 planeMeshRenderer3.material = new KICK.material.Material(engine,{
                     name:"Some material",
-                    shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+                    shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
                     uniforms:{
                         mainColor: {
                             value: [1,1,1],
