@@ -208,7 +208,7 @@ KICK.namespace = function (ns_string) {
                             cancelRequestAnimFrame(animationFrameObj);
                             animationFrameObj = null;
                         } else {
-                            lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
+                            lastTime = new Date().getTime()-16; // ensures valid delta time in next frame
                             animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
                         }
                     }
