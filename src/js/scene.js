@@ -1379,7 +1379,7 @@ KICK.namespace = function (ns_string) {
             height = height || 1;
             if (!pickingQueue){
                 pickingQueue = [];
-                pickingShader = engine.project.load(engine.project.ENGINE_SHADER_PICK);
+                pickingShader = engine.project.load(engine.project.ENGINE_SHADER___PICK);
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
                     dimension: gl.viewportSize
                 });
@@ -1408,7 +1408,7 @@ KICK.namespace = function (ns_string) {
             _scene.addComponentListener(thisObj);
 
             if (engine.config.shadows){
-                _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER_SHADOWMAP);
+                _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
             } else if (_renderShadow){
                 _renderShadow = false; // disable render shadow
                 if (ASSERT){

@@ -591,7 +591,7 @@ KICK.namespace = function (ns_string) {
                 var p = core.Project,
                     res,
                     url;
-                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_ERROR){
+                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER___ERROR){
                     switch (uid){
                         case p.ENGINE_SHADER_DEFAULT:
                             url = "kickjs://shader/default/";
@@ -608,13 +608,13 @@ KICK.namespace = function (ns_string) {
                         case p.ENGINE_SHADER_TRANSPARENT_UNLIT:
                             url = "kickjs://shader/transparent_unlit/";
                             break;
-                        case p.ENGINE_SHADER_SHADOWMAP:
+                        case p.ENGINE_SHADER___SHADOWMAP:
                             url = "kickjs://shader/__shadowmap/";
                             break;
-                        case p.ENGINE_SHADER_PICK:
+                        case p.ENGINE_SHADER___PICK:
                             url = "kickjs://shader/__pick/";
                             break;
-                        case p.ENGINE_SHADER_ERROR :
+                        case p.ENGINE_SHADER___ERROR :
                             url = "kickjs://shader/__error/";
                             break;
                         default:
@@ -844,6 +844,40 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Returns the buildin engine resources
+         * @method getEngineResourceDescriptorByType
+         * @param {String} type
+         * @return {Array[KICK.core.ResourceDescriptor]}
+         */
+        this.getEngineResourceDescriptorByType = function(type){
+            var res = [];
+            var searchFor;
+            if (type === "KICK.mesh.Mesh"){
+                searchFor = "ENGINE_MESH_";
+            } else if (type === "KICK.material.Shader"){
+                searchFor = "ENGINE_SHADER_";
+            } else if (type === "KICK.texture.Texture"){
+                searchFor = "ENGINE_TEXTURE_";
+            }
+            if (searchFor){
+                for (var name in core.Project){
+                    if (typeof core.Project[name] === "number" && core.Project.hasOwnProperty(name) && name.indexOf(searchFor) === 0){
+                        var uid = core.Project[name];
+                        var name = core.Util.toCamelCase(name.substr(searchFor.length)," ");
+                        console.log(name);
+                        res.push(new core.ResourceDescriptor({
+                            type: type,
+                            config:{
+                                name: name
+                            },
+                            uid: uid}));
+                    }
+                }
+            }
+            return res;
+        };
+
+        /**
          * @method getResourceDescriptorByType
          * @param {String} type
          * @return {Array[KICK.core.ResourceDescriptor]}
@@ -955,23 +989,23 @@ KICK.namespace = function (ns_string) {
      */
     core.Project.ENGINE_SHADER_TRANSPARENT_UNLIT = -104;
     /**
-     * @property ENGINE_SHADER_TRANSPARENT_UNLIT
+     * @property ENGINE_SHADER___SHADOWMAP
      * @type Number
      * @static
      */
-    core.Project.ENGINE_SHADER_SHADOWMAP = -105;
+    core.Project.ENGINE_SHADER___SHADOWMAP = -105;
     /**
-     * @property ENGINE_SHADER_PICK
+     * @property ENGINE_SHADER___PICK
      * @type Number
      * @static
      */
-    core.Project.ENGINE_SHADER_PICK = -106;
+    core.Project.ENGINE_SHADER___PICK = -106;
     /**
-     * @property ENGINE_SHADER_ERROR
+     * @property ENGINE_SHADER___ERROR
      * @type Number
      * @static
      */
-    core.Project.ENGINE_SHADER_ERROR = -107;
+    core.Project.ENGINE_SHADER___ERROR = -107;
 
     /**
      * @property ENGINE_TEXTURE_BLACK
@@ -1671,6 +1705,40 @@ KICK.namespace = function (ns_string) {
          */
         hasProperty:function (obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
+        },
+        /**
+         *
+         * @method toCamelCase
+         * @param {String} str
+         * @param {String} wordSeparator Optional - default value is empty string
+         */
+        toCamelCase:function(str, wordSeparator){
+            if (!wordSeparator){
+                wordSeparator = "";
+            }
+            // skip initial underscore
+            var i,
+                wasLastCharSpace = true,
+                char,
+                resStr = "";
+            for (i=0;i<str.length;i++){
+                char = str.charAt(i);
+                if (char !== "_"){
+                    break;
+                }
+                resStr += char;
+            }
+
+            for (;i<str.length;i++){
+                var char = str.charAt(i);
+                var isSpace = char === '_';
+                if (isSpace){
+                    char = wordSeparator;
+                }
+                resStr += wasLastCharSpace ? char.toUpperCase() : char.toLowerCase();
+                wasLastCharSpace = isSpace;
+            }
+            return resStr;
         },
         /**
          * @method getJSONReference

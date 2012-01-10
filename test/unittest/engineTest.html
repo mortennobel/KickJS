@@ -382,6 +382,33 @@ YUI().use('node', 'console', 'test', function (Y) {
             var Assert = Y.Assert;
             var texture = engine.project.load(engine.project.ENGINE_TEXTURE_GRAY);
             Assert.areEqual(engine.project.ENGINE_TEXTURE_GRAY,texture.uid);
+        },
+        testGetDefaultAssets: function(){
+            var Assert = Y.Assert;
+            var isAllNegativeUIDSAndHaveName = function(array){
+                for (var i=0;i<array.length;i++){
+                    Assert.isTrue(array[i].uid < 0);
+                    Assert.isTrue(array[i].name && array[i].name.length > 0);
+                    Assert.isTrue(array[i].name.charAt(1).toLowerCase() == array[i].name.charAt(1));
+                }
+            };
+            var meshes = engine.project.getResourceDescriptorByType("KICK.mesh.Mesh")
+            Assert.areEqual(0,meshes.length);
+            meshes = engine.project.getEngineResourceDescriptorByType("KICK.mesh.Mesh");
+            Assert.areNotEqual(0,meshes.length);
+            isAllNegativeUIDSAndHaveName(meshes);
+
+            var textures = engine.project.getResourceDescriptorByType("KICK.texture.Texture")
+            Assert.areEqual(0,textures.length);
+            textures = engine.project.getEngineResourceDescriptorByType("KICK.texture.Texture");
+            Assert.areNotEqual(0,textures.length);
+            isAllNegativeUIDSAndHaveName(textures);
+
+            var shaders = engine.project.getResourceDescriptorByType("KICK.material.Shader")
+            Assert.areEqual(0,shaders.length);
+            shaders = engine.project.getEngineResourceDescriptorByType("KICK.material.Shader");
+            Assert.areNotEqual(0,shaders.length);
+            isAllNegativeUIDSAndHaveName(shaders);
         }
     });
 
