@@ -623,7 +623,11 @@ KICK.namespace = function (ns_string) {
                             }
                             return null;
                     }
-                    res = new KICK.material.Shader(engine,{dataURI:url,name:getUrlAsResourceName(url)})
+                    res = new KICK.material.Shader(engine,{
+                        dataURI:url,
+                        name:getUrlAsResourceName(url),
+                        uid:uid
+                    })
                 } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_GRAY){
                     switch (uid){
                         case p.ENGINE_TEXTURE_BLACK:
@@ -647,7 +651,8 @@ KICK.namespace = function (ns_string) {
                             name:getUrlAsResourceName(url),
                             minFilter: constants.GL_NEAREST,
                             magFilter: constants.GL_NEAREST,
-                            generateMipmaps: false
+                            generateMipmaps: false,
+                            uid:uid
                         });
                 } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE){
                     switch (uid){
@@ -672,7 +677,8 @@ KICK.namespace = function (ns_string) {
                     res = new KICK.mesh.Mesh(engine,
                         {
                             dataURI:url,
-                            name:getUrlAsResourceName(url)
+                            name:getUrlAsResourceName(url),
+                            uid:uid
                         });
                 }
 
