@@ -387,7 +387,7 @@ YUI().use('node', 'console', 'test', function (Y) {
             var Assert = Y.Assert;
             var isAllNegativeUIDSAndHaveName = function(array){
                 for (var i=0;i<array.length;i++){
-                    Assert.isTrue(array[i].uid < 0);
+                    Assert.isTrue(array[i].config.uid < 0);
                     Assert.isTrue(array[i].name && array[i].name.length > 0);
                     Assert.isTrue(array[i].name.charAt(1).toLowerCase() == array[i].name.charAt(1));
                 }

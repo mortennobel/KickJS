@@ -868,9 +868,9 @@ KICK.namespace = function (ns_string) {
                         res.push(new core.ResourceDescriptor({
                             type: type,
                             config:{
-                                name: name
-                            },
-                            uid: uid}));
+                                name: name,
+                                uid: uid
+                            }}));
                     }
                 }
             }
