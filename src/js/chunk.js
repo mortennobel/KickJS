@@ -141,11 +141,16 @@ KICK.namespace = function (ns_string) {
                 return null;
             };
         /**
-         * Size of chunkdata in bytes
+         * Size of chunkdata in bytes. Note that the data is added padding so it always fit into a double array.
          * @method getSize
          */
         this.getSize = function(){
-            return getHeaderSize()+getChunksSize()
+            var size = getHeaderSize()+getChunksSize();
+            var remainder = size%8;
+            if (remainder !== 0){
+                size += 8- remainder;
+            }
+            return size;
         };
 
         /**

@@ -156,7 +156,26 @@ YUI().use('node', 'console', 'test', function (Y) {
             for (var i=0;i<valueView.length;i++){
                 Assert.isTrue(recievedValueView[i]===valueView[i], "Content is not equal");
             }
+        },
+        testChunkLengthDivBy8 : function () {
+            var Assert = Y.Assert;
+
+            var string = "";
+            for (var i=0;i<16;i++){
+                var chunkData = new KICK.core.ChunkData();
+                chunkData.setString(1,string);
+                var res = chunkData.getString(1);
+                console.log("Converted string is :'"+res+"'");
+                Assert.isTrue(string === res);
+
+                // check serialized data is diviable with 8
+                var serializedData = chunkData.serialize();
+                Assert.isTrue(serializedData.byteLength%8 === 0, "Was "+serializedData.byteLength+" ("+(serializedData.byteLength/8)+")");
+
+                string += "a";
+            }
         }
+
     });
 
     var ExampleSuite = new Y.Test.Suite("ChunkData test");
