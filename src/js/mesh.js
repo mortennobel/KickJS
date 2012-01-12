@@ -209,7 +209,7 @@ KICK.namespace = function (ns_string) {
             var chunkData = new KICK.core.ChunkData();
             chunkData.setArrayBuffer(1,thisObj.interleavedArray);
             chunkData.setString(2,JSON.stringify(thisObj.interleavedArrayFormat));
-            chunkData.setString(3,thisObj.name);
+            chunkData.setString(3,thisObj.name || "MeshData");
             var subMeshes = thisObj.subMeshes;
             var numberOfSubMeshes = subMeshes.length;
             chunkData.setNumber(4,numberOfSubMeshes);
@@ -940,16 +940,28 @@ KICK.namespace = function (ns_string) {
                     return _dataURI;
                 },
                 set:function(newValue){
-                    if (newValue !== _dataURI){
-                        _dataURI = newValue;
-                        engine.resourceManager.getMeshData(newValue,thisObj);
-                    }
+                    thisObj.setDataURI(newValue,true);
                 }
             }
         });
 
+        /**
+         * @method setDataURI
+         * @param {String} newValue
+         * @param {Boolean} automaticGetMeshData optional. if true the mesh data is attempted to be loaded by resourceManager.getMeshData
+         */
+        this.setDataURI = function(newValue, automaticGetMeshData){
+            if (newValue !== _dataURI){
+                _dataURI = newValue;
+                if (automaticGetMeshData){
+                    engine.resourceManager.getMeshData(newValue,thisObj);
+                }
+            }
+        };
+
         KICK.core.Util.applyConfig(this,config);
         engine.project.registerObject(this, "KICK.mesh.Mesh");
+
 
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
