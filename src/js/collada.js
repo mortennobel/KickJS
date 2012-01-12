@@ -60,7 +60,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
      * @param {boolean} rotate90x rotate -90 degrees around x axis
-     * @return {Array[KICK.scene.GameObject]}
+     * @return {Object} returns container object with the properties(mesh:[], gameObjects:[], materials:[])
      * @static
      */
     importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
