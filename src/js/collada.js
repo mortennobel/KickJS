@@ -294,7 +294,7 @@ KICK.namespace = function (ns_string) {
             buildMeshData = function (colladaDOM, engine, geometry){
                 var tagName,
                     meshChild,
-                    name = geometry.getAttribute('name'),
+                    name = geometry.getAttribute('name') || "MeshData",
                     destMeshData,
                     mesh = geometry.getElementsByTagName("mesh");
                 if (mesh.length==0){
