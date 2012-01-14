@@ -409,6 +409,21 @@ KICK.namespace = function (ns_string) {
             _intFormat = oldIntFormat;
         };
 
+        /**
+         * Allows setting the dataURI without reloading the image
+         * @method setDataURI
+         * @param newValue
+         * @param automaticGetTextureData
+         */
+        this.setDataURI = function( newValue , automaticGetTextureData ){
+            if (newValue !== _dataURI){
+                _dataURI = newValue;
+                if (automaticGetTextureData){
+                    engine.resourceManager.getImageData(_dataURI,thisObj);
+                }
+            }
+        };
+
         Object.defineProperties(this,{
             /**
              * @property textureId
@@ -454,10 +469,7 @@ KICK.namespace = function (ns_string) {
                     return _dataURI;
                 },
                 set:function(newValue){
-                    if (newValue !== _dataURI){
-                        _dataURI = newValue;
-                        engine.resourceManager.getImageData(_dataURI,thisObj);
-                    }
+                    thisObj.setDataURI(newValue,true);
                 }
             },
             /**
