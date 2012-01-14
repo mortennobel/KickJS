@@ -306,7 +306,10 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
-     * Abstract method called when a component is added to scene. May be undefined.
+     * Abstract method called when a component is added to scene. May be undefined. <br>
+     * This method method works in many cases like a constructor function, where references to other game objects can
+     * be looked up (this cannot be done when the actual constructor function is called, since the scene may not be
+     * loaded completely).
      * @method activated
      */
 
@@ -331,13 +334,15 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
-     * Abstract method called every update. May be undefined.
-     * @method update
+     * @property renderOrder
+     * @type Number
      */
 
+
+
     /**
-     * Abstract method called every update as the last thing. Useful for camera scripts. May be undefined.
-     * @method lateUpdate
+     * Abstract method called every update. May be undefined.
+     * @method update
      */
 //};
 
@@ -685,7 +690,6 @@ KICK.namespace = function (ns_string) {
             gameObjectsNew = [],
             gameObjectsDelete = [],
             updateableComponents= [],
-            lateUpdateableComponents = [],
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
@@ -763,9 +767,6 @@ KICK.namespace = function (ns_string) {
                         if (typeof(component.update) === "function") {
                             core.Util.insertSorted(component,updateableComponents,sortByScriptPriority);
                         }
-                        if (typeof(component.lateUpdate) === "function") {
-                            core.Util.insertSorted(component,lateUpdateableComponents,sortByScriptPriority);
-                        }
                         if (typeof(component.render) === "function") {
                             renderableComponents.push(component);
                         }
@@ -808,9 +809,6 @@ KICK.namespace = function (ns_string) {
                         if (typeof(component.update) === "function") {
                             core.Util.removeElementFromArray(updateableComponents,component);
                         }
-                        if (typeof(component.lateUpdate) === "function") {
-                            core.Util.removeElementFromArray(lateUpdateableComponents,component);
-                        }
                         if (component instanceof scene.Camera){
                             core.Util.removeElementFromArray(cameras,component);
                         } else if (component instanceof scene.Light){
@@ -827,9 +825,6 @@ KICK.namespace = function (ns_string) {
                 var i;
                 for (i=updateableComponents.length-1; i >= 0; i--) {
                     updateableComponents[i].update();
-                }
-                for (i=lateUpdateableComponents.length-1; i >= 0; i--) {
-                    lateUpdateableComponents[i].lateUpdate();
                 }
                 cleanupGameObjects();
             },
@@ -910,7 +905,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Should only be called by GameObject when a component is added. If the component is updateable (implements
-         * update or lateUpdate) the components is added to the current list of updateable components after the update loop
+         * update method) the components is added to the current list of updateable components after the update loop
          * (so it will not recieve any update invocations in the current frame).
          * If the component is renderable (implements), is it added to the renderer's components
          * @method addComponent
