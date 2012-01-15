@@ -238,6 +238,22 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Applies the texture settings
+         * @method apply
+         */
+        this.apply = function(){
+            thisObj.bind(0); // bind to texture slot 0
+            if (_textureType === constants.GL_TEXTURE_2D){
+                gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
+                gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
+            } else {
+
+            }
+            gl.texParameteri(_textureType, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+            gl.texParameteri(_textureType, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+        };
+
+        /**
          * Bind the current texture
          * @method bind
          */
@@ -293,8 +309,6 @@ KICK.namespace = function (ns_string) {
                 gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
                 gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, _intFormat, constants.GL_UNSIGNED_BYTE, imageObj);
 
-                gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
-                gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
                 vec2.set([imageObj.width,imageObj.height],_dimension);
             } else {
                  var cubemapOrder = [
@@ -323,8 +337,7 @@ KICK.namespace = function (ns_string) {
                 }
                 vec2.set([width,height],_dimension);
             }
-            gl.texParameteri(_textureType, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
-            gl.texParameteri(_textureType, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+            thisObj.apply();
             if (_generateMipmaps){
                 gl.generateMipmap(_textureType);
             }
