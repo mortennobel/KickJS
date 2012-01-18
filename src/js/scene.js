@@ -334,11 +334,13 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
+     * Default value is 1000<br>
+     * &lt; 2000 default geometry<br>
+     * 2000 - 2999 transparent geometry (sorted back-to-front when rendered)<br>
+     * &gt; 3000 overlay geometry rendered on top
      * @property renderOrder
      * @type Number
      */
-
-
 
     /**
      * Abstract method called every update. May be undefined.
@@ -1919,10 +1921,7 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
-            /**
-             * @property renderOrder
-             * @type Number
-             */
+            // inherit documentation from component
             renderOrder:{
                 get:function(){
                     return _renderOrder;
