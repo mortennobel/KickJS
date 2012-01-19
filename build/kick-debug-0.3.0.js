@@ -6585,9 +6585,9 @@ KICK.namespace = function (ns_string) {
                         res.push(new core.ResourceDescriptor({
                             type: type,
                             config:{
-                                name: name
-                            },
-                            uid: uid}));
+                                name: name,
+                                uid: uid
+                            }}));
                     }
                 }
             }
@@ -6712,7 +6712,7 @@ KICK.namespace = function (ns_string) {
      */
     core.Project.ENGINE_SHADER___SHADOWMAP = -105;
     /**
-     * @property ENGINE_SHADER_PICK
+     * @property ENGINE_SHADER___PICK
      * @type Number
      * @static
      */
@@ -8048,11 +8048,16 @@ KICK.namespace = function (ns_string) {
                 return null;
             };
         /**
-         * Size of chunkdata in bytes
+         * Size of chunkdata in bytes. Note that the data is added padding so it always fit into a double array.
          * @method getSize
          */
         this.getSize = function(){
-            return getHeaderSize()+getChunksSize()
+            var size = getHeaderSize()+getChunksSize();
+            var remainder = size%8;
+            if (remainder !== 0){
+                size += 8- remainder;
+            }
+            return size;
         };
 
         /**
@@ -8461,7 +8466,7 @@ KICK.namespace = function (ns_string) {
             var chunkData = new KICK.core.ChunkData();
             chunkData.setArrayBuffer(1,thisObj.interleavedArray);
             chunkData.setString(2,JSON.stringify(thisObj.interleavedArrayFormat));
-            chunkData.setString(3,thisObj.name);
+            chunkData.setString(3,thisObj.name || "MeshData");
             var subMeshes = thisObj.subMeshes;
             var numberOfSubMeshes = subMeshes.length;
             chunkData.setNumber(4,numberOfSubMeshes);
@@ -9192,16 +9197,28 @@ KICK.namespace = function (ns_string) {
                     return _dataURI;
                 },
                 set:function(newValue){
-                    if (newValue !== _dataURI){
-                        _dataURI = newValue;
-                        engine.resourceManager.getMeshData(newValue,thisObj);
-                    }
+                    thisObj.setDataURI(newValue,true);
                 }
             }
         });
 
+        /**
+         * @method setDataURI
+         * @param {String} newValue
+         * @param {Boolean} automaticGetMeshData optional. if true the mesh data is attempted to be loaded by resourceManager.getMeshData
+         */
+        this.setDataURI = function(newValue, automaticGetMeshData){
+            if (newValue !== _dataURI){
+                _dataURI = newValue;
+                if (automaticGetMeshData){
+                    engine.resourceManager.getMeshData(newValue,thisObj);
+                }
+            }
+        };
+
         KICK.core.Util.applyConfig(this,config);
         engine.project.registerObject(this, "KICK.mesh.Mesh");
+
 
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
@@ -9280,7 +9297,8 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Renders the current mesh
+         * Renders the current mesh.
+         * Assumes that the Mesh.bind(shader) has been called prior to this, to setup the mesh with the shader.
          * @method render
          * @param {Number} submeshIndex
          */
@@ -9627,7 +9645,10 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
-     * Abstract method called when a component is added to scene. May be undefined.
+     * Abstract method called when a component is added to scene. May be undefined. <br>
+     * This method method works in many cases like a constructor function, where references to other game objects can
+     * be looked up (this cannot be done when the actual constructor function is called, since the scene may not be
+     * loaded completely).
      * @method activated
      */
 
@@ -9652,13 +9673,17 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
-     * Abstract method called every update. May be undefined.
-     * @method update
+     * Default value is 1000<br>
+     * &lt; 2000 default geometry<br>
+     * 2000 - 2999 transparent geometry (sorted back-to-front when rendered)<br>
+     * &gt; 3000 overlay geometry rendered on top
+     * @property renderOrder
+     * @type Number
      */
 
     /**
-     * Abstract method called every update as the last thing. Useful for camera scripts. May be undefined.
-     * @method lateUpdate
+     * Abstract method called every update. May be undefined.
+     * @method update
      */
 //};
 
@@ -10006,7 +10031,6 @@ KICK.namespace = function (ns_string) {
             gameObjectsNew = [],
             gameObjectsDelete = [],
             updateableComponents= [],
-            lateUpdateableComponents = [],
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
@@ -10084,9 +10108,6 @@ KICK.namespace = function (ns_string) {
                         if (typeof(component.update) === "function") {
                             core.Util.insertSorted(component,updateableComponents,sortByScriptPriority);
                         }
-                        if (typeof(component.lateUpdate) === "function") {
-                            core.Util.insertSorted(component,lateUpdateableComponents,sortByScriptPriority);
-                        }
                         if (typeof(component.render) === "function") {
                             renderableComponents.push(component);
                         }
@@ -10129,9 +10150,6 @@ KICK.namespace = function (ns_string) {
                         if (typeof(component.update) === "function") {
                             core.Util.removeElementFromArray(updateableComponents,component);
                         }
-                        if (typeof(component.lateUpdate) === "function") {
-                            core.Util.removeElementFromArray(lateUpdateableComponents,component);
-                        }
                         if (component instanceof scene.Camera){
                             core.Util.removeElementFromArray(cameras,component);
                         } else if (component instanceof scene.Light){
@@ -10148,9 +10166,6 @@ KICK.namespace = function (ns_string) {
                 var i;
                 for (i=updateableComponents.length-1; i >= 0; i--) {
                     updateableComponents[i].update();
-                }
-                for (i=lateUpdateableComponents.length-1; i >= 0; i--) {
-                    lateUpdateableComponents[i].lateUpdate();
                 }
                 cleanupGameObjects();
             },
@@ -10231,7 +10246,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Should only be called by GameObject when a component is added. If the component is updateable (implements
-         * update or lateUpdate) the components is added to the current list of updateable components after the update loop
+         * update method) the components is added to the current list of updateable components after the update loop
          * (so it will not recieve any update invocations in the current frame).
          * If the component is renderable (implements), is it added to the renderer's components
          * @method addComponent
@@ -11245,10 +11260,7 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
-            /**
-             * @property renderOrder
-             * @type Number
-             */
+            // inherit documentation from component
             renderOrder:{
                 get:function(){
                     return _renderOrder;
@@ -11933,6 +11945,22 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Applies the texture settings
+         * @method apply
+         */
+        this.apply = function(){
+            thisObj.bind(0); // bind to texture slot 0
+            if (_textureType === 3553){
+                gl.texParameteri(3553, 10242, _wrapS);
+                gl.texParameteri(3553, 10243, _wrapT);
+            } else {
+
+            }
+            gl.texParameteri(_textureType, 10240, _magFilter);
+            gl.texParameteri(_textureType, 10241, _minFilter);
+        };
+
+        /**
          * Bind the current texture
          * @method bind
          */
@@ -11988,8 +12016,6 @@ KICK.namespace = function (ns_string) {
                 gl.pixelStorei(3317, 1);
                 gl.texImage2D(3553, 0, _intFormat, _intFormat, 5121, imageObj);
 
-                gl.texParameteri(3553, 10242, _wrapS);
-                gl.texParameteri(3553, 10243, _wrapT);
                 vec2.set([imageObj.width,imageObj.height],_dimension);
             } else {
                  var cubemapOrder = [
@@ -12018,8 +12044,7 @@ KICK.namespace = function (ns_string) {
                 }
                 vec2.set([width,height],_dimension);
             }
-            gl.texParameteri(_textureType, 10240, _magFilter);
-            gl.texParameteri(_textureType, 10241, _minFilter);
+            thisObj.apply();
             if (_generateMipmaps){
                 gl.generateMipmap(_textureType);
             }
@@ -12104,6 +12129,21 @@ KICK.namespace = function (ns_string) {
             _intFormat = oldIntFormat;
         };
 
+        /**
+         * Allows setting the dataURI without reloading the image
+         * @method setDataURI
+         * @param newValue
+         * @param automaticGetTextureData
+         */
+        this.setDataURI = function( newValue , automaticGetTextureData ){
+            if (newValue !== _dataURI){
+                _dataURI = newValue;
+                if (automaticGetTextureData){
+                    engine.resourceManager.getImageData(_dataURI,thisObj);
+                }
+            }
+        };
+
         Object.defineProperties(this,{
             /**
              * @property textureId
@@ -12149,10 +12189,7 @@ KICK.namespace = function (ns_string) {
                     return _dataURI;
                 },
                 set:function(newValue){
-                    if (newValue !== _dataURI){
-                        _dataURI = newValue;
-                        engine.resourceManager.getImageData(_dataURI,thisObj);
-                    }
+                    thisObj.setDataURI(newValue,true);
                 }
             },
             /**
@@ -12800,6 +12837,7 @@ KICK.namespace = function (ns_string) {
         applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants,
         ASSERT = true,
+        fail = core.Util.fail,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
@@ -13687,7 +13725,7 @@ KICK.namespace = function (ns_string) {
                  set:function(newValue){_name = newValue;}
              },
             /**
-             * Also allows string - this will be used to lookup the shader in engine.project 
+
              * @property shader
              * @type KICK.material.Shader
              */
@@ -13696,6 +13734,9 @@ KICK.namespace = function (ns_string) {
                     return _shader;
                 },
                 set:function(newValue){
+                    if (!newValue instanceof KICK.material.Shader){
+                        fail("KICK.material.Shader expected");
+                    }
                     _shader = newValue;
                     thisObj.init();
                 }
@@ -13745,9 +13786,6 @@ KICK.namespace = function (ns_string) {
          * @method init
          */
         this.init = function(){
-            if (typeof _shader === 'string'){
-                _shader = engine.project.load(_shader);
-            }
             if (!_shader){
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
                 _shader = engine.project.load("kickjs://shader/__error/");
@@ -14238,7 +14276,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
      * @param {boolean} rotate90x rotate -90 degrees around x axis
-     * @return {Array[KICK.scene.GameObject]}
+     * @return {Object} returns container object with the properties(mesh:[], gameObjects:[], materials:[])
      * @static
      */
     importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x){
@@ -14472,7 +14510,7 @@ KICK.namespace = function (ns_string) {
             buildMeshData = function (colladaDOM, engine, geometry){
                 var tagName,
                     meshChild,
-                    name = geometry.getAttribute('name'),
+                    name = geometry.getAttribute('name') || "MeshData",
                     destMeshData,
                     mesh = geometry.getElementsByTagName("mesh");
                 if (mesh.length==0){
@@ -14691,7 +14729,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
      * @param {boolean} rotate90x rotate -90 degrees around x axis
-     * @return {Object} returns container object of the type {mesh:[], gameObjects:[], materials:[]}
+     * @return {Object} returns container object with the properties (mesh:[], gameObjects:[], materials:[])
      * @static
      */
     importer.ObjImporter.import = function (objFileContent, engine, scene, rotate90x){

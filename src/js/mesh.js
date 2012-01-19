@@ -1040,7 +1040,8 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Renders the current mesh
+         * Renders the current mesh.
+         * Assumes that the Mesh.bind(shader) has been called prior to this, to setup the mesh with the shader.
          * @method render
          * @param {Number} submeshIndex
          */
