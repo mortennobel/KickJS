@@ -6450,6 +6450,45 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Loads a project by URL. This call is asynchronous, and onSuccess or onFail will be called when the loading is
+         * complete.
+         * @method loadProjectByURL
+         * @param {String} url
+         * @param {Function} onSuccess
+         * @param {Function} onFail
+         */
+        this.loadProjectByURL = function(url, onSuccess, onError){
+            var getAbsoluteURL = function(url){
+                if (url.indexOf('/')===0){
+                    url = location.href.substring(0,location.href.lastIndexOf('/')+1) + url;
+                }
+                return url;
+            },voidFunction = function(){}
+                ;
+            onSuccess = onSuccess || voidFunction ;
+            onError = onError || voidFunction ;
+
+            url = getAbsoluteURL(url);
+            var oXHR = new XMLHttpRequest();
+            oXHR.open("GET", url, true);
+            oXHR.onreadystatechange = function (oEvent) {
+                if (oXHR.readyState === 4) {
+                    if (oXHR.status === 200) {
+                        var value = JSON.parse(oXHR.responseText);
+                        try{
+                            thisObj.loadProject(value);
+                            onSuccess();
+                        }catch(e){
+                            onError(e);
+                        }
+                    } else {
+                        onError();
+                    }
+                }
+            };
+            oXHR.send(null);
+        };
+        /**
          * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor],activeScene:number}
          * @method loadProject
          * @param {object} config
