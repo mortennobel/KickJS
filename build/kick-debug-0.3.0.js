@@ -6463,7 +6463,6 @@ KICK.namespace = function (ns_string) {
             onSuccess = onSuccess || voidFunction ;
             onError = onError || voidFunction ;
 
-            url = core.Util.getAbsoluteURL(url);
             var oXHR = new XMLHttpRequest();
             oXHR.open("GET", url, true);
             oXHR.onreadystatechange = function (oEvent) {
@@ -7448,19 +7447,6 @@ KICK.namespace = function (ns_string) {
      */
     core.Util = {
         /**
-         * Converts a url to a absolute url (using document location)
-         * @method getAbsoluteURL
-         * @param {String} url
-         * @return {String}
-         * @static
-         */
-        getAbsoluteURL : function(url){
-            if (url.indexOf('http') !== 0){
-                url = location.href.substring(0,location.href.lastIndexOf('/')+1) + url;
-            }
-            return url;
-        },
-        /**
          * @method hasProperty
          * @param {Object} obj
          * @param {String} prop
@@ -8033,9 +8019,9 @@ KICK.namespace = function (ns_string) {
                     paddingSize:{
                         get:function(){
                             var dataSize = thisObj.data.length*thisObj.data.BYTES_PER_ELEMENT;
-                            var dataSizeMod4 = dataSize%4;
+                            var dataSizeMod4 = dataSize%8;
                             if (dataSizeMod4){
-                                return 4-dataSizeMod4;
+                                return 8-dataSizeMod4;
                             }
                             return 0;
                         }
@@ -15154,7 +15140,29 @@ KICK.namespace = function (ns_string) {
         });
 
         this.getMeshData = function(url,meshDestination){
-            fail("Not implemented yet");
+            var oReq = new XMLHttpRequest();
+
+            function handler()
+            {
+                if (oReq.readyState == 4 /* complete */) {
+                    if (oReq.status == 200 /* ok */) {
+                        var arrayBuffer = oReq.response;
+                        var meshData = new KICK.mesh.MeshData();
+                        if (meshData.deserialize(arrayBuffer)){
+                            meshDestination.meshData = meshData;
+                        } else {
+                            fail("Cannot deserialize meshdata "+url);
+                        }
+                    } else {
+                        fail("Cannot load meshdata "+url+". Server responded "+oReq.status);
+                    }
+                }
+            }
+
+            oReq.open("GET", url, true);
+            oReq.responseType = "arraybuffer";
+            oReq.onreadystatechange = handler;
+            oReq.send();
         };
 
         this.getImageData = function(uri,textureDestination){

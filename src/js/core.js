@@ -746,7 +746,6 @@ KICK.namespace = function (ns_string) {
             onSuccess = onSuccess || voidFunction ;
             onError = onError || voidFunction ;
 
-            url = core.Util.getAbsoluteURL(url);
             var oXHR = new XMLHttpRequest();
             oXHR.open("GET", url, true);
             oXHR.onreadystatechange = function (oEvent) {
@@ -1730,19 +1729,6 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
-        /**
-         * Converts a url to a absolute url (using document location)
-         * @method getAbsoluteURL
-         * @param {String} url
-         * @return {String}
-         * @static
-         */
-        getAbsoluteURL : function(url){
-            if (url.indexOf('http') !== 0){
-                url = location.href.substring(0,location.href.lastIndexOf('/')+1) + url;
-            }
-            return url;
-        },
         /**
          * @method hasProperty
          * @param {Object} obj
