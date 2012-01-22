@@ -174,6 +174,37 @@ YUI().use('node', 'console', 'test', function (Y) {
 
                 string += "a";
             }
+        },
+        testPaddingIssue:function(){
+            // When declaring a view on the data it must be aligned with the ELEMENT_SIZE.
+            // Otherwise a 'INDEX_SIZE_ERR: DOM Exception 1' occurs
+            var Assert = Y.Assert;
+            var chunkData = new KICK.core.ChunkData();
+            var value = new ArrayBuffer(11);
+            var valueView = new Uint8Array(value);
+            // set content of array
+            for (var i=0;i<valueView.length;i++){
+                valueView[i] = i*33;
+            }
+            chunkData.set(1,valueView);
+            var valueFloat64 = new ArrayBuffer(8);
+            var valueViewFloat64 = new Float64Array(valueFloat64);
+            // set content of array
+            for (var i=0;i<valueViewFloat64.length;i++){
+                valueViewFloat64[i] = i*33;
+            }
+            chunkData.set(2,valueViewFloat64);
+
+            var serializedData = chunkData.serialize();
+            var chunkData2 = new KICK.core.ChunkData();
+            chunkData2.deserialize(serializedData);
+            var recievedValue = chunkData2.get(1);
+            Assert.isTrue(recievedValue.byteLength === valueView.byteLength, "Length is not equal");
+            // compare content of array
+
+            for (var i=0;i<valueView.length;i++){
+                Assert.isTrue(recievedValue[i]===valueView[i], "Content is not equal");
+            }
         }
 
     });

@@ -79,9 +79,9 @@ KICK.namespace = function (ns_string) {
                     paddingSize:{
                         get:function(){
                             var dataSize = thisObj.data.length*thisObj.data.BYTES_PER_ELEMENT;
-                            var dataSizeMod4 = dataSize%4;
+                            var dataSizeMod4 = dataSize%8;
                             if (dataSizeMod4){
-                                return 4-dataSizeMod4;
+                                return 8-dataSizeMod4;
                             }
                             return 0;
                         }
