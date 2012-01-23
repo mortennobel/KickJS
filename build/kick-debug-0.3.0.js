@@ -5850,7 +5850,7 @@ KICK.namespace = function (ns_string) {
                 get: function(){ return activeScene},
                 set: function(value){
                     if (value === null){
-                        activeScene = new KICK.scene.Scene(engine);
+                        activeScene = KICK.scene.Scene.createDefault(thisObj);
                     } else {
                         activeScene = value;
                     }
@@ -6458,7 +6458,11 @@ KICK.namespace = function (ns_string) {
          * @param {Function} onFail
          */
         this.loadProjectByURL = function(url, onSuccess, onError){
-            var voidFunction = function(){}
+            var voidFunction = function(){
+                if (DEBUG){
+                    console.log(arguments);
+                }
+            }
                 ;
             onSuccess = onSuccess || voidFunction ;
             onError = onError || voidFunction ;
@@ -6473,6 +6477,7 @@ KICK.namespace = function (ns_string) {
                             thisObj.loadProject(value);
                             onSuccess();
                         } catch(e) {
+                            debugger;
                             onError(e);
                         }
                     } else {
@@ -6498,11 +6503,19 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
             }
-            if (config.activeScene){
-                engine.activeScene = this.load(config.activeScene);
-            } else {
-                engine.activeScene = KICK.scene.Scene.createDefault(engine);
-            }
+            engine.activeScene = null; // create temporaty default scene
+
+            // preload all resources
+            var onComplete = function(){
+                thisObj.removeResourceDescriptor(engine.activeScene.uid); // delete current scene
+                _maxUID = config.maxUID || 0; // reset maxUID
+                if (config.activeScene){
+                    engine.activeScene = thisObj.load(config.activeScene);
+                } else {
+                    engine.activeScene = null; // create final default scene
+                }
+            };
+            onComplete();
         };
 
         /**
@@ -6674,12 +6687,15 @@ KICK.namespace = function (ns_string) {
         this.removeResourceDescriptor = function(uid){
             // destroy the resource
             var resource = resourceCache[uid];
-            if (resource && resource.detroy){
-                resource.destroy();
+            if (resource){
+                // remove references
+                delete resourceCache[uid];
+                delete resourceDescriptorsByUID[uid];
+                // call destroy if exist
+                if (resource.destroy){
+                    resource.destroy();
+                }
             }
-            // remove references
-            delete resourceCache[uid];
-            delete resourceDescriptorsByUID[uid];
         };
 
         /**
@@ -7274,7 +7290,6 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
-         *
          * @method isButtonDown
          * @param {Number} mouseButton
          * @return {boolean} true if mouse button is pressed down in this frame
@@ -8714,7 +8729,7 @@ KICK.namespace = function (ns_string) {
             color:createGetterSetter(5126, "color"),
             /**
              * Vertex attribute.
-             * Integer attribute (two Int32)
+             * Integer attribute (onw Int32)
              * @property int1
              * @type Array[Number]
              */
@@ -8728,14 +8743,14 @@ KICK.namespace = function (ns_string) {
             int2:createGetterSetter(5124, "int2"),
             /**
              * Vertex attribute.
-             * Integer attribute (two Int32)
+             * Integer attribute (three Int32)
              * @property int3
              * @type Array[Number]
              */
             int3:createGetterSetter(5124, "int3"),
             /**
              * Vertex attribute.
-             * Integer attribute (two Int32)
+             * Integer attribute (four Int32)
              * @property int4
              * @type Array[Number]
              */
@@ -10738,8 +10753,8 @@ KICK.namespace = function (ns_string) {
          * game objects, then a callback is added to the event queue (and will run in next frame).
          * @method pick
          * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
-         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width)
-         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height)
+         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width - 1)
+         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height - 1)
          * @param {Number} width Optional (default 1)
          * @param {Number} height Optional (default 1)
          */
