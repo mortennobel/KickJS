@@ -741,7 +741,11 @@ KICK.namespace = function (ns_string) {
          * @param {Function} onFail
          */
         this.loadProjectByURL = function(url, onSuccess, onError){
-            var voidFunction = function(){}
+            var voidFunction = function(){
+                if (DEBUG){
+                    console.log(arguments);
+                }
+            }
                 ;
             onSuccess = onSuccess || voidFunction ;
             onError = onError || voidFunction ;
@@ -756,6 +760,7 @@ KICK.namespace = function (ns_string) {
                             thisObj.loadProject(value);
                             onSuccess();
                         } catch(e) {
+                            debugger;
                             onError(e);
                         }
                     } else {
@@ -781,11 +786,19 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
             }
-            if (config.activeScene){
-                engine.activeScene = this.load(config.activeScene);
-            } else {
-                engine.activeScene = KICK.scene.Scene.createDefault(engine);
-            }
+            engine.activeScene = KICK.scene.Scene.createDefault(engine); // creates a temporary scene
+
+            // preload all resources
+            var onComplete = function(){
+                thisObj.removeResourceDescriptor(engine.activeScene.uid); // delete current scene
+                _maxUID = config.maxUID || 0; // reset maxUID
+                if (config.activeScene){
+                    engine.activeScene = this.load(config.activeScene);
+                } else {
+                    engine.activeScene = KICK.scene.Scene.createDefault(engine);
+                }
+            };
+            onComplete();
         };
 
         /**
@@ -957,7 +970,7 @@ KICK.namespace = function (ns_string) {
         this.removeResourceDescriptor = function(uid){
             // destroy the resource
             var resource = resourceCache[uid];
-            if (resource && resource.detroy){
+            if (resource && resource.destroy){
                 resource.destroy();
             }
             // remove references
@@ -1557,7 +1570,6 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
-         *
          * @method isButtonDown
          * @param {Number} mouseButton
          * @return {boolean} true if mouse button is pressed down in this frame
