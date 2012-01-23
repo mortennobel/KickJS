@@ -424,7 +424,7 @@ KICK.namespace = function (ns_string) {
             color:createGetterSetter(constants.GL_FLOAT, "color"),
             /**
              * Vertex attribute.
-             * Integer attribute (two Int32)
+             * Integer attribute (onw Int32)
              * @property int1
              * @type Array[Number]
              */
@@ -438,14 +438,14 @@ KICK.namespace = function (ns_string) {
             int2:createGetterSetter(constants.GL_INT, "int2"),
             /**
              * Vertex attribute.
-             * Integer attribute (two Int32)
+             * Integer attribute (three Int32)
              * @property int3
              * @type Array[Number]
              */
             int3:createGetterSetter(constants.GL_INT, "int3"),
             /**
              * Vertex attribute.
-             * Integer attribute (two Int32)
+             * Integer attribute (four Int32)
              * @property int4
              * @type Array[Number]
              */
