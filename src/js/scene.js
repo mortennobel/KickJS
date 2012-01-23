@@ -1366,8 +1366,8 @@ KICK.namespace = function (ns_string) {
          * game objects, then a callback is added to the event queue (and will run in next frame).
          * @method pick
          * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
-         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width)
-         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height)
+         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width - 1)
+         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height - 1)
          * @param {Number} width Optional (default 1)
          * @param {Number} height Optional (default 1)
          */
