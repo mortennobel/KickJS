@@ -661,7 +661,7 @@ KICK.namespace = function (ns_string) {
                 uid: gameObject.engine.getUID(thisObj),
                 config:{
                     localPosition: typedArrayToArray(localPosition),
-                    localRotationQuat: typedArrayToArray(localRotationQuat),
+                    localRotation: typedArrayToArray(localRotationQuat),
                     localScale: typedArrayToArray(localScale),
                     parent: parentTransform ? KICK.core.Util.getJSONReference(parentTransform): null // todo
                 }
