@@ -1143,9 +1143,14 @@ KICK.namespace = function (ns_string) {
                                 objectsById[componentObj.uid] = componentObj;
                             } else {
                                 type = KICK.namespace(component.type);
-                                componentObj = new type({uid:component.uid});
-                                componentObj.uid = component.uid;
-                                gameObject.addComponent(componentObj);
+                                if (typeof type === 'function'){
+                                    componentObj = new type({uid:component.uid});
+                                    componentObj.uid = component.uid;
+                                    gameObject.addComponent(componentObj);
+                                } else {
+                                    KICK.core.Util.warn("Cannot find Class "+component.type);
+                                    continue;
+                                }
                             }
                             mappingUidToObject[component.uid] = componentObj;
                             configs[component.uid] = component.config;
