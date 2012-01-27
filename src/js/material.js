@@ -60,7 +60,32 @@ KICK.namespace = function (ns_string) {
         ]);
 
     /**
-     * GLSL Shader object
+     * GLSL Shader object<br>
+     * The shader basically encapsulates a GLSL shader programs, but makes sure that the correct
+     * WebGL settings are set when the shader is bound (such as if blending is enabled or not).<br>
+     * The Shader extend the default WebGL GLSL in the following way:
+     * <ul>
+     *     <li>
+     *         <code>#pragma include &lt;filename&gt;</code> includes of the following KickJS file as a string:
+     *         <ul>
+     *             <li>light.glsl</li>
+     *             <li>shadowmap.glsl</li>
+     *         </ul>
+     *     </li>
+     *     <li>Auto binds the following uniform variables:
+     *      <ul>
+     *          <li><code>_mvProj</code> (mat4) Model view projection matrix</li>
+     *          <li><code>_mv</code> (mat4) Model view matrix</li>
+     *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
+     *          <li><code>_time</code> (float) Run time of engine</li>
+     *          <li><code>_ambient</code> (vec3) Ambient light</li>
+     *          <li><code>_dLight.lDir</code> (vec3) Directional light direction</li>
+     *          <li><code>_dLight.colInt</code> (vec3) Directional light color intensity</li>
+     *          <li><code>_dLight.halfV</code> (vec3) Directional light half vector</li>
+     *      </ul>
+     *     </li>
+     *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
+     * </ul>
      * @class Shader
      * @namespace KICK.material
      * @constructor
@@ -729,7 +754,10 @@ KICK.namespace = function (ns_string) {
             }
         }
 
-        sourcecode = "#define SHADOWS "+(engine.config.shadows===true)+"\n#line 1\n"+sourcecode;
+        sourcecode = sourcecode+
+            "\n#define SHADOWS "+(engine.config.shadows===true)+
+            "\n#define LIGHTS "+(engine.config.maxNumerOfLights)+"\n"
+        ;
         return sourcecode;
     };
 
