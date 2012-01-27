@@ -2185,7 +2185,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Color intensity of the light (RGBA)
+             * Color intensity of the light (RGB). Default [1,1,1]
              * @property color
              * @type KICK.math.vec3
              */
