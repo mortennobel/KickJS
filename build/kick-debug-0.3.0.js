@@ -10692,9 +10692,31 @@ KICK.namespace = function (ns_string) {
 
                 mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
             },
+            /**
+             * Compare two objects based on renderOrder value and then material.shader.uid (if exist)
+             * @method compareRenderOrder
+             * @param {Component}
+             * @param {Component}
+             * @return Number
+             * @private
+             */
             compareRenderOrder = function(a,b){
                 var aRenderOrder = a.renderOrder || 1000,
                     bRenderOrder = b.renderOrder || 1000;
+                var getMeshShaderUid = function(o, defaultValue){
+                    var names = ["material","shader","uid"];
+                    for (var i=0;i<names.length;i++){
+                        o = o[names[i]];
+                        if (!o){
+                            return defaultValue;
+                        }
+                    }
+                    return o;
+                }
+                if (aRenderOrder == bRenderOrder && a.material && b.material){
+                    aRenderOrder = getMeshShaderUid(a,aRenderOrder);
+                    bRenderOrder = getMeshShaderUid(a,aRenderOrder);
+                }
                 return aRenderOrder-bRenderOrder;
             },
             sortTransparentBackToFront = function(){
