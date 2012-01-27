@@ -753,11 +753,21 @@ KICK.namespace = function (ns_string) {
                 sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
             }
         }
-
-        sourcecode = sourcecode+
-            "\n#define SHADOWS "+(engine.config.shadows===true)+
-            "\n#define LIGHTS "+(engine.config.maxNumerOfLights)+"\n"
-        ;
+        var version = "#version 100";
+        var lineOffset = 1;
+        // if shader already contain version tag, then reuse this version information
+        if (sourcecode.indexOf("#version ")===0){
+            var indexOfNewline = sourcecode.indexOf('\n');
+            version = sourcecode.substring(0,indexOfNewline); // save version info
+            sourcecode = sourcecode.substring(indexOfNewline+1); // strip version info
+            lineOffset = 2;
+        }
+        sourcecode =
+            version + "\n"+
+                "#define SHADOWS "+(engine.config.shadows===true)+"\n"+
+                "#define LIGHTS "+(engine.config.maxNumerOfLights)+"\n"+
+                "#line "+lineOffset+"\n"+
+                sourcecode;
         return sourcecode;
     };
 
