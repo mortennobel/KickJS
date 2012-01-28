@@ -25,6 +25,6 @@ void main(void)
     }
     vec3 color = max(diffuse*visibility,_ambient.xyz)*mainColor.xyz;
 
-    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color.xyz, 1.0)+vec4(specular*specularColor,0.0);
+    gl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color.xyz, 1.0)+vec4(specular*specularColor,0.0);
 }
  
