@@ -45,7 +45,7 @@ KICK.namespace = function (ns_string) {
         mat4 = math.mat4;
 
      /**
-     * Imports an obj mesh into a scene
+     * Imports a Wavefront .obj mesh into a scene
      * @class ObjImporter
      * @namespace KICK.importer
      */
