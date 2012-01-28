@@ -823,12 +823,12 @@ KICK.namespace = function (ns_string) {
                 }
             },
             updateComponents = function(){
+                cleanupGameObjects();
                 addNewGameObjects();
                 var i;
                 for (i=updateableComponents.length-1; i >= 0; i--) {
                     updateableComponents[i].update();
                 }
-                cleanupGameObjects();
             },
             renderComponents = function(){
                 var i;
