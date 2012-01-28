@@ -118,17 +118,17 @@ KICK.namespace = function (ns_string) {
          * Create a UV sphere
          * @method createUVSphereData
          * @static
-         * @param {Number} slices
-         * @param {Number} stacks
+         * @param {Number} slices Optional default value is 64
+         * @param {Number} stacks Optional default value is 32
          * @param {Number} radius
          * @return {KICK.mesh.MeshData} uv-sphere mesh
          */
         createUVSphereData : function(slices, stacks, radius){
             if (!slices || slices < 3){
-                slices = 20;
+                slices = 64;
             }
             if (!stacks || stacks < 2){
-                stacks = 10;
+                stacks = 32;
             }
             if (!radius){
                 radius = 1;
