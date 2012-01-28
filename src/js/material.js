@@ -57,7 +57,8 @@ KICK.namespace = function (ns_string) {
             0  ,0.5,0  ,0.5,
             0  ,0  ,0.5,0.5,
             0  ,0  ,0  ,1
-        ]);
+        ]),
+        vec3Zero = math.vec3.create();
 
     /**
      * GLSL Shader object<br>
@@ -791,16 +792,17 @@ KICK.namespace = function (ns_string) {
             uniform,
             value,
             location,
-            mv = this.lookupUniform["_mv"],
-            proj = this.lookupUniform["_proj"],
-            mvProj = this.lookupUniform["_mvProj"],
-            norm = this.lookupUniform["_norm"],
-            lightUniform,
-            gameObjectUID = this.lookupUniform["_gameObjectUID"],
-            time = this.lookupUniform["_time"],
-            viewport = this.lookupUniform["_viewport"],
-            shadowMapTexture = this.lookupUniform["_shadowMapTexture"],
-            _lightMat = this.lookupUniform["_lightMat"],
+            mv = this.lookupUniform._mv,
+            proj = this.lookupUniform._proj,
+            mvProj = this.lookupUniform._mvProj,
+            norm = this.lookupUniform._norm,
+            lightUniform = this.lookupUniform["_dLight.colInt"],
+            gameObjectUID = this.lookupUniform._gameObjectUID,
+            time = this.lookupUniform._time,
+            viewport = this.lookupUniform._viewport,
+            shadowMapTexture = this.lookupUniform._shadowMapTexture,
+            _lightMat = this.lookupUniform._lightMat,
+            lightUniformAmbient =  this.lookupUniform._ambient,
             sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
@@ -889,21 +891,30 @@ KICK.namespace = function (ns_string) {
             globalTransform = globalTransform || transform.getGlobalMatrix();
             gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
         }
-        if (ambientLight !== null){
-            lightUniform =  this.lookupUniform["_ambient"];
-            if (lightUniform){
-                gl.uniform3fv(lightUniform.location, ambientLight.colorIntensity);
-            }
+
+        if (lightUniformAmbient){
+            var ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
+            gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
-        if (directionalLight !== null){
-            lightUniform =  this.lookupUniform["_dLight.colInt"];
-            if (lightUniform){
-                gl.uniform3fv(lightUniform.location, directionalLight.colorIntensity);
-                lightUniform =  this.lookupUniform["_dLight.lDir"];
-                gl.uniform3fv(lightUniform.location, sceneLights.directionalLightDirection);
-                lightUniform =  this.lookupUniform["_dLight.halfV"];
-                gl.uniform3fv(lightUniform.location, sceneLights.directionalHalfVector);
+
+        if (lightUniform){
+            var colorIntensity,
+                directionalLightDirection,
+                directionalHalfVector;
+            if (directionalLight !== null){
+                colorIntensity = directionalLight.colorIntensity;
+                directionalLightDirection = sceneLights.directionalLightDirection;
+                directionalHalfVector = sceneLights.directionalHalfVector;
+            } else {
+                colorIntensity = vec3Zero;
+                directionalLightDirection = vec3Zero;
+                directionalHalfVector = vec3Zero;
             }
+            gl.uniform3fv(lightUniform.location, colorIntensity);
+            lightUniform =  this.lookupUniform["_dLight.lDir"];
+            gl.uniform3fv(lightUniform.location, directionalLightDirection);
+            lightUniform =  this.lookupUniform["_dLight.halfV"];
+            gl.uniform3fv(lightUniform.location, directionalHalfVector);
         }
         for (i=otherLights.length-1;i >= 0;i--){
             // todo
