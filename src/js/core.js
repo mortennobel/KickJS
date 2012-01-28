@@ -663,10 +663,10 @@ KICK.namespace = function (ns_string) {
                             url = "kickjs://mesh/plane/";
                             break;
                         case p.ENGINE_MESH_UVSPHERE:
-                            url = "kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0";
+                            url = "kickjs://mesh/uvsphere/";
                             break;
                         case p.ENGINE_MESH_CUBE:
-                            url = "kickjs://mesh/cube/?length=1.0";
+                            url = "kickjs://mesh/cube/";
                             break;
                         default:
                             if (ASSERT){
