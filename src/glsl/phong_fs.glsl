@@ -4,7 +4,7 @@ precision highp float;
 varying vec2 vUv;
 varying vec3 vNormal;
 
-uniform vec3 mainColor;
+uniform vec4 mainColor;
 uniform float specularExponent;
 uniform vec3 specularColor;
 uniform sampler2D mainTexture;
@@ -23,8 +23,8 @@ void main(void)
     } else {
         visibility = 1.0;
     }
-    vec3 color = max(diffuse*visibility,_ambient.xyz)*mainColor;
+    vec3 color = max(diffuse*visibility,_ambient.xyz)*mainColor.xyz;
 
-    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color, 1.0)+vec4(specular*specularColor,0.0);
+    gl_FragColor = texture2D(mainTexture,vUv)*vec4(color.xyz, 1.0)+vec4(specular*specularColor,0.0);
 }
  
