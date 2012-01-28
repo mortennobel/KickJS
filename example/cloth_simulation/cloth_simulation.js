@@ -313,7 +313,6 @@ function Constraint(p1,p2){
         meshRenderer,
         vertices = [],
         normals = [],
-        colors = [],
         getParticle = function(x,y){
             return particles[y*num_particles_width + x];
         },
@@ -379,10 +378,9 @@ function Constraint(p1,p2){
          * @param {Particle} p1
         * @param {Particle} p2
         * @param {Particle} p3
-        * @param {vec3} color
         * @param {Number} triangleIndex triangle index
         */
-        drawTriangle = function(p1, p2, p3, color, triangleIndex){
+        drawTriangle = function(p1, p2, p3,  triangleIndex){
             var set = function(destArray, newValue, idx){
                 for (var i = 0;i<newValue.length;i++){
                     destArray[idx+i] = newValue[i];
@@ -396,9 +394,6 @@ function Constraint(p1,p2){
             set(normals,p2.accumulated_normal,triangleIndex*9+3);
             set(normals,p3.accumulated_normal,triangleIndex*9+6);
 
-            set(colors,color,triangleIndex*12);
-            set(colors,color,triangleIndex*12+4);
-            set(colors,color,triangleIndex*12+8);
 
             /*
             glColor3fv( (GLfloat*) &color );
@@ -570,14 +565,9 @@ function Constraint(p1,p2){
         {
             for(var y=0; y<num_particles_height-1; y++)
             {
-                if (x%2 ^ y%2) // red and white color is interleaved according to which column number
-                    color = colorDark;
-                else
-                    color = colorBright;
-
-                drawTriangle(getParticle(x+1,y),getParticle(x,y),getParticle(x,y+1),color,triangleIndex);
+                drawTriangle(getParticle(x+1,y),getParticle(x,y),getParticle(x,y+1),triangleIndex);
                 triangleIndex ++;
-                drawTriangle(getParticle(x+1,y+1),getParticle(x+1,y),getParticle(x,y+1),color,triangleIndex);
+                drawTriangle(getParticle(x+1,y+1),getParticle(x+1,y),getParticle(x,y+1),triangleIndex);
                 triangleIndex ++;
             }
         }
@@ -662,7 +652,6 @@ function Constraint(p1,p2){
             thisObj.updateMeshData();
             meshData.vertex = vertices;
             meshData.normal = normals;
-            meshData.color = colors;
             if (!meshData.uv1){
                 meshData.uv1 = new Float32Array(vertices.length/3*2);
             }
