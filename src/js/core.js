@@ -686,12 +686,8 @@ KICK.namespace = function (ns_string) {
                 return res;
             };
 
-        // copy static values to object values
-        for (var name in core.Project){
-            if (core.Project.hasOwnProperty(name)){
-                thisObj[name] = core.Project[name];
-            }
-        }
+        core.Util.copyStaticPropertiesToObject(thisObj,core.Project);
+
 
         Object.defineProperties(this, {
             /**
@@ -1744,6 +1740,19 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        /**
+         * @method copyStaticPropertiesToObject
+         * @param {Object} object
+         * @param {Function} type constructor function
+         * @static
+         */
+        copyStaticPropertiesToObject : function(object, type){
+            for (var name in type){
+                if (type.hasOwnProperty(name)){
+                    object[name] = type[name];
+                }
+            }
+        },
         /**
          * @method hasProperty
          * @param {Object} obj
