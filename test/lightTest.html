@@ -81,14 +81,18 @@
             lightComponents.length = 0;
             var id = element.getAttribute('id');
             if (id.indexOf('ambient')>=0){
-                lightComponent = new KICK.scene.Light({type:KICK.scene.Light.TYPE_AMBIENT});
-                lightComponent.color = [0.1,0.1,0.1,1];
+                lightComponent = new KICK.scene.Light({
+                    type:KICK.scene.Light.TYPE_AMBIENT,
+                    color: [0.1,0.1,0.1,1]
+                });
                 lightGameObject.addComponent(lightComponent);
                 lightComponents.push(lightComponent);
             }
             if (id.indexOf('directional')>=0){
-                lightComponent = new KICK.scene.Light({type:KICK.scene.Light.TYPE_DIRECTIONAL});
-                lightComponent.color = [1.0,1.0,1.0,1];
+                lightComponent = new KICK.scene.Light({
+                    type:KICK.scene.Light.TYPE_DIRECTIONAL,
+                    color: [1.0,1.0,1.0,1]
+                });
                 lightGameObject.addComponent(lightComponent);
                 lightComponents.push(lightComponent);
             }
