@@ -2200,12 +2200,12 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Color type. Must be either:<br>
-             * Light.LIGHT_TYPE_AMBIENT,
-             * Light.LIGHT_TYPE_DIRECTIONAL,
-             * Light.LIGHT_TYPE_POINT <br>
+             * Light.TYPE_AMBIENT,
+             * Light.TYPE_DIRECTIONAL,
+             * Light.TYPE_POINT <br>
              * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
              * component of its gameObject.
-             * Default type is LIGHT_TYPE_POINT
+             * Default type is TYPE_POINT
              * @property type
              * @type Enum
              * @final
@@ -2292,23 +2292,23 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * @property LIGHT_TYPE_AMBIENT
+     * @property TYPE_AMBIENT
      * @type Number
      * @static
      */
-    scene.Light.LIGHT_TYPE_AMBIENT = KICK.core.Constants._LIGHT_TYPE_AMBIENT;
+    scene.Light.TYPE_AMBIENT = KICK.core.Constants._LIGHT_TYPE_AMBIENT;
     /**
-     * @property LIGHT_TYPE_DIRECTIONAL
+     * @property TYPE_DIRECTIONAL
      * @type Number
      * @static
      */
-    scene.Light.LIGHT_TYPE_DIRECTIONAL = KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL;
+    scene.Light.TYPE_DIRECTIONAL = KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL;
     /**
-     * @property LIGHT_TYPE_POINT
+     * @property TYPE_POINT
      * @type Number
      * @static
      */
-    scene.Light.LIGHT_TYPE_POINT = KICK.core.Constants._LIGHT_TYPE_POINT;
+    scene.Light.TYPE_POINT = KICK.core.Constants._LIGHT_TYPE_POINT;
 
     Object.freeze(scene.Light);
 
