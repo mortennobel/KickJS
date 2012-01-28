@@ -880,6 +880,11 @@ KICK.namespace = function (ns_string) {
                 }
             };
 
+        if (DEBUG){
+            if (!(engine instanceof KICK.core.Engine)){
+                fail("Engine param not valid");
+            }
+        }
         engine.addContextListener(contextListener);
 
         Object.defineProperties(this,{
