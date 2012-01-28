@@ -244,7 +244,7 @@ function initKick() {
     meshRenderer = new KICK.scene.MeshRenderer();
     meshRenderer.mesh = new KICK.mesh.Mesh(engine,
         {
-            dataURI:"kickjs://mesh/uvsphere/?slices=12&stacks=6&radius=0.5",
+            dataURI:"kickjs://mesh/uvsphere/?slices=48&stacks=24&radius=0.5",
             name:"Default object"
         });
     material = createMaterial('vertexShaderColor','fragmentShader');

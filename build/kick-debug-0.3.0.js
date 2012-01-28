@@ -181,14 +181,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         _LIGHT_TYPE_AMBIENT :{value: 1,enumerable:true},
         /**
          * Used to define directional light in the scene (such as sunlight)
-         * @property LIGHT_TYPE_DIRECTIONAL
+         * @property _LIGHT_TYPE_DIRECTIONAL
          * @type Number
          * @final
          */
         _LIGHT_TYPE_DIRECTIONAL:{value: 2,enumerable:true},
         /**
          * Used to define point light in the scene
-         * @property TYPE_POINT
+         * @property _LIGHT_TYPE_POINT
          * @type Number
          * @final
          */
@@ -11601,12 +11601,12 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Color type. Must be either:<br>
-             * Light.LIGHT_TYPE_AMBIENT,
-             * Light.LIGHT_TYPE_DIRECTIONAL,
-             * Light.LIGHT_TYPE_POINT <br>
+             * Light.TYPE_AMBIENT,
+             * Light.TYPE_DIRECTIONAL,
+             * Light.TYPE_POINT <br>
              * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
              * component of its gameObject.
-             * Default type is LIGHT_TYPE_POINT
+             * Default type is TYPE_POINT
              * @property type
              * @type Enum
              * @final
@@ -11693,23 +11693,23 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * @property LIGHT_TYPE_AMBIENT
+     * @property TYPE_AMBIENT
      * @type Number
      * @static
      */
-    scene.Light.LIGHT_TYPE_AMBIENT = 1;
+    scene.Light.TYPE_AMBIENT = 1;
     /**
-     * @property LIGHT_TYPE_DIRECTIONAL
+     * @property TYPE_DIRECTIONAL
      * @type Number
      * @static
      */
-    scene.Light.LIGHT_TYPE_DIRECTIONAL = 2;
+    scene.Light.TYPE_DIRECTIONAL = 2;
     /**
-     * @property LIGHT_TYPE_POINT
+     * @property TYPE_POINT
      * @type Number
      * @static
      */
-    scene.Light.LIGHT_TYPE_POINT = 3;
+    scene.Light.TYPE_POINT = 3;
 
     Object.freeze(scene.Light);
 
