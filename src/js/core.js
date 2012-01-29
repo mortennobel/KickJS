@@ -628,7 +628,7 @@ KICK.namespace = function (ns_string) {
                         name:getUrlAsResourceName(url),
                         uid:uid
                     })
-                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_GRAY){
+                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_LOGO){
                     switch (uid){
                         case p.ENGINE_TEXTURE_BLACK:
                             url = "kickjs://texture/black/";
@@ -638,6 +638,9 @@ KICK.namespace = function (ns_string) {
                             break;
                         case p.ENGINE_TEXTURE_GRAY:
                             url = "kickjs://texture/gray/";
+                            break;
+                        case p.ENGINE_TEXTURE_LOGO:
+                            url = "kickjs://texture/logo/";
                             break;
                         default:
                             if (ASSERT){
@@ -1070,6 +1073,13 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_TEXTURE_GRAY = -202;
+
+    /**
+     * @property ENGINE_TEXTURE_LOGO
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_TEXTURE_LOGO = -203;
 
     /**
      * @property ENGINE_MESH_TRIANGLE
