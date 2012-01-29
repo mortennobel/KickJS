@@ -82,7 +82,7 @@ function buildScene(){
                 type:KICK.core.Constants.GL_FLOAT_VEC3
             },
             mainTexture:{
-                value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                value: engine.project.load(engine.project.ENGINE_TEXTURE_LOGO),
                 type:KICK.core.Constants.GL_SAMPLER_2D
             }
         }
@@ -557,9 +557,6 @@ function Constraint(p1,p2){
             }
         }
 
-        var color = vec4.create();
-        var colorDark = vec4.create([0.6,0.2,0.2,1.0]);
-        var colorBright = vec4.create([1.0,1.0,1.0,1.0]);
         var triangleIndex = 0;
         for(var x = 0; x<num_particles_width-1; x++)
         {
@@ -572,6 +569,31 @@ function Constraint(p1,p2){
             }
         }
     };
+
+    this.getUvs = function(){
+        var uvs = [];
+
+        for(var x = 0; x<num_particles_width-1; x++)
+        {
+            for(var y=0; y<num_particles_height-1; y++)
+            {
+                uvs.push(x+1,y);
+                uvs.push(x,y);
+                uvs.push(x,y+1);
+                uvs.push(x+1,y+1);
+                uvs.push(x+1,y);
+                uvs.push(x,y+1);
+            }
+        }
+        var divX = 1/num_particles_width;
+        var divY = 1/num_particles_height;
+        for (var i=0;i<uvs.length;i=i+2){
+            uvs[i] *= divX;
+            uvs[i+1] *= divY;
+            uvs[i+1] = 1-uvs[i+1];
+        }
+        return uvs;
+    }
 
     this.timeStep = function(){
         for(var j=0; j<CONSTRAINT_ITERATIONS; j++) // iterate over all constraints several times
@@ -653,7 +675,9 @@ function Constraint(p1,p2){
             meshData.vertex = vertices;
             meshData.normal = normals;
             if (!meshData.uv1){
-                meshData.uv1 = new Float32Array(vertices.length/3*2);
+                var uvs = this.getUvs();
+                console.log(vertices.length/3*2,uvs.length);
+                meshData.uv1 = uvs;
             }
             meshRenderer.mesh.meshData = meshData;
         };
