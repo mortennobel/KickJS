@@ -24,13 +24,13 @@ function buildScene(){
     var scene = engine.activeScene;
     var cameraGO = scene.createGameObject({name:"Camera"});
     var camera = new KICK.scene.Camera({
-        fieldOfView: 80
+        fieldOfView: 60
     });
     camera.clearColor = [0.2, 0.2, 0.4, 1];
     cameraGO.addComponent(camera);
     var cameraTransform = cameraGO.transform;
-    cameraTransform.localPosition = [6.5,-5.5,29.0];
-    cameraTransform.localRotationEuler = [0,6,0];
+    cameraTransform.localPosition = [-5.5,-5.5,13.0];
+    cameraTransform.localRotationEuler = [0,-40,0];
 
     // add light on scene
     var lightGO = scene.createGameObject({name:"Light"});
@@ -204,11 +204,6 @@ var Particle = function (newPos){
         }
     };
 
-    this.resetAcceleration = function(){
-        // acceleration = Vec3(0,0,0);
-        vec3.set(vec3Zero,acceleration);
-    };
-
     /**
      * @param {vec3} v
      */
@@ -224,7 +219,7 @@ var Particle = function (newPos){
     };
 
     /**
-     * @param {Vec3} normal
+     * @param {vec3} normal
      */
     this.addToNormal = function(normal){
         // accumulated_normal += normal.normalized();
@@ -304,8 +299,6 @@ function Constraint(p1,p2){
     var time,
         thisObj = this,
         ballTransform,
-        GRAVITY = vec3.scale(vec3.create([0,-0.2,0]),TIME_STEPSIZE2),
-        WIND = vec3.scale(vec3.create([0.5,0,0.2]),TIME_STEPSIZE2),
         // total number of particles is num_particles_width*num_particles_height
         particles = [],// all particles that are part of this cloth
         constraints = [], // all constraints between particles as part of this cloth
@@ -356,7 +349,7 @@ function Constraint(p1,p2){
             // create clojure to have private variables
             var normal = vec3.create(),
                 d = vec3.create();
-            var res = function(p1,p2,p3, direction){
+            return function (p1, p2, p3, direction) {
                 /**
                  * Vec3 normal = calcTriangleNormal(p1,p2,p3);
                  Vec3 d = normal.normalized();
@@ -365,14 +358,13 @@ function Constraint(p1,p2){
                  p2->addForce(force);
                  p3->addForce(force);
                  */
-                calcTriangleNormal(p1,p2,p3,normal);
-                vec3.normalize(normal,d);
+                calcTriangleNormal(p1, p2, p3, normal);
+                vec3.normalize(normal, d);
                 var force = vec3.scale(normal, vec3.dot(d, direction));
                 p1.addForce(force);
                 p2.addForce(force);
                 p3.addForce(force);
             };
-            return res;
         })(),
         /** A private method used by updateMeshData(), that draws a single triangle p1,p2,p3 with a color
          * @param {Particle} p1
@@ -453,9 +445,9 @@ function Constraint(p1,p2){
 		}
          */
         // Connecting immediate neighbor particles with constraints (distance 1 and sqrt(2) in the grid)
-        for(var x=0; x<num_particles_width; x++)
+        for(x=0; x<num_particles_width; x++)
         {
-            for(var y=0; y<num_particles_height; y++)
+            for(y=0; y<num_particles_height; y++)
             {
                 if (x<num_particles_width-1) makeConstraint(getParticle(x,y),getParticle(x+1,y));
                 if (y<num_particles_height-1) makeConstraint(getParticle(x,y),getParticle(x,y+1));
@@ -477,9 +469,9 @@ function Constraint(p1,p2){
         }
          */
         // Connecting secondary neighbors with constraints (distance 2 and sqrt(4) in the grid)
-        for(var x=0; x<num_particles_width; x++)
+        for(x=0; x<num_particles_width; x++)
         {
-            for(var y=0; y<num_particles_height; y++)
+            for(y=0; y<num_particles_height; y++)
             {
                 if (x<num_particles_width-2) makeConstraint(getParticle(x,y),getParticle(x+2,y));
                 if (y<num_particles_height-2) makeConstraint(getParticle(x,y),getParticle(x,y+2));
@@ -549,18 +541,18 @@ function Constraint(p1,p2){
                 getParticle(x,y+1).addToNormal(normal);
             }
         }
-        for(var x = 0; x<num_particles_width; x++)
+        for(x = 0; x<num_particles_width; x++)
         {
-            for(var y=0; y<num_particles_height; y++)
+            for(y=0; y<num_particles_height; y++)
             {
                 getParticle(x,y).normalize();
             }
         }
 
         var triangleIndex = 0;
-        for(var x = 0; x<num_particles_width-1; x++)
+        for(x = 0; x<num_particles_width-1; x++)
         {
-            for(var y=0; y<num_particles_height-1; y++)
+            for(y=0; y<num_particles_height-1; y++)
             {
                 drawTriangle(getParticle(x+1,y),getParticle(x,y),getParticle(x,y+1),triangleIndex);
                 triangleIndex ++;
@@ -593,7 +585,7 @@ function Constraint(p1,p2){
             uvs[i+1] = 1-uvs[i+1];
         }
         return uvs;
-    }
+    };
 
     this.timeStep = function(){
         for(var j=0; j<CONSTRAINT_ITERATIONS; j++) // iterate over all constraints several times
@@ -604,7 +596,7 @@ function Constraint(p1,p2){
             }
         }
 
-        for(var i=particles.length-1;i>=0;i--)
+        for(i=particles.length-1;i>=0;i--)
         {
             particles[i].timeStep(); // calculate the position of each particle at the next time step.
         }
@@ -675,7 +667,7 @@ function Constraint(p1,p2){
             meshData.vertex = vertices;
             meshData.normal = normals;
             if (!meshData.uv1){
-                var uvs = this.getUvs();
+                var uvs = thisObj.getUvs();
                 console.log(vertices.length/3*2,uvs.length);
                 meshData.uv1 = uvs;
             }
@@ -684,33 +676,6 @@ function Constraint(p1,p2){
     })();
 }
 
-function startSimulation(){
+window.addEventListener("load",function(){
     initKick();
-}
-
-function starTest(){
-    var p = new Particle(vec3.create([1,2, 3]));
-    p.addForce(vec3.create([4,5,6]));
-    p.addForce(vec3.create([7,8,9]));
-    p.timeStep();
-    p.addToNormal(vec3.create([1,2,3]));
-    p.addToNormal(vec3.create([7,2,3]));
-    console.log("Pos "+vec3.str(p.pos));
-    console.log("Nor "+vec3.str(p.accumulated_normal));
-    p.addForce(vec3.create([7,8,9]));
-    p.resetAcceleration();
-    console.log("Acc reset "+vec3.str(p.acceleration));
-    p.resetNormal();
-    console.log("Nor reset "+vec3.str(p.acceleration));
-
-    var p1 = new Particle (vec3.create([1,2, 3]));
-    var p2 = new Particle (vec3.create([13,21, 31]));
-    var c = new Constraint (p1,p2);
-    p2.pos[2] = 0;
-    c.satisfyConstraint();
-    console.log("Pos1 "+vec3.str(p1.pos));
-    console.log("Pos2 "+vec3.str(p2.pos));
-
-
-
-}
+},false);
