@@ -123,9 +123,14 @@ KICK.namespace = function (ns_string) {
                         },
                         set:function(newValue){
                             if (newValue){
-                                newValue = new typedArrayType(newValue);
+                                if (data[name] && data[name].length == newValue.length){
+                                    data[name].set(newValue);
+                                } else {
+                                    data[name] = new typedArrayType(newValue);
+                                }
+                            } else {
+                                data[name] = null;
                             }
-                            data[name] = newValue;
                             clearInterleavedData();
                         }
                     };
