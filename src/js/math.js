@@ -2629,36 +2629,34 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} target
      * @param {KICK.math.vec3} up
      * @param {KICK.math.quat4} dest optional
-     * @param {KICK.math.mat4} destMatrix optional - rotation matrix used to calculate the quaternion. Using this also avoids memory allocation
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
      */
-    quat4.lookAt = function(position,target,up,dest,destMatrix){
-        // idea create mat3 rotation and transform into quaternion
+    quat4.lookAt = (function(){
         var upVector = vec3.create(),
             rightVector = vec3.create(),
-            forwardVector = vec3.create();
-        vec3.subtract(position,target, forwardVector);
-        vec3.normalize(forwardVector);
-        vec3.cross(up,forwardVector,rightVector);
-        vec3.normalize(rightVector); // needed?
-        vec3.cross(forwardVector,rightVector,upVector);
-        vec3.normalize(upVector); // needed?
-        if (!destMatrix){
+            forwardVector = vec3.create(),
             destMatrix = mat3.create();
-        }
-        destMatrix[0] = rightVector[0];
-        destMatrix[1] = rightVector[1];
-        destMatrix[2] = rightVector[2];
-        destMatrix[3] = upVector[0];
-        destMatrix[4] = upVector[1];
-        destMatrix[5] = upVector[2];
-        destMatrix[6] = forwardVector[0];
-        destMatrix[7] = forwardVector[1];
-        destMatrix[8] = forwardVector[2];
+        return function(position,target,up,dest){
+            // idea create mat3 rotation and transform into quaternion
+            vec3.subtract(position,target, forwardVector);
+            vec3.normalize(forwardVector);
+            vec3.cross(up,forwardVector,rightVector);
+            vec3.normalize(rightVector); // needed?
+            vec3.cross(forwardVector,rightVector,upVector);
+            vec3.normalize(upVector); // needed?
+            destMatrix[0] = rightVector[0];
+            destMatrix[1] = rightVector[1];
+            destMatrix[2] = rightVector[2];
+            destMatrix[3] = upVector[0];
+            destMatrix[4] = upVector[1];
+            destMatrix[5] = upVector[2];
+            destMatrix[6] = forwardVector[0];
+            destMatrix[7] = forwardVector[1];
+            destMatrix[8] = forwardVector[2];
         
-        return mat3.toQuat(destMatrix,dest);
-    };
-
+            return mat3.toQuat(destMatrix,dest);
+        };
+    })();
     /**
      * Set the rotation based on eulers angles.
      * Pitch->X axis, Yaw->Y axis, Roll->Z axis
