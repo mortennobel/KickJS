@@ -129,6 +129,7 @@
                 mouseInput.mouseWheelPreventDefaultAction = true;
             };
 
+            var localRotate = KICK.math.quat4.create();
             this.update = function(){
                 if (mouseInput.isButton(0)){
                     var mouseDelta = mouseInput.deltaMovement;
@@ -147,7 +148,7 @@
                 }
                 vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
                 transform.position = cartesianCoordinates;
-                transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0]);
+                transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
             };
         }
     </script>
