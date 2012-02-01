@@ -1759,7 +1759,9 @@ KICK.namespace = function (ns_string) {
         copyStaticPropertiesToObject : function(object, type){
             for (var name in type){
                 if (type.hasOwnProperty(name)){
-                    object[name] = type[name];
+                    Object.defineProperty(object,name,{
+                        value:type[name]
+                    });
                 }
             }
         },
