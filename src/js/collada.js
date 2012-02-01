@@ -288,7 +288,7 @@ KICK.namespace = function (ns_string) {
                 vertexAttributeCache.numberOfVertices = numberOfVertices ;
             },
             /**
-             * Builds meshdata component (based on a <mesh> node)
+             * Builds meshdata component (based on a &lt;mesh&gt; node)
              * @method buildMeshData
              */
             buildMeshData = function (colladaDOM, engine, geometry){
