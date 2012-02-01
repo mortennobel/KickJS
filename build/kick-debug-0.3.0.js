@@ -7474,7 +7474,9 @@ KICK.namespace = function (ns_string) {
         copyStaticPropertiesToObject : function(object, type){
             for (var name in type){
                 if (type.hasOwnProperty(name)){
-                    object[name] = type[name];
+                    Object.defineProperty(object,name,{
+                        value:type[name]
+                    });
                 }
             }
         },
@@ -11475,7 +11477,7 @@ KICK.namespace = function (ns_string) {
             color = vec3.create([1.0,1.0,1.0]),
             engine,
             type = 3,
-            _shadow,
+            _shadow = false,
             _shadowStrength = 1.0,
             _shadowBias = 0.05,
             _shadowTexture = null,
@@ -11483,7 +11485,7 @@ KICK.namespace = function (ns_string) {
             _shadowTextureDebug = null,
             _shadowRenderTextureDebug = null,
             intensity = 1,
-            colorIntensity = vec3.create(),
+            colorIntensity = vec3.create([1.0,1.0,1.0]),
             updateIntensity = function(){
                 vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
             },
@@ -11569,7 +11571,8 @@ KICK.namespace = function (ns_string) {
                             updateShadowTexture();
                         }
                     }
-                }
+                },
+                enumerable: true
             },
             /**
              * Shadow strength (between 0.0 and 1.0). Default value is 1.0
@@ -11582,8 +11585,8 @@ KICK.namespace = function (ns_string) {
                 },
                 set: function(value){
                     _shadowStrength = value;
-                }
-
+                },
+                enumerable: true
             },
             /**
              * Shadow bias. Default value is 0.05
@@ -11596,7 +11599,8 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(value){
                     _shadowBias = value;
-                }
+                },
+                enumerable: true
             },
             /**
              * Color intensity of the light (RGB). Default [1,1,1]
@@ -11608,9 +11612,15 @@ KICK.namespace = function (ns_string) {
                     return vec3.create(color);
                 },
                 set: function(value){
+                    if (ASSERT){
+                        if (value.length !== 3){
+                            KICK.core.Util.fail("Light color must be vec3");
+                        }
+                    }
                     vec3.set(value,color);
                     updateIntensity();
-                }
+                },
+                enumerable: true
             },
             /**
              * Color type. Must be either:<br>
@@ -11629,14 +11639,6 @@ KICK.namespace = function (ns_string) {
                     return type;
                 },
                 set: function(newValue){
-                    if (ASSERT){
-                        if (config.type !== 3 &&
-                            config.type !== 2 &&
-                            config.type !== 1){
-                            KICK.core.Util.fail("Light type must be 3, " +
-                                "2 or 1");
-                        }
-                    }
                     if (!engine){
                         type = newValue;
                     } else {
@@ -11644,7 +11646,8 @@ KICK.namespace = function (ns_string) {
                             KICK.core.Util.fail("Light type cannot be changed after initialization");
                         }
                     }
-                }
+                },
+                enumerable: true
             },
             /**
              * Light intensity (a multiplier to color)
@@ -11658,7 +11661,8 @@ KICK.namespace = function (ns_string) {
                 set: function(value){
                     intensity = value;
                     updateIntensity();
-                }
+                },
+                enumerable: true
             },
             /**
              * color RGB multiplied with intensity (plus color A).<br>
@@ -11674,7 +11678,8 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     colorIntensity = newValue;
-                }
+                },
+                enumerable: true
             },
             // inherited interface from component
             gameObject:{
@@ -11692,13 +11697,22 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(value){
                     scriptPriority = value;
-                }
+                },
+                enumerable: true
             }
         });
 
         this.activated = function(){
             engine = thisObj.gameObject.engine;
             updateShadowTexture();
+        };
+
+        /**
+         * @method toJSON
+         * @return {JSON}
+         */
+        this.toJSON = function(){
+            return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.Light");
         };
 
         applyConfig(this,config);
@@ -14677,7 +14691,7 @@ KICK.namespace = function (ns_string) {
                 vertexAttributeCache.numberOfVertices = numberOfVertices ;
             },
             /**
-             * Builds meshdata component (based on a <mesh> node)
+             * Builds meshdata component (based on a &lt;mesh&gt; node)
              * @method buildMeshData
              */
             buildMeshData = function (colladaDOM, engine, geometry){
@@ -14889,8 +14903,10 @@ KICK.namespace = function (ns_string) {
         quat4 = math.quat4,
         mat4 = math.mat4;
 
-     /**
-     * Imports a Wavefront .obj mesh into a scene
+    /**
+     * Imports a Wavefront .obj mesh into a scene. The importer loading both normals and texture coordinates from the
+     * model if available. Note that each import can contains multiple models and each model may have multiple
+     * sub-meshes.
      * @class ObjImporter
      * @namespace KICK.importer
      */
