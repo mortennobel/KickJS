@@ -44,8 +44,10 @@ KICK.namespace = function (ns_string) {
         quat4 = math.quat4,
         mat4 = math.mat4;
 
-     /**
-     * Imports a Wavefront .obj mesh into a scene
+    /**
+     * Imports a Wavefront .obj mesh into a scene. The importer loading both normals and texture coordinates from the
+     * model if available. Note that each import can contains multiple models and each model may have multiple
+     * sub-meshes.
      * @class ObjImporter
      * @namespace KICK.importer
      */
