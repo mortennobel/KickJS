@@ -574,6 +574,8 @@ KICK.namespace = function (ns_string) {
             gl.attachShader(_shaderProgramId, vertexShader);
             gl.attachShader(_shaderProgramId, fragmentShader);
             gl.linkProgram(_shaderProgramId);
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
 
             if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
