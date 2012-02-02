@@ -67,10 +67,12 @@
 
         function changeShader(shader){
             material.shader = engine.project.load(shader);
-            console.log("__________________vertexShaderSrc__________________");
-            console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
-            console.log("_________________fragmentShaderSrc_________________");
-            console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
+            if (window.debugShader){
+                console.log("__________________vertexShaderSrc__________________");
+                console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
+                console.log("_________________fragmentShaderSrc_________________");
+                console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
+            }
         }
 
         function setLight(element){
@@ -81,17 +83,19 @@
             lightComponents.length = 0;
             var id = element.getAttribute('id');
             if (id.indexOf('ambient')>=0){
-                lightComponent = new KICK.scene.Light({
+                lightComponent = new KICK.scene.Light();
+                KICK.core.Util.applyConfig(lightComponent,{
                     type:KICK.scene.Light.TYPE_AMBIENT,
-                    color: [0.1,0.1,0.1,1]
+                    color: [0.1,0.1,0.1]
                 });
                 lightGameObject.addComponent(lightComponent);
                 lightComponents.push(lightComponent);
             }
             if (id.indexOf('directional')>=0){
-                lightComponent = new KICK.scene.Light({
+                lightComponent = new KICK.scene.Light();
+                KICK.core.Util.applyConfig(lightComponent,{
                     type:KICK.scene.Light.TYPE_DIRECTIONAL,
-                    color: [1.0,1.0,1.0,1]
+                    color: [1.0,1.0,1.0]
                 });
                 lightGameObject.addComponent(lightComponent);
                 lightComponents.push(lightComponent);
