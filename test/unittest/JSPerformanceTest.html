@@ -97,14 +97,14 @@ YUI().use('node', 'console', 'test', function (Y) {
          * Sets up data that is needed by each test.
          */
         setUp : function () {
-            for (var i=0;i<largeArrayA.length;i++){
+            /*for (var i=0;i<largeArrayA.length;i++){
                 largeArrayA[i] = createRandomObject(i);
                 largeArrayB[i] = createRandomObject(i);
                 largeArrayDouble[i] = i*0.5;
                 largeArrayFloat32[i] = i*0.5;
                 largeArrayFloat64[i] = i*0.5;
                 largeArrayInt8[i] = i*0.5;
-            }
+            }*/
         },
 
         /*
@@ -116,8 +116,17 @@ YUI().use('node', 'console', 'test', function (Y) {
         //---------------------------------------------------------------------
         // Test methods - names must begin with "test"
         //---------------------------------------------------------------------
-
-        testReflectSimple: function () {
+        testNumberPresicion: function(){
+            var Assert = Y.Assert;
+            // test that the browser is actually performing all calculations with double presicion
+            var x = [12345678,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1];
+            var y = new Float32Array(x);
+            // if this calculation is done with only single precision, you will end up with only y[0], since
+            // all other values are rounded to zero
+            var sumY = y[0]+y[1]+y[2]+y[3]+y[4]+y[5]+y[6]+y[7]+y[8]+y[9]+y[10];
+            Assert.areNotEqual(sumY, y[0], "Browser does not perform calculations with double presision");
+        },
+        /*testReflectSimple: function () {
             var sum = 0;
             var result = vec3.create();
             var L = vec3.create([1,2,3]);
@@ -138,7 +147,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 sum += result[0];
             }
             console.log("Equal "+sum);
-        }
+        }*/
         /*
         ,
 
