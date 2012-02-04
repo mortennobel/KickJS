@@ -2337,7 +2337,9 @@ KICK.namespace = function (ns_string) {
             directionalLightColorIntensity = directionalLightData.subarray(3,6),
             directionalHalfVector = directionalLightData.subarray(6,9),
             directionalLightTransform = null,
-            otherLights = [];
+            otherLights = [],
+            eyeDirection = [0,0,-1],
+            invEyeDirection = [0,0,1];
         Object.defineProperties(this,{
             /**
              * The ambient light in the scene.
@@ -2382,22 +2384,11 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * The half vector of the directional light source  (calculated in recomputeDirectionalLight())
-             * @property directionalHalfVector
-             * @type KICK.math.vec3
+             * Matrix of directional light data. Column 1 contains the lightDirection in eye space,
+             * column 2 colorIntensity and column 3 half Vector
+             * @property directionalLightData
+             * @type KICK.math.mat3
              */
-            directionalHalfVector:{
-                value:directionalHalfVector
-            },
-            /**
-             * Normalized light direction (calculated in recomputeDirectionalLight()) <br>
-             * Note the light direction if from the surface towards the light
-             * @property directionalLightDirection
-             * @type KICK.math.vec3
-             */
-            directionalLightDirection:{
-                value:directionalLightDirection
-            },
             directionalLightData:{
                 get:function(){
                     return directionalLightData;
@@ -2419,17 +2410,14 @@ KICK.namespace = function (ns_string) {
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
                 // compute light direction (note direction from surface towards camera)
-                vec4.set([0,0,-1],directionalLightDirection);
-                quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
+                quat4.multiplyVec3(directionalLightTransform.rotation,eyeDirection,directionalLightDirection);
 
                 // transform to eye space
                 mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
-                // compute eye direction
-                var eyeDirection = [0,0,1];
                 // compute half vector
-                vec3.add(eyeDirection, directionalLightDirection, directionalHalfVector);
+                vec3.add(invEyeDirection, directionalLightDirection, directionalHalfVector);
                 vec3.normalize(directionalHalfVector);
 
                 vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);
