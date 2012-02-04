@@ -1,14 +1,12 @@
-struct DirectionalLight {
-   vec3 lDir;
-   vec3 colInt;
-   vec3 halfV;
-};
 // assumes that normal is normalized
-void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular){
-    float diffuseContribution = max(dot(normal, dLight.lDir), 0.0);
-	float specularContribution = max(dot(normal, dLight.halfV), 0.0);
+void getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular){
+    vec3 ECLigDir = dLight[0];
+    vec3 colInt = dLight[1];
+    vec3 halfV = dLight[2];
+    float diffuseContribution = max(dot(normal, ECLigDir), 0.0);
+	float specularContribution = max(dot(normal, halfV), 0.0);
     specular =  pow(specularContribution, specularExponent);
-	diffuse = (dLight.colInt * diffuseContribution);
+	diffuse = (colInt * diffuseContribution);
 }
-uniform DirectionalLight _dLight;
+uniform mat3 _dLight;
 uniform vec3 _ambient;

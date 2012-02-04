@@ -798,7 +798,7 @@ KICK.namespace = function (ns_string) {
             proj = this.lookupUniform._proj,
             mvProj = this.lookupUniform._mvProj,
             norm = this.lookupUniform._norm,
-            lightUniform = this.lookupUniform["_dLight.colInt"],
+            directionalLightUniform = this.lookupUniform._dLight,
             gameObjectUID = this.lookupUniform._gameObjectUID,
             time = this.lookupUniform._time,
             viewport = this.lookupUniform._viewport,
@@ -808,6 +808,7 @@ KICK.namespace = function (ns_string) {
             sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
+            directionalLightData = sceneLights.directionalLightData,
             otherLights = sceneLights.otherLights,
             globalTransform,
             i,
@@ -899,24 +900,8 @@ KICK.namespace = function (ns_string) {
             gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
 
-        if (lightUniform){
-            var colorIntensity,
-                directionalLightDirection,
-                directionalHalfVector;
-            if (directionalLight !== null){
-                colorIntensity = directionalLight.colorIntensity;
-                directionalLightDirection = sceneLights.directionalLightDirection;
-                directionalHalfVector = sceneLights.directionalHalfVector;
-            } else {
-                colorIntensity = vec3Zero;
-                directionalLightDirection = vec3Zero;
-                directionalHalfVector = vec3Zero;
-            }
-            gl.uniform3fv(lightUniform.location, colorIntensity);
-            lightUniform =  this.lookupUniform["_dLight.lDir"];
-            gl.uniform3fv(lightUniform.location, directionalLightDirection);
-            lightUniform =  this.lookupUniform["_dLight.halfV"];
-            gl.uniform3fv(lightUniform.location, directionalHalfVector);
+        if (directionalLightUniform){
+            gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
         }
         for (i=otherLights.length-1;i >= 0;i--){
             // todo

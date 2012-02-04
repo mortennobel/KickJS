@@ -2332,8 +2332,10 @@ KICK.namespace = function (ns_string) {
     scene.SceneLights = function(){
         var ambientLight = null,
             directionalLight = null,
-            directionalHalfVector = vec3.create(),
-            directionalLightDirection = vec3.create(),
+            directionalLightData = KICK.math.mat3.create(), // column matrix with the columns lightDirection,colorIntensity,halfVector
+            directionalLightDirection = directionalLightData.subarray(0,3),
+            directionalLightColorIntensity = directionalLightData.subarray(3,6),
+            directionalHalfVector = directionalLightData.subarray(6,9),
             directionalLightTransform = null,
             otherLights = [];
         Object.defineProperties(this,{
@@ -2375,6 +2377,7 @@ KICK.namespace = function (ns_string) {
                         directionalLightTransform = directionalLight.gameObject.transform;
                     } else {
                         directionalLightTransform = null;
+                        KICK.math.mat3.set([0,0,0,0,0,0,0,0,0],directionalLightData);
                     }
                 }
             },
@@ -2394,6 +2397,11 @@ KICK.namespace = function (ns_string) {
              */
             directionalLightDirection:{
                 value:directionalLightDirection
+            },
+            directionalLightData:{
+                get:function(){
+                    return directionalLightData;
+                }
             },
             /**
              * The point  light sources in the scene.
@@ -2423,6 +2431,8 @@ KICK.namespace = function (ns_string) {
                 // compute half vector
                 vec3.add(eyeDirection, directionalLightDirection, directionalHalfVector);
                 vec3.normalize(directionalHalfVector);
+
+                vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);
             }
         };
     };
