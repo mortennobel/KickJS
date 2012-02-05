@@ -46,7 +46,7 @@ The key down event and key up event will change the color of the objects.<br><br
                 uniforms.mainColor.value = thisObj.rotationColor;
             }
             if (keyInput.isKeyUp(thisObj.keyCode)){ // test if key has been released in this frame
-                uniforms.mainColor.value = [1,1,1];
+                uniforms.mainColor.value = [1,1,1,1];
             }
             if (keyInput.isKey(thisObj.keyCode)){ // test if key is being pressed
                 // accelerate
@@ -83,8 +83,8 @@ The key down event and key up event will change the color of the objects.<br><br
             shader: shader,
             uniforms:{
                 mainColor: {
-                    value: [1,1,1],
-                    type: KICK.core.Constants.GL_FLOAT_VEC3
+                    value: [1,1,1,1],
+                    type: KICK.core.Constants.GL_FLOAT_VEC4
                 },
                 mainTexture: {
                     value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
@@ -98,7 +98,7 @@ The key down event and key up event will change the color of the objects.<br><br
     var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
     var keyCodes = ["1","2"];
     var rotationAcceleration = [0.0002,0.00032];
-    var rotationColor = [[1,0,0],[0,0,1]];
+    var rotationColor = [[1,0,0,1],[0,0,1,1]];
 
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();

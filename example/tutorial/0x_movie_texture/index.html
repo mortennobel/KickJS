@@ -47,14 +47,14 @@
 
         });
         texture.setTemporaryTexture();
-        meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/");
+        meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
          // create material
         meshRenderer.material = new KICK.material.Material(engine,{
-            shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+            shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
             uniforms:{
                 mainColor: {
-                    value: [1,0,1], // change the color slightly (to give a very simple effect)
-                    type: KICK.core.Constants.GL_FLOAT_VEC3
+                    value: [1,.8,1,1], // change the color slightly (to give a very simple effect)
+                    type: KICK.core.Constants.GL_FLOAT_VEC4
                 },
                 mainTexture: {
                     value: texture,
@@ -84,6 +84,8 @@ function clock(){
   var ctx = document.getElementById('2dcanvas').getContext('2d');
   ctx.save();
   ctx.clearRect(0,0,150,150);
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, 150, 150);
   ctx.translate(75,75);
   ctx.scale(0.4,0.4);
   ctx.rotate(-Math.PI/2);
