@@ -95,8 +95,7 @@
             lightComponents.length = 0;
             var id = element.getAttribute('id');
             if (id.indexOf('ambient')>=0){
-                lightComponent = new KICK.scene.Light();
-                KICK.core.Util.applyConfig(lightComponent,{
+                lightComponent = new KICK.scene.Light({
                     type:KICK.scene.Light.TYPE_AMBIENT,
                     color: [0.1,0.1,0.1]
                 });
@@ -104,8 +103,7 @@
                 lightComponents.push(lightComponent);
             }
             if (id.indexOf('directional')>=0){
-                lightComponent = new KICK.scene.Light();
-                KICK.core.Util.applyConfig(lightComponent,{
+                lightComponent = new KICK.scene.Light({
                     type:KICK.scene.Light.TYPE_DIRECTIONAL,
                     color: [1.0,1.0,1.0]
                 });
