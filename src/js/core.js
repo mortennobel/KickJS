@@ -2067,7 +2067,7 @@ KICK.namespace = function (ns_string) {
             if (!sortFunc) {
                 sortFunc = this.numberSortFunction;
             }
-            // assuming that the array is relative small, todo: add support for larger array using binary search
+            // assuming that the array is relative small
             for (i = sortedArray.length-1; i >= 0; i--) {
                 if (sortFunc(sortedArray[i],element) <= 0) {
                     sortedArray.splice(i+1,0,element);
