@@ -7782,7 +7782,7 @@ KICK.namespace = function (ns_string) {
             if (!sortFunc) {
                 sortFunc = this.numberSortFunction;
             }
-            // assuming that the array is relative small, todo: add support for larger array using binary search
+            // assuming that the array is relative small
             for (i = sortedArray.length-1; i >= 0; i--) {
                 if (sortFunc(sortedArray[i],element) <= 0) {
                     sortedArray.splice(i+1,0,element);
@@ -9713,7 +9713,7 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @class Component
      */
-//scene.Component = function () {
+
     /**
      * The gameObject owning the component. Initially undefined. The value is set when the Component object is added
      * to a GameObject
@@ -9736,7 +9736,7 @@ KICK.namespace = function (ns_string) {
 
 
     /**
-     * Abstract method called every rendering. May be undefined.
+     * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
      * @param (KICK.math.mat4) projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
@@ -9762,7 +9762,15 @@ KICK.namespace = function (ns_string) {
      * Abstract method called every update. May be undefined.
      * @method update
      */
-//};
+
+    /**
+     * Creates a JSON version of the configuration of the class. May be undefined, if so the
+     * KICK.core.Util.componentToJSON() are used for serializaing of the component.<br>
+     * Note that references to assets, gameObjects or other components should be wrapped by the KICK.core.Util.getJSONReference() method
+     * @method toJSON
+     * @return {Object}
+     */
+
 
     /**
      * Position, rotation and scale of a game object. This component should not be created manually.
@@ -11754,8 +11762,8 @@ KICK.namespace = function (ns_string) {
             directionalHalfVector = directionalLightData.subarray(6,9),
             directionalLightTransform = null,
             otherLights = [],
-            eyeDirection = [0,0,-1],
-            invEyeDirection = [0,0,1];
+            lightDirection = [0,0,1],
+            invEyeDirection = [0,0,-1];
         Object.defineProperties(this,{
             /**
              * The ambient light in the scene.
@@ -11825,15 +11833,15 @@ KICK.namespace = function (ns_string) {
          */
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
-                // compute light direction (note direction from surface towards camera)
-                quat4.multiplyVec3(directionalLightTransform.rotation,eyeDirection,directionalLightDirection);
+                // compute light direction
+                quat4.multiplyVec3(directionalLightTransform.rotation,lightDirection,directionalLightDirection);
 
                 // transform to eye space
                 mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
                 // compute half vector
-                vec3.add(invEyeDirection, directionalLightDirection, directionalHalfVector);
+                vec3.add(lightDirection, directionalLightDirection, directionalHalfVector);
                 vec3.normalize(directionalHalfVector);
 
                 vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);

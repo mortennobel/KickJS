@@ -2346,8 +2346,7 @@ KICK.namespace = function (ns_string) {
             directionalHalfVector = directionalLightData.subarray(6,9),
             directionalLightTransform = null,
             otherLights = [],
-            eyeDirection = [0,0,-1],
-            invEyeDirection = [0,0,1];
+            lightDirection = [0,0,1];
         Object.defineProperties(this,{
             /**
              * The ambient light in the scene.
@@ -2417,15 +2416,15 @@ KICK.namespace = function (ns_string) {
          */
         this.recomputeDirectionalLight = function(modelViewMatrix){
             if (directionalLight !== null){
-                // compute light direction (note direction from surface towards camera)
-                quat4.multiplyVec3(directionalLightTransform.rotation,eyeDirection,directionalLightDirection);
+                // compute light direction
+                quat4.multiplyVec3(directionalLightTransform.rotation,lightDirection,directionalLightDirection);
 
                 // transform to eye space
                 mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
                 // compute half vector
-                vec3.add(invEyeDirection, directionalLightDirection, directionalHalfVector);
+                vec3.add(lightDirection, directionalLightDirection, directionalHalfVector);
                 vec3.normalize(directionalHalfVector);
 
                 vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);
