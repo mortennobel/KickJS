@@ -208,7 +208,7 @@ function initLights(){
     var ambientlightGameObject = engine.activeScene.createGameObject();
     ambientlightGameObject.name = "ambient light";
     var ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
-    ambientLight.color = [0.1,0.1,0.1,1];
+    ambientLight.color = [0.1,0.1,0.1];
     ambientlightGameObject.addComponent(ambientLight);
 
     var lightGameObject = engine.activeScene.createGameObject();
@@ -216,7 +216,7 @@ function initLights(){
     var light = new KICK.scene.Light(
         {
             type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
-            color:[1,1,1,1],
+            color:[1,1,1],
             intensity:1
         }
     );
