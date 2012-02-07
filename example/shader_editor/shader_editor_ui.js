@@ -148,9 +148,6 @@
     }
 
     function setSettingsData(settingsData){
-        if (!settingsData.lightrotation){
-            settingsData.lightrotation = [0,180,0]; // change default light rotation
-        }
         setRadioValue('meshsetting',settingsData.meshsetting);
         setRadioValue('projection',settingsData.projection);
         setRadioValue('rotatemesh',settingsData.rotatemesh);

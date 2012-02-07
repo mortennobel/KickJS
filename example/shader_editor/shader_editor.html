@@ -290,13 +290,8 @@
      <div style="background-color: #d3d3d3;">
          <h4>light.glsl</h4>
          <div>
-         struct DirectionalLight {<br>
-   &nbsp;&nbsp;&nbsp;vec3 lDir;<br>
-   &nbsp;&nbsp;&nbsp;vec3 colInt;<br>
-   &nbsp;&nbsp;&nbsp;vec3 halfV;<br>
-};<br>
-         void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular);<br>
-         uniform DirectionalLight _dLight;<br>
+         void getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular);<br>
+         uniform mat3 _dLight;<br>
          uniform vec3 _ambient;
              </div>
      </div>
