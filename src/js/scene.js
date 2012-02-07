@@ -297,7 +297,7 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @class Component
      */
-//scene.Component = function () {
+
     /**
      * The gameObject owning the component. Initially undefined. The value is set when the Component object is added
      * to a GameObject
@@ -320,7 +320,7 @@ KICK.namespace = function (ns_string) {
 
 
     /**
-     * Abstract method called every rendering. May be undefined.
+     * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
      * @param (KICK.math.mat4) projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
@@ -346,7 +346,15 @@ KICK.namespace = function (ns_string) {
      * Abstract method called every update. May be undefined.
      * @method update
      */
-//};
+
+    /**
+     * Creates a JSON version of the configuration of the class. May be undefined, if so the
+     * KICK.core.Util.componentToJSON() are used for serializaing of the component.<br>
+     * Note that references to assets, gameObjects or other components should be wrapped by the KICK.core.Util.getJSONReference() method
+     * @method toJSON
+     * @return {Object}
+     */
+
 
     /**
      * Position, rotation and scale of a game object. This component should not be created manually.
