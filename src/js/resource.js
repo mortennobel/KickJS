@@ -357,6 +357,7 @@ KICK.namespace = function (ns_string) {
          *  <ul>
          *  <li><b>Default</b> Url: kickjs://shader/default/</li>
          *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
+         *  <li><b>Diffuse</b> Url: kickjs://shader/diffuse/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
@@ -392,9 +393,9 @@ KICK.namespace = function (ns_string) {
                     }
                     return res;
                 },
-                shaderTypes = ["specular","__shadowmap","__error","__pick","transparent_specular","unlit","transparent_unlit"];
+                shaderTypes = ["specular","diffuse","__shadowmap","__error","__pick","transparent_specular","transparent_diffuse","unlit","transparent_unlit"];
             if (url === "kickjs://shader/default/"){
-                url = "kickjs://shader/specular/";
+                url = "kickjs://shader/diffuse/";
             }
             for (var i=0;i<shaderTypes.length;i++){
                 if (compareAndSetShader(shaderTypes[i])){
@@ -424,6 +425,7 @@ KICK.namespace = function (ns_string) {
          * The following shaders are available:
          *  <ul>
          *  <li><b>Default</b> Url: kickjs://shader/default/</li>
+         *  <li><b>Diffuse</b> Url: kickjs://shader/diffuse/</li>
          *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
          *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>

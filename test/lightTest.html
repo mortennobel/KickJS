@@ -63,7 +63,7 @@
                 shader:shader,
                 uniforms:{
                     mainColor:{
-                        value:[1.0,1.0,1.0,1.0],
+                        value:[1.0,0.0,0.9,1.0],
                         type:KICK.core.Constants.GL_FLOAT_VEC4
                     },
                     mainTexture:{
@@ -80,7 +80,6 @@
                     }
                 }
             });
-
             addSphere();
             addLightComponent();
         }
@@ -115,7 +114,7 @@
             if (id.indexOf('directional')>=0){
                 lightComponent = new KICK.scene.Light({
                     type:KICK.scene.Light.TYPE_DIRECTIONAL,
-                    color: [1.0,0.0,0.9]
+                    color: [1.0,1.0,1.0]
                 });
                 lightGameObject.addComponent(lightComponent);
                 lightComponents.push(lightComponent);
@@ -145,8 +144,8 @@
                         cameraObject.removeComponent(rotator);
                     }
                     var transform = cameraObject.transform;
-                    transform.localPosition = [0,0,3];
-                    transform.localRotationEuler = [0,0,0];
+                    transform.localPosition = vec3.sphericalToCarterian([2.2,-Math.PI*.25,0],[0,0,0]);
+                    transform.localRotationEuler = [0,45,0];
                 }
             }
         }
@@ -160,7 +159,7 @@
                 wheelSpeed = 0.0001,
                 mouseRotationSpeed = 0.01,
                 mouseInput,
-                sphericalCoordinates = vec3.create([3,0,0]); // radius, polar, elevation
+                sphericalCoordinates = vec3.create([2.2,0,0]); // radius, polar, elevation
                 cartesianCoordinates = vec3.create();
 
             this.activated = function(){
@@ -212,7 +211,8 @@
 <button id="point" onclick="setLight(this);">Point light</button>
 <button id="ambient_directional_point" onclick="setLight(this);">Ambient+Directional+Point light</button><br>
 <button id="unlit" onclick="changeShader(engine.project.ENGINE_SHADER_UNLIT,this);">Unlit</button>
-<button id="phong" onclick="changeShader(engine.project.ENGINE_SHADER_SPECULAR,this);">Phong</button>
+<button id="diffuse" onclick="changeShader(engine.project.ENGINE_SHADER_DIFFUSE,this);">Diffuse</button>
+<button id="phong" onclick="changeShader(engine.project.ENGINE_SHADER_SPECULAR,this);">Specular</button>
 <button id="transparent_unlit" onclick="changeShader(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT,this);">Transparent Unlit</button>
 <button id="transparent_phong" onclick="changeShader(engine.project.ENGINE_SHADER_TRANSPARENT_SPECULAR,this);">Transparent Phong</button><br>
 <button id="white" onclick="setTexture('kickjs://texture/white/',this);">Texture white</button>
