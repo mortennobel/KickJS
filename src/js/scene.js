@@ -1644,7 +1644,8 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Set the field of view Y in degrees<br>
-             * Only used when perspective camera type. Default 60.0
+             * Only used when perspective camera type. Default 60.0.
+             * Must be between 1 and 179
              * @property fieldOfView
              * @type Number
              */
@@ -1654,7 +1655,7 @@ KICK.namespace = function (ns_string) {
                     if (c._ASSERT){
                         assertNumber(newValue,"fieldOfView");
                     }
-                    _fieldOfView = newValue;
+                    _fieldOfView = Math.min(179,Math.max(newValue,1));
                 }
             },
             /**
