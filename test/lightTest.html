@@ -63,7 +63,7 @@
                 shader:shader,
                 uniforms:{
                     mainColor:{
-                        value:[1.0,0.0,0.9,1.0],
+                        value:[1.0,0.0,0.9,0.5],
                         type:KICK.core.Constants.GL_FLOAT_VEC4
                     },
                     mainTexture:{
@@ -196,7 +196,7 @@
 
         function initLight(){
             setLight(document.getElementById('directional'));
-            changeShader(engine.project.ENGINE_SHADER_SPECULAR,document.getElementById('phong'));
+            changeShader(engine.project.ENGINE_SHADER_SPECULAR,document.getElementById('specular'));
             setTexture('kickjs://texture/white/',document.getElementById('white'));
             setRotation(true, document.getElementById('rotate'));
         }
@@ -212,9 +212,10 @@
 <button id="ambient_directional_point" onclick="setLight(this);">Ambient+Directional+Point light</button><br>
 <button id="unlit" onclick="changeShader(engine.project.ENGINE_SHADER_UNLIT,this);">Unlit</button>
 <button id="diffuse" onclick="changeShader(engine.project.ENGINE_SHADER_DIFFUSE,this);">Diffuse</button>
-<button id="phong" onclick="changeShader(engine.project.ENGINE_SHADER_SPECULAR,this);">Specular</button>
+<button id="specular" onclick="changeShader(engine.project.ENGINE_SHADER_SPECULAR,this);">Specular</button>
 <button id="transparent_unlit" onclick="changeShader(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT,this);">Transparent Unlit</button>
-<button id="transparent_phong" onclick="changeShader(engine.project.ENGINE_SHADER_TRANSPARENT_SPECULAR,this);">Transparent Phong</button><br>
+<button id="transparent_specular" onclick="changeShader(engine.project.ENGINE_SHADER_TRANSPARENT_SPECULAR,this);">Transparent Specular</button>
+<button id="transparent_diffuse" onclick="changeShader(engine.project.ENGINE_SHADER_TRANSPARENT_DIFFUSE,this);">Transparent Diffuse</button><br>
 <button id="white" onclick="setTexture('kickjs://texture/white/',this);">Texture white</button>
 <button onclick="setTexture('kickjs://texture/gray/',this);">Texture gray</button>
 <button onclick="setTexture(exampleTexture,this);">Texture</button><br>
