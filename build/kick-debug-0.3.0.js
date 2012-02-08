@@ -13933,32 +13933,31 @@ KICK.namespace = function (ns_string) {
             verifyUniforms = function(){
                 var uniformName,
                     type,
+                    uniformValue,
                     c = KICK.core.Constants;
 
                 for (uniformName in _uniforms){
-                    var uniformType = _uniforms[uniformName].type;
-                    var uniformValue = _uniforms[uniformName].value;
+                    uniformValue = _uniforms[uniformName].value;
+                    type = _uniforms[uniformName].type;
+                    if (type === 35678 || type ===35680 ){
+                        if (uniformValue && typeof uniformValue.ref === 'number'){
+                            _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
+                        }
+                        if (true){
+                            if (typeof _uniforms[uniformName].value !== KICK.texture.Texture){
+                                KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
+                            }
+                        }
+                    }
                     if (Array.isArray(uniformValue) || typeof uniformValue === 'number'){
-                        type = _uniforms[uniformName].type;
-                        if (type === 35678 || type ===35680 ){
-                            if (uniformValue && typeof uniformValue.ref === 'number'){
-                                _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
-                            }
-                            if (true){
-                                if (typeof _uniforms[uniformName].value !== KICK.texture.Texture){
-                                    KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
-                                }
-                            }
+                        var array = uniformValue;
+                        if (typeof array === 'number'){
+                            array = [array];
+                        }
+                        if (type === 5124 || type===35667 || type===35668 || type===35669){
+                            _uniforms[uniformName].value = new Int32Array(array);
                         } else {
-                            var array = uniformValue;
-                            if (typeof array === 'number'){
-                                array = [array];
-                            }
-                            if (type === 5124 || type===35667 || type===35668 || type===35669){
-                                _uniforms[uniformName].value = new Int32Array(array);
-                            } else {
-                                _uniforms[uniformName].value = new Float32Array(array);
-                            }
+                            _uniforms[uniformName].value = new Float32Array(array);
                         }
                     }
                 }
