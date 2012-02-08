@@ -64,11 +64,19 @@
                 uniforms:{
                     mainColor:{
                         value:[1.0,1.0,1.0,1.0],
-                        type:KICK.core.Constants.GL_FLOAT_VEC3
+                        type:KICK.core.Constants.GL_FLOAT_VEC4
                     },
                     mainTexture:{
                         value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                         type:KICK.core.Constants.GL_SAMPLER_2D
+                    },
+                    specularExponent:{
+                        value: 50,
+                        type:KICK.core.Constants.GL_FLOAT
+                    },
+                    specularColor:{
+                        value: [1,1,1,1],
+                        type:KICK.core.Constants.GL_FLOAT_VEC4
                     }
                 }
             });
@@ -107,7 +115,7 @@
             if (id.indexOf('directional')>=0){
                 lightComponent = new KICK.scene.Light({
                     type:KICK.scene.Light.TYPE_DIRECTIONAL,
-                    color: [1.0,1.0,1.0]
+                    color: [1.0,0.0,0.9]
                 });
                 lightGameObject.addComponent(lightComponent);
                 lightComponents.push(lightComponent);
@@ -188,8 +196,7 @@
         }
 
         function initLight(){
-//            setLight(document.getElementById('directional'));
-            setLight(document.getElementById('point'));
+            setLight(document.getElementById('directional'));
             changeShader(engine.project.ENGINE_SHADER_SPECULAR,document.getElementById('phong'));
             setTexture('kickjs://texture/white/',document.getElementById('white'));
             setRotation(true, document.getElementById('rotate'));

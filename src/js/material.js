@@ -1092,7 +1092,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * The method replaces any invalid uniform (Array) with a wrapped one (Float32Array or Int32Array)
+     * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
      * @method verifyUniforms
      * @param {Object} uniforms
      * @static
@@ -1104,16 +1104,22 @@ KICK.namespace = function (ns_string) {
         for (uniform in uniforms){
             if (Array.isArray(uniforms[uniform].value) || typeof uniforms[uniform].value === 'number'){
                 type = uniforms[uniform].type;
-                if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
-                    uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
-                } else if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
+                if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
                     if (c._ASSERT){
                         if (typeof uniforms[uniform].value !== KICK.texture.Texture){
                             KICK.core.Util.fail("Uniform value should be a texture object but was "+uniforms[uniform].value);
                         }
                     }
                 } else {
-                    uniforms[uniform].value = new Float32Array(uniforms[uniform].value);
+                    var array = uniforms[uniform].value;
+                    if (typeof array === 'number'){
+                        array = [array];
+                    }
+                    if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
+                        uniforms[uniform].value = new Int32Array(array);
+                    } else {
+                        uniforms[uniform].value = new Float32Array(array);
+                    }
                 }
             }
         }
