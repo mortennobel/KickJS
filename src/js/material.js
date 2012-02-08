@@ -953,7 +953,6 @@ KICK.namespace = function (ns_string) {
             _uniforms = {},
             thisObj = this,
             _renderOrder,
-            gl = engine.gl,
             /**
              * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
              * @method verifyUniforms
