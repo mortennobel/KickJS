@@ -596,14 +596,14 @@ KICK.namespace = function (ns_string) {
                         case p.ENGINE_SHADER_DEFAULT:
                             url = "kickjs://shader/default/";
                             break;
-                        case p.ENGINE_SHADER_PHONG:
-                            url = "kickjs://shader/phong/";
+                        case p.ENGINE_SHADER_SPECULAR:
+                            url = "kickjs://shader/specular/";
                             break;
                         case p.ENGINE_SHADER_UNLIT:
                             url = "kickjs://shader/unlit/";
                             break;
-                        case p.ENGINE_SHADER_TRANSPARENT_PHONG:
-                            url = "kickjs://shader/transparent_phong/";
+                        case p.ENGINE_SHADER_TRANSPARENT_SPECULAR:
+                            url = "kickjs://shader/transparent_specular/";
                             break;
                         case p.ENGINE_SHADER_TRANSPARENT_UNLIT:
                             url = "kickjs://shader/transparent_unlit/";
@@ -1013,11 +1013,11 @@ KICK.namespace = function (ns_string) {
      */
     core.Project.ENGINE_SHADER_DEFAULT = -100;
     /**
-     * @property ENGINE_SHADER_PHONG
+     * @property ENGINE_SHADER_SPECULAR
      * @type Number
      * @static
      */
-    core.Project.ENGINE_SHADER_PHONG = -101;
+    core.Project.ENGINE_SHADER_SPECULAR = -101;
     /**
      * @property ENGINE_SHADER_UNLIT
      * @type Number
@@ -1025,11 +1025,11 @@ KICK.namespace = function (ns_string) {
      */
     core.Project.ENGINE_SHADER_UNLIT = -102;
     /**
-     * @property ENGINE_SHADER_TRANSPARENT_PHONG
+     * @property ENGINE_SHADER_TRANSPARENT_SPECULAR
      * @type Number
      * @static
      */
-    core.Project.ENGINE_SHADER_TRANSPARENT_PHONG = -103;
+    core.Project.ENGINE_SHADER_TRANSPARENT_SPECULAR = -103;
     /**
      * @property ENGINE_SHADER_TRANSPARENT_UNLIT
      * @type Number

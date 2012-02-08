@@ -54,7 +54,7 @@ function buildScene(){
             dataURI:"kickjs://mesh/uvsphere/?slices=25&stacks=50&radius="+(ball_radius-0.2),
             name:"Default object"
         });
-    var shader = engine.project.load(engine.project.ENGINE_SHADER_PHONG);
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
     ballMeshRenderer.material = new KICK.material.Material(engine, {
         shader:shader,
         uniforms:{

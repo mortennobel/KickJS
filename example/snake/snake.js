@@ -1,4 +1,4 @@
-window.onload = function(){
+var initSnake = function(){
     "use strict";
     var vec3 = KICK.math.vec3,
         mat4 = KICK.math.mat4,
@@ -11,10 +11,20 @@ window.onload = function(){
             levelSize = snakeLevelComponent.size;
         this.activated = function (){
             var engine = this.gameObject.engine,
-                shader = new KICK.material.Shader(engine),
+                shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
                 material = new KICK.material.Material(engine,{
                     shader:shader,
-                    name:"SnakeFood material"
+                    name:"SnakeFood material",
+                    uniforms:{
+                        mainColor: {
+                            value: [0,1,1,1],
+                            type: KICK.core.Constants.GL_FLOAT_VEC4
+                        },
+                        mainTexture: {
+                            value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                            type: KICK.core.Constants.GL_SAMPLER_2D
+                        }
+                    }
                 }),
                 mesh = new KICK.mesh.Mesh(engine,
                                         {
@@ -101,10 +111,20 @@ window.onload = function(){
             position = vec3.create(initialMovePosition || [0,0,0]),
             scene = engine.activeScene,
             currentMovement = 0, // limits movement to not go backwards
-            shader = new KICK.material.Shader(engine),
+            shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
             material = new KICK.material.Material(engine,{
                 shader:shader,
-                name:"Snake material"
+                name:"Snake material",
+                uniforms:{
+                    mainColor: {
+                        value: [.3,1,.4,1],
+                        type: KICK.core.Constants.GL_FLOAT_VEC4
+                    },
+                    mainTexture: {
+                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                        type: KICK.core.Constants.GL_SAMPLER_2D
+                    }
+                }
             }),
             mesh = new KICK.mesh.Mesh(engine,
                 {
@@ -257,7 +277,7 @@ window.onload = function(){
 
         var init = function(){
             var childPosition = vec3.create(position),
-                tailDirection = vec3.multiply([-1,-1,-1],moveDirection);
+                tailDirection = vec3.multiply([-1,-1,-1],moveDirection,vec3.create());
             for (var i=0;i<initialLength;i++){
                 vec3.add(childPosition,tailDirection);
                 addChild(childPosition);
@@ -279,11 +299,21 @@ window.onload = function(){
             var engine = this.gameObject.engine;
             meshRenderer = this.gameObject.getComponentOfType(KICK.scene.MeshRenderer);
 
-            shader = new KICK.material.Shader(engine);
+            shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
 
             material = new KICK.material.Material(engine,{
                 shader:shader,
-                name:"Snake material"
+                name:"Snake material",
+                uniforms:{
+                    mainColor: {
+                        value: [0,0,1,1],
+                        type: KICK.core.Constants.GL_FLOAT_VEC4
+                    },
+                    mainTexture: {
+                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                        type: KICK.core.Constants.GL_SAMPLER_2D
+                    }
+                }
             });
 
             meshRenderer.material = material;
@@ -295,7 +325,8 @@ window.onload = function(){
             var meshData = new KICK.mesh.MeshData({
                 meshType:wideCube.meshType,
                 vertex:[],
-                indices:[]
+                indices:[],
+                uv1:[]
             });
             var translateUpMatrix         = mat4.translate(mat4.identity(mat4.create()),[0,0,-size/2]);
             var translateDownHeightMatrix = mat4.translate(mat4.identity(mat4.create()),[0,0,size/2]);
@@ -306,7 +337,7 @@ window.onload = function(){
             meshData = meshData.combine(tallCube.transform(translateLeftMatrix));
             meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
+            //meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
         };
 
         this.isIntersecting = function(position){
@@ -336,7 +367,7 @@ window.onload = function(){
         });
         var addSnake = function(moveLeft,moveRight, movePos, moveDir){
             var snakeGameObject = activeScene.createGameObject();
-            var snakeComponent = new SnakeComponent(engine,moveLeft,moveRight,10,movePos,moveDir);
+            var snakeComponent = new SnakeComponent(engine,moveLeft,moveRight,1,movePos,moveDir);
             snakeGameObject.addComponent(snakeComponent);
             return snakeComponent;
         };
@@ -436,7 +467,8 @@ window.onload = function(){
 
         var levelGameObject = activeScene.createGameObject();
         var levelComponent = new SnakeLevelComponent();
-        levelGameObject.addComponent(new KICK.scene.MeshRenderer());
+        var meshRenderer = new KICK.scene.MeshRenderer();
+        levelGameObject.addComponent(meshRenderer);
         levelGameObject.addComponent(levelComponent);
 
         gameController = new GameController(engine,levelComponent);
@@ -450,11 +482,12 @@ window.onload = function(){
 
     function documentResized(){
         var canvas = document.getElementById('canvas');
-        canvas.width = document.width;
-        canvas.height = document.height-canvas.offsetTop;
+        canvas.width = document.width || document.body.clientWidth;
+        canvas.height = (document.height || document.body.clientHeight)-canvas.offsetTop;
         engine.canvasResized();
     }
     documentResized();
+
 
     var playerScores = [
         document.getElementById('player1score'),
@@ -536,3 +569,5 @@ window.onload = function(){
     document.getElementById('playButton').addEventListener('click',playButtonClicked,false);
     document.addEventListener('keyup',keyListener,true);
 };
+
+window.addEventListener("load",initSnake,false);

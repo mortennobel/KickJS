@@ -5,12 +5,14 @@
     <title>Sierpinsky Pyramid</title>
 </head>
 <body>
+    <!--<script type="text/javascript" src="../build/kick-debug-0.3.0.js"></script>-->
     <script type="text/javascript" src="../build/kick-min-0.3.0.js"></script>
     <h1>Sierpinsky Pyramid (Elements: <span id="elements"></span>)</h1>
-       Performance test of rendering much data.
+       Performance test of having many script udpates.
        <br>
-   <canvas id="canvas" style="border: none;" width="1" height="1"></canvas>
+   <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
    <script type="text/javascript">
+       var meshRecursionDepth = 3;
        function initLight(){
            var lightGameObject = engine.activeScene.createGameObject();
            lightGameObject.transform.localRotationEuler = [10,145,0];
@@ -29,10 +31,25 @@
            window.dirLight = lightComponent;
        }
 
+       var meshGameObject;
        // init engine (create 3d context)
        var engine = new KICK.core.Engine('canvas',{
            enableDebugContext: false
        });
+
+       var SetPositionScript = function(){
+           var transform;
+
+           this.scriptPriority = 0;
+
+           this.activated = function(){
+               transform = meshGameObject.transform;
+           };
+
+           this.update = function(){
+               transform.localPosition = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
+           };
+       };
 
        
        var material = new KICK.material.Material(engine,{
@@ -75,17 +92,22 @@
            });
            cameraObject.addComponent(camera);
            
-           for (var i=0;i<numberOfPrimitives ;i++){
-               var gameObject = engine.activeScene.createGameObject();
-               gameObject.name = "Object "+(i+1);
 
-               gameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
-               gameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
-               gameObject.transform.localScale = [10,10,10];
-               var meshRenderer = new KICK.scene.MeshRenderer();
-               meshRenderer.mesh = createSierpinskyTriangleMesh();
-               meshRenderer.material = material;
-               gameObject.addComponent(meshRenderer);
+           meshGameObject = engine.activeScene.createGameObject();
+           meshGameObject.name = "mesh";
+
+           meshGameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
+           meshGameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
+           meshGameObject.transform.localScale = [10,10,10];
+           var meshRenderer = new KICK.scene.MeshRenderer();
+           meshRenderer.mesh = createSierpinskyTriangleMesh();
+           meshRenderer.material = material;
+           meshGameObject.addComponent(meshRenderer);
+
+           for (var i=0;i<primitives;i++){
+               var gameObject = engine.activeScene.createGameObject();
+               gameObject.name = "Update #"+i;
+               gameObject.addComponent(new SetPositionScript());
            }
 
            // init light
@@ -139,7 +161,7 @@
 
            var vertices = [];
            var indices = [];
-           var depth = 6;
+
            var p1 = [0,0,0];
            var p2 = [1,0,0];
            var p3 = [0.5,0,Math.sqrt(0.75)];
@@ -147,7 +169,7 @@
 
            var meshData;
            if (!window.meshData){
-               generateSierpinskyPyramid(p1, p2, p3, p4, depth);
+               generateSierpinskyPyramid(p1, p2, p3, p4, meshRecursionDepth);
                meshData = new KICK.mesh.MeshData();
                meshData.vertex = vertices;
                console.log("Vertex count "+(meshData.vertex.length/3));
@@ -167,13 +189,16 @@
        }
        
    </script>
-    <button onclick="startTest(100);">100</button>
-    <button onclick="startTest(200);">200</button>
-    <button onclick="startTest(300);">300</button>
-    <button onclick="startTest(400);">400</button>
-    <button onclick="startTest(500);">500</button>
-    <button onclick="startTest(600);">600</button>
-    <button onclick="startTest(700);">700</button>
-    <button onclick="startTest(800);">800</button>
+    <button onclick="startTest(1000);">1000</button>
+    <button onclick="startTest(5000);">5000</button>
+    <button onclick="startTest(10000);">10000</button>
+    <button onclick="startTest(12000);">12000</button>
+    <button onclick="startTest(14000);">14000</button>
+    <button onclick="startTest(16000);">16000</button>
+    <button onclick="startTest(18000);">18000</button>
+    <button onclick="startTest(20000);">20000</button>
+    <button onclick="startTest(30000);">30000</button>
+    <button onclick="startTest(40000);">40000</button>
+    <button onclick="startTest(50000);">50000</button>
 </body>
 </html>

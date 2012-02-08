@@ -356,9 +356,9 @@ KICK.namespace = function (ns_string) {
          * The following shaders are available:
          *  <ul>
          *  <li><b>Default</b> Url: kickjs://shader/default/</li>
-         *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
-         *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
+         *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
          *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
          *  <li><b>Pick</b> Url: kickjs://shader/__pick/</li>
@@ -392,9 +392,9 @@ KICK.namespace = function (ns_string) {
                     }
                     return res;
                 },
-                shaderTypes = ["phong","__shadowmap","__error","__pick","transparent_phong","unlit","transparent_unlit"];
+                shaderTypes = ["specular","__shadowmap","__error","__pick","transparent_specular","unlit","transparent_unlit"];
             if (url === "kickjs://shader/default/"){
-                url = "kickjs://shader/phong/";
+                url = "kickjs://shader/specular/";
             }
             for (var i=0;i<shaderTypes.length;i++){
                 if (compareAndSetShader(shaderTypes[i])){
@@ -424,9 +424,9 @@ KICK.namespace = function (ns_string) {
          * The following shaders are available:
          *  <ul>
          *  <li><b>Default</b> Url: kickjs://shader/default/</li>
-         *  <li><b>Phong</b> Url: kickjs://shader/phong/</li>
+         *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
-         *  <li><b>Transparent Phong</b> Url: kickjs://shader/transparent_phong/</li>
+         *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
          *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
          *  <li><b>Pick</b> Url: kickjs://shader/__pick/</li>
