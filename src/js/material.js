@@ -970,10 +970,10 @@ KICK.namespace = function (ns_string) {
                     if (Array.isArray(uniformValue) || typeof uniformValue === 'number'){
                         type = _uniforms[uniformName].type;
                         if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
+                            if (uniformValue && typeof uniformValue.ref === 'number'){
+                                _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
+                            }
                             if (c._ASSERT){
-                                if (uniformValue && typeof uniformValue.ref === 'number'){
-                                    _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
-                                }
                                 if (typeof _uniforms[uniformName].value !== KICK.texture.Texture){
                                     KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
                                 }

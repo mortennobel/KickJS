@@ -13903,10 +13903,10 @@ KICK.namespace = function (ns_string) {
                     if (Array.isArray(uniformValue) || typeof uniformValue === 'number'){
                         type = _uniforms[uniformName].type;
                         if (type === 35678 || type ===35680 ){
+                            if (uniformValue && typeof uniformValue.ref === 'number'){
+                                _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
+                            }
                             if (true){
-                                if (uniformValue && typeof uniformValue.ref === 'number'){
-                                    _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
-                                }
                                 if (typeof _uniforms[uniformName].value !== KICK.texture.Texture){
                                     KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
                                 }
