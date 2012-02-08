@@ -953,7 +953,45 @@ KICK.namespace = function (ns_string) {
             _uniforms = {},
             thisObj = this,
             _renderOrder,
-            gl = engine.gl;
+            gl = engine.gl,
+            /**
+             * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
+             * @method verifyUniforms
+             * @private
+             */
+            verifyUniforms = function(){
+                var uniformName,
+                    type,
+                    c = KICK.core.Constants;
+
+                for (uniformName in _uniforms){
+                    var uniformType = _uniforms[uniformName].type;
+                    var uniformValue = _uniforms[uniformName].value;
+                    if (Array.isArray(uniformValue) || typeof uniformValue === 'number'){
+                        type = _uniforms[uniformName].type;
+                        if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
+                            if (c._ASSERT){
+                                if (uniformValue && typeof uniformValue.ref === 'number'){
+                                    _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
+                                }
+                                if (typeof _uniforms[uniformName].value !== KICK.texture.Texture){
+                                    KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
+                                }
+                            }
+                        } else {
+                            var array = uniformValue;
+                            if (typeof array === 'number'){
+                                array = [array];
+                            }
+                            if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
+                                _uniforms[uniformName].value = new Int32Array(array);
+                            } else {
+                                _uniforms[uniformName].value = new Float32Array(array);
+                            }
+                        }
+                    }
+                }
+            };
         Object.defineProperties(this,{
             /**
              * @property engine
@@ -991,7 +1029,7 @@ KICK.namespace = function (ns_string) {
              * Object with of uniforms.
              * The object has a number of named properties one for each uniform. The uniform object contains value and type.
              * The value is always an array<br>
-             * Note when updating the uniform value, it is important to call the material.shader.markUniformUpdated().
+             * Note when updating the a uniform through a reference to uniforms, it is important to call the material.shader.markUniformUpdated().
              * When the material.uniform is set to something the markUniformUpdated function is implicit called.
              * @property uniforms
              * @type Object
@@ -1001,7 +1039,8 @@ KICK.namespace = function (ns_string) {
                     return _uniforms;
                 },
                 set:function(newValue){
-                    _uniforms = newValue;
+                    _uniforms = newValue || {};
+                    verifyUniforms();
                     if (_shader){
                         _shader.markUniformUpdated();
                     }
@@ -1078,50 +1117,6 @@ KICK.namespace = function (ns_string) {
         (function init(){
             applyConfig(thisObj,config);
             engine.project.registerObject(thisObj, "KICK.material.Material");
-            // replace references to images with references
-            for (var name in _uniforms){
-                var uniformType = _uniforms[name].type;
-                var uniformValue = _uniforms[name].value;
-                if ((uniformType === KICK.core.Constants.GL_SAMPLER_2D ||
-                    uniformType === KICK.core.Constants.GL_SAMPLER_CUBE ) && uniformValue && typeof uniformValue.ref === 'number'){
-                    _uniforms[name].value = engine.project.load(uniformValue.ref);
-                }
-            }
-            material.Material.verifyUniforms(_uniforms);
         })();
-    };
-
-    /**
-     * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
-     * @method verifyUniforms
-     * @param {Object} uniforms
-     * @static
-     */
-    material.Material.verifyUniforms = function(uniforms){
-        var uniform,
-            type,
-            c = KICK.core.Constants;
-        for (uniform in uniforms){
-            if (Array.isArray(uniforms[uniform].value) || typeof uniforms[uniform].value === 'number'){
-                type = uniforms[uniform].type;
-                if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
-                    if (c._ASSERT){
-                        if (typeof uniforms[uniform].value !== KICK.texture.Texture){
-                            KICK.core.Util.fail("Uniform value should be a texture object but was "+uniforms[uniform].value);
-                        }
-                    }
-                } else {
-                    var array = uniforms[uniform].value;
-                    if (typeof array === 'number'){
-                        array = [array];
-                    }
-                    if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
-                        uniforms[uniform].value = new Int32Array(array);
-                    } else {
-                        uniforms[uniform].value = new Float32Array(array);
-                    }
-                }
-            }
-        }
     };
 })();
