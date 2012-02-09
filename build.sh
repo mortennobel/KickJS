@@ -97,6 +97,20 @@ $nodejs $project/preprocessor/preprocessor $project/src/js/resource.js $project/
 cp $project/src/js/constants.js $project/build/pre/constants.js
 cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 
+## For debugging purpose only - skip preprocessor
+## cp $project/src/js/math.js $project/build/pre/math.js
+## cp $project/src/js/core.js $project/build/pre/core.js
+## cp $project/src/js/chunk.js $project/build/pre/chunk.js
+## cp $project/src/js/scene.js $project/build/pre/scene.js
+## cp $project/src/js/mesh.js $project/build/pre/mesh.js
+## cp $project/src/js/renderer.js $project/build/pre/renderer.js
+## cp $project/src/js/material.js $project/build/pre/material.js
+## cp $project/src/js/meshfactory.js $project/build/pre/meshfactory.js
+## cp $project/src/js/texture.js $project/build/pre/texture.js
+## cp $project/src/js/collada.js $project/build/pre/collada.js
+## cp $project/src/js/obj.js $project/build/pre/obj.js
+## cp $project/src/js/resource.js $project/build/pre/resource.js
+
 ##############################################################################
 ## http://code.google.com/closure/compiler/
 ##############################################################################
