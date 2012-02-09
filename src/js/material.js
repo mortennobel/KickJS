@@ -114,6 +114,7 @@ KICK.namespace = function (ns_string) {
             glslConstants = material.GLSLConstants,
             _vertexShaderSrc = glslConstants["__error_vs.glsl"],
             _fragmentShaderSrc = glslConstants["__error_fs.glsl"],
+            _defaultUniforms,
             _errorLog = KICK.core.Util.fail,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
@@ -233,6 +234,17 @@ KICK.namespace = function (ns_string) {
              */
             gl:{
                 value:gl
+            },
+            /**
+             * Get default configuration of shader uniforms
+             * @property defaultUniforms
+             * @type Object
+             */
+            defaultUniforms:{
+                get:function(){ return _defaultUniforms; },
+                set:function(value){
+                    _defaultUniforms = value;
+                }
             },
             /**
              * @property vertexShaderSrc
@@ -706,7 +718,8 @@ KICK.namespace = function (ns_string) {
                 polygonOffsetFactor:_polygonOffsetFactor,
                 polygonOffsetUnits:_polygonOffsetUnits,
                 renderOrder:_renderOrder,
-                zTest:_zTest
+                zTest:_zTest,
+                defaultUniforms:_defaultUniforms
             };
         };
 
@@ -952,7 +965,25 @@ KICK.namespace = function (ns_string) {
             _shader = null,
             _uniforms = {},
             thisObj = this,
-            _renderOrder,
+            _renderOrder = 0,
+            inheritDefaultUniformsFromShader = function(){
+                var shaderDefaultUniforms = _shader.defaultUniforms;
+                var dirty = false;
+                for (var name in shaderDefaultUniforms){
+                    if (!_uniforms[name]){
+                        var defaultValue = shaderDefaultUniforms[name];
+                        _uniforms[name] = {
+                            value: defaultValue.value,
+                            type: defaultValue.type
+                        };
+                        dirty = true;
+                    }
+                }
+                if (dirty){
+                    verifyUniforms();
+                }
+            },
+
             /**
              * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
              * @method verifyUniforms
@@ -1019,8 +1050,10 @@ KICK.namespace = function (ns_string) {
                     if (!newValue instanceof KICK.material.Shader){
                         fail("KICK.material.Shader expected");
                     }
-                    _shader = newValue;
-                    thisObj.init();
+                    if (_shader !==newValue){
+                        _shader = newValue;
+                        thisObj.init();
+                    }
                 }
             },
             /**
@@ -1073,7 +1106,12 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
                 _shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
             }
-            _renderOrder = _shader.renderOrder;
+
+            inheritDefaultUniformsFromShader();
+
+            if (!_renderOrder){
+                _renderOrder = _shader.renderOrder;
+            }
         };
 
         /**

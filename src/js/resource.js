@@ -377,6 +377,7 @@ KICK.namespace = function (ns_string) {
                 depthMask = true,
                 renderOrder = 1000,
                 glslConstants = KICK.material.GLSLConstants,
+                defaultUniforms = {},
                 compareAndSetShader = function(shaderName){
                     var res = url.indexOf("kickjs://shader/"+shaderName+"/")===0;
                     if (res){
@@ -390,6 +391,43 @@ KICK.namespace = function (ns_string) {
                         if (shaderName==="__shadowmap"){
                             polygonOffsetEnabled = true;
                         }
+
+                        if (shaderName==="specular" || shaderName==="transparent_specular"){
+                            defaultUniforms = {
+                                mainColor: {
+                                    value: [1,1,1,1],
+                                    type: KICK.core.Constants.GL_FLOAT_VEC4
+                                },
+                                mainTexture: {
+                                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                                    type: KICK.core.Constants.GL_SAMPLER_2D
+                                },
+                                specularColor: {
+                                    value: [1,1,1,1],
+                                    type: KICK.core.Constants.GL_FLOAT_VEC4
+                                },
+                                specularExponent: {
+                                    value: 50,
+                                    type: KICK.core.Constants.GL_FLOAT
+                                }
+                            };
+                        }
+                        if (shaderName==="diffuse" ||
+                            shaderName==="transparent_diffuse" ||
+                            shaderName==="unlit" ||
+                            shaderName==="transparent_unlit"){
+                            defaultUniforms = {
+                                mainColor: {
+                                    value: [1,1,1,1],
+                                    type: KICK.core.Constants.GL_FLOAT_VEC4
+                                },
+                                mainTexture: {
+                                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                                    type: KICK.core.Constants.GL_SAMPLER_2D
+                                }
+                            };
+                        }
+
                     }
                     return res;
                 },
@@ -407,13 +445,16 @@ KICK.namespace = function (ns_string) {
                     KICK.core.Util.fail("Cannot find shader url '"+url+"'");
                 }
             }
+
+
             var config = {
                 blend:blend,
                 depthMask:depthMask,
                 renderOrder:renderOrder,
                 polygonOffsetEnabled:polygonOffsetEnabled,
                 vertexShaderSrc: vertexShaderSrc,
-                fragmentShaderSrc: fragmentShaderSrc
+                fragmentShaderSrc: fragmentShaderSrc,
+                defaultUniforms: defaultUniforms
             };
 
             KICK.core.Util.applyConfig(shaderDestination,config);
