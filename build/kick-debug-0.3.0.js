@@ -13944,7 +13944,7 @@ KICK.namespace = function (ns_string) {
                             _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
                         }
                         if (true){
-                            if (typeof _uniforms[uniformName].value !== KICK.texture.Texture){
+                            if (!(_uniforms[uniformName].value instanceof KICK.texture.Texture)){
                                 KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
                             }
                         }
@@ -14043,7 +14043,7 @@ KICK.namespace = function (ns_string) {
         this.init = function(){
             if (!_shader){
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
-                _shader = engine.project.load("kickjs://shader/__error/");
+                _shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
             }
             _renderOrder = _shader.renderOrder;
         };
