@@ -5,11 +5,12 @@
     <title>Sierpinsky Pyramid</title>
 </head>
 <body>
-    <script type="text/javascript" src="../build/kick-min-0.3.0.js"></script>
+    <script type="text/javascript" src="../../build/kick-min-0.3.0.js"></script>
     <h1>Sierpinsky Pyramid (Elements: <span id="elements"></span>)</h1>
-       Performance test of rendering much data.
+       Performance test of rendering much data. Currently view volume culling is not suported by KickJS, so the
+       performance may not be impresive.
        <br>
-   <canvas id="canvas" style="border: none;" width="1" height="1"></canvas>
+   <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
    <script type="text/javascript">
        function initLight(){
            var lightGameObject = engine.activeScene.createGameObject();
@@ -55,38 +56,49 @@
            return min + Math.random()*(max-min);
        };
        
-       function startTest(primitives){
+       function startTest(stacks, slices){
            engine.activeScene = new KICK.scene.Scene(engine);
-           var numberOfPrimitives = primitives;
-           document.getElementById('elements').innerHTML = numberOfPrimitives;
-           
+           var numberOfPrimitives = 0;
+
+
+           var piDivStacks = Math.PI/stacks,
+                PI2 = Math.PI*2,
+                PIDiv2 = Math.PI/2;
+
            // create a game object in [0,0,0] facing down the -z axis
            var cameraObject = engine.activeScene.createGameObject();
            cameraObject.transform.position = [0,0,0];
            // create a perspective camera
            var camera = new KICK.scene.Camera({
-               perspective: false,
-               left:-100,
-               right:100,
-               top:100,
-               bottom:-100,
-               near:-100,
-               far:100
+               perspective: true,
+               fieldOfView:60
            });
            cameraObject.addComponent(camera);
            
-           for (var i=0;i<numberOfPrimitives ;i++){
-               var gameObject = engine.activeScene.createGameObject();
-               gameObject.name = "Object "+(i+1);
+           for (var j = 0;j<stacks;j++){
+               var latitude = piDivStacks * j - PIDiv2;
+               var sinLat = Math.sin(latitude);
+               var cosLat = Math.cos(latitude);
+               for (var i = 0;i<slices;i++){
+                   var longitude = (PI2/slices) * i;
+                   var sinLong = Math.sin(longitude);
+                   var cosLong = Math.cos(longitude);
+                   var x = cosLong * cosLat*50;
+                   var y = sinLat*50;
+                   var z = sinLong * cosLat*50;
+                   var gameObject = engine.activeScene.createGameObject();
+                   gameObject.name = "Object "+(i+1);
 
-               gameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
-               gameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
-               gameObject.transform.localScale = [10,10,10];
-               var meshRenderer = new KICK.scene.MeshRenderer();
-               meshRenderer.mesh = createSierpinskyTriangleMesh();
-               meshRenderer.material = material;
-               gameObject.addComponent(meshRenderer);
+                   gameObject.transform.position = [x,y,z];
+                   gameObject.transform.localScale = [10,10,10];
+                   var meshRenderer = new KICK.scene.MeshRenderer();
+                   meshRenderer.mesh = createSierpinskyTriangleMesh();
+                   meshRenderer.material = material;
+                   gameObject.addComponent(meshRenderer);
+                   numberOfPrimitives ++;
+               }
            }
+           document.getElementById('elements').innerHTML = "stacks "+stacks+" slices "+slices+" = "+numberOfPrimitives;
 
            // init light
            initLight();
@@ -167,13 +179,9 @@
        }
        
    </script>
-    <button onclick="startTest(100);">100</button>
-    <button onclick="startTest(200);">200</button>
-    <button onclick="startTest(300);">300</button>
-    <button onclick="startTest(400);">400</button>
-    <button onclick="startTest(500);">500</button>
-    <button onclick="startTest(600);">600</button>
-    <button onclick="startTest(700);">700</button>
-    <button onclick="startTest(800);">800</button>
+    <button onclick="startTest(16,16);">16x16</button>
+    <button onclick="startTest(16,24);">16x24</button>
+    <button onclick="startTest(24,24);">24x24</button>
+    <button onclick="startTest(24,32);">24x32</button>
 </body>
 </html>
