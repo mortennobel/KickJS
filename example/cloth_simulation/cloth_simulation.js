@@ -15,7 +15,7 @@ var engine,
     windForce = vec3.create([0.2*TIME_STEPSIZE2,0,0.05*TIME_STEPSIZE2]);
 function initKick() {
     engine = new KICK.core.Engine('canvas',{
-        enableDebugContext: true
+        enableDebugContext: location.search === "?debug" // debug enabled if query == debug
     });
     buildScene();
 }
@@ -36,14 +36,14 @@ function buildScene(){
     var lightGO = scene.createGameObject({name:"Light"});
     var light = new KICK.scene.Light({
         type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
-        color: [1.0,1.0,1.0,1]
+        color: [1.0,1.0,1.0]
     });
     lightGO.addComponent(light);
-    lightGO.transform.localRotation = [0,90,0];
+    lightGO.transform.localRotationEuler = [0,0,0];
 
     var lightAmbient = new KICK.scene.Light({
         type:KICK.core.Constants._LIGHT_TYPE_AMBIENT,
-        color: [0.1,0.1,0.1,1]
+        color: [0.1,0.1,0.1]
     });
     lightGO.addComponent(lightAmbient);
 
@@ -668,7 +668,6 @@ function Constraint(p1,p2){
             meshData.normal = normals;
             if (!meshData.uv1){
                 var uvs = thisObj.getUvs();
-                console.log(vertices.length/3*2,uvs.length);
                 meshData.uv1 = uvs;
             }
             meshRenderer.mesh.meshData = meshData;
