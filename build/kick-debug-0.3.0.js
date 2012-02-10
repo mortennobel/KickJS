@@ -6726,12 +6726,13 @@ KICK.namespace = function (ns_string) {
             if (resource){
                 // remove references
                 delete resourceCache[uid];
-                delete resourceDescriptorsByUID[uid];
                 // call destroy if exist
                 if (resource.destroy){
                     resource.destroy();
                 }
             }
+            // remove description
+            delete resourceDescriptorsByUID[uid];
         };
 
         /**
@@ -14061,8 +14062,16 @@ KICK.namespace = function (ns_string) {
                     return _uniforms;
                 },
                 set:function(newValue){
-                    _uniforms = newValue || {};
-                    verifyUniforms();
+                    if (newValue != _uniforms){
+                        newValue = newValue || {};
+                        for (var name in newValue){
+                            if (newValue.hasOwnProperty(name)){
+                                _uniforms[name] = newValue[name];
+                            }
+                        }
+                        verifyUniforms();
+                    }
+
                     if (_shader){
                         _shader.markUniformUpdated();
                     }
