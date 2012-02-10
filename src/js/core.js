@@ -591,7 +591,7 @@ KICK.namespace = function (ns_string) {
                 var p = core.Project,
                     res,
                     url;
-                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_TRANSPARENT_DIFFUSE){
+                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_UNLIT_VERTEX_COLOR){
                     switch (uid){
                         case p.ENGINE_SHADER_DEFAULT:
                             url = "kickjs://shader/default/";
@@ -604,6 +604,9 @@ KICK.namespace = function (ns_string) {
                             break;
                         case p.ENGINE_SHADER_UNLIT:
                             url = "kickjs://shader/unlit/";
+                            break;
+                        case p.ENGINE_SHADER_UNLIT_VERTEX_COLOR:
+                            url = "kickjs://shader/unlit_vertex_color/";
                             break;
                         case p.ENGINE_SHADER_TRANSPARENT_SPECULAR:
                             url = "kickjs://shader/transparent_specular/";
@@ -1072,6 +1075,12 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_SHADER_TRANSPARENT_DIFFUSE = -109;
+    /**
+     * @property ENGINE_SHADER_UNLIT_VERTEX_COLOR
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER_UNLIT_VERTEX_COLOR = -110;
 
     /**
      * @property ENGINE_TEXTURE_BLACK

@@ -415,6 +415,7 @@ KICK.namespace = function (ns_string) {
                         if (shaderName==="diffuse" ||
                             shaderName==="transparent_diffuse" ||
                             shaderName==="unlit" ||
+                            shaderName==="unlit_vertex_color" ||
                             shaderName==="transparent_unlit"){
                             defaultUniforms = {
                                 mainColor: {
@@ -431,7 +432,17 @@ KICK.namespace = function (ns_string) {
                     }
                     return res;
                 },
-                shaderTypes = ["specular","diffuse","__shadowmap","__error","__pick","transparent_specular","transparent_diffuse","unlit","transparent_unlit"];
+                shaderTypes = [
+                    "specular",
+                    "diffuse",
+                    "__shadowmap",
+                    "__error",
+                    "__pick",
+                    "transparent_specular",
+                    "transparent_diffuse",
+                    "unlit",
+                    "unlit_vertex_color",
+                    "transparent_unlit"];
             if (url === "kickjs://shader/default/"){
                 url = "kickjs://shader/diffuse/";
             }
@@ -469,6 +480,7 @@ KICK.namespace = function (ns_string) {
          *  <li><b>Diffuse</b> Url: kickjs://shader/diffuse/</li>
          *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
+         *  <li><b>Unlit</b> Url: kickjs://shader/unlit_vertex_color/</li>
          *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
          *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
