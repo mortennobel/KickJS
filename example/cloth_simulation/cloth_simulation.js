@@ -22,6 +22,14 @@ function initKick() {
 
 function buildScene(){
     var scene = engine.activeScene;
+    buildCamera(scene);
+    buildLight(scene);
+    buildBackground(scene);
+    buildBall(scene);
+    buildCloth(scene);
+}
+
+function buildCamera(scene){
     var cameraGO = scene.createGameObject({name:"Camera"});
     var camera = new KICK.scene.Camera({
         fieldOfView: 60
@@ -31,8 +39,64 @@ function buildScene(){
     var cameraTransform = cameraGO.transform;
     cameraTransform.localPosition = [-5.5,-5.5,13.0];
     cameraTransform.localRotationEuler = [0,-40,0];
+}
 
-    // add light on scene
+function buildCloth(scene){
+    var clothGO = scene.createGameObject({name:"Cloth"});
+    clothGO.addComponent(new ClothComponent(14,10,13,13));
+    var clothMeshRenderer = new KICK.scene.MeshRenderer();
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
+    clothMeshRenderer.material = new KICK.material.Material(engine, {
+        shader:shader,
+        uniforms:{
+            mainColor:{
+                value:[1.0,1.0,1.0,1.0],
+                type:KICK.core.Constants.GL_FLOAT_VEC4
+            },
+            mainTexture:{
+                value: engine.project.load(engine.project.ENGINE_TEXTURE_LOGO),
+                type:KICK.core.Constants.GL_SAMPLER_2D
+            }
+        }
+    });
+    clothGO.addComponent(clothMeshRenderer);
+}
+
+function buildBall(scene){
+    var ballGO = scene.createGameObject({name:"Ball"});
+    var ballMeshRenderer = new KICK.scene.MeshRenderer();
+    ballMeshRenderer.mesh = new KICK.mesh.Mesh(engine,
+        {
+            dataURI:"kickjs://mesh/uvsphere/?slices=25&stacks=50&radius="+(ball_radius-0.2),
+            name:"Default object"
+        });
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
+    ballMeshRenderer.material = new KICK.material.Material(engine, {
+        shader:shader,
+        uniforms:{
+            mainColor:{
+                value:[1.0,0.0,0.9,0.5],
+                type:KICK.core.Constants.GL_FLOAT_VEC4
+            },
+            mainTexture:{
+                value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                type:KICK.core.Constants.GL_SAMPLER_2D
+            },
+            specularExponent:{
+                value: 80,
+                type:KICK.core.Constants.GL_FLOAT
+            },
+            specularColor:{
+                value: [1,1,1,1],
+                type:KICK.core.Constants.GL_FLOAT_VEC4
+            }
+        }
+    });
+    ballGO.addComponent(ballMeshRenderer);
+    ballGO.addComponent(new BallUpdater());
+}
+
+function buildLight(scene){
     var lightGO = scene.createGameObject({name:"Light"});
     var light = new KICK.scene.Light({
         type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
@@ -46,21 +110,35 @@ function buildScene(){
         color: [0.1,0.1,0.1]
     });
     lightGO.addComponent(lightAmbient);
+}
 
-    var ballGO = scene.createGameObject({name:"Ball"});
-    var ballMeshRenderer = new KICK.scene.MeshRenderer();
-    ballMeshRenderer.mesh = new KICK.mesh.Mesh(engine,
+function buildBackground(scene){
+    var backgroundGO = scene.createGameObject({name:"Background"});
+    var backgroundMeshRenderer = new KICK.scene.MeshRenderer();
+
+    backgroundMeshRenderer.mesh = new KICK.mesh.Mesh(engine,
         {
-            dataURI:"kickjs://mesh/uvsphere/?slices=25&stacks=50&radius="+(ball_radius-0.2),
+            dataURI:"kickjs://mesh/plane/",
             name:"Default object"
         });
-    var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
-    ballMeshRenderer.material = new KICK.material.Material(engine, {
-        shader:shader,
+    // modify the mesh to add colors in the corners (which will be interpolated as a smooth background)
+    var meshData = backgroundMeshRenderer.mesh.meshData;
+    var color = new Float32Array((meshData.vertex.length/3)*4);
+    var color1 = [146/255,194/255,136/255,1];
+    var color2 = [79/255,0,1,1];
+    vec4.set(color1,color.subarray(0,4));
+    vec4.set(color2,color.subarray(4,8));
+    vec4.set(color1,color.subarray(8,12));
+    vec4.set(color2,color.subarray(12,16));
+    meshData.color = color;
+    backgroundMeshRenderer.mesh.meshData = meshData;
+    var shaderUnlit = engine.project.load(engine.project.ENGINE_SHADER_UNLIT_VERTEX_COLOR);
+    backgroundMeshRenderer.material = new KICK.material.Material(engine, {
+        shader:shaderUnlit,
         uniforms:{
             mainColor:{
-                value:[0.4,0.8,0.5,1.0],
-                type:KICK.core.Constants.GL_FLOAT_VEC3
+                value:[1.0,1.0,1.0,1.0],
+                type:KICK.core.Constants.GL_FLOAT_VEC4
             },
             mainTexture:{
                 value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
@@ -68,26 +146,10 @@ function buildScene(){
             }
         }
     });
-    ballGO.addComponent(ballMeshRenderer);
-    ballGO.addComponent(new BallUpdater());
-
-    var clothGO = scene.createGameObject({name:"Cloth"});
-    clothGO.addComponent(new ClothComponent(14,10,13,13));
-    var clothMeshRenderer = new KICK.scene.MeshRenderer();
-    clothMeshRenderer.material = new KICK.material.Material(engine, {
-        shader:shader,
-        uniforms:{
-            mainColor:{
-                value:[1.0,1.0,1.0,1.0],
-                type:KICK.core.Constants.GL_FLOAT_VEC3
-            },
-            mainTexture:{
-                value: engine.project.load(engine.project.ENGINE_TEXTURE_LOGO),
-                type:KICK.core.Constants.GL_SAMPLER_2D
-            }
-        }
-    });
-    clothGO.addComponent(clothMeshRenderer);
+    backgroundGO.addComponent(backgroundMeshRenderer);
+    var transform = backgroundGO.transform;
+    transform.localScale = [50,50,50];
+    transform.localPosition = [10,0,-10];
 }
 
 function BallUpdater(){
