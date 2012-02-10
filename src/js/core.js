@@ -981,12 +981,13 @@ KICK.namespace = function (ns_string) {
             if (resource){
                 // remove references
                 delete resourceCache[uid];
-                delete resourceDescriptorsByUID[uid];
                 // call destroy if exist
                 if (resource.destroy){
                     resource.destroy();
                 }
             }
+            // remove description
+            delete resourceDescriptorsByUID[uid];
         };
 
         /**
