@@ -18,7 +18,6 @@ window.shaderEditor = new (function(){
 
     this.textures = [];
 
-
     Object.defineProperties(this,
         {
             engine:{
@@ -235,7 +234,7 @@ window.shaderEditor = new (function(){
 
             var ambientlightGameObject = _engine.activeScene.createGameObject();
             _ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
-            _ambientLight.color = [0.1,0.1,0.1,1];
+            _ambientLight.color = [0.1,0.1,0.1];
             ambientlightGameObject.addComponent(_ambientLight);
 
             var lightGameObject = _engine.activeScene.createGameObject();

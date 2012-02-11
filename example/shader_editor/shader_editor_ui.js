@@ -829,12 +829,21 @@
         //create the console
         var r = new Y.Console({
             newestOnTop : false,
-            width: 600,
-            height: 200,
-            consoleLimit:10
+            width: 300,
+            height: 300,
+            consoleLimit:10,
+            style: "inline",
+            strings: {
+                title : "Shader error console",
+                pause : "Pause",
+                clear : "Clear",
+                collapse : "Collapse",
+                expand : "Expand"
+            }
         });
 
         r.render('#logger');
+
         window.log = r;
         var idParameter = document.location.hash.length>1;
         var shader = null;
@@ -1103,14 +1112,11 @@
                             logoutURL = obj.logoutURL;
                             username = obj.username;
                             document.getElementById('LogoutButton').style.display = "inline";
-                            document.getElementById('username').style.display = "block";
-                            document.getElementById('username').innerHTML = "Logged in as "+username;
+                            document.getElementById('LogoutButton').title = "Currently logged in as "+username;
                             document.getElementById('LoginButton').style.display = "none";
                         } else {
                             loginURL = obj.loginURL;
                             document.getElementById('LogoutButton').style.display = "none";
-                            document.getElementById('username').style.display = "none";
-                            document.getElementById('username').innerHTML = "";
                             document.getElementById('LoginButton').style.display = "inline";
                         }
                     }
