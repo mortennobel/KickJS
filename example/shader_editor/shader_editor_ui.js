@@ -899,6 +899,85 @@
             nestedPanel.render('#nestedPanel');
         };
 
+        window.YUILoadExample = function (){
+            var elements = [
+                {
+                    id:"http://goo.gl/lLjyf",
+                    name:"Phong ligthing"
+                },
+                {
+                    id:"http://goo.gl/EoxBh",
+                    name:"Mandelbrot shader"
+                },
+                {
+                    id:"http://goo.gl/2JJe0",
+                    name:"Brick shader"
+                },
+                {
+                    id:"http://goo.gl/2SwX1",
+                    name:"Sliced geometry"
+                },
+                {
+                    id:"http://goo.gl/Jsne8",
+                    name:"ASCII shader"
+                },
+                {
+                    id:"http://goo.gl/viDKB",
+                    name:"Normal shader"
+                }
+            ];
+            var bodyContent = document.createElement("select");
+            bodyContent.style.width = "225px";
+            bodyContent.style.height = "200px";
+            bodyContent.style.font = "120% arial,helvetica,clean";
+            bodyContent.multiple = true;
+            for (var i=0;i<elements.length;i++){
+                var elem = elements[i];
+                var option = document.createElement("option");
+                option.value = elem.id;
+                option.innerHTML = elem.name;
+                bodyContent.appendChild(option);
+            }
+            var panel = new Y.Panel({
+                srcNode: "#panelContent",
+                width: 250,
+                centered: true,
+                visible: true,
+                modal:true,
+                zIndex:5,
+                headerContent: "Load example shader",
+                bodyContent: bodyContent,
+                buttons:[
+                    {
+                        value: "Cancel",
+                        action: function(e) {
+                            e.preventDefault();
+                            panel.hide();
+                            panel.destroy();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    },
+                    {
+                        value: "Load",
+                        action: function(e) {
+                            e.preventDefault();
+                            panel.hide();
+                            var selectedIndex = bodyContent.selectedIndex;
+                            if (selectedIndex >-1){
+                                var url = bodyContent.options[selectedIndex].value;
+                                document.location.href = url;
+                            }
+                            panel.destroy();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    }
+                ]
+            });
+
+            panel.render();
+            window.tabview.selectChild(0);
+        };
+
         window.YUILoad = function(elements){
             var bodyContent = document.createElement("select");
             bodyContent.style.width = "225px";
@@ -1053,6 +1132,7 @@
             document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
             document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
             document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
+            document.getElementById('ExampleButton').addEventListener('click', window.YUILoadExample,false);
 
             document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
 
