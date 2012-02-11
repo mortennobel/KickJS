@@ -13,6 +13,8 @@ function destroyAllMeshRenderersInScene(){
             gameObject.destroy();
         }
     }
+    console.log(scene.toJSON());
+    engine.eventQueue.add(function(){console.log(scene.toJSON());},100);
 }
 
 function load(content,url,func){
@@ -31,7 +33,7 @@ function load(content,url,func){
         if (meshRendererNew){
             var materials = [];
             for (var j = meshRendererNew.mesh.meshData.subMeshes.length-1;j>=0;j--){
-                materials[j] = duckMaterial;
+                materials[j] = material;
             }
             meshRendererNew.materials = materials;
             meshRenderer = meshRendererNew;
@@ -39,6 +41,22 @@ function load(content,url,func){
 //            console.log(KICK.core.Util.typedArrayToArray(meshRendererNew.mesh.aabb));
         }
     }
+}
+
+function loadObj(url){
+    var oReq = new XMLHttpRequest();
+    function handler()
+    {
+        if (oReq.readyState == 4 /* complete */) {
+            if (oReq.status == 200) {
+                var txt = oReq.responseText;
+                load(txt,url,KICK.importer.ObjImporter.import);
+            }
+        }
+    }
+    oReq.open("GET", url, true);
+    oReq.onreadystatechange = handler;
+    oReq.send();
 }
 
 function loadCollada(url){
@@ -57,8 +75,8 @@ function loadCollada(url){
     oReq.send();
 }
 
+
 var material;
-var duckMaterial;
 
 function duckClicked(){
     loadCollada("duck.dae");
@@ -102,7 +120,7 @@ function loadClicked(files){
             fileLowerCase.lastIndexOf(".png") === fileLengthMinus4){
             var reader = new FileReader();
             reader.onload = function(e) {
-                loadTexture(e.target.result);
+                texture.dataURI = e.target.result;
             };
             reader.readAsDataURL(file);
 
@@ -115,14 +133,8 @@ var camera;
 var meshRenderer;
 var texture;
 
-function createMaterial(vertexShaderId, fragmentShaderId){
-    var vs = document.getElementById(vertexShaderId).value;
-    var fs = document.getElementById(fragmentShaderId).value;
-    var shader = new KICK.material.Shader(engine);
-    shader.vertexShaderSrc = vs;
-    shader.fragmentShaderSrc = fs;
-    shader.errorLog = console.log;
-    shader.apply();
+function createMaterial(){
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
     var missingAttributes = meshRenderer.mesh.verify(shader);
     if (missingAttributes){
         console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
@@ -186,22 +198,14 @@ function RotatorComponent(){
     };
 }
 
-function loadTexture(url){
-    var image = new Image();
-    image.onload = function() {
-        texture.setImage(image, url);
-    };
-    image.src = url;
-}
-
 function initDuckTexture(){
     texture = new KICK.texture.Texture(engine);
     texture.setTemporaryTexture();
-    duckMaterial.uniforms.tex = {
+    texture.dataURI = "duckCM.jpg";
+    material.uniforms.mainTexture = {
         value:texture,
         type: KICK.core.Constants.GL_SAMPLER_2D
     };
-    loadTexture("duckCM.jpg");
 }
 
 function initLights(){
@@ -240,19 +244,20 @@ function initKick() {
     cameraObject.addComponent(new RotatorComponent());
 
     var gameObject = engine.activeScene.createGameObject();
-    gameObject.name = "Mesh";
+    gameObject.name = "InitialMesh";
     meshRenderer = new KICK.scene.MeshRenderer();
     meshRenderer.mesh = new KICK.mesh.Mesh(engine,
         {
             dataURI:"kickjs://mesh/uvsphere/?slices=48&stacks=24&radius=0.5",
             name:"Default object"
         });
-    material = createMaterial('vertexShaderColor','fragmentShader');
-    duckMaterial = createMaterial('vertexShaderColorImg','fragmentShaderImg');
-    meshRenderer.material = duckMaterial;
+
+    material = createMaterial();
+    meshRenderer.material = material;
+    gameObject.addComponent(meshRenderer);
     initDuckTexture();
     initLights();
-    gameObject.addComponent(meshRenderer);
+
 }
 
 function pauseResume(){
