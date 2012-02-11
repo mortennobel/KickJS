@@ -9621,6 +9621,15 @@ KICK.namespace = function (ns_string) {
                     get:function(){
                         return _components.length;
                     }
+                },
+                /**
+                 * @property destroyed
+                 * @type Boolean
+                 */
+                destroyed:{
+                    get:function(){
+                        return _components.length==0;
+                    }
                 }
             }
         );
@@ -9679,6 +9688,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Destroys game object after next frame.
          * Removes all components instantly.
+         * This method will call destroyObject on the associated scene.
          * @method destroy
          */
         this.destroy = function () {
@@ -9686,7 +9696,7 @@ KICK.namespace = function (ns_string) {
             for (i = _components.length-1; i >= 0 ; i--) {
                 this.removeComponent(_components[i]);
             }
-            this.scene.destroyObject(this);
+            this.scene.destroyObject(thisObj);
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
@@ -9749,7 +9759,10 @@ KICK.namespace = function (ns_string) {
                 if (!component.toJSON){
                     componentsJSON.push(KICK.core.Util.componentToJSON(scene.engine,component));
                 } else {
-                    componentsJSON.push(component.toJSON());
+                    var componentJSON = component.toJSON();
+                    if (componentJSON){
+                        componentsJSON.push(componentJSON);
+                    }
                 }
 
             }
@@ -10497,12 +10510,20 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Destroys the game object and delete it from the scene.
+         * This call will call destroy on the gameObject
          * @method destroyObject
          * @param {KICK.scene.GameObject} gameObject
          */
         this.destroyObject = function (gameObject) {
-            gameObjectsDelete.push(gameObject);
-            delete objectsById[gameObject.uid];
+            var isMarkedForDeletion = core.Util.contains(gameObjectsDelete, gameObject);
+            if (!isMarkedForDeletion){
+                gameObjectsDelete.push(gameObject);
+                delete objectsById[gameObject.uid];
+            }
+            if (!gameObject.destroyed){
+                gameObject.destroy();
+            }
         };
 
         /**
@@ -10942,12 +10963,16 @@ KICK.namespace = function (ns_string) {
                 var component = components[i];
                 if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
                     var renderOrder = component.renderOrder || 1000;
+                    var array;
                     if (renderOrder < 2000){
-                        insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
+                        array = renderableComponentsBackGroundAndGeometry;
                     } else if (renderOrder >= 3000){
-                        insertSorted(component,renderableComponentsOverlay,compareRenderOrder);
+                        array = renderableComponentsOverlay;
                     } else {
-                        renderableComponentsTransparent.push(component);
+                        array = renderableComponentsTransparent;
+                    }
+                    if (!KICK.core.Util.contains(array,component)){
+                        insertSorted(component,array,compareRenderOrder);
                     }
                 }
             }
@@ -11523,7 +11548,11 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         this.toJSON = function(){
-            return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
+            if (thisObj.gameObject){
+                return null; // component is destroyed
+            } else {
+                return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
+            }
         };
 
         applyConfig(this,config);
