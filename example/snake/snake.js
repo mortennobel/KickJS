@@ -11,26 +11,18 @@ var initSnake = function(){
             levelSize = snakeLevelComponent.size;
         this.activated = function (){
             var engine = this.gameObject.engine,
-                shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
+                shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
                 material = new KICK.material.Material(engine,{
                     shader:shader,
                     name:"SnakeFood material",
                     uniforms:{
                         mainColor: {
-                            value: [0,1,1,1],
+                            value: [108/255,93/255,36/255,1],
                             type: KICK.core.Constants.GL_FLOAT_VEC4
-                        },
-                        mainTexture: {
-                            value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                            type: KICK.core.Constants.GL_SAMPLER_2D
                         }
                     }
                 }),
-                mesh = new KICK.mesh.Mesh(engine,
-                                        {
-                                            dataURI:"kickjs://mesh/uvsphere/?slices=12&stacks=6&radius=0.5",
-                                            name:"SnakeFoodMesh"
-                                        });
+                mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE );
             transform = this.gameObject.transform;
 
             var meshRenderer = new KICK.scene.MeshRenderer();
@@ -38,6 +30,7 @@ var initSnake = function(){
             meshRenderer.material = material;
             this.gameObject.addComponent(meshRenderer);
             transform.localPosition = position;
+            transform.localScale = [.5,.5,.5];
         };
 
         this.respawn = function(){
@@ -100,7 +93,7 @@ var initSnake = function(){
         );
     }
 
-    function SnakeComponent(engine,keyLeft,keyRight,initialLength,initialMovePosition,initialMoveDirection){
+    function SnakeComponent(engine,keyLeft,keyRight,initialLength,initialMovePosition,initialMoveDirection, color){
         var meshRenderer,
             time,
             transform,
@@ -111,24 +104,20 @@ var initSnake = function(){
             position = vec3.create(initialMovePosition || [0,0,0]),
             scene = engine.activeScene,
             currentMovement = 0, // limits movement to not go backwards
-            shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
+            shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
             material = new KICK.material.Material(engine,{
                 shader:shader,
                 name:"Snake material",
                 uniforms:{
                     mainColor: {
-                        value: [.3,1,.4,1],
+                        value: color,
                         type: KICK.core.Constants.GL_FLOAT_VEC4
-                    },
-                    mainTexture: {
-                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                        type: KICK.core.Constants.GL_SAMPLER_2D
                     }
                 }
             }),
             mesh = new KICK.mesh.Mesh(engine,
                 {
-                    dataURI:"kickjs://mesh/cube/?length=0.5",
+                    dataURI:"kickjs://mesh/cube/?length=0.45",
                     name:"Snake body"
                 }),
             rotateLeft = function(){
@@ -218,7 +207,9 @@ var initSnake = function(){
         };
 
         var addChild = function(tailPosition){
-            var gameObject = scene.createGameObject();
+            var gameObject = scene.createGameObject({
+                name:"SnakeComponent"
+            });
             var meshRenderer = new KICK.scene.MeshRenderer();
             gameObject.addComponent(meshRenderer);
             meshRenderer.mesh = mesh;
@@ -291,27 +282,29 @@ var initSnake = function(){
             shader,
             material,
             size = 60,
-            sizeHalf = size/2;
+            sizeHalf = size/2,
+            thisObj = this;
 
         Object.defineProperty(this,"size",{value:size});
 
+        this.deactivated = function(){
+            console.log("wat");
+        };
+
         this.activated = function (){
-            var engine = this.gameObject.engine;
-            meshRenderer = this.gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+            var engine = thisObj.gameObject.engine;
+            meshRenderer = thisObj.gameObject.getComponentOfType(KICK.scene.MeshRenderer);
 
-            shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-
+            shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
+            console.log("Level uid "+thisObj.uid);
+            console.log("Mesh renderer "+meshRenderer.uid);
             material = new KICK.material.Material(engine,{
                 shader:shader,
-                name:"Snake material",
+                name:"Snake level material",
                 uniforms:{
                     mainColor: {
-                        value: [0,0,1,1],
+                        value: [56/255,67/255,51/255,1],
                         type: KICK.core.Constants.GL_FLOAT_VEC4
-                    },
-                    mainTexture: {
-                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                        type: KICK.core.Constants.GL_SAMPLER_2D
                     }
                 }
             });
@@ -325,6 +318,7 @@ var initSnake = function(){
             var meshData = new KICK.mesh.MeshData({
                 meshType:wideCube.meshType,
                 vertex:[],
+                normal:[],
                 indices:[],
                 uv1:[]
             });
@@ -337,7 +331,12 @@ var initSnake = function(){
             meshData = meshData.combine(tallCube.transform(translateLeftMatrix));
             meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 
-            //meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
+            meshRenderer.mesh.destroy = function(){
+                debugger;
+            };
+            console.log("Mesh uid "+meshRenderer.mesh.uid);
+//            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
         };
 
         this.isIntersecting = function(position){
@@ -365,16 +364,16 @@ var initSnake = function(){
                 set:function(newValue){_gameSpeed = newValue;}
             }
         });
-        var addSnake = function(moveLeft,moveRight, movePos, moveDir){
-            var snakeGameObject = activeScene.createGameObject();
-            var snakeComponent = new SnakeComponent(engine,moveLeft,moveRight,1,movePos,moveDir);
+        var addSnake = function(moveLeft,moveRight, movePos, moveDir,color){
+            var snakeGameObject = activeScene.createGameObject({name:"SnakeHead"});
+            var snakeComponent = new SnakeComponent(engine,moveLeft,moveRight,7,movePos,moveDir,color);
             snakeGameObject.addComponent(snakeComponent);
             return snakeComponent;
         };
 
         var snakes = [
-            addSnake(keyCodeA,keyCodeZ,[-5,0,-15],[1,0,0]),
-            addSnake(keyCodeM,keyCodeK,[5,0,15],[-1,0,0])
+            addSnake(keyCodeA,keyCodeZ,[-5,0,-15],[1,0,0],[62/255,90/255,96/255,1]),
+            addSnake(keyCodeM,keyCodeK,[5,0,15],[-1,0,0],[77/255,63/255,96/255,1])
         ];
 
         this.getSnakes = function(){
@@ -447,14 +446,35 @@ var initSnake = function(){
         };
     }
 
+    function initLights(){
+        var ambientlightGameObject = engine.activeScene.createGameObject();
+        ambientlightGameObject.name = "ambient light";
+        var ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
+        ambientLight.color = [0.5,0.5,0.5];
+        ambientlightGameObject.addComponent(ambientLight);
+
+        var lightGameObject = engine.activeScene.createGameObject();
+        lightGameObject.name = "directional light";
+        var light = new KICK.scene.Light(
+            {
+                type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+                color:[1,1,1],
+                intensity:1.5
+            }
+        );
+        lightGameObject.transform.localRotationEuler = [-70,20,0];
+        lightGameObject.addComponent(light);
+    }
+
     var engine;
     var camera;
     function initKick() {
         engine = new KICK.core.Engine('canvas',{
-            enableDebugContext: true
+            enableDebugContext: false
         });
+        initLights();
         var activeScene = engine.activeScene;
-        var cameraObject = activeScene.createGameObject();
+        var cameraObject = activeScene.createGameObject({name:"Camera"});
         camera = new KICK.scene.Camera({
             clearColor: [124/255,163/255,137/255,1],
             fieldOfView: 90
@@ -465,7 +485,7 @@ var initSnake = function(){
         cameraTransform.localPosition = [0,40,0];
         cameraTransform.localRotationEuler = [-90,0,0];
 
-        var levelGameObject = activeScene.createGameObject();
+        var levelGameObject = activeScene.createGameObject({name:"Level"});
         var levelComponent = new SnakeLevelComponent();
         var meshRenderer = new KICK.scene.MeshRenderer();
         levelGameObject.addComponent(meshRenderer);
@@ -474,7 +494,7 @@ var initSnake = function(){
         gameController = new GameController(engine,levelComponent);
         levelGameObject.addComponent(gameController);
 
-        var foodGameObject = activeScene.createGameObject();
+        var foodGameObject = activeScene.createGameObject({name:"Food"});
         var foodComponent = new SnakeFood(levelComponent,gameController.getSnakes());
         foodGameObject.addComponent(foodComponent);
     }
@@ -517,7 +537,7 @@ var initSnake = function(){
         var panel = new Y.Panel({
             srcNode: "#panelContent",
             width: 250,
-            y: 25,
+            y: 100,
             x: 5,
             buttons:[],
             centered: false,
@@ -565,8 +585,17 @@ var initSnake = function(){
         }
     }
 
+    function toogleFullscreen(){
+        if (engine.isFullScreenSupported()){
+            engine.setFullscreen(true);
+        } else {
+            alert("Fullscreen is not supported in this browser");
+        }
+    }
+
     window.onresize = documentResized;
     document.getElementById('playButton').addEventListener('click',playButtonClicked,false);
+    document.getElementById('fullscreen').addEventListener('click',toogleFullscreen,false);
     document.addEventListener('keyup',keyListener,true);
 };
 
