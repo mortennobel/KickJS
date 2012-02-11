@@ -13215,7 +13215,9 @@ KICK.namespace = function (ns_string) {
                 set:function(newValue){
                     if (_dataURI !== newValue){
                         _dataURI = newValue;
-                        engine.resourceManager.getShaderData(_dataURI,thisObj);
+                        if (_dataURI){ // load resource if not null
+                            engine.resourceManager.getShaderData(_dataURI,thisObj);
+                        }
                     }
                 }
             },
@@ -13736,7 +13738,6 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     material.Shader.getPrecompiledSource = function(engine,sourcecode){
-        // todo optimize with regular expression search
         if (true){
             // insert #line nn after each #pragma include to give meaning full lines in error console
             var linebreakPosition = [];
