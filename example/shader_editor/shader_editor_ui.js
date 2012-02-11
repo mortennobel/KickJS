@@ -595,40 +595,11 @@
     }
 
     function toogleFullscreen(){
-        var i, child;
-        var menuAndContent = document.getElementById("menuAndContent");
-        if (window.isHidden){
-            document.getElementById("ahead").style.display = "block";
-            for (i=menuAndContent.childElementCount-1;i>=0;i--){
-                child = menuAndContent.children[i];
-                if (child.nodeName !== "CANVAS"){
-                    child.style.display = child.style.initialDisplay;
-                } else {
-                    child.width = 300;
-                    child.height = 300;
-                }
-            }
-            document.getElementById("mainEditor").style.display = "block";
-            document.getElementById("alogger").style.display = "block";
-            document.body.style.overflow = '';
+        if (shaderEditor.engine.isFullScreenSupported()){
+            shaderEditor.engine.setFullscreen(true);
         } else {
-            for (i=menuAndContent.childElementCount-1;i>=0;i--){
-                child = menuAndContent.children[i];
-                if (child.nodeName !== "CANVAS"){
-                    child.style.initialDisplay = child.style.display;
-                    child.style.display = "none";
-                } else {
-                    child.width = window.innerWidth;
-                    child.height = window.innerHeight;
-                }
-            }
-            document.getElementById("ahead").style.display = "none";
-            document.getElementById("mainEditor").style.display = "none";
-            document.getElementById("alogger").style.display = "none";
-            document.body.style.overflow = 'hidden';
+            alert("Fullscreen is not supported in this browser");
         }
-        window.isHidden = !window.isHidden;
-        shaderEditor.canvasResized();
     }
 
     function onLogoutButton(){
@@ -1085,8 +1056,6 @@
 
             document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
 
-
-            document.getElementById('canvas').addEventListener('click', toogleFullscreen,false);
             document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
             document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
             document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
