@@ -159,6 +159,7 @@
     }
 
     function getData(){
+        shaderEditor.meshRenderer.material.shader.dataURI = null; // force shader to be serialized
         return {
             shader: shaderEditor.meshRenderer.material.shader.toJSON(),
             material: shaderEditor.meshRenderer.material.toJSON(),
