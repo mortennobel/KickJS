@@ -35,7 +35,7 @@ window.shaderEditor = new (function(){
         _ambientLight.color = settings.lightAmbient;
         _light.intensity = settings.lightintensity;
         _light.color = settings.lightcolor;
-        _lightTransform.rotationEuler = settings.lightrotation;
+        _lightTransform.rotationEuler = settings.lightrot;
         _lightTransform.position = settings.lightpos;
         isRotating = settings.rotatemesh==="on";
         var cameraTransform = camera.gameObject.transform;
@@ -208,7 +208,6 @@ window.shaderEditor = new (function(){
     this.initKick = function() {
         try{
             _engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true,
                 preserveDrawingBuffer:true,
                 checkCanvasResizeInterval:0
             });

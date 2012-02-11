@@ -140,7 +140,7 @@
             projection: getRadioValue('projection'),
             rotatemesh: getRadioValue('rotatemesh'),
             lightpos: getChildrenValueVector('lightpos'),
-            lightrotation: getChildrenValueVector('lightrot'),
+            lightrot: getChildrenValueVector('lightrot'),
             lightcolor: getChildrenValueVector('lightcolor'),
             lightAmbient: getChildrenValueVector('ambientLight'),
             lightintensity: Number(document.getElementById('lightintensity').value)
@@ -153,7 +153,7 @@
         setRadioValue('rotatemesh',settingsData.rotatemesh);
         var lightintensity = document.getElementById('lightintensity');
         setChildrenValueVector('lightpos',settingsData.lightpos);
-        setChildrenValueVector('lightrot',settingsData.lightrotation);
+        setChildrenValueVector('lightrot',settingsData.lightrot);
         setChildrenValueVector('lightcolor',settingsData.lightcolor);
         lightintensity.value = settingsData.lightintensity;
     }
