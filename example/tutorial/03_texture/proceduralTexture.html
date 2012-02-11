@@ -62,10 +62,6 @@ This example shows how to create a texture from JavaScript.<br>
     var material = new KICK.material.Material(engine,{
         shader: shader,
         uniforms:{
-            mainColor: {
-                value: [1,1,1,1],
-                type: KICK.core.Constants.GL_FLOAT_VEC4
-            },
             mainTexture: {
                 value: texture,
                 type: KICK.core.Constants.GL_SAMPLER_2D
