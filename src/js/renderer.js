@@ -58,8 +58,7 @@ KICK.namespace = function (ns_string) {
      */
     /**
      * Name of the class
-     * @property
-     * @name name
+     * @property name
      * @type String
      */
 
