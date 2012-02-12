@@ -17,6 +17,26 @@ function destroyAllMeshRenderersInScene(){
     engine.eventQueue.add(function(){console.log(scene.toJSON());},100);
 }
 
+function loadKickJSModel(fileContent){
+    destroyAllMeshRenderersInScene();
+    var meshData = new KICK.mesh.MeshData();
+    meshData.deserialize(fileContent);
+    var gameObject = engine.activeScene.createGameObject({name:meshData.name});
+    var mesh = new KICK.mesh.Mesh(engine,{
+        meshData: meshData
+    });
+    var materials = [];
+    for (var j = meshData.subMeshes.length-1;j>=0;j--){
+        materials[j] = material;
+    }
+
+    var meshRenderer = new KICK.scene.MeshRenderer({
+        mesh: mesh,
+        materials: materials
+    });
+    gameObject.addComponent(meshRenderer);
+}
+
 function load(content,url,func){
     destroyAllMeshRenderersInScene();
 
@@ -87,37 +107,51 @@ function cubeClicked(){
 }
 
 function loadModelFile(file){
-    var reader = new FileReader();
+    var reader = new FileReader(),
+        fileNameLowercase = file.fileName.toLowerCase();
+    var endsWith = function(str,search) {
+        return (str.match(search+"$")==search)
+    };
 
     reader.onload = function(event) {
-        var txt = event.target.result,
-            fileName = file.fileName;
-        if (fileName.toLowerCase().lastIndexOf(".obj") === fileName.length-4){
-            load(txt,fileName,KICK.importer.ObjImporter.import);
-        } else {
+        var fileContent = event.target.result;
+
+        if (endsWith(fileNameLowercase,".obj")){
+            load(fileContent,fileName,KICK.importer.ObjImporter.import);
+        } else if (endsWith(fileNameLowercase,".dae")){
             var parser=new DOMParser();
-            load(parser.parseFromString(txt,"text/xml"),fileName,KICK.importer.ColladaImporter.import);
+            load(parser.parseFromString(fileContent,"text/xml"),fileName,KICK.importer.ColladaImporter.import);
+        } else if (endsWith(fileNameLowercase, ".kickjs")){
+            loadKickJSModel(fileContent);
+        } else {
+            alert("Unsupported file type. ");
         }
     };
 
     reader.onerror = function() {
       alert("Error reading file");
     };
-
-    reader.readAsText(file);
+    if (endsWith(fileNameLowercase,".kickjs")){
+        reader.readAsArrayBuffer(file);
+    } else {
+        reader.readAsText(file);
+    }
 }
 
 function loadClicked(files){
+    var endsWith = function(str,search) {
+        return (str.match(search+"$")==search)
+    };
     for (var i=0;i<files.length;i++){
         var file = files[i];
-        var fileLowerCase = file.fileName.toLowerCase(),
-            fileLengthMinus4 = fileLowerCase.length-4;
-        if (fileLowerCase.lastIndexOf(".dae") ===  fileLengthMinus4 ||
-            fileLowerCase.lastIndexOf(".obj") === fileLengthMinus4 ){
+        var fileLowerCase = file.fileName.toLowerCase();
+        if (endsWith(fileLowerCase,".dae") ||
+            endsWith(fileLowerCase,".obj") || 
+            endsWith(fileLowerCase,".kickjs")){
             loadModelFile(file);
-        } else if (fileLowerCase.lastIndexOf(".jpg") === fileLengthMinus4 ||
-            fileLowerCase.lastIndexOf(".jpeg") === fileLengthMinus4-1 ||
-            fileLowerCase.lastIndexOf(".png") === fileLengthMinus4){
+        } else if (endsWith(fileLowerCase,".jpg") ||
+            endsWith(fileLowerCase,".jpeg") ||
+            endsWith(fileLowerCase,".png")){
             var reader = new FileReader();
             reader.onload = function(e) {
                 texture.dataURI = e.target.result;
@@ -281,13 +315,268 @@ function toogleBackground(){
     } 
 }
 
+function getConfiguration(){
+    var isChecked = function(id){
+        return document.getElementById(id).checked;
+    };
+    return {
+        normals:isChecked('normals'),
+        uv1: isChecked('uv1'),
+        color: isChecked('color'),
+        tangents: isChecked('tangents'),
+        compactJSON: isChecked('compactJSON')
+    };
+    
+}
+
+function getCurrentModelAsJSON(){
+    var res = [];
+    var conf = getConfiguration();
+    var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+    var scene = engine.activeScene;
+    for (var i=scene.getNumberOfGameObjects()-1;i>=0;i--){
+        var gameObject = scene.getGameObject(i);
+        var meshRenderer = gameObject.getComponentOfType(KICK.scene.MeshRenderer); 
+        if (meshRenderer){
+            var meshData = meshRenderer.mesh.meshData;
+            var obj = {
+                vertex: typedArrayToArray(meshData.vertex),
+                name: meshRenderer.mesh.name || ""
+            };
+            for (var i=0;i<meshData.subMeshes.length;i++){
+                obj["indices"+i] = typedArrayToArray(meshData.subMeshes[i]);
+            }
+            if (conf.normals){
+                if (!meshData.normal){
+                    meshData.recalculateNormals();
+                }
+                obj.normal = typedArrayToArray(meshData.normal);
+            }
+            if (conf.uv1){
+                obj.uv1 = typedArrayToArray(meshData.uv1);
+            }
+            if (conf.color){
+                obj.color = typedArrayToArray(meshData.color || new Float32Array(obj.vertex.length/3*4));
+            }
+            if (conf.tangents){
+                if (!meshData.tangent){
+                    meshData.recalculateTangents();
+                }
+                // tangent may not exist, then return (0, 0, 0)
+                obj.tangent = typedArrayToArray(meshData.tangent || new Float32Array(obj.vertex.length/3*4));
+            }
+            res.push(obj);
+        }
+    }
+    return JSON.stringify(res,null,conf.compactJSON?0:3);
+}
+// based on Base64 in JSZip. Changed to arrayBuffer
+// <http://jszip.stuartk.co.uk>
+var encodeBase64 = function() {
+   // private property
+   var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+
+    // public method for encoding
+   return function(arrayBuffer) {
+         var input = new Uint8Array(arrayBuffer);
+         var output = "";
+         var chr1, chr2, chr3, enc1, enc2, enc3, enc4;
+         var i = 0;
+
+         while (i < input.length) {
+
+            chr1 = input[i++];
+            chr2 = input[i++];
+            chr3 = input[i++];
+
+            enc1 = chr1 >> 2;
+            enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
+            enc3 = ((chr2 & 15) << 2) | (chr3 >> 6);
+            enc4 = chr3 & 63;
+
+            if (isNaN(chr2)) {
+               enc3 = enc4 = 64;
+            } else if (isNaN(chr3)) {
+               enc4 = 64;
+            }
+
+            output = output +
+            _keyStr.charAt(enc1) + _keyStr.charAt(enc2) +
+            _keyStr.charAt(enc3) + _keyStr.charAt(enc4);
+
+         }
+
+         return output;
+   }
+}();
+
+function getCurrentModelAsKickJSBinary(){
+    var res = new ArrayBuffer(0);
+    var conf = getConfiguration();
+    var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+    var scene = engine.activeScene;
+    for (var i=scene.getNumberOfGameObjects()-1;i>=0;i--){
+        var gameObject = scene.getGameObject(i);
+        var meshRenderer = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+        if (meshRenderer){
+            var meshData = new KICK.mesh.MeshData(meshRenderer.mesh.meshData);
+            if (conf.normals){
+                if (!meshData.normal){
+                    meshData.recalculateNormals();
+                }
+            } else {
+                meshData.normal = null;
+            }
+            if (conf.uv1){
+                if (!meshData.uv1){
+                    meshData.uv1 = typedArrayToArray(meshData.uv1);
+                }
+            } else {
+                meshData.uv1 = null;
+            }
+            if (conf.color){
+                if (!meshData.color){
+                    meshData.color = new Float32Array(meshData.vertex.length/3*4)
+                }
+            } else {
+                meshData.color = null;
+            }
+            if (conf.tangents){
+                if (!meshData.tangent){
+                    var success = meshData.recalculateTangents();
+                    if (!success){
+                        meshData.tangent = new Float32Array(meshData.vertex.length/3*4);
+                    }
+                }
+
+            }
+            console.log("Found mesh "+meshData.name);
+            res = meshData.serialize();
+            console.log("Mesh size "+res.byteLength);
+            break;
+        }
+    }
+    var base64 = encodeBase64(res);
+    console.log("base64 len "+base64.length);
+    return base64;
+}
+
+function initDownloadify(){
+    Downloadify.create('JSONExport',{
+        filename: function(){
+            return "model.json";
+        },
+        data: function(){
+            return getCurrentModelAsJSON();
+        },
+        onComplete: function(){
+            window.hideExportWindow();
+            alert('Export completed');
+        },
+        onCancel: function(){
+            alert('Export cancelled');
+        },
+        onError: function(){
+            alert('You must put something in the File Contents or there will be nothing to save!');
+        },
+        transparent: false,
+        swf: '/example/model_viewer/downloadtify/downloadify.swf',
+        downloadImage: 'json.png',
+        width: 61,
+        height: 26,
+        append: false
+    });
+    Downloadify.create('KickJSExport',{
+        filename: function(){
+            return "model.kickjs";
+        },
+        data: function(){
+            return getCurrentModelAsKickJSBinary();
+        },
+        onComplete: window.hideExportWindow,
+        onCancel: window.hideExportWindow,
+        onError: function(){
+            alert('You must put something in the File Contents or there will be nothing to save!');
+        },
+        transparent: false,
+        swf: '/example/model_viewer/downloadtify/downloadify.swf',
+        downloadImage: 'KickJS.png',
+        width: 68,
+        height: 26,
+        transparent: true,
+        append: false,
+        dataType: 'base64'
+    });
+}
+
 window.addEventListener("load",function(){
     initKick();
     document.getElementById("duckButton").addEventListener("click", duckClicked,false);
     document.getElementById("cubeButton").addEventListener("click", cubeClicked,false);
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
     document.getElementById("backgroundButton").addEventListener("click", toogleBackground,false);
-    document.getElementById("file").onchange = function() {
-      loadClicked(this.files);
-    };
+    document.getElementById("localFileButton").addEventListener("click", window.openFileDialog,false);
+    document.getElementById("exportButton").addEventListener("click", window.exportDialog,false);
+
 },false);
+
+YUI().use("panel", function (Y) {
+    window.openFileDialog = function(){
+        var description = "Open a local file. <br>Collada (.dae) files and Wavefront (.obj) or KickJS (.kickjs) are supported for models. <br>JPEG and PNG are supported for textures.";
+        var nestedPanel = new Y.Panel({
+            headerContent: "Load local file",
+            bodyContent: description+'<br><br><input type="file" id="file" multiple/>',
+            width      : 400,
+            zIndex     : 6,
+            centered   : true,
+            modal      : true,
+            render     : true,
+            buttons: [
+                {
+                    value  : 'Close',
+                    section: Y.WidgetStdMod.FOOTER,
+                    action : function (e) {
+                        e.preventDefault();
+                        nestedPanel.hide();
+                        panel.hide();
+                    }
+                }
+            ]
+        });
+        document.getElementById("file").onchange = function() {
+            nestedPanel.hide();
+            loadClicked(this.files);
+        };
+    };
+
+    var exportPanel = new Y.Panel({
+        headerContent: "Export model",
+        width      : 400,
+        zIndex     : 6,
+        centered   : true,
+        modal      : true,
+        srcNode    : '#exportContent',
+        render     : true,
+        visible: false,
+        buttons: [
+            {
+                value  : 'Cancel',
+                section: Y.WidgetStdMod.FOOTER,
+                action : function (e) {
+                    e.preventDefault();
+                    window.hideExportWindow();
+                }
+            }
+        ]
+    });
+
+    window.exportDialog = function(){
+        initDownloadify();
+        exportPanel.show();
+    };
+    window.hideExportWindow = function(){
+        exportPanel.hide();
+        Y.one("#JSONExport").set("innerHTML","");
+        Y.one("#KickJSExport").set("innerHTML","");
+    }
+});

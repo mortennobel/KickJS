@@ -4,13 +4,15 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Model viewer</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0pr2/build/cssreset/reset-min.css&3.5.0pr2/build/cssfonts/fonts-min.css&3.5.0pr2/build/cssgrids/grids-min.css&3.5.0pr2/build/cssbase/base-min.css&3.5.0pr2/build/cssbutton/cssbutton.css">
-    <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui.js"></script>
+    <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
     <link href='/style.css' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="../js/webgl-debug.js"></script>
     <!--<script type="text/javascript" src="../js/kick-min-0.2.0.js"></script>-->
     <script type="text/javascript" src="../js/kick-debug-0.3.0.js"></script>
     <script src="model_viewer.js"></script>
+    <script type="text/javascript" src="downloadtify/downloadify.min.js"></script>
+    <script type="text/javascript" src="downloadtify/swfobject.js"></script>
     <script type="text/javascript" src="../common/common.js"></script>
 </head>
 <body class="yui3-skin-sam">
@@ -19,11 +21,30 @@
 <h1>Model viewer</h1>
 <button id="duckButton" class='yui3-button'>Duck</button>
 <button id="cubeButton" class='yui3-button'>Cube</button>
-<input type="file" id="file" multiple/>
+<button id="localFileButton" class='yui3-button'>Local file</button>
+<button id="exportButton" class='yui3-button'>Export</button>
+ &nbsp;|&nbsp;
 <button id="pauseButton" class='yui3-button'>Pause</button>
 <button id="backgroundButton" class='yui3-button'>Background</button>
 <br>
 <canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
 <script type="text/javascript" src="/header.js"></script>
+
+<div id="exportContent">
+    <div class="yui3-widget-bd">
+        <b>Export data:</b><br>
+        <input type="checkbox" value="1" id="normals" checked><label for="normals" title="Computed if not exists"> Normals</label><br>
+        <input type="checkbox" value="1" id="uv1" checked><label for="uv1"  title="Set to (0, 0) if not exists"> UV</label><br>
+        <input type="checkbox" value="1" id="color" checked><label for="color" title="Set to (0, 0, 0, 0) if not exists"> Vertex color</label><br>
+        <input type="checkbox" value="1" id="tangents" checked><label for="tangents" title="Computed if not exist"> Tangents</label><br>
+        <b>JSON options:</b><br>
+        <input type="checkbox" value="1" id="compactJSON" checked><label for="compactJSON" title="Compact = no whitespaces"> Compact JSON</label><br>
+        <b>Export as :</b><br>
+        <div style="margin: 5px;">
+        <span id="KickJSExport"></span>&nbsp;<span id="JSONExport"></span>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
