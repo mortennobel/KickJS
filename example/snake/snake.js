@@ -332,11 +332,6 @@ var initSnake = function(){
             meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 
             meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
-            meshRenderer.mesh.destroy = function(){
-                debugger;
-            };
-            console.log("Mesh uid "+meshRenderer.mesh.uid);
-//            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
         };
 
         this.isIntersecting = function(position){
