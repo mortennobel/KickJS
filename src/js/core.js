@@ -242,7 +242,6 @@ KICK.namespace = function (ns_string) {
                                 canvas.originalHeight = canvas.height;
                                 canvas.width = screen.width;
                                 canvas.height = screen.height;
-
                             } else {
                                 canvas.width = canvas.originalWidth;
                                 canvas.height = canvas.originalHeight;

@@ -58,7 +58,7 @@ KICK.namespace = function (ns_string) {
      * This is a pure data class with no WebGL dependency
      * @class MeshData
      * @namespace KICK.mesh
-     * @parameter {Object} config
+     * @param {Object} config
      * @constructor
      */
     mesh.MeshData = function(config){
@@ -728,14 +728,18 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Recalculates the tangents.<br>
+     * Recalculates the tangents on a triangle mesh.<br>
      * Algorithm is based on<br>
      *   Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”.<br>
      *   Terathon Software 3D Graphics Library, 2001.<br>
      *   http://www.terathon.com/code/tangent.html
      * @method recalculateTangents
+     * @return {Boolean} false if meshtype is not GL_TRIANGLES
      */
     mesh.MeshData.prototype.recalculateTangents = function(){
+        if (this.meshType != constants.GL_TRIANGLES){
+            return false;
+        }
         var vertex = vec3.wrapArray(this.vertex),
             vertexCount = vertex.length,
             normal = vec3.wrapArray(this.normal),
@@ -812,6 +816,7 @@ KICK.namespace = function (ns_string) {
             // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
             tangent[a][3] = (vec3.dot(vec3.cross(n, t,vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
         }
+        return true;
     };
 
     /**
