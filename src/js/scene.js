@@ -1892,7 +1892,7 @@ KICK.namespace = function (ns_string) {
                     renderShadow: _renderShadow,
                     renderer:_renderer.name,
                     layerMask:_layerMask,
-                    renderTarget:_renderTarget, // todo add reference
+                    renderTarget:KICK.core.Util.getJSONReference(engine,_renderTarget),
                     fieldOfView:_fieldOfView,
                     near:_near,
                     far:_far,
@@ -1902,7 +1902,7 @@ KICK.namespace = function (ns_string) {
                     bottom:_bottom,
                     top:_top,
                     cameraIndex:_cameraIndex,
-                    clearColor:_clearColor,
+                    clearColor:KICK.core.Util.typedArrayToArray(_clearColor),
                     clearFlagColor:_clearFlagColor,
                     clearFlagDepth:_clearFlagDepth,
                     normalizedViewportRect:KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
@@ -2313,7 +2313,8 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     vec3.set(newValue,attenuation)
-                }
+                },
+                enumerable: true
             },
             /**
              * color RGB multiplied with intensity (plus color A).<br>
