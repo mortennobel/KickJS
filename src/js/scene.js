@@ -719,7 +719,7 @@ KICK.namespace = function (ns_string) {
             componentsAll = [],
             cameras = [],
             renderableComponents = [],
-            sceneLightObj = new KICK.scene.SceneLights(),
+            sceneLightObj = new KICK.scene.SceneLights(engine.config.maxNumerOfLights),
             _name = "Scene",
             _uid = 0,
             gl,
@@ -731,7 +731,7 @@ KICK.namespace = function (ns_string) {
                 } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
                     sceneLightObj.directionalLight = light;
                 } else {
-                    sceneLightObj.otherLights.push(light);
+                    sceneLightObj.addPointLight(light);
                 }
             },
             removeLight = function(light){
@@ -740,7 +740,7 @@ KICK.namespace = function (ns_string) {
                 } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
                     sceneLightObj.directionalLight = null;
                 } else {
-                    core.Util.removeElementFromArray(sceneLightObj.otherLights,light);
+                    sceneLightObj.removePointLight(light);
                 }
             },
             /**
@@ -1532,7 +1532,7 @@ KICK.namespace = function (ns_string) {
             }
             setupCamera();
 
-            sceneLightObj.recomputeDirectionalLight(viewMatrix);
+            sceneLightObj.recomputeLight(viewMatrix);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
             }
@@ -2106,6 +2106,7 @@ KICK.namespace = function (ns_string) {
             _shadowRenderTexture = null,
             _shadowTextureDebug = null,
             _shadowRenderTextureDebug = null,
+            attenuation = vec3.create([1,0,0]),
             intensity = 1,
             colorIntensity = vec3.create([1.0,1.0,1.0]),
             updateIntensity = function(){
@@ -2287,6 +2288,23 @@ KICK.namespace = function (ns_string) {
                 enumerable: true
             },
             /**
+             * Specifies the light falloff.<br>
+             * attenuation[0] is constant attenuation,<br>
+             * attenuation[1] is linear attenuation,<br>
+             * attenuation[2] is quadratic attenuation.<br>
+             * Default value is (1,0,0)
+             * @property attenuation
+             * @type KICK.math.vec3
+             */
+            attenuation:{
+                get:function(){
+                    return attenuation;
+                },
+                set:function(newValue){
+                    vec3.set(newValue,attenuation)
+                }
+            },
+            /**
              * color RGB multiplied with intensity (plus color A).<br>
              * This property exposes a internal value. This value should not be modified.
              * Instead use the intensity and color property.
@@ -2362,12 +2380,14 @@ KICK.namespace = function (ns_string) {
 
     Object.freeze(scene.Light);
 
-     /**
+    /**
      * Datastructure used pass light information
      * @class SceneLights
      * @namespace KICK.scene
+     * @constructor
+     * @param {Number} maxNumerOfLights (value from config)
      */
-    scene.SceneLights = function(){
+    scene.SceneLights = function(maxNumerOfLights){
         var ambientLight = null,
             directionalLight = null,
             directionalLightData = KICK.math.mat3.create(), // column matrix with the columns lightDirection,colorIntensity,halfVector
@@ -2375,8 +2395,23 @@ KICK.namespace = function (ns_string) {
             directionalLightColorIntensity = directionalLightData.subarray(3,6),
             directionalHalfVector = directionalLightData.subarray(6,9),
             directionalLightTransform = null,
-            otherLights = [],
-            lightDirection = [0,0,1];
+            pointLightData = new Float32Array(9*maxNumerOfLights), // mat3*maxNumerOfLights
+            pointLightDataVec3 = vec3.wrapArray(pointLightData),
+            pointLights = [],
+            lightDirection = [0,0,1],
+            /**
+             * Set the point light to have not contribution this means setting the position 1,1,1, the color to 0,0,0
+             * and attenuation to 1,0,0.<br>
+             * This is needed since the ecLight position would otherwise be in 0,0,0 which is invalid
+             * @method resetPointLight
+             * @param {Number} index of point light
+             * @private
+             */
+            resetPointLight = function(index){
+                for (var i=0;i<3;i++){
+                    vec3.set([0,0,0],pointLightDataVec3[index*3+i]);
+                }
+            };
         Object.defineProperties(this,{
             /**
              * The ambient light in the scene.
@@ -2421,8 +2456,8 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Matrix of directional light data. Column 1 contains the lightDirection in eye space,
-             * column 2 colorIntensity and column 3 half Vector
+             * Matrix of directional light data. Column 1 contains the light-direction in eye space,
+             * column 2 color intensity and column 3 half vector
              * @property directionalLightData
              * @type KICK.math.mat3
              */
@@ -2432,25 +2467,55 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * The point  light sources in the scene.
-             * @property otherLights
-             * @type Array[KICK.scene.Light]
+             * Matrices of point light data. Each matrix (mat3) contains:<br>
+             * Column 1 vector: point light position in eye coordinates<br>
+             * Column 2 vector: color intensity<br>
+             * Column 3 vector: attenuation vector
              */
-            otherLights:{
-                value:otherLights
+            pointLightData:{
+                get: function(){
+                    return pointLightData;
+                }
             }
         });
+
         /**
-         * @method recomputeDirectionalLight
-         * @param {KICK.math.mat4} modelViewMatrix
+         * @method addPointLight
+         * @param {KICK.scene.Light} pointLight
          */
-        this.recomputeDirectionalLight = function(modelViewMatrix){
+        this.addPointLight = function(pointLight){
+            if (!KICK.core.Util.contains(pointLights,pointLight)){
+                if (pointLights.length==maxNumerOfLights){
+                    if (ASSERT){
+                        fail("Only "+maxNumerOfLights+" point lights allowed in scene");
+                    }
+                } else {
+                    pointLights.push(pointLight);
+                }
+            }
+        };
+
+        /**
+         * @method removePointLight
+         * @param {KICK.scene.Light} pointLight
+         */
+        this.removePointLight = function(pointLight){
+            KICK.core.Util.removeElementFromArray(pointLights,pointLight);
+        };
+
+        /**
+         * Recompute the light based on the view-matrix. This method is called from the camera when the scene is
+         * rendered, to transform the light into eye coordinates and compute the half vector for directional light
+         * @method recomputeLight
+         * @param {KICK.math.mat4} viewMatrix
+         */
+        this.recomputeLight = function(viewMatrix){
             if (directionalLight !== null){
                 // compute light direction
                 quat4.multiplyVec3(directionalLightTransform.rotation,lightDirection,directionalLightDirection);
 
                 // transform to eye space
-                mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
+                mat4.multiplyVec3Vector(viewMatrix,directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
                 // compute half vector
@@ -2459,6 +2524,25 @@ KICK.namespace = function (ns_string) {
 
                 vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);
             }
+            if (maxNumerOfLights){ // only run if max number of lights are 1 or above (otherwise JIT compiler will skip it)
+                var index = 0;
+                for (var i=pointLights.length-1;i>=0;i--){
+                    var pointLight = pointLights[i];
+                    var pointLightTransform = pointLight.gameObject.transform;
+                    var pointLightPosition = pointLightTransform.position;
+
+                    mat4.multiplyVec3Vector(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
+                    vec3.set(pointLight.colorIntensity, pointLightDataVec3[index+1]);
+                    vec3.set(pointLight.attenuation, pointLightDataVec3[index+2]);
+                    index += 3;
+                }
+            }
         };
+
+        (function init(){
+            for (var i=0;i<maxNumerOfLights;i++){
+                resetPointLight(i);
+            }
+        })();
     };
  })();

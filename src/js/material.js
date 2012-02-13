@@ -813,6 +813,7 @@ KICK.namespace = function (ns_string) {
             mvProj = this.lookupUniform._mvProj,
             norm = this.lookupUniform._norm,
             directionalLightUniform = this.lookupUniform._dLight,
+            pointLightUniform = this.lookupUniform["_pLights[0]"],
             gameObjectUID = this.lookupUniform._gameObjectUID,
             time = this.lookupUniform._time,
             viewport = this.lookupUniform._viewport,
@@ -823,7 +824,7 @@ KICK.namespace = function (ns_string) {
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
             directionalLightData = sceneLights.directionalLightData,
-            otherLights = sceneLights.otherLights,
+            pointLightData = sceneLights.pointLightData,
             globalTransform,
             i,
             currentTexture = 0;
@@ -917,8 +918,8 @@ KICK.namespace = function (ns_string) {
         if (directionalLightUniform){
             gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
         }
-        for (i=otherLights.length-1;i >= 0;i--){
-            // todo
+        if (pointLightUniform){
+            gl.uniformMatrix3fv(pointLightUniform.location, false, pointLightData);
         }
         if (time){
             timeObj = this.engine.time;
