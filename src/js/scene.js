@@ -2398,6 +2398,7 @@ KICK.namespace = function (ns_string) {
             pointLightData = new Float32Array(9*maxNumerOfLights), // mat3*maxNumerOfLights
             pointLightDataVec3 = vec3.wrapArray(pointLightData),
             pointLights = [],
+            pointLightTransforms = [],
             lightDirection = [0,0,1],
             /**
              * Set the point light to have not contribution this means setting the position 1,1,1, the color to 0,0,0
@@ -2491,6 +2492,7 @@ KICK.namespace = function (ns_string) {
                     }
                 } else {
                     pointLights.push(pointLight);
+                    pointLightTransforms.push(pointLight.gameObject.transform);
                 }
             }
         };
@@ -2500,7 +2502,17 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Light} pointLight
          */
         this.removePointLight = function(pointLight){
-            KICK.core.Util.removeElementFromArray(pointLights,pointLight);
+            var index = pointLights.indexOf(pointLight);
+            if (index >=0){
+                // remove element at position index
+                pointLights.splice(index, 1);
+                pointLightTransforms.splice(index, 1);
+            } else {
+                if (ASSERT){
+                    fail("Error removing point light");
+                }
+            }
+            resetPointLight(pointLights.length);
         };
 
         /**
@@ -2528,8 +2540,7 @@ KICK.namespace = function (ns_string) {
                 var index = 0;
                 for (var i=pointLights.length-1;i>=0;i--){
                     var pointLight = pointLights[i];
-                    var pointLightTransform = pointLight.gameObject.transform;
-                    var pointLightPosition = pointLightTransform.position;
+                    var pointLightPosition = pointLightTransforms[i].position;
 
                     mat4.multiplyVec3Vector(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
                     vec3.set(pointLight.colorIntensity, pointLightDataVec3[index+1]);
