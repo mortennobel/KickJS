@@ -2074,7 +2074,7 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         this.toJSON = function(){
-            if (thisObj.gameObject){
+            if (!thisObj.gameObject){
                 return null; // component is destroyed
             } else {
                 return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");

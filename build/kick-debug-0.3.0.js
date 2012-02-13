@@ -6662,7 +6662,6 @@ KICK.namespace = function (ns_string) {
                     if (typeof core.Project[name] === "number" && core.Project.hasOwnProperty(name) && name.indexOf(searchFor) === 0){
                         var uid = core.Project[name];
                         var name = core.Util.toCamelCase(name.substr(searchFor.length)," ");
-                        console.log(name);
                         res.push(new core.ResourceDescriptor({
                             type: type,
                             config:{
@@ -11370,7 +11369,7 @@ KICK.namespace = function (ns_string) {
                     renderShadow: _renderShadow,
                     renderer:_renderer.name,
                     layerMask:_layerMask,
-                    renderTarget:_renderTarget, // todo add reference
+                    renderTarget:KICK.core.Util.getJSONReference(engine,_renderTarget),
                     fieldOfView:_fieldOfView,
                     near:_near,
                     far:_far,
@@ -11380,7 +11379,7 @@ KICK.namespace = function (ns_string) {
                     bottom:_bottom,
                     top:_top,
                     cameraIndex:_cameraIndex,
-                    clearColor:_clearColor,
+                    clearColor:KICK.core.Util.typedArrayToArray(_clearColor),
                     clearFlagColor:_clearFlagColor,
                     clearFlagDepth:_clearFlagDepth,
                     normalizedViewportRect:KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
@@ -11552,7 +11551,7 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         this.toJSON = function(){
-            if (thisObj.gameObject){
+            if (!thisObj.gameObject){
                 return null; // component is destroyed
             } else {
                 return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
@@ -11791,7 +11790,8 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     vec3.set(newValue,attenuation)
-                }
+                },
+                enumerable: true
             },
             /**
              * color RGB multiplied with intensity (plus color A).<br>
