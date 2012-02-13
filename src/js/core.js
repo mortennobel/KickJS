@@ -917,7 +917,6 @@ KICK.namespace = function (ns_string) {
                     if (typeof core.Project[name] === "number" && core.Project.hasOwnProperty(name) && name.indexOf(searchFor) === 0){
                         var uid = core.Project[name];
                         var name = core.Util.toCamelCase(name.substr(searchFor.length)," ");
-                        console.log(name);
                         res.push(new core.ResourceDescriptor({
                             type: type,
                             config:{
