@@ -2108,6 +2108,7 @@ KICK.namespace = function (ns_string) {
             _shadowRenderTextureDebug = null,
             attenuation = vec3.create([1,0,0]),
             intensity = 1,
+            transform,
             colorIntensity = vec3.create([1.0,1.0,1.0]),
             updateIntensity = function(){
                 vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
@@ -2157,6 +2158,16 @@ KICK.namespace = function (ns_string) {
             shadowTextureDebug:{
                 get:function(){
                     return _shadowTextureDebug;
+                }
+            },
+            /**
+             * Short for lightObj.gameObject.transform
+             * @property transform
+             * @type KICK.scene.Transform
+             */
+            transform:{
+                get:function(){
+                    return transform;
                 }
             },
             /**
@@ -2343,7 +2354,9 @@ KICK.namespace = function (ns_string) {
         });
 
         this.activated = function(){
-            engine = thisObj.gameObject.engine;
+            var gameObject = thisObj.gameObject;
+            engine = gameObject.engine;
+            transform = gameObject.transform;
             updateShadowTexture();
         };
 
@@ -2398,7 +2411,6 @@ KICK.namespace = function (ns_string) {
             pointLightData = new Float32Array(9*maxNumerOfLights), // mat3*maxNumerOfLights
             pointLightDataVec3 = vec3.wrapArray(pointLightData),
             pointLights = [],
-            pointLightTransforms = [],
             lightDirection = [0,0,1],
             /**
              * Set the point light to have not contribution this means setting the position 1,1,1, the color to 0,0,0
@@ -2492,7 +2504,6 @@ KICK.namespace = function (ns_string) {
                     }
                 } else {
                     pointLights.push(pointLight);
-                    pointLightTransforms.push(pointLight.gameObject.transform);
                 }
             }
         };
@@ -2506,7 +2517,6 @@ KICK.namespace = function (ns_string) {
             if (index >=0){
                 // remove element at position index
                 pointLights.splice(index, 1);
-                pointLightTransforms.splice(index, 1);
             } else {
                 if (ASSERT){
                     fail("Error removing point light");
@@ -2540,7 +2550,7 @@ KICK.namespace = function (ns_string) {
                 var index = 0;
                 for (var i=pointLights.length-1;i>=0;i--){
                     var pointLight = pointLights[i];
-                    var pointLightPosition = pointLightTransforms[i].position;
+                    var pointLightPosition = pointLight.transform.position;
 
                     mat4.multiplyVec3Vector(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
                     vec3.set(pointLight.colorIntensity, pointLightDataVec3[index+1]);
