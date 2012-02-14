@@ -95,6 +95,23 @@ function loadCollada(url){
     oReq.send();
 }
 
+function loadKickJSModelFromURL(url){
+    var oReq = new XMLHttpRequest();
+    function handler()
+    {
+        if (oReq.readyState == 4 /* complete */) {
+            if (oReq.status == 200) {
+                var content = oReq.response;
+                loadKickJSModel(content);
+            }
+        }
+    }
+    oReq.open("GET", url, true);
+    oReq.responseType = "arraybuffer";
+    oReq.onreadystatechange = handler;
+    oReq.send();
+}
+
 
 var material;
 
@@ -104,6 +121,10 @@ function duckClicked(){
 
 function cubeClicked(){
     loadCollada("cube.dae");
+}
+
+function teapotClicked(){
+    loadKickJSModelFromURL("teapot.kickjs");
 }
 
 function loadModelFile(file){
@@ -513,6 +534,7 @@ window.addEventListener("load",function(){
     initKick();
     document.getElementById("duckButton").addEventListener("click", duckClicked,false);
     document.getElementById("cubeButton").addEventListener("click", cubeClicked,false);
+    document.getElementById("teapotButton").addEventListener("click", teapotClicked,false);
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
     document.getElementById("backgroundButton").addEventListener("click", toogleBackground,false);
     document.getElementById("localFileButton").addEventListener("click", window.openFileDialog,false);
