@@ -13,8 +13,6 @@ function destroyAllMeshRenderersInScene(){
             gameObject.destroy();
         }
     }
-    console.log(scene.toJSON());
-    engine.eventQueue.add(function(){console.log(scene.toJSON());},100);
 }
 
 function loadKickJSModel(fileContent){
@@ -560,7 +558,6 @@ YUI().use("panel", function (Y) {
                     action : function (e) {
                         e.preventDefault();
                         nestedPanel.hide();
-                        panel.hide();
                     }
                 }
             ]
