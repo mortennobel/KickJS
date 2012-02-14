@@ -17,6 +17,6 @@ void main(void) {
     gl_Position = _mvProj * v;
     vUv = uv1;
     vEcPosition = (_mv * v).xyz;
-    vNormal= normalize(_norm * normal);
+    vNormal= _norm * normal;
     vShadowMapCoord = _lightMat * v;
 } 

@@ -13,8 +13,9 @@ uniform sampler2D mainTexture;
 
 void main(void)
 {
-    vec3 diffuseDirectionalLight = getDirectionalLightDiffuse(vNormal,_dLight);
-    vec3 diffusePointLight = getPointLightDiffuse(vNormal,vEcPosition, _pLights);
+    vec3 normal = normalize(vNormal);
+    vec3 diffuseDirectionalLight = getDirectionalLightDiffuse(normal,_dLight);
+    vec3 diffusePointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);
     vec4 color = vec4(max(diffuseDirectionalLight+diffusePointLight,_ambient.xyz),1.0)*mainColor;
 
     gl_FragColor = texture2D(mainTexture,vUv)*color;

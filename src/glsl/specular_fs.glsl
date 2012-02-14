@@ -13,12 +13,13 @@ uniform sampler2D mainTexture;
 
 void main(void)
 {
+    vec3 normal = normalize(vNormal);
     vec3 diffuse;
     float specular;
-    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);
+    getDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);
     vec3 diffusePoint;
     float specularPoint;
-    getPointLight(vNormal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);
+    getPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);
     float visibility;
     if (SHADOWS){
         computeLightVisibility();

@@ -11,12 +11,12 @@ varying vec3 vNormal;
 varying vec3 vEcPosition;
 
 void main(void) {
- vec4 v = vec4(vertex, 1.0);
- // compute position
- gl_Position = _mvProj * v;
+    vec4 v = vec4(vertex, 1.0);
+    // compute position
+    gl_Position = _mvProj * v;
 
- vEcPosition = (_mv * v).xyz;
- vUv = uv1;
- // compute light info
- vNormal= normalize(_norm * normal);
+    vEcPosition = (_mv * v).xyz;
+    vUv = uv1;
+    // compute light info
+    vNormal= _norm * normal;
 } 

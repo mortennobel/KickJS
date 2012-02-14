@@ -13,12 +13,13 @@ uniform sampler2D mainTexture;
 
 void main(void)
 {
+    vec3 normal = normalize(vNormal);
     vec3 diffuse;
     float specular;
-    getDirectionalLight(vNormal, _dLight, specularExponent, diffuse, specular);
+    getDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);
     vec3 diffusePoint;
     float specularPoint;
-    getPointLight(vNormal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);
+    getPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);
     vec4 color = vec4(max(diffuse+diffusePoint,_ambient.xyz),1.0)*mainColor;
 
     gl_FragColor = texture2D(mainTexture,vUv)*color+vec4((specular+specularPoint)*specularColor.xyz,0.0);
