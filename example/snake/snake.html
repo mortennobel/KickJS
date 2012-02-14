@@ -5,28 +5,20 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Snake</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css">
-    <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0pr2/build/cssreset/reset-min.css&3.5.0pr2/build/cssfonts/fonts-min.css&3.5.0pr2/build/cssgrids/grids-min.css&3.5.0pr2/build/cssbase/base-min.css&3.5.0pr2/build/cssbutton/cssbutton.css">
+    <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js"></script>
     <!--<script type="text/javascript" src="../js/webgl-debug.js"></script>-->
-    <script type="text/javascript" src="../js/kick-min-0.2.0.js"></script>
-    <!--<script type="text/javascript" src="../js/kick-debug-0.2.0.js"></script>-->
+    <script type="text/javascript" src="../js/kick-min-0.3.0.js"></script>
+    <!--<script type="text/javascript" src="../js/kick-debug-0.3.0.js"></script>-->
     <script type="text/javascript" src="snake.js"></script>
     <!-- Google analytics-->
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-26354413-1']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
+    <script type="text/javascript" src="../common/common.js"></script>
     <style>
         body{
             overflow: hidden;
+            height:100%
         }
+
     </style>
 </head>
 <body class="yui3-skin-sam">
@@ -42,7 +34,7 @@
             Player 2: <div id="player2score">0</div>
             Speed:
             <div class="snakespeed"></div>
-            <button id="playButton">Play</button>
+            <button id="playButton" class='yui3-button'>Play</button> <button id="fullscreen" class='yui3-button'>Fullscreen</button>
             <h2>Instructions</h2>
             Player 1: Move 'A' + 'Z'<br>
             Player 2: Move 'M' + 'K'<br>
@@ -52,5 +44,6 @@
 </article>
 <footer id="kickjs-footer">
 </footer>
+<script type="text/javascript" src="/header.js"></script>
 </body>
 </html>

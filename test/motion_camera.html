@@ -41,7 +41,7 @@
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
-            shader.updateShader();
+            shader.apply();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
@@ -110,7 +110,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(cameraGameObject,"");

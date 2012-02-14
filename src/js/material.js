@@ -46,13 +46,47 @@ KICK.namespace = function (ns_string) {
         core = KICK.namespace("KICK.core"),
         applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants,
+        ASSERT = c._ASSERT,
+        fail = core.Util.fail,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
-        tmpVec4 = vec4.create();
+        tmpVec4 = vec4.create(),
+        offsetMatrix = mat4.create([
+            0.5,0  ,0  ,0.5,
+            0  ,0.5,0  ,0.5,
+            0  ,0  ,0.5,0.5,
+            0  ,0  ,0  ,1
+        ]),
+        vec3Zero = math.vec3.create();
 
     /**
-     * GLSL Shader object
+     * GLSL Shader object<br>
+     * The shader basically encapsulates a GLSL shader programs, but makes sure that the correct
+     * WebGL settings are set when the shader is bound (such as if blending is enabled or not).<br>
+     * The Shader extend the default WebGL GLSL in the following way:
+     * <ul>
+     *     <li>
+     *         <code>#pragma include &lt;filename&gt;</code> includes of the following KickJS file as a string:
+     *         <ul>
+     *             <li>light.glsl</li>
+     *             <li>shadowmap.glsl</li>
+     *         </ul>
+     *     </li>
+     *     <li>Auto binds the following uniform variables:
+     *      <ul>
+     *          <li><code>_mvProj</code> (mat4) Model view projection matrix</li>
+     *          <li><code>_mv</code> (mat4) Model view matrix</li>
+     *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
+     *          <li><code>_time</code> (float) Run time of engine</li>
+     *          <li><code>_ambient</code> (vec3) Ambient light</li>
+     *          <li><code>_dLight.lDir</code> (vec3) Directional light direction</li>
+     *          <li><code>_dLight.colInt</code> (vec3) Directional light color intensity</li>
+     *          <li><code>_dLight.halfV</code> (vec3) Directional light half vector</li>
+     *      </ul>
+     *     </li>
+     *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
+     * </ul>
      * @class Shader
      * @namespace KICK.material
      * @constructor
@@ -61,7 +95,6 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Shader = function (engine, config) {
-        //todo add support for polygon offset
         var gl = engine.gl,
             thisObj = this,
             _shaderProgramId = -1,
@@ -71,13 +104,17 @@ KICK.namespace = function (ns_string) {
             _blend = false,
             _blendSFactor = core.Constants.GL_SRC_ALPHA,
             _blendDFactor = core.Constants.GL_ONE_MINUS_SRC_ALPHA,
+            _polygonOffsetEnabled = false,
+            _polygonOffsetFactor = 2.5,
+            _polygonOffsetUnits = 10.0,
             _renderOrder = 1000,
-            _dataURI = null,
+            _dataURI =  "memory://void",
             _name = "",
             blendKey,
             glslConstants = material.GLSLConstants,
-            _vertexShaderSrc = glslConstants["error_vs.glsl"],
-            _fragmentShaderSrc = glslConstants["error_fs.glsl"],
+            _vertexShaderSrc = glslConstants["__error_vs.glsl"],
+            _fragmentShaderSrc = glslConstants["__error_fs.glsl"],
+            _defaultUniforms,
             _errorLog = KICK.core.Util.fail,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
@@ -97,7 +134,7 @@ KICK.namespace = function (ns_string) {
             compileShader = function (str, isFragmentShader) {
                 var shader,
                     c = KICK.core.Constants;
-                str = material.Shader.getPrecompiledSource(str);
+                str = material.Shader.getPrecompiledSource(engine,str);
                 if (isFragmentShader) {
                     shader = gl.createShader(c.GL_FRAGMENT_SHADER);
                 } else {
@@ -151,6 +188,19 @@ KICK.namespace = function (ns_string) {
                     }
                     gl.blendFunc(_blendSFactor,_blendDFactor);
                 }
+            },
+            updatePolygonOffset = function(){
+                if (gl.polygonOffsetEnabled !== _polygonOffsetEnabled){
+                    gl.polygonOffsetEnabled = _polygonOffsetEnabled;
+                    if (_polygonOffsetEnabled){
+                        gl.enable(KICK.core.Constants.GL_POLYGON_OFFSET_FILL);
+                    } else {
+                        gl.disable(KICK.core.Constants.GL_POLYGON_OFFSET_FILL);
+                    }
+                }
+                if (_polygonOffsetEnabled){
+                    gl.polygonOffset(_polygonOffsetFactor,_polygonOffsetUnits);
+                }
             };
 
         Object.defineProperties(this,{
@@ -170,7 +220,14 @@ KICK.namespace = function (ns_string) {
              */
             dataURI:{
                 get:function(){ return _dataURI; },
-                set:function(newValue){ _dataURI = newValue; }
+                set:function(newValue){
+                    if (_dataURI !== newValue){
+                        _dataURI = newValue;
+                        if (_dataURI){ // load resource if not null
+                            engine.resourceManager.getShaderData(_dataURI,thisObj);
+                        }
+                    }
+                }
             },
             /**
              * Get the gl context of the shader
@@ -179,6 +236,17 @@ KICK.namespace = function (ns_string) {
              */
             gl:{
                 value:gl
+            },
+            /**
+             * Get default configuration of shader uniforms
+             * @property defaultUniforms
+             * @type Object
+             */
+            defaultUniforms:{
+                get:function(){ return _defaultUniforms; },
+                set:function(value){
+                    _defaultUniforms = value;
+                }
             },
             /**
              * @property vertexShaderSrc
@@ -256,6 +324,57 @@ KICK.namespace = function (ns_string) {
              */
             shaderProgramId:{
                 get: function(){ return _shaderProgramId;}
+            },
+            /**
+             * (From http://www.opengl.org/)<br>
+             * When GL_POLYGON_OFFSET_FILL, GL_POLYGON_OFFSET_LINE, or GL_POLYGON_OFFSET_POINT is enabled, each
+             * fragment's depth value will be offset after it is interpolated from the depth values of the appropriate
+             * vertices. The value of the offset is factor × DZ + r × units , where DZ is a measurement of the change
+             * in depth relative to the screen area of the polygon, and r is the smallest value that is guaranteed to
+             * produce a resolvable offset for a given implementation. The offset is added before the depth test is
+             * performed and before the value is written into the depth buffer.<br><br>
+             *
+             * glPolygonOffset is useful for rendering hidden-line images, for applying decals to surfaces, and for
+             * rendering solids with highlighted edges.<br><br>
+             * Possible values:<br>
+             * true or false<br>
+             * Default false
+             * @property polygonOffsetEnabled
+             * @type boolean
+             */
+            polygonOffsetEnabled: {
+                get: function(){
+                    return _polygonOffsetEnabled;
+                },
+                set: function(value){
+                    _polygonOffsetEnabled = value;
+                }
+            },
+            /**
+             * Default 2.5
+             * @property polygonOffsetFactor
+             * @type Number
+             */
+            polygonOffsetFactor:{
+                get:function(){
+                    return _polygonOffsetFactor;
+                },
+                set:function(value){
+                    _polygonOffsetFactor = value;
+                }
+            },
+            /**
+             * Default 10.0
+             * @property polygonOffsetUnits
+             * @type Number
+             */
+            polygonOffsetUnits:{
+                get:function(){
+                    return _polygonOffsetUnits;
+                },
+                set:function(value){
+                    _polygonOffsetUnits = value;
+                }
             },
             /**
              * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default),
@@ -373,11 +492,11 @@ KICK.namespace = function (ns_string) {
                             value !== c.GL_DST_COLOR &&
                             value !== c.GL_ONE_MINUS_DST_COLOR &&
                             value !== c.GL_SRC_ALPHA &&
-                            value !== c.GL_GL_ONE_MINUS_SRC_ALPHA &&
+                            value !== c.GL_ONE_MINUS_SRC_ALPHA &&
                             value !== c.GL_DST_ALPHA &&
                             value !== c.GL_ONE_MINUS_DST_ALPHA &&
                             value !== c.GL_CONSTANT_COLOR &&
-                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR,
+                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
                             value !== c.GL_CONSTANT_ALPHA &&
                             value !== c.GL_ONE_MINUS_CONSTANT_ALPHA &&
                             value !== c.GL_SRC_ALPHA_SATURATE){
@@ -400,7 +519,7 @@ KICK.namespace = function (ns_string) {
              * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
              * GL_ONE_MINUS_SRC_ALPHA.<br>
              * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
-             * @property blendSFactor
+             * @property blendDFactor
              * @type {Number}
              */
             blendDFactor:{
@@ -415,11 +534,11 @@ KICK.namespace = function (ns_string) {
                             value !== c.GL_DST_COLOR &&
                             value !== c.GL_ONE_MINUS_DST_COLOR &&
                             value !== c.GL_SRC_ALPHA &&
-                            value !== c.GL_GL_ONE_MINUS_SRC_ALPHA &&
+                            value !== c.GL_ONE_MINUS_SRC_ALPHA &&
                             value !== c.GL_DST_ALPHA &&
                             value !== c.GL_ONE_MINUS_DST_ALPHA &&
                             value !== c.GL_CONSTANT_COLOR &&
-                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR,
+                            value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
                             value !== c.GL_CONSTANT_ALPHA &&
                             value !== c.GL_ONE_MINUS_CONSTANT_ALPHA){
                             KICK.core.Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
@@ -445,10 +564,11 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * @method updateShader
+         * Updates the shader (must be called after any shader state is changed to apply changes)
+         * @method apply
          * @return {Boolean} shader created successfully
          */
-        this.updateShader = function () {
+        this.apply = function () {
             var errorLog = _errorLog || console.log,
                 vertexShader = compileShader(_vertexShaderSrc, false, errorLog),
                 fragmentShader = compileShader(_fragmentShaderSrc, true, errorLog),
@@ -468,6 +588,8 @@ KICK.namespace = function (ns_string) {
             gl.attachShader(_shaderProgramId, vertexShader);
             gl.attachShader(_shaderProgramId, fragmentShader);
             gl.linkProgram(_shaderProgramId);
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
 
             if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
                 errorLog("Could not initialise shaders");
@@ -565,6 +687,7 @@ KICK.namespace = function (ns_string) {
                 updateCullFace();
                 updateDepthProperties();
                 updateBlending();
+                updatePolygonOffset();
             }
         };
 
@@ -582,26 +705,34 @@ KICK.namespace = function (ns_string) {
                     dataURI:_dataURI
                 }
             }
-            // todo fill in missing attributes
             return {
                 uid: thisObj.uid,
                 name:_name,
+                blend:_blend,
+                blendSFactor:_blendSFactor,
+                blendDFactor:_blendDFactor,
+                dataURI:_dataURI,
+                depthMask:_depthMask,
                 faceCulling:_faceCulling,
-                zTest:_zTest,
-                depthMask: _depthMask,
+                fragmentShaderSrc:_fragmentShaderSrc,
                 vertexShaderSrc:_vertexShaderSrc,
-                fragmentShaderSrc:_fragmentShaderSrc
+                polygonOffsetEnabled:_polygonOffsetEnabled,
+                polygonOffsetFactor:_polygonOffsetFactor,
+                polygonOffsetUnits:_polygonOffsetUnits,
+                renderOrder:_renderOrder,
+                zTest:_zTest,
+                defaultUniforms:_defaultUniforms
             };
         };
 
         (function init(){
             applyConfig(thisObj,config);
             engine.project.registerObject(thisObj, "KICK.material.Shader");
-            if (_dataURI){
+            if (_dataURI && _dataURI.indexOf("memory://") !== 0){
                 engine.resourceManager.getShaderData(_dataURI,thisObj);
             } else {
                 updateBlendKey();
-                thisObj.updateShader();
+                thisObj.apply();
             }
         })();
     };
@@ -609,12 +740,12 @@ KICK.namespace = function (ns_string) {
 
     /**
      * @method getPrecompiledSource
+     * @param {KICK.core.Engine} engine
      * @param {String} sourcecode
      * @return {String} sourcecode after precompiler
      * @static
      */
-    material.Shader.getPrecompiledSource = function(sourcecode){
-        // todo optimize with regular expression search
+    material.Shader.getPrecompiledSource = function(engine,sourcecode){
         if (c._DEBUG){
             // insert #line nn after each #pragma include to give meaning full lines in error console
             var linebreakPosition = [];
@@ -639,6 +770,21 @@ KICK.namespace = function (ns_string) {
                 sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
             }
         }
+        var version = "#version 100";
+        var lineOffset = 1;
+        // if shader already contain version tag, then reuse this version information
+        if (sourcecode.indexOf("#version ")===0){
+            var indexOfNewline = sourcecode.indexOf('\n');
+            version = sourcecode.substring(0,indexOfNewline); // save version info
+            sourcecode = sourcecode.substring(indexOfNewline+1); // strip version info
+            lineOffset = 2;
+        }
+        sourcecode =
+            version + "\n"+
+                "#define SHADOWS "+(engine.config.shadows===true)+"\n"+
+                "#define LIGHTS "+(engine.config.maxNumerOfLights)+"\n"+
+                "#line "+lineOffset+"\n"+
+                sourcecode;
         return sourcecode;
     };
 
@@ -649,13 +795,10 @@ KICK.namespace = function (ns_string) {
      * The uniforms is expected to be in a valid format
      * @method bindUniform
      * @param {KICK.material.Material} material
-     * @param {KICK.math.mat4} projectionMatrix
-     * @param {KICK.math.mat4} modelViewMatrix
-     * @param {KICK.math.mat4} modelViewProjectionMatrix
+     * @param {Object} engineUniforms
      * @param {KICK.scene.Transform) transform
-     * @param {KICK.scene.SceneLights} sceneLights
      */
-    material.Shader.prototype.bindUniform = function(material, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights){
+    material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
         // todo optimize this code
         var gl = this.gl,
             materialUniforms = material.uniforms,
@@ -665,17 +808,23 @@ KICK.namespace = function (ns_string) {
             uniform,
             value,
             location,
-            mv = this.lookupUniform["_mv"],
-            proj = this.lookupUniform["_proj"],
-            mvProj = this.lookupUniform["_mvProj"],
-            norm = this.lookupUniform["_norm"],
-            lightUniform,
-            gameObjectUID = this.lookupUniform["_gameObjectUID"],
-            time = this.lookupUniform["_time"],
-            viewport = this.lookupUniform["_viewport"],
+            mv = this.lookupUniform._mv,
+            proj = this.lookupUniform._proj,
+            mvProj = this.lookupUniform._mvProj,
+            norm = this.lookupUniform._norm,
+            directionalLightUniform = this.lookupUniform._dLight,
+            pointLightUniform = this.lookupUniform["_pLights[0]"],
+            gameObjectUID = this.lookupUniform._gameObjectUID,
+            time = this.lookupUniform._time,
+            viewport = this.lookupUniform._viewport,
+            shadowMapTexture = this.lookupUniform._shadowMapTexture,
+            _lightMat = this.lookupUniform._lightMat,
+            lightUniformAmbient =  this.lookupUniform._ambient,
+            sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLight = sceneLights.directionalLight,
-            otherLights = sceneLights.otherLights,
+            directionalLightData = sceneLights.directionalLightData,
+            pointLightData = sceneLights.pointLightData,
             globalTransform,
             i,
             currentTexture = 0;
@@ -733,46 +882,44 @@ KICK.namespace = function (ns_string) {
             }
         }
         if (proj){
-            gl.uniformMatrix4fv(proj.location,false,projectionMatrix);
+            gl.uniformMatrix4fv(proj.location,false,engineUniforms.projectionMatrix);
         }
         if (mv || norm){
             // todo optimize
             globalTransform = transform.getGlobalMatrix();
-            var finalModelView = mat4.multiply(modelViewMatrix,globalTransform,tempMat4);
+            var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
             if (mv){
-                gl.uniformMatrix4fv(mv.location,false,finalModelView);
+                gl.uniformMatrix4fv(mv.location,false,modelView);
             }
             if (norm){
                 // note this can be simplified to
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
-//                var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(finalModelView,tempMat3);
+                //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
+                var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
+                if (ASSERT){
+                    if (!normalMatrix){
+                        KICK.core.Util.fail("Singular matrix");
+                    }
+                }
                 gl.uniformMatrix3fv(norm.location,false,normalMatrix);
             }
         }
         if (mvProj){
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(modelViewProjectionMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
         }
-        if (ambientLight !== null){
-            lightUniform =  this.lookupUniform["_ambient"];
-            if (lightUniform){
-                gl.uniform3fv(lightUniform.location, ambientLight.colorIntensity);
-            }
+
+        if (lightUniformAmbient){
+            var ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
+            gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
-        if (directionalLight !== null){
-            lightUniform =  this.lookupUniform["_dLight.colInt"];
-            if (lightUniform){
-                gl.uniform3fv(lightUniform.location, directionalLight.colorIntensity);
-                lightUniform =  this.lookupUniform["_dLight.lDir"];
-                gl.uniform3fv(lightUniform.location, sceneLights.directionalLightDirection);
-                lightUniform =  this.lookupUniform["_dLight.halfV"];
-                gl.uniform3fv(lightUniform.location, sceneLights.directionalHalfVector);
-            }
+
+        if (directionalLightUniform){
+            gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
         }
-        for (i=otherLights.length-1;i >= 0;i--){
-            // todo
+        if (pointLightUniform){
+            gl.uniformMatrix3fv(pointLightUniform.location, false, pointLightData);
         }
         if (time){
             timeObj = this.engine.time;
@@ -787,6 +934,21 @@ KICK.namespace = function (ns_string) {
                 console.log("transform.gameObject.uid "+transform.gameObject.uid);
             }
             gl.uniform4fv(gameObjectUID.location, uidAsVec4);
+        }
+        if (shadowMapTexture){
+            if (ASSERT){
+                if (!directionalLight){
+                    KICK.core.Util.fail("No directional light found in scene - but shader needs it");
+                }
+            }
+            directionalLight.shadowTexture.bind(currentTexture);
+            gl.uniform1i(shadowMapTexture.location,currentTexture);
+            currentTexture ++;
+        }
+        if (_lightMat){
+            globalTransform = globalTransform || transform.getGlobalMatrix();
+            var lightModelViewProjection = mat4.multiply(engineUniforms.lightViewProjectionMatrix,globalTransform,tempMat4);
+            gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(offsetMatrix,lightModelViewProjection,tempMat4));
         }
     };
 
@@ -805,9 +967,70 @@ KICK.namespace = function (ns_string) {
             _shader = null,
             _uniforms = {},
             thisObj = this,
-            _renderOrder,
-            gl = engine.gl;
+            _renderOrder = 0,
+            inheritDefaultUniformsFromShader = function(){
+                var shaderDefaultUniforms = _shader.defaultUniforms;
+                var dirty = false;
+                for (var name in shaderDefaultUniforms){
+                    if (!_uniforms[name]){
+                        var defaultValue = shaderDefaultUniforms[name];
+                        _uniforms[name] = {
+                            value: defaultValue.value,
+                            type: defaultValue.type
+                        };
+                        dirty = true;
+                    }
+                }
+                if (dirty){
+                    verifyUniforms();
+                }
+            },
+
+            /**
+             * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
+             * @method verifyUniforms
+             * @private
+             */
+            verifyUniforms = function(){
+                var uniformName,
+                    type,
+                    uniformValue,
+                    c = KICK.core.Constants;
+
+                for (uniformName in _uniforms){
+                    uniformValue = _uniforms[uniformName].value;
+                    type = _uniforms[uniformName].type;
+                    if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
+                        if (uniformValue && typeof uniformValue.ref === 'number'){
+                            _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
+                        }
+                        if (c._ASSERT){
+                            if (!(_uniforms[uniformName].value instanceof KICK.texture.Texture)){
+                                KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
+                            }
+                        }
+                    }
+                    if (Array.isArray(uniformValue) || typeof uniformValue === 'number'){
+                        var array = uniformValue;
+                        if (typeof array === 'number'){
+                            array = [array];
+                        }
+                        if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
+                            _uniforms[uniformName].value = new Int32Array(array);
+                        } else {
+                            _uniforms[uniformName].value = new Float32Array(array);
+                        }
+                    }
+                }
+            };
         Object.defineProperties(this,{
+            /**
+             * @property engine
+             * @type KICK.core.Engine
+             */
+            engine:{
+                value:engine
+            },
              /**
               * @property name
               * @type String
@@ -817,7 +1040,7 @@ KICK.namespace = function (ns_string) {
                  set:function(newValue){_name = newValue;}
              },
             /**
-             * Also allows string - this will be used to lookup the shader in engine.project 
+
              * @property shader
              * @type KICK.material.Shader
              */
@@ -826,15 +1049,20 @@ KICK.namespace = function (ns_string) {
                     return _shader;
                 },
                 set:function(newValue){
-                    _shader = newValue;
-                    thisObj.init();
+                    if (!newValue instanceof KICK.material.Shader){
+                        fail("KICK.material.Shader expected");
+                    }
+                    if (_shader !==newValue){
+                        _shader = newValue;
+                        thisObj.init();
+                    }
                 }
             },
             /**
              * Object with of uniforms.
              * The object has a number of named properties one for each uniform. The uniform object contains value and type.
              * The value is always an array<br>
-             * Note when updating the uniform value, it is important to call the material.shader.markUniformUpdated().
+             * Note when updating the a uniform through a reference to uniforms, it is important to call the material.shader.markUniformUpdated().
              * When the material.uniform is set to something the markUniformUpdated function is implicit called.
              * @property uniforms
              * @type Object
@@ -844,7 +1072,16 @@ KICK.namespace = function (ns_string) {
                     return _uniforms;
                 },
                 set:function(newValue){
-                    _uniforms = newValue;
+                    if (newValue != _uniforms){
+                        newValue = newValue || {};
+                        for (var name in newValue){
+                            if (newValue.hasOwnProperty(name)){
+                                _uniforms[name] = newValue[name];
+                            }
+                        }
+                        verifyUniforms();
+                    }
+
                     if (_shader){
                         _shader.markUniformUpdated();
                     }
@@ -875,28 +1112,16 @@ KICK.namespace = function (ns_string) {
          * @method init
          */
         this.init = function(){
-            if (typeof _shader === 'string'){
-                _shader = engine.project.load(_shader);
-            }
             if (!_shader){
                 KICK.core.Util.fail("Cannot initiate shader in material "+_name);
-                _shader = engine.project.load("kickjs://shader/error/");
+                _shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
             }
-            _renderOrder = _shader.renderOrder;
-        };
 
-        /**
-         * Binds textures and uniforms
-         * @method bind
-         * @param {KICK.math.mat4} projectionMatrix
-         * @param {KICK.math.mat4} modelViewMatrix
-         * @param {KICK.math.mat4} modelViewProjectionMatrix
-         * @param {KICK.scene.Transform} transform
-         * @param {KICK.scene.SceneLights} sceneLights
-         * @param {KICK.material.Shader} shader
-         */
-        this.bind = function(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights, shader){
-            shader.bindUniform (thisObj, projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform, sceneLights);
+            inheritDefaultUniformsFromShader();
+
+            if (!_renderOrder){
+                _renderOrder = _shader.renderOrder;
+            }
         };
 
         /**
@@ -930,6 +1155,7 @@ KICK.namespace = function (ns_string) {
             return {
                 uid: thisObj.uid,
                 name:_name,
+                shader: KICK.core.Util.getJSONReference(engine,_shader),
                 uniforms: filteredUniforms
             };
         };
@@ -937,44 +1163,6 @@ KICK.namespace = function (ns_string) {
         (function init(){
             applyConfig(thisObj,config);
             engine.project.registerObject(thisObj, "KICK.material.Material");
-            // replace references to images with references
-            for (var name in _uniforms){
-                var uniformType = _uniforms[name].type;
-                var uniformValue = _uniforms[name].value;
-                if ((uniformType === KICK.core.Constants.GL_SAMPLER_2D ||
-                    uniformType === KICK.core.Constants.GL_SAMPLER_CUBE ) && uniformValue && typeof uniformValue.ref === 'number'){
-                    _uniforms[name].value = engine.project.load(uniformValue.ref);
-                }
-            }
-            material.Material.verifyUniforms(_uniforms);
         })();
-    };
-
-    /**
-     * The method replaces any invalid uniform (Array) with a wrapped one (Float32Array or Int32Array)
-     * @method verifyUniforms
-     * @param {Object} uniforms
-     * @static
-     */
-    material.Material.verifyUniforms = function(uniforms){
-        var uniform,
-            type,
-            c = KICK.core.Constants;
-        for (uniform in uniforms){
-            if (Array.isArray(uniforms[uniform].value) || typeof uniforms[uniform].value === 'number'){
-                type = uniforms[uniform].type;
-                if (type === c.GL_INT || type===c.GL_INT_VEC2 || type===c.GL_INT_VEC3 || type===c.GL_INT_VEC4){
-                    uniforms[uniform].value = new Int32Array(uniforms[uniform].value);
-                } else if (type === c.GL_SAMPLER_2D || type ===c.GL_SAMPLER_CUBE ){
-                    if (c._ASSERT){
-                        if (typeof uniforms[uniform].value !== KICK.texture.Texture){
-                            KICK.core.Util.fail("Uniform value should be a texture object but was "+uniforms[uniform].value);
-                        }
-                    }
-                } else {
-                    uniforms[uniform].value = new Float32Array(uniforms[uniform].value);
-                }
-            }
-        }
     };
 })();

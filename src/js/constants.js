@@ -132,14 +132,14 @@ KICK.namespace = KICK.namespace || function (ns_string) {
         _LIGHT_TYPE_AMBIENT :{value: 1,enumerable:true},
         /**
          * Used to define directional light in the scene (such as sunlight)
-         * @property LIGHT_TYPE_DIRECTIONAL
+         * @property _LIGHT_TYPE_DIRECTIONAL
          * @type Number
          * @final
          */
         _LIGHT_TYPE_DIRECTIONAL:{value: 2,enumerable:true},
         /**
          * Used to define point light in the scene
-         * @property TYPE_POINT
+         * @property _LIGHT_TYPE_POINT
          * @type Number
          * @final
          */

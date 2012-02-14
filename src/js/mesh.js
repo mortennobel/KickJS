@@ -58,13 +58,13 @@ KICK.namespace = function (ns_string) {
      * This is a pure data class with no WebGL dependency
      * @class MeshData
      * @namespace KICK.mesh
-     * @parameter {Object} config
+     * @param {Object} config
      * @constructor
      */
     mesh.MeshData = function(config){
         var data = {},
             thisObj = this,
-            _indices,
+            _indices = [],
             _interleavedArray,
             _interleavedArrayFormat,
             _vertexAttrLength,
@@ -123,9 +123,14 @@ KICK.namespace = function (ns_string) {
                         },
                         set:function(newValue){
                             if (newValue){
-                                newValue = new typedArrayType(newValue);
+                                if (data[name] && data[name].length == newValue.length){
+                                    data[name].set(newValue);
+                                } else {
+                                    data[name] = new typedArrayType(newValue);
+                                }
+                            } else {
+                                data[name] = null;
                             }
-                            data[name] = newValue;
                             clearInterleavedData();
                         }
                     };
@@ -200,7 +205,74 @@ KICK.namespace = function (ns_string) {
                  _vertexAttrLength = length*4;
             };
 
+        /**
+         * Saves the MeshData into binary form (ArrayBuffer)
+         * @method serialize
+         * @return ArrayBuffer
+         */
+        this.serialize = function(){
+            var chunkData = new KICK.core.ChunkData();
+            chunkData.setArrayBuffer(1,thisObj.interleavedArray);
+            chunkData.setString(2,JSON.stringify(thisObj.interleavedArrayFormat));
+            chunkData.setString(3,thisObj.name || "MeshData");
+            var subMeshes = thisObj.subMeshes;
+            var numberOfSubMeshes = subMeshes.length;
+            chunkData.setNumber(4,numberOfSubMeshes);
+            chunkData.setNumber(5,thisObj.vertexAttrLength);
+            for (var i=0;i<numberOfSubMeshes;i++){
+                chunkData.set(10+i,subMeshes[i]);
+            }
+
+            return chunkData.serialize();
+        };
+
+        /**
+         * Restores the
+         * @method deserialize
+         * @param {ArrayBuffer} data
+         * @return Boolean
+         */
+        this.deserialize = function(data){
+            var chunkData = new KICK.core.ChunkData();
+            if (chunkData.deserialize(data)){
+                thisObj.interleavedArray = chunkData.getArrayBuffer(1);
+                thisObj.interleavedArrayFormat = JSON.parse(chunkData.getString(2));
+                thisObj.name = chunkData.getString(3);
+                var numberOfSubMeshes = chunkData.getNumber(4);
+                thisObj.vertexAttrLength = chunkData.getNumber(5);
+                var submeshes = [];
+                for (var i = 0;i< numberOfSubMeshes;i++){
+                    submeshes[i] = chunkData.get(10+i);
+                }
+                thisObj.subMeshes = submeshes;
+                return true;
+            }
+            return false;
+        };
+
+
         Object.defineProperties(this,{
+            /**
+             * Note that this property is not cached. Use KICK.mesh.Mesh.aabb for a cached version.
+             * Readonly
+             * @property aabb
+             * @type KICK.math.aabb
+             */
+            aabb:{
+                get:function(){
+                    var vertex = thisObj.vertex;
+                    if (!vertex){
+                        return null;
+                    }
+                    var vertexLength = vertex.length;
+                    var aabb = KICK.math.aabb.create();
+                    for (var i=0;i<vertexLength;i += 3){
+                        var point = vertex.subarray(i,i+3);
+                        KICK.math.aabb.addPoint(aabb,point);
+                    }
+                    return aabb;
+                }
+            },
             /**
              * @property name
              * @type string
@@ -255,7 +327,7 @@ KICK.namespace = function (ns_string) {
              * <pre class="brush: js">
              * var vertexOffset = meshData.interleavedArrayFormat["vertex"].pointer;
              * </pre>
-             * @property description
+             * @property interleavedArrayFormat
              * @type Object
              */
             interleavedArrayFormat:{
@@ -314,86 +386,121 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Vertex attribute.
              * Vertex (vec3)
              * @property vertex
              * @type Array[Number]
              */
             vertex:createGetterSetter(constants.GL_FLOAT, "vertex"),
             /**
+             * Vertex attribute.
              * Normal (vec3)
              * @property normal
              * @type Array[Number]
              */
             normal:createGetterSetter(constants.GL_FLOAT, "normal"),
             /**
+             * Vertex attribute.
              * UV1 (vec2)
              * @property uv1
              * @type Array[Number]
              */
             uv1:createGetterSetter(constants.GL_FLOAT, "uv1"),
             /**
+             * Vertex attribute.
              * UV2 (vec2)
              * @property uv2
              * @type Array[Number]
              */
             uv2:createGetterSetter(constants.GL_FLOAT, "uv2"),
             /**
+             * Vertex attribute.
              * Tangent (vec4)
              * @property tangent
              * @type Array[Number]
              */
             tangent:createGetterSetter(constants.GL_FLOAT, "tangent"),
             /**
+             * Vertex attribute.
              * Color (vec4)
              * @property color
              * @type Array[Number]
              */
             color:createGetterSetter(constants.GL_FLOAT, "color"),
             /**
-             * Integer attribute (two Int32)
+             * Vertex attribute.
+             * Integer attribute (onw Int32)
              * @property int1
              * @type Array[Number]
              */
             int1:createGetterSetter(constants.GL_INT, "int1"),
             /**
+             * Vertex attribute.
              * Integer attribute (two Int32)
              * @property int2
              * @type Array[Number]
              */
             int2:createGetterSetter(constants.GL_INT, "int2"),
             /**
-             * Integer attribute (two Int32)
+             * Vertex attribute.
+             * Integer attribute (three Int32)
              * @property int3
              * @type Array[Number]
              */
             int3:createGetterSetter(constants.GL_INT, "int3"),
             /**
-             * Integer attribute (two Int32)
+             * Vertex attribute.
+             * Integer attribute (four Int32)
              * @property int4
              * @type Array[Number]
              */
             int4:createGetterSetter(constants.GL_INT, "int4"),
             /**
-             * indices (integer)
+             * Vertex attribute.
+             * indices (integer).
+             * indices is shortcut for subMeshes[0]
              * @property indices
              * @type Array[Number]
              */
             indices:{
                 get:function(){
-                    return _indices;
+                    if (_indices==0){
+                        return null;
+                    }
+                    return _indices[0];
                 },
                 set:function(newValue){
                     if (newValue && !(newValue instanceof Uint16Array)){
                         newValue = new Uint16Array(newValue);
                     }
-                    if (_indices && isVertexDataInitialized()){
+                    if (_indices[0] && isVertexDataInitialized()){
                         clearInterleavedData();
+                    }
+                    if (newValue){
+                        _indices[0] = newValue;
+                    }
+                }
+            },
+            /**
+             * indices (integer)
+             * @property subMeshes
+             * @type Array[Array[Number]]
+             */
+            subMeshes:{
+                get:function(){
+                    return _indices;
+                },
+                set:function(newValue){
+                    for (var i=0;i<newValue.length;i++){
+                        if (newValue[i] && !(newValue[i] instanceof Uint16Array)){
+                            newValue[i] = new Uint16Array(newValue[i]);
+                        }
                     }
                     _indices = newValue;
                 }
             },
             /**
-             * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, or GL_TRIANGLE_STRIP
+             * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, or GL_LINES
              * @property meshType
              * @type Number
              */
@@ -403,7 +510,9 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     if (ASSERT){
-                        if (newValue != constants.GL_TRIANGLES &&
+                        if (
+                            newValue != constants.GL_LINES &&
+                            newValue != constants.GL_TRIANGLES &&
                             newValue != constants.GL_TRIANGLE_FAN &&
                             newValue != constants.GL_TRIANGLE_STRIP){
                             fail("MeshData.meshType must be GL_TRIANGLES, GL_TRIANGLE_FAN or GL_TRIANGLE_STRIP");
@@ -423,10 +532,12 @@ KICK.namespace = function (ns_string) {
                 createVertexDataFromInterleavedData();
             }
             var vertexCount = data.vertex.length/3;
-            for (var i=_indices.length-1;i>=0;i--){
-                if (_indices[i]<0 || _indices[i] >= vertexCount){
-                    debugger;
-                    return false;
+            for (var j=0;j<_indices.length;j++){
+                for (var i=_indices[j].length-1;i>=0;i--){
+                    if (_indices[j][i] >= vertexCount){
+                        debugger;
+                        return false;
+                    }
                 }
             }
             return true;
@@ -617,14 +728,18 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Recalculates the tangents.<br>
+     * Recalculates the tangents on a triangle mesh.<br>
      * Algorithm is based on<br>
      *   Lengyel, Eric. “Computing Tangent Space Basis Vectors for an Arbitrary Mesh”.<br>
      *   Terathon Software 3D Graphics Library, 2001.<br>
      *   http://www.terathon.com/code/tangent.html
      * @method recalculateTangents
+     * @return {Boolean} false if meshtype is not GL_TRIANGLES
      */
     mesh.MeshData.prototype.recalculateTangents = function(){
+        if (this.meshType != constants.GL_TRIANGLES){
+            return false;
+        }
         var vertex = vec3.wrapArray(this.vertex),
             vertexCount = vertex.length,
             normal = vec3.wrapArray(this.normal),
@@ -701,6 +816,7 @@ KICK.namespace = function (ns_string) {
             // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
             tangent[a][3] = (vec3.dot(vec3.cross(n, t,vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
         }
+        return true;
     };
 
     /**
@@ -716,33 +832,35 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
-            meshVertexIndexBuffer,
+            meshVertexIndexBuffers = [],
             _name,
             _meshData,
-            _urlResource,
+            _dataURI = "memory://void",
+            _aabb = null,
             thisObj = this,
             c = KICK.core.Constants,
             vertexAttrLength = 0,
             meshType,
-            meshElements,
+            meshElements = [],
             contextListener = {
                 contextLost: function(){},
                 contextRestored: function(newGl){
-                    meshVertexIndexBuffer = null;
+                    meshVertexIndexBuffers = null;
                     meshVertexAttBuffer = null;
                     gl = newGl;
                     updateData();
                 }
             },
             deleteBuffers = function(){
-                if (typeof meshVertexIndexBuffer === "number"){
-                    gl.deleteBuffer(meshVertexIndexBuffer);
-                    meshVertexIndexBuffer = null;
+                for (var i=0;i<meshVertexIndexBuffers.length;i++){
+                    gl.deleteBuffer(meshVertexIndexBuffers[i]);
                 }
                 if (typeof meshVertexAttBuffer === "number"){
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
+                meshElements.length = 0;
+                meshVertexIndexBuffers.length = 0;
             },
             /**
              * Copy data to the vertex buffer object (VBO)
@@ -750,28 +868,50 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             updateData = function () {
-                var indices = _meshData.indices;
+                var subMeshes = _meshData.subMeshes;
                 // delete current buffers
                 deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 vertexAttrLength = _meshData.vertexAttrLength;
                 meshType = _meshData.meshType;
-                meshElements = indices.length;
-
 
                 meshVertexAttBuffer = gl.createBuffer();
                 gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
                 gl.bufferData(c.GL_ARRAY_BUFFER, _meshData.interleavedArray, c.GL_STATIC_DRAW);
 
-                meshVertexIndexBuffer = gl.createBuffer();
-                gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
-                gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
+                for (var i=0;i<subMeshes.length;i++){
+                    var indices = subMeshes[i];
+                    var meshVertexIndexBuffer = gl.createBuffer();
+                    meshElements[i] = indices.length;
+                    meshVertexIndexBuffers.push(meshVertexIndexBuffer);
+                    gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+                    gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
+                }
             };
 
+        if (DEBUG){
+            if (!(engine instanceof KICK.core.Engine)){
+                fail("Engine param not valid");
+            }
+        }
         engine.addContextListener(contextListener);
 
         Object.defineProperties(this,{
+            /**
+             * Axis aligned bounding box.
+             * Readonly.
+             * @property aabb
+             * @type KICK.math.aabb
+             */
+            aabb:{
+                get:function(){
+                    if (!_aabb && _meshData){
+                        _aabb = _meshData.aabb;
+                    }
+                    return _aabb;
+                }
+            },
             /**
              * @property name
              * @type String
@@ -801,29 +941,42 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _meshData = newValue;
+                    _aabb = null;
                     updateData();
                 }
             },
             /**
              * The resource url of the mesh. Setting this property will try to load the meshData.
-             * @property urlResource
+             * @property dataURI
              * @type String
              */
-            urlResource:{
+            dataURI:{
                 get:function(){
-                    return _urlResource;
+                    return _dataURI;
                 },
                 set:function(newValue){
-                    if (newValue !== _urlResource){
-                        engine.resourceManager.getMeshData(newValue,thisObj);
-                    }
-                    _urlResource = newValue;
+                    thisObj.setDataURI(newValue,true);
                 }
             }
         });
 
+        /**
+         * @method setDataURI
+         * @param {String} newValue
+         * @param {Boolean} automaticGetMeshData optional. if true the mesh data is attempted to be loaded by resourceManager.getMeshData
+         */
+        this.setDataURI = function(newValue, automaticGetMeshData){
+            if (newValue !== _dataURI){
+                _dataURI = newValue;
+                if (automaticGetMeshData){
+                    engine.resourceManager.getMeshData(newValue,thisObj);
+                }
+            }
+        };
+
         KICK.core.Util.applyConfig(this,config);
         engine.project.registerObject(this, "KICK.mesh.Mesh");
+
 
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
@@ -897,16 +1050,19 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                 }
-                gl.bindBuffer(constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+
             }
         };
 
         /**
-         * Renders the current mesh
+         * Renders the current mesh.
+         * Assumes that the Mesh.bind(shader) has been called prior to this, to setup the mesh with the shader.
          * @method render
+         * @param {Number} submeshIndex
          */
-        this.render = function () {
-            gl.drawElements(meshType, meshElements, c.GL_UNSIGNED_SHORT, 0);
+        this.render = function (submeshIndex) {
+            gl.bindBuffer(constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffers[submeshIndex]);
+            gl.drawElements(meshType, meshElements[submeshIndex], c.GL_UNSIGNED_SHORT, 0);
         };
 
         /**
@@ -927,10 +1083,15 @@ KICK.namespace = function (ns_string) {
          * @return {Object} data object
          */
         this.toJSON = function(){
+            if (ASSERT){
+                if (!_dataURI){
+                    fail("_dataURI not defined");
+                }
+            }
             return {
                 uid: thisObj.uid,
                 name:_name,
-                urlResource:_urlResource
+                dataURI:_dataURI
             };
         };
     };

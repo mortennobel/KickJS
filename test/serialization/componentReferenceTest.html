@@ -101,7 +101,7 @@ void main(void)
                     uid:6,
                     config: {
                         name:"CubeMesh",
-                        urlResource:"kickjs://meshdata/cube/"
+                        dataURI:"kickjs://mesh/cube/"
                     }
                 },
                 {
@@ -109,7 +109,7 @@ void main(void)
                     uid:7,
                     config: {
                         name:"TriangleMesh",
-                        urlResource:"kickjs://meshdata/triangle/"
+                        dataURI:"kickjs://mesh/triangle/"
                     }
                 },
                 {
@@ -262,19 +262,18 @@ void main(void)
 
       function testSerialization(){
           var sceneCopy = engine.activeScene.toJSON();
+          console.log(sceneCopy);
+          sceneCopy.name ="SerializedScene";
+          var uid = engine.createUID();
+          engine.project.addResourceDescriptor(new KICK.core.ResourceDescriptor({
+              type: "KICK.scene.Scene",
+              uid: uid,
+              config:sceneCopy
+          }));
 
-            sceneCopy.name ="SerializedScene";
-            var uid = engine.createUID();
-            engine.project.addResourceDescriptor(new KICK.core.ResourceDescriptor({
-                type: "KICK.scene.Scene",
-                uid: uid,
-                config:sceneCopy
-            }));
-
-            var newScene = engine.project.loadByName("SerializedScene");
-            var camera = newScene.findComponentsOfType(KICK.scene.Camera)[0];
-            camera.clearColor = [0.2,0.4,0,1];
-            engine.activeScene = newScene;
+          var newScene = engine.project.loadByName("SerializedScene");
+          var camera = newScene.findComponentsOfType(KICK.scene.Camera)[0];
+          engine.activeScene = newScene;
       }
     </script>
 </body>

@@ -14,7 +14,7 @@
                 var vsNew = window.vertexShaderSession.getValue();
                 var fsNew = window.fragmentShaderSession.getValue();
                 if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
-                    shaderEditor.updateShader(vsNew,fsNew);
+                    shaderEditor.apply(vsNew,fsNew);
                     saveLocally();
                 }
             }
@@ -95,7 +95,7 @@
             checked = null,
             isElementChecked,
             firstInputElement = null;
-        for (i=0;i<elem.children.length;i++){
+        for (var i=0;i<elem.children.length;i++){
             var childElem =elem.children[i];
             if (childElem.nodeName === 'INPUT'){
                 isElementChecked = childElem.value === value;
@@ -159,6 +159,7 @@
     }
 
     function getData(){
+        shaderEditor.meshRenderer.material.shader.dataURI = null; // force shader to be serialized
         return {
             shader: shaderEditor.meshRenderer.material.shader.toJSON(),
             material: shaderEditor.meshRenderer.material.toJSON(),
@@ -594,40 +595,11 @@
     }
 
     function toogleFullscreen(){
-        var i, child;
-        var menuAndContent = document.getElementById("menuAndContent");
-        if (window.isHidden){
-            document.getElementById("ahead").style.display = "block";
-            for (i=menuAndContent.childElementCount-1;i>=0;i--){
-                child = menuAndContent.children[i];
-                if (child.nodeName !== "CANVAS"){
-                    child.style.display = child.style.initialDisplay;
-                } else {
-                    child.width = 300;
-                    child.height = 300;
-                }
-            }
-            document.getElementById("mainEditor").style.display = "block";
-            document.getElementById("alogger").style.display = "block";
-            document.body.style.overflow = '';
+        if (shaderEditor.engine.isFullScreenSupported()){
+            shaderEditor.engine.setFullscreen(true);
         } else {
-            for (i=menuAndContent.childElementCount-1;i>=0;i--){
-                child = menuAndContent.children[i];
-                if (child.nodeName !== "CANVAS"){
-                    child.style.initialDisplay = child.style.display;
-                    child.style.display = "none";
-                } else {
-                    child.width = window.innerWidth;
-                    child.height = window.innerHeight;
-                }
-            }
-            document.getElementById("ahead").style.display = "none";
-            document.getElementById("mainEditor").style.display = "none";
-            document.getElementById("alogger").style.display = "none";
-            document.body.style.overflow = 'hidden';
+            alert("Fullscreen is not supported in this browser");
         }
-        window.isHidden = !window.isHidden;
-        shaderEditor.canvasResized();
     }
 
     function onLogoutButton(){
@@ -829,12 +801,21 @@
         //create the console
         var r = new Y.Console({
             newestOnTop : false,
-            width: 600,
-            height: 200,
-            consoleLimit:10
+            width: 300,
+            height: 300,
+            consoleLimit:10,
+            style: "inline",
+            strings: {
+                title : "Shader error console",
+                pause : "Pause",
+                clear : "Clear",
+                collapse : "Collapse",
+                expand : "Expand"
+            }
         });
 
         r.render('#logger');
+
         window.log = r;
         var idParameter = document.location.hash.length>1;
         var shader = null;
@@ -916,6 +897,85 @@
             });
 
             nestedPanel.render('#nestedPanel');
+        };
+
+        window.YUILoadExample = function (){
+            var elements = [
+                {
+                    id:"http://goo.gl/lLjyf",
+                    name:"Phong ligthing"
+                },
+                {
+                    id:"http://goo.gl/EoxBh",
+                    name:"Mandelbrot shader"
+                },
+                {
+                    id:"http://goo.gl/2JJe0",
+                    name:"Brick shader"
+                },
+                {
+                    id:"http://goo.gl/2SwX1",
+                    name:"Sliced geometry"
+                },
+                {
+                    id:"http://goo.gl/Jsne8",
+                    name:"ASCII shader"
+                },
+                {
+                    id:"http://goo.gl/viDKB",
+                    name:"Normal shader"
+                }
+            ];
+            var bodyContent = document.createElement("select");
+            bodyContent.style.width = "225px";
+            bodyContent.style.height = "200px";
+            bodyContent.style.font = "120% arial,helvetica,clean";
+            bodyContent.multiple = true;
+            for (var i=0;i<elements.length;i++){
+                var elem = elements[i];
+                var option = document.createElement("option");
+                option.value = elem.id;
+                option.innerHTML = elem.name;
+                bodyContent.appendChild(option);
+            }
+            var panel = new Y.Panel({
+                srcNode: "#panelContent",
+                width: 250,
+                centered: true,
+                visible: true,
+                modal:true,
+                zIndex:5,
+                headerContent: "Load example shader",
+                bodyContent: bodyContent,
+                buttons:[
+                    {
+                        value: "Cancel",
+                        action: function(e) {
+                            e.preventDefault();
+                            panel.hide();
+                            panel.destroy();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    },
+                    {
+                        value: "Load",
+                        action: function(e) {
+                            e.preventDefault();
+                            panel.hide();
+                            var selectedIndex = bodyContent.selectedIndex;
+                            if (selectedIndex >-1){
+                                var url = bodyContent.options[selectedIndex].value;
+                                document.location.href = url;
+                            }
+                            panel.destroy();
+                        },
+                        section: Y.WidgetStdMod.FOOTER
+                    }
+                ]
+            });
+
+            panel.render();
+            window.tabview.selectChild(0);
         };
 
         window.YUILoad = function(elements){
@@ -1072,11 +1132,10 @@
             document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
             document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
             document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
+            document.getElementById('ExampleButton').addEventListener('click', window.YUILoadExample,false);
 
             document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
 
-
-            document.getElementById('canvas').addEventListener('click', toogleFullscreen,false);
             document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
             document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
             document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
@@ -1103,14 +1162,11 @@
                             logoutURL = obj.logoutURL;
                             username = obj.username;
                             document.getElementById('LogoutButton').style.display = "inline";
-                            document.getElementById('username').style.display = "block";
-                            document.getElementById('username').innerHTML = "Logged in as "+username;
+                            document.getElementById('LogoutButton').title = "Currently logged in as "+username;
                             document.getElementById('LoginButton').style.display = "none";
                         } else {
                             loginURL = obj.loginURL;
                             document.getElementById('LogoutButton').style.display = "none";
-                            document.getElementById('username').style.display = "none";
-                            document.getElementById('username').innerHTML = "";
                             document.getElementById('LoginButton').style.display = "inline";
                         }
                     }

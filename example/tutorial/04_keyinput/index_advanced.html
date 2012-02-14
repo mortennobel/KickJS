@@ -2,6 +2,7 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>KickJS | Tutorial | 04 - Key input - advanced</title>
+    <script type="text/javascript" src="../common/common.js"></script>
 </head>
 <body>
 <h1>KickJS | Tutorial | 04 - Key input - advanced</h1>
@@ -9,7 +10,7 @@
 <!-- Tutorial start -->
 <!--<script type="text/javascript" src="../../js/webgl-debug.js"></script>-->
     <!--<script type="text/javascript" src="../../js/kick-debug-0.2.0.js"></script>-->
-<script type="text/javascript" src="../../js/kick-min-0.2.0.js"></script>
+<script type="text/javascript" src="../../js/kick-min-0.3.0.js"></script>
 Accelerate the triangle by pressing '1' and the square by pressing '2'.<br>
 The key down event and key up event will change the color of the objects.<br><br>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
@@ -45,7 +46,7 @@ The key down event and key up event will change the color of the objects.<br><br
                 uniforms.mainColor.value = thisObj.rotationColor;
             }
             if (keyInput.isKeyUp(thisObj.keyCode)){ // test if key has been released in this frame
-                uniforms.mainColor.value = [1,1,1];
+                uniforms.mainColor.value = [1,1,1,1];
             }
             if (keyInput.isKey(thisObj.keyCode)){ // test if key is being pressed
                 // accelerate
@@ -77,15 +78,16 @@ The key down event and key up event will change the color of the objects.<br><br
     cameraObject.addComponent(camera);
 
     function createMaterial(){
+        var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
         return new KICK.material.Material(engine,{
-            shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+            shader: shader,
             uniforms:{
                 mainColor: {
-                    value: [1,1,1],
-                    type: KICK.core.Constants.GL_FLOAT_VEC3
+                    value: [1,1,1,1],
+                    type: KICK.core.Constants.GL_FLOAT_VEC4
                 },
                 mainTexture: {
-                    value: engine.resourceManager.getTexture("kickjs://texture/white/"),
+                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                     type: KICK.core.Constants.GL_SAMPLER_2D
                 }
             }
@@ -93,16 +95,16 @@ The key down event and key up event will change the color of the objects.<br><br
     }
 
     // create meshes
-    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/"];
+    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
     var keyCodes = ["1","2"];
     var rotationAcceleration = [0.0002,0.00032];
-    var rotationColor = [[1,0,0],[0,0,1]];
+    var rotationColor = [[1,0,0,1],[0,0,1,1]];
 
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
         var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
+        meshRenderer.mesh = engine.project.load(meshes[i]);
         meshRenderer.material = createMaterial();
         gameObject.addComponent(meshRenderer);
         gameObject.addComponent(new RotatorComponent(

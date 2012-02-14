@@ -1,15 +1,16 @@
 <html>
 <head>
+    <script type="text/javascript" src="../common/common.js"></script>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>KickJS | Tutorial | 02 - Scripting triangle world - Optimized code</title>
 </head>
 <body>
 <h1>KickJS | Tutorial | 02 - Scripting triangle world - Optimized code</h1>
-This example demonstrate how to script update that runs in every frame (slightly optimized code).
+This example demonstrate how to script update that runs in every frame (slightly optimized code).<br>
 <!-- Tutorial start -->
 <!--<script type="text/javascript" src="../../js/webgl-debug.js"></script>-->
     <!--<script type="text/javascript" src="../../js/kick-debug-0.2.0.js"></script>-->
-<script type="text/javascript" src="../../js/kick-min-0.2.0.js"></script>
+<script type="text/javascript" src="../../js/kick-min-0.3.0.js"></script>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 <script type="text/javascript">
 
@@ -50,32 +51,29 @@ This example demonstrate how to script update that runs in every frame (slightly
     cameraObject.addComponent(camera);
 
     // create material
-    var material = new KICK.material.Material(engine,{
-        shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
-        uniforms:{
-            mainColor: {
-                value: [1,1,1],
-                type: KICK.core.Constants.GL_FLOAT_VEC3
-            },
-            mainTexture: {
-                value: engine.resourceManager.getTexture("kickjs://texture/white/"),
-                type: KICK.core.Constants.GL_SAMPLER_2D
+        var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+        var material = new KICK.material.Material(engine,{
+            shader: shader,
+            uniforms:{
+                mainColor: {
+                    value: [1,1,1,1],
+                    type: KICK.core.Constants.GL_FLOAT_VEC4
+                }
             }
-        }
-    });
+        });
 
-    // create meshes
-    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/"];
-    for (var i=0;i<meshes.length;i++){
-        var gameObject = engine.activeScene.createGameObject();
-        gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
-        meshRenderer.material = material;
-        gameObject.addComponent(meshRenderer);
-        var rotationSpeed = i-0.4;
-        gameObject.addComponent(new RotatorComponent({rotationSpeed:rotationSpeed}));
-    }
+        // create meshes
+        var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
+        for (var i=0;i<meshes.length;i++){
+            var gameObject = engine.activeScene.createGameObject();
+            gameObject.transform.position = [-2.0+4*i,0,0];
+            var meshRenderer = new KICK.scene.MeshRenderer();
+            meshRenderer.mesh = engine.project.load(meshes[i]);
+            meshRenderer.material = material;
+            gameObject.addComponent(meshRenderer);
+            var rotationSpeed = i-0.4;
+            gameObject.addComponent(new RotatorComponent({rotationSpeed:rotationSpeed}));
+        }
 </script>
 <!-- Tutorial end -->
 </body>

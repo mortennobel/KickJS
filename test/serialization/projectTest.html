@@ -23,11 +23,16 @@
 <button onclick="loadProjectAndScene(projectData,'SimpleScene');loadSerializedScene();">Default project - scene 1 - serialized</button>
 <button onclick="loadProjectAndScene(projectData,'EmptyScene');">Default project - scene 2</button>
 <button onclick="loadProjectAndScene(projectDataAlt,'EmptyScene');">Alt project - scene 1</button><br><br>
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  Shows how the Project class can be used
+<button onclick="reloadProject();">Serialize and Deserialize current project</button><br><br>
+<canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+Shows how the Project class can be used<br>
+Info:<br>
+<textarea style="width: 500px;height:300px;" id="info">
 
-  <div style="display:none;">
-  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+</textarea>
+<div style="display:none;">
+
+<textarea style="width:500px;height:150px;" id="vertexShaderColor">
 attribute vec3 vertex;
 attribute vec2 uv1;
 
@@ -134,7 +139,7 @@ void main(void)
                     uid:6,
                     config: {
                         name:"CubeMesh",
-                        urlResource:"kickjs://meshdata/cube/?length=0.5"
+                        dataURI:"kickjs://mesh/cube/?length=0.5"
                     }
                 },
                 {
@@ -142,7 +147,7 @@ void main(void)
                     uid:7,
                     config: {
                         name:"SphereMesh",
-                        urlResource:"kickjs://meshdata/uvsphere/?radius=0.6"
+                        dataURI:"kickjs://mesh/uvsphere/?radius=0.6"
                     }
                 },
                 {
@@ -216,7 +221,7 @@ void main(void)
                                     },
                                     {
                                         type:"KICK.scene.MeshRenderer",
-                                        uid:13,
+                                        uid:40,
                                         config:{
                                             material:{
                                                 ref:5,
@@ -362,6 +367,13 @@ void main(void)
             engine.activeScene = engine.project.loadByName("SerializedScene");
         }
 
+        function updateInfo(){
+            var info = document.getElementById('info');
+            var str = "Assets: "+engine.project.resourceDescriptorUIDs.length;
+            str += "\nGameObjects in scene: "+engine.activeScene.getNumberOfGameObjects();
+            info.innerHTML = str;
+        }
+
         function loadProjectAndScene(project,scene){
             engine.project.loadProject(project);
             var s = engine.project.loadByName(scene);
@@ -370,6 +382,15 @@ void main(void)
             } else {
                 console.log("Cannot load scene "+scene);
             }
+
+            updateInfo();
+        }
+      
+        function reloadProject(){
+            var projectStr = JSON.stringify(engine.project.toJSON());
+            var projectJSON = JSON.parse(projectStr);
+            console.log(projectJSON);
+            engine.project.loadProject(projectJSON);
         }
     </script>
 </body>

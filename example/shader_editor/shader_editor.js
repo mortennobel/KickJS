@@ -13,11 +13,10 @@ window.shaderEditor = new (function(){
         isRotating = true,
         meshsetting,
         setMesh = function (url){
-            _meshRenderer.mesh = _engine.resourceManager.getMesh(url);
+            _meshRenderer.mesh = new KICK.mesh.Mesh(_engine,{dataURI:url});
         };
 
     this.textures = [];
-
 
     Object.defineProperties(this,
         {
@@ -209,7 +208,6 @@ window.shaderEditor = new (function(){
     this.initKick = function() {
         try{
             _engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true,
                 preserveDrawingBuffer:true,
                 checkCanvasResizeInterval:0
             });
@@ -235,7 +233,7 @@ window.shaderEditor = new (function(){
 
             var ambientlightGameObject = _engine.activeScene.createGameObject();
             _ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
-            _ambientLight.color = [0.1,0.1,0.1,1];
+            _ambientLight.color = [0.1,0.1,0.1];
             ambientlightGameObject.addComponent(_ambientLight);
 
             var lightGameObject = _engine.activeScene.createGameObject();
@@ -248,15 +246,15 @@ window.shaderEditor = new (function(){
         }
     };
 
-    this.updateShader = function(vs,fs){
+    this.apply = function(vs,fs){
         shader.vertexShaderSrc = vs;
         shader.fragmentShaderSrc = fs;
         shader.errorLog = logFn;
-        var res = shader.updateShader();
+        var res = shader.apply();
         function onError(){
             previousShaderError = true;
-            console.log(KICK.material.Shader.getPrecompiledSource(vs));
-            console.log(KICK.material.Shader.getPrecompiledSource(fs));
+            console.log(KICK.material.Shader.getPrecompiledSource(_engine,vs));
+            console.log(KICK.material.Shader.getPrecompiledSource(_engine,fs));
             document.body.style.backgroundColor = 'pink';
         }
         if (!res){

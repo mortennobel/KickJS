@@ -5,36 +5,20 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Shader Editor</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.4.1/build/cssreset/reset-min.css&amp;3.4.1/build/cssfonts/fonts-min.css&amp;3.4.1/build/cssbase/base-min.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0pr2/build/cssreset/reset-min.css&3.5.0pr2/build/cssfonts/fonts-min.css&3.5.0pr2/build/cssgrids/grids-min.css&3.5.0pr2/build/cssbase/base-min.css&3.5.0pr2/build/cssbutton/cssbutton.css">
+    <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js"></script>
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/mode-glsl_es.js" type="text/javascript" charset="utf-8"></script>
 
     <style>
         #glslEditor {
-            position: absolute;
-            width: 800px;
-            height: 400px;
-        }
-         #glslEditorInfo{
-            position: absolute;
-            left: 830px;
-            height: 400px;
-         }
-
-        #desc {
-            margin-bottom:20px;
-            border-bottom:1px dotted #333;
-        }
-        #desc span {
-            background:#a3350d;
-            padding:2px;
-            color:#f27243;
+            width: 65%;
+            height: 80%;
         }
 
         .yui3-panel {
             outline:none;
-
         }
 
         .yui3-panel-content .yui3-widget-hd {
@@ -67,261 +51,250 @@
         }
     </style>
 
-    <script src="http://yui.yahooapis.com/3.4.1/build/yui/yui.js"></script>
     <!--<script type="text/javascript" src="../js/webgl-debug.js"></script>-->
-    <script type="text/javascript" src="../js/kick-min-0.2.0.js"></script>
-    <!--<script type="text/javascript" src="../js/kick-debug-0.2.0.js"></script>-->
+    <script type="text/javascript" src="../js/kick-min-0.3.0.js"></script>
+    <!--<script type="text/javascript" src="../js/kick-debug-0.3.0.js"></script>-->
     <script type="text/javascript" src="shader_editor_default.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
     <link href='/style.css' rel='stylesheet' type='text/css'>
-    <script type="text/javascript">
-
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-26354413-1']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-
-</script>
+    <script type="text/javascript" src="../common/common.js"></script>
 </head>
 <body class="yui3-skin-sam" style="background-color: white;">
 <header>
 </header>
-<header id="ahead">
-    <h1 id="header"><a href="/">Kick.js</a> | Shader editor</h1>
-</header>
+
 <article id="menuAndContent">
-    <div id="menu">
-        <div id="username"></div>
-        <button id="resetShader">New</button>
-        <button id="LoadButton">Load</button>
-        <button id="SaveButton">Save</button>
+    <header id="ahead" style="float: right">
+        <h1 id="header" style="margin-top: 5px;padding-right:10px;"><a href="/">Kick.js</a> | Shader editor</h1>
+    </header>
+    <div id="menu" style="margin: 18px;">
+        <button id="resetShader" class='yui3-button'>New</button>
+        <button id="LoadButton" class='yui3-button'>Load</button>
+        <button id="SaveButton" class='yui3-button'>Save</button>
+        <button id="ExampleButton" class='yui3-button'>Examples</button>
         &nbsp;|&nbsp;
-        <button id="ShareButton" title="Get the public url for this shader">Share</button>
-        <button id="fullscreen">Full screen</button>
+        <button id="ShareButton" title="Get the public url for this shader" class='yui3-button'>Share</button>
+        <button id="fullscreen" class='yui3-button'>Full screen</button>
         &nbsp;|&nbsp;
-        <button id="LogoutButton" style="display: none;">Logout</button>
-        <button id="LoginButton"  style="display: none;" title="Login using a Google Account. This allows you to load and save shaders."><img src="google_account.png"> Login</button>
+        <button id="LogoutButton" style="display: none;" class='yui3-button'>Logout</button>
+        <button id="LoginButton"  style="display: none;" title="Login using a Google Account. This allows you to load and save shaders." class='yui3-button'><img src="google_account.png"> Login</button>
     </div>
-    <h2>Preview</h2>
-  <canvas id="canvas" style="border: none;" width="300" height="300" title="Click to toggle full screen"></canvas>
 </article>
-<article id="mainEditor">
-    <div id="editorSection">
-    <ul>
-        <li><a href="#vs">Vertex shader</a></li>
-        <li><a href="#fs">Fragment shader</a></li>
-        <li><a href="#uniforms">Textures</a></li>
-        <li><a href="#textures">Uniforms</a></li>
-        <li><a href="#settings">Settings</a></li>
-        <li><a href="#about">About</a></li>
-    </ul>
-    <div>
-        <div id="vs" class="sourceEditorPanel">
-        </div>
-        <div id="fs" class="sourceEditorPanel">
-        </div>
-        <div id="textures" class="sourceEditorPanel">
-            <h3>Current textures</h3>
-            <select multiple=true style="width:300px;height:100px;vertical-align:top;" id="currentTextures">
-            </select>
-            <button id="addTextureButton">+</button>
-            <button id="removeTextureButton">-</button>
+<div class="yui3-g" id="layout" style="padding-left:320px;padding-right: 10px;">
+<div class="yui3-u" id="nav" style="margin-left:-310px; width:300px;">
+    <canvas id="canvas" style="border: none;margin-bottom: -300px;" width="300" height="300"></canvas>
+    <div id="logger" style="margin-top:300px;margin-bottom: -600px;"></div>
+</div>
+<div class="yui3-u" id="main" style="width:100%;">
+    <div id="mainEditor">
+        <div id="editorSection">
+            <ul>
+                <li><a href="#vs">Vertex shader</a></li>
+                <li><a href="#fs">Fragment shader</a></li>
+                <li><a href="#uniforms">Textures</a></li>
+                <li><a href="#textures">Uniforms</a></li>
+                <li><a href="#settings">Settings</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+            <div>
+                <div id="vs" class="sourceEditorPanel">
+                </div>
+                <div id="fs" class="sourceEditorPanel">
+                </div>
+                <div id="textures" class="sourceEditorPanel">
+                    <h3>Current textures</h3>
+                    <select multiple=true style="width:300px;height:100px;vertical-align:top;" id="currentTextures">
+                    </select>
+                    <button id="addTextureButton" title="Add new texture" class='yui3-button'>+</button>
+                    <button id="removeTextureButton" title="Delete selected texture" class='yui3-button'>-</button>
 
-            <div id="textureDetails" style="width:300px;display: none;">
-                <h3>Texture detail</h3>
-                Texture source:<br>
-                <input type="text" id="textureSrc" style="width:300px;"><br>
-                Texture type [<a id="textureTypeInfo" style="font-weight: bold;color: blue;cursor: pointer;">?</a>]:
-                <select id="textureType" style="float:right;">
-                    <option value="Texture2D">Texture 2D</option>
-                    <option value="CubeMap">Cube map</option>
-                </select><br style="clear: both;">
-                <br>
-                Texture format:
-                <select id="textureFormat" style="float:right;">
-                    <option value="Alpha">Alpha</option>
-                    <option value="RGB">RGB</option>
-                    <option value="RGBA">RGBA</option>
-                    <option value="Luminance">Luminance</option>
-                    <option value="Luminance alpha">Luminance alpha</option>
-                </select><br style="clear: both;">
-                Mip mapping: <span style="float:right;"><input type="checkbox" id="mipMapping"/>&nbsp;<label for="mipMapping" >Enabled</label></span><br style="clear: both;">
-                Texture mode:
-                <select id="textureMode" style="float:right;">
-                    <option value="Repeat">Repeat</option>
-                    <option value="Clamp">Clamp</option>
-                </select><br style="clear: both;">
-                Flip Y: <span style="float:right;"><input type="checkbox" id="flipY"/>&nbsp;<label for="flipY" >Enabled</label></span><br>
-                Minification filter:
-                <select id="minFilter" style="float:right;">
-                    <option value="Nearest">Nearest</option>
-                    <option value="Linear">Linear</option>
-                    <option value="Nearest mipmap nearest">Nearest mipmap nearest</option>
-                    <option value="Linear mipmap nearest">Linear mipmap nearest</option>
-                    <option value="Nearest mipmap linear">Nearest mipmap linear</option>
-                    <option value="Linear mipmap linear">Linear mipmap linear</option>
-                </select><br style="clear: both;">
-                Magnification filter:
-                <select id="magFilter" style="float:right;">
-                    <option value="Nearest">Nearest</option>
-                    <option value="Linear">Linear</option>
-                </select><br style="clear: both;">
-                <br>
-                <button id="updateTexture">Update</button>
-                <br>
-            </div>
-            <div id="texturePreview" style="width:300px;display: none;">
-                <h2>Preview</h2>
-                <div id="texturePreviewPanel" style="width: 300px;height:200px;overflow: scroll;">
-                <img id="texturePreviewImg" src="">
+                    <div id="textureDetails" style="width:300px;display: none;">
+                        <h3>Texture detail</h3>
+                        Texture source:<br>
+                        <input type="text" id="textureSrc" style="width:300px;"><br>
+                        Texture type [<a id="textureTypeInfo" style="font-weight: bold;color: blue;cursor: pointer;">?</a>]:
+                        <select id="textureType" style="float:right;">
+                            <option value="Texture2D">Texture 2D</option>
+                            <option value="CubeMap">Cube map</option>
+                        </select><br style="clear: both;">
+                        <br>
+                        Texture format:
+                        <select id="textureFormat" style="float:right;">
+                            <option value="Alpha">Alpha</option>
+                            <option value="RGB">RGB</option>
+                            <option value="RGBA">RGBA</option>
+                            <option value="Luminance">Luminance</option>
+                            <option value="Luminance alpha">Luminance alpha</option>
+                        </select><br style="clear: both;">
+                        Mip mapping: <span style="float:right;"><input type="checkbox" id="mipMapping"/>&nbsp;<label for="mipMapping" >Enabled</label></span><br style="clear: both;">
+                        Texture mode:
+                        <select id="textureMode" style="float:right;">
+                            <option value="Repeat">Repeat</option>
+                            <option value="Clamp">Clamp</option>
+                        </select><br style="clear: both;">
+                        Flip Y: <span style="float:right;"><input type="checkbox" id="flipY"/>&nbsp;<label for="flipY" >Enabled</label></span><br>
+                        Minification filter:
+                        <select id="minFilter" style="float:right;">
+                            <option value="Nearest">Nearest</option>
+                            <option value="Linear">Linear</option>
+                            <option value="Nearest mipmap nearest">Nearest mipmap nearest</option>
+                            <option value="Linear mipmap nearest">Linear mipmap nearest</option>
+                            <option value="Nearest mipmap linear">Nearest mipmap linear</option>
+                            <option value="Linear mipmap linear">Linear mipmap linear</option>
+                        </select><br style="clear: both;">
+                        Magnification filter:
+                        <select id="magFilter" style="float:right;">
+                            <option value="Nearest">Nearest</option>
+                            <option value="Linear">Linear</option>
+                        </select><br style="clear: both;">
+                        <br>
+                        <button id="updateTexture"  class='yui3-button'>Update</button>
+                        <br>
+                    </div>
+                    <div id="texturePreview" style="width:300px;display: none;">
+                        <h2>Preview</h2>
+                        <div id="texturePreviewPanel" style="width: 300px;height:200px;overflow: scroll;">
+                            <img id="texturePreviewImg" src="">
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div id="uniforms"  class="sourceEditorPanel">
-            <h3>Current uniforms</h3>
-            <select multiple=true style="width:300px;height:100px;vertical-align:top;" id="currentUniforms">
-            </select>
-            <div id="uniformDetail">
-                <h4>Uniform details:</h4>
-                Name:<br>
-                <input type="text" id="uniformName" readonly=readonly><br>
-                Type:<br>
-                <input type="text" id="uniformType" readonly=readonly><br>
-                Size:<br>
-                <input type="text" id="uniformSize" readonly=readonly title="Length of uniform array or 1 if not array"><br>
-                Value:<br>
-                <div id="uniform_group_autobound">
-                Auto bound by game engine<br>
+                <div id="uniforms"  class="sourceEditorPanel">
+                    <h3>Current uniforms</h3>
+                    <select multiple=true style="width:300px;height:100px;vertical-align:top;" id="currentUniforms">
+                    </select>
+                    <div id="uniformDetail">
+                        <h4>Uniform details:</h4>
+                        Name:<br>
+                        <input type="text" id="uniformName" readonly=readonly><br>
+                        Type:<br>
+                        <input type="text" id="uniformType" readonly=readonly><br>
+                        Size:<br>
+                        <input type="text" id="uniformSize" readonly=readonly title="Length of uniform array or 1 if not array"><br>
+                        Value:<br>
+                        <div id="uniform_group_autobound">
+                            Auto bound by game engine<br>
+                        </div>
+                        <div id="uniform_group_number">
+                            <input id="uniform_0" style="width: 75px;"><input id="uniform_4" style="width: 75px;"><input id="uniform_8" style="width: 75px;"><input id="uniform_12" style="width: 75px;"><br>
+                            <input id="uniform_1" style="width: 75px;"><input id="uniform_5" style="width: 75px;"><input id="uniform_9" style="width: 75px;"><input id="uniform_13" style="width: 75px;"><br>
+                            <input id="uniform_2" style="width: 75px;"><input id="uniform_6" style="width: 75px;"><input id="uniform_10" style="width: 75px;"><input id="uniform_14" style="width: 75px;"><br>
+                            <input id="uniform_3" style="width: 75px;"><input id="uniform_7" style="width: 75px;"><input id="uniform_11" style="width: 75px;"><input id="uniform_15" style="width: 75px;"><br>
+                            <button id="uniform_number_update"  class='yui3-button'>Update</button>
+                        </div>
+                        <div id="uniform_group_sampler">
+                            <select id="uniform_sampler"></select><br>
+                            <button id="uniform_sampler_update" class='yui3-button'>Update</button>
+                        </div>
+                    </div>
                 </div>
-                <div id="uniform_group_number">
-                    <input id="uniform_0" style="width: 75px;"><input id="uniform_4" style="width: 75px;"><input id="uniform_8" style="width: 75px;"><input id="uniform_12" style="width: 75px;"><br>
-                    <input id="uniform_1" style="width: 75px;"><input id="uniform_5" style="width: 75px;"><input id="uniform_9" style="width: 75px;"><input id="uniform_13" style="width: 75px;"><br>
-                    <input id="uniform_2" style="width: 75px;"><input id="uniform_6" style="width: 75px;"><input id="uniform_10" style="width: 75px;"><input id="uniform_14" style="width: 75px;"><br>
-                    <input id="uniform_3" style="width: 75px;"><input id="uniform_7" style="width: 75px;"><input id="uniform_11" style="width: 75px;"><input id="uniform_15" style="width: 75px;"><br>
-                    <button id="uniform_number_update">Update</button>
-                </div>
-                <div id="uniform_group_sampler">
-                    <select id="uniform_sampler"></select><br>
-                    <button id="uniform_sampler_update">Update</button>
-                </div>
-            </div>
-        </div>
-        <div id="settings"  class="sourceEditorPanel">
-            <h3>Type of mesh</h3>
-            <div id="meshsetting">
-            <input type="radio" name="mesh-settings" value="cube">Cube</option>
-            <input type="radio" name="mesh-settings" value="sphere" checked>Sphere</option>
-            <input type="radio" name="mesh-settings" value="plane">Plane</option>
-            </div>
+                <div id="settings"  class="sourceEditorPanel">
+                    <h3>Type of mesh</h3>
+                    <div id="meshsetting">
+                        <input type="radio" name="mesh-settings" value="cube">Cube</option>
+                        <input type="radio" name="mesh-settings" value="sphere" checked>Sphere</option>
+                        <input type="radio" name="mesh-settings" value="plane">Plane</option>
+                    </div>
 
-            <h3>Camera</h3>
-            <div id="projection">
-            <input type="radio" name="camera-projection-perspective" value="orthogonale" checked>Orthogonale</option>
-            <input type="radio" name="camera-projection-perspective" value="perspective">Perspective</option>
-            </div>
-            <!--<h3>Rotate camera</h3>
-            <div id="rotatecam">
-            <input type="radio" name="camera-rotate-settings" value="off">Off</option>
-            <input type="radio" name="camera-rotate-settings" value="on" checked>On</option>
-            </div> -->
-            <h3>Rotate mesh</h3>
-            <div id="rotatemesh">
-                <input type="radio" name="mesh-rotate-settings" value="off">Off</option>
-                <input type="radio" name="mesh-rotate-settings" value="on" checked>On</option>
-            </div>
-            <h3>Light</h3>
-            <div id="lighttype">
-                <!-- <input type="radio" name="lighttype" value="pointlight">Point light</option> -->
-                <input type="radio" name="lighttype" value="directionalLight" checked>Directional light</option>
-            </div><br>
-            <!-- position is hidden since it only makes sense for point-light -->
-            <div style="display: none;">
-            Position:<br>
-            <div id="lightpos">
-                <input type="number" name="lightx" value="1" step=0.1>
-                <input type="number" name="lighty" value="1" step=0.1>
-                <input type="number" name="lightz" value="1" step=0.1><br>
-            </div>
-            </div>
-            Rotation (<b title="default pointing towards negative z">Euler</b>):<br>
-            <div id="lightrot">
-                <input type="number" id="light_rot_x" value="0" step=5>
-                <input type="number" id="light_rot_y" value="0" step=5>
-                <input type="number" id="light_rot_z" value="0" step=5><br>
-            </div>
-            Color:<br>
-            <div id="lightcolor">
-                <input type="number" id="light_col_r" value="1" step=0.1>
-                <input type="number" id="light_col_g" value="1" step=0.1>
-                <input type="number" id="light_col_b" value="1" step=0.1><br>
-            </div>
-            Intensity:<br>
-            <input type="number" id="lightintensity" value="1" step=0.1>
-            <h3>Ambient light (RGB)</h3>
-            <div id="ambientLight">
-                <input type="number" name="ambientLight_r" value="0.1" step=0.1>
-                <input type="number" name="ambientLight_g" value="0.1" step=0.1>
-                <input type="number" name="ambientLight_b" value="0.1" step=0.1><br>
+                    <h3>Camera</h3>
+                    <div id="projection">
+                        <input type="radio" name="camera-projection-perspective" value="orthogonale" checked>Orthogonale</option>
+                        <input type="radio" name="camera-projection-perspective" value="perspective">Perspective</option>
+                    </div>
+                    <!--<h3>Rotate camera</h3>
+                    <div id="rotatecam">
+                    <input type="radio" name="camera-rotate-settings" value="off">Off</option>
+                    <input type="radio" name="camera-rotate-settings" value="on" checked>On</option>
+                    </div> -->
+                    <h3>Rotate mesh</h3>
+                    <div id="rotatemesh">
+                        <input type="radio" name="mesh-rotate-settings" value="off">Off</option>
+                        <input type="radio" name="mesh-rotate-settings" value="on" checked>On</option>
+                    </div>
+                    <h3>Light</h3>
+                    <div id="lighttype">
+                        <!-- <input type="radio" name="lighttype" value="pointlight">Point light</option> -->
+                        <input type="radio" name="lighttype" value="directionalLight" checked>Directional light</option>
+                    </div><br>
+                    <!-- position is hidden since it only makes sense for point-light -->
+                    <div style="display: none;">
+                        Position:<br>
+                        <div id="lightpos">
+                            <input type="number" name="lightx" value="1" step=0.1>
+                            <input type="number" name="lighty" value="1" step=0.1>
+                            <input type="number" name="lightz" value="1" step=0.1><br>
+                        </div>
+                    </div>
+                    Rotation (<b title="default pointing towards negative z">Euler</b>):<br>
+                    <div id="lightrot">
+                        <input type="number" id="light_rot_x" value="0" step=5>
+                        <input type="number" id="light_rot_y" value="0" step=5>
+                        <input type="number" id="light_rot_z" value="0" step=5><br>
+                    </div>
+                    Color:<br>
+                    <div id="lightcolor">
+                        <input type="number" id="light_col_r" value="1" step=0.1>
+                        <input type="number" id="light_col_g" value="1" step=0.1>
+                        <input type="number" id="light_col_b" value="1" step=0.1><br>
+                    </div>
+                    Intensity:<br>
+                    <input type="number" id="lightintensity" value="1" step=0.1>
+                    <h3>Ambient light (RGB)</h3>
+                    <div id="ambientLight">
+                        <input type="number" name="ambientLight_r" value="0.1" step=0.1>
+                        <input type="number" name="ambientLight_g" value="0.1" step=0.1>
+                        <input type="number" name="ambientLight_b" value="0.1" step=0.1><br>
+                    </div>
+                </div>
+                <div id="about"  class="sourceEditorPanel">
+                    Shader name:<br>
+                    <input id="shadername" maxlength="75"><br>
+                    About:<br>
+                    <textarea id="shaderAbout" style="width:500px;height:200px;"></textarea>
+                </div>
             </div>
         </div>
-        <div id="about"  class="sourceEditorPanel">
-            Shader name:<br>
-            <input id="shadername" maxlength="75"><br>
-            About:<br>
-            <textarea id="shaderAbout" style="width:500px;height:200px;"></textarea>
-        </div>
+    </div>
+    <div id="glslEditorPanel">
+        <div id="glslEditor"></div>
     </div>
 </div>
-<div id="glslEditorPanel">
- <div id="glslEditor"></div>
- <div id="glslEditorInfo">
-     <h3>Predefined attributes</h3>
-      vec3 vertex: Vertex position in local space<br>
-      vec3 color: Color information (if available)<br>
-      vec2 uv1: Texture UV mapping 1<br>
-      vec2 uv2: Texture UV mapping 2<br>
-      vec3 normal: Vertex normals<br>
-      vec4 tangent: Tangent (currently broken)<br>
-     <h3>Predefined uniforms</h3>
-     mat4 _mvProj: Model view projection matrix<br>
-     mat4 _mv: Model view matrix<br>
-     mat3 _norm: Normal matrix<br>
-     mat4 _proj: Projection matrix<br>
-     float _time: total time<br>
-     vec3 _ambient: Ambient light<br>
-     vec3 _dLight.lDir: Directional light direction<br>
-     vec3 _dLight.colInt: Color intensity<br>
-     vec3 _dLight.halfV: half vector<br>
-     #pragma include "filename": Include of predefined file
-     <div style="background-color: #d3d3d3;">
-         <h4>light.glsl</h4>
-         <div>
-         struct DirectionalLight {<br>
-   &nbsp;&nbsp;&nbsp;vec3 lDir;<br>
-   &nbsp;&nbsp;&nbsp;vec3 colInt;<br>
-   &nbsp;&nbsp;&nbsp;vec3 halfV;<br>
-};<br>
-         void getDirectionalLight(vec3 normal, DirectionalLight dLight, float specularExponent, out vec3 diffuse, out float specular);<br>
-         uniform DirectionalLight _dLight;<br>
-         uniform vec3 _ambient;
-             </div>
-     </div>
- </div>
 </div>
-</article>
-<article id="alogger">
-    <div id="logger"></div>
-</article>
 <footer id="kickjs-footer">
 </footer>
 <div id="panelContent"></div>
 <div id="nestedPanel"></div>
+<!-- todo - add documentation -->
+<div style="display: none;">
+    <div id="glslEditorInfo">
+                <h3>Predefined attributes</h3>
+                vec3 vertex: Vertex position in local space<br>
+                vec4 color: Color information (if available)<br>
+                vec2 uv1: Texture UV mapping 1<br>
+                vec2 uv2: Texture UV mapping 2<br>
+                vec3 normal: Vertex normals<br>
+                vec4 tangent: Tangent (currently broken)<br>
+                <h3>Predefined uniforms</h3>
+                mat4 _mvProj: Model view projection matrix<br>
+                mat4 _mv: Model view matrix<br>
+                mat3 _norm: Normal matrix<br>
+                mat4 _proj: Projection matrix<br>
+                float _time: total time<br>
+                vec3 _ambient: Ambient light<br>
+                vec3 _dLight.lDir: Directional light direction<br>
+                vec3 _dLight.colInt: Color intensity<br>
+                vec3 _dLight.halfV: half vector<br>
+                #pragma include "filename": Include of predefined file
+                <div style="background-color: #d3d3d3;">
+                    <h4>light.glsl</h4>
+                    <div>
+                        void getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular);<br>
+                        uniform mat3 _dLight;<br>
+                        uniform vec3 _ambient;
+                    </div>
+                </div>
+            </div>
+</div>
 <script type="text/javascript" src="/header.js"></script>
 </body>
 </html>

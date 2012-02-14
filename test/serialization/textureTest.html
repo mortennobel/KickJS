@@ -31,14 +31,14 @@
                  {
             maxUID:100,
             resourceDescriptors:[
-            {
-                type:"KICK.texture.Texture",
-                uid:1,
-                config:{
-                    name:"CORS_TEST",
-                    dataURI:"http://khm0.googleapis.com/kh?v=95&x=0&y=0&z=0"
-                }
-            },
+//            {
+//                type:"KICK.texture.Texture",
+//                uid:1,
+//                config:{
+//                    name:"CORS_TEST",
+//                    dataURI:"http://www.google.dk/images/srpr/logo3w.png" // insert CORS supported image here
+//                }
+//            },
             {
                 type:"KICK.texture.Texture",
                 uid:2,
@@ -50,7 +50,7 @@
         ]};
 
         function initMaterials(vertexShaderId, fragmentShaderId){
-            var shader = engine.resourceManager.getShader("kickjs://shader/unlit/");
+            var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
@@ -108,7 +108,7 @@
 
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/plane/");
+            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
             initMaterials('vertexShader','fragmentShader');
             gameObject.addComponent(meshRenderer);
         }
@@ -137,8 +137,8 @@
             uniforms.mainTexture.value = texture;
         }
 
-        function setURL(url){
-            texture = engine.resourceManager.getTexture(url);
+        function setTexture(uid){
+            texture = engine.project.load(uid);
             var uniforms = material.uniforms;
             uniforms.mainTexture.value = texture;
         }
@@ -159,10 +159,10 @@
   <a href="#" onclick="setTmpTexture(); return false;">TemporaryTexture</a>
   <a href="#" onclick="setGIF(); return false;">Test.jpeg (RGB 25x40)</a>
   <a href="#" onclick="setPNG(); return false;">webgl.png (RGBA 128x128)</a> |
-  <a href="#" onclick="setURL('kickjs://texture/black/'); return false;">Black</a>
-  <a href="#" onclick="setURL('kickjs://texture/white/'); return false;">White</a>
-  <a href="#" onclick="setURL('kickjs://texture/gray/'); return false;">Gray</a> |
+  <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_BLACK); return false;">Black</a>
+  <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_WHITE); return false;">White</a>
+  <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_GRAY); return false;">Gray</a> |
   <a href="#" onclick="loadTextureFromProject('ProjectWhite'); return false;">ProjectWhite</a>
-  <a href="#" onclick="loadTextureFromProject('CORS_TEST'); return false;">Cors test (Google api)</a>
+  <!--<a href="#" onclick="loadTextureFromProject('CORS_TEST'); return false;">Cors test (Currently broken)</a>-->
 </body>
 </html>

@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title></title>
+    <title>KickJS: Mesh Transform Test</title>
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
@@ -43,7 +43,7 @@
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
-            shader.updateShader();
+            shader.apply();
             return new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
@@ -97,7 +97,7 @@
             });
             cameraObject.addComponent(camera);
 
-            mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
+            mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             material = createMaterial('vertexShaderColor','fragmentShader');
 
             var transform = null;

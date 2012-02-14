@@ -3,22 +3,23 @@
 <html>
 <head>
     <title></title>
+            <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+            <link rel="stylesheet" href="/combo/css?main-min.css">
 
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/resource.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/material.js"></script>
-    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
+        <link rel="stylesheet" href="/vendor/prettify/prettify-min.css">
+        <link rel="stylesheet" href="/css/docs-min.css">
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
     <!-- allows to use random seed -->
     <script type="text/javascript">
 // seedrandom.js version 2.0.
@@ -294,116 +295,207 @@ mixkey(math.random(), pool);
   52    // significance: there are 52 significant digits in a double
 );
     </script>
-    <script type="text/javascript">
-        var engine;
-        var meshRenderer;
-        Math.seedrandom("hello");
-        
-        var log = function (output) {
-            var element = document.getElementById("output");
-            element.innerHTML = element.innerHTML+output+"<br>";
-        };
 
-        var clearLog = function(){
-            var element = document.getElementById("output");
-            element.innerHTML = "";
-        };
 
-        var shader;
 
-        function setMaterial(vertexShaderId, fragmentShaderId){
-            clearLog();
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            if (!shader){
-                shader = new KICK.material.Shader(engine);
-                shader.vertexShaderSrc = vs;
-                shader.fragmentShaderSrc = fs;
-                shader.errorLog = log;
-                shader.updateShader();
-                var missingAttributes = meshRenderer.mesh.verify(shader);
-                if (missingAttributes){
-                    log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                    return;
-                }
-            }
-            meshRenderer.material = new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader
-            });
-        }
-
-        function addObject(pos){
-            var gameObject = engine.activeScene.createGameObject(),
-                    transform = gameObject.transform;
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.resourceManager.getMesh("kickjs://mesh/cube/?length=0.5");
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-            transform.localScale = [0.8*Math.random(),0.8*Math.random(),0.8*Math.random()];
-            transform.localRotationEuler = [360*Math.random(),360*Math.random(),360*Math.random()];
-            transform.localPosition = pos;
-        }
-
-        function initKick() {
-            engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-            var cameraObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1]
-            });
-            cameraObject.transform.localPosition = [0,0,10];
-            cameraObject.addComponent(camera);
-            var count = 0;
-            for (var i=-1;i<=1;i+=0.1){
-                for (var j=-1;j<=1;j+=0.1){
-                    addObject([i*10,j*10,0]);
-                    count++;
-                }
-            }
-            console.log("Created "+count+" cubes");
-        }
-
-    </script>
+<script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
 </head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example shows how a cube is rotated.
-  <br>
+<body class="yui3-skin-sam">
+<h1>Math test</h1>
+<style scoped>
+    #testLogger {
+        margin-bottom: 1em;
+    }
 
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Show data</h2>
-  [<a href="#" onclick="refreshData();">Refresh</a>]
-  <div id="example" class="yui3-skin-sam"></div>
+    #testLogger .yui3-console .yui3-console-title {
+        border: 0 none;
+        color: #000;
+        font-size: 13px;
+        font-weight: bold;
+        margin: 0;
+        text-transform: none;
+    }
+    #testLogger .yui3-console .yui3-console-entry-meta {
+        margin: 0;
+    }
 
-  <div style="display:none;">
-  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
-attribute vec3 vertex;
-attribute vec4 color;
+    .yui3-skin-sam .yui3-console-entry-pass .yui3-console-entry-cat {
+        background: #070;
+        color: #fff;
+    }
+    </style>
 
-uniform mat4 _mvProj;
+    <div id="testLogger"></div>
 
-varying vec3 vColor;
+<script>
+Math.seedrandom("hello");
+YUI().use('node', 'console', 'test', function (Y) {
 
-void main(void) {
-    gl_Position = _mvProj * vec4(vertex, 1.0);
-    vColor = color.xyz;
-}
-  </textarea>
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 vColor;
-void main(void)
-{
-    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
-}
-  </textarea>
+    Y.namespace("KICK.engine");
+    var engine,canvas;
+    Y.KICK.engine.engineTest = new Y.Test.Case({
+
+        //name of the test case - if not provided, one is auto-generated
+        name : "engineTest",
+
+
+        //---------------------------------------------------------------------
+        // setUp and tearDown methods - optional
+        //---------------------------------------------------------------------
+
+        /*
+         * Sets up data that is needed by each test.
+         */
+        setUp : function () {
+            if (!canvas){
+                canvas = document.createElement("canvas");
+                canvas.width = 10;
+                canvas.height = 10;
+                document.body.appendChild(canvas);
+            }
+            engine = new KICK.core.Engine(canvas);
+        },
+
+        /*
+         * Cleans up everything that was created by setUp().
+         */
+        tearDown : function () {
+            engine.paused = true;
+        },
+
+        //---------------------------------------------------------------------
+        // Test methods - names must begin with "test"
+        //---------------------------------------------------------------------
+
+        testLoadMesh : function () {
+            var Assert = Y.Assert;
+
+            var mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
+            Assert.areEqual(engine.project.ENGINE_MESH_CUBE,mesh.uid);
+        },
+        testLoadShader : function(){
+            var Assert = Y.Assert;
+            var shader = engine.project.load(engine.project.ENGINE_SHADER_DEFAULT);
+            Assert.areEqual(engine.project.ENGINE_SHADER_DEFAULT,shader.uid );
+        },
+        testLoadTexture : function(){
+            var Assert = Y.Assert;
+            var texture = engine.project.load(engine.project.ENGINE_TEXTURE_GRAY);
+            Assert.areEqual(engine.project.ENGINE_TEXTURE_GRAY,texture.uid);
+        },
+        testGetDefaultAssets: function(){
+            var Assert = Y.Assert;
+            var isAllNegativeUIDSAndHaveName = function(array){
+                for (var i=0;i<array.length;i++){
+                    Assert.isTrue(array[i].config.uid < 0);
+                    Assert.isTrue(array[i].name && array[i].name.length > 0);
+                    Assert.isTrue(array[i].name.charAt(1).toLowerCase() == array[i].name.charAt(1));
+                }
+            };
+            var meshes = engine.project.getResourceDescriptorByType("KICK.mesh.Mesh")
+            Assert.areEqual(0,meshes.length);
+            meshes = engine.project.getEngineResourceDescriptorByType("KICK.mesh.Mesh");
+            Assert.areNotEqual(0,meshes.length);
+            isAllNegativeUIDSAndHaveName(meshes);
+
+            var textures = engine.project.getResourceDescriptorByType("KICK.texture.Texture")
+            Assert.areEqual(0,textures.length);
+            textures = engine.project.getEngineResourceDescriptorByType("KICK.texture.Texture");
+            Assert.areNotEqual(0,textures.length);
+            isAllNegativeUIDSAndHaveName(textures);
+
+            var shaders = engine.project.getResourceDescriptorByType("KICK.material.Shader")
+            Assert.areEqual(0,shaders.length);
+            shaders = engine.project.getEngineResourceDescriptorByType("KICK.material.Shader");
+            Assert.areNotEqual(0,shaders.length);
+            isAllNegativeUIDSAndHaveName(shaders);
+        }
+    });
+
+    /**
+     * Assumes that the quaternions is normalized
+     * @param expected
+     * @param actual
+     * @param message
+     */
+    Y.Assert.compareQuat4 = function(expected,actual, message){
+        var quat4 = KICK.math.quat4;
+        var epsilon = 0.001;
+        var message = "Expected \n"+KICK.math.vec4.str(expected)+" \nActual \n"+KICK.math.vec4.str(actual);
+        var isEqual = function(quat){
+            for (var i=0;i<4;i++){
+                if (Math.abs(expected[i]-quat[i])>epsilon){
+                    return false;
+                }
+            }
+            return true;
+        };
+        if (isEqual(actual)){
+            return;
+        }
+        var actualAlternative = quat4.create([actual[0]*-1,actual[1]*-1,actual[2]*-1,actual[3]*-1]);
+        if (isEqual(actualAlternative)){
+            return;
+        }
+        Y.Assert.isTrue(false,message);
+    };
+
+    /// extend Asset to compare float values
+    Y.Assert.compareVec = function(expected,actual,message){
+        if (!message){
+            if (expected.length==3){
+                message = "Expected "+KICK.math.vec3.str(expected)+" Actual "+KICK.math.vec3.str(actual);
+            }
+        }
+        var vectorType;
+        if (expected.length==2){
+            vectorType = KICK.math.vec2;
+        } else if (expected.length==3){
+            vectorType = KICK.math.vec3;
+        } else if (expected.length==4){
+            vectorType = KICK.math.vec4;
+        }
+        if (vectorType){
+            Y.Assert.isTrue(vectorType.equal(expected,actual,0.001),message);
+        } else {
+            for (var i=0;i<expected.length;i++){
+                Y.Assert.compareFloat(expected[i],actual[i],message);
+            }
+        }
+    };
+    Y.Assert.compareFloat = function(f1,f2,message){
+        var epsilon = 0.001;
+        var res = Math.abs(f1-f2)<epsilon;
+        if (!res){
+            debugger;
+        }
+        return Y.Assert.isTrue(res,message);
+    };
+
+    var ExampleSuite = new Y.Test.Suite("Example Suite");
+    ExampleSuite.add(Y.KICK.engine.engineTest);
+
+
+
+    //create the console
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block', // to anchor in the example content,
+        width: 600,
+        height: 600
+    });
+
+    r.render('#testLogger');
+
+    Y.Test.Runner.add(ExampleSuite);
+
+    //run the tests
+    Y.Test.Runner.run();
+
+});
+</script>
+
 </div>
-  <br/>
+
 </body>
 </html>

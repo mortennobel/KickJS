@@ -46,19 +46,36 @@ void main(void) {
 }
 </textarea>
 <h1>Output</h1>
+<button onclick="runTranslation();">Preprocess</button><br>
+<textarea id="config" style="width: 500px;height:100px">
+{
+    "alpha": true,
+    "antialias": true,
+    "checkCanvasResizeInterval":0,
+    "maxNumerOfLights": 3,
+    "premultipliedAlpha": 0,
+    "shadows": false,
+    "stencil": false
+}
+</textarea><br>
 <textarea id="sourceoutput" style="width: 500px;height:200px"></textarea>
 <script>
-    var sourceinput = document.getElementById('sourceinput');
-    var sourceoutput = document.getElementById('sourceoutput');
-    function replace(){
+    function runTranslation(){
+        var sourceinput = document.getElementById('sourceinput');
+        var sourceoutput = document.getElementById('sourceoutput');
+        var config = JSON.parse(document.getElementById('config').value);
+        console.log(config);
+        var engine = {};
+        engine.config = config;
+        engine.config.shadows = {};
+
         var input = sourceinput.value;
-        var newValue = KICK.material.Shader.getPrecompiledSource(input);
+        var newValue = KICK.material.Shader.getPrecompiledSource(engine,input);
         if (newValue !== sourceoutput.value){
             sourceoutput.value = newValue;
         }
-        setTimeout(replace,1000);
+
     }
-    replace();
 </script>
 </body>
 </html>

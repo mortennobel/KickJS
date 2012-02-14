@@ -49,6 +49,7 @@ KICK.namespace = function (ns_string) {
         constants = KICK.core.Constants,
         DEBUG = constants._DEBUG,
         ASSERT = constants._ASSERT,
+        fail = KICK.core.Util.fail,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
         vec4uint8ToUint32 = KICK.core.Util.vec4uint8ToUint32;
@@ -146,6 +147,15 @@ KICK.namespace = function (ns_string) {
                     get:function(){
                         return _components.length;
                     }
+                },
+                /**
+                 * @property destroyed
+                 * @type Boolean
+                 */
+                destroyed:{
+                    get:function(){
+                        return _components.length==0;
+                    }
                 }
             }
         );
@@ -204,6 +214,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Destroys game object after next frame.
          * Removes all components instantly.
+         * This method will call destroyObject on the associated scene.
          * @method destroy
          */
         this.destroy = function () {
@@ -211,7 +222,7 @@ KICK.namespace = function (ns_string) {
             for (i = _components.length-1; i >= 0 ; i--) {
                 this.removeComponent(_components[i]);
             }
-            this.scene.destroyObject(this);
+            this.scene.destroyObject(thisObj);
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
@@ -272,9 +283,12 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<_components.length;i++){
                 component = _components[i];
                 if (!component.toJSON){
-                    componentsJSON.push(KICK.core.Util.componentToJSON(engine,component));
+                    componentsJSON.push(KICK.core.Util.componentToJSON(scene.engine,component));
                 } else {
-                    componentsJSON.push(component.toJSON());
+                    var componentJSON = component.toJSON();
+                    if (componentJSON){
+                        componentsJSON.push(componentJSON);
+                    }
                 }
 
             }
@@ -296,7 +310,7 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.scene
      * @class Component
      */
-//scene.Component = function () {
+
     /**
      * The gameObject owning the component. Initially undefined. The value is set when the Component object is added
      * to a GameObject
@@ -305,7 +319,10 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
-     * Abstract method called when a component is added to scene. May be undefined.
+     * Abstract method called when a component is added to scene. May be undefined. <br>
+     * This method method works in many cases like a constructor function, where references to other game objects can
+     * be looked up (this cannot be done when the actual constructor function is called, since the scene may not be
+     * loaded completely).
      * @method activated
      */
 
@@ -316,7 +333,7 @@ KICK.namespace = function (ns_string) {
 
 
     /**
-     * Abstract method called every rendering. May be undefined.
+     * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
      * @param (KICK.math.mat4) projectionMatrix
      * @param {KICK.math.mat4} modelViewMatrix
@@ -330,15 +347,27 @@ KICK.namespace = function (ns_string) {
      */
 
     /**
+     * Default value is 1000<br>
+     * &lt; 2000 default geometry<br>
+     * 2000 - 2999 transparent geometry (sorted back-to-front when rendered)<br>
+     * &gt; 3000 overlay geometry rendered on top
+     * @property renderOrder
+     * @type Number
+     */
+
+    /**
      * Abstract method called every update. May be undefined.
      * @method update
      */
 
     /**
-     * Abstract method called every update as the last thing. Useful for camera scripts. May be undefined.
-     * @method lateUpdate
+     * Creates a JSON version of the configuration of the class. May be undefined, if so the
+     * KICK.core.Util.componentToJSON() are used for serializaing of the component.<br>
+     * Note that references to assets, gameObjects or other components should be wrapped by the KICK.core.Util.getJSONReference() method
+     * @method toJSON
+     * @return {Object}
      */
-//};
+
 
     /**
      * Position, rotation and scale of a game object. This component should not be created manually.
@@ -516,7 +545,8 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * Local scale
+             * Local scale.
+             * Any zero value will be replaced with an epsilon value.
              * @property localScale
              * @type KICK.math.vec3
              */
@@ -526,6 +556,12 @@ KICK.namespace = function (ns_string) {
                 },
                 set: function(newValue){
                     vec3.set(newValue,localScale);
+                    // replace 0 value with epsilon to prevent a singular matrix
+                    for (var i=0;i<localScale.length;i++){
+                        if (localScale[i] === 0){
+                            localScale[i] = KICK.core.Constants._EPSILON;
+                        }
+                    }
                     markLocalDirty();
                 }
             },
@@ -646,7 +682,7 @@ KICK.namespace = function (ns_string) {
                 uid: gameObject.engine.getUID(thisObj),
                 config:{
                     localPosition: typedArrayToArray(localPosition),
-                    localRotationQuat: typedArrayToArray(localRotationQuat),
+                    localRotation: typedArrayToArray(localRotationQuat),
                     localScale: typedArrayToArray(localScale),
                     parent: parentTransform ? KICK.core.Util.getJSONReference(parentTransform): null // todo
                 }
@@ -677,15 +713,15 @@ KICK.namespace = function (ns_string) {
             gameObjectsNew = [],
             gameObjectsDelete = [],
             updateableComponents= [],
-            lateUpdateableComponents = [],
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
             componentsAll = [],
             cameras = [],
             renderableComponents = [],
-            sceneLightObj = new KICK.scene.SceneLights(),
-            _name = config ? config.name : "Scene",
+            sceneLightObj = new KICK.scene.SceneLights(engine.config.maxNumerOfLights),
+            _name = "Scene",
+            _uid = 0,
             gl,
             i,
             thisObj = this,
@@ -695,7 +731,7 @@ KICK.namespace = function (ns_string) {
                 } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
                     sceneLightObj.directionalLight = light;
                 } else {
-                    sceneLightObj.otherLights.push(light);
+                    sceneLightObj.addPointLight(light);
                 }
             },
             removeLight = function(light){
@@ -704,7 +740,7 @@ KICK.namespace = function (ns_string) {
                 } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
                     sceneLightObj.directionalLight = null;
                 } else {
-                    core.Util.removeElementFromArray(sceneLightObj.otherLights,light);
+                    sceneLightObj.removePointLight(light);
                 }
             },
             /**
@@ -754,9 +790,6 @@ KICK.namespace = function (ns_string) {
                         if (typeof(component.update) === "function") {
                             core.Util.insertSorted(component,updateableComponents,sortByScriptPriority);
                         }
-                        if (typeof(component.lateUpdate) === "function") {
-                            core.Util.insertSorted(component,lateUpdateableComponents,sortByScriptPriority);
-                        }
                         if (typeof(component.render) === "function") {
                             renderableComponents.push(component);
                         }
@@ -799,9 +832,6 @@ KICK.namespace = function (ns_string) {
                         if (typeof(component.update) === "function") {
                             core.Util.removeElementFromArray(updateableComponents,component);
                         }
-                        if (typeof(component.lateUpdate) === "function") {
-                            core.Util.removeElementFromArray(lateUpdateableComponents,component);
-                        }
                         if (component instanceof scene.Camera){
                             core.Util.removeElementFromArray(cameras,component);
                         } else if (component instanceof scene.Light){
@@ -814,15 +844,12 @@ KICK.namespace = function (ns_string) {
                 }
             },
             updateComponents = function(){
+                cleanupGameObjects();
                 addNewGameObjects();
                 var i;
                 for (i=updateableComponents.length-1; i >= 0; i--) {
                     updateableComponents[i].update();
                 }
-                for (i=lateUpdateableComponents.length-1; i >= 0; i--) {
-                    lateUpdateableComponents[i].lateUpdate();
-                }
-                cleanupGameObjects();
             },
             renderComponents = function(){
                 var i;
@@ -901,7 +928,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Should only be called by GameObject when a component is added. If the component is updateable (implements
-         * update or lateUpdate) the components is added to the current list of updateable components after the update loop
+         * update method) the components is added to the current list of updateable components after the update loop
          * (so it will not recieve any update invocations in the current frame).
          * If the component is renderable (implements), is it added to the renderer's components
          * @method addComponent
@@ -921,12 +948,28 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method getObjectByUID
-         * @param uid
+         * @param {Number} uid
          * @return {Object} GameObject or component
          */
         this.getObjectByUID = function(uid){
             return objectsById[uid];
         };
+
+        /**
+         * Returns a gameobject identified by name
+         * @method getGameObjectByName
+         * @param {String} name
+         * @return {KICK.scene.GameObject} GameObject or undefined if not found
+         */
+        this.getGameObjectByName = function(name){
+            for (var i=gameObjects.length-1;i>=0;i--){
+                var gameObject = gameObjects[i];
+                if (gameObject.name === name){
+                    return gameObject;
+                }
+            }
+        };
+
 
         /**
          * @method removeComponent
@@ -960,6 +1003,23 @@ KICK.namespace = function (ns_string) {
                     _name = newValue;
                 }
 
+            },
+            /**
+             * @property uid
+             * @type Number
+             */
+            uid:{
+                get:function(){
+                    return _uid;
+                },
+                set:function(newValue){
+                    if (ASSERT){
+                        if (_uid){
+                            fail("Reassigning uid")
+                        }
+                    }
+                    _uid = newValue;
+                }
             }
         });
 
@@ -976,12 +1036,20 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Destroys the game object and delete it from the scene.
+         * This call will call destroy on the gameObject
          * @method destroyObject
          * @param {KICK.scene.GameObject} gameObject
          */
         this.destroyObject = function (gameObject) {
-            gameObjectsDelete.push(gameObject);
-            delete objectsById[gameObject.uid];
+            var isMarkedForDeletion = core.Util.contains(gameObjectsDelete, gameObject);
+            if (!isMarkedForDeletion){
+                gameObjectsDelete.push(gameObject);
+                delete objectsById[gameObject.uid];
+            }
+            if (!gameObject.destroyed){
+                gameObject.destroy();
+            }
         };
 
         /**
@@ -1012,12 +1080,17 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method toJSON
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @return {Object}
          */
-        this.toJSON = function (){
+        this.toJSON = function (filterFn){
             var gameObjectsCopy = [];
+            filterFn = filterFn || function(){return true;}
             for (var i=0;i<gameObjects.length;i++){
-                gameObjectsCopy.push(gameObjects[i].toJSON());
+                var gameObject = gameObjects[i];
+                if (filterFn(gameObject)){
+                    gameObjectsCopy.push(gameObject.toJSON());
+                }
             }
             return {
                 uid: thisObj.uid,
@@ -1027,10 +1100,13 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
+
             var gameObject,
                 hasProperty = KICK.core.Util.hasProperty,
                 applyConfig = KICK.core.Util.applyConfig;
             if (config){
+                _uid = config.uid;
+                _name = config.name || "Scene";
                 var gameObjects = config.gameObjects;
                 var mappingUidToObject = {};
                 var configs = {};
@@ -1044,19 +1120,32 @@ KICK.namespace = function (ns_string) {
                 })();
 
                 var createConfigWithReferences = function (config){
+                    // deserialize an object (recursively if the object is an array
+                    var deserialize = function(value){
+                        if (typeof value === 'number'){
+                            return value;
+                        }
+                        if (Array.isArray(value)){
+                            for (var i=0;i<value.length;i++){
+                                value[i] = deserialize(value[i]);
+                            }
+                        } else if (value){
+                            if (value && value.ref && value.reftype){
+                                if (value.reftype === "project"){
+                                    value = engine.project.load(value.ref);
+                                } else if (value.reftype === "gameobject" || value.reftype === "component"){
+                                    value = thisObj.getObjectByUID(value.ref);
+                                }
+                            }
+                        }
+                        return value;
+                    };
+
                     var configCopy = {};
                     for (var name in config){
                         if (hasProperty(config,name)){
                             var value = config[name];
-                            if (value){
-                                if (value && value.ref && value.reftype){
-                                    if (value.reftype === "project"){
-                                        value = engine.project.load(value.ref);
-                                    } else if (value.reftype === "gameobject" || value.reftype === "component"){
-                                        value = thisObj.getObjectByUID(value.ref);
-                                    }
-                                }
-                            }
+                            value = deserialize(value);
                             configCopy[name] = value;
                         }
                     }
@@ -1083,9 +1172,14 @@ KICK.namespace = function (ns_string) {
                                 objectsById[componentObj.uid] = componentObj;
                             } else {
                                 type = KICK.namespace(component.type);
-                                componentObj = new type(gameObject,{uid:component.uid});
-                                componentObj.uid = component.uid;
-                                gameObject.addComponent(componentObj);
+                                if (typeof type === 'function'){
+                                    componentObj = new type({uid:component.uid});
+                                    componentObj.uid = component.uid;
+                                    gameObject.addComponent(componentObj);
+                                } else {
+                                    KICK.core.Util.warn("Cannot find Class "+component.type);
+                                    continue;
+                                }
                             }
                             mappingUidToObject[component.uid] = componentObj;
                             configs[component.uid] = component.config;
@@ -1110,6 +1204,19 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Create empty scene with camera
+     * @method createDefault
+     * @param {KICK.core.Engine} engine
+     * @static
+     */
+    scene.Scene.createDefault = function(engine){
+        var newScene = new scene.Scene(engine);
+        var gameObject = newScene.createGameObject();
+        gameObject.addComponent(new scene.Camera());
+        return newScene;
+    };
+
+    /**
      * Creates a game camera
      * @class Camera
      * @namespace KICK.scene
@@ -1122,7 +1229,9 @@ KICK.namespace = function (ns_string) {
             thisObj = this,
             transform,
             engine,
+            _enabled = true,
             c = KICK.core.Constants,
+            _renderShadow = false,
             _renderTarget = null,
             _fieldOfView = 60,
             _near = 0.1,
@@ -1139,14 +1248,22 @@ KICK.namespace = function (ns_string) {
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
             _renderer = new KICK.renderer.ForwardRenderer(),
+            _shadowmapShader,
             _scene,
             pickingQueue = null,
             pickingShader = null,
             pickingRenderTarget = null,
             pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
-            modelViewMatrix = mat4.create(),
-            modelViewProjectionMatrix = mat4.create(),
+            viewMatrix = mat4.create(),
+            viewProjectionMatrix = mat4.create(),
+            lightViewProjectionMatrix = mat4.create(),
+            engineUniforms = {
+                    viewMatrix: viewMatrix,
+                    projectionMatrix: projectionMatrix,
+                    viewProjectionMatrix:viewProjectionMatrix,
+                    lightViewProjectionMatrix:lightViewProjectionMatrix
+                },
             renderableComponentsBackGroundAndGeometry = [],
             renderableComponentsTransparent = [],
             renderableComponentsOverlay = [],
@@ -1172,6 +1289,10 @@ KICK.namespace = function (ns_string) {
                     KICK.core.Util.fail("Camera."+name+" must be number");
                 }
             },
+            setupViewport = function(offsetX,offsetY,width,height){
+                gl.viewport(offsetX,offsetY,width,height);
+                gl.scissor(offsetX,offsetY,width,height);
+            },
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
              * @method setupCamera
@@ -1185,8 +1306,7 @@ KICK.namespace = function (ns_string) {
                     offsetY = viewPortWidth*_normalizedViewportRect[1],
                     width = viewPortWidth*_normalizedViewportRect[2],
                     height = viewPortHeight*_normalizedViewportRect[3];
-                gl.viewport(offsetX,offsetY,width,height);
-                gl.scissor(offsetX,offsetY,width,height);
+                setupViewport(offsetX,offsetY,width,height);
                 
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
@@ -1195,6 +1315,7 @@ KICK.namespace = function (ns_string) {
                     } else {
                         gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
                     }
+                    gl.renderTarget = _renderTarget;
                 }
 
                 setupClearColor(_clearColor);
@@ -1209,13 +1330,35 @@ KICK.namespace = function (ns_string) {
                 }
 
                 var globalMatrixInv = transform.getGlobalTRSInverse();
-                mat4.set(globalMatrixInv, modelViewMatrix);
+                mat4.set(globalMatrixInv, viewMatrix);
 
-                mat4.multiply(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix);
+                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
             },
+            /**
+             * Compare two objects based on renderOrder value and then material.shader.uid (if exist)
+             * @method compareRenderOrder
+             * @param {Component}
+             * @param {Component}
+             * @return Number
+             * @private
+             */
             compareRenderOrder = function(a,b){
                 var aRenderOrder = a.renderOrder || 1000,
                     bRenderOrder = b.renderOrder || 1000;
+                var getMeshShaderUid = function(o, defaultValue){
+                    var names = ["material","shader","uid"];
+                    for (var i=0;i<names.length;i++){
+                        o = o[names[i]];
+                        if (!o){
+                            return defaultValue;
+                        }
+                    }
+                    return o;
+                }
+                if (aRenderOrder == bRenderOrder && a.material && b.material){
+                    aRenderOrder = getMeshShaderUid(a,aRenderOrder);
+                    bRenderOrder = getMeshShaderUid(a,aRenderOrder);
+                }
                 return aRenderOrder-bRenderOrder;
             },
             sortTransparentBackToFront = function(){
@@ -1231,6 +1374,47 @@ KICK.namespace = function (ns_string) {
                     return b.distanceToCamera-a.distanceToCamera;
                 }
                 renderableComponentsTransparent.sort(compareDistanceToCamera);
+            },
+            /**
+             * @method renderSceneObjects
+             * @param sceneLightObj
+             * @param shader
+             * @private
+             */
+            renderSceneObjects = function(sceneLightObj,shader){
+                engineUniforms.sceneLights=sceneLightObj;
+                _renderer.render(renderableComponentsBackGroundAndGeometry,engineUniforms,shader);
+                _renderer.render(renderableComponentsTransparent,engineUniforms,shader);
+                _renderer.render(renderableComponentsOverlay,engineUniforms,shader);
+            },
+            renderShadowMap = function(sceneLightObj){
+                var directionalLight = sceneLightObj.directionalLight,
+                    directionalLightTransform = directionalLight.gameObject.transform,
+                    shadowRenderTexture = directionalLight.shadowRenderTexture,
+                    renderTextureDimension = shadowRenderTexture.dimension,
+                    renderTextureWidth = renderTextureDimension[0],
+                    renderTextureHeight = renderTextureDimension[1];
+                setupViewport(0,0,renderTextureWidth,renderTextureHeight);
+
+                shadowRenderTexture.bind();
+                setupClearColor([0,0,0,0]);
+                gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
+
+                mat4.ortho(-5, 5, -5, 5, // todo replace with fitting
+                    -10, 10, projectionMatrix);
+
+                var globalMatrixInv = directionalLightTransform.getGlobalTRSInverse(); // // todo replace with fitting
+                mat4.set(globalMatrixInv, viewMatrix);
+
+                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
+                renderSceneObjects(sceneLightObj,_shadowmapShader);
+
+                mat4.set(viewProjectionMatrix,lightViewProjectionMatrix);
+
+                // debug
+                directionalLight.shadowRenderTextureDebug.bind();
+                gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
+                renderSceneObjects(sceneLightObj);
             };
 
         /**
@@ -1238,8 +1422,8 @@ KICK.namespace = function (ns_string) {
          * game objects, then a callback is added to the event queue (and will run in next frame).
          * @method pick
          * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
-         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width)
-         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height)
+         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width - 1)
+         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height - 1)
          * @param {Number} width Optional (default 1)
          * @param {Number} height Optional (default 1)
          */
@@ -1248,10 +1432,11 @@ KICK.namespace = function (ns_string) {
             height = height || 1;
             if (!pickingQueue){
                 pickingQueue = [];
-                pickingShader = engine.resourceManager.getShader("kickjs://shader/pick/");
+                pickingShader = engine.project.load(engine.project.ENGINE_SHADER___PICK);
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
                     dimension: gl.viewportSize
                 });
+                pickingRenderTarget.name = "__pickRenderTexture";
             }
             pickingQueue.push({
                 gameObjectPickedFn:gameObjectPickedFn,
@@ -1274,6 +1459,16 @@ KICK.namespace = function (ns_string) {
             gl = engine.gl;
             _scene = gameObject.scene;
             _scene.addComponentListener(thisObj);
+
+            if (engine.config.shadows){
+                _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
+            } else if (_renderShadow){
+                _renderShadow = false; // disable render shadow
+                if (ASSERT){
+                    fail("engine.config.shadows must be enabled for shadows");
+                }
+            }
+
         };
 
         /**
@@ -1294,12 +1489,16 @@ KICK.namespace = function (ns_string) {
                 var component = components[i];
                 if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
                     var renderOrder = component.renderOrder || 1000;
+                    var array;
                     if (renderOrder < 2000){
-                        insertSorted(component,renderableComponentsBackGroundAndGeometry,compareRenderOrder);
+                        array = renderableComponentsBackGroundAndGeometry;
                     } else if (renderOrder >= 3000){
-                        insertSorted(component,renderableComponentsOverlay,compareRenderOrder);
+                        array = renderableComponentsOverlay;
                     } else {
-                        renderableComponentsTransparent.push(component);
+                        array = renderableComponentsTransparent;
+                    }
+                    if (!KICK.core.Util.contains(array,component)){
+                        insertSorted(component,array,compareRenderOrder);
                     }
                 }
             }
@@ -1325,17 +1524,19 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
         this.renderScene = function(sceneLightObj){
+            if (!_enabled){
+                return;
+            }
+            if (_renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+                renderShadowMap(sceneLightObj);
+            }
             setupCamera();
-            sceneLightObj.recomputeDirectionalLight(modelViewMatrix);
+
+            sceneLightObj.recomputeLight(viewMatrix);
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
             }
-            var renderSceneObjects = function(shader){
-                _renderer.render(renderableComponentsBackGroundAndGeometry,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsTransparent,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-                _renderer.render(renderableComponentsOverlay,projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLightObj,shader);
-            };
-            renderSceneObjects();
+            renderSceneObjects(sceneLightObj);
 
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
@@ -1346,7 +1547,7 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
-                renderSceneObjects(pickingShader);
+                renderSceneObjects(sceneLightObj,pickingShader);
                 for (var i=pickingQueue.length-1;i>=0;i--){
                     // create clojure
                     (function(){
@@ -1387,23 +1588,55 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
+             * Default is true
+             * @property enabled
+             * @type Boolean
+             */
+            enabled:{
+                get:function(){ return _enabled;},
+                set:function(newValue){ _enabled = newValue;}
+            },
+            /**
+             * Default false
+             * @property renderShadow
+             * @type Boolean
+             */
+            renderShadow:{
+                get:function(){return _renderShadow;},
+                set:function(newValue){
+                    if (engine){ // if object is initialized
+                        if (engine.config.shadows){
+                            _renderShadow = newValue;
+                        } else if (newValue) {
+                            if (ASSERT){
+                                fail("engine.config.shadows must be enabled for shadows");
+                            }
+                        }
+                    } else {
+                        _renderShadow = newValue;
+                    }
+                }
+            },
+            /**
              * @property renderer
              * @type KICK.renderer.Renderer
              */
             renderer:{
                 get:function(){ return _renderer;},
                 set:function(newValue){
-                    if (c._ASSERT){
-                        if (typeof newValue.render !== "function"){
-                            KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
-                        }
+                    if (typeof newValue === "string"){
+                        var constructor = KICK.namespace(newValue);
+                        newValue = new constructor();
                     }
-                    _renderer = newValue;
+                    if (newValue && typeof newValue.render === "function"){
+                        _renderer = newValue;
+                    } else if (c._ASSERT){
+                        KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
+                    }
                 }
             },
             /**
              * Camera renders only objects where the components layer exist in the layer mask. <br>
-             * The two values a
              * @property layerMask
              * @type Number
              */
@@ -1436,7 +1669,8 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Set the field of view Y in degrees<br>
-             * Only used when perspective camera type. Default 60.0
+             * Only used when perspective camera type. Default 60.0.
+             * Must be between 1 and 179
              * @property fieldOfView
              * @type Number
              */
@@ -1446,7 +1680,7 @@ KICK.namespace = function (ns_string) {
                     if (c._ASSERT){
                         assertNumber(newValue,"fieldOfView");
                     }
-                    _fieldOfView = newValue;
+                    _fieldOfView = Math.min(179,Math.max(newValue,1));
                 }
             },
             /**
@@ -1652,11 +1886,13 @@ KICK.namespace = function (ns_string) {
         this.toJSON = function(){
             return {
                 type:"KICK.scene.Camera",
-                uid:7,
+                uid: thisObj.uid || (engine?engine.getUID(thisObj):0),
                 config:{
-                    renderer:_renderer, // todo add reference
+                    enabled: _enabled,
+                    renderShadow: _renderShadow,
+                    renderer:_renderer.name,
                     layerMask:_layerMask,
-                    renderTarget:_renderTarget, // todo add reference
+                    renderTarget:KICK.core.Util.getJSONReference(engine,_renderTarget),
                     fieldOfView:_fieldOfView,
                     near:_near,
                     far:_far,
@@ -1666,7 +1902,7 @@ KICK.namespace = function (ns_string) {
                     bottom:_bottom,
                     top:_top,
                     cameraIndex:_cameraIndex,
-                    clearColor:_clearColor,
+                    clearColor:KICK.core.Util.typedArrayToArray(_clearColor),
                     clearFlagColor:_clearFlagColor,
                     clearFlagDepth:_clearFlagDepth,
                     normalizedViewportRect:KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
@@ -1731,10 +1967,11 @@ KICK.namespace = function (ns_string) {
      */
     scene.MeshRenderer = function (config) {
         var transform,
-            _material,
+            _materials = [],
             _mesh,
             _renderOrder,
-            gl;
+            gl,
+            thisObj = this;
 
         /**
          * @method activated
@@ -1745,22 +1982,23 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
-            /**
-             * @property renderOrder
-             * @type Number
-             */
+            // inherit documentation from component
             renderOrder:{
                 get:function(){
                     return _renderOrder;
                 }
             },
             /**
+             * Shortcut for materials[0]
              * @property material
              * @type KICK.material.Material
              */
             material:{
                 get:function(){
-                    return _material;
+                    if (_materials.length === 0){
+                        return null;
+                    }
+                    return _materials[0];
                 },
                 set:function(newValue){
                     if (ASSERT){
@@ -1768,8 +2006,30 @@ KICK.namespace = function (ns_string) {
                             KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
                         }
                     }
-                    _material = newValue;
-                    _renderOrder = _material.renderOrder;
+                    _materials[0] = newValue;
+                    _renderOrder = _materials[0].renderOrder;
+                }
+            },
+            /**
+             *
+             * @property materias
+             * @type Array[KICK.material.Material]
+             */
+            materials:{
+                get:function(){
+                    return _materials;
+                },
+                set:function(newValue){
+                    _materials = [];
+                    for (var i=0;i<newValue.length;i++){
+                        if (ASSERT){
+                            if (!(newValue[i] instanceof KICK.material.Material)){
+                                KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
+                            }
+                        }
+                        _materials[i] = newValue[i];
+                        _renderOrder = _materials[i].renderOrder;
+                    }
                 },
                 enumerable: true
             },
@@ -1796,17 +2056,17 @@ KICK.namespace = function (ns_string) {
         /**
          * This method may not be called (the renderer could make the same calls)
          * @method render
-         * @param (KICK.math.mat4) projectionMatrix
-         * @param {KICK.math.mat4} modelViewMatrix
-         * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
-         * @param {KICK.scene.SceneLights} sceneLights
+         * @param engineUniforms
          * @param {KICK.material.Shader} overwriteShader Optional
          */
-        this.render = function (projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,sceneLights,overwriteShader) {
-            var shader = overwriteShader || _material.shader;
-            _mesh.bind(shader);
-            _material.bind(projectionMatrix,modelViewMatrix,modelViewProjectionMatrix,transform,sceneLights,shader);
-            _mesh.render();
+        this.render = function (engineUniforms,overwriteShader) {
+            var length = _materials.length;
+            for (var i=0;i<length;i++){
+                var shader = overwriteShader || _materials[i].shader;
+                _mesh.bind(shader);
+                shader.bindUniform(_materials[i],engineUniforms,transform);
+                _mesh.render(i);
+            }
         };
 
         /**
@@ -1814,7 +2074,11 @@ KICK.namespace = function (ns_string) {
          * @return {JSON}
          */
         this.toJSON = function(){
-            return KICK.core.Util.componentToJSON(engine, this, "KICK.scene.MeshRenderer");
+            if (!thisObj.gameObject){
+                return null; // component is destroyed
+            } else {
+                return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
+            }
         };
 
         applyConfig(this,config);
@@ -1831,35 +2095,149 @@ KICK.namespace = function (ns_string) {
      * @final
      */
     scene.Light = function (config) {
-        var color = vec3.create([1.0,1.0,1.0]),
-            type,
-            intensity,
-            colorIntensity = vec3.create(),
+        var thisObj = this,
+            color = vec3.create([1.0,1.0,1.0]),
+            engine,
+            type = core.Constants._LIGHT_TYPE_POINT,
+            _shadow = false,
+            _shadowStrength = 1.0,
+            _shadowBias = 0.05,
+            _shadowTexture = null,
+            _shadowRenderTexture = null,
+            _shadowTextureDebug = null,
+            _shadowRenderTextureDebug = null,
+            attenuation = vec3.create([1,0,0]),
+            intensity = 1,
+            transform,
+            colorIntensity = vec3.create([1.0,1.0,1.0]),
             updateIntensity = function(){
                 vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
             },
             gameObject,
-            scriptPriority;
-        config = config || {};
-        if (config.color){
-            vec3.set(config.color,color);
-        }
-        intensity = config.intensity || 1;
-        updateIntensity();
-        if (ASSERT){
-            if (config.type){
-                if (config.type !== core.Constants._LIGHT_TYPE_POINT &&
-                    config.type !== core.Constants._LIGHT_TYPE_DIRECTIONAL &&
-                    config.type !== core.Constants._LIGHT_TYPE_AMBIENT){
-                    KICK.core.Util.fail("Light type must be KICK.core.Constants._LIGHT_TYPE_POINT, " +
-                        "KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL or KICK.core.Constants._LIGHT_TYPE_AMBIENT");
+            scriptPriority,
+            updateShadowTexture = function(){
+                if (_shadow){
+                    _shadowTexture = new KICK.texture.Texture(engine,{
+                        minFilter:KICK.core.Constants.GL_NEAREST,
+                        magFilter:KICK.core.Constants.GL_NEAREST,
+                        wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        flipY: false,
+                        generateMipmaps:false
+                    });
+                    _shadowTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                    _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
+                        colorTexture:_shadowTexture
+                    });
+
+                    // debug info
+                    _shadowTextureDebug = new KICK.texture.Texture(engine,{
+                        minFilter:KICK.core.Constants.GL_NEAREST,
+                        magFilter:KICK.core.Constants.GL_NEAREST,
+                        wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                        flipY: false,
+                        generateMipmaps:false
+                    });
+                    _shadowTextureDebug.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                    _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
+                        colorTexture:_shadowTextureDebug
+                    });
+
+                } else if (_shadowRenderTexture){
+                    _shadowRenderTexture.destroy();
+                    _shadowTexture.destroy();
                 }
-            }
-        }
-        type = config.type ||  core.Constants._LIGHT_TYPE_POINT;
+            };
         Object.defineProperties(this,{
+            shadowRenderTextureDebug:{
+                get:function(){
+                    return _shadowRenderTextureDebug;
+                }
+            },
+            shadowTextureDebug:{
+                get:function(){
+                    return _shadowTextureDebug;
+                }
+            },
             /**
-             * Color intensity of the light (RGBA)
+             * Short for lightObj.gameObject.transform
+             * @property transform
+             * @type KICK.scene.Transform
+             */
+            transform:{
+                get:function(){
+                    return transform;
+                }
+            },
+            /**
+             * @property shadowRenderTexture
+             * @type KICK.texture.RenderTexture
+             */
+            shadowRenderTexture:{
+                get:function(){
+                    return _shadowRenderTexture;
+                }
+            },
+            /**
+             * @property shadowTexture
+             * @type KICK.texture.Texture
+             */
+            shadowTexture:{
+                get:function(){
+                    return _shadowTexture;
+                }
+            },
+            /**
+             * Default value is false.
+             * Only directional light supports shadows.
+             * @property shadow
+             * @type boolean
+             */
+            shadow: {
+                get: function(){
+                    return _shadow;
+                },
+                set: function(value){
+                    if (value !== _shadow){
+                        _shadow = value;
+                        if (engine){
+                            updateShadowTexture();
+                        }
+                    }
+                },
+                enumerable: true
+            },
+            /**
+             * Shadow strength (between 0.0 and 1.0). Default value is 1.0
+             * @property shadowStrength
+             * @type Number
+             */
+            shadowStrength:{
+                get: function(){
+                    return _shadowStrength;
+                },
+                set: function(value){
+                    _shadowStrength = value;
+                },
+                enumerable: true
+            },
+            /**
+             * Shadow bias. Default value is 0.05
+             * @property shadowBias
+             * @type Number
+             */
+            shadowBias:{
+                get:function(){
+                    return _shadowBias;
+                },
+                set:function(value){
+                    _shadowBias = value;
+                },
+                enumerable: true
+            },
+            /**
+             * Color intensity of the light (RGB). Default [1,1,1]
              * @property color
              * @type KICK.math.vec3
              */
@@ -1868,17 +2246,24 @@ KICK.namespace = function (ns_string) {
                     return vec3.create(color);
                 },
                 set: function(value){
+                    if (ASSERT){
+                        if (value.length !== 3){
+                            KICK.core.Util.fail("Light color must be vec3");
+                        }
+                    }
                     vec3.set(value,color);
                     updateIntensity();
-                }
+                },
+                enumerable: true
             },
             /**
              * Color type. Must be either:<br>
-             * KICK.core.Constants._LIGHT_TYPE_AMBIENT,
-             * KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
-             * KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL <br>
-             * Note that this value is readonly. To change it create a new Light component and replace the current light
-             * component of its gameObject
+             * Light.TYPE_AMBIENT,
+             * Light.TYPE_DIRECTIONAL,
+             * Light.TYPE_POINT <br>
+             * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
+             * component of its gameObject.
+             * Default type is TYPE_POINT
              * @property type
              * @type Enum
              * @final
@@ -1886,7 +2271,17 @@ KICK.namespace = function (ns_string) {
             type: {
                 get: function(){
                     return type;
-                }
+                },
+                set: function(newValue){
+                    if (!engine){
+                        type = newValue;
+                    } else {
+                        if (ASSERT){
+                            KICK.core.Util.fail("Light type cannot be changed after initialization");
+                        }
+                    }
+                },
+                enumerable: true
             },
             /**
              * Light intensity (a multiplier to color)
@@ -1900,7 +2295,26 @@ KICK.namespace = function (ns_string) {
                 set: function(value){
                     intensity = value;
                     updateIntensity();
-                }
+                },
+                enumerable: true
+            },
+            /**
+             * Specifies the light falloff.<br>
+             * attenuation[0] is constant attenuation,<br>
+             * attenuation[1] is linear attenuation,<br>
+             * attenuation[2] is quadratic attenuation.<br>
+             * Default value is (1,0,0)
+             * @property attenuation
+             * @type KICK.math.vec3
+             */
+            attenuation:{
+                get:function(){
+                    return attenuation;
+                },
+                set:function(newValue){
+                    vec3.set(newValue,attenuation)
+                },
+                enumerable: true
             },
             /**
              * color RGB multiplied with intensity (plus color A).<br>
@@ -1911,7 +2325,13 @@ KICK.namespace = function (ns_string) {
              * @final
              */
             colorIntensity: {
-                value:colorIntensity
+                get: function(){
+                    return colorIntensity;
+                },
+                set:function(newValue){
+                    colorIntensity = newValue;
+                },
+                enumerable: true
             },
             // inherited interface from component
             gameObject:{
@@ -1929,24 +2349,83 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(value){
                     scriptPriority = value;
-                }
+                },
+                enumerable: true
             }
         });
+
+        this.activated = function(){
+            var gameObject = thisObj.gameObject;
+            engine = gameObject.engine;
+            transform = gameObject.transform;
+            updateShadowTexture();
+        };
+
+        /**
+         * @method toJSON
+         * @return {JSON}
+         */
+        this.toJSON = function(){
+            return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.Light");
+        };
+
+        applyConfig(this,config);
+        KICK.core.Util.copyStaticPropertiesToObject(this,scene.Light);
     };
+
+    /**
+     * @property TYPE_AMBIENT
+     * @type Number
+     * @static
+     */
+    scene.Light.TYPE_AMBIENT = KICK.core.Constants._LIGHT_TYPE_AMBIENT;
+    /**
+     * @property TYPE_DIRECTIONAL
+     * @type Number
+     * @static
+     */
+    scene.Light.TYPE_DIRECTIONAL = KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL;
+    /**
+     * @property TYPE_POINT
+     * @type Number
+     * @static
+     */
+    scene.Light.TYPE_POINT = KICK.core.Constants._LIGHT_TYPE_POINT;
+
     Object.freeze(scene.Light);
 
-     /**
+    /**
      * Datastructure used pass light information
      * @class SceneLights
      * @namespace KICK.scene
+     * @constructor
+     * @param {Number} maxNumerOfLights (value from config)
      */
-    scene.SceneLights = function(){
+    scene.SceneLights = function(maxNumerOfLights){
         var ambientLight = null,
             directionalLight = null,
-            directionalHalfVector = vec3.create(),
-            directionalLightDirection = vec3.create(),
+            directionalLightData = KICK.math.mat3.create(), // column matrix with the columns lightDirection,colorIntensity,halfVector
+            directionalLightDirection = directionalLightData.subarray(0,3),
+            directionalLightColorIntensity = directionalLightData.subarray(3,6),
+            directionalHalfVector = directionalLightData.subarray(6,9),
             directionalLightTransform = null,
-            otherLights = [];
+            pointLightData = new Float32Array(9*maxNumerOfLights), // mat3*maxNumerOfLights
+            pointLightDataVec3 = vec3.wrapArray(pointLightData),
+            pointLights = [],
+            lightDirection = [0,0,1],
+            /**
+             * Set the point light to have not contribution this means setting the position 1,1,1, the color to 0,0,0
+             * and attenuation to 1,0,0.<br>
+             * This is needed since the ecLight position would otherwise be in 0,0,0 which is invalid
+             * @method resetPointLight
+             * @param {Number} index of point light
+             * @private
+             */
+            resetPointLight = function(index){
+                for (var i=0;i<3;i++){
+                    vec3.set([0,0,0],pointLightDataVec3[index*3+i]);
+                }
+            };
         Object.defineProperties(this,{
             /**
              * The ambient light in the scene.
@@ -1986,55 +2465,106 @@ KICK.namespace = function (ns_string) {
                         directionalLightTransform = directionalLight.gameObject.transform;
                     } else {
                         directionalLightTransform = null;
+                        KICK.math.mat3.set([0,0,0,0,0,0,0,0,0],directionalLightData);
                     }
                 }
             },
             /**
-             * The half vector of the directional light source  (calculated in recomputeDirectionalLight())
-             * @property directionalHalfVector
-             * @type KICK.math.vec3
+             * Matrix of directional light data. Column 1 contains the light-direction in eye space,
+             * column 2 color intensity and column 3 half vector
+             * @property directionalLightData
+             * @type KICK.math.mat3
              */
-            directionalHalfVector:{
-                value:directionalHalfVector
+            directionalLightData:{
+                get:function(){
+                    return directionalLightData;
+                }
             },
             /**
-             * Normalized light direction (calculated in recomputeDirectionalLight()) <br>
-             * Note the light direction if from the surface towards the light
-             * @property directionalLightDirection
-             * @type KICK.math.vec3
+             * Matrices of point light data. Each matrix (mat3) contains:<br>
+             * Column 1 vector: point light position in eye coordinates<br>
+             * Column 2 vector: color intensity<br>
+             * Column 3 vector: attenuation vector
              */
-            directionalLightDirection:{
-                value:directionalLightDirection
-            },
-            /**
-             * The point  light sources in the scene.
-             * @property otherLights
-             * @type Array[KICK.scene.Light]
-             */
-            otherLights:{
-                value:otherLights
+            pointLightData:{
+                get: function(){
+                    return pointLightData;
+                }
             }
         });
+
         /**
-         * @method recomputeDirectionalLight
-         * @param {KICK.math.mat4} modelViewMatrix
+         * @method addPointLight
+         * @param {KICK.scene.Light} pointLight
          */
-        this.recomputeDirectionalLight = function(modelViewMatrix){
-            if (directionalLight !== null){
-                // compute light direction (note direction from surface towards camera)
-                vec4.set([0,0,1],directionalLightDirection);
-                quat4.multiplyVec3(directionalLightTransform.rotation,directionalLightDirection);
-
-                // transform to eye space
-                mat4.multiplyVec3Vector(modelViewMatrix,directionalLightDirection);
-                vec3.normalize(directionalLightDirection);
-
-                // compute eye direction
-                var eyeDirection = [0,0,1];
-                // compute half vector
-                vec3.add(eyeDirection, directionalLightDirection, directionalHalfVector);
-                vec3.normalize(directionalHalfVector);
+        this.addPointLight = function(pointLight){
+            if (!KICK.core.Util.contains(pointLights,pointLight)){
+                if (pointLights.length==maxNumerOfLights){
+                    if (ASSERT){
+                        fail("Only "+maxNumerOfLights+" point lights allowed in scene");
+                    }
+                } else {
+                    pointLights.push(pointLight);
+                }
             }
         };
+
+        /**
+         * @method removePointLight
+         * @param {KICK.scene.Light} pointLight
+         */
+        this.removePointLight = function(pointLight){
+            var index = pointLights.indexOf(pointLight);
+            if (index >=0){
+                // remove element at position index
+                pointLights.splice(index, 1);
+            } else {
+                if (ASSERT){
+                    fail("Error removing point light");
+                }
+            }
+            resetPointLight(pointLights.length);
+        };
+
+        /**
+         * Recompute the light based on the view-matrix. This method is called from the camera when the scene is
+         * rendered, to transform the light into eye coordinates and compute the half vector for directional light
+         * @method recomputeLight
+         * @param {KICK.math.mat4} viewMatrix
+         */
+        this.recomputeLight = function(viewMatrix){
+            if (directionalLight !== null){
+                // compute light direction
+                quat4.multiplyVec3(directionalLightTransform.rotation,lightDirection,directionalLightDirection);
+
+                // transform to eye space
+                mat4.multiplyVec3Vector(viewMatrix,directionalLightDirection);
+                vec3.normalize(directionalLightDirection);
+
+                // compute half vector
+                vec3.add(lightDirection, directionalLightDirection, directionalHalfVector);
+                vec3.normalize(directionalHalfVector);
+
+                vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);
+            }
+            if (maxNumerOfLights){ // only run if max number of lights are 1 or above (otherwise JIT compiler will skip it)
+                var index = 0;
+                for (var i=pointLights.length-1;i>=0;i--){
+                    var pointLight = pointLights[i];
+                    var pointLightPosition = pointLight.transform.position;
+
+                    mat4.multiplyVec3(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
+                    vec3.set(pointLight.colorIntensity, pointLightDataVec3[index+1]);
+                    vec3.set(pointLight.attenuation, pointLightDataVec3[index+2]);
+                    index += 3;
+                }
+            }
+        };
+
+        (function init(){
+            for (var i=0;i<maxNumerOfLights;i++){
+                resetPointLight(i);
+            }
+        })();
     };
  })();

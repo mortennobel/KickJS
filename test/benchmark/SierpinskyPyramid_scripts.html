@@ -1,0 +1,204 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Sierpinsky Pyramid</title>
+</head>
+<body>
+    <!--<script type="text/javascript" src="../build/kick-debug-0.3.0.js"></script>-->
+    <script type="text/javascript" src="../../build/kick-min-0.3.0.js"></script>
+    <h1>Sierpinsky Pyramid (Elements: <span id="elements"></span>)</h1>
+       Performance test of having many script udpates.
+       <br>
+   <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+   <script type="text/javascript">
+       var meshRecursionDepth = 3;
+       function initLight(){
+           var lightGameObject = engine.activeScene.createGameObject();
+           lightGameObject.transform.localRotationEuler = [10,145,0];
+           var lightComponent = new KICK.scene.Light({
+               type:KICK.scene.Light.TYPE_AMBIENT,
+               color: [1.0,0.1,0.1]
+           });
+           lightGameObject.addComponent(lightComponent);
+           window.ambLight = lightComponent;
+
+           lightComponent = new KICK.scene.Light({
+               type:KICK.scene.Light.TYPE_DIRECTIONAL,
+               color: [1.0,1.0,1.0]
+           });
+           lightGameObject.addComponent(lightComponent);
+           window.dirLight = lightComponent;
+       }
+
+       var meshGameObject;
+       // init engine (create 3d context)
+       var engine = new KICK.core.Engine('canvas',{
+           enableDebugContext: false
+       });
+
+       var SetPositionScript = function(){
+           var transform;
+
+           this.scriptPriority = 0;
+
+           this.activated = function(){
+               transform = meshGameObject.transform;
+           };
+
+           this.update = function(){
+               transform.localPosition = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
+           };
+       };
+
+       
+       var material = new KICK.material.Material(engine,{
+           shader: engine.project.load(engine.project.ENGINE_SHADER_SPECULAR),
+           uniforms:{
+               mainColor: {
+                   value: [.8,.7,.6,1],
+                   type: KICK.core.Constants.GL_FLOAT_VEC4
+               },
+               mainTexture: {
+                   value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                   type: KICK.core.Constants.GL_SAMPLER_2D
+               }
+           }
+       });
+
+       
+       // create meshes
+       var randomRange = function(min,max){
+           return min + Math.random()*(max-min);
+       };
+       
+       function startTest(primitives){
+           engine.activeScene = new KICK.scene.Scene(engine);
+           var numberOfPrimitives = primitives;
+           document.getElementById('elements').innerHTML = numberOfPrimitives;
+           
+           // create a game object in [0,0,0] facing down the -z axis
+           var cameraObject = engine.activeScene.createGameObject();
+           cameraObject.transform.position = [0,0,0];
+           // create a perspective camera
+           var camera = new KICK.scene.Camera({
+               perspective: false,
+               left:-100,
+               right:100,
+               top:100,
+               bottom:-100,
+               near:-100,
+               far:100
+           });
+           cameraObject.addComponent(camera);
+           
+
+           meshGameObject = engine.activeScene.createGameObject();
+           meshGameObject.name = "mesh";
+
+           meshGameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
+           meshGameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
+           meshGameObject.transform.localScale = [10,10,10];
+           var meshRenderer = new KICK.scene.MeshRenderer();
+           meshRenderer.mesh = createSierpinskyTriangleMesh();
+           meshRenderer.material = material;
+           meshGameObject.addComponent(meshRenderer);
+
+           for (var i=0;i<primitives;i++){
+               var gameObject = engine.activeScene.createGameObject();
+               gameObject.name = "Update #"+i;
+               gameObject.addComponent(new SetPositionScript());
+           }
+
+           // init light
+           initLight();
+       }
+       function createSierpinskyTriangleMesh(){
+           function generateSierpinskyPyramid(p1,p2,p3, p4,depth){
+               if (depth == 0){
+                   addTriangle(p3, p2, p1);
+                   addTriangle(p1, p2, p4);
+                   addTriangle(p2, p3, p4);
+                   addTriangle(p1, p4, p3);
+                   return;
+               }
+               depth --;
+
+               var p1p2 = splitEdge(p1,p2);
+               var p1p3 = splitEdge(p1,p3);
+               var p1p4 = splitEdge(p1,p4);
+               var p2p3 = splitEdge(p2,p3);
+               var p2p4 = splitEdge(p2,p4);
+               var p3p4 = splitEdge(p3,p4);
+
+               generateSierpinskyPyramid(p1,p1p2,p1p3,p1p4,depth);
+               generateSierpinskyPyramid(p1p2,p2,p2p3,p2p4,depth);
+               generateSierpinskyPyramid(p1p3,p2p3,p3,p3p4,depth);
+               generateSierpinskyPyramid(p1p4,p2p4,p3p4,p4,depth);
+           }
+
+           function  splitEdge(p1, p2){
+               return [
+                   p1[0]+((p2[0]-p1[0])*0.5),
+                   p1[1]+((p2[1]-p1[1])*0.5),
+                   p1[2]+((p2[2]-p1[2])*0.5)
+               ];
+           }
+
+           function addTriangle(p1, p2, p3){
+               function pushVertex(v){
+                   for (var i=0;i<v.length;i++){
+                       vertices.push(v[i]);
+                   }
+               }
+               pushVertex(p1);
+               pushVertex(p2);
+               pushVertex(p3);
+               indices.push(indices.length);
+               indices.push(indices.length);
+               indices.push(indices.length);
+           }
+
+           var vertices = [];
+           var indices = [];
+
+           var p1 = [0,0,0];
+           var p2 = [1,0,0];
+           var p3 = [0.5,0,Math.sqrt(0.75)];
+           var p4 = [0.5,Math.sqrt(0.75),Math.sqrt(0.75)/3];
+
+           var meshData;
+           if (!window.meshData){
+               generateSierpinskyPyramid(p1, p2, p3, p4, meshRecursionDepth);
+               meshData = new KICK.mesh.MeshData();
+               meshData.vertex = vertices;
+               console.log("Vertex count "+(meshData.vertex.length/3));
+               meshData.uv1 = new Float32Array(indices.length*2);
+               meshData.indices = indices;
+               meshData.recalculateNormals();
+               window.meshData = meshData;
+           } else {
+               meshData = window.meshData;
+           }
+
+
+
+           var mesh = new KICK.mesh.Mesh(engine);
+           mesh.meshData = meshData;
+           return mesh;
+       }
+       
+   </script>
+    <button onclick="startTest(1000);">1000</button>
+    <button onclick="startTest(5000);">5000</button>
+    <button onclick="startTest(10000);">10000</button>
+    <button onclick="startTest(12000);">12000</button>
+    <button onclick="startTest(14000);">14000</button>
+    <button onclick="startTest(16000);">16000</button>
+    <button onclick="startTest(18000);">18000</button>
+    <button onclick="startTest(20000);">20000</button>
+    <button onclick="startTest(30000);">30000</button>
+    <button onclick="startTest(40000);">40000</button>
+    <button onclick="startTest(50000);">50000</button>
+</body>
+</html>

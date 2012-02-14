@@ -31,11 +31,11 @@
         var clearLog = function(){
             var element = document.getElementById("output");
             element.innerHTML = "";
-        }
+        };
 
         function setMesh(url){
             clearLog();
-            meshRenderer.mesh = engine.resourceManager.getMesh(url);
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: url});
         }
 
         function setMaterial(vertexShaderId, fragmentShaderId){
@@ -46,7 +46,7 @@
             shader.errorLog = log;
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
-            shader.updateShader();
+            shader.apply();
             var missingAttributes = meshRenderer.mesh.verify(shader);
             if (missingAttributes){
                 log("Missing attributes in mesh "+JSON.stringify(missingAttributes));

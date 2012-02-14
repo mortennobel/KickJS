@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Point light test</title>
+    <script type="text/javascript" src="pointlightProject.js"></script>
+    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../src/js/constants.js"></script>
+    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../src/js/math.js"></script>
+    <script type="text/javascript" src="../src/js/core.js"></script>
+    <script type="text/javascript" src="../src/js/resource.js"></script>
+    <script type="text/javascript" src="../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../src/js/scene.js"></script>
+    <script type="text/javascript" src="../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../src/js/material.js"></script>
+    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript">
+        var engine;
+
+        function RotatorComponent(){
+            var thisObj = this,
+                time,
+                transform,
+                vec3 = KICK.math.vec3,
+                quat4= KICK.math.quat4,
+                rotationSpeed = 0.001,
+                upDownSpeed = 0.0001,
+                wheelSpeed = 0.0001,
+                mouseRotationSpeed = 0.01,
+                mouseInput,
+                sphericalCoordinates = vec3.create([20.2,0,0]); // radius, polar, elevation
+                cartesianCoordinates = vec3.create();
+
+            this.activated = function(){
+                var gameObject = thisObj.gameObject,
+                    engine = gameObject.engine;
+                transform = gameObject.transform;
+                time = engine.time;
+                mouseInput = engine.mouseInput;
+                mouseInput.mouseWheelPreventDefaultAction = true;
+            };
+
+            var localRotate = KICK.math.quat4.create();
+            this.update = function(){
+                if (mouseInput.isButton(0)){
+                    var mouseDelta = mouseInput.deltaMovement;
+                    sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
+                    sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
+                    sphericalCoordinates[2] = Math.max(-Math.PI*0.499,sphericalCoordinates[2]);
+                    sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
+                } else {
+                    sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
+                    sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
+                }
+                var wheelY = mouseInput.deltaWheel[1];
+                if (wheelY){
+                    var delta = wheelY*wheelSpeed;
+                    sphericalCoordinates[0] *= 1+delta;
+                }
+                vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+                transform.position = cartesianCoordinates;
+                transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
+            };
+        }
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
+
+            engine.project.loadProject(pointProject);
+            var camera = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
+            camera.gameObject.addComponent(new RotatorComponent());
+        }
+    </script>
+
+</head>
+<body onload="initKick();">
+<h1>Point light test</h1>
+
+
+<canvas id="canvas" style="border: none;" width="500" height="500"></canvas> <br>
+</body>
+</html>

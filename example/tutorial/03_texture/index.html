@@ -2,15 +2,16 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>KickJS | Tutorial | 03 - Texture</title>
+    <script type="text/javascript" src="../common/common.js"></script>
 </head>
 <body>
 <h1>KickJS | Tutorial | 03 - Texture</h1>
 This example shows how to load a texture - note that it only works when run on a webserver with the following
-image: /images/webgl.png.
+image: /images/webgl.png.<br>
 <!-- Tutorial start -->
 <!--<script type="text/javascript" src="../../js/webgl-debug.js"></script>-->
     <!--<script type="text/javascript" src="../../js/kick-debug-0.2.0.js"></script>-->
-<script type="text/javascript" src="../../js/kick-min-0.2.0.js"></script>
+<script type="text/javascript" src="../../js/kick-min-0.3.0.js"></script>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 <script type="text/javascript">
     // init engine (create 3d context)
@@ -37,13 +38,10 @@ image: /images/webgl.png.
     texture.init();
     
     // create material
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
     var material = new KICK.material.Material(engine,{
-        shader: engine.resourceManager.getShader("kickjs://shader/unlit/"),
+        shader: shader,
         uniforms:{
-            mainColor: {
-                value: [1,1,1],
-                type: KICK.core.Constants.GL_FLOAT_VEC3
-            },
             mainTexture: {
                 value: texture,
                 type: KICK.core.Constants.GL_SAMPLER_2D
@@ -52,12 +50,12 @@ image: /images/webgl.png.
     });
 
     // create meshes
-    var meshes = ["kickjs://mesh/triangle/","kickjs://mesh/cube/"];
+    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
         var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.resourceManager.getMesh(meshes[i]);
+        meshRenderer.mesh = engine.project.load(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
     }

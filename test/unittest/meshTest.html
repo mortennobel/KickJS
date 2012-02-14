@@ -14,6 +14,7 @@
 <script src="../../src/js/constants.js"></script>
 <script src="../../src/js/math.js"></script>
 <script src="../../src/js/core.js"></script>
+<script src="../../src/js/chunk.js"></script>
 <script src="../../src/js/Mesh.js"></script>
 <script src="../../src/js/MeshFactory.js"></script>
 <script src="../../src/js/scene.js"></script>
@@ -254,6 +255,24 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.compareFloat(meshData3.color.length, meshData1.color.length*2,"vertex");
             Assert.compareFloat(meshData3.indices.length, meshData1.indices.length*2,"indices");
             Assert.isTrue(meshData3.isValid());
+        },
+        testSerialize: function () {
+            var Assert = Y.Assert;
+
+            var meshData1 = KICK.mesh.MeshFactory.createCubeData(0.5);
+            var meshData1Serialized = meshData1.serialize();
+            var meshData2 = new KICK.mesh.MeshData();
+            meshData2.deserialize(meshData1Serialized);
+
+            var meshData1Vertex = meshData1.vertex;
+            var meshData2Vertex = meshData2.vertex;
+
+            Assert.isTrue(typeof(meshData1Vertex) === "object","meshData1Vertex");
+            Assert.isTrue(typeof(meshData2Vertex) === "object","meshData2Vertex");
+            Assert.isTrue(meshData1Vertex.length === meshData2Vertex.length);
+            for (var i=0;i<meshData1Vertex.length;i++){
+                Assert.isTrue(meshData1Vertex[i]=== meshData2Vertex[i]);
+            }
         }
     });
 
