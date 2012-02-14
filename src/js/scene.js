@@ -2553,7 +2553,7 @@ KICK.namespace = function (ns_string) {
                     var pointLight = pointLights[i];
                     var pointLightPosition = pointLight.transform.position;
 
-                    mat4.multiplyVec3Vector(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
+                    mat4.multiplyVec3(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
                     vec3.set(pointLight.colorIntensity, pointLightDataVec3[index+1]);
                     vec3.set(pointLight.attenuation, pointLightDataVec3[index+2]);
                     index += 3;
