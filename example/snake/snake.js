@@ -206,7 +206,7 @@ var initSnake = function(){
             meshRenderer.mesh = mesh;
         };
 
-        var addChild = function(tailPosition){
+        var addTail = function(tailPosition){
             var gameObject = scene.createGameObject({
                 name:"SnakeComponent"
             });
@@ -238,7 +238,7 @@ var initSnake = function(){
         };
 
         this.grow = function(){
-            addChild(position); // start by positioning the tail at the head - on next move the tail will be located correct
+            addTail(position); // start by positioning the tail at the head - on next move the tail will be located correct
         };
 
         this.reset = function(){
@@ -271,7 +271,7 @@ var initSnake = function(){
                 tailDirection = vec3.multiply([-1,-1,-1],moveDirection,vec3.create());
             for (var i=0;i<initialLength;i++){
                 vec3.add(childPosition,tailDirection);
-                addChild(childPosition);
+                addTail(childPosition);
             }
         };
         init();
@@ -403,7 +403,7 @@ var initSnake = function(){
                     snake.move();
                 }
 
-                // intersection test
+                // intersection test 
                 for (i=0;i<snakeLength;i++){
                     snake = snakes[i];
                     snakePosition = snake.position;
