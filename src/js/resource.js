@@ -60,14 +60,25 @@ KICK.namespace = function (ns_string) {
             }
             return name;
         };
-    
+
+    /**
+     * ResourceManager is renamed to ResourceLoader
+     * @class ResourceLoader
+     * @namespace KICK.core
+     * @constructor
+     * @deprecated
+     */
+    core.ResourceManager = function(engine){
+        console.log("ResourceManager is deprecated. Renamed to ResourceLoader");
+    };
+
     /**
      * Responsible for allocation and deallocation of resources.
-     * @class ResourceManager
+     * @class ResourceLoader
      * @namespace KICK.core
      * @constructor
      */
-    core.ResourceManager = function (engine) {
+    core.ResourceLoader = function (engine) {
         var resourceProviders =
             [
                 new core.URLResourceProvider(engine),

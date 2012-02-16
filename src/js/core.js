@@ -99,7 +99,7 @@ KICK.namespace = function (ns_string) {
              * @type KICK.core.ResourceManager
              */
             resourceManager:{
-                value: new core.ResourceManager(this)
+                value: new core.ResourceLoader(this)
             },
             /**
              * Project describes the resources available for a given projects (such as Scenes, Materials, Shader and Meshes)

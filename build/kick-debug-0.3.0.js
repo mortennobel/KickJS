@@ -5844,7 +5844,7 @@ KICK.namespace = function (ns_string) {
              * @type KICK.core.ResourceManager
              */
             resourceManager:{
-                value: new core.ResourceManager(this)
+                value: new core.ResourceLoader(this)
             },
             /**
              * Project describes the resources available for a given projects (such as Scenes, Materials, Shader and Meshes)
@@ -15390,11 +15390,11 @@ KICK.namespace = function (ns_string) {
     
     /**
      * Responsible for allocation and deallocation of resources.
-     * @class ResourceManager
+     * @class ResourceLoader
      * @namespace KICK.core
      * @constructor
      */
-    core.ResourceManager = function (engine) {
+    core.ResourceLoader = function (engine) {
         var resourceProviders =
             [
                 new core.URLResourceProvider(engine),
