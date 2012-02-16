@@ -107,8 +107,10 @@ window.shaderEditor = new (function(){
                 fnSetImageSrc(thisObj.getWrappedImageSource(config.dataURI));
             }
         };
+        var loadImageUsingProxyAfter5Sec = setTimeout(loadImageUsingProxy,5000);
         var img = new Image();
         img.onload = function(){
+            clearTimeout(loadImageUsingProxyAfter5Sec);
             try{
                 texture.setImage(img,config.dataURI);
             } catch (e){
@@ -117,6 +119,7 @@ window.shaderEditor = new (function(){
             }
         };
         img.onerror = function(e){
+            clearTimeout(loadImageUsingProxyAfter5Sec);
             console.log("Error using image - trying to load using image proxy",e);
             loadImageUsingProxy();
         };
