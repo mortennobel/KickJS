@@ -166,7 +166,7 @@ function loadClicked(files){
         var file = files[i];
         var fileLowerCase = file.fileName.toLowerCase();
         if (endsWith(fileLowerCase,".dae") ||
-            endsWith(fileLowerCase,".obj") || 
+            endsWith(fileLowerCase,".obj") ||
             endsWith(fileLowerCase,".kickjs")){
             loadModelFile(file);
         } else if (endsWith(fileLowerCase,".jpg") ||
@@ -376,7 +376,7 @@ function getCurrentModelAsJSON(){
                 obj.uv1 = typedArrayToArray(meshData.uv1);
             }
             if (conf.color){
-                obj.color = typedArrayToArray(meshData.color || new Float32Array(obj.vertex.length/3*4));
+                obj.color = typedArrayToArray(meshData.color || new Float32Array(obj.vertex.length/3*4));
             }
             if (conf.tangents){
                 if (!meshData.tangent){
