@@ -1,0 +1,25 @@
+{
+   "engineVersion": "0.3.0",
+   "maxUID": 3,
+   "activeScene": 1,
+   "resourceDescriptors": [
+      {
+         "type": "KICK.scene.Scene",
+         "uid": 1,
+         "config": {
+            "uid": 1,
+            "gameObjects": [],
+            "name": "Scene"
+         }
+      },
+      {
+         "type": "KICK.mesh.Mesh",
+         "uid": 2,
+         "config": {
+            "uid": 2,
+            "name": "Teapot",
+            "dataURI": "teapot.kickjs"
+         }
+      }
+   ]
+}

@@ -829,18 +829,103 @@
             shader = loadLocally();
         }
 
-        shaderEditor.initKick();
+        shaderEditor.initKick(function(){
+            (function setupSettings(){
+                var meshsetting = document.getElementById('meshsetting'),
+                    projection = document.getElementById('projection'),
+                    rotatemesh = document.getElementById('rotatemesh'),
+                    resetShaderBut = document.getElementById('resetShader'),
+                    addChildListeners = function (component, listener, listenerNames,tag){
+                        var i;
+                        for (i=0;i<component.children.length;i++){
+                            if (Array.isArray(listenerNames)){
+                                for (var j=0;j<listenerNames.length;j++){
+                                    component.children[i].addEventListener(listenerNames[j],listener,false);
+                                }
+                            } else {
+                                component.children[i].addEventListener(listenerNames,listener,false);
+                            }
+                            if (tag){
+                                component.children[i][tag] = i;
+                            }
+                        }
+                    };
+
+                addChildListeners(meshsetting,updateSettings,'click',"meshid");
+                addChildListeners(projection,updateSettings,'click',"projection");
+                addChildListeners(rotatemesh,updateSettings,'click',"isOn");
+                resetShaderBut.addEventListener('click',resetShader,false);
+
+                (function addLightListeners(){
+                    var lightpos = document.getElementById('lightpos'),
+                        lightrot = document.getElementById('lightrot'),
+                        lightcolor = document.getElementById('lightcolor'),
+                        lightintensity = document.getElementById('lightintensity');
+
+                    addChildListeners(lightpos,updateSettings,['click','change'],"position");
+                    addChildListeners(lightrot,updateSettings,['click','change'],"position");
+                    addChildListeners(lightcolor,updateSettings,['click','change'],"position");
+
+                    lightintensity.addEventListener('change',updateSettings,false);
+                    lightintensity.addEventListener('click',updateSettings,false);
+                })();
+
+
+                (function addAmbientListener(){
+                    var am = document.getElementById('ambientLight');
+                    addChildListeners(am,updateSettings,['click','change'],"position");
+                })();
+
+                addGLConstantToSelect('textureFormat',[c.GL_ALPHA,c.GL_RGB,c.GL_RGBA,c.GL_LUMINANCE,c.GL_LUMINANCE_ALPHA]);
+                addGLConstantToSelect('textureMode',[c.GL_REPEAT,c.GL_CLAMP_TO_EDGE]);
+                addGLConstantToSelect('minFilter',[c.GL_NEAREST,c.GL_LINEAR,c.GL_NEAREST_MIPMAP_NEAREST,c.GL_LINEAR_MIPMAP_NEAREST,c.GL_NEAREST_MIPMAP_LINEAR,c.GL_LINEAR_MIPMAP_LINEAR]);
+                addGLConstantToSelect('magFilter',[c.GL_NEAREST,c.GL_LINEAR]);
+                addGLConstantToSelect('textureType',[c.GL_TEXTURE_2D,c.GL_TEXTURE_CUBE_MAP]);
+
+                document.getElementById('textureTypeInfo').addEventListener('click', function(){
+                    window.YUIMessage("Texture type", "Cube maps must be arranged in one row with the order [Right, Left, Top, Bottom, Front, Back] (also used in <a href='http://www.cgtextures.com/content.php?action=tutorial&name=cubemaps'>NVidia DDS Exporter</a>)<br>");
+                }, false);
+
+
+                document.getElementById('fullscreen').addEventListener('click', toogleFullscreen,false);
+                document.getElementById('LogoutButton').addEventListener('click', onLogoutButton,false);
+                document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
+                document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
+                document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
+                document.getElementById('ExampleButton').addEventListener('click', window.YUILoadExample,false);
+
+                document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
+
+                document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
+                document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
+                document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
+
+                document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
+                document.getElementById('currentUniforms').addEventListener('click', uniformSelected, false);
+                document.getElementById('uniform_sampler_update').addEventListener('click', updateUniformSampler, false);
+                document.getElementById('uniform_number_update').addEventListener('click', updateUniformNumber, false);
+                document.getElementById('shadername').addEventListener('change', updateShaderName, false);
+
+                // start shader listener
+                setInterval(shaderChangeListener,2000);
+            })();
+            setShader( shader );
+        });
 
         var initEditor = function(id){
-            var editor = window.ace.edit(id);
-            editor.setTheme("ace/theme/twilight");
-            var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
-            var EditSession = window.require('ace/edit_session').EditSession;
-            window.vertexShaderSession = new EditSession( shader.shader.vertexShaderSrc );
-            window.vertexShaderSession.setMode(new GLSL_ES_Mode());
-            editor.setSession(window.vertexShaderSession);
-            window.fragmentShaderSession = new EditSession( shader.shader.fragmentShaderSrc);
-            window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
+            try{
+                var editor = window.ace.edit(id);
+                editor.setTheme("ace/theme/twilight");
+                var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
+                var EditSession = window.require('ace/edit_session').EditSession;
+                window.vertexShaderSession = new EditSession( shader.shader.vertexShaderSrc );
+                window.vertexShaderSession.setMode(new GLSL_ES_Mode());
+                editor.setSession(window.vertexShaderSession);
+                window.fragmentShaderSession = new EditSession( shader.shader.fragmentShaderSrc);
+                window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
+            } catch (e){
+                console.log(e);
+            }
             return editor;
         };
         window.aceeditor = initEditor('glslEditor');
@@ -1070,85 +1155,6 @@
             nestedPanel.render('#nestedPanel');
         };
 
-        (function setupSettings(){
-            var meshsetting = document.getElementById('meshsetting'),
-                projection = document.getElementById('projection'),
-                rotatemesh = document.getElementById('rotatemesh'),
-                resetShaderBut = document.getElementById('resetShader'),
-                addChildListeners = function (component, listener, listenerNames,tag){
-                    var i;
-                    for (i=0;i<component.children.length;i++){
-                        if (Array.isArray(listenerNames)){
-                            for (var j=0;j<listenerNames.length;j++){
-                                component.children[i].addEventListener(listenerNames[j],listener,false);
-                            }
-                        } else {
-                            component.children[i].addEventListener(listenerNames,listener,false);
-                        }
-                        if (tag){
-                            component.children[i][tag] = i;
-                        }
-                    }
-                };
-
-            addChildListeners(meshsetting,updateSettings,'click',"meshid");
-            addChildListeners(projection,updateSettings,'click',"projection");
-            addChildListeners(rotatemesh,updateSettings,'click',"isOn");
-            resetShaderBut.addEventListener('click',resetShader,false);
-
-            (function addLightListeners(){
-                var lightpos = document.getElementById('lightpos'),
-                    lightrot = document.getElementById('lightrot'),
-                    lightcolor = document.getElementById('lightcolor'),
-                    lightintensity = document.getElementById('lightintensity');
-
-                addChildListeners(lightpos,updateSettings,['click','change'],"position");
-                addChildListeners(lightrot,updateSettings,['click','change'],"position");
-                addChildListeners(lightcolor,updateSettings,['click','change'],"position");
-
-                lightintensity.addEventListener('change',updateSettings,false);
-                lightintensity.addEventListener('click',updateSettings,false);
-            })();
-
-
-            (function addAmbientListener(){
-                var am = document.getElementById('ambientLight');
-                addChildListeners(am,updateSettings,['click','change'],"position");
-            })();
-
-            addGLConstantToSelect('textureFormat',[c.GL_ALPHA,c.GL_RGB,c.GL_RGBA,c.GL_LUMINANCE,c.GL_LUMINANCE_ALPHA]);
-            addGLConstantToSelect('textureMode',[c.GL_REPEAT,c.GL_CLAMP_TO_EDGE]);
-            addGLConstantToSelect('minFilter',[c.GL_NEAREST,c.GL_LINEAR,c.GL_NEAREST_MIPMAP_NEAREST,c.GL_LINEAR_MIPMAP_NEAREST,c.GL_NEAREST_MIPMAP_LINEAR,c.GL_LINEAR_MIPMAP_LINEAR]);
-            addGLConstantToSelect('magFilter',[c.GL_NEAREST,c.GL_LINEAR]);
-            addGLConstantToSelect('textureType',[c.GL_TEXTURE_2D,c.GL_TEXTURE_CUBE_MAP]);
-
-            document.getElementById('textureTypeInfo').addEventListener('click', function(){
-                window.YUIMessage("Texture type", "Cube maps must be arranged in one row with the order [Right, Left, Top, Bottom, Front, Back] (also used in <a href='http://www.cgtextures.com/content.php?action=tutorial&name=cubemaps'>NVidia DDS Exporter</a>)<br>");
-            }, false);
-
-
-            document.getElementById('fullscreen').addEventListener('click', toogleFullscreen,false);
-            document.getElementById('LogoutButton').addEventListener('click', onLogoutButton,false);
-            document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
-            document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
-            document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
-            document.getElementById('ExampleButton').addEventListener('click', window.YUILoadExample,false);
-
-            document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
-
-            document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
-            document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
-            document.getElementById('currentTextures').addEventListener('click', textureSelected, false);
-
-            document.getElementById('updateTexture').addEventListener('click', textureUpdate, false);
-            document.getElementById('currentUniforms').addEventListener('click', uniformSelected, false);
-            document.getElementById('uniform_sampler_update').addEventListener('click', updateUniformSampler, false);
-            document.getElementById('uniform_number_update').addEventListener('click', updateUniformNumber, false);
-            document.getElementById('shadername').addEventListener('change', updateShaderName, false);
-
-            // start shader listener
-            setInterval(shaderChangeListener,2000);
-        })();
 
         function loginInfo(){
             var oReq = new XMLHttpRequest();
@@ -1176,7 +1182,6 @@
             oReq.onreadystatechange = handler;
             oReq.send();
         }
-        setShader( shader );
         loginInfo();
         setInterval(loginInfo,1000*60*30); // check for logout every 30 min
     });

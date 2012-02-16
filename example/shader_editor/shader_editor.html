@@ -191,15 +191,16 @@
                 <div id="settings"  class="sourceEditorPanel">
                     <h3>Type of mesh</h3>
                     <div id="meshsetting">
-                        <input type="radio" name="mesh-settings" value="cube">Cube</option>
-                        <input type="radio" name="mesh-settings" value="sphere" checked>Sphere</option>
-                        <input type="radio" name="mesh-settings" value="plane">Plane</option>
+                        <input type="radio" name="mesh-settings" id="cube" value="cube"><label for="cube"> Cube</label></option>
+                        <input type="radio" name="mesh-settings" id="sphere" value="sphere" checked><label for="sphere"> Sphere</label></option>
+                        <input type="radio" name="mesh-settings" id="plane"  value="plane"><label for="plane"> Plane</label></option>
+                        <input type="radio" name="mesh-settings" id="teapot" value="teapot"><label for="teapot"> Teapot</label></option>
                     </div>
 
                     <h3>Camera</h3>
                     <div id="projection">
-                        <input type="radio" name="camera-projection-perspective" value="orthogonale" checked>Orthogonale</option>
-                        <input type="radio" name="camera-projection-perspective" value="perspective">Perspective</option>
+                        <input type="radio" name="camera-projection-perspective" id="orthogonale" value="orthogonale" checked><label for="orthogonale"> Orthogonale</label></option>
+                        <input type="radio" name="camera-projection-perspective" id="perspective" value="perspective"><label for="perspective"> Perspective</label></option>
                     </div>
                     <!--<h3>Rotate camera</h3>
                     <div id="rotatecam">

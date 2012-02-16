@@ -14,6 +14,9 @@ window.shaderEditor = new (function(){
         meshsetting,
         setMesh = function (url){
             _meshRenderer.mesh = new KICK.mesh.Mesh(_engine,{dataURI:url});
+        },
+        setMeshByName = function(name){
+            _meshRenderer.mesh = _engine.project.loadByName(name);
         };
 
     this.textures = [];
@@ -60,6 +63,9 @@ window.shaderEditor = new (function(){
                 case "sphere":
                     setMesh('kickjs://mesh/uvsphere/');
                 break;
+                case "teapot":
+                    setMeshByName('Teapot');
+                    break;
                 default:
                     setMesh('kickjs://mesh/plane/');
                 break;
@@ -208,41 +214,45 @@ window.shaderEditor = new (function(){
         _engine.canvasResized();
     };
 
-    this.initKick = function() {
+    this.initKick = function(onComplete) {
         try{
             _engine = new KICK.core.Engine('canvas',{
                 preserveDrawingBuffer:true,
                 checkCanvasResizeInterval:0
             });
-            var cameraObject = _engine.activeScene.createGameObject();
-            camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1],
-                perspective: false,
-                near:-1,
-                far:1
-            });
-            cameraObject.addComponent(camera);
+            var initEngine = function(){
+                var cameraObject = _engine.activeScene.createGameObject();
+                camera = new KICK.scene.Camera({
+                    clearColor: [0,0,0,1],
+                    perspective: false,
+                    near:-1,
+                    far:1
+                });
+                cameraObject.addComponent(camera);
 
-            var gameObject = _engine.activeScene.createGameObject();
-            _meshRenderer = new KICK.scene.MeshRenderer();
-            setMesh("kickjs://mesh/plane/");
-            if (window.shader){
-                // load saved content
-                loadMaterial(window.shader);
-            }
+                var gameObject = _engine.activeScene.createGameObject();
+                _meshRenderer = new KICK.scene.MeshRenderer();
+                setMesh("kickjs://mesh/plane/");
+                if (window.shader){
+                    // load saved content
+                    loadMaterial(window.shader);
+                }
 
-            gameObject.addComponent(_meshRenderer);
-            addRotatorComponent(gameObject);
+                gameObject.addComponent(_meshRenderer);
+                addRotatorComponent(gameObject);
 
-            var ambientlightGameObject = _engine.activeScene.createGameObject();
-            _ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
-            _ambientLight.color = [0.1,0.1,0.1];
-            ambientlightGameObject.addComponent(_ambientLight);
+                var ambientlightGameObject = _engine.activeScene.createGameObject();
+                _ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
+                _ambientLight.color = [0.1,0.1,0.1];
+                ambientlightGameObject.addComponent(_ambientLight);
 
-            var lightGameObject = _engine.activeScene.createGameObject();
-            _light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
-            lightGameObject.addComponent(_light);
-            _lightTransform = lightGameObject.transform;
+                var lightGameObject = _engine.activeScene.createGameObject();
+                _light = new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
+                lightGameObject.addComponent(_light);
+                _lightTransform = lightGameObject.transform;
+                onComplete();
+            };
+            _engine.project.loadProjectByURL('project.json',initEngine);
         } catch (e) {
             debugger;
             logFn(e);
