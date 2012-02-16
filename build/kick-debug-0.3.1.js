@@ -9526,6 +9526,7 @@ KICK.namespace = function (ns_string) {
         constants = KICK.core.Constants,
         DEBUG = true,
         ASSERT = true,
+        warn = KICK.core.Util.warn,
         fail = KICK.core.Util.fail,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
@@ -10827,14 +10828,25 @@ KICK.namespace = function (ns_string) {
                     for (var i=0;i<names.length;i++){
                         o = o[names[i]];
                         if (!o){
+                            if (DEBUG){
+                                debugger;
+                                warn("Cannot find uid of "+o);
+                            }
                             return defaultValue;
                         }
                     }
                     return o;
-                }
-                if (aRenderOrder == bRenderOrder && a.material && b.material){
+                };
+                var getMeshUid = function(o, defaultValue){
+                    return o.mesh.uid || defaultValue;
+                };
+                if (aRenderOrder === bRenderOrder && a.material && b.material){
                     aRenderOrder = getMeshShaderUid(a,aRenderOrder);
-                    bRenderOrder = getMeshShaderUid(a,aRenderOrder);
+                    bRenderOrder = getMeshShaderUid(b,aRenderOrder);
+                }
+                if (aRenderOrder === bRenderOrder && a.mesh && b.mesh){
+                    aRenderOrder = getMeshUid(a,aRenderOrder);
+                    bRenderOrder = getMeshUid(b,aRenderOrder);
                 }
                 return aRenderOrder-bRenderOrder;
             },
