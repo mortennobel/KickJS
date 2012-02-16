@@ -4,9 +4,6 @@
 <head>
     <title></title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
     <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
     <script type="text/javascript" src="../src/js/constants.js"></script>
     <script type="text/javascript" src="../src/js/glslconstants.js"></script>
@@ -112,7 +109,7 @@
 
             createMaterials();
 
-            var gameObjects = KICK.importer.ObjImporter.import( document.getElementById("objFileContent").value , engine , engine.activeScene);
+            var gameObjects = KICK.importer.ObjImporter.import( document.getElementById("objFileContent").value , engine , engine.activeScene).gameObjects;
             console.log("Imported "+gameObjects.length+" gameObjects");
             for (var i=0;i<gameObjects.length;i++){
                 var gameObject = gameObjects[i];
@@ -140,14 +137,6 @@
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
   This example shows how a cube is rotated.
   <br>
-
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Show data</h2>
-  [<a href="#" onclick="refreshData();">Refresh</a>]
-  <div id="example" class="yui3-skin-sam"></div>
-
   <div style="display:none;">
 
   <textarea style="width:500px;height:150px;" id="objFileContent">
