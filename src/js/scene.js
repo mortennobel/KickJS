@@ -1307,7 +1307,7 @@ KICK.namespace = function (ns_string) {
                     width = viewPortWidth*_normalizedViewportRect[2],
                     height = viewPortHeight*_normalizedViewportRect[3];
                 setupViewport(offsetX,offsetY,width,height);
-                
+                gl.currentMaterial = null; // clear current material
                 // setup render target
                 if (gl.renderTarget !== _renderTarget){
                     if (_renderTarget){
@@ -1528,6 +1528,7 @@ KICK.namespace = function (ns_string) {
                 return;
             }
             if (_renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+                gl.currentMaterial = null; // clear current material
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
@@ -1544,6 +1545,7 @@ KICK.namespace = function (ns_string) {
                 gl.generateMipmap(gl.TEXTURE_2D);
             }
             if (pickingQueue && pickingQueue.length>0){
+                gl.currentMaterial = null; // clear current material
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);

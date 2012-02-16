@@ -788,19 +788,17 @@ KICK.namespace = function (ns_string) {
         return sourcecode;
     };
 
-    Object.freeze(material.Shader);
-
     /**
-     * Binds the uniforms to the current shader.
-     * The uniforms is expected to be in a valid format
-     * @method bindUniform
-     * @param {KICK.material.Material} material
-     * @param {Object} engineUniforms
-     * @param {KICK.scene.Transform) transform
+     * Update the material uniform
+     * @method bindMaterialUniform
+     * @param material
+     * @param engineUniforms
      */
-    material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
-        // todo optimize this code
+    material.Shader.prototype.bindMaterialUniform = function (material, engineUniforms) {
+        // lookup uniforms
         var gl = this.gl,
+            uniformName,
+            materialUniforms = material.uniforms,
             materialUniforms = material.uniforms,
             timeObj,
             uniformName,
@@ -808,29 +806,22 @@ KICK.namespace = function (ns_string) {
             uniform,
             value,
             location,
-            mv = this.lookupUniform._mv,
-            proj = this.lookupUniform._proj,
-            mvProj = this.lookupUniform._mvProj,
-            norm = this.lookupUniform._norm,
-            directionalLightUniform = this.lookupUniform._dLight,
-            pointLightUniform = this.lookupUniform["_pLights[0]"],
-            gameObjectUID = this.lookupUniform._gameObjectUID,
-            time = this.lookupUniform._time,
-            viewport = this.lookupUniform._viewport,
-            shadowMapTexture = this.lookupUniform._shadowMapTexture,
-            _lightMat = this.lookupUniform._lightMat,
-            lightUniformAmbient =  this.lookupUniform._ambient,
             sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
-            directionalLight = sceneLights.directionalLight,
             directionalLightData = sceneLights.directionalLightData,
             pointLightData = sceneLights.pointLightData,
-            globalTransform,
-            i,
+            lookupUniforms = this.lookupUniform,
+            proj = lookupUniforms._proj,
+            directionalLightUniform = lookupUniforms._dLight,
+            pointLightUniform = lookupUniforms["_pLights[0]"],
+            time = lookupUniforms._time,
+            viewport = lookupUniforms._viewport,
+            lightUniformAmbient =  lookupUniforms._ambient,
             currentTexture = 0;
 
+
         for (uniformName in materialUniforms){
-            shaderUniform = this.lookupUniform[uniformName];
+            shaderUniform = lookupUniforms[uniformName];
             if (shaderUniform){ // if shader has a uniform with uniformName
                 uniform = materialUniforms[uniformName];
                 location = shaderUniform.location;
@@ -881,35 +872,10 @@ KICK.namespace = function (ns_string) {
                 }
             }
         }
+
         if (proj){
             gl.uniformMatrix4fv(proj.location,false,engineUniforms.projectionMatrix);
         }
-        if (mv || norm){
-            // todo optimize
-            globalTransform = transform.getGlobalMatrix();
-            var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
-            if (mv){
-                gl.uniformMatrix4fv(mv.location,false,modelView);
-            }
-            if (norm){
-                // note this can be simplified to
-                // var normalMatrix = math.mat4.toMat3(finalModelView);
-                // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
-                //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
-                if (ASSERT){
-                    if (!normalMatrix){
-                        KICK.core.Util.fail("Singular matrix");
-                    }
-                }
-                gl.uniformMatrix3fv(norm.location,false,normalMatrix);
-            }
-        }
-        if (mvProj){
-            globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
-        }
-
         if (lightUniformAmbient){
             var ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
             gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
@@ -928,30 +894,91 @@ KICK.namespace = function (ns_string) {
         if (viewport){
             gl.uniform2fv(viewport.location, gl.viewportSize);
         }
-        if (gameObjectUID){
-            var uidAsVec4 = uint32ToVec4(transform.gameObject.uid,tmpVec4);
-            if (this.engine.time.frame < 3){
-                console.log("transform.gameObject.uid "+transform.gameObject.uid);
-            }
-            gl.uniform4fv(gameObjectUID.location, uidAsVec4);
+        return currentTexture;
+    };
+
+    /**
+     * Binds the uniforms to the current shader.
+     * The uniforms is expected to be in a valid format.
+     * The method will call Shader.bindMaterialUniform if material uniforms needs to be changed.
+     * @method bindUniform
+     * @param {KICK.material.Material} material
+     * @param {Object} engineUniforms
+     * @param {KICK.scene.Transform) transform
+        */
+    material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
+        var lookupUniform = this.lookupUniform,
+            gl = this.gl,
+            mv = lookupUniform._mv,
+            mvProj = lookupUniform._mvProj,
+            norm = lookupUniform._norm,
+            gameObjectUID = lookupUniform._gameObjectUID,
+            shadowMapTexture = lookupUniform._shadowMapTexture,
+            _lightMat = lookupUniform._lightMat,
+            sceneLights = engineUniforms.sceneLights,
+            directionalLight = sceneLights.directionalLight,
+            globalTransform,
+            i,
+            currentTexture = 0;
+        if (gl.currentMaterial !== material)
+        // shared material uniforms
+        {
+            gl.currentMaterial = material;
+            currentTexture = this.bindMaterialUniform(material, engineUniforms);
         }
-        if (shadowMapTexture){
-            if (ASSERT){
-                if (!directionalLight){
-                    KICK.core.Util.fail("No directional light found in scene - but shader needs it");
+
+        // mesh instance uniforms
+        {
+            if (mv || norm){
+                globalTransform = transform.getGlobalMatrix();
+                var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
+                if (mv){
+                    gl.uniformMatrix4fv(mv.location,false,modelView);
+                }
+                if (norm){
+                    // note this can be simplified to
+                    // var normalMatrix = math.mat4.toMat3(finalModelView);
+                    // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
+                    //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
+                    var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
+                    if (ASSERT){
+                        if (!normalMatrix){
+                            KICK.core.Util.fail("Singular matrix");
+                        }
+                    }
+                    gl.uniformMatrix3fv(norm.location,false,normalMatrix);
                 }
             }
-            directionalLight.shadowTexture.bind(currentTexture);
-            gl.uniform1i(shadowMapTexture.location,currentTexture);
-            currentTexture ++;
-        }
-        if (_lightMat){
-            globalTransform = globalTransform || transform.getGlobalMatrix();
-            var lightModelViewProjection = mat4.multiply(engineUniforms.lightViewProjectionMatrix,globalTransform,tempMat4);
-            gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(offsetMatrix,lightModelViewProjection,tempMat4));
+            if (mvProj){
+                globalTransform = globalTransform || transform.getGlobalMatrix();
+                gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
+            }
+            if (gameObjectUID){
+                var uidAsVec4 = uint32ToVec4(transform.gameObject.uid,tmpVec4);
+                if (this.engine.time.frame < 3){
+                    console.log("transform.gameObject.uid "+transform.gameObject.uid);
+                }
+                gl.uniform4fv(gameObjectUID.location, uidAsVec4);
+            }
+            if (shadowMapTexture){
+                if (ASSERT){
+                    if (!directionalLight){
+                        KICK.core.Util.fail("No directional light found in scene - but shader needs it");
+                    }
+                }
+                directionalLight.shadowTexture.bind(currentTexture);
+                gl.uniform1i(shadowMapTexture.location,currentTexture);
+                currentTexture ++;
+            }
+            if (_lightMat){
+                globalTransform = globalTransform || transform.getGlobalMatrix();
+                var lightModelViewProjection = mat4.multiply(engineUniforms.lightViewProjectionMatrix,globalTransform,tempMat4);
+                gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(offsetMatrix,lightModelViewProjection,tempMat4));
+            }
         }
     };
 
+    Object.freeze(material.Shader);
 
     /**
      * Material configuration

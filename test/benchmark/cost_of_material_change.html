@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Cost of material change</title>
+</head>
+<body>
+    <script type="text/javascript" src="../../build/kick-min-0.3.1.js"></script>
+    <!--<script type="text/javascript" src="../../build/kick-debug-0.3.1.js"></script>-->
+    <h1>Cost of material change (Elements: <span id="elements"></span>)</h1>
+       Performance test cost of material change.
+       <br>
+   <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+   <script type="text/javascript">
+       function initLight(){
+           var lightGameObject = engine.activeScene.createGameObject();
+           lightGameObject.transform.localRotationEuler = [10,0,0];
+           var lightComponent = new KICK.scene.Light({
+               type:KICK.scene.Light.TYPE_AMBIENT,
+               color: [0.1,0.1,0.1]
+           });
+           lightGameObject.addComponent(lightComponent);
+           window.ambLight = lightComponent;
+
+           lightComponent = new KICK.scene.Light({
+               type:KICK.scene.Light.TYPE_DIRECTIONAL,
+               color: [1.0,1.0,1.0]
+           });
+           lightGameObject.addComponent(lightComponent);
+           window.dirLight = lightComponent;
+       }
+
+       // init engine (create 3d context)
+       var engine = new KICK.core.Engine('canvas',{
+           enableDebugContext: false
+       });
+
+       // create meshes
+       var randomRange = function(min,max){
+           return min + Math.random()*(max-min);
+       };
+       
+       function startTest(primitives, sameMaterial){
+           engine.activeScene = new KICK.scene.Scene(engine);
+           var numberOfPrimitives = primitives;
+           document.getElementById('elements').innerHTML = numberOfPrimitives;
+           
+           // create a game object in [0,0,0] facing down the -z axis
+           var cameraObject = engine.activeScene.createGameObject();
+           cameraObject.transform.position = [0,0,0];
+           // create a perspective camera
+           var camera = new KICK.scene.Camera({
+               perspective: false,
+               left:-100,
+               right:100,
+               top:100,
+               bottom:-100,
+               near:-100,
+               far:100
+           });
+           cameraObject.addComponent(camera);
+           var material;
+           if (sameMaterial){
+               material = new KICK.material.Material(engine,{
+                   shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
+                   uniforms:{
+                       mainColor: {
+                           value: [Math.random(),Math.random(),Math.random(),Math.random()],
+                           type: KICK.core.Constants.GL_FLOAT_VEC4
+                       },
+                       mainTexture: {
+                           value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                           type: KICK.core.Constants.GL_SAMPLER_2D
+                       }
+                   }
+               });
+           }
+           
+           for (var i=0;i<numberOfPrimitives ;i++){
+               var gameObject = engine.activeScene.createGameObject();
+               gameObject.name = "Object "+(i+1);
+
+               gameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
+               gameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
+               gameObject.transform.localScale = [1,1,1];
+               var meshRenderer = new KICK.scene.MeshRenderer();
+               meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
+               meshRenderer.material = material || new KICK.material.Material(engine,{
+                   shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
+                   uniforms:{
+                       mainColor: {
+                           value: [Math.random(),Math.random(),Math.random(),Math.random()],
+                           type: KICK.core.Constants.GL_FLOAT_VEC4
+                       },
+                       mainTexture: {
+                           value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                           type: KICK.core.Constants.GL_SAMPLER_2D
+                       }
+                   }
+               });
+               gameObject.addComponent(meshRenderer);
+           }
+
+           // init light
+           initLight();
+
+       }
+       window.onload = function(){
+           startTest(5);
+       };
+   </script>
+    <br>
+    Different materials<br>
+    <button onclick="startTest(5, false);">5</button>
+    <button onclick="startTest(500, false);">500</button>
+    <button onclick="startTest(1000, false);">1000</button>
+    <button onclick="startTest(1500, false);">1500</button>
+    <button onclick="startTest(2000, false);">2000</button>
+    <button onclick="startTest(2500, false);">2500</button>
+    <button onclick="startTest(3000, false);">3000</button>
+    <button onclick="startTest(3500, false);">3500</button>
+    <button onclick="startTest(4000, false);">4000</button>
+    <button onclick="startTest(4500, false);">4500</button>
+    <button onclick="startTest(5000, false);">5000</button><br>
+    Same materials<br>
+    <button onclick="startTest(5, true);">5</button>
+    <button onclick="startTest(500, true);">500</button>
+    <button onclick="startTest(1000, true);">1000</button>
+    <button onclick="startTest(1500, true);">1500</button>
+    <button onclick="startTest(2000, true);">2000</button>
+    <button onclick="startTest(2500, true);">2500</button>
+    <button onclick="startTest(3000, true);">3000</button>
+    <button onclick="startTest(3500, true);">3500</button>
+    <button onclick="startTest(4000, true);">4000</button>
+    <button onclick="startTest(4500, true);">4500</button>
+    <button onclick="startTest(5000, true);">5000</button>
+</body>
+</html>
