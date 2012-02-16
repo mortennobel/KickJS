@@ -2,19 +2,19 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>Material default uniform test</title>
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/resource.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/material.js"></script>
-    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <title>Multi material test</title>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
     <script type="text/javascript">
         var engine,
                 vec3 = KICK.math.vec3,
@@ -141,59 +141,85 @@
             setLight();
 
             var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
-
-            var material = new KICK.material.Material(engine, {
-                shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1.0,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
+            for (var i = 0;i<5;i++){
+                var material = new KICK.material.Material(engine, {
+                    shader:shader,
+                    uniforms:{
+                        mainColor:{
+                            value:[1.0,0.0,0.9,0.5],
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        },
+                        mainTexture:{
+                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                            type:KICK.core.Constants.GL_SAMPLER_2D
+                        },
+                        specularExponent:{
+                            value: 1+i/5*50,
+                            type:KICK.core.Constants.GL_FLOAT
+                        },
+                        specularColor:{
+                            value: [1,1,1,1],
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        }
                     }
-                }
-            });
-            console.log(material.uniforms);
-            var position = [0,0,0];
-            addSphere(material, position,[0.25,0.25,0.25]);
-
+                });
+                var position = [-1+(i/5)*3,0,0];
+                addSphere(material, position,[0.25,0.25,0.25]);
+            }
             var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
-            var material = new KICK.material.Material(engine, {
-                shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
+            for (var i = 0;i<5;i++){
+                var material = new KICK.material.Material(engine, {
+                    shader:shader,
+                    uniforms:{
+                        mainColor:{
+                            value:[i/5,0.0,0.9,0.5],
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        },
+                        mainTexture:{
+                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                            type:KICK.core.Constants.GL_SAMPLER_2D
+                        }
                     }
-                }
-            });
-            var position = [0,.75,0];
-            addSphere(material, position,[0.25,0.25,0.25]);
-
+                });
+                var position = [-1+(i/5)*3,.75,0];
+                addSphere(material, position,[0.25,0.25,0.25]);
+            }
             var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-
-            var material = new KICK.material.Material(engine, {
-                shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
+            for (var i = 0;i<5;i++){
+                var material = new KICK.material.Material(engine, {
+                    shader:shader,
+                    uniforms:{
+                        mainColor:{
+                            value:[i/5,0.0,0.9,0.5],
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        },
+                        mainTexture:{
+                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                            type:KICK.core.Constants.GL_SAMPLER_2D
+                        }
                     }
-                }
-            });
-            var position = [0,-.75,0];
-            addSphere(material, position,[0.25,0.25,0.25]);
-
+                });
+                var position = [-1+(i/5)*3,-.75,0];
+                addSphere(material, position,[0.25,0.25,0.25]);
+            }
             var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
-            var material = new KICK.material.Material(engine, {
-                shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
+            for (var i = 0;i<5;i++){
+                var material = new KICK.material.Material(engine, {
+                    shader:shader,
+                    uniforms:{
+                        mainColor:{
+                            value:[i/5,0.0,0.9,0.5],
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        },
+                        mainTexture:{
+                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                            type:KICK.core.Constants.GL_SAMPLER_2D
+                        }
                     }
-                }
-            });
-            var position = [0,-1.5,0];
-            addSphere(material, position,[0.25,0.25,0.25]);
+                });
+                var position = [-1+(i/5)*3,-1.5,0];
+                addSphere(material, position,[0.25,0.25,0.25]);
+            }
 
             setRotation(true);
         }

@@ -2,27 +2,29 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title></title>
+    <title>KickJS: Mesh Transform Test</title>
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
     <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/resource.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/material.js"></script>
-    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
     <script type="text/javascript">
         var engine;
-        var meshRenderer;
-        
+
+        var mesh;
+        var material;
+
         var log = function (output) {
             var element = document.getElementById("output");
             element.innerHTML = element.innerHTML+output+"<br>";
@@ -33,7 +35,7 @@
             element.innerHTML = "";
         };
 
-        function setMaterial(vertexShaderId, fragmentShaderId){
+        function createMaterial(vertexShaderId, fragmentShaderId){
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
@@ -42,30 +44,10 @@
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
             shader.apply();
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                return;
-            }
-
-            meshRenderer.material = new KICK.material.Material(engine,{
+            return new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader
             });
-        }
-
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
         }
 
         function addRotatorComponent(gameObject){
@@ -81,6 +63,23 @@
             });
         }
 
+        function addCube(parent){
+            var gameObject = engine.activeScene.createGameObject();
+            var meshRenderer = new KICK.scene.MeshRenderer();
+            meshRenderer.mesh = mesh;
+            meshRenderer.material = material;
+            gameObject.addComponent(meshRenderer);
+            addRotatorComponent(gameObject);
+            if (parent){
+                gameObject.transform.parent = parent;
+                gameObject.transform.localPosition = [0,1.2,0];
+            } else {
+                gameObject.transform.localPosition = [0,-5,0];
+            }
+
+            return gameObject.transform;
+        }
+
         function initKick() {
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true
@@ -90,24 +89,25 @@
                 clearColor: [0,0,0,1],
                 perspective: false,
                 near:-1,
-                far:1
+                far:1,
+                bottom:-10,
+                top:10,
+                left:-10,
+                right:10
             });
             cameraObject.addComponent(camera);
 
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
+            mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            material = createMaterial('vertexShaderColor','fragmentShader');
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-            addRotatorComponent(gameObject);
+            var transform = null;
+            for (var i=0;i<5;i++){
+                transform = addCube(transform);
+            }
         }
-
     </script>
 </head>
 <body onload="initKick();">
-    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
-
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
   This example shows how a cube is rotated.
   <br>

@@ -7,18 +7,18 @@
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
     <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/resource.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/renderer.js"></script>
-    <script type="text/javascript" src="../src/js/material.js"></script>
-    <script type="text/javascript" src="../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/renderer.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
     <script type="text/javascript">
         var engine;
         var meshRenderer;
@@ -31,11 +31,9 @@
         var clearLog = function(){
             var element = document.getElementById("output");
             element.innerHTML = "";
-        }
+        };
 
-
-
-        function setMaterial(vertexShaderId, fragmentShaderId){
+        function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer){
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
@@ -76,7 +74,7 @@
                     rotationSpeed = 0.001,
                     translation = transform.localPosition,
                     rotVec = transform.localRotationEuler,
-                    radius = 10,
+                    radius = 5,
                     radianToDegree = KICK.core.Constants._RADIAN_TO_DEGREE,
                     res = document.getElementById("res");
             gameObject.addComponent({
@@ -91,48 +89,21 @@
 
                     //new Date().getMilliseconds();
                     transform.localRotationEuler = rotVec;
+                    if (useMat3ToQuat){
+                        var rotationQuat = transform.localRotation;
+                        var rotationMat3 = KICK.math.quat4.toMat3(rotationQuat);
+                        transform.localRotation = KICK.math.mat3.toQuat(rotationMat3);
+                    }
+                    if (useQuatLookAt){
+                        transform.localRotation = KICK.math.quat4.lookAt(translation,[0,0,0],[0,1,0]);
+                    }
                     res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
                 }
             });
         }
 
-        function buildScene(){
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.transform.localScale = [2,1,1];
-            gameObject.addComponent(meshRenderer);
-
-            var gameObjectSphere = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.5"});
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObjectSphere.transform.localRotation = [0.7071,0,0,0.7071];
-            gameObjectSphere.transform.localPosition = [0,1,0];
-            gameObjectSphere.transform.parent = gameObject.transform;
-            gameObjectSphere.addComponent(meshRenderer);
-
-            var gameObjectCube = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObjectCube.transform.localPosition = [0,-1,0];
-            gameObjectCube.transform.localScale = [2,0.5,1];
-            gameObjectCube.transform.parent = gameObjectSphere.transform;
-            gameObjectCube.addComponent(meshRenderer);
-
-            var gameObjectCube2 = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObjectCube2.transform.localPosition = [0,0,1];
-            gameObjectCube2.transform.localScale = [0.5,0.5,0.5];
-            gameObjectCube2.transform.parent = gameObjectCube.transform;
-            gameObjectCube2.addComponent(meshRenderer);
-
-
-        }
+        var useMat3ToQuat = true;
+        var useQuatLookAt = true;
 
         function initKick() {
             engine = new KICK.core.Engine('canvas',{
@@ -145,7 +116,20 @@
             });
             cameraObject.addComponent(camera);
 
-            buildScene();
+            var gameObject = engine.activeScene.createGameObject();
+            meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
+            gameObject.addComponent(meshRenderer);
+
+            var gameObject2 = engine.activeScene.createGameObject();
+            gameObject2.transform.position = [0,0.5,0];
+            var meshRenderer2 = new KICK.scene.MeshRenderer();
+
+            meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
+            setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
+            gameObject2.addComponent(meshRenderer2);
 
             addRotatorComponent(cameraObject);
         }
@@ -158,7 +142,7 @@
 </head>
 <body onload="initKick();">
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This test shows tests how a deep scene hiearchy works.
+  This example shows how a cube is rotated.
   <br>
 
   <h2>Output</h2>
