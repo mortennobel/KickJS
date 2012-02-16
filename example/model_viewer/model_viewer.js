@@ -127,7 +127,8 @@ function teapotClicked(){
 
 function loadModelFile(file){
     var reader = new FileReader(),
-        fileNameLowercase = file.fileName.toLowerCase();
+        fileName = file.fileName,
+        fileNameLowercase = fileName.toLowerCase();
     var endsWith = function(str,search) {
         return (str.match(search+"$")==search)
     };
