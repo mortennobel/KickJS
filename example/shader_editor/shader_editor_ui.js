@@ -195,7 +195,7 @@
                     }
                 }
             }
-        }
+        };
 
         this.setShaderSource = function(vertexShaderSrc,fragmentShaderSrc){
             vertexShaderSession.setValue(vertexShaderSrc);
