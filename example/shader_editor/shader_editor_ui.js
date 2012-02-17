@@ -673,7 +673,6 @@
                 lightcolor = document.getElementById('lightcolor'),
                 lightintensity = document.getElementById('lightintensity');
 
-            addChildListeners(lightpos,updateSettings,['click','change'],"position");
             addChildListeners(lightrot,updateSettings,['click','change'],"position");
             addChildListeners(lightcolor,updateSettings,['click','change'],"position");
 
