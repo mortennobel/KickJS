@@ -6,6 +6,201 @@
     var shaderid = "";
     var shortUrl = "";
 
+    var ButtonPanel = function(Y){
+        function onFullscreenButton(){
+            if (shaderEditor.engine.isFullScreenSupported()){
+                shaderEditor.engine.setFullscreen(true);
+            } else {
+                alert("Fullscreen is not supported in this browser");
+            }
+        }
+
+        function onLogoutButton(){
+            document.location = logoutURL;
+        }
+
+        function onLoginButton(){
+            saveLocally();
+            document.location = loginURL;
+        }
+
+        function onLoadButton(){
+            if (!username){
+                window.YUIMessage("Login needed", "To load a shader you need to login first.");
+                return;
+            }
+            if (this.isLoading){
+                return;
+            }
+            this.isLoading = true;
+            var thisObj = this;
+            var oReq = new XMLHttpRequest();
+            function handler()
+            {
+                if (oReq.readyState == 4 /* complete */) {
+                    delete thisObj.isLoading;
+                    if (oReq.status == 200) {
+                        var obj = JSON.parse(oReq.responseText);
+                        var shaderList = obj.shaderList;
+                        if (shaderList && shaderList.length){
+                            window.YUILoad(shaderList);
+                        } else {
+                            window.YUIMessage("Load", "Nothing to load.");
+                        }
+
+                    } else {
+                        console.log("Request returned "+oReq.status);
+                    }
+                }
+            }
+
+            oReq.open("GET", "/example/shader_editor/GetShader?ts="+new Date().getTime(), true);
+            oReq.onreadystatechange = handler;
+            oReq.send();
+        }
+
+        function onSaveButton(){
+            if (!username){
+                window.YUIMessage("Login needed", "To save a shader you need to login first.");
+                return;
+            }
+
+            var name = document.getElementById("shadername").value;
+            if (name.trim().length == 0){
+                YUIMessage("Shader name not valid", "Change name in the 'about'-tab");
+                return;
+            }
+
+            var saveButton = document.getElementById('SaveButton');
+            saveButton.innerHTML = "Saving ...";
+            function resetSave(){
+                saveButton.innerHTML = "Save";
+            }
+
+            var about = document.getElementById("shaderAbout").value;
+            var jsonData = getData();
+
+            var obj = {
+                id:shaderid,
+                name:name,
+                about:about,
+                owner:username,
+                data:JSON.stringify(jsonData)
+            };
+            var objStr = JSON.stringify(obj);
+            var oReq = new XMLHttpRequest();
+
+            function handler()
+            {
+                if (oReq.readyState == 4 /* complete */) {
+                    if (oReq.status == 200) {
+                        var obj = JSON.parse(oReq.responseText);
+                        shaderid = obj.id;
+                        shortUrl = obj.shortUrl;
+                        console.log(obj.message);
+                        saveButton.innerHTML = obj.message;
+                    } else {
+                        saveButton.innerHTML = "Save error";
+                    }
+                    setTimeout(resetSave,3000);
+                }
+            }
+            oReq.open("POST", "/example/shader_editor/UpdateShader", true);
+            oReq.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+            oReq.onreadystatechange = handler;
+            oReq.send(objStr);
+        }
+
+        function onShareButton(){
+            if (!username){
+                window.YUIMessage("Login needed", "To share a shader you need to login and save the shader.");
+                return;
+            }
+            if (shortUrl ==null || shortUrl.length==0){
+                window.YUIMessage("Error", "Shader needs to be saved first");
+                return;
+            }
+            var div = document.createElement("div");
+            var input = document.createElement("input");
+            input.style.width="205px";
+            input.style.font = "120% arial,helvetica,clean";
+            input.type="text";
+            input.value = shortUrl;
+            div.appendChild(document.createTextNode("Short url:"));
+            div.appendChild(document.createElement("br"));
+            div.appendChild(input);
+            div.appendChild(document.createElement("br"));
+            var bottomText = document.createElement("a");
+            bottomText.href = shortUrl+".info";
+            bottomText.target = "_new";
+
+            var statsText = document.createTextNode("See stats");
+            bottomText.appendChild(statsText);
+            div.appendChild(bottomText);
+            div.appendChild(document.createElement("br"));
+            var tweet = document.createTextNode("For tweeting use #KickJS");
+            div.appendChild(tweet);
+
+
+            YUIMessage("This shader can be accessed by anyone at:",div);
+            input.focus();
+            input.select();
+        }
+
+        function onExampleButton(){
+            window.YUILoadExample();
+        }
+
+        function onNewButton(){
+            window.YUIConfirm("New shader","Create a new shader?",null,function(){
+                var shader = JSON.parse(window.defaultMaterial);
+                setShader(shader);
+                shaderid = "";
+                shortUrl = "";
+            });
+        }
+        Y.one("#resetShader").on("click",onNewButton);
+        Y.one("#fullscreen").on("click",onFullscreenButton);
+        Y.one("#LogoutButton").on("click",onLogoutButton);
+        Y.one("#LoginButton").on("click",onLoginButton);
+        Y.one("#LoadButton").on("click",onLoadButton);
+        Y.one("#SaveButton").on("click",onSaveButton);
+        Y.one("#ShareButton").on("click",onShareButton);
+        Y.one("#ExampleButton").on("click",onExampleButton);
+    };
+
+    var GLSLEditorPanel = function(Y, id){
+        var editor = window.ace.edit(id);
+        editor.setTheme("ace/theme/twilight");
+        var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
+        var EditSession = window.require('ace/edit_session').EditSession;
+        window.vertexShaderSession = new EditSession( shader.shader.vertexShaderSrc );
+        window.vertexShaderSession.setMode(new GLSL_ES_Mode());
+        editor.setSession(window.vertexShaderSession);
+        window.fragmentShaderSession = new EditSession( shader.shader.fragmentShaderSrc);
+        window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
+
+        this.showVertexShader = function(){
+            document.getElementById('glslEditorPanel').style.display = "block";
+            editor.setSession(window.vertexShaderSession);
+            // clear undo manager
+            var UndoManager = window.require("ace/undomanager").UndoManager;
+            editor.getSession().setUndoManager(new UndoManager());
+        };
+
+        this.showFragmentShader = function(){
+            document.getElementById('glslEditorPanel').style.display = "block";
+            editor.setSession(window.fragmentShaderSession);
+            // clear undo manager
+            var UndoManager = window.require("ace/undomanager").UndoManager;
+            editor.getSession().setUndoManager(new UndoManager());
+        };
+
+        this.hideEditor = function(){
+            document.getElementById('glslEditorPanel').style.display = "none";
+        };
+    };
+
     function shaderChangeListener(force){
         if (window.vertexShaderSession && window.fragmentShaderSession){
             var meshRenderer = shaderEditor.meshRenderer;
@@ -38,15 +233,6 @@
         document.getElementById('shaderAbout').value = shader.about;
         updateShaderName();
         shaderChangeListener(true);
-    }
-
-    function resetShader(){
-        if (window.YUIConfirm("New shader","Create a new shader?",null,function(){
-            var shader = JSON.parse(window.defaultMaterial);
-            setShader(shader);
-            shaderid = "";
-            shortUrl = "";
-        }));
     }
 
     function getChildrenValueVector(elementName){
@@ -594,22 +780,6 @@
         }
     }
 
-    function toogleFullscreen(){
-        if (shaderEditor.engine.isFullScreenSupported()){
-            shaderEditor.engine.setFullscreen(true);
-        } else {
-            alert("Fullscreen is not supported in this browser");
-        }
-    }
-
-    function onLogoutButton(){
-        document.location = logoutURL;
-    }
-
-    function onLoginButton(){
-        saveLocally();
-        document.location = loginURL;
-    }
 
     function loadShaderFromServer(id){
         var oReq = new XMLHttpRequest();
@@ -652,129 +822,6 @@
         oReq.onreadystatechange = handler;
         oReq.send();
         return result;
-    }
-
-    function onLoadButton(){
-        if (!username){
-            window.YUIMessage("Login needed", "To load a shader you need to login first.");
-            return;
-        }
-        if (this.isLoading){
-            return;
-        }
-        this.isLoading = true;
-        var thisObj = this;
-        var oReq = new XMLHttpRequest();
-        function handler()
-        {
-            if (oReq.readyState == 4 /* complete */) {
-                delete thisObj.isLoading;
-                if (oReq.status == 200) {
-                    var obj = JSON.parse(oReq.responseText);
-                    var shaderList = obj.shaderList;
-                    if (shaderList && shaderList.length){
-                        window.YUILoad(shaderList);
-                    } else {
-                        window.YUIMessage("Load", "Nothing to load.");
-                    }
-
-                } else {
-                    console.log("Request returned "+oReq.status);
-                }
-            }
-        }
-
-        oReq.open("GET", "/example/shader_editor/GetShader?ts="+new Date().getTime(), true);
-        oReq.onreadystatechange = handler;
-        oReq.send();
-    }
-
-    function onSaveButton(){
-        if (!username){
-            window.YUIMessage("Login needed", "To save a shader you need to login first.");
-            return;
-        }
-
-        var name = document.getElementById("shadername").value;
-        if (name.trim().length == 0){
-            YUIMessage("Shader name not valid", "Change name in the 'about'-tab");
-            return;
-        }
-        
-        var saveButton = document.getElementById('SaveButton');
-        saveButton.innerHTML = "Saving ...";
-        function resetSave(){
-            saveButton.innerHTML = "Save";
-        }
-
-        var about = document.getElementById("shaderAbout").value;
-        var jsonData = getData();
-        
-        var obj = {
-            id:shaderid,
-            name:name,
-            about:about,
-            owner:username,
-            data:JSON.stringify(jsonData)
-        };
-        var objStr = JSON.stringify(obj);
-        var oReq = new XMLHttpRequest();
-
-        function handler()
-        {
-            if (oReq.readyState == 4 /* complete */) {
-                if (oReq.status == 200) {
-                    var obj = JSON.parse(oReq.responseText);
-                    shaderid = obj.id;
-                    shortUrl = obj.shortUrl;
-                    console.log(obj.message);
-                    saveButton.innerHTML = obj.message;
-                } else {
-                    saveButton.innerHTML = "Save error";
-                }
-                setTimeout(resetSave,3000);
-            }
-        }
-        oReq.open("POST", "/example/shader_editor/UpdateShader", true);
-        oReq.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-        oReq.onreadystatechange = handler;
-        oReq.send(objStr);
-    }
-
-    function onShareButton(){
-        if (!username){
-            window.YUIMessage("Login needed", "To share a shader you need to login and save the shader.");
-            return;
-        }
-        if (shortUrl ==null || shortUrl.length==0){
-            window.YUIMessage("Error", "Shader needs to be saved first");
-            return;
-        }
-        var div = document.createElement("div");
-        var input = document.createElement("input");
-        input.style.width="205px";
-        input.style.font = "120% arial,helvetica,clean";
-        input.type="text";
-        input.value = shortUrl;
-        div.appendChild(document.createTextNode("Short url:"));
-        div.appendChild(document.createElement("br"));
-        div.appendChild(input);
-        div.appendChild(document.createElement("br"));
-        var bottomText = document.createElement("a");
-        bottomText.href = shortUrl+".info";
-        bottomText.target = "_new";
-
-        var statsText = document.createTextNode("See stats");
-        bottomText.appendChild(statsText);
-        div.appendChild(bottomText);
-        div.appendChild(document.createElement("br"));
-        var tweet = document.createTextNode("For tweeting use #KickJS");
-        div.appendChild(tweet);
-
-
-        YUIMessage("This shader can be accessed by anyone at:",div);
-        input.focus();
-        input.select();
     }
 
     function updateSettings(){
@@ -834,7 +881,6 @@
                 var meshsetting = document.getElementById('meshsetting'),
                     projection = document.getElementById('projection'),
                     rotatemesh = document.getElementById('rotatemesh'),
-                    resetShaderBut = document.getElementById('resetShader'),
                     addChildListeners = function (component, listener, listenerNames,tag){
                         var i;
                         for (i=0;i<component.children.length;i++){
@@ -854,7 +900,6 @@
                 addChildListeners(meshsetting,updateSettings,'click',"meshid");
                 addChildListeners(projection,updateSettings,'click',"projection");
                 addChildListeners(rotatemesh,updateSettings,'click',"isOn");
-                resetShaderBut.addEventListener('click',resetShader,false);
 
                 (function addLightListeners(){
                     var lightpos = document.getElementById('lightpos'),
@@ -886,15 +931,8 @@
                     window.YUIMessage("Texture type", "Cube maps must be arranged in one row with the order [Right, Left, Top, Bottom, Front, Back] (also used in <a href='http://www.cgtextures.com/content.php?action=tutorial&name=cubemaps'>NVidia DDS Exporter</a>)<br>");
                 }, false);
 
+                new ButtonPanel(Y);
 
-                document.getElementById('fullscreen').addEventListener('click', toogleFullscreen,false);
-                document.getElementById('LogoutButton').addEventListener('click', onLogoutButton,false);
-                document.getElementById('LoginButton').addEventListener('click', onLoginButton,false);
-                document.getElementById('LoadButton').addEventListener('click', onLoadButton,false);
-                document.getElementById('SaveButton').addEventListener('click', onSaveButton,false);
-                document.getElementById('ExampleButton').addEventListener('click', window.YUILoadExample,false);
-
-                document.getElementById('ShareButton').addEventListener('click', onShareButton,false);
 
                 document.getElementById('addTextureButton').addEventListener('click', addTexture, false);
                 document.getElementById('removeTextureButton').addEventListener('click', removeTexture, false);
@@ -912,50 +950,26 @@
             setShader( shader );
         });
 
-        var initEditor = function(id){
-            try{
-                var editor = window.ace.edit(id);
-                editor.setTheme("ace/theme/twilight");
-                var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
-                var EditSession = window.require('ace/edit_session').EditSession;
-                window.vertexShaderSession = new EditSession( shader.shader.vertexShaderSrc );
-                window.vertexShaderSession.setMode(new GLSL_ES_Mode());
-                editor.setSession(window.vertexShaderSession);
-                window.fragmentShaderSession = new EditSession( shader.shader.fragmentShaderSrc);
-                window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
-            } catch (e){
-                console.log(e);
-            }
-            return editor;
-        };
-        window.aceeditor = initEditor('glslEditor');
+        var glslEditor = new GLSLEditorPanel(Y,'glslEditor');
 
         tabview.on("selectionChange", function(e){
             switch (e.newVal.get('index')){
                 case 0:
-                    document.getElementById('glslEditorPanel').style.display = "block";
-                    window.aceeditor.setSession(window.vertexShaderSession);
-                        // clear undo manager
-                    var UndoManager = window.require("ace/undomanager").UndoManager;
-                    window.aceeditor.getSession().setUndoManager(new UndoManager());
+                    glslEditor.showVertexShader();
                 break;
                 case 1:
-                    document.getElementById('glslEditorPanel').style.display = "block";
-                    window.aceeditor.setSession(window.fragmentShaderSession);
-                        // clear undo manager
-                    var UndoManager = window.require("ace/undomanager").UndoManager;
-                    window.aceeditor.getSession().setUndoManager(new UndoManager());
+                    glslEditor.showFragmentShader();
                 break;
                 case 2:
                     refreshTextures();
-                    document.getElementById('glslEditorPanel').style.display = "none";
+                    glslEditor.hideEditor();
                 break;
                 case 3:
                     refreshUniforms();
-                    document.getElementById('glslEditorPanel').style.display = "none";
+                    glslEditor.hideEditor();
                 break;
                 default:
-                    document.getElementById('glslEditorPanel').style.display = "none";
+                    glslEditor.hideEditor();
                 break;
             }
         });
