@@ -182,6 +182,21 @@
         var fragmentShaderSession = new EditSession( "" );
         fragmentShaderSession.setMode(new GLSL_ES_Mode());
 
+        this.shaderChangeListener = function (force){
+            if (vertexShaderSession && fragmentShaderSession){
+                var meshRenderer = shaderEditor.meshRenderer;
+                if (meshRenderer){
+                    var shader = meshRenderer.material.shader;
+                    var vsNew = vertexShaderSession.getValue();
+                    var fsNew = fragmentShaderSession.getValue();
+                    if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
+                        shaderEditor.apply(vsNew,fsNew);
+                        controller.saveLocally();
+                    }
+                }
+            }
+        }
+
         this.setShaderSource = function(vertexShaderSrc,fragmentShaderSrc){
             vertexShaderSession.setValue(vertexShaderSrc);
             fragmentShaderSession.setValue(fragmentShaderSrc);
@@ -808,21 +823,7 @@
     };
 
     var GLSLEditorController = function(glslEditorPanel, texturePanel, uniformPanel, settingsPanel, descriptionPanel, tabview){
-        var thisObj = this,
-            shaderChangeListener = function (force){
-                if (window.vertexShaderSession && window.fragmentShaderSession){
-                    var meshRenderer = shaderEditor.meshRenderer;
-                    if (meshRenderer){
-                        var shader = meshRenderer.material.shader;
-                        var vsNew = window.vertexShaderSession.getValue();
-                        var fsNew = window.fragmentShaderSession.getValue();
-                        if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
-                            shaderEditor.apply(vsNew,fsNew);
-                            controller.saveLocally();
-                        }
-                    }
-                }
-            };
+        var thisObj = this;
 
         this.loadShaderFromServer = function(id){
             var oReq = new XMLHttpRequest();
@@ -843,7 +844,7 @@
             oReq.open("GET", "/example/shader_editor/GetShader?id="+id+"&ts="+new Date().getTime(), true);
             oReq.onreadystatechange = handler;
             oReq.send();
-        }
+        };
 
         this.setShader = function(shader){
             window.shader = shader;
@@ -858,7 +859,7 @@
             shaderEditor.loadMaterial(shader);
             settingsPanel.setSettingsData(shader.settingsData);
             descriptionPanel.setShaderNameAndDescription(shader.name,shader.about);
-            shaderChangeListener(true);
+            glslEditorPanel.shaderChangeListener(true);
         };
 
         this.getData = function (){
@@ -924,7 +925,7 @@
             }
         });
         // start shader listener
-        setInterval(shaderChangeListener,2000);
+        setInterval(glslEditorPanel.shaderChangeListener,2000);
     };
 
 
