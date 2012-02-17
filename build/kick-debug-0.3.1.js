@@ -13723,8 +13723,8 @@ KICK.namespace = function (ns_string) {
                 activeAttributes,
                 attribute;
             if (compileError){
-                vertexShader = compileShader(glslConstants["error_vs.glsl"], false, errorLog);
-                fragmentShader = compileShader(glslConstants["error_fs.glsl"], true, errorLog);
+                vertexShader = compileShader(glslConstants["__error_vs.glsl"], false, errorLog);
+                fragmentShader = compileShader(glslConstants["__error_fs.glsl"], true, errorLog);
             }
 
             _shaderProgramId = gl.createProgram();
