@@ -6,7 +6,7 @@
     var shaderid = "";
     var shortUrl = "";
 
-    var settingsPanel;
+    var controller;
 
     var ButtonPanel = function(Y){
         function onFullscreenButton(){
@@ -22,7 +22,7 @@
         }
 
         function onLoginButton(){
-            saveLocally();
+            controller.saveLocally();
             document.location = loginURL;
         }
 
@@ -80,7 +80,7 @@
             }
 
             var about = document.getElementById("shaderAbout").value;
-            var jsonData = getData();
+            var jsonData = controller.getData();
 
             var obj = {
                 id:shaderid,
@@ -156,7 +156,7 @@
         function onNewButton(){
             window.YUIConfirm("New shader","Create a new shader?",null,function(){
                 var shader = JSON.parse(window.defaultMaterial);
-                setShader(shader);
+                controller.setShader(shader);
                 shaderid = "";
                 shortUrl = "";
             });
@@ -176,15 +176,20 @@
         editor.setTheme("ace/theme/twilight");
         var GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
         var EditSession = window.require('ace/edit_session').EditSession;
-        window.vertexShaderSession = new EditSession( shader.shader.vertexShaderSrc );
-        window.vertexShaderSession.setMode(new GLSL_ES_Mode());
-        editor.setSession(window.vertexShaderSession);
-        window.fragmentShaderSession = new EditSession( shader.shader.fragmentShaderSrc);
-        window.fragmentShaderSession.setMode(new GLSL_ES_Mode());
+        var vertexShaderSession = new EditSession( "" );
+        vertexShaderSession.setMode(new GLSL_ES_Mode());
+        editor.setSession(vertexShaderSession);
+        var fragmentShaderSession = new EditSession( "" );
+        fragmentShaderSession.setMode(new GLSL_ES_Mode());
+
+        this.setShaderSource = function(vertexShaderSrc,fragmentShaderSrc){
+            vertexShaderSession.setValue(vertexShaderSrc);
+            fragmentShaderSession.setValue(fragmentShaderSrc);
+        };
 
         this.showVertexShader = function(){
             document.getElementById('glslEditorPanel').style.display = "block";
-            editor.setSession(window.vertexShaderSession);
+            editor.setSession(vertexShaderSession);
             // clear undo manager
             var UndoManager = window.require("ace/undomanager").UndoManager;
             editor.getSession().setUndoManager(new UndoManager());
@@ -192,7 +197,7 @@
 
         this.showFragmentShader = function(){
             document.getElementById('glslEditorPanel').style.display = "block";
-            editor.setSession(window.fragmentShaderSession);
+            editor.setSession(fragmentShaderSession);
             // clear undo manager
             var UndoManager = window.require("ace/undomanager").UndoManager;
             editor.getSession().setUndoManager(new UndoManager());
@@ -205,6 +210,29 @@
 
     var TexturePanel = function(Y){
         var currentTextures = document.getElementById('currentTextures');
+
+        function getSelectedGLConstant(elementId){
+            var elem = document.getElementById(elementId),
+                options = elem.options,
+                selectedIndex = elem.selectedIndex;
+            if (selectedIndex===-1){
+                return null;
+            }
+            return options[elem.selectedIndex].gl;
+        }
+
+        function setSelectedGLConstant(elementId, glConst){
+            var elem = document.getElementById(elementId),
+                options = elem.options;
+            for (var i=0;i<options.length;i++){
+                if (options[i].gl === glConst){
+                    elem.selectedIndex = i;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /**
          * Add gl attribute to option elements of a select
          * @param elementId select element to be modified
@@ -307,6 +335,11 @@
                 currentTextures.add(newOption,null);
             }
         };
+
+        this.getTextureData = function (){
+            return shaderEditor.textures;
+        };
+
         var c = KICK.core.Constants;
         Y.one("#addTextureButton").on('click', addTexture);
         Y.one("#removeTextureButton").on('click', removeTexture);
@@ -635,6 +668,70 @@
                 }
             };
 
+        function getChildrenValueVector(elementName){
+            var elem = document.getElementById(elementName),
+                array = [],
+                i,
+                count = 0;
+            for (i=0;i<elem.children.length;i++){
+                if (elem.children[i].nodeName === 'INPUT'){
+                    array[count++] = Number(elem.children[i].value);
+                }
+            }
+            return array;
+        }
+
+        function setChildrenValueVector(elementName,vector){
+            var elem = document.getElementById(elementName),
+                i,
+                count = 0,
+                childElem;
+            for (i=0;i<elem.children.length;i++){
+                childElem =elem.children[i];
+                if (childElem.nodeName === 'INPUT'){
+                    childElem.value = vector[count++];
+                }
+            }
+        }
+
+        function getRadioValue(elementName){
+            var elem = document.getElementById(elementName),
+                i,
+                childElem;
+            for (i=0;i<elem.children.length;i++){
+                childElem =elem.children[i];
+                if (childElem.nodeName === 'INPUT'){
+                    if (childElem.checked){
+                        return childElem.value;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function setRadioValue(elementName,value){
+            var  elem = document.getElementById(elementName),
+                checked = null,
+                isElementChecked,
+                firstInputElement = null;
+            for (var i=0;i<elem.children.length;i++){
+                var childElem =elem.children[i];
+                if (childElem.nodeName === 'INPUT'){
+                    isElementChecked = childElem.value === value;
+                    childElem.checked = isElementChecked;
+                    if (isElementChecked){
+                        checked = childElem;
+                    }
+                    if (firstInputElement === null){
+                        firstInputElement = childElem;
+                    }
+                }
+            }
+            if (checked === null){ // if no element found - check the first element
+                firstInputElement.checked = true;
+            }
+        }
+
         function updateSettings(){
             var data = thisObj.getSettingsData();
             window.shaderEditor.updateSettings(data);
@@ -660,6 +757,7 @@
             setChildrenValueVector('lightrot',settingsData.lightrot);
             setChildrenValueVector('lightcolor',settingsData.lightcolor);
             lightintensity.value = settingsData.lightintensity;
+            updateSettings();
         };
 
 
@@ -685,197 +783,151 @@
             var am = document.getElementById('ambientLight');
             addChildListeners(am,updateSettings,['click','change'],"position");
         })();
+    };
 
+    var DescriptionPanel = function(Y){
+        var shaderNameElement =Y.one("#shadername"),
+            thisObj = this;
+        shaderNameElement.on('change', function(){
+            thisObj.updateShaderName();
+        });
+
+        this.updateShaderName = function(){
+            var val = shaderNameElement.get("value");
+            var title = "Kick.js | Shader editor | "+val;
+            document.getElementById('header').innerHTML = title.escapeHTML();
+            document.title = title;
+        };
+
+        this.setShaderNameAndDescription = function(name, description){
+            shaderNameElement.set("value", name || "Unnamed shader");
+            thisObj.updateShaderName();
+            document.getElementById('shaderAbout').value = description || "";
+        }
+
+    };
+
+    var GLSLEditorController = function(glslEditorPanel, texturePanel, uniformPanel, settingsPanel, descriptionPanel, tabview){
+        var thisObj = this,
+            shaderChangeListener = function (force){
+                if (window.vertexShaderSession && window.fragmentShaderSession){
+                    var meshRenderer = shaderEditor.meshRenderer;
+                    if (meshRenderer){
+                        var shader = meshRenderer.material.shader;
+                        var vsNew = window.vertexShaderSession.getValue();
+                        var fsNew = window.fragmentShaderSession.getValue();
+                        if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
+                            shaderEditor.apply(vsNew,fsNew);
+                            controller.saveLocally();
+                        }
+                    }
+                }
+            };
+
+        this.loadShaderFromServer = function(id){
+            var oReq = new XMLHttpRequest();
+            function handler()
+            {
+                if (oReq.readyState == 4 /* complete */) {
+                    if (oReq.status == 200) {
+                        var obj = JSON.parse(oReq.responseText);
+                        shaderid = id;
+                        shortUrl = obj.shortUrl;
+                        thisObj.setShader(JSON.parse(obj.data));
+                    } else {
+                        console.log("loadShaderFromServer status "+oReq.status);
+                    }
+                }
+            }
+
+            oReq.open("GET", "/example/shader_editor/GetShader?id="+id+"&ts="+new Date().getTime(), true);
+            oReq.onreadystatechange = handler;
+            oReq.send();
+        }
+
+        this.setShader = function(shader){
+            window.shader = shader;
+            var currentTextures = document.getElementById('currentTextures');
+            while (currentTextures.options.length>0){
+                currentTextures.remove(0);
+            }
+            document.getElementById('textureDetails').style.display = 'none';
+            document.getElementById('texturePreview').style.display = 'none';
+
+            glslEditorPanel.setShaderSource(shader.shader.vertexShaderSrc,shader.shader.fragmentShaderSrc)
+            shaderEditor.loadMaterial(shader);
+            settingsPanel.setSettingsData(shader.settingsData);
+            descriptionPanel.setShaderNameAndDescription(shader.name,shader.about);
+            shaderChangeListener(true);
+        };
+
+        this.getData = function (){
+            shaderEditor.meshRenderer.material.shader.dataURI = null; // force shader to be serialized
+            return {
+                shader: shaderEditor.meshRenderer.material.shader.toJSON(),
+                material: shaderEditor.meshRenderer.material.toJSON(),
+                textureData: texturePanel.getTextureData(),
+                settingsData: settingsPanel.getSettingsData(),
+                name: document.getElementById('shadername').value,
+                about: document.getElementById('shaderAbout').value
+            };
+        };
+
+        this.saveLocally = function (){
+            var jsonData = thisObj.getData();
+            localStorage.setItem("shader",JSON.stringify(jsonData));
+        };
+
+        /**
+         * Loads a shader (if not found - use the default material).
+         * This will replace the global window.shader - but not change UI or update shader
+         */
+        this.loadLocally = function(){
+            try{
+                var shaderData = JSON.parse(window.defaultMaterial);
+                window.shader = shaderData;
+
+                var shaderStr = localStorage.getItem("shader");
+                if (shaderStr){
+                    var shaderDataTmp = JSON.parse(shaderStr);
+                    if (shaderDataTmp){
+                        window.shader = shaderData;
+                        shaderData = shaderDataTmp;
+                    }
+                }
+            } catch (e){
+                console.log(e);
+                window.shader = JSON.parse(window.defaultMaterial);
+            }
+            return window.shader;
+        };
+
+        tabview.on("selectionChange", function(e){
+            switch (e.newVal.get('index')){
+                case 0:
+                    glslEditorPanel.showVertexShader();
+                    break;
+                case 1:
+                    glslEditorPanel.showFragmentShader();
+                    break;
+                case 2:
+                    texturePanel.refreshTextures();
+                    glslEditorPanel.hideEditor();
+                    break;
+                case 3:
+                    uniformPanel.refreshUniforms();
+                    glslEditorPanel.hideEditor();
+                    break;
+                default:
+                    glslEditorPanel.hideEditor();
+                    break;
+            }
+        });
         // start shader listener
         setInterval(shaderChangeListener,2000);
     };
 
-    function shaderChangeListener(force){
-        if (window.vertexShaderSession && window.fragmentShaderSession){
-            var meshRenderer = shaderEditor.meshRenderer;
-            if (meshRenderer){
-                var shader = meshRenderer.material.shader;
-                var vsNew = window.vertexShaderSession.getValue();
-                var fsNew = window.fragmentShaderSession.getValue();
-                if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
-                    shaderEditor.apply(vsNew,fsNew);
-                    saveLocally();
-                }
-            }
-        }
-    }
 
-    function setShader(shader){
-        window.shader = shader;
-        var currentTextures = document.getElementById('currentTextures');
-        while (currentTextures.options.length>0){
-            currentTextures.remove(0);
-        }
-        document.getElementById('textureDetails').style.display = 'none';
-        document.getElementById('texturePreview').style.display = 'none';
-        window.vertexShaderSession.setValue(shader.shader.vertexShaderSrc);
-        window.fragmentShaderSession.setValue(shader.shader.fragmentShaderSrc);
-        shaderEditor.loadMaterial(shader);
-        settingsPanel.setSettingsData(shader.settingsData);
-        settingsPanel.updateSettings();
-        document.getElementById('shadername').value = shader.name || "Unnamed shader";
-        document.getElementById('shaderAbout').value = shader.about;
-        updateShaderName();
-        shaderChangeListener(true);
-    }
-
-    function getChildrenValueVector(elementName){
-        var elem = document.getElementById(elementName),
-            array = [],
-            i,
-            count = 0;
-        for (i=0;i<elem.children.length;i++){
-            if (elem.children[i].nodeName === 'INPUT'){
-                array[count++] = Number(elem.children[i].value);
-            }
-        }
-        return array;
-    }
-
-    function setChildrenValueVector(elementName,vector){
-        var elem = document.getElementById(elementName),
-            i,
-            count = 0,
-            childElem;
-        for (i=0;i<elem.children.length;i++){
-            childElem =elem.children[i];
-            if (childElem.nodeName === 'INPUT'){
-                childElem.value = vector[count++];
-            }
-        }
-    }
-
-    function getRadioValue(elementName){
-        var elem = document.getElementById(elementName),
-            i,
-            childElem;
-        for (i=0;i<elem.children.length;i++){
-            childElem =elem.children[i];
-            if (childElem.nodeName === 'INPUT'){
-                if (childElem.checked){
-                    return childElem.value;
-                }
-            }
-        }
-        return null;
-    }
-
-    function setRadioValue(elementName,value){
-        var  elem = document.getElementById(elementName),
-            checked = null,
-            isElementChecked,
-            firstInputElement = null;
-        for (var i=0;i<elem.children.length;i++){
-            var childElem =elem.children[i];
-            if (childElem.nodeName === 'INPUT'){
-                isElementChecked = childElem.value === value;
-                childElem.checked = isElementChecked;
-                if (isElementChecked){
-                    checked = childElem;
-                }
-                if (firstInputElement === null){
-                    firstInputElement = childElem;
-                }
-            }
-        }
-        if (checked === null){ // if no element found - check the first element
-            firstInputElement.checked = true;
-        }
-    }
-
-    function getTextureData(){
-        return shaderEditor.textures;
-    }
-
-
-    function getData(){
-        shaderEditor.meshRenderer.material.shader.dataURI = null; // force shader to be serialized
-        return {
-            shader: shaderEditor.meshRenderer.material.shader.toJSON(),
-            material: shaderEditor.meshRenderer.material.toJSON(),
-            textureData: getTextureData(),
-            settingsData: settingsPanel.getSettingsData(),
-            name: document.getElementById('shadername').value,
-            about: document.getElementById('shaderAbout').value
-        };
-    }
-
-    function saveLocally(){
-        var jsonData = getData();
-        localStorage.setItem("shader",JSON.stringify(jsonData));
-    }
-
-    /**
-     * Loads a shader (if not found - use the default material).
-     * This will replace the global window.shader - but not change UI or update shader
-     */
-    function loadLocally(){
-        try{
-            var shaderData = JSON.parse(window.defaultMaterial);
-            window.shader = shaderData;
-
-            var shaderStr = localStorage.getItem("shader");
-            if (shaderStr){
-                var shaderDataTmp = JSON.parse(shaderStr);
-                if (shaderDataTmp){
-                    window.shader = shaderData;
-                    shaderData = shaderDataTmp;
-                }
-            }
-        } catch (e){
-            console.log(e);
-            window.shader = JSON.parse(window.defaultMaterial);
-        }
-        return window.shader;
-    }
-
-    function getSelectedGLConstant(elementId){
-        var elem = document.getElementById(elementId),
-            options = elem.options,
-            selectedIndex = elem.selectedIndex;
-        if (selectedIndex===-1){
-            return null;
-        }
-        return options[elem.selectedIndex].gl;
-    }
-
-    function setSelectedGLConstant(elementId, glConst){
-        var elem = document.getElementById(elementId),
-                options = elem.options;
-        for (var i=0;i<options.length;i++){
-            if (options[i].gl === glConst){
-                elem.selectedIndex = i;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function loadShaderFromServer(id){
-        var oReq = new XMLHttpRequest();
-        function handler()
-        {
-            if (oReq.readyState == 4 /* complete */) {
-                if (oReq.status == 200) {
-                    var obj = JSON.parse(oReq.responseText);
-                    shaderid = id;
-                    shortUrl = obj.shortUrl;
-                    setShader(JSON.parse(obj.data));
-                } else {
-                    console.log("loadShaderFromServer status "+oReq.status);
-                }
-            }
-        }
-
-        oReq.open("GET", "/example/shader_editor/GetShader?id="+id+"&ts="+new Date().getTime(), true);
-        oReq.onreadystatechange = handler;
-        oReq.send();
-    }
 
     function loadShaderSync(id){
         var oReq = new XMLHttpRequest();
@@ -897,13 +949,6 @@
         oReq.onreadystatechange = handler;
         oReq.send();
         return result;
-    }
-
-    function updateShaderName(){
-        var val = document.getElementById('shadername').value;
-        var title = "Kick.js | Shader editor | "+val;
-        document.getElementById('header').innerHTML = title.escapeHTML();
-        document.title = title;
     }
 
     window.YUI().use('tabview','console', "panel", "datatable-base", "dd-plugin",function(Y) {
@@ -934,49 +979,29 @@
         r.render('#logger');
 
         window.log = r;
-        var idParameter = document.location.hash.length>1;
-        var shader = null;
-        if (idParameter){
-            idParameter = document.location.hash.substring(1);
-            document.location.hash = "";
-            var result = loadShaderSync(idParameter);
-            shader = JSON.parse(result.data);
-        }
-        if (shader==null){
-            shader = loadLocally();
-        }
 
-        shaderEditor.initKick(function(){
-            setShader( shader );
-        });
         var buttonPanel = new ButtonPanel(Y);
-        var glslEditor = new GLSLEditorPanel(Y,'glslEditor');
+
         var texturePanel = new TexturePanel(Y);
         var uniformPanel = new UniformsPanel(Y);
-        settingsPanel = new SettingsPanel(Y);
-
-        document.getElementById('shadername').addEventListener('change', updateShaderName, false);
-
-        tabview.on("selectionChange", function(e){
-            switch (e.newVal.get('index')){
-                case 0:
-                    glslEditor.showVertexShader();
-                break;
-                case 1:
-                    glslEditor.showFragmentShader();
-                break;
-                case 2:
-                    texturePanel.refreshTextures();
-                    glslEditor.hideEditor();
-                break;
-                case 3:
-                    uniformPanel.refreshUniforms();
-                    glslEditor.hideEditor();
-                break;
-                default:
-                    glslEditor.hideEditor();
-                break;
+        var settingsPanel = new SettingsPanel(Y);
+        var descriptionPanel = new DescriptionPanel(Y);
+        shaderEditor.initKick(function(){
+            var glslEditor = new GLSLEditorPanel(Y,'glslEditor');
+            controller = new GLSLEditorController(glslEditor,texturePanel,uniformPanel,settingsPanel, descriptionPanel, tabview);
+            var idParameter = document.location.hash.length>1;
+            var shader = null;
+            if (idParameter){
+                idParameter = document.location.hash.substring(1);
+                document.location.hash = "";
+                var result = loadShaderSync(idParameter);
+                shader = JSON.parse(result.data);
             }
+
+            if (shader==null){
+                shader = controller.loadLocally();
+            }
+            controller.setShader( shader );
         });
 
         window.YUIMessage = function (headerTxt,bodyTxt){
@@ -1122,7 +1147,7 @@
                             var selectedIndex = bodyContent.selectedIndex;
                             if (selectedIndex >-1){
                                 var id = bodyContent.options[selectedIndex].value;
-                                loadShaderFromServer(id);
+                                controller.loadShaderFromServer(id);
                             }
                             panel.destroy();
                         },
@@ -1174,7 +1199,6 @@
             nestedPanel.render('#nestedPanel');
         };
 
-
         function loginInfo(){
             var oReq = new XMLHttpRequest();
 
@@ -1210,10 +1234,10 @@
 String.prototype.trim=function(){return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');};
 
 String.prototype.escapeHTML = function () {
-        return(
-            this.replace(/&/g,'&amp;').
-                replace(/>/g,'&gt;').
-                replace(/</g,'&lt;').
-                replace(/"/g,'&quot;')
+    return(
+        this.replace(/&/g,'&amp;').
+            replace(/>/g,'&gt;').
+            replace(/</g,'&lt;').
+            replace(/"/g,'&quot;')
         );
-    };
+};

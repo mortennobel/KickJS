@@ -91,7 +91,7 @@ window.shaderEditor = new (function(){
      */
     this.updateTexture = function(texture,config, fnSetImageSrc){
         for (var name in config){
-            if (typeof name === 'string'){
+            if (typeof name === 'string' && name !== "dataURI"){
                 try{
                     texture[name] = config[name];
                 } catch (ignore){}
