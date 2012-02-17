@@ -10585,7 +10585,7 @@ KICK.namespace = function (ns_string) {
             if (config){
                 _uid = config.uid;
                 _name = config.name || "Scene";
-                var gameObjects = config.gameObjects;
+                var gameObjects = config.gameObjects || [];
                 var mappingUidToObject = {};
                 var configs = {};
                 // create game objects
@@ -10635,7 +10635,7 @@ KICK.namespace = function (ns_string) {
                         componentObj,
                         type,
                         gameObjectConfig;
-                    var gameObjects = config.gameObjects;
+                    var gameObjects = config.gameObjects || [];
 
                     for (var j=0;j<gameObjects.length;j++){
                         gameObjectConfig = config.gameObjects[j];
@@ -10813,7 +10813,8 @@ KICK.namespace = function (ns_string) {
                 mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
             },
             /**
-             * Compare two objects based on renderOrder value and then material.shader.uid (if exist)
+             * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
+             * and finally on mesh.
              * @method compareRenderOrder
              * @param {Component}
              * @param {Component}
