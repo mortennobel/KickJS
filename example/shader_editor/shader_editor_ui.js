@@ -6,6 +6,8 @@
     var shaderid = "";
     var shortUrl = "";
 
+    var settingsPanel;
+
     var ButtonPanel = function(Y){
         function onFullscreenButton(){
             if (shaderEditor.engine.isFullScreenSupported()){
@@ -612,6 +614,83 @@
         Y.one('#uniform_number_update').on('click', updateUniformNumber, false);
     };
 
+    var SettingsPanel = function(Y){
+        var meshsetting = document.getElementById('meshsetting'),
+            projection = document.getElementById('projection'),
+            rotatemesh = document.getElementById('rotatemesh'),
+            thisObj = this,
+            addChildListeners = function (component, listener, listenerNames,tag){
+                var i;
+                for (i=0;i<component.children.length;i++){
+                    if (Array.isArray(listenerNames)){
+                        for (var j=0;j<listenerNames.length;j++){
+                            component.children[i].addEventListener(listenerNames[j],listener,false);
+                        }
+                    } else {
+                        component.children[i].addEventListener(listenerNames,listener,false);
+                    }
+                    if (tag){
+                        component.children[i][tag] = i;
+                    }
+                }
+            };
+
+        function updateSettings(){
+            var data = thisObj.getSettingsData();
+            window.shaderEditor.updateSettings(data);
+        }
+
+        this.getSettingsData = function(){
+            return {
+                meshsetting: getRadioValue('meshsetting'),
+                projection: getRadioValue('projection'),
+                rotatemesh: getRadioValue('rotatemesh'),
+                lightrot: getChildrenValueVector('lightrot'),
+                lightcolor: getChildrenValueVector('lightcolor'),
+                lightAmbient: getChildrenValueVector('ambientLight'),
+                lightintensity: Number(document.getElementById('lightintensity').value)
+            };
+        };
+
+        this.setSettingsData = function(settingsData){
+            setRadioValue('meshsetting',settingsData.meshsetting);
+            setRadioValue('projection',settingsData.projection);
+            setRadioValue('rotatemesh',settingsData.rotatemesh);
+            var lightintensity = document.getElementById('lightintensity');
+            setChildrenValueVector('lightrot',settingsData.lightrot);
+            setChildrenValueVector('lightcolor',settingsData.lightcolor);
+            lightintensity.value = settingsData.lightintensity;
+        };
+
+
+        addChildListeners(meshsetting,updateSettings,'click',"meshid");
+        addChildListeners(projection,updateSettings,'click',"projection");
+        addChildListeners(rotatemesh,updateSettings,'click',"isOn");
+
+        (function addLightListeners(){
+            var lightpos = document.getElementById('lightpos'),
+                lightrot = document.getElementById('lightrot'),
+                lightcolor = document.getElementById('lightcolor'),
+                lightintensity = document.getElementById('lightintensity');
+
+            addChildListeners(lightpos,updateSettings,['click','change'],"position");
+            addChildListeners(lightrot,updateSettings,['click','change'],"position");
+            addChildListeners(lightcolor,updateSettings,['click','change'],"position");
+
+            lightintensity.addEventListener('change',updateSettings,false);
+            lightintensity.addEventListener('click',updateSettings,false);
+        })();
+
+
+        (function addAmbientListener(){
+            var am = document.getElementById('ambientLight');
+            addChildListeners(am,updateSettings,['click','change'],"position");
+        })();
+
+        // start shader listener
+        setInterval(shaderChangeListener,2000);
+    };
+
     function shaderChangeListener(force){
         if (window.vertexShaderSession && window.fragmentShaderSession){
             var meshRenderer = shaderEditor.meshRenderer;
@@ -638,8 +717,8 @@
         window.vertexShaderSession.setValue(shader.shader.vertexShaderSrc);
         window.fragmentShaderSession.setValue(shader.shader.fragmentShaderSrc);
         shaderEditor.loadMaterial(shader);
-        setSettingsData(shader.settingsData);
-        updateSettings();
+        settingsPanel.setSettingsData(shader.settingsData);
+        settingsPanel.updateSettings();
         document.getElementById('shadername').value = shader.name || "Unnamed shader";
         document.getElementById('shaderAbout').value = shader.about;
         updateShaderName();
@@ -714,29 +793,6 @@
         return shaderEditor.textures;
     }
 
-    function getSettingsData(){
-        return {
-            meshsetting: getRadioValue('meshsetting'),
-            projection: getRadioValue('projection'),
-            rotatemesh: getRadioValue('rotatemesh'),
-            lightpos: getChildrenValueVector('lightpos'),
-            lightrot: getChildrenValueVector('lightrot'),
-            lightcolor: getChildrenValueVector('lightcolor'),
-            lightAmbient: getChildrenValueVector('ambientLight'),
-            lightintensity: Number(document.getElementById('lightintensity').value)
-        };
-    }
-
-    function setSettingsData(settingsData){
-        setRadioValue('meshsetting',settingsData.meshsetting);
-        setRadioValue('projection',settingsData.projection);
-        setRadioValue('rotatemesh',settingsData.rotatemesh);
-        var lightintensity = document.getElementById('lightintensity');
-        setChildrenValueVector('lightpos',settingsData.lightpos);
-        setChildrenValueVector('lightrot',settingsData.lightrot);
-        setChildrenValueVector('lightcolor',settingsData.lightcolor);
-        lightintensity.value = settingsData.lightintensity;
-    }
 
     function getData(){
         shaderEditor.meshRenderer.material.shader.dataURI = null; // force shader to be serialized
@@ -744,7 +800,7 @@
             shader: shaderEditor.meshRenderer.material.shader.toJSON(),
             material: shaderEditor.meshRenderer.material.toJSON(),
             textureData: getTextureData(),
-            settingsData: getSettingsData(),
+            settingsData: settingsPanel.getSettingsData(),
             name: document.getElementById('shadername').value,
             about: document.getElementById('shaderAbout').value
         };
@@ -844,11 +900,6 @@
         return result;
     }
 
-    function updateSettings(){
-        var data = getSettingsData();
-        window.shaderEditor.updateSettings(data);
-    }
-
     function updateShaderName(){
         var val = document.getElementById('shadername').value;
         var title = "Kick.js | Shader editor | "+val;
@@ -897,65 +948,15 @@
         }
 
         shaderEditor.initKick(function(){
-            (function setupSettings(){
-                var meshsetting = document.getElementById('meshsetting'),
-                    projection = document.getElementById('projection'),
-                    rotatemesh = document.getElementById('rotatemesh'),
-                    addChildListeners = function (component, listener, listenerNames,tag){
-                        var i;
-                        for (i=0;i<component.children.length;i++){
-                            if (Array.isArray(listenerNames)){
-                                for (var j=0;j<listenerNames.length;j++){
-                                    component.children[i].addEventListener(listenerNames[j],listener,false);
-                                }
-                            } else {
-                                component.children[i].addEventListener(listenerNames,listener,false);
-                            }
-                            if (tag){
-                                component.children[i][tag] = i;
-                            }
-                        }
-                    };
-
-                addChildListeners(meshsetting,updateSettings,'click',"meshid");
-                addChildListeners(projection,updateSettings,'click',"projection");
-                addChildListeners(rotatemesh,updateSettings,'click',"isOn");
-
-                (function addLightListeners(){
-                    var lightpos = document.getElementById('lightpos'),
-                        lightrot = document.getElementById('lightrot'),
-                        lightcolor = document.getElementById('lightcolor'),
-                        lightintensity = document.getElementById('lightintensity');
-
-                    addChildListeners(lightpos,updateSettings,['click','change'],"position");
-                    addChildListeners(lightrot,updateSettings,['click','change'],"position");
-                    addChildListeners(lightcolor,updateSettings,['click','change'],"position");
-
-                    lightintensity.addEventListener('change',updateSettings,false);
-                    lightintensity.addEventListener('click',updateSettings,false);
-                })();
-
-
-                (function addAmbientListener(){
-                    var am = document.getElementById('ambientLight');
-                    addChildListeners(am,updateSettings,['click','change'],"position");
-                })();
-
-
-                new ButtonPanel(Y);
-
-
-                document.getElementById('shadername').addEventListener('change', updateShaderName, false);
-
-                // start shader listener
-                setInterval(shaderChangeListener,2000);
-            })();
             setShader( shader );
         });
-
+        var buttonPanel = new ButtonPanel(Y);
         var glslEditor = new GLSLEditorPanel(Y,'glslEditor');
         var texturePanel = new TexturePanel(Y);
         var uniformPanel = new UniformsPanel(Y);
+        settingsPanel = new SettingsPanel(Y);
+
+        document.getElementById('shadername').addEventListener('change', updateShaderName, false);
 
         tabview.on("selectionChange", function(e){
             switch (e.newVal.get('index')){

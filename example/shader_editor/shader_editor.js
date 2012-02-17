@@ -39,7 +39,6 @@ window.shaderEditor = new (function(){
         _light.intensity = settings.lightintensity;
         _light.color = settings.lightcolor;
         _lightTransform.rotationEuler = settings.lightrot;
-        _lightTransform.position = settings.lightpos;
         isRotating = settings.rotatemesh==="on";
         var cameraTransform = camera.gameObject.transform;
         if (settings.projection === "perspective"){

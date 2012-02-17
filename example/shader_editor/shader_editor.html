@@ -202,30 +202,12 @@
                         <input type="radio" name="camera-projection-perspective" id="orthogonale" value="orthogonale" checked><label for="orthogonale"> Orthogonale</label></option>
                         <input type="radio" name="camera-projection-perspective" id="perspective" value="perspective"><label for="perspective"> Perspective</label></option>
                     </div>
-                    <!--<h3>Rotate camera</h3>
-                    <div id="rotatecam">
-                    <input type="radio" name="camera-rotate-settings" value="off">Off</option>
-                    <input type="radio" name="camera-rotate-settings" value="on" checked>On</option>
-                    </div> -->
                     <h3>Rotate mesh</h3>
                     <div id="rotatemesh">
-                        <input type="radio" name="mesh-rotate-settings" value="off">Off</option>
-                        <input type="radio" name="mesh-rotate-settings" value="on" checked>On</option>
+                        <input type="radio" name="mesh-rotate-settings" id="rotateOff" value="off"><label for="rotateOff"> Off</label></option>
+                        <input type="radio" name="mesh-rotate-settings" id="rotateOn" value="on" checked><label for="rotateOn"> On</label></option>
                     </div>
-                    <h3>Light</h3>
-                    <div id="lighttype">
-                        <!-- <input type="radio" name="lighttype" value="pointlight">Point light</option> -->
-                        <input type="radio" name="lighttype" value="directionalLight" checked>Directional light</option>
-                    </div><br>
-                    <!-- position is hidden since it only makes sense for point-light -->
-                    <div style="display: none;">
-                        Position:<br>
-                        <div id="lightpos">
-                            <input type="number" name="lightx" value="1" step=0.1>
-                            <input type="number" name="lighty" value="1" step=0.1>
-                            <input type="number" name="lightz" value="1" step=0.1><br>
-                        </div>
-                    </div>
+                    <h3>Directional Light</h3>
                     Rotation (<b title="default pointing towards negative z">Euler</b>):<br>
                     <div id="lightrot">
                         <input type="number" id="light_rot_x" value="0" step=5>
