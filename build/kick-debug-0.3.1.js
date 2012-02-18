@@ -6648,11 +6648,11 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Returns the buildin engine resources
-         * @method getEngineResourceDescriptorByType
+         * @method getEngineResourceDescriptorsByType
          * @param {String} type
          * @return {Array[KICK.core.ResourceDescriptor]}
          */
-        this.getEngineResourceDescriptorByType = function(type){
+        this.getEngineResourceDescriptorsByType = function(type){
             var res = [];
             var searchFor;
             if (type === "KICK.mesh.Mesh"){

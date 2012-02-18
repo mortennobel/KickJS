@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title></title>
+    <title>KickJS engine unit-test</title>
             <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
             <link rel="stylesheet" href="/combo/css?main-min.css">
@@ -301,7 +301,7 @@ mixkey(math.random(), pool);
 <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
 </head>
 <body class="yui3-skin-sam">
-<h1>Math test</h1>
+<h1>KickJS engine unit-test</h1>
 <style scoped>
     #testLogger {
         margin-bottom: 1em;
@@ -632,7 +632,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 };
             engine.project.loadProject(projectConfig);
             var expectedValue = 1; // since the project only contains a single scene, no other scene should be added
-            Assert.areEqual(expectedValue,engine.project.getResourceDescriptorByType("KICK.scene.Scene").length);
+            Assert.areEqual(expectedValue,engine.project.getResourceDescriptorsByType("KICK.scene.Scene").length);
             var expectedUid = 1;
             Assert.areEqual(expectedUid,engine.activeScene.uid);
         },
@@ -645,21 +645,21 @@ YUI().use('node', 'console', 'test', function (Y) {
                     Assert.isTrue(array[i].name.charAt(1).toLowerCase() == array[i].name.charAt(1));
                 }
             };
-            var meshes = engine.project.getResourceDescriptorByType("KICK.mesh.Mesh")
+            var meshes = engine.project.getResourceDescriptorsByType("KICK.mesh.Mesh")
             Assert.areEqual(0,meshes.length);
-            meshes = engine.project.getEngineResourceDescriptorByType("KICK.mesh.Mesh");
+            meshes = engine.project.getEngineResourceDescriptorsByType("KICK.mesh.Mesh");
             Assert.areNotEqual(0,meshes.length);
             isAllNegativeUIDSAndHaveName(meshes);
 
-            var textures = engine.project.getResourceDescriptorByType("KICK.texture.Texture")
+            var textures = engine.project.getResourceDescriptorsByType("KICK.texture.Texture")
             Assert.areEqual(0,textures.length);
-            textures = engine.project.getEngineResourceDescriptorByType("KICK.texture.Texture");
+            textures = engine.project.getEngineResourceDescriptorsByType("KICK.texture.Texture");
             Assert.areNotEqual(0,textures.length);
             isAllNegativeUIDSAndHaveName(textures);
 
-            var shaders = engine.project.getResourceDescriptorByType("KICK.material.Shader")
+            var shaders = engine.project.getResourceDescriptorsByType("KICK.material.Shader")
             Assert.areEqual(0,shaders.length);
-            shaders = engine.project.getEngineResourceDescriptorByType("KICK.material.Shader");
+            shaders = engine.project.getEngineResourceDescriptorsByType("KICK.material.Shader");
             Assert.areNotEqual(0,shaders.length);
             isAllNegativeUIDSAndHaveName(shaders);
         }
