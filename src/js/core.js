@@ -78,6 +78,7 @@ KICK.namespace = function (ns_string) {
             mouseInput = null,
             keyInput = null,
             activeScene,
+            activeSceneNull = {updateAndRender:function(){}},
             animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
@@ -126,14 +127,20 @@ KICK.namespace = function (ns_string) {
                 value: canvas
             },
             /**
+             * If null then nothing is rendered
              * @property activeScene
              * @type KICK.scene.Scene
              */
             activeScene:{
-                get: function(){ return activeScene},
+                get: function(){
+                    if (activeScene === activeSceneNull){
+                        return null;
+                    }
+                    return activeScene;
+                },
                 set: function(value){
                     if (value === null){
-                        activeScene = KICK.scene.Scene.createDefault(thisObj);
+                        activeScene = activeSceneNull;
                     } else {
                         activeScene = value;
                     }
@@ -247,7 +254,7 @@ KICK.namespace = function (ns_string) {
                                 canvas.height = canvas.originalHeight;
                             }
                             thisObj.canvasResized();
-                        }
+                        };
                         canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
                     } else if (canvas.mozRequestFullScreen){
                         canvas.mozRequestFullScreen();
@@ -278,7 +285,7 @@ KICK.namespace = function (ns_string) {
             
             eventQueue.run();
 
-            this.activeScene.updateAndRender();
+            activeScene.updateAndRender();
             for (var i=frameListeners.length-1;i>=0;i--){
                 frameListeners[i].frameUpdated();
             }
@@ -800,7 +807,7 @@ KICK.namespace = function (ns_string) {
                 if (config.activeScene){
                     engine.activeScene = thisObj.load(config.activeScene);
                 } else {
-                    engine.activeScene = null; // create final default scene
+                    engine.activeScene = null;
                 }
             };
             onComplete();
@@ -944,7 +951,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method getResourceDescriptor
-         * @param uid
+         * @param {Number} uid
          * @return {KICK.core.ResourceDescriptor} resource descriptor (or null if not found)
          */
         this.getResourceDescriptor = function(uid){
