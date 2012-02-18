@@ -5823,6 +5823,7 @@ KICK.namespace = function (ns_string) {
             mouseInput = null,
             keyInput = null,
             activeScene,
+            activeSceneNull = {updateAndRender:function(){}},
             animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
@@ -5871,14 +5872,20 @@ KICK.namespace = function (ns_string) {
                 value: canvas
             },
             /**
+             * If null then nothing is rendered
              * @property activeScene
              * @type KICK.scene.Scene
              */
             activeScene:{
-                get: function(){ return activeScene},
+                get: function(){
+                    if (activeScene === activeSceneNull){
+                        return null;
+                    }
+                    return activeScene;
+                },
                 set: function(value){
                     if (value === null){
-                        activeScene = KICK.scene.Scene.createDefault(thisObj);
+                        activeScene = activeSceneNull;
                     } else {
                         activeScene = value;
                     }
@@ -5992,7 +5999,7 @@ KICK.namespace = function (ns_string) {
                                 canvas.height = canvas.originalHeight;
                             }
                             thisObj.canvasResized();
-                        }
+                        };
                         canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
                     } else if (canvas.mozRequestFullScreen){
                         canvas.mozRequestFullScreen();
@@ -6023,7 +6030,7 @@ KICK.namespace = function (ns_string) {
             
             eventQueue.run();
 
-            this.activeScene.updateAndRender();
+            activeScene.updateAndRender();
             for (var i=frameListeners.length-1;i>=0;i--){
                 frameListeners[i].frameUpdated();
             }
@@ -6545,7 +6552,7 @@ KICK.namespace = function (ns_string) {
                 if (config.activeScene){
                     engine.activeScene = thisObj.load(config.activeScene);
                 } else {
-                    engine.activeScene = null; // create final default scene
+                    engine.activeScene = null;
                 }
             };
             onComplete();
@@ -6689,7 +6696,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method getResourceDescriptor
-         * @param uid
+         * @param {Number} uid
          * @return {KICK.core.ResourceDescriptor} resource descriptor (or null if not found)
          */
         this.getResourceDescriptor = function(uid){
@@ -9669,7 +9676,7 @@ KICK.namespace = function (ns_string) {
             }
             component.gameObject = this;
             _components.push(component);
-            this.scene.addComponent(component);
+            scene.addComponent(component);
         };
 
         /**
@@ -9684,7 +9691,7 @@ KICK.namespace = function (ns_string) {
                 // ignore if gameObject cannot be deleted
             }
             core.Util.removeElementFromArray(_components,component);
-            this.scene.removeComponent(component);
+            scene.removeComponent(component);
         };
 
         /**
@@ -9696,9 +9703,9 @@ KICK.namespace = function (ns_string) {
         this.destroy = function () {
             var i;
             for (i = _components.length-1; i >= 0 ; i--) {
-                this.removeComponent(_components[i]);
+                thisObj.removeComponent(_components[i]);
             }
-            this.scene.destroyObject(thisObj);
+            scene.destroyObject(thisObj);
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>

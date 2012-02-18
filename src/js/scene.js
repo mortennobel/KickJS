@@ -194,7 +194,7 @@ KICK.namespace = function (ns_string) {
             }
             component.gameObject = this;
             _components.push(component);
-            this.scene.addComponent(component);
+            scene.addComponent(component);
         };
 
         /**
@@ -209,7 +209,7 @@ KICK.namespace = function (ns_string) {
                 // ignore if gameObject cannot be deleted
             }
             core.Util.removeElementFromArray(_components,component);
-            this.scene.removeComponent(component);
+            scene.removeComponent(component);
         };
 
         /**
@@ -221,9 +221,9 @@ KICK.namespace = function (ns_string) {
         this.destroy = function () {
             var i;
             for (i = _components.length-1; i >= 0 ; i--) {
-                this.removeComponent(_components[i]);
+                thisObj.removeComponent(_components[i]);
             }
-            this.scene.destroyObject(thisObj);
+            scene.destroyObject(thisObj);
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
