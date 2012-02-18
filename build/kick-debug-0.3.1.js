@@ -6538,11 +6538,9 @@ KICK.namespace = function (ns_string) {
             for (var i=0;i<resourceDescriptors.length;i++){
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
             }
-            // engine.activeScene = null; // create temporaty default scene
 
             // preload all resources
             var onComplete = function(){
-                thisObj.removeResourceDescriptor(engine.activeScene.uid); // delete current scene
                 _maxUID = config.maxUID || 0; // reset maxUID
                 if (config.activeScene){
                     engine.activeScene = thisObj.load(config.activeScene);
