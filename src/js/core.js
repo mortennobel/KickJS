@@ -935,11 +935,11 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * @method getResourceDescriptorByType
+         * @method getResourceDescriptorsByType
          * @param {String} type
          * @return {Array[KICK.core.ResourceDescriptor]}
          */
-        this.getResourceDescriptorByType = function(type){
+        this.getResourceDescriptorsByType = function(type){
             var res = [];
             for (var uid in resourceDescriptorsByUID){
                 if (resourceDescriptorsByUID[uid].type === type){
@@ -948,6 +948,23 @@ KICK.namespace = function (ns_string) {
             }
             return res;
         };
+
+        /**
+         * @method getResourceDescriptorsByName
+         * @param {String} type
+         * @return {Array[KICK.core.ResourceDescriptor]}
+         */
+        this.getResourceDescriptorsByName = function(name){
+            var res = [];
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID[uid].name === name){
+                    res.push(resourceDescriptorsByUID[uid]);
+                }
+            }
+            return res;
+        };
+
+
 
         /**
          * @method getResourceDescriptor
