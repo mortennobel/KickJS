@@ -427,28 +427,29 @@ KICK.namespace = function (ns_string) {
             position:{
                 get: function(){
                     // if no parent - use local position
-                    if (parentTransform==null){
+                    if (parentTransform === null){
                         return vec3.create(localPosition);
                     }
                     if (dirty[GLOBAL_POSITION]){
-                        mat4.multiplyVec3(this.getGlobalMatrix(),[0,0,0],globalPosition);
+                        mat4.multiplyVec3(thisObj.getGlobalMatrix(),[0,0,0],globalPosition);
                         dirty[GLOBAL_POSITION] = 0;
                     }
                     return vec3.create(globalPosition);
                 },
                 set:function(newValue){
                     var currentPosition;
-                    if (parentTransform==null){
-                        this.localPosition = newValue;
+                    if (parentTransform === null){
+                        thisObj.localPosition = newValue;
                         return;
                     }
-                    currentPosition = this.position;
+                    currentPosition = thisObj.position;
                     vec3.set(newValue,localPosition);
-                    this.localPosition = [
+                    thisObj.localPosition = [
                         localPosition[0]+currentPosition[0]-newValue[0],
                         localPosition[1]+currentPosition[1]-newValue[1],
                         localPosition[2]+currentPosition[2]-newValue[2]
                     ];
+                    markLocalDirty();
                 }
             },
             /**
@@ -489,7 +490,7 @@ KICK.namespace = function (ns_string) {
             rotationEuler: {
                 get: function(){
                     var vec = vec3.create();
-                    quat4.toEuler(this.rotation,vec);
+                    quat4.toEuler(thisObj.rotation,vec);
                     return vec;
                 },
                 set: function(newValue){
@@ -507,12 +508,12 @@ KICK.namespace = function (ns_string) {
             rotation:{
                 get: function(){
                     var parentIterator = null;
-                    if (parentTransform==null){
+                    if (parentTransform === null){
                         return quat4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]){
                         quat4.set(localRotationQuat,globalRotationQuat);
-                        parentIterator = this.parent;
+                        parentIterator = thisObj.parent;
                         while (parentIterator != null){
                             quat4.multiply(parentIterator.localRotation,globalRotationQuat,globalRotationQuat);
                             parentIterator = parentIterator.parent;
@@ -522,12 +523,12 @@ KICK.namespace = function (ns_string) {
                     return globalRotationQuat;
                 },
                 set: function(newValue){
-                    if (parentTransform==null){
+                    if (parentTransform == null){
                         this.localRotation = newValue;
                         return;
                     }
                     var rotationDifference = quat4.create();
-                    quat4.difference(newValue,this.rotation,rotationDifference);
+                    quat4.difference(newValue,thisObj.rotation,rotationDifference);
                     this.localRotation = quat4.multiply(localRotationQuat,rotationDifference);
                 }
             },
@@ -1108,45 +1109,25 @@ KICK.namespace = function (ns_string) {
             if (config){
                 _uid = config.uid;
                 _name = config.name || "Scene";
-                var gameObjects = config.gameObjects || [];
-                var mappingUidToObject = {};
-                var configs = {};
+                var gameObjects = config.gameObjects || [],
+                    mappingUidToObject = {},
+                    newGameObjects = [],
+                    configs = {};
                 // create game objects
                 (function createGameObjects(){
                     for (var i=0;i<gameObjects.length;i++){
                         gameObject = config.gameObjects[i];
-                        gameObject.newObject = createGameObjectPrivate(gameObject);
-                        mappingUidToObject[gameObject.uid] = gameObject.newObject;
+                        newGameObjects[i] = createGameObjectPrivate(gameObject);
+                        mappingUidToObject[gameObject.uid] = newGameObjects[i];
                     }
                 })();
 
                 var createConfigWithReferences = function (config){
-                    // deserialize an object (recursively if the object is an array
-                    var deserialize = function(value){
-                        if (typeof value === 'number'){
-                            return value;
-                        }
-                        if (Array.isArray(value)){
-                            for (var i=0;i<value.length;i++){
-                                value[i] = deserialize(value[i]);
-                            }
-                        } else if (value){
-                            if (value && value.ref && value.reftype){
-                                if (value.reftype === "project"){
-                                    value = engine.project.load(value.ref);
-                                } else if (value.reftype === "gameobject" || value.reftype === "component"){
-                                    value = thisObj.getObjectByUID(value.ref);
-                                }
-                            }
-                        }
-                        return value;
-                    };
-
                     var configCopy = {};
                     for (var name in config){
                         if (hasProperty(config,name)){
                             var value = config[name];
-                            value = deserialize(value);
+                            value = KICK.core.Util.deserializeConfig(value,engine,thisObj);
                             configCopy[name] = value;
                         }
                     }
@@ -1162,7 +1143,7 @@ KICK.namespace = function (ns_string) {
 
                     for (var j=0;j<gameObjects.length;j++){
                         gameObjectConfig = config.gameObjects[j];
-                        gameObject = gameObjectConfig.newObject;
+                        gameObject = newGameObjects[j];
                         // build components
                         for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
                             component = gameObjectConfig.components[i];
@@ -1992,8 +1973,8 @@ KICK.namespace = function (ns_string) {
          * @method activated
          */
         this.activated = function(){
-            transform = this.gameObject.transform;
-            gl = this.gameObject.engine.gl
+            transform = thisObj.gameObject.transform;
+            gl = thisObj.gameObject.engine.gl
         };
 
         Object.defineProperties(this,{

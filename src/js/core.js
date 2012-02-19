@@ -216,7 +216,7 @@ KICK.namespace = function (ns_string) {
                             animationFrameObj = null;
                         } else {
                             lastTime = new Date().getTime()-16; // ensures valid delta time in next frame
-                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,thisObj.canvas);
                         }
                     }
                 }
@@ -238,7 +238,7 @@ KICK.namespace = function (ns_string) {
          * @param {Boolean} fullscreen
          */
         this.setFullscreen = function(fullscreen){
-            if (this.isFullScreenSupported()){
+            if (thisObj.isFullScreenSupported()){
                 if (fullscreen){
                     if (canvas.requestFullscreen){
                         canvas.requestFullscreen();
@@ -291,7 +291,7 @@ KICK.namespace = function (ns_string) {
             }
 
             if (animationFrameObj !== null){
-                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,thisObj.canvas);
             }
         };
 
@@ -784,11 +784,11 @@ KICK.namespace = function (ns_string) {
             };
             oXHR.send(null);
         };
+
         /**
          * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor],activeScene:number}
          * @method loadProject
          * @param {object} config
-         *
          */
         this.loadProject = function(config){
             if (_maxUID>0){
@@ -845,6 +845,18 @@ KICK.namespace = function (ns_string) {
             }
 
             return loadEngineAsset(uid);
+        };
+
+        /**
+         * Remove cache references to an object. Next time load(uid) is called a new object is
+         * initialized from the resource config
+         * @method removeCacheReference
+         * @param {Number} uid
+         */
+        this.removeCacheReference = function(uid){
+            if (resourceCache[uid]){
+                delete resourceCache[uid];
+            }
         };
 
         /**
@@ -1030,7 +1042,7 @@ KICK.namespace = function (ns_string) {
             return {
                 engineVersion:engine.version,
                 maxUID:_maxUID,
-                activeScene:engine.activeScene.uid,
+                activeScene: engine.activeScene ? engine.activeScene.uid : 0,
                 resourceDescriptors:res
             };
         };
@@ -1248,13 +1260,14 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
-         * Updates the configuration with the one from object
+         * Updates the configuration with the one from object. The method will use object.toJSON(filter)
+         * (if toJSON method exist - otherwise the object are used directly)
          * @method updateConfig
-         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @param {Object} object
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          */
         this.updateConfig = function(object,filter){
-            resourceConfig = object.toJSON(filter);
+            resourceConfig = object.toJSON ? object.toJSON(filter) : object;
         };
 
         /**
@@ -1832,6 +1845,64 @@ KICK.namespace = function (ns_string) {
      */
     core.Util = {
         /**
+         * Used for deserializing a configuration (replaces reference objects with actual references)
+         * @method deserializeConfig
+         * @param {Object} config
+         * @param {KICK.engine.Engine} engine usef for looking up references to project assets
+         * @param {KICK.scene.Scene} scene used for looking up references to gameObjects and components
+         */
+        deserializeConfig: function(config, engine, scene){
+            if (typeof config === 'number'){
+                return config;
+            }
+            if (Array.isArray(config)){
+                var destArray = new Array(config.length);
+                for (var i=0;i<config.length;i++){
+                    destArray [i] = core.Util.deserializeConfig(config[i], engine, scene);
+                }
+                config = destArray;
+            } else if (config){
+                if (config && config.ref && config.reftype){
+                    if (config.reftype === "project"){
+                        config = engine.project.load(config.ref);
+                    } else if (config.reftype === "gameobject" || config.reftype === "component"){
+                        config = scene.getObjectByUID(config.ref);
+                    }
+                }
+            }
+            return config;
+        },
+        /**
+         * @method deepCopy 
+         * @param {Object} src
+         * @return Object 
+         */
+        deepCopy : function(object){
+            var res;
+
+            var typeOfValue = typeof object;
+            if (object === null || typeof(object)==="undefined"){
+                res = null;
+            } else if (Array.isArray(object)
+                || object.buffer instanceof ArrayBuffer){ // treat typed arrays as normal arrays
+                res = [];
+                for (var i=0;i<object.length;i++){
+                    res[i] = core.Util.deepCopy(object[i]);
+                }
+            } else if (typeOfValue === "object"){
+                res = {};
+                for (var name in object){
+                    if (object.hasOwnProperty(name)){
+                        res[name] = core.Util.deepCopy(object[name]);
+                    }
+                }
+            } else {
+                res = object;
+            }
+
+            return res;
+        },
+        /**
          * @method copyStaticPropertiesToObject
          * @param {Object} object
          * @param {Function} type constructor function
@@ -2146,7 +2217,7 @@ KICK.namespace = function (ns_string) {
         insertSorted : function (element,sortedArray,sortFunc) {
             var i;
             if (!sortFunc) {
-                sortFunc = this.numberSortFunction;
+                sortFunc = core.Util.numberSortFunction;
             }
             // assuming that the array is relative small
             for (i = sortedArray.length-1; i >= 0; i--) {

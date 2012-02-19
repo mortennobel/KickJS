@@ -20,6 +20,7 @@
     <script type="text/javascript" src="../../src/js/material.js"></script>
     <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
     <script type="text/javascript" src="../../src/js/texture.js"></script>
+    <script type="text/javascript" src="pointlightProject.js"></script>
     <!-- allows to use random seed -->
     <script type="text/javascript">
 // seedrandom.js version 2.0.
@@ -662,6 +663,34 @@ YUI().use('node', 'console', 'test', function (Y) {
             shaders = engine.project.getEngineResourceDescriptorsByType("KICK.material.Shader");
             Assert.areNotEqual(0,shaders.length);
             isAllNegativeUIDSAndHaveName(shaders);
+        },
+        testProjectLoadShouldNotChangeConfigObj:function(){
+            var Assert = Y.Assert;
+            var before = JSON.stringify(pointProject,null,3);
+            engine.project.loadProject(pointProject);
+            var after = JSON.stringify(pointProject,null,3);
+            Assert.areEqual(before,after);
+        },
+        testDeepCopy:function(){
+            var Assert = Y.Assert;
+            var deepCopy = KICK.core.Util.deepCopy;
+            var simpleObj = {test:"Simple"};
+            var simpleObjCopy = deepCopy(simpleObj);
+            Assert.areEqual(simpleObj.test,simpleObjCopy.test);
+            var deepObj = {test:{test:"Deep"}};
+            var deepObjCopy = deepCopy(deepObj);
+            Assert.areEqual(deepObj.test.test,deepObjCopy.test.test);
+            var number = 123;
+            var numberCopy = deepCopy(number);
+            Assert.areEqual(number,numberCopy);
+            var array = [1,{test:1},"test"];
+            var arrayCopy = deepCopy(array);
+            Assert.areEqual(array[0],arrayCopy[0]);
+            Assert.areEqual(array[1].test,arrayCopy[1].test);
+            Assert.areEqual(array[2],arrayCopy[2]);
+            Assert.areNotSame(array,arrayCopy);
+
+
         }
     });
 
