@@ -1032,7 +1032,7 @@ KICK.namespace = function (ns_string) {
         this.createGameObject = function (config) {
             var gameObject = createGameObjectPrivate(config),
                 transform = gameObject.transform;
-            objectsById[transform.uid] = transform;
+            objectsById[engine.getUID(transform)] = transform;
             return gameObject;
         };
 
