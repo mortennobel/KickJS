@@ -128,7 +128,7 @@ void main(void)
         }
       }
       vec4 avarage = sum / vec4(fontSize.x*fontSize.y);
-      float brightness = (avarage.x+avarage.y+avarage.z)*0.33333;
+      float brightness = dot(avarage.xyz,vec3(0.2125,0.7154,0.0721)); // luminance in sRGB
       vec4 clampedColor = floor(avarage*8.0)/8.0;
       float asciiChar = floor((1.0-brightness)*256.0)/256.0;
       gl_FragColor = clampedColor*lookupASCII(asciiChar);
