@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset=UTF-8”>
+    <title>Kick.js | WebCam Ascii Art</title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0pr2/build/cssreset/reset-min.css&3.5.0pr2/build/cssfonts/fonts-min.css&3.5.0pr2/build/cssgrids/grids-min.css&3.5.0pr2/build/cssbase/base-min.css&3.5.0pr2/build/cssbutton/cssbutton.css">
+    <style>
+        #glslEditor {
+            position: absolute;
+            width: 800px;
+            height: 400px;
+        }
+         #glslEditorInfo{
+            position: absolute;
+            left: 830px;
+            height: 400px;
+         }
+
+        #desc {
+            margin-bottom:20px;
+            border-bottom:1px dotted #333;
+        }
+        #desc span {
+            background:#a3350d;
+            padding:2px;
+            color:#f27243;
+        }
+
+        .yui3-panel {
+            outline:none;
+
+        }
+
+        .yui3-panel-content .yui3-widget-hd {
+            font-weight:bold;
+        }
+
+        .yui3-panel-content .yui3-widget-bd {
+            padding:15px;
+        }
+        .yui3-panel-content label {
+            margin-right:30px;
+        }
+        .yui3-panel-content fieldset {
+            border:none;
+            padding:0;
+        }
+        .yui3-panel-content input[type="text"] {
+            border:none;
+            border:1px solid #ccc;
+            padding: 3px 7px;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            font-size:100%;
+            width:200px;
+        }
+    </style>
+    <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js"></script>
+
+    <link rel="stylesheet" href="reset-min.css">
+    <!--<script type="text/javascript" src="../js/webgl-debug.js"></script>-->
+    <script type="text/javascript" src="../js/kick-min-0.3.0.js"></script>
+    <!--<script type="text/javascript" src="../js/kick-debug-0.3.1.js"></script>-->
+    <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
+    <!-- Google analytics-->
+    <script type="text/javascript" src="../common/common.js"></script>
+    <style>
+        body{
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="yui3-skin-sam">
+<header id="kickjs-header">
+</header>
+<header>
+</header>
+<article>
+    <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+    <div id="panelContent"></div>
+    <div style="display: none">
+    <textarea style="width:500px;height:150px;" id="vertexShaderTex">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec2 uv;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    uv = uv1;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShaderAscii">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec2 uv;
+uniform vec2 _viewport;
+uniform sampler2D tex;
+uniform sampler2D ascii;
+const vec2 fontSize = vec2(8.0,16.0);
+
+vec4 lookupASCII(float asciiValue){
+  vec2 pos = mod(gl_FragCoord.xy,fontSize.xy);
+
+  pos = pos / vec2(2048.0,16.0);
+  pos.x += asciiValue;
+  return vec4(texture2D(ascii,pos).rgb,1.0);
+}
+
+
+void main(void)
+{
+      vec2 invViewport = vec2(1.0) / _viewport;
+      vec2 pixelSize = fontSize;
+      vec4 sum = vec4(0.0);
+      vec2 uvClamped = uv-mod(uv,pixelSize * invViewport);
+      for (float x=0.0;x< fontSize.x;x++){
+        for (float y=0.0;y< fontSize.y;y++){
+            vec2 offset = vec2(x,y);
+            sum += texture2D(tex,uvClamped+(offset*invViewport));
+        }
+      }
+      vec4 avarage = sum / vec4(fontSize.x*fontSize.y);
+      float brightness = dot(avarage.xyz,vec3(0.2125,0.7154,0.0721)); // luminance in sRGB
+      vec4 clampedColor = floor(avarage*8.0)/8.0;
+      float asciiChar = floor((1.0-brightness)*256.0)/256.0;
+      gl_FragColor = clampedColor*lookupASCII(asciiChar);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShaderTex">
+      #ifdef GL_ES
+precision highp float;
+#endif
+uniform sampler2D tex;
+varying vec2 uv;
+void main(void)
+{
+    gl_FragColor = texture2D(tex, uv);
+}
+
+  </textarea>
+        </div>
+</article>
+<script type="text/javascript" src="/header.js"></script>
+<script type="text/javascript" src="webcam_ascii.js"></script>
+</body>
+</html>
