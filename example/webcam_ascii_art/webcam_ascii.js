@@ -141,6 +141,13 @@ window.onload = function(){
 
             };
             div.appendChild(button);
+            div.appendChild(document.createElement("br"));
+            div.appendChild(document.createElement("br"));
+            var img = document.createElement("img");
+            img.src = "/images/example_webcam_ascii_art.jpg";
+            img.style.padding = "20px";
+            img.title = "Preview - press 'Start WebCam' to show realtime effect";
+            div.appendChild(img);
 
             window.currentDialog = YUIConfirm("Start webcam", div,[]);
         };
