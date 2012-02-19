@@ -10,6 +10,7 @@ programming in a browser easy.
 
 <a href="http://www.kickjs.org/example/shader_editor/shader_editor.html" title="GLSL Editor"><img src="http://www.kickjs.org/images/example_glsl_editor.jpg"></a>
 <a href="http://www.kickjs.org/example/video_ascii_art/Video_Ascii_Art.html" title="Video ascii art"><img src="http://www.kickjs.org/images/example_video_ascii_art.jpg"></a>
+<a href="http://www.kickjs.org/example/webcam_ascii_art/Webcam_Ascii_Art.html" title="WebCam ascii art"><img src="http://www.kickjs.org/images/example_webcam_ascii_art.jpg"></a>
 <a href="http://www.kickjs.org/example/model_viewer/model_viewer.html" title="Model viewer (Collada .dae and Wavefront .obj)"><img src="http://www.kickjs.org/images/example_collada_import.jpg"></a>
 <a href="http://www.kickjs.org/example/cloth_simulation/cloth_simulation.html" title="Cloth simulation"><img src="http://www.kickjs.org/images/example_cloth_simulation.jpg"></a>
 <a href="http://www.kickjs.org/example/snake/snake.html" title="Snake"><img src="http://www.kickjs.org/images/example_snake.jpg"></a>
