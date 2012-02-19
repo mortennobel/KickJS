@@ -142,7 +142,7 @@ window.onload = function(){
             };
             div.appendChild(button);
 
-            window.currentDialog = YUIConfirm("Load video", div,[]);
+            window.currentDialog = YUIConfirm("Start webcam", div,[]);
         };
         buildLoadVideoDialog();
     });
