@@ -1483,6 +1483,7 @@ KICK.namespace = function (ns_string) {
             removeElementFromArray = core.Util.removeElementFromArray,
             contains = core.Util.contains,
             mouseMovementListening = true,
+            releaseMouseButtonOnMouseOut = true,
             body = document.body,
             isFirefox = navigator.userAgent.indexOf("Firefox") !== -1,
             isChrome = navigator.userAgent.indexOf("Chrome") !== -1,
@@ -1532,6 +1533,14 @@ KICK.namespace = function (ns_string) {
                 removeElementFromArray(mouse,mouseButton);
                 if (!mouseMovementListening){ // also update mouse position if not listening for mouse movement
                     mouseMovementHandler();
+                }
+            },
+            mouseOutHandler = function(e){
+                if (releaseMouseButtonOnMouseOut){
+                    // simulate mouse up events
+                    for (var i=mouse.length-1;i>=0;i--){
+                        mouseUpHandler({button:mouse[i]});
+                    }
                 }
             },
             /**
@@ -1603,6 +1612,27 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     mouseWheelPreventDefaultAction = newValue;
+                }
+            },
+            /**
+             * When true mouse buttons are auto released when mouse moves outside the canvas
+             * Default true
+             * @property releaseMouseButtonOnMouseOut
+             * @type Boolean
+             */
+            releaseMouseButtonOnMouseOut:{
+                get:function(){
+                    return releaseMouseButtonOnMouseOut;
+                },
+                set:function(newValue){
+                    if (newValue !== releaseMouseButtonOnMouseOut){
+                        releaseMouseButtonOnMouseOut = newValue;
+                        if (releaseMouseButtonOnMouseOut){
+                            canvas.addEventListener( "mouseout", mouseOutHandler, false);
+                        } else {
+                            canvas.removeEventListener( "mouseout", mouseOutHandler, false);
+                        }
+                    }
                 }
             },
             /**
@@ -1684,6 +1714,7 @@ KICK.namespace = function (ns_string) {
             canvas.addEventListener( "mousedown", mouseDownHandler, true);
             canvas.addEventListener( "mouseup", mouseUpHandler, true);
             canvas.addEventListener( "mousemove", mouseMovementHandler, true);
+            canvas.addEventListener( "mouseout", mouseOutHandler, true);
             canvas.addEventListener( "contextmenu", mouseContextMenuHandler, true);
             if (isFirefox){
                 canvas.addEventListener( 'MozMousePixelScroll', mouseWheelHandler, true); // Firefox
