@@ -1615,7 +1615,9 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
-             * When true mouse buttons are auto released when mouse moves outside the canvas
+             * When true mouse buttons are auto released when mouse moves outside the canvas.
+             * If this is not true, then mouse up events may not be detected. This is important
+             * when listening for mouse drag events.
              * Default true
              * @property releaseMouseButtonOnMouseOut
              * @type Boolean
