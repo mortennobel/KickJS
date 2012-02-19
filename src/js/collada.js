@@ -410,6 +410,24 @@ KICK.namespace = function (ns_string) {
                         tagName === "scale" ||
                         tagName === "matrix"){
                         updateTransform(transform, childNode);
+                        // todo handle situation where a number of transformation is done
+                        // such as
+                        //
+//                        <node id="BarrelChild2" type="NODE">
+//                                    <matrix sid="parentinverse">-1.239744 0.2559972 -2.716832 10.05096 -2.541176 -1.195862 1.046907 -3.691495 -0.1949036 0.5362619 0.1394684 -0.6007659 0 0 0 1</matrix>
+//                                    <translate sid="location">0.02037613 0.3007245 4.455008</translate>
+//                                    <rotate sid="rotationZ">0 0 1 303.8883</rotate>
+//                                    <rotate sid="rotationY">0 1 0 32.78434</rotate>
+//                                    <rotate sid="rotationX">1 0 0 120.9668</rotate>
+//                                    <scale sid="scale">0.333636 0.333636 1.702475</scale>
+//                                    <instance_geometry url="#Torus_002-mesh">
+//                                      <bind_material>
+//                                        <technique_common>
+//                                          <instance_material symbol="Blue_material1" target="#Blue_material-material"/>
+//                                        </technique_common>
+//                                      </bind_material>
+//                                    </instance_geometry>
+//                                  </node>
                     }
                     else if (tagName === "instance_geometry"){
                         createMeshRenderer(gameObject, childNode);

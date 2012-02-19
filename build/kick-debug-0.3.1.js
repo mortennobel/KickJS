@@ -5961,7 +5961,7 @@ KICK.namespace = function (ns_string) {
                             animationFrameObj = null;
                         } else {
                             lastTime = new Date().getTime()-16; // ensures valid delta time in next frame
-                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,thisObj.canvas);
                         }
                     }
                 }
@@ -5983,7 +5983,7 @@ KICK.namespace = function (ns_string) {
          * @param {Boolean} fullscreen
          */
         this.setFullscreen = function(fullscreen){
-            if (this.isFullScreenSupported()){
+            if (thisObj.isFullScreenSupported()){
                 if (fullscreen){
                     if (canvas.requestFullscreen){
                         canvas.requestFullscreen();
@@ -6036,7 +6036,7 @@ KICK.namespace = function (ns_string) {
             }
 
             if (animationFrameObj !== null){
-                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,this.canvas);
+                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,thisObj.canvas);
             }
         };
 
@@ -6529,11 +6529,11 @@ KICK.namespace = function (ns_string) {
             };
             oXHR.send(null);
         };
+
         /**
          * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor],activeScene:number}
          * @method loadProject
          * @param {object} config
-         *
          */
         this.loadProject = function(config){
             if (_maxUID>0){
@@ -6590,6 +6590,18 @@ KICK.namespace = function (ns_string) {
             }
 
             return loadEngineAsset(uid);
+        };
+
+        /**
+         * Remove cache references to an object. Next time load(uid) is called a new object is
+         * initialized from the resource config
+         * @method removeCacheReference
+         * @param {Number} uid
+         */
+        this.removeCacheReference = function(uid){
+            if (resourceCache[uid]){
+                delete resourceCache[uid];
+            }
         };
 
         /**
@@ -6694,6 +6706,13 @@ KICK.namespace = function (ns_string) {
             return res;
         };
 
+        if (DEBUG){
+            this.debug = function(){
+                console.log("resourceCache");
+                console.log(resourceCache);
+            };
+        }
+
         /**
          * @method getResourceDescriptorsByName
          * @param {String} type
@@ -6775,7 +6794,7 @@ KICK.namespace = function (ns_string) {
             return {
                 engineVersion:engine.version,
                 maxUID:_maxUID,
-                activeScene:engine.activeScene.uid,
+                activeScene: engine.activeScene ? engine.activeScene.uid : 0,
                 resourceDescriptors:res
             };
         };
@@ -6993,13 +7012,14 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
-         * Updates the configuration with the one from object
+         * Updates the configuration with the one from object. The method will use object.toJSON(filter)
+         * (if toJSON method exist - otherwise the object are used directly)
          * @method updateConfig
-         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @param {Object} object
+         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          */
         this.updateConfig = function(object,filter){
-            resourceConfig = object.toJSON(filter);
+            resourceConfig = object.toJSON ? object.toJSON(filter) : object;
         };
 
         /**
@@ -7228,6 +7248,7 @@ KICK.namespace = function (ns_string) {
             removeElementFromArray = core.Util.removeElementFromArray,
             contains = core.Util.contains,
             mouseMovementListening = true,
+            releaseMouseButtonOnMouseOut = true,
             body = document.body,
             isFirefox = navigator.userAgent.indexOf("Firefox") !== -1,
             isChrome = navigator.userAgent.indexOf("Chrome") !== -1,
@@ -7277,6 +7298,14 @@ KICK.namespace = function (ns_string) {
                 removeElementFromArray(mouse,mouseButton);
                 if (!mouseMovementListening){ // also update mouse position if not listening for mouse movement
                     mouseMovementHandler();
+                }
+            },
+            mouseOutHandler = function(e){
+                if (releaseMouseButtonOnMouseOut){
+                    // simulate mouse up events
+                    for (var i=mouse.length-1;i>=0;i--){
+                        mouseUpHandler({button:mouse[i]});
+                    }
                 }
             },
             /**
@@ -7348,6 +7377,29 @@ KICK.namespace = function (ns_string) {
                 },
                 set:function(newValue){
                     mouseWheelPreventDefaultAction = newValue;
+                }
+            },
+            /**
+             * When true mouse buttons are auto released when mouse moves outside the canvas.
+             * If this is not true, then mouse up events may not be detected. This is important
+             * when listening for mouse drag events.
+             * Default true
+             * @property releaseMouseButtonOnMouseOut
+             * @type Boolean
+             */
+            releaseMouseButtonOnMouseOut:{
+                get:function(){
+                    return releaseMouseButtonOnMouseOut;
+                },
+                set:function(newValue){
+                    if (newValue !== releaseMouseButtonOnMouseOut){
+                        releaseMouseButtonOnMouseOut = newValue;
+                        if (releaseMouseButtonOnMouseOut){
+                            canvas.addEventListener( "mouseout", mouseOutHandler, false);
+                        } else {
+                            canvas.removeEventListener( "mouseout", mouseOutHandler, false);
+                        }
+                    }
                 }
             },
             /**
@@ -7429,6 +7481,7 @@ KICK.namespace = function (ns_string) {
             canvas.addEventListener( "mousedown", mouseDownHandler, true);
             canvas.addEventListener( "mouseup", mouseUpHandler, true);
             canvas.addEventListener( "mousemove", mouseMovementHandler, true);
+            canvas.addEventListener( "mouseout", mouseOutHandler, true);
             canvas.addEventListener( "contextmenu", mouseContextMenuHandler, true);
             if (isFirefox){
                 canvas.addEventListener( 'MozMousePixelScroll', mouseWheelHandler, true); // Firefox
@@ -7543,6 +7596,64 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.core
      */
     core.Util = {
+        /**
+         * Used for deserializing a configuration (replaces reference objects with actual references)
+         * @method deserializeConfig
+         * @param {Object} config
+         * @param {KICK.engine.Engine} engine usef for looking up references to project assets
+         * @param {KICK.scene.Scene} scene used for looking up references to gameObjects and components
+         */
+        deserializeConfig: function(config, engine, scene){
+            if (typeof config === 'number'){
+                return config;
+            }
+            if (Array.isArray(config)){
+                var destArray = new Array(config.length);
+                for (var i=0;i<config.length;i++){
+                    destArray [i] = core.Util.deserializeConfig(config[i], engine, scene);
+                }
+                config = destArray;
+            } else if (config){
+                if (config && config.ref && config.reftype){
+                    if (config.reftype === "project"){
+                        config = engine.project.load(config.ref);
+                    } else if (config.reftype === "gameobject" || config.reftype === "component"){
+                        config = scene.getObjectByUID(config.ref);
+                    }
+                }
+            }
+            return config;
+        },
+        /**
+         * @method deepCopy 
+         * @param {Object} src
+         * @return Object 
+         */
+        deepCopy : function(object){
+            var res;
+
+            var typeOfValue = typeof object;
+            if (object === null || typeof(object)==="undefined"){
+                res = null;
+            } else if (Array.isArray(object)
+                || object.buffer instanceof ArrayBuffer){ // treat typed arrays as normal arrays
+                res = [];
+                for (var i=0;i<object.length;i++){
+                    res[i] = core.Util.deepCopy(object[i]);
+                }
+            } else if (typeOfValue === "object"){
+                res = {};
+                for (var name in object){
+                    if (object.hasOwnProperty(name)){
+                        res[name] = core.Util.deepCopy(object[name]);
+                    }
+                }
+            } else {
+                res = object;
+            }
+
+            return res;
+        },
         /**
          * @method copyStaticPropertiesToObject
          * @param {Object} object
@@ -7858,7 +7969,7 @@ KICK.namespace = function (ns_string) {
         insertSorted : function (element,sortedArray,sortFunc) {
             var i;
             if (!sortFunc) {
-                sortFunc = this.numberSortFunction;
+                sortFunc = core.Util.numberSortFunction;
             }
             // assuming that the array is relative small
             for (i = sortedArray.length-1; i >= 0; i--) {
@@ -9926,28 +10037,29 @@ KICK.namespace = function (ns_string) {
             position:{
                 get: function(){
                     // if no parent - use local position
-                    if (parentTransform==null){
+                    if (parentTransform === null){
                         return vec3.create(localPosition);
                     }
                     if (dirty[GLOBAL_POSITION]){
-                        mat4.multiplyVec3(this.getGlobalMatrix(),[0,0,0],globalPosition);
+                        mat4.multiplyVec3(thisObj.getGlobalMatrix(),[0,0,0],globalPosition);
                         dirty[GLOBAL_POSITION] = 0;
                     }
                     return vec3.create(globalPosition);
                 },
                 set:function(newValue){
                     var currentPosition;
-                    if (parentTransform==null){
-                        this.localPosition = newValue;
+                    if (parentTransform === null){
+                        thisObj.localPosition = newValue;
                         return;
                     }
-                    currentPosition = this.position;
+                    currentPosition = thisObj.position;
                     vec3.set(newValue,localPosition);
-                    this.localPosition = [
+                    thisObj.localPosition = [
                         localPosition[0]+currentPosition[0]-newValue[0],
                         localPosition[1]+currentPosition[1]-newValue[1],
                         localPosition[2]+currentPosition[2]-newValue[2]
                     ];
+                    markLocalDirty();
                 }
             },
             /**
@@ -9988,7 +10100,7 @@ KICK.namespace = function (ns_string) {
             rotationEuler: {
                 get: function(){
                     var vec = vec3.create();
-                    quat4.toEuler(this.rotation,vec);
+                    quat4.toEuler(thisObj.rotation,vec);
                     return vec;
                 },
                 set: function(newValue){
@@ -10006,12 +10118,12 @@ KICK.namespace = function (ns_string) {
             rotation:{
                 get: function(){
                     var parentIterator = null;
-                    if (parentTransform==null){
+                    if (parentTransform === null){
                         return quat4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]){
                         quat4.set(localRotationQuat,globalRotationQuat);
-                        parentIterator = this.parent;
+                        parentIterator = thisObj.parent;
                         while (parentIterator != null){
                             quat4.multiply(parentIterator.localRotation,globalRotationQuat,globalRotationQuat);
                             parentIterator = parentIterator.parent;
@@ -10021,12 +10133,12 @@ KICK.namespace = function (ns_string) {
                     return globalRotationQuat;
                 },
                 set: function(newValue){
-                    if (parentTransform==null){
+                    if (parentTransform == null){
                         this.localRotation = newValue;
                         return;
                     }
                     var rotationDifference = quat4.create();
-                    quat4.difference(newValue,this.rotation,rotationDifference);
+                    quat4.difference(newValue,thisObj.rotation,rotationDifference);
                     this.localRotation = quat4.multiply(localRotationQuat,rotationDifference);
                 }
             },
@@ -10531,7 +10643,7 @@ KICK.namespace = function (ns_string) {
         this.createGameObject = function (config) {
             var gameObject = createGameObjectPrivate(config),
                 transform = gameObject.transform;
-            objectsById[transform.uid] = transform;
+            objectsById[engine.getUID(transform)] = transform;
             return gameObject;
         };
 
@@ -10607,45 +10719,25 @@ KICK.namespace = function (ns_string) {
             if (config){
                 _uid = config.uid;
                 _name = config.name || "Scene";
-                var gameObjects = config.gameObjects || [];
-                var mappingUidToObject = {};
-                var configs = {};
+                var gameObjects = config.gameObjects || [],
+                    mappingUidToObject = {},
+                    newGameObjects = [],
+                    configs = {};
                 // create game objects
                 (function createGameObjects(){
                     for (var i=0;i<gameObjects.length;i++){
                         gameObject = config.gameObjects[i];
-                        gameObject.newObject = createGameObjectPrivate(gameObject);
-                        mappingUidToObject[gameObject.uid] = gameObject.newObject;
+                        newGameObjects[i] = createGameObjectPrivate(gameObject);
+                        mappingUidToObject[gameObject.uid] = newGameObjects[i];
                     }
                 })();
 
                 var createConfigWithReferences = function (config){
-                    // deserialize an object (recursively if the object is an array
-                    var deserialize = function(value){
-                        if (typeof value === 'number'){
-                            return value;
-                        }
-                        if (Array.isArray(value)){
-                            for (var i=0;i<value.length;i++){
-                                value[i] = deserialize(value[i]);
-                            }
-                        } else if (value){
-                            if (value && value.ref && value.reftype){
-                                if (value.reftype === "project"){
-                                    value = engine.project.load(value.ref);
-                                } else if (value.reftype === "gameobject" || value.reftype === "component"){
-                                    value = thisObj.getObjectByUID(value.ref);
-                                }
-                            }
-                        }
-                        return value;
-                    };
-
                     var configCopy = {};
                     for (var name in config){
                         if (hasProperty(config,name)){
                             var value = config[name];
-                            value = deserialize(value);
+                            value = KICK.core.Util.deserializeConfig(value,engine,thisObj);
                             configCopy[name] = value;
                         }
                     }
@@ -10661,7 +10753,7 @@ KICK.namespace = function (ns_string) {
 
                     for (var j=0;j<gameObjects.length;j++){
                         gameObjectConfig = config.gameObjects[j];
-                        gameObject = gameObjectConfig.newObject;
+                        gameObject = newGameObjects[j];
                         // build components
                         for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
                             component = gameObjectConfig.components[i];
@@ -11491,8 +11583,8 @@ KICK.namespace = function (ns_string) {
          * @method activated
          */
         this.activated = function(){
-            transform = this.gameObject.transform;
-            gl = this.gameObject.engine.gl
+            transform = thisObj.gameObject.transform;
+            gl = thisObj.gameObject.engine.gl
         };
 
         Object.defineProperties(this,{
@@ -13765,6 +13857,8 @@ KICK.namespace = function (ns_string) {
             gl.useProgram(_shaderProgramId);
             gl.boundShader = _shaderProgramId;
             activeUniforms = gl.getProgramParameter( _shaderProgramId, 35718);
+
+            // todo : suspecious usage of this
             /**
              * Array of Object with size,type, name and index properties
              * @property activeUniforms
@@ -13843,7 +13937,7 @@ KICK.namespace = function (ns_string) {
          */
         this.bind = function () {
             if (true){
-                if (!(this.isValid)){
+                if (!(thisObj.isValid)){
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
             }
@@ -14269,7 +14363,7 @@ KICK.namespace = function (ns_string) {
                         newValue = newValue || {};
                         for (var name in newValue){
                             if (newValue.hasOwnProperty(name)){
-                                _uniforms[name] = newValue[name];
+                                _uniforms[name] = KICK.core.Util.deepCopy(newValue[name]);
                             }
                         }
                         verifyUniforms();
@@ -15112,6 +15206,24 @@ KICK.namespace = function (ns_string) {
                         tagName === "scale" ||
                         tagName === "matrix"){
                         updateTransform(transform, childNode);
+                        // todo handle situation where a number of transformation is done
+                        // such as
+                        //
+//                        <node id="BarrelChild2" type="NODE">
+//                                    <matrix sid="parentinverse">-1.239744 0.2559972 -2.716832 10.05096 -2.541176 -1.195862 1.046907 -3.691495 -0.1949036 0.5362619 0.1394684 -0.6007659 0 0 0 1</matrix>
+//                                    <translate sid="location">0.02037613 0.3007245 4.455008</translate>
+//                                    <rotate sid="rotationZ">0 0 1 303.8883</rotate>
+//                                    <rotate sid="rotationY">0 1 0 32.78434</rotate>
+//                                    <rotate sid="rotationX">1 0 0 120.9668</rotate>
+//                                    <scale sid="scale">0.333636 0.333636 1.702475</scale>
+//                                    <instance_geometry url="#Torus_002-mesh">
+//                                      <bind_material>
+//                                        <technique_common>
+//                                          <instance_material symbol="Blue_material1" target="#Blue_material-material"/>
+//                                        </technique_common>
+//                                      </bind_material>
+//                                    </instance_geometry>
+//                                  </node>
                     }
                     else if (tagName === "instance_geometry"){
                         createMeshRenderer(gameObject, childNode);
