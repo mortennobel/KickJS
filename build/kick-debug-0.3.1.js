@@ -12427,11 +12427,11 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-//            if (gl.currentTexture[textureSlot] !== _textureId){
-//                gl.currentTexture[textureSlot] = _textureId;
+            if (gl.currentTexture[textureSlot] !== _textureId){
+                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
-//            }
+            }
         };
 
         /**
@@ -12510,6 +12510,7 @@ KICK.namespace = function (ns_string) {
             if (_generateMipmaps){
                 gl.generateMipmap(_textureType);
             }
+            gl.currentMaterial = null; // for material to rebind
         };
 
         /**
@@ -12574,6 +12575,7 @@ KICK.namespace = function (ns_string) {
             if (_generateMipmaps){
                 gl.generateMipmap(3553);
             }
+            gl.currentMaterial = null; // for material to rebind
         };
 
         /**
@@ -12852,13 +12854,13 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // apply
-            applyConfig(thisObj, config);
-
             // create active texture cache on glContext
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
+            // apply
+            applyConfig(thisObj, config);
+
             engine.project.registerObject(thisObj, "KICK.texture.Texture");
         })();
     };
@@ -12895,21 +12897,20 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-//            if (gl.currentTexture[textureSlot] !== _textureId){
-//                gl.currentTexture[textureSlot] = _textureId;
+            if (gl.currentTexture[textureSlot] !== _textureId){
+                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(3553, _textureId);
-
-                if (lastGrappedFrame < timer.frame && _videoElement){
-                    lastGrappedFrame = timer.frame+_skipFrames;
-                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                        gl.UNSIGNED_BYTE, _videoElement);
-                    if (_generateMipmaps){
-                        gl.generateMipmap(3553);
-                    }
+            }
+            if (lastGrappedFrame < timer.frame && _videoElement){
+                lastGrappedFrame = timer.frame+_skipFrames;
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                    gl.UNSIGNED_BYTE, _videoElement);
+                if (_generateMipmaps){
+                    gl.generateMipmap(3553);
                 }
-//            }
+            }
         };
 
         /**
@@ -12918,6 +12919,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function(){
             if (_textureId !== null){
+                gl.currentMaterial = null; // for material to rebind
                 gl.deleteTexture(_textureId);
                 _textureId = null;
                 engine.project.removeResourceDescriptor(thisObj.uid);
@@ -12937,6 +12939,7 @@ KICK.namespace = function (ns_string) {
             gl.texParameteri(3553, 10241, _minFilter);
             gl.texParameteri(3553, 10242, _wrapS);
             gl.texParameteri(3553, 10243, _wrapT);
+            gl.currentMaterial = null; // for material to rebind
         };
 
         Object.defineProperties(this,{
@@ -13139,13 +13142,14 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // apply
-            applyConfig(thisObj, config);
-
             // create active texture cache on glContext
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
+
+            // apply
+            applyConfig(thisObj, config);
+
             engine.project.registerObject(thisObj, "KICK.texture.MovieTexture");
         })();
     };

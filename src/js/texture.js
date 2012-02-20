@@ -258,11 +258,11 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-//            if (gl.currentTexture[textureSlot] !== _textureId){
-//                gl.currentTexture[textureSlot] = _textureId;
+            if (gl.currentTexture[textureSlot] !== _textureId){
+                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(_textureType, _textureId);
-//            }
+            }
         };
 
         /**
@@ -341,6 +341,7 @@ KICK.namespace = function (ns_string) {
             if (_generateMipmaps){
                 gl.generateMipmap(_textureType);
             }
+            gl.currentMaterial = null; // for material to rebind
         };
 
         /**
@@ -405,6 +406,7 @@ KICK.namespace = function (ns_string) {
             if (_generateMipmaps){
                 gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
+            gl.currentMaterial = null; // for material to rebind
         };
 
         /**
@@ -683,13 +685,13 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // apply
-            applyConfig(thisObj, config);
-
             // create active texture cache on glContext
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
+            // apply
+            applyConfig(thisObj, config);
+
             engine.project.registerObject(thisObj, "KICK.texture.Texture");
         })();
     };
@@ -726,21 +728,20 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-//            if (gl.currentTexture[textureSlot] !== _textureId){
-//                gl.currentTexture[textureSlot] = _textureId;
+            if (gl.currentTexture[textureSlot] !== _textureId){
+                gl.currentTexture[textureSlot] = _textureId;
                 gl.activeTexture(texture0+textureSlot);
                 gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
-
-                if (lastGrappedFrame < timer.frame && _videoElement){
-                    lastGrappedFrame = timer.frame+_skipFrames;
-                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-                        gl.UNSIGNED_BYTE, _videoElement);
-                    if (_generateMipmaps){
-                        gl.generateMipmap(constants.GL_TEXTURE_2D);
-                    }
+            }
+            if (lastGrappedFrame < timer.frame && _videoElement){
+                lastGrappedFrame = timer.frame+_skipFrames;
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
+                    gl.UNSIGNED_BYTE, _videoElement);
+                if (_generateMipmaps){
+                    gl.generateMipmap(constants.GL_TEXTURE_2D);
                 }
-//            }
+            }
         };
 
         /**
@@ -749,6 +750,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function(){
             if (_textureId !== null){
+                gl.currentMaterial = null; // for material to rebind
                 gl.deleteTexture(_textureId);
                 _textureId = null;
                 engine.project.removeResourceDescriptor(thisObj.uid);
@@ -768,6 +770,7 @@ KICK.namespace = function (ns_string) {
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
+            gl.currentMaterial = null; // for material to rebind
         };
 
         Object.defineProperties(this,{
@@ -970,13 +973,14 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // apply
-            applyConfig(thisObj, config);
-
             // create active texture cache on glContext
             if (!gl.currentTexture){
                 gl.currentTexture = {};
             }
+
+            // apply
+            applyConfig(thisObj, config);
+
             engine.project.registerObject(thisObj, "KICK.texture.MovieTexture");
         })();
     };
