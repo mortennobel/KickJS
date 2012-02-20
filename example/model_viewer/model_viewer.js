@@ -159,6 +159,20 @@ function loadModelFile(file){
 }
 
 function loadClicked(files){
+    var URL = window.webkitURL || window.URL;
+    var isPNG = function(arrayBuffer){
+        var uInt8 = new Uint8Array(arrayBuffer);
+        return uInt8.length>10 &&
+            uInt8[0] === 137 &&
+            uInt8[1] === 80 &&
+            uInt8[2] === 78 &&
+            uInt8[3] === 71 &&
+            uInt8[4] === 13 &&
+            uInt8[5] === 10 &&
+            uInt8[6] === 26 &&
+            uInt8[7] === 10;
+    };
+
     var endsWith = function(str,search) {
         return (str.match(search+"$")==search)
     };
@@ -172,12 +186,13 @@ function loadClicked(files){
         } else if (endsWith(fileLowerCase,".jpg") ||
             endsWith(fileLowerCase,".jpeg") ||
             endsWith(fileLowerCase,".png")){
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                texture.dataURI = e.target.result;
-            };
-            reader.readAsDataURL(file);
 
+            var img = document.createElement("img");
+            img.onload = function(e) {
+                texture.setImage(img, "");
+                URL.revokeObjectURL(this.src);
+            };
+            img.src = URL.createObjectURL(file);
         }
     }
 }
@@ -311,7 +326,6 @@ function initKick() {
     gameObject.addComponent(meshRenderer);
     initDuckTexture();
     initLights();
-
 }
 
 function pauseResume(){
@@ -468,7 +482,6 @@ function getCurrentModelAsKickJSBinary(){
                         meshData.tangent = new Float32Array(meshData.vertex.length/3*4);
                     }
                 }
-
             }
             console.log("Found mesh "+meshData.name);
             res = meshData.serialize();
