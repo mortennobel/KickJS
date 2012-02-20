@@ -1105,7 +1105,8 @@ KICK.namespace = function (ns_string) {
                         newValue = newValue || {};
                         for (var name in newValue){
                             if (newValue.hasOwnProperty(name)){
-                                _uniforms[name] = KICK.core.Util.deepCopy(newValue[name]);
+                                var excludeClasses = [KICK.texture.Texture,KICK.texture.MovieTexture,KICK.texture.RenderTexture];
+                                _uniforms[name] = KICK.core.Util.deepCopy(newValue[name], excludeClasses);
                             }
                         }
                         verifyUniforms();

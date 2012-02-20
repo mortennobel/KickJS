@@ -1875,25 +1875,38 @@ KICK.namespace = function (ns_string) {
         /**
          * @method deepCopy 
          * @param {Object} src
-         * @return Object 
+         * @param {Array[Classes]} passthroughClasses Optional. Don't attempt to clone object of these classes (uses instanceof operator)
+         * @return Object
          */
-        deepCopy : function(object){
-            var res;
+        deepCopy : function(object, passthroughClasses){
+            var res,
+                isPassthrough = false,
+                i;
+            passthroughClasses = passthroughClasses || [];
+
+            for (i=0;i<passthroughClasses.length;i++){
+                if (object instanceof passthroughClasses[i]){
+                    isPassthrough = true;
+                    break;
+                }
+            }
 
             var typeOfValue = typeof object;
-            if (object === null || typeof(object)==="undefined"){
+            if (isPassthrough){
+                res = object;
+            } else if (object === null || typeof(object)==="undefined"){
                 res = null;
             } else if (Array.isArray(object)
                 || object.buffer instanceof ArrayBuffer){ // treat typed arrays as normal arrays
                 res = [];
-                for (var i=0;i<object.length;i++){
-                    res[i] = core.Util.deepCopy(object[i]);
+                for (i=0;i<object.length;i++){
+                    res[i] = core.Util.deepCopy(object[i],passthroughClasses);
                 }
             } else if (typeOfValue === "object"){
                 res = {};
                 for (var name in object){
                     if (object.hasOwnProperty(name)){
-                        res[name] = core.Util.deepCopy(object[name]);
+                        res[name] = core.Util.deepCopy(object[name],passthroughClasses);
                     }
                 }
             } else {
