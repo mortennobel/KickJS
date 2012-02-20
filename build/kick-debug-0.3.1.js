@@ -5884,7 +5884,7 @@ KICK.namespace = function (ns_string) {
                     return activeScene;
                 },
                 set: function(value){
-                    if (value === null){
+                    if (value === null || typeof value === "undefined"){
                         activeScene = activeSceneNull;
                     } else {
                         activeScene = value;
@@ -6705,13 +6705,6 @@ KICK.namespace = function (ns_string) {
             }
             return res;
         };
-
-        if (DEBUG){
-            this.debug = function(){
-                console.log("resourceCache");
-                console.log(resourceCache);
-            };
-        }
 
         /**
          * @method getResourceDescriptorsByName
@@ -13858,7 +13851,7 @@ KICK.namespace = function (ns_string) {
             gl.boundShader = _shaderProgramId;
             activeUniforms = gl.getProgramParameter( _shaderProgramId, 35718);
 
-            // todo : suspecious usage of this
+
             /**
              * Array of Object with size,type, name and index properties
              * @property activeUniforms

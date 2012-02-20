@@ -139,7 +139,7 @@ KICK.namespace = function (ns_string) {
                     return activeScene;
                 },
                 set: function(value){
-                    if (value === null){
+                    if (value === null || typeof value === "undefined"){
                         activeScene = activeSceneNull;
                     } else {
                         activeScene = value;
