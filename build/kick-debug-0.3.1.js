@@ -10842,6 +10842,7 @@ KICK.namespace = function (ns_string) {
             _perspective = true,
             _clearFlagColor = true,
             _clearFlagDepth = true,
+            _replacementShader = null,
             _currentClearFlags,
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
@@ -11147,7 +11148,7 @@ KICK.namespace = function (ns_string) {
             if (renderableComponentsTransparent.length>0){
                 sortTransparentBackToFront();
             }
-            renderSceneObjects(sceneLightObj);
+            renderSceneObjects(sceneLightObj,_replacementShader);
 
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
                 var textureId = _renderTarget.colorTexture.textureId;
@@ -11199,6 +11200,16 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            /**
+             * Allows usage of replacement shader on camera rendering
+             * Default value is null.
+             * @property replacementShader
+             * @type KICK.material.Shader
+             */
+            replacementShader:{
+                get:function(){return _replacementShader; },
+                set:function(newValue){_replacementShader = newValue;}
+            },
             /**
              * Default is true
              * @property enabled
