@@ -22,7 +22,7 @@ void main(void)
     getPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);
     float visibility;
     if (SHADOWS){
-        computeLightVisibility();
+        visibility = computeLightVisibility();
     } else {
         visibility = 1.0;
     }

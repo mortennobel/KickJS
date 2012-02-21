@@ -16,7 +16,7 @@ void main(void)
     vec3 pointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);
     float visibility;
     if (SHADOWS){
-        computeLightVisibility();
+        visibility = computeLightVisibility();
     } else {
         visibility = 1.0;
     }
