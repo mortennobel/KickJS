@@ -1285,7 +1285,7 @@ KICK.namespace = function (ns_string) {
                     viewPortWidth = viewportDimension[0],
                     viewPortHeight = viewportDimension[1],
                     offsetX = viewPortWidth*_normalizedViewportRect[0],
-                    offsetY = viewPortWidth*_normalizedViewportRect[1],
+                    offsetY = viewPortHeight*_normalizedViewportRect[1],
                     width = viewPortWidth*_normalizedViewportRect[2],
                     height = viewPortHeight*_normalizedViewportRect[3];
                 setupViewport(offsetX,offsetY,width,height);
