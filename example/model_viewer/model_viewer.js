@@ -56,6 +56,7 @@ function load(content,url,func){
             meshRendererNew.materials = materials;
             meshRenderer = meshRendererNew;
             recalculateNormals();
+            createDummyUVsIfNotExist();
 //            console.log(KICK.core.Util.typedArrayToArray(meshRendererNew.mesh.aabb));
         }
     }
@@ -218,17 +219,55 @@ function createMaterial(){
 function recalculateNormals(){
     var mesh = meshRenderer.mesh;
     var meshData = mesh.meshData;
-    if (!meshData.interleavedArrayFormat["normal"]){
+    if (!meshData.interleavedArrayFormat.normal){
+        console.log("Recalculate normals");
         meshData.recalculateNormals();
         mesh.meshData = meshData;
     }
+}
+
+function createDummyUVsIfNotExist(){
+    var mesh = meshRenderer.mesh;
+    var meshData = mesh.meshData;
+    if (!meshData.interleavedArrayFormat.uv1){
+        console.log("Create dummy uv1");
+        meshData.uv1 = new Float32Array(meshData.vertex.length/3*2);
+        mesh.meshData = meshData;
+        meshRenderer.mesh = mesh;
+    }
+}
+
+function LightRotatorComponent(){
+    var thisObj = this,
+        transform,
+        rotationSensitivity = 1,
+        rotationEuler,
+        mouseInput;
+    this.activated = function(){
+        var gameObject = thisObj.gameObject,
+            engine = gameObject.engine;
+        transform = gameObject.transform;
+        rotationEuler = transform.localRotationEuler;
+        mouseInput = engine.mouseInput;
+    };
+
+    this.update = function(){
+        transform.localRotationEuler = rotationEuler;
+        if (mouseInput.isButton(2)){
+            var mouseDelta = mouseInput.deltaMovement;
+            rotationEuler[1] += mouseDelta[0]*rotationSensitivity;
+            rotationEuler[0] += mouseDelta[1]*rotationSensitivity;
+            transform.localRotationEuler = rotationEuler;
+            console.log(rotationEuler[0]+","+rotationEuler[1]);
+        }
+    };
 }
 
 function RotatorComponent(){
     var thisObj = this,
         time,
         transform,
-        rotationSpeed = 0.001,
+        rotationSpeed = 0.0004,
         upDownSpeed = 0.0001,
         wheelSpeed = 0.0001,
         mouseRotationSpeed = 0.01,
@@ -295,11 +334,12 @@ function initLights(){
     );
     lightGameObject.transform.position = [1,1,1];
     lightGameObject.addComponent(light);
+    lightGameObject.addComponent(new LightRotatorComponent());
 }
 
 function initKick() {
     engine = new KICK.core.Engine('canvas',{
-        enableDebugContext: true
+        enableDebugContext: false
     });
     var cameraObject = engine.activeScene.createGameObject();
     cameraObject.name = "Camera";
