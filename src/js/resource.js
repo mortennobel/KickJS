@@ -63,7 +63,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * ResourceManager is renamed to ResourceLoader
-     * @class ResourceLoader
+     * @class ResourceManager
      * @namespace KICK.core
      * @constructor
      * @deprecated
