@@ -76,6 +76,7 @@ KICK.namespace = function (ns_string) {
      *     <li>Auto binds the following uniform variables:
      *      <ul>
      *          <li><code>_mvProj</code> (mat4) Model view projection matrix</li>
+     *          <li><code>_m</code> (mat4) Model matrix</li>
      *          <li><code>_mv</code> (mat4) Model view matrix</li>
      *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
      *          <li><code>_time</code> (float) Run time of engine</li>
@@ -224,7 +225,7 @@ KICK.namespace = function (ns_string) {
                     if (_dataURI !== newValue){
                         _dataURI = newValue;
                         if (_dataURI){ // load resource if not null
-                            engine.resourceManager.getShaderData(_dataURI,thisObj);
+                            engine.resourceLoader.getShaderData(_dataURI,thisObj);
                         }
                     }
                 }
@@ -731,7 +732,7 @@ KICK.namespace = function (ns_string) {
             applyConfig(thisObj,config);
             engine.project.registerObject(thisObj, "KICK.material.Shader");
             if (_dataURI && _dataURI.indexOf("memory://") !== 0){
-                engine.resourceManager.getShaderData(_dataURI,thisObj);
+                engine.resourceLoader.getShaderData(_dataURI,thisObj);
             } else {
                 updateBlendKey();
                 thisObj.apply();
@@ -911,6 +912,7 @@ KICK.namespace = function (ns_string) {
     material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
         var lookupUniform = this.lookupUniform,
             gl = this.gl,
+            modelMatrix = lookupUniform._m,
             mv = lookupUniform._mv,
             mvProj = lookupUniform._mvProj,
             norm = lookupUniform._norm,
@@ -931,8 +933,11 @@ KICK.namespace = function (ns_string) {
 
         // mesh instance uniforms
         {
-            if (mv || norm){
+            if (modelMatrix || mv || norm){
                 globalTransform = transform.getGlobalMatrix();
+                if (modelMatrix){
+                    gl.uniformMatrix4fv(modelMatrix.location,false,globalTransform);
+                }
                 var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
                 if (mv){
                     gl.uniformMatrix4fv(mv.location,false,modelView);
