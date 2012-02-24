@@ -46,7 +46,6 @@ KICK.namespace = function (ns_string) {
     var core = KICK.namespace("KICK.core"),
         mesh = KICK.namespace("KICK.mesh"),
         constants = core.Constants,
-        scene = KICK.namespace("KICK.scene"),
         ASSERT = constants._ASSERT,
         debug = constants._DEBUG,
         fail = core.Util.fail,
@@ -73,7 +72,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Responsible for allocation and deallocation of resources.
+     * Responsible for loading of resources.
      * @class ResourceLoader
      * @namespace KICK.core
      * @constructor
