@@ -233,7 +233,7 @@ KICK.namespace = function (ns_string) {
          */
         this.init = function(){
             if (_dataURI){
-                engine.resourceManager.getImageData(_dataURI,thisObj);
+                engine.resourceLoader.getImageData(_dataURI,thisObj);
             }
         };
 
@@ -434,7 +434,7 @@ KICK.namespace = function (ns_string) {
             if (newValue !== _dataURI){
                 _dataURI = newValue;
                 if (automaticGetTextureData){
-                    engine.resourceManager.getImageData(_dataURI,thisObj);
+                    engine.resourceLoader.getImageData(_dataURI,thisObj);
                 }
             }
         };
