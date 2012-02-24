@@ -963,13 +963,13 @@ KICK.namespace = function (ns_string) {
         /**
          * @method setDataURI
          * @param {String} newValue
-         * @param {Boolean} automaticGetMeshData optional. if true the mesh data is attempted to be loaded by resourceManager.getMeshData
+         * @param {Boolean} automaticGetMeshData optional. if true the mesh data is attempted to be loaded by resourceLoader.getMeshData
          */
         this.setDataURI = function(newValue, automaticGetMeshData){
             if (newValue !== _dataURI){
                 _dataURI = newValue;
                 if (automaticGetMeshData){
-                    engine.resourceManager.getMeshData(newValue,thisObj);
+                    engine.resourceLoader.getMeshData(newValue,thisObj);
                 }
             }
         };
