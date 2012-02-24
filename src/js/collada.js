@@ -48,7 +48,7 @@ KICK.namespace = function (ns_string) {
         };
 
      /**
-     * Imports a collada meshes into a scene
+     * Imports a Collada meshes into a scene
      * @class ColladaImporter
      * @namespace KICK.importer
      */
