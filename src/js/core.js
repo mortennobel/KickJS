@@ -95,11 +95,22 @@ KICK.namespace = function (ns_string) {
                 value:constants._VERSION
             },
             /**
+             * @property resourceManager
+             * @deprecated
+             * @type KICK.core.ResourceManager
+             */
+            resourceManager:{
+                get: function(){
+                    KICK.core.Util.warn("Engine.resourceManager is deprecated"); // todo remove
+                    return thisObj.resourceLoader;
+                }
+            },
+            /**
              * Resource manager of the engine. Loads and cache resources.
              * @property resourceManager
              * @type KICK.core.ResourceManager
              */
-            resourceManager:{
+            resourceLoader:{
                 value: new core.ResourceLoader(this)
             },
             /**
@@ -551,7 +562,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * A project asset is a object that can be serialized into a project and restored at a later state.<br>
+     * A project asset is an object that can be serialized into a project and restored at a later state.<br>
      * The class only exist in documentation and is used to describe the behavior any project asset must implement.<br>
      * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
      * The config parameter is used to initialize the object and the content should match the output of the
@@ -1208,7 +1219,7 @@ KICK.namespace = function (ns_string) {
                         var ref = value?value.ref:null;
                         if (value && ref && reftype){
                             if (reftype === "resource"){
-                                value = engine.resourceManager[value.refMethod](ref);
+                                value = engine.resourceLoader[value.refMethod](ref);
                             } else if (reftype === "project"){
                                 value = engine.project.load(ref);
                             }
@@ -1743,7 +1754,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Key Input manager.<br>
-     * This class encapsulate keyboard input and makes it easy to
+     * This class encapsulates keyboard input and makes it easy to
      * test for key input.<br>
      * Example code:
      * <pre class="brush: js">
