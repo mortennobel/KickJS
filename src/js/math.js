@@ -2956,6 +2956,7 @@ KICK.namespace = function (ns_string) {
      * @method transform
      * @param {KICK.math.aabb} aabbIn
      * @param {KICK.math.mat4} mat
+     * @param {KICK.math.aabb} dest Optional new aabb create if not specified
      * @return {KICK.math.aabb}
      */
     aabb.transform = (function(){
