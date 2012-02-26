@@ -2952,15 +2952,46 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Transforms the eight points of the Axis-Aligned Bounding Box into a new AABB
+     * @method transform
+     * @param {KICK.math.aabb} aabbIn
+     * @param {KICK.math.mat4} mat
+     * @return {KICK.math.aabb}
+     */
+    aabb.transform = (function(){
+        var point = vec3.create();
+        return function(aabbIn, mat,dest){
+            var max = Number.MAX_VALUE,
+                min = Number.MIN_VALUE;
+            if (!dest){
+                dest = aabb.create();
+            } else {
+                aabb.set([max,max,max,min,min,min],dest);
+            }
+            for (var i=0;i<2;i++){
+                for (var j=0;j<2;j++){
+                    for (var k=0;k<2;k++){
+                        point[0] = aabbIn[i*3];
+                        point[1] = aabbIn[j*3+1];
+                        point[2] = aabbIn[k*3+2];
+                        var transformedPoint = mat4.multiplyVec3(mat,point);
+                        aabb.addPoint(dest,transformedPoint);
+                    }
+                }
+            }
+            return dest;
+        }})();
+
+    /**
      * @method merge
      * @param {KICK.math.aabb} aabb
      * @param {KICK.math.aabb} aabb2
-     * @param {KICK.math.aabb} dest Optional, receiving copied values
+     * @param {KICK.math.aabb} dest Optional, receiving copied values - otherwise using aabb
      * @return {KICK.math.aabb} dest if specified - otherwise a new value is returned
      */
     aabb.merge = function(aabb,aabb2,dest){
         if (!dest){
-            dest = new Float32Array(6);
+            dest = aabb;
         }
         dest[0] = min(aabb[0],aabb2[0]);
         dest[1] = min(aabb[1],aabb2[1]);
@@ -2997,10 +3028,27 @@ KICK.namespace = function (ns_string) {
         if (!centerVec3){
             centerVec3 = vec3.create();
         }
-        centerVec3[0] = aabb[3]-aabb[0];
-        centerVec3[1] = aabb[4]-aabb[1];
-        centerVec3[2] = aabb[5]-aabb[2];
+        centerVec3[0] = aabb[0]+(aabb[3]-aabb[0])*0.5;
+        centerVec3[1] = aabb[1]+(aabb[4]-aabb[1])*0.5;
+        centerVec3[2] = aabb[2]+(aabb[5]-aabb[2])*0.5;
 
         return centerVec3;
+    };
+
+    /**
+     * Diagonal from min to max
+     * @method diagonal
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.vec3} diagonalVec3 optional
+     * @return {KICK.math.vec3}
+     */
+    aabb.diagonal = function(aabb,diagonalVec3){
+        if (!diagonalVec3){
+            diagonalVec3 = vec3.create();
+        }
+        diagonalVec3[0] = aabb[3]-aabb[0];
+        diagonalVec3[1] = aabb[4]-aabb[1];
+        diagonalVec3[2] = aabb[5]-aabb[2];
+        return diagonalVec3;
     };
 })();

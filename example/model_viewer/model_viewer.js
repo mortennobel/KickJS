@@ -1,5 +1,8 @@
 var vec3 = KICK.math.vec3,
-    quat4 = KICK.math.quat4;
+    quat4 = KICK.math.quat4,
+    aabb = KICK.math.aabb,
+    objectCenter = vec3.create(),
+    sphericalCoordinates = vec3.create([10,0,0]); // radius, polar, elevation
 
 if (location.href.indexOf('file')===0){
     alert("Model viewer example must be run from a web-server due to security constrains");
@@ -33,6 +36,12 @@ function loadKickJSModel(fileContent){
         materials: materials
     });
     gameObject.addComponent(meshRenderer);
+    var boundingBox = mesh.aabb;
+    aabb.center(boundingBox,objectCenter);
+    var length = vec3.length(aabb.diagonal(boundingBox))*0.5;
+    var lengthPlusOffset = length*2.5;
+
+    sphericalCoordinates[0] = lengthPlusOffset;
 }
 
 function load(content,url,func){
@@ -41,14 +50,14 @@ function load(content,url,func){
     var createdObject = func(content,engine,engine.activeScene,true);
     var gameObjectsCreated = createdObject.gameObjects;
 
+    var boundingBox = aabb.create();
     for (var i=0;i<gameObjectsCreated.length;i++){
         var gameObject = gameObjectsCreated[i];
-        var isDuck = url==="duck.dae" || url==="duck_triangulate.dae";
-        if (isDuck){
-            gameObject.transform.localScale = [0.01,0.01,0.01];
-        }
         var meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
         if (meshRendererNew){
+            var meshAabb = meshRendererNew.mesh.aabb;
+            var aabbTransformed = aabb.transform(meshAabb,gameObject.transform.getGlobalMatrix ( ));
+            aabb.merge(boundingBox,aabbTransformed);
             var materials = [];
             for (var j = meshRendererNew.mesh.meshData.subMeshes.length-1;j>=0;j--){
                 materials[j] = material;
@@ -57,9 +66,13 @@ function load(content,url,func){
             meshRenderer = meshRendererNew;
             recalculateNormals();
             createDummyUVsIfNotExist();
-//            console.log(KICK.core.Util.typedArrayToArray(meshRendererNew.mesh.aabb));
         }
     }
+    aabb.center(boundingBox,objectCenter);
+    var length = vec3.length(aabb.diagonal(boundingBox))*0.5;
+    var lengthPlusOffset = length*2.5;
+
+    sphericalCoordinates[0] = lengthPlusOffset;
 }
 
 function loadObj(url){
@@ -272,7 +285,6 @@ function RotatorComponent(){
         wheelSpeed = 0.0001,
         mouseRotationSpeed = 0.01,
         mouseInput,
-        sphericalCoordinates = vec3.create([10,0,0]); // radius, polar, elevation
         cartesianCoordinates = vec3.create();
 
     this.activated = function(){
@@ -302,7 +314,7 @@ function RotatorComponent(){
         }
         vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
         transform.position = cartesianCoordinates;
-        transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0]);
+        transform.localRotation = quat4.lookAt(cartesianCoordinates,objectCenter,[0,1,0]);
     };
 }
 
