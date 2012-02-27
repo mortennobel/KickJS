@@ -2927,9 +2927,9 @@ KICK.namespace = function (ns_string) {
             dest[0] = Number.MAX_VALUE;
             dest[1] = Number.MAX_VALUE;
             dest[2] = Number.MAX_VALUE;
-            dest[3] = Number.MIN_VALUE;
-            dest[4] = Number.MIN_VALUE;
-            dest[5] = Number.MIN_VALUE;
+            dest[3] = -Number.MAX_VALUE;
+            dest[4] = -Number.MAX_VALUE;
+            dest[5] = -Number.MAX_VALUE;
         }
         return dest;
     };
@@ -2963,7 +2963,7 @@ KICK.namespace = function (ns_string) {
         var point = vec3.create();
         return function(aabbIn, mat,dest){
             var max = Number.MAX_VALUE,
-                min = Number.MIN_VALUE;
+                min = -Number.MAX_VALUE;
             if (!dest){
                 dest = aabb.create();
             } else {
@@ -3051,5 +3051,15 @@ KICK.namespace = function (ns_string) {
         diagonalVec3[1] = aabb[4]-aabb[1];
         diagonalVec3[2] = aabb[5]-aabb[2];
         return diagonalVec3;
+    };
+
+    aabb.str = function(aabb){
+        return "{("+
+            aabb[0]+","+
+            aabb[1]+","+
+            aabb[2]+"),("+
+            aabb[3]+","+
+            aabb[4]+","+
+            aabb[5]+")}";
     };
 })();

@@ -700,9 +700,15 @@ YUI().use('node', 'console', 'test', function (Y) {
                     mat4 = KICK.math.mat4,
                     aabb = KICK.math.aabb;
             var ab = aabb.create([-1,-1,-1],[1,1,1]);
-            var translateMat = mat4.setTRS([2,0,0],[0,0,0,1],[1,1,1]);
+            var translateMat = mat4.setTRS([3,0,0],[0,0,0,1],[1,1,1]);
             var transformedAABB = aabb.transform(ab,translateMat);
-            var expectedRes = aabb.create([1,-1,-1],[3,1,1]);
+            var expectedRes = aabb.create([2,-1,-1],[4,1,1]);
+            Y.Assert.compareVec(expectedRes,transformedAABB);
+
+            ab = aabb.create([-1,-1,-1],[1,1,1]);
+            translateMat = mat4.setTRS([-5,0,0],[0,0,0,1],[1,1,1]);
+            transformedAABB = aabb.transform(ab,translateMat);
+            expectedRes = aabb.create([-6,-1,-1],[-4,1,1]);
             Y.Assert.compareVec(expectedRes,transformedAABB);
         },
         testAABBTransformTranslateScale:function(){
@@ -711,10 +717,10 @@ YUI().use('node', 'console', 'test', function (Y) {
                     mat4 = KICK.math.mat4,
                     aabb = KICK.math.aabb;
             var ab = aabb.create([-1,-1,-1],[1,1,1]);
-            var translateMat = mat4.setTRS([2,0,0],[0,0,0,1],[2,2,2]);
+            var translateMat = mat4.setTRS([3,0,0],[0,0,0,1],[2,2,2]);
             var transformedAABB = aabb.transform(ab,translateMat);
-            var expectedRes = aabb.create([0,-2,-2],[4,2,2]);
-            Y.Assert.compareVec(expectedRes,transformedAABB);
+            var expectedRes = aabb.create([1,-2,-2],[5,2,2]);
+            Y.Assert.compareVec(expectedRes,transformedAABB, "Was "+aabb.str(transformedAABB)+" expected "+aabb.str(expectedRes));
         },
         testAABBCenter:function(){
             var Assert = Y.Assert,
