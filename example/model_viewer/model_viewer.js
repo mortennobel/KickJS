@@ -313,6 +313,7 @@ function RotatorComponent(){
             sphericalCoordinates[0] *= 1+delta;
         }
         vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+        cartesianCoordinates = vec3.add(cartesianCoordinates,objectCenter,cartesianCoordinates);
         transform.position = cartesianCoordinates;
         transform.localRotation = quat4.lookAt(cartesianCoordinates,objectCenter,[0,1,0]);
     };
