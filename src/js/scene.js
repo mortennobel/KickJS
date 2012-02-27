@@ -1396,15 +1396,14 @@ KICK.namespace = function (ns_string) {
                 gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
                 mat4.ortho(-5, 5, -5, 5, // todo replace with fitting
-                    -10, 10, projectionMatrix);
+                    -20, 20, projectionMatrix);
 
                 var globalMatrixInv = directionalLightTransform.getGlobalTRSInverse(); // // todo replace with fitting
                 mat4.set(globalMatrixInv, viewMatrix);
 
                 mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
-                renderSceneObjects(sceneLightObj,_shadowmapShader);
-
                 mat4.set(viewProjectionMatrix,lightViewProjectionMatrix);
+                renderSceneObjects(sceneLightObj,_shadowmapShader);
 
                 // debug
                 directionalLight.shadowRenderTextureDebug.bind();
@@ -2124,36 +2123,39 @@ KICK.namespace = function (ns_string) {
             scriptPriority,
             updateShadowTexture = function(){
                 if (_shadow){
-                    _shadowTexture = new KICK.texture.Texture(engine,{
-                        minFilter:KICK.core.Constants.GL_NEAREST,
-                        magFilter:KICK.core.Constants.GL_NEAREST,
-                        wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                        wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                        flipY: false,
-                        generateMipmaps:false
-                    });
-                    _shadowTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
-                    _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
-                        colorTexture:_shadowTexture
-                    });
+                    if (!_shadowTexture){
+                        _shadowTexture = new KICK.texture.Texture(engine,{
+                            minFilter:KICK.core.Constants.GL_NEAREST,
+                            magFilter:KICK.core.Constants.GL_NEAREST,
+                            wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                            wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                            flipY: false,
+                            generateMipmaps:false
+                        });
+                        _shadowTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                        _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
+                            colorTexture:_shadowTexture
+                        });
 
-                    // debug info
-                    _shadowTextureDebug = new KICK.texture.Texture(engine,{
-                        minFilter:KICK.core.Constants.GL_NEAREST,
-                        magFilter:KICK.core.Constants.GL_NEAREST,
-                        wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                        wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                        flipY: false,
-                        generateMipmaps:false
-                    });
-                    _shadowTextureDebug.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
-                    _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
-                        colorTexture:_shadowTextureDebug
-                    });
-
+                        // debug info
+                        _shadowTextureDebug = new KICK.texture.Texture(engine,{
+                            minFilter:KICK.core.Constants.GL_NEAREST,
+                            magFilter:KICK.core.Constants.GL_NEAREST,
+                            wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                            wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                            flipY: false,
+                            generateMipmaps:false
+                        });
+                        _shadowTextureDebug.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                        _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
+                            colorTexture:_shadowTextureDebug
+                        });
+                    }
                 } else if (_shadowRenderTexture){
                     _shadowRenderTexture.destroy();
                     _shadowTexture.destroy();
+                    _shadowRenderTexture = null;
+                    _shadowTexture = null;
                 }
             };
         Object.defineProperties(this,{
