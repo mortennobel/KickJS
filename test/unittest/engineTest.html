@@ -331,7 +331,7 @@ mixkey(math.random(), pool);
 <script>
 Math.seedrandom("hello");
 YUI().use('node', 'console', 'test', function (Y) {
-
+    "use strict";
     Y.namespace("KICK.engine");
     var engine,canvas;
     Y.KICK.engine.engineTest = new Y.Test.Case({
@@ -689,8 +689,20 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.areEqual(array[1].test,arrayCopy[1].test);
             Assert.areEqual(array[2],arrayCopy[2]);
             Assert.areNotSame(array,arrayCopy);
+        },
+        testKeepTransformParent:function(){
+            var Assert = Y.Assert;
 
-
+            engine.project.loadProject(pointProject);
+            var red = engine.activeScene.getGameObjectByName('Red');
+            var green = engine.activeScene.getGameObjectByName('Green');
+            red.transform.parent = green.transform;
+            var seralizedProject = engine.project.toJSON();
+            engine.project.loadProject(seralizedProject);
+            console.log(JSON.stringify(seralizedProject, null,3));
+            red = engine.activeScene.getGameObjectByName('Red');
+            green = engine.activeScene.getGameObjectByName('Green');
+            Assert.areSame(red.transform.parent, green.transform);
         }
     });
 
