@@ -562,6 +562,31 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Class used for tracking initialization of resources (such as loading, creating, etc.)
+     * @class ResourceTracker
+     * @param {KICK.core.Project} project
+     */
+    core.ResourceTracker = function(project){
+        var thisObj = this;
+        /**
+         * Calls project.removeResourceTracker
+         * @method resourceReady
+         */
+        this.resourceReady = function(){
+            project.removeResourceTracker(thisObj);
+        };
+
+        /**
+         * Calls project.removeResourceTracker
+         * @method resourceFailed
+         */
+        this.resourceFailed = function(){
+            project.removeResourceTracker(thisObj);
+        }
+    };
+
+
+    /**
      * A project asset is an object that can be serialized into a project and restored at a later state.<br>
      * The class only exist in documentation and is used to describe the behavior any project asset must implement.<br>
      * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
@@ -586,6 +611,13 @@ KICK.namespace = function (ns_string) {
             resourceCache = {},
             thisObj = this,
             _maxUID = 0,
+            resourceTrackers = [],
+            resourceTrackerListeners = [],
+            notifyTrackedResourcesChanged = function(){
+                for (var i=0;i<resourceTrackerListeners.length;i++){
+                    resourceTrackerListeners[i].resourceTrackerChanged();
+                }
+            },
             refreshResourceDescriptor = function(uid,filter){
                 if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
                     var liveObject = resourceCache[uid];
@@ -797,11 +829,35 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * @method createResourceTracker
+         * @return {KICK.core.ResourceTracker}
+         */
+        this.createResourceTracker = function(){
+            var newResourceTracker = new KICK.core.ResourceTracker(thisObj);
+            resourceTrackers.push(newResourceTracker);
+            notifyTrackedResourcesChanged();
+            return newResourceTracker;
+        };
+
+        /**
+         * @method removeResourceTracker
+         * @param {KICK.core.ResourceTracker} resourceTracker
+         */
+        this.removeResourceTracker = function(resourceTracker){
+            var removed = KICK.core.Util.removeElementFromArray(resourceTrackers, resourceTracker);
+            if (removed){
+                notifyTrackedResourcesChanged();
+            }
+        };
+
+        /**
          * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor],activeScene:number}
          * @method loadProject
          * @param {object} config
+         * @param {Function} onSuccess
+         * @param {Function} onFail
          */
-        this.loadProject = function(config){
+        this.loadProject = function(config, onSuccess, onError){
             if (_maxUID>0){
                 thisObj.closeProject();
             }
@@ -813,6 +869,16 @@ KICK.namespace = function (ns_string) {
             }
 
             // preload all resources
+            for (var uid in resourceDescriptorsByUID){
+                if (resourceDescriptorsByUID.hasOwnProperty(uid)){
+                    try{
+                        thisObj.load(uid);
+                    }catch(e){
+                        onError ? onError(e) : KICK.core.Util.warn(e);
+                    }
+                }
+            }
+
             var onComplete = function(){
                 _maxUID = config.maxUID || 0; // reset maxUID
                 if (config.activeScene){
@@ -820,8 +886,21 @@ KICK.namespace = function (ns_string) {
                 } else {
                     engine.activeScene = null;
                 }
+                if (onSuccess){
+                    onSuccess();
+                }
             };
-            onComplete();
+            var resourceLoadedListener = {
+                resourceTrackerChanged : function(){
+                    console.log("Resource listeners in queue : "+resourceTrackers.length); // todo remove
+                    if (resourceTrackers.length==0){
+                        KICK.core.Util.removeElementFromArray(resourceTrackerListeners,resourceLoadedListener);
+                        onComplete();
+                    }
+                }
+            };
+            resourceTrackerListeners.push(resourceLoadedListener);
+            notifyTrackedResourcesChanged();
         };
 
         /**
@@ -1994,6 +2073,11 @@ KICK.namespace = function (ns_string) {
         getJSONReference: function(engine,object){
             if (object == null){
                 return null;
+            }
+            if (DEBUG){
+                if (!engine instanceof KICK.core.Engine){
+                    KICK.core.Util.fail("getJSONReference - engine not defined");
+                }
             }
             var isGameObject = object instanceof KICK.scene.GameObject;
             var isComponent = !isGameObject && object.gameObject instanceof KICK.scene.GameObject;
