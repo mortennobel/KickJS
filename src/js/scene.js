@@ -588,6 +588,11 @@ KICK.namespace = function (ns_string) {
                     if (newParent === this) {
                         KICK.core.Util.fail('Cannot assign parent to self');
                     }
+                    if (ASSERT){
+                        if (typeof newParent === 'undefined'){
+                            fail("Cannot set newParent to undefined - should be null");
+                        }
+                    }
                     if (newParent !== parentTransform){
                         if (newParent === null){
                             parentTransform = null;
@@ -679,6 +684,11 @@ KICK.namespace = function (ns_string) {
          */
         this.toJSON = function(){
             var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+            if (ASSERT){
+                if (!thisObj.gameObject || !thisObj.gameObject.engine){
+                    fail("Cannot serialize a Transform object that has no reference to gameObject/engine");
+                }
+            }
             return {
                 type:"KICK.scene.Transform",
                 uid: gameObject.engine.getUID(thisObj),
@@ -686,7 +696,7 @@ KICK.namespace = function (ns_string) {
                     localPosition: typedArrayToArray(localPosition),
                     localRotation: typedArrayToArray(localRotationQuat),
                     localScale: typedArrayToArray(localScale),
-                    parent: parentTransform ? KICK.core.Util.getJSONReference(parentTransform): null // todo
+                    parent: parentTransform ? KICK.core.Util.getJSONReference(thisObj.gameObject.engine,parentTransform): null
                 }
             };
         };
