@@ -147,7 +147,12 @@ KICK.namespace = function (ns_string) {
              */
             colorTexture:{
                 get: function(){ return colorTexture; },
-                set: function(newValue){ colorTexture = newValue; initFBO(); }
+                set: function(newValue){
+                    colorTexture = newValue;
+                    if (colorTexture){
+                        initFBO();
+                    }
+                }
             },
             /**
              * @property name
@@ -183,7 +188,8 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            initFBO();
+            // apply
+            applyConfig(thisObj, config);
             engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
         })();
     };
