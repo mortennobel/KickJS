@@ -75,6 +75,7 @@ KICK.namespace = function (ns_string) {
         mat4 = KICK.namespace("KICK.math.mat4"),
         quat4 = KICK.namespace("KICK.math.quat4"),
         aabb = KICK.namespace("KICK.math.aabb"),
+        frustum = KICK.namespace("KICK.math.frustum"),
         min = Math.min,
         max = Math.max,
         sqrt = Math.sqrt,
@@ -3061,5 +3062,77 @@ KICK.namespace = function (ns_string) {
             aabb[3]+","+
             aabb[4]+","+
             aabb[5]+")}";
+    };
+
+    /**
+     * Frustum represented as 6 line equations (a*x+b*y+c*z+d=0 , where [a,b,c] is the normal of the plane).
+     * Note the normals of the frustum points inwards. The order of the planes are left, right, top, bottom, near, far
+     * The implementation is based on
+     * "Fast Extraction of Viewing Frustum Planes from the WorldView-Projection Matrix" by Gil Grib and Klaus Hartmann
+     * http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf
+     * @class frustum
+     * @namespace KICK.math
+     */
+    math.frustum = frustum;
+
+    /**
+     * @method extractPlanes
+     * @param {KICK.math.mat4} modelViewMatrix
+     * @param {Boolean} normalize normalize plane normal
+     * @param {Array[32]} dest
+     * @return {Array[32]} 6 plane equations
+     */
+    frustum.extractPlanes = function(modelViewMatrix, normalize, dest){
+        if (!dest){
+            dest = new Float32Array(6*4);
+        }
+        var   _11 = modelViewMatrix[0], _21 = modelViewMatrix[1], _31 = modelViewMatrix[2], _41 = modelViewMatrix[3];
+        var   _12 = modelViewMatrix[4], _22 = modelViewMatrix[5], _32 = modelViewMatrix[6], _42 = modelViewMatrix[7];
+        var   _13 = modelViewMatrix[8], _23 = modelViewMatrix[9], _33 = modelViewMatrix[10], _43 = modelViewMatrix[11];
+        var   _14 = modelViewMatrix[12], _24 = modelViewMatrix[13], _34 = modelViewMatrix[14], _44 = modelViewMatrix[15];
+        // Left clipping plane
+        dest[0] = _41 + _11;
+        dest[1] = _42 + _12;
+        dest[2] = _43 + _13;
+        dest[3] = _44 + _14;
+        // Right clipping plane
+        dest[4] = _41 - _11;
+        dest[4+1] = _42 - _12;
+        dest[4+2] = _43 - _13;
+        dest[4+3] = _44 - _14;
+        // Top clipping plane
+        dest[2*4] = _41 - _21;
+        dest[2*4+1] = _42 - _22;
+        dest[2*4+2] = _43 - _23;
+        dest[2*4+3] = _44 - _24;
+        // Bottom clipping plane
+        dest[3*4] = _41 + _21;
+        dest[3*4+1] = _42 + _22;
+        dest[3*4+2] = _43 + _23;
+        dest[3*4+3] = _44 + _24;
+        // Near clipping plane
+        dest[4*4] = _41 + _31;
+        dest[4*4+1] = _42 + _32;
+        dest[4*4+2] = _43 + _33;
+        dest[4*4+3] = _44 + _34;
+        // Far clipping plane
+        dest[5*4] = _41 - _31;
+        dest[5*4+1] = _42 - _32;
+        dest[5*4+2] = _43 - _33;
+        dest[5*4+3] = _44 - _34;
+        if (normalize){
+            for (var i=0;i<6;i++){
+                var x = dest[i*4+0],
+                    y = dest[i*4+1],
+                    z = dest[i*4+2],
+                    length = Math.sqrt(x*x+y*y+z*z),
+                    lengthRecip = 1 / length;
+                dest[i*4+0] *= lengthRecip;
+                dest[i*4+1] *= lengthRecip;
+                dest[i*4+2] *= lengthRecip;
+                dest[i*4+3] *= lengthRecip;
+            }
+        }
+        return dest;
     };
 })();

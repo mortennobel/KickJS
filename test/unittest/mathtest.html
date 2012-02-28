@@ -735,6 +735,50 @@ YUI().use('node', 'console', 'test', function (Y) {
             var center = aabb.center(ab);
             var expectedRes = [2.5,4,5.5];
             Y.Assert.compareVec(center,expectedRes);
+        },
+        testFrustumTest:function(){
+            var Assert = Y.Assert,
+                    mat4 = KICK.math.mat4,
+                    vec3 = KICK.math.vec3,
+                    frustum = KICK.math.frustum;
+            for (var i=0;i<2;i++){
+                // Test a simple case where the view projection has a near plane of 1 and far plane of 5
+                var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                var normalize = i;
+                var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+                Y.Assert.areEqual(frustumPlanes.length,4*6);
+                var near = frustumPlanes.subarray(4*4,5*4);
+                var far = frustumPlanes.subarray(5*4,6*4);
+
+                Y.Assert.areEqual(near.length,4);
+                Y.Assert.areEqual(far.length,4);
+                Y.Assert.areEqual(vec3.dot(near, [0,0,-1]), -near[3]); // (0*near.x+0*near.y-1*near.z + near.w = 0)
+                Y.Assert.areEqual(vec3.dot(far, [0,0,-5]), -far[3]); // (0*near.x+0*near.y-5*near.z + near.w = 0)
+
+                // Test modelView where translated with z=+2
+                var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                var cameraTransform = mat4.translate(mat4.identity(mat4.create()),[0,0,2]);
+                var viewMatrix = mat4.inverse(cameraTransform);
+                var modelView = mat4.multiply(projectionMat,viewMatrix);
+                var frustumPlanes = frustum.extractPlanes(modelView,normalize);
+                Y.Assert.areEqual(frustumPlanes.length,4*6);
+                var near = frustumPlanes.subarray(4*4,5*4);
+                var far = frustumPlanes.subarray(5*4,6*4);
+                Y.Assert.areEqual(vec3.dot(near, [0,0,1]), -near[3]); // (0*near.x+0*near.y-1*near.z + near.w = 0)
+                Y.Assert.areEqual(vec3.dot(far, [0,0,-3]), -far[3]); // (0*near.x+0*near.y-5*near.z + near.w = 0)
+
+                // Test modelView where rotated -90 degree around y
+                var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                var cameraTransform = mat4.rotateEuler(mat4.identity(mat4.create()),[0,-90,0]);
+                var viewMatrix = mat4.inverse(cameraTransform);
+                var modelView = mat4.multiply(projectionMat,viewMatrix);
+                var frustumPlanes = frustum.extractPlanes(modelView,normalize);
+                Y.Assert.areEqual(frustumPlanes.length,4*6);
+                var near = frustumPlanes.subarray(4*4,5*4);
+                var far = frustumPlanes.subarray(5*4,6*4);
+                Y.Assert.areEqual(vec3.dot(near, [1,0,0]), -near[3]); // (0*near.x+0*near.y-1*near.z + near.w = 0)
+                Y.Assert.areEqual(vec3.dot(far, [5,0,0]), -far[3]); // (0*near.x+0*near.y-5*near.z + near.w = 0)
+            }
         }
     });
 
