@@ -814,8 +814,7 @@ KICK.namespace = function (ns_string) {
                     if (oXHR.status === 200) {
                         var value = JSON.parse(oXHR.responseText);
                         try{
-                            thisObj.loadProject(value);
-                            onSuccess();
+                            thisObj.loadProject(value,onSuccess,onError);
                         } catch(e) {
                             debugger;
                             onError(e);
@@ -892,7 +891,6 @@ KICK.namespace = function (ns_string) {
             };
             var resourceLoadedListener = {
                 resourceTrackerChanged : function(){
-                    console.log("Resource listeners in queue : "+resourceTrackers.length); // todo remove
                     if (resourceTrackers.length==0){
                         KICK.core.Util.removeElementFromArray(resourceTrackerListeners,resourceLoadedListener);
                         onComplete();
