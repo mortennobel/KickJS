@@ -1429,7 +1429,7 @@ KICK.namespace = function (ns_string) {
          * @property maxNumerOfLights
          * @type Number
          */
-        this.maxNumerOfLights = config.maxNumerOfLights ? config.maxNumerOfLights : 1;
+        this.maxNumerOfLights = typeof(config.maxNumerOfLights) === 'number' ? config.maxNumerOfLights : 1;
 
         /**
          * Checks for WebGL errors after each webgl function is called.
@@ -1461,7 +1461,7 @@ KICK.namespace = function (ns_string) {
          * @property alpha
          * @type Boolean
          */
-        this.alpha = typeof config.alpha === 'boolean' ? config.alpha : true;
+        this.alpha = typeof(config.alpha) === 'boolean' ? config.alpha : true;
 
         /**
          * WebGL spec: Default: true. If the value is true, the drawing buffer has a depth buffer of at least 16 bits.
@@ -1469,7 +1469,7 @@ KICK.namespace = function (ns_string) {
          * @property alpha
          * @type Boolean
          */
-        this.depth = typeof config.depth === 'boolean' ? config.depth : true;
+        this.depth = typeof(config.depth) === 'boolean' ? config.depth : true;
 
         /**
          * WebGL spec: Default: false. If the value is true, the drawing buffer has a stencil buffer of at least 8 bits.
@@ -1477,7 +1477,7 @@ KICK.namespace = function (ns_string) {
          * @property stencil
          * @type Boolean
          */
-        this.stencil = typeof config.stencil === 'boolean' ? config.stencil : false;
+        this.stencil = typeof(config.stencil) === 'boolean' ? config.stencil : false;
 
         /**
          * WebGL spec: Default: true. If the value is true and the implementation supports antialiasing the drawing
@@ -1486,7 +1486,7 @@ KICK.namespace = function (ns_string) {
          * @property antialias
          * @type Boolean
          */
-        this.antialias = typeof config.antialias === 'boolean' ? config.antialias : true;
+        this.antialias = typeof(config.antialias) === 'boolean' ? config.antialias : true;
 
         /**
          * WebGL spec: Default: true. If the value is true the page compositor will assume the drawing buffer contains
@@ -1496,7 +1496,7 @@ KICK.namespace = function (ns_string) {
          * @property premultipliedAlpha
          * @type Boolean
          */
-        this.premultipliedAlpha = typeof config.premultipliedAlpha === 'boolean' ? config.premultipliedAlpha : true;
+        this.premultipliedAlpha = typeof(config.premultipliedAlpha) === 'boolean' ? config.premultipliedAlpha : true;
 
         /**
          * Polling of canvas resize. Default is 0 (meaning not polling)
