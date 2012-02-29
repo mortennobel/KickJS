@@ -1403,6 +1403,27 @@ KICK.namespace = function (ns_string) {
          * @type Boolean
          */
         this.shadows = config.shadows || false;
+        /**
+         * The maximum distance shadows are displayed (the smaller the better shadow map).
+         * Default value is 20
+         * @property shadowDistance
+         * @type Number
+         */
+        this.shadowDistance = config.shadowDistance || 20;
+        /**
+         * A multiplier that moves the near plane of the shadow map. Default is 2.0
+         * @property shadowNearMultiplier
+         * @type Number
+         */
+        this.shadowNearMultiplier = config.shadowNearMultiplier || 2.0;
+        /**
+         * Shadow map resolution (relative to max texture size). Default is 1.0.
+         * Allowed values are 1/2, 1/4, 1/8, etc.
+         * @property shadowMapQuality
+         * @type Number
+         */
+        this.shadowMapQuality = config.shadowMapQuality || 1.0;
+
          /**
          * Maximum number of lights in scene. Default value is 1
          * @property maxNumerOfLights

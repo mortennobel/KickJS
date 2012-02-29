@@ -2144,8 +2144,6 @@ KICK.namespace = function (ns_string) {
             _shadowBias = 0.05,
             _shadowTexture = null,
             _shadowRenderTexture = null,
-            _shadowTextureDebug = null,
-            _shadowRenderTextureDebug = null,
             attenuation = vec3.create([1,0,0]),
             intensity = 1,
             transform,
@@ -2166,23 +2164,12 @@ KICK.namespace = function (ns_string) {
                             flipY: false,
                             generateMipmaps:false
                         });
-                        _shadowTexture.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
+                        var maxTextureSize = Math.min(engine.gl.getParameter(KICK.core.Constants.GL_MAX_RENDERBUFFER_SIZE),
+                            engine.gl.getParameter(KICK.core.Constants.GL_MAX_TEXTURE_SIZE));
+                        maxTextureSize = Math.min(maxTextureSize,4096)*engine.config.shadowMapQuality;
+                        _shadowTexture.setImageData(maxTextureSize,maxTextureSize,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
                         _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
                             colorTexture:_shadowTexture
-                        });
-
-                        // debug info
-                        _shadowTextureDebug = new KICK.texture.Texture(engine,{
-                            minFilter:KICK.core.Constants.GL_NEAREST,
-                            magFilter:KICK.core.Constants.GL_NEAREST,
-                            wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                            wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                            flipY: false,
-                            generateMipmaps:false
-                        });
-                        _shadowTextureDebug.setImageData(512,512,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
-                        _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
-                            colorTexture:_shadowTextureDebug
                         });
                     }
                 } else if (_shadowRenderTexture){

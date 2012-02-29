@@ -7481,6 +7481,27 @@ KICK.namespace = function (ns_string) {
          * @type Boolean
          */
         this.shadows = config.shadows || false;
+        /**
+         * The maximum distance shadows are displayed (the smaller the better shadow map).
+         * Default value is 20
+         * @property shadowDistance
+         * @type Number
+         */
+        this.shadowDistance = config.shadowDistance || 20;
+        /**
+         * A multiplier that moves the near plane of the shadow map. Default is 2.0
+         * @property shadowNearMultiplier
+         * @type Number
+         */
+        this.shadowNearMultiplier = config.shadowNearMultiplier || 2.0;
+        /**
+         * Shadow map resolution (relative to max texture size). Default is 1.0.
+         * Allowed values are 1/2, 1/4, 1/8, etc.
+         * @property shadowMapQuality
+         * @type Number
+         */
+        this.shadowMapQuality = config.shadowMapQuality || 1.0;
+
          /**
          * Maximum number of lights in scene. Default value is 1
          * @property maxNumerOfLights
@@ -12186,8 +12207,6 @@ KICK.namespace = function (ns_string) {
             _shadowBias = 0.05,
             _shadowTexture = null,
             _shadowRenderTexture = null,
-            _shadowTextureDebug = null,
-            _shadowRenderTextureDebug = null,
             attenuation = vec3.create([1,0,0]),
             intensity = 1,
             transform,
@@ -12208,23 +12227,12 @@ KICK.namespace = function (ns_string) {
                             flipY: false,
                             generateMipmaps:false
                         });
-                        _shadowTexture.setImageData(512,512,0,5121,null,"");
+                        var maxTextureSize = Math.min(engine.gl.getParameter(34024),
+                            engine.gl.getParameter(3379));
+                        maxTextureSize = Math.min(maxTextureSize,4096)*engine.config.shadowMapQuality;
+                        _shadowTexture.setImageData(maxTextureSize,maxTextureSize,0,5121,null,"");
                         _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
                             colorTexture:_shadowTexture
-                        });
-
-                        // debug info
-                        _shadowTextureDebug = new KICK.texture.Texture(engine,{
-                            minFilter:9728,
-                            magFilter:9728,
-                            wrapS:33071,
-                            wrapT:33071,
-                            flipY: false,
-                            generateMipmaps:false
-                        });
-                        _shadowTextureDebug.setImageData(512,512,0,5121,null,"");
-                        _shadowRenderTextureDebug = new KICK.texture.RenderTexture (engine,{
-                            colorTexture:_shadowTextureDebug
                         });
                     }
                 } else if (_shadowRenderTexture){
@@ -14609,7 +14617,8 @@ KICK.namespace = function (ns_string) {
                 currentTexture ++;
             }
             if (_lightMat){
-                gl.uniformMatrix4fv(_lightMat.location,false,engineUniforms.lightMatrix);
+                globalTransform = transform.getGlobalMatrix();
+                gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(engineUniforms.lightMatrix,globalTransform,tempMat4));
             }
         }
     };
