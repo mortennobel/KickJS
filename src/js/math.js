@@ -113,6 +113,7 @@ KICK.namespace = function (ns_string) {
      * @method wrapArray
      * @param {Float32Array} array
      * @return {Array[KICK.math.vec2]} of vec2
+     * @static
      */
     vec2.wrapArray = function(array){
         return wrapArray(array,2);
@@ -125,6 +126,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} count Number of vec 2 to be layed out in memory
      * @param {Object} ref Optional, if set a memory reference is set to ref.mem
      * @return {KICK.math.vec2} New vec2
+     * @static
      */
     vec2.array = function(count,ref){
         var memory = new Float32Array(count*2);
@@ -140,6 +142,7 @@ KICK.namespace = function (ns_string) {
      * @method create
      * @param {Array[Number]} vec Optional, vec2 containing values to initialize with
      * @return {KICK.math.vec2} New vec2
+     * @static
      */
     vec2.create = function(vec) {
         var dest = new Float32Array(2);
@@ -158,6 +161,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec2} vec vec2 containing values to copy
      * @param {KICK.math.vec2} dest vec2 receiving copied values
      * @return {KICK.math.vec2} dest
+     * @static
      */
     vec2.set = function(vec, dest) {
         dest[0] = vec[0];
@@ -173,6 +177,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec2} vec2  second operand
      * @param {KICK.math.vec2} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec2} dest if specified, vec otherwise
+     * @static
      */
     vec2.add = function(vec, vec2, dest) {
         if(!dest || vec == dest) {
@@ -193,6 +198,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec2} vec2 second operand
      * @param {KICK.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec2} dest if specified, vec otherwise
+     * @static
      */
     vec2.subtract = function(vec, vec2, dest) {
         if(!dest || vec == dest) {
@@ -213,6 +219,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec2} vec2 second operand
      * @param {Number} epsilon Optional - default value is
      * @return {Boolean} true if two vectors are equals
+     * @static
      */
     vec2.equal = function(vec, vec2, epsilon) {
         if (!epsilon){
@@ -233,6 +240,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec2} vec vec3 to normalize
      * @param {KICK.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec2} dest if specified, vec otherwise
+     * @static
      */
     vec2.normalize = function(vec, dest) {
         if(!dest) { dest = vec; }
@@ -270,6 +278,7 @@ KICK.namespace = function (ns_string) {
      * @method wrapArray
      * @param {Float32Array} array
      * @return {Array[KICK.math.vec3]} of vec3
+     * @static
      */
     vec3.wrapArray = function(array){
         return wrapArray(array,3);
@@ -295,6 +304,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} count Number of vec 3 to be layed out in memory
      * @param {Object} ref Optional, if set a memory reference is set to ref.mem
      * @return {KICK.math.vec3} New vec3
+     * @static
      */
     vec3.array = function(count,ref){
         var memory = new Float32Array(count*3);
@@ -310,6 +320,7 @@ KICK.namespace = function (ns_string) {
      * @method create
      * @param {Array[Number]} vec Optional, vec3 containing values to initialize with
      * @return {KICK.math.vec3} New vec3
+     * @static
      */
     vec3.create = function(vec) {
         var dest = new Float32Array(3);
@@ -329,6 +340,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 containing values to copy
      * @param {KICK.math.vec3} dest vec3 receiving copied values
      * @return {KICK.math.vec3} dest
+     * @static
      */
     vec3.set = function(vec, dest) {
         dest[0] = vec[0];
@@ -345,6 +357,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec2  second operand
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.add = function(vec, vec2, dest) {
         if (!dest || vec === dest) {
@@ -367,6 +380,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec2 second operand
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.subtract = function(vec, vec2, dest) {
         if (!dest || vec === dest) {
@@ -389,6 +403,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec2 second operand
      * @param {Number} epsilon Optional - default value is
      * @return {Boolean} true if two vectors are equals
+     * @static
      */
     vec3.equal = function(vec, vec2, epsilon) {
         if (!epsilon){
@@ -409,6 +424,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec2 second operand
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.multiply = function(vec, vec2, dest) {
         if(!dest || vec == dest) {
@@ -430,6 +446,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 to negate
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.negate = function(vec, dest) {
         if (!dest) { dest = vec; }
@@ -447,6 +464,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} val Numeric value to scale by
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.scale = function(vec, val, dest) {
         if (!dest || vec === dest) {
@@ -469,6 +487,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 to normalize
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.normalize = function(vec, dest) {
         if (!dest) { dest = vec; }
@@ -502,6 +521,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec2 second operand
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.cross = function(vec, vec2, dest){
         if(!dest) { dest = vec; }
@@ -520,6 +540,7 @@ KICK.namespace = function (ns_string) {
      * @method length
      * @param {KICK.math.vec3} vec vec3 to calculate length of
      * @return {Number} Length of vec
+     * @static
      */
     vec3.length = function(vec){
         var x = vec[0], y = vec[1], z = vec[2];
@@ -531,6 +552,7 @@ KICK.namespace = function (ns_string) {
      * @method lengthSqr
      * @param {KICK.math.vec3} vec vec3 to calculate squared length of
      * @return {Number} Squared length of vec
+     * @static
      */
     vec3.lengthSqr = function(vec){
         var x = vec[0], y = vec[1], z = vec[2];
@@ -543,6 +565,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec first operand
      * @param {KICK.math.vec3} vec2 second operand
      * @return {Number} Dot product of vec and vec2
+     * @static
      */
     vec3.dot = function(vec, vec2){
         return vec[0]*vec2[0] + vec[1]*vec2[1] + vec[2]*vec2[2];
@@ -555,6 +578,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec2 vec3 to point to
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.direction = function(vec, vec2, dest) {
         if (!dest) { dest = vec; }
@@ -586,6 +610,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} lerp interpolation amount between the two inputs
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.lerp = function(vec, vec2, lerp, dest){
         if(!dest) { dest = vec; }
@@ -604,6 +629,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec first vector
      * @param {KICK.math.vec3} vec2 second vector
      * @return {Number} distance between vec and vec2
+     * @static
      */
     vec3.dist = function (vec, vec2) {
         var x = vec2[0] - vec[0],
@@ -625,6 +651,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
      * @param {KICK.math.vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     vec3.unproject = (function(){
         var m = new Float32Array(16);
@@ -658,6 +685,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} spherical spherical coordinates
      * @param {KICK.math.vec3} dest optionally if not specified a new vec3 is returned
      * @return {KICK.math.vec3} position in cartesian angles
+     * @static
      */
     vec3.sphericalToCarterian = function(spherical, dest){
         var radius = spherical[0],
@@ -680,6 +708,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} cartesian
      * @param {KICK.math.vec3} dest Optional
      * @return {KICK.math.vec3}
+     * @static
      */
     vec3.cartesianToSpherical = function(cartesian, dest){
         var x = cartesian[0],
@@ -706,6 +735,7 @@ KICK.namespace = function (ns_string) {
      * @method str
      * @param {KICK.math.vec3} vec vec3 to represent as a string
      * @return {String} string representation of vec
+     * @static
      */
     vec3.str = function(vec) {
         return '[' + vec[0] + ', ' + vec[1] + ', ' + vec[2] + ']';
@@ -740,7 +770,8 @@ KICK.namespace = function (ns_string) {
      * </pre>
      * @method wrapArray
      * @param {Float32Array} array
-     * @return {Array[KICK.math.vec4]} 
+     * @return {Array[KICK.math.vec4]}
+     * @static
      */
     vec4.wrapArray = function(array){
         return wrapArray(array,4);
@@ -764,6 +795,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} count Number of vec 3 to be layed out in memory
      * @param {Object} ref Optional, if set a memory reference is set to ref.mem
      * @return {KICK.math.vec3} New vec3
+     * @static
      */
     vec4.array = function(count,ref){
         var memory = new Float32Array(count*4);
@@ -779,6 +811,7 @@ KICK.namespace = function (ns_string) {
      * @method create
      * @param {Array[Number]} vec Optional, vec4 containing values to initialize with
      * @return {KICK.math.vec4} New vec4
+     * @static
      */
     vec4.create = function(vec) {
         var dest = new Float32Array(4);
@@ -799,6 +832,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec vec4 containing values to copy
      * @param {KICK.math.vec4} dest vec4 receiving copied values
      * @return {KICK.math.vec4} dest
+     * @static
      */
     vec4.set = function(vec, dest) {
         dest[0] = vec[0];
@@ -816,6 +850,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec2  second operand
      * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec4} dest if specified, vec otherwise
+     * @static
      */
     vec4.add = function(vec, vec2, dest) {
         if(!dest || vec == dest) {
@@ -840,6 +875,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec2 second operand
      * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec4} dest if specified, vec otherwise
+     * @static
      */
     vec4.subtract = function(vec, vec2, dest) {
         if(!dest || vec == dest) {
@@ -864,6 +900,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec2 second operand
      * @param {Number} epsilon Optional - default value is
      * @return {Boolean} true if two vectors are equals
+     * @static
      */
     vec4.equal = function(vec, vec2, epsilon) {
         if (!epsilon){
@@ -884,6 +921,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec2 second operand
      * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec4} dest if specified, vec otherwise
+     * @static
      */
     vec4.multiply = function(vec, vec2, dest) {
         if(!dest || vec == dest) {
@@ -907,6 +945,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec vec4 to negate
      * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec4} dest if specified, vec otherwise
+     * @static
      */
     vec4.negate = function(vec, dest) {
         if(!dest) { dest = vec; }
@@ -923,6 +962,7 @@ KICK.namespace = function (ns_string) {
      * @method length
      * @param {KICK.math.vec4} vec vec4 to calculate length of
      * @return {Number} Length of vec
+     * @static
      */
     vec4.length = function(vec){
         var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
@@ -935,6 +975,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec first operand
      * @param {KICK.math.vec4} vec2 second operand
      * @return {Number} Dot product of vec and vec2
+     * @static
      */
     vec4.dot = function(vec, vec2){
         return vec[0]*vec2[0] + vec[1]*vec2[1] + vec[2]*vec2[2] + vec[3]*vec2[3];
@@ -947,6 +988,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} val Numeric value to scale by
      * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec4} dest if specified, vec otherwise
+     * @static
      */
     vec4.scale = function(vec, val, dest) {
         if(!dest || vec == dest) {
@@ -969,6 +1011,7 @@ KICK.namespace = function (ns_string) {
      * @method str
      * @param {KICK.math.vec4} vec vec4 to represent as a string
      * @return {String} string representation of vec
+     * @static
      */
     vec4.str = function(vec) {
         return '[' + vec[0] + ', ' + vec[1] + ', ' + vec[2]+ ', ' + vec[3] + ']';
@@ -988,6 +1031,7 @@ KICK.namespace = function (ns_string) {
      * @method create
      * @param {Array[Number]} mat Optional, mat3 containing values to initialize with
      * @return {KICK.math.mat3} New mat3
+     * @static
      */
     mat3.create = function(mat) {
         var dest = new Float32Array(9);
@@ -1013,6 +1057,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat3} mat mat3 containing values to copy
      * @param {KICK.math.mat3} dest mat3 receiving copied values
      * @return {KICK.math.mat3} dest
+     * @static
      */
     mat3.set = function(mat, dest) {
         dest[0] = mat[0];
@@ -1032,6 +1077,7 @@ KICK.namespace = function (ns_string) {
      * @method identity
      * @param {KICK.math.mat3} dest mat3 to set
      * @return {KICK.math.mat3} dest
+     * @static
      */
     mat3.identity = function(dest) {
         if (!dest) { dest = mat3.create(); }
@@ -1053,6 +1099,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat3} mat mat3 to transpose
      * @param {KICK.math.mat3} dest Optional, mat3 receiving transposed values. If not specified result is written to mat
      * @return {KICK.math.mat3} dest is specified, mat otherwise
+     * @static
      */
     mat3.transpose = function(mat, dest) {
         // If we are transposing ourselves we can skip a few steps but have to cache some values
@@ -1087,6 +1134,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat3} mat mat3 containing values to copy
      * @param {KICK.math.mat4} dest Optional, mat4 receiving copied values
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     mat3.toMat4 = function(mat, dest) {
         if (!dest) { dest = mat4.create(); }
@@ -1119,6 +1167,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat3} mat
      * @param {KICK.math.quat4} dest
      * @return {KICK.math.quat4}
+     * @static
      */
     mat3.toQuat = function(mat,dest){
         // Code based on http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
@@ -1166,6 +1215,7 @@ KICK.namespace = function (ns_string) {
      * @method str
      * @param {KICK.math.mat3} mat mat3 to represent as a string
      * @return {String} string representation of mat
+     * @static
      */
     mat3.str = function(mat) {
         return '[' + mat[0] + ', ' + mat[1] + ', ' + mat[2] +
@@ -1178,6 +1228,7 @@ KICK.namespace = function (ns_string) {
      * @method strPretty
      * @param {KICK.math.mat3} mat mat3 to represent as a string
      * @return {String} string representation of mat
+     * @static
      */
     mat3.strPretty = function(mat) {
         return '[' + mat[0] + ', ' + mat[3] + ', ' + mat[6] + '\n' +
@@ -1198,6 +1249,7 @@ KICK.namespace = function (ns_string) {
      * @method create
      * @param {Array[Number]} mat Optional, mat4 containing values to initialize with
      * @return {KICK.math.mat4} New mat4
+     * @static
      */
     mat4.create = function(mat) {
         var dest = new Float32Array(16);
@@ -1230,6 +1282,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat mat4 containing values to copy
      * @param {KICK.math.mat4} dest mat4 receiving copied values
      * @return {KICK.math.mat4} dest
+     * @static
      */
     mat4.set = function(mat, dest) {
         dest[0] = mat[0];
@@ -1259,6 +1312,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} scale
      * @param {KICK.math.mat4} dest Optinal
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
+     * @static
      */
     mat4.setTRS = function(translate, rotateQuat, scale, dest){
         if (!dest) { dest = mat4.create(); }
@@ -1308,6 +1362,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} scale
      * @param {KICK.math.mat4} dest Optinal
      * @return {KICK.math.mat4} dest if specified mat4 otherwise
+     * @static
      */
     mat4.setTRSInverse = function(translate, rotateQuat, scale, dest){
         if (!dest) { dest = mat4.create(); }
@@ -1386,6 +1441,7 @@ KICK.namespace = function (ns_string) {
      * @method identity
      * @param {KICK.math.mat4} dest mat4 to set
      * @return {KICK.math.mat4} dest
+     * @static
      */
     mat4.identity = function(dest) {
         dest[0] = 1;
@@ -1413,6 +1469,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat mat4 to transpose
      * @param {KICK.math.mat4} dest Optional, mat4 receiving transposed values. If not specified result is written to mat
      * @return {KICK.math.mat4} dest is specified, mat otherwise
+     * @static
      */
     mat4.transpose = function(mat, dest) {
         // If we are transposing ourselves we can skip a few steps but have to cache some values
@@ -1460,6 +1517,7 @@ KICK.namespace = function (ns_string) {
      * @method determinant
      * @param {KICK.math.mat4} mat mat4 to calculate determinant of
      * @return {Number} determinant of mat
+     * @static
      */
     mat4.determinant = function(mat) {
         // Cache the matrix values (makes for huge speed increases!)
@@ -1482,6 +1540,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat mat4 to calculate inverse of
      * @param {KICK.math.mat4} dest Optional, mat4 receiving inverse matrix. If not specified result is written to mat
      * @return {KICK.math.mat4} dest is specified, mat otherwise
+     * @static
      */
     mat4.inverse = function(mat, dest) {
         if (!dest) { dest = mat; }
@@ -1538,6 +1597,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat mat4 containing values to copy
      * @param {KICK.math.mat4} dest Optional, mat4 receiving copied values
      * @return {KICK.math.mat4} dest is specified, a new mat4 otherwise
+     * @static
      */
     mat4.toRotationMat = function(mat, dest) {
         if (!dest) { dest = mat4.create(); }
@@ -1567,7 +1627,8 @@ KICK.namespace = function (ns_string) {
      * @method toMat3
      * @param {KICK.math.mat4} mat mat4 containing values to copy
      * @param {KICK.math.mat3} dest Optional, mat3 receiving copied values
-     * return {KICK.math.mat3} dest is specified, a new mat3 otherwise
+     * @return {KICK.math.mat3} dest is specified, a new mat3 otherwise
+     * @static
      */
     mat4.toMat3 = function(mat, dest) {
         if (!dest) { dest = mat3.create(); }
@@ -1592,6 +1653,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat mat4 containing values to tranpose, invert and copy
      * @param {KICK.math.mat3} dest Optional, mat3 receiving values
      * @return {KICK.math.mat3} dest is specified, a new mat3 otherwise
+     * @static
      */
     mat4.toNormalMat3 = function(mat, dest){
         // Cache the matrix values (makes for huge speed increases!)
@@ -1631,6 +1693,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat mat4 containing values to invert and copy
      * @param {KICK.math.mat3} dest Optional, mat3 receiving values
      * @return {KICK.math.mat3} dest is specified, a new mat3 otherwise
+     * @static
      */
     mat4.toInverseMat3 = function(mat, dest) {
         // Cache the matrix values (makes for huge speed increases!)
@@ -1670,6 +1733,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat2 second operand
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.multiply = function(mat, mat2, dest) {
         if (!dest) { dest = mat; }
@@ -1713,6 +1777,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 to transform
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     mat4.multiplyVec3 = function(mat, vec, dest) {
         if (!dest) { dest = vec; }
@@ -1734,6 +1799,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 to transform
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     mat4.multiplyVec3Vector = function(mat, vec, dest) {
         if(!dest) { dest = vec }
@@ -1755,6 +1821,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec4} vec vec4 to transform
      * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec4} dest if specified, vec otherwise
+     * @static
      */
     mat4.multiplyVec4 = function(mat, vec, dest) {
         if (!dest) { dest = vec; }
@@ -1776,6 +1843,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 specifying the translation
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.translate = function(mat, vec, dest) {
         var x = vec[0], y = vec[1], z = vec[2],
@@ -1813,6 +1881,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 specifying the scale for each axis
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.scale = function(mat, vec, dest) {
         var x = vec[0], y = vec[1], z = vec[2];
@@ -1862,6 +1931,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} axis vec3 representing the axis to rotate around
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.rotate = function(mat, angle, axis, dest) {
         var x = axis[0], y = axis[1], z = axis[2],
@@ -1929,6 +1999,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} angle angle (in radians) to rotate
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.rotateX = function(mat, angle, dest) {
         var s = sin(angle);
@@ -1972,6 +2043,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} angle angle (in radians) to rotate
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.rotateY = function(mat, angle, dest) {
         var s = sin(angle);
@@ -2015,6 +2087,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} angle angle (in radians) to rotate
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
      * @return {KICK.math.mat4} dest if specified, mat otherwise
+     * @static
      */
     mat4.rotateZ = function(mat, angle, dest) {
         var s = sin(angle);
@@ -2063,6 +2136,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} far far bounds of the frustum
      * @param {KICK.math.mat4} dest Optional, mat4 frustum matrix will be written into
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     mat4.frustum = function(left, right, bottom, top, near, far, dest) {
         if(!dest) { dest = mat4.create(); }
@@ -2097,6 +2171,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} far far bounds of the frustum
      * @param {KICK.math.mat4} dest Optional, mat4 frustum matrix will be written into
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     mat4.perspective = function(fovy, aspect, near, far, dest) {
         var top = near*tan(fovy*PI / 360.0);
@@ -2115,6 +2190,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} far far bounds of the frustum
      * @param {KICK.math.mat4} dest Optional, mat4 frustum matrix will be written into
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     mat4.ortho = function(left, right, bottom, top, near, far, dest) {
         if(!dest) { dest = mat4.create(); }
@@ -2148,6 +2224,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} up vec3 pointing "up"
      * @param {KICK.math.mat4} dest Optional, mat4 frustum matrix will be written into
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     mat4.lookAt = function(eye, center, up, dest) {
         if(!dest) { dest = mat4.create(); }
@@ -2239,6 +2316,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} rotate Optional
      * @param {KICK.math.vec3} scale Optional
      * @return Array[tranlate,rotate,scale]
+     * @static
      */
     mat4.decompose = (function(){
         var copy = mat4.create();
@@ -2306,6 +2384,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec specifying the translation
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to a new mat4
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     mat4.fromRotationTranslation = function (quat, vec, dest) {
         if (!dest) { dest = mat4.create(); }
@@ -2351,6 +2430,7 @@ KICK.namespace = function (ns_string) {
      * @method str
      * @param {KICK.math.mat4} mat mat4 to represent as a string
      * @return {String} string representation of mat
+     * @static
      */
     mat4.str = function(mat) {
         return '[' + mat[0] + ', ' + mat[1] + ', ' + mat[2] + ', ' + mat[3] +
@@ -2364,6 +2444,7 @@ KICK.namespace = function (ns_string) {
      * @method strPretty
      * @param {KICK.math.mat4} mat mat4 to represent as a string
      * @return {String} string representation of mat
+     * @static
      */
     mat4.strPretty = function(mat) {
         return '[' + mat[0] + ', ' + mat[4] + ', ' + mat[8] + ', ' + mat[12] + '\n' +
@@ -2385,6 +2466,7 @@ KICK.namespace = function (ns_string) {
      * @method create
      * @param {Array[Number]} quat Optional, quat4 containing values to initialize with
      * @return {KICK.math.quat4} New quat4
+     * @static
      */
     quat4.create = vec4.create;
 
@@ -2394,6 +2476,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 containing values to copy
      * @param {KICK.math.quat4} dest quat4 receiving copied values
      * @return {KICK.math.quat4} dest
+     * @static
      */
     quat4.set = vec4.set;
 
@@ -2405,6 +2488,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to calculate W component of
      * @param {KICK.math.quat4} dest Optional, quat4 receiving calculated values. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.calculateW = function(quat, dest) {
         var x = quat[0], y = quat[1], z = quat[2],
@@ -2428,6 +2512,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to calculate inverse of
      * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.inverse = function(quat, dest) {
         var dot = quat4.dot(quat,quat),
@@ -2452,6 +2537,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to calculate conjugate of
      * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.conjugate = function(quat, dest) {
         if(!dest || quat == dest) {
@@ -2472,7 +2558,7 @@ KICK.namespace = function (ns_string) {
      * @method length
      * @param {KICK.math.quat4} quat quat4 to calculate length of
      * @return {Number} Length of quat
-     *
+     * @static
      */
     quat4.length = vec4.length;
 
@@ -2482,6 +2568,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} q1
      * @param {KICK.math.quat4} q2
      * @return {Number}
+     * @static
      */
     quat4.dot = vec4.dot;
 
@@ -2492,6 +2579,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to normalize
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.normalize = function(quat, dest) {
         if (!dest) { dest = quat; }
@@ -2521,6 +2609,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat2 second operand
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.multiply = function(quat, quat2, dest) {
         if (!dest) { dest = quat; }
@@ -2543,6 +2632,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 to transform
      * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
      * @return {KICK.math.vec3} dest if specified, vec otherwise
+     * @static
      */
     quat4.multiplyVec3 = function(quat, vec, dest) {
         if (!dest) { dest = vec; }
@@ -2569,6 +2659,7 @@ KICK.namespace = function (ns_string) {
      * @method identity
      * @param {KICK.math.quat4} dest Optional, quat4 to set the identity to
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     * @static
      */
     quat4.identity = function(dest){
         if(!dest) { dest = quat4.create(); }
@@ -2586,6 +2677,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
      * @return {KICK.math.vec3} dest if specified, a new vec3 otherwise
+     * @static
      */
     quat4.toEuler = function(quat, dest) {
         var x = quat[0], y = quat[1], z = quat[2],w = quat[3],
@@ -2608,6 +2700,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec normalized axis
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     * @static
      */
     quat4.angleAxis = function(angle,vec, dest) {
         var degreeToRadian = KICK.core.Constants._DEGREE_TO_RADIAN,
@@ -2631,6 +2724,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} up
      * @param {KICK.math.quat4} dest optional
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     * @static
      */
     quat4.lookAt = (function(){
         var upVector = vec3.create(),
@@ -2665,6 +2759,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.vec3} vec vec3 eulers angles (degrees)
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
      * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+     * @static
      */
     quat4.setEuler = function(vec, dest) {
         // code based on GLM
@@ -2689,6 +2784,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat
      * @param {KICK.math.quat4} dest Optional
      * @return {KICK.math.quat4}
+     * @static
      */
     quat4.setFromRotationMatrix = function(mat,dest){
         var x,y,z,w,
@@ -2723,6 +2819,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.mat3} dest Optional, mat3 receiving operation result
      * @return {KICK.math.mat3} dest if specified, a new mat3 otherwise
+     * @static
      */
     quat4.toMat3 = function(quat, dest) {
         if (!dest) { dest = mat3.create(); }
@@ -2763,6 +2860,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat quat4 to create matrix from
      * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result
      * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+     * @static
      */
     quat4.toMat4 = function(quat, dest) {
         if (!dest) { dest = mat4.create(); }
@@ -2813,6 +2911,7 @@ KICK.namespace = function (ns_string) {
      * @param {Number} slerp interpolation amount between the two inputs
      * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.slerp = function(quat, quat2, slerp, dest) {
         if(!dest) { dest = quat; }
@@ -2859,6 +2958,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.quat4} quat2 to rotation
      * @param {KICK.math.quat4} dest Optional
      * @return {KICK.math.quat4} dest if specified, quat otherwise
+     * @static
      */
     quat4.difference = function(quat, quat2, dest) {
         if(!dest) { dest = quat; }
@@ -2881,6 +2981,7 @@ KICK.namespace = function (ns_string) {
      * @method str
      * @param {KICK.math.quat4} quat quat4 to represent as a string
      * @return {String} string representation of quat
+     * @static
      */
     quat4.str = function(quat) {
         return '[' + quat[0] + ', ' + quat[1] + ', ' + quat[2] + ', ' + quat[3] + ']';
@@ -2891,7 +2992,9 @@ KICK.namespace = function (ns_string) {
 
 
     /**
-     * Axis-Aligned Bounding Box. A rectangle or box with the restriction that it's sides or faces are parallel to the axes of the system.
+     * Axis-Aligned Bounding Box. A rectangle or box with the restriction that it's sides or faces are parallel to the
+     * axes of the system.
+     * The aabb is represented using an array: [min_x,min_y,min_z,max_x,max_y,max_z]
      * @class aabb
      * @namespace KICK.math
      */
@@ -2903,6 +3006,7 @@ KICK.namespace = function (ns_string) {
      * @param {Array[Number] | KICK.math.aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
      * @param {Array[Number]} vec3Max Optional, vec3Max containing values to initialize maximum values with
      * @return {KICK.math.aabb} New aabb
+     * @static
      */
     aabb.create = function(vec3Min, vec3Max){
         var dest = new Float32Array(6);
@@ -2941,6 +3045,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.aabb} aabb containing values to copy
      * @param {KICK.math.aabb} dest receiving copied values
      * @return {KICK.math.aabb} dest
+     * @static
      */
     aabb.set = function(aabb,dest){
         dest[0] = aabb[0];
@@ -2959,6 +3064,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.mat4} mat
      * @param {KICK.math.aabb} dest Optional new aabb create if not specified
      * @return {KICK.math.aabb}
+     * @static
      */
     aabb.transform = (function(){
         var point = vec3.create();
@@ -2990,6 +3096,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.aabb} aabb2
      * @param {KICK.math.aabb} dest Optional, receiving copied values - otherwise using aabb
      * @return {KICK.math.aabb} dest if specified - otherwise a new value is returned
+     * @static
      */
     aabb.merge = function(aabb,aabb2,dest){
         if (!dest){
@@ -3009,6 +3116,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.aabb} aabb
      * @param {KICK.math.vec3} vec3Point
      * @return {KICK.math.aabb} aabb (same object as input)
+     * @static
      */
     aabb.addPoint = function(aabb,vec3Point){
         aabb[0] = min(aabb[0],vec3Point[0]);
@@ -3025,16 +3133,35 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.aabb} aabb
      * @param {KICK.math.vec3} centerVec3 Optional
      * @return {KICK.math.vec3} Center of aabb, (centerVec3 if specified)
+     * @static
      */
     aabb.center = function(aabb,centerVec3){
         if (!centerVec3){
             centerVec3 = vec3.create();
         }
-        centerVec3[0] = aabb[0]+(aabb[3]-aabb[0])*0.5;
-        centerVec3[1] = aabb[1]+(aabb[4]-aabb[1])*0.5;
-        centerVec3[2] = aabb[2]+(aabb[5]-aabb[2])*0.5;
+        centerVec3[0] = (aabb[0]+aabb[3])*0.5;
+        centerVec3[1] = (aabb[1]+aabb[4])*0.5;
+        centerVec3[2] = (aabb[2]+aabb[5])*0.5;
 
         return centerVec3;
+    };
+
+    /**
+     * @method halfVector
+     * @param {KICK.math.aabb} aabb
+     * @param {KICK.math.vec3} halfVec3 Optional
+     * @return {KICK.math.vec3} Halfvector of aabb, (halfVec3 if specified)
+     * @static
+     */
+    aabb.halfVec3 = function(aabb,halfVec3){
+        if (!halfVec3){
+            halfVec3 = vec3.create();
+        }
+        halfVec3[0] = (aabb[3]-aabb[0])*0.5;
+        halfVec3[1] = (aabb[4]-aabb[1])*0.5;
+        halfVec3[2] = (aabb[5]-aabb[2])*0.5;
+
+        return halfVec3;
     };
 
     /**
@@ -3043,6 +3170,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.math.aabb} aabb
      * @param {KICK.math.vec3} diagonalVec3 optional
      * @return {KICK.math.vec3}
+     * @static
      */
     aabb.diagonal = function(aabb,diagonalVec3){
         if (!diagonalVec3){
@@ -3054,6 +3182,11 @@ KICK.namespace = function (ns_string) {
         return diagonalVec3;
     };
 
+    /**
+     * @method str
+     * @param {KICK.math.aabb} aabb
+     * @static
+     */
     aabb.str = function(aabb){
         return "{("+
             aabb[0]+","+
@@ -3081,6 +3214,7 @@ KICK.namespace = function (ns_string) {
      * @param {Boolean} normalize normalize plane normal
      * @param {Array[32]} dest
      * @return {Array[32]} 6 plane equations
+     * @static
      */
     frustum.extractPlanes = function(modelViewMatrix, normalize, dest){
         if (!dest){
@@ -3135,4 +3269,71 @@ KICK.namespace = function (ns_string) {
         }
         return dest;
     };
+
+    /**
+     * Value = 0
+     * @property OUTSIDE
+     * @type Number
+     * @static
+     */
+    frustum.OUTSIDE = 0;
+    /**
+     * Value = 1
+     * @property INSIDE
+     * @type Number
+     * @static
+     */
+    frustum.INSIDE = 1;
+    /**
+     * Value = 2
+     * @property INTERSECTING
+     * @type Number
+     * @static
+     */
+    frustum.INTERSECTING = 2;
+
+    /**
+     * Based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.14.3
+     * @method intersectAabb
+     * @param {KICK.math.frustum} frustumPlanes
+     * @param {KICK.math.aabb} aabbIn
+     * @return {Number} frustum.OUTSIDE = outside(0), frustum.INSIDE = inside(1), frustum.INTERSECTING = intersecting(2)
+     * @static
+     */
+    frustum.intersectAabb = (function(){
+            var c = vec3.create();
+            var h = vec3.create();
+            return function(frustumPlanes,aabbIn){
+                    var result = frustum.INSIDE,
+                        testResult,
+                        c = aabb.center(aabbIn,c),
+                        h = aabb.halfVec3(aabbIn,h),
+                        // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
+                        planeAabbIntersect = function(planeIndex){
+                            var offset = planeIndex*4,
+                                nx = frustumPlanes[offset],
+                                ny = frustumPlanes[offset+1],
+                                nz = frustumPlanes[offset+2],
+                                d = frustumPlanes[offset+3],
+                                e = h[0]*Math.abs(nx)+h[1]*Math.abs(ny)+h[2]*Math.abs(nz),
+                                s = c[0]*nx + c[1]*ny + c[2]*nz + d;
+                            // Note that the following is reverse than in [Akenine-Moller's Real-Time Rendering 3rd Ed],
+                            // since we define outside as the negative halfspace
+                            if (s-e > 0) return frustum.INSIDE;
+                            if (s+e < 0) return frustum.OUTSIDE;
+                            return frustum.INTERSECTING;
+                        };
+                    for (var i=0;i<6;i++){
+                        testResult = planeAabbIntersect(i);
+                        if (testResult === frustum.OUTSIDE){
+                            return testResult;
+                        } else if (testResult === frustum.INTERSECTING) {
+                            result = frustum.INTERSECTING;
+                        }
+                    }
+                    return result;
+                };
+        })();
+
+
 })();

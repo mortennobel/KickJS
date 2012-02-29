@@ -754,6 +754,10 @@ YUI().use('node', 'console', 'test', function (Y) {
                 Y.Assert.areEqual(far.length,4);
                 Y.Assert.areEqual(vec3.dot(near, [0,0,-1]), -near[3]); // (0*near.x+0*near.y-1*near.z + near.w = 0)
                 Y.Assert.areEqual(vec3.dot(far, [0,0,-5]), -far[3]); // (0*near.x+0*near.y-5*near.z + near.w = 0)
+                if (normalize){
+                    Y.Assert.areEqual(vec3.length(near),1);
+                    Y.Assert.areEqual(vec3.length(far),1);
+                }
 
                 // Test modelView where translated with z=+2
                 var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
@@ -766,6 +770,10 @@ YUI().use('node', 'console', 'test', function (Y) {
                 var far = frustumPlanes.subarray(5*4,6*4);
                 Y.Assert.areEqual(vec3.dot(near, [0,0,1]), -near[3]); // (0*near.x+0*near.y-1*near.z + near.w = 0)
                 Y.Assert.areEqual(vec3.dot(far, [0,0,-3]), -far[3]); // (0*near.x+0*near.y-5*near.z + near.w = 0)
+                if (normalize){
+                    Y.Assert.areEqual(vec3.length(near),1);
+                    Y.Assert.areEqual(vec3.length(far),1);
+                }
 
                 // Test modelView where rotated -90 degree around y
                 var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
@@ -778,6 +786,67 @@ YUI().use('node', 'console', 'test', function (Y) {
                 var far = frustumPlanes.subarray(5*4,6*4);
                 Y.Assert.areEqual(vec3.dot(near, [1,0,0]), -near[3]); // (0*near.x+0*near.y-1*near.z + near.w = 0)
                 Y.Assert.areEqual(vec3.dot(far, [5,0,0]), -far[3]); // (0*near.x+0*near.y-5*near.z + near.w = 0)
+                if (normalize){
+                    Y.Assert.areEqual(vec3.length(near),1);
+                    Y.Assert.areEqual(vec3.length(far),1);
+                }
+            }
+        },
+        testFrustumIntersectTestOutside:function(){
+            var Assert = Y.Assert,
+                    mat4 = KICK.math.mat4,
+                    vec3 = KICK.math.vec3,
+                    aabb = KICK.math.aabb,
+                    frustum = KICK.math.frustum;
+            for (var i=1;i<2;i++){
+                // Test a simple case where the view projection has a near plane of 1 and far plane of 5
+                var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                var normalize = i;
+                var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+
+                var aabb05 = aabb.create([0,0,0],[.5,.5,.5]);
+                var res = frustum.intersectAabb(frustumPlanes, aabb05);
+                Y.Assert.areEqual(frustum.OUTSIDE,res);
+
+                var length = 1.5;
+                var aabbOffset5 = aabb.create([-length,-length,-length-10],[length,length,length-10]);
+                var res = frustum.intersectAabb(frustumPlanes, aabbOffset5);
+                Y.Assert.areEqual(frustum.OUTSIDE,res, aabb.str(aabbOffset5)+" normalize "+normalize);
+            }
+        },
+        testFrustumIntersectTestIntersecting:function(){
+            var Assert = Y.Assert,
+                    mat4 = KICK.math.mat4,
+                    vec3 = KICK.math.vec3,
+                    aabb = KICK.math.aabb,
+                    frustum = KICK.math.frustum;
+            for (var i=1;i<2;i++){
+                // Test a simple case where the view projection has a near plane of 1 and far plane of 5
+                var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                var normalize = i;
+                var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+
+                var length = 1.5;
+                var aabb15 = aabb.create([-length,-length,-length],[length,length,length]);
+                var res = frustum.intersectAabb(frustumPlanes, aabb15);
+                Y.Assert.areEqual(frustum.INTERSECTING,res, aabb.str(aabb15)+" normalize "+normalize);
+            }
+        },
+        testFrustumIntersectTestInside:function(){
+            var Assert = Y.Assert,
+                    mat4 = KICK.math.mat4,
+                    vec3 = KICK.math.vec3,
+                    aabb = KICK.math.aabb,
+                    frustum = KICK.math.frustum;
+            for (var i=1;i<2;i++){
+                // Test a simple case where the view projection has a near plane of 1 and far plane of 5
+                var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                var normalize = i;
+                var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+
+                var aabb45 = aabb.create([0,0,-4.5],[.1,.1,-4.0]);
+                var res = frustum.intersectAabb(frustumPlanes, aabb45);
+                Y.Assert.areEqual(frustum.INSIDE,res, aabb.str(aabb45)+" normalize "+normalize);
             }
         }
     });
