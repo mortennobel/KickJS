@@ -159,7 +159,7 @@
 
            var meshData;
            if (!window.meshData){
-               generateSierpinskyPyramid(p1, p2, p3, p4, depth);
+               generateSierpinskyPyramid(p1, p2, p3, p4, 0);
                meshData = new KICK.mesh.MeshData();
                meshData.vertex = vertices;
                console.log("Vertex count "+(meshData.vertex.length/3));
@@ -180,11 +180,11 @@
     <button onclick="startTest(6,3);">6x3</button>
     <button onclick="startTest(6,4);">6x4</button>
     <button onclick="startTest(7,4);">7x4</button>
-    <button onclick="startTest(16,16);">16x16</button>
-    <button onclick="startTest(16,16);">16x16</button>
-    <button onclick="startTest(16,20);">16x20</button>
-    <button onclick="startTest(16,24);">16x24</button>
-    <button onclick="startTest(20,24);">20x24</button>
-    <button onclick="startTest(24,24);">24x24</button>
+    <button onclick="startTest(34,34);">34x34</button>
+    <button onclick="startTest(38,38);">38x38</button>
+    <button onclick="startTest(42,42);">42x42</button>
+    <button onclick="startTest(48,48);">48x48</button>
+    <button onclick="startTest(52,52);">52x52</button>
+    <button onclick="startTest(56,56);">56x56</button>
 </body>
 </html>

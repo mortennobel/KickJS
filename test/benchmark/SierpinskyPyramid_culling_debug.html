@@ -35,7 +35,6 @@
            enableDebugContext: false
        });
 
-       
        var material = new KICK.material.Material(engine,{
            shader: engine.project.load(engine.project.ENGINE_SHADER_SPECULAR),
            uniforms:{
@@ -50,6 +49,32 @@
            }
        });
 
+       var CameraMover = function(){
+           var transform,
+                   keyInput;
+           this.activated = function(){
+               transform = this.gameObject.transform;
+               keyInput = this.gameObject.engine.keyInput;
+           };
+
+           this.update = function(){
+               var pos = transform.localPosition;
+               var cameraSpeed = .1;
+               if (keyInput.isKey("A".charCodeAt(0))){
+                   pos[0] -= cameraSpeed;
+               }
+               if (keyInput.isKey("D".charCodeAt(0))){
+                   pos[0] += cameraSpeed;
+               }
+               if (keyInput.isKey("W".charCodeAt(0))){
+                   pos[2] += cameraSpeed;
+               }
+               if (keyInput.isKey("S".charCodeAt(0))){
+                   pos[2] -= cameraSpeed;
+               }
+               transform.localPosition = pos;
+           };
+       };
        
        // create meshes
        var randomRange = function(min,max){
@@ -74,7 +99,8 @@
                fieldOfView:60
            });
            cameraObject.addComponent(camera);
-           
+           cameraObject.addComponent(new CameraMover());
+
            for (var j = 0;j<stacks;j++){
                var latitude = piDivStacks * j - PIDiv2;
                var sinLat = Math.sin(latitude);
