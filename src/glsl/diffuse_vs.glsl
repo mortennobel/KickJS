@@ -6,7 +6,6 @@ uniform mat4 _mvProj;
 uniform mat4 _mv;
 uniform mat4 _lightMat;
 uniform mat3 _norm;
-uniform mat4 _m;
 
 varying vec2 vUv;
 varying vec3 vNormal;
@@ -19,5 +18,5 @@ void main(void) {
     vEcPosition = (_mv * v).xyz;
     vUv = uv1;
     vNormal = _norm * normal;
-    vShadowMapCoord = _lightMat * _m * v;
+    vShadowMapCoord = _lightMat  * v;
 } 

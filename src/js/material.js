@@ -972,7 +972,8 @@ KICK.namespace = function (ns_string) {
                 currentTexture ++;
             }
             if (_lightMat){
-                gl.uniformMatrix4fv(_lightMat.location,false,engineUniforms.lightMatrix);
+                globalTransform = transform.getGlobalMatrix();
+                gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(engineUniforms.lightMatrix,globalTransform,tempMat4));
             }
         }
     };

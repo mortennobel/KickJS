@@ -547,13 +547,12 @@ void main(void) {
         attribute vec3 vertex;
 
         uniform mat4 _mvProj;
-        uniform mat4 _m;
         uniform mat4 _lightMat;
 
         varying vec4 vShadowMapCoord;
 
         void main(void) {
-            vShadowMapCoord = _lightMat * _m * vec4(vertex, 1.0);
+            vShadowMapCoord = _lightMat * vec4(vertex, 1.0);
         	// compute position
         	gl_Position = _mvProj * vec4(vertex, 1.0);
         }
