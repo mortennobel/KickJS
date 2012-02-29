@@ -195,6 +195,7 @@
                 color: [1.0,1.0,1.0],
                 intensity: 1
             });
+            lightObj.addComponent(new LightRotator());
             lightObj.addComponent(directionalLight);
             lightObj.transform.rotationEuler = [-70,0,10];
             lightObj.transform.position = [1,10,1];
@@ -204,6 +205,33 @@
                 intensity: 0.4
             }));
             return lightObj;
+        }
+
+        function LightRotator(){
+            var transform,
+                    keyInput,
+                    rotationSpeed = 1;
+            this.activated = function(){
+                transform = this.gameObject.transform;
+                keyInput = this.gameObject.engine.keyInput;
+            };
+
+            this.update = function(){
+                var rotationEuler = transform.localRotationEuler;
+                if (keyInput.isKey("J".charCodeAt(0))){
+                    rotationEuler[1] += rotationSpeed;
+                }
+                if (keyInput.isKey("L".charCodeAt(0))){
+                    rotationEuler[1] -= rotationSpeed;
+                }
+                if (keyInput.isKey("I".charCodeAt(0))){
+                    rotationEuler[0] += rotationSpeed;
+                }
+                if (keyInput.isKey("K".charCodeAt(0))){
+                    rotationEuler[0] -= rotationSpeed;
+                }
+                transform.localRotationEuler = rotationEuler;
+            };
         }
 
         function addNormalCameraOnLightSource(viewport,replacementShader){
@@ -381,7 +409,6 @@
             var meshData = mesh.meshData;
             var mat4 = KICK.math.mat4;
             var transformation = mat4.scale(mat4.identity(mat4.create()),[5,5,20]);
-            console.log(mat4.strPretty(transformation));
             mesh.meshData = meshData.transform(transformation);
             var material = new KICK.material.Material(engine,{
                                     shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
@@ -393,7 +420,7 @@
                                     }
                                 });
             var meshRenderer = new KICK.scene.MeshRenderer({
-                    material:material,
+                    materials:[],
                     mesh: mesh
             });
             lightObj.addComponent(meshRenderer);
@@ -520,12 +547,13 @@ void main(void) {
         attribute vec3 vertex;
 
         uniform mat4 _mvProj;
+        uniform mat4 _m;
         uniform mat4 _lightMat;
 
         varying vec4 vShadowMapCoord;
 
         void main(void) {
-            vShadowMapCoord = _lightMat * vec4(vertex, 1.0);
+            vShadowMapCoord = _lightMat * _m * vec4(vertex, 1.0);
         	// compute position
         	gl_Position = _mvProj * vec4(vertex, 1.0);
         }
@@ -568,7 +596,7 @@ void main(void) {
         <canvas id="canvas" style="position: absolute; x:0; top:0;border: none;" width="900" height="700"></canvas>
         <div style="position:absolute;left:5px;top:5px;background-color: white;padding: 5px;">Main camera</div>
         <div style="position:absolute;left:5px;top:355px;background-color: white;padding: 5px;">Main shadow map UV visualized</div>
-        <div style="position:absolute;left:305px;top:5px;background-color: white;padding: 5px;">Light depth</div>
+        <!--<div style="position:absolute;left:305px;top:5px;background-color: white;padding: 5px;">Light depth</div>-->
         <div style="position:absolute;left:305px;top:355px;background-color: white;padding: 5px;">Light normal view</div>
         <div style="position:absolute;left:605px;top:355px;background-color: white;padding: 5px;">Visualized shadow map raw</div>
         <div style="position:absolute;left:605px;top:5px;background-color: white;padding: 5px;">Visualized shadow map depth</div>

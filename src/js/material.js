@@ -52,12 +52,6 @@ KICK.namespace = function (ns_string) {
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
         tmpVec4 = vec4.create(),
-        offsetMatrix = mat4.create([
-            0.5,0  ,0  ,0,
-            0  ,0.5,0  ,0,
-            0  ,0  ,0.5,0,
-            0.5  ,0.5  ,0.5  ,1
-        ]),
         vec3Zero = math.vec3.create();
 
     /**
@@ -978,9 +972,7 @@ KICK.namespace = function (ns_string) {
                 currentTexture ++;
             }
             if (_lightMat){
-                globalTransform = globalTransform || transform.getGlobalMatrix();
-                var lightModelViewProjection = mat4.multiply(engineUniforms.lightViewProjectionMatrix,globalTransform,tempMat4);
-                gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(lightModelViewProjection,offsetMatrix,tempMat4));
+                gl.uniformMatrix4fv(_lightMat.location,false,engineUniforms.lightMatrix);
             }
         }
     };

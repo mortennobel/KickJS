@@ -13,7 +13,7 @@ float computeLightVisibility(){
     if (shadowCoord.x >= 0.0 && shadowCoord.x <= 1.0 && shadowCoord.y >= 0.0 && shadowCoord.y <= 1.0){
         vec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);
         float shadowDepth = unpackDepth(packedShadowDepth);
-        if (shadowDepth > shadowCoord.z + shadowBias){
+        if (shadowDepth > shadowCoord.z - shadowBias){
             return 1.0;
         }
         return 0.0;

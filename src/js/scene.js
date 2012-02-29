@@ -1258,12 +1258,12 @@ KICK.namespace = function (ns_string) {
             projectionMatrix = mat4.create(),
             viewMatrix = mat4.create(),
             viewProjectionMatrix = mat4.create(),
-            lightViewProjectionMatrix = mat4.create(),
+            lightMatrix = mat4.create(),
             engineUniforms = {
                     viewMatrix: viewMatrix,
                     projectionMatrix: projectionMatrix,
                     viewProjectionMatrix:viewProjectionMatrix,
-                    lightViewProjectionMatrix:lightViewProjectionMatrix
+                    lightMatrix:lightMatrix
                 },
             renderableComponentsBackGroundAndGeometry = [],
             renderableComponentsTransparent = [],
@@ -1443,13 +1443,19 @@ KICK.namespace = function (ns_string) {
                 mat4.set(globalMatrixInv, viewMatrix);
 
                 mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
-                mat4.set(viewProjectionMatrix,lightViewProjectionMatrix);
+
+                // update light matrix (will be used when scene is rendering with shadow map shader)
+                var offsetMatrix = mat4.create([
+                    0.5,0  ,0  ,0,
+                    0  ,0.5,0  ,0,
+                    0  ,0  ,0.5,0,
+                    0.5  ,0.5  ,0.5  ,1
+                ]);
+                mat4.multiply(mat4.multiply(offsetMatrix,projectionMatrix,lightMatrix),
+                    globalMatrixInv,lightMatrix);
+
                 renderSceneObjects(sceneLightObj,_shadowmapShader);
 
-                // debug
-                directionalLight.shadowRenderTextureDebug.bind();
-                gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
-                renderSceneObjects(sceneLightObj);
             };
 
         /**
@@ -2187,16 +2193,6 @@ KICK.namespace = function (ns_string) {
                 }
             };
         Object.defineProperties(this,{
-            shadowRenderTextureDebug:{
-                get:function(){
-                    return _shadowRenderTextureDebug;
-                }
-            },
-            shadowTextureDebug:{
-                get:function(){
-                    return _shadowTextureDebug;
-                }
-            },
             /**
              * Short for lightObj.gameObject.transform
              * @property transform
