@@ -44,10 +44,10 @@ function loadKickJSModel(fileContent){
     sphericalCoordinates[0] = lengthPlusOffset;
 }
 
-function load(content,url,func){
+function load(content,url,func,rotateAroundX){
     destroyAllMeshRenderersInScene();
 
-    var createdObject = func(content,engine,engine.activeScene,true);
+    var createdObject = func(content,engine,engine.activeScene,rotateAroundX);
     var gameObjectsCreated = createdObject.gameObjects;
 
     var boundingBox = aabb.create();
@@ -139,7 +139,7 @@ function teapotClicked(){
     loadKickJSModelFromURL("teapot.kickjs");
 }
 
-function loadModelFile(file){
+function loadModelFile(file,rotateAroundX){
     var reader = new FileReader(),
         fileName = file.fileName,
         fileNameLowercase = fileName.toLowerCase();
@@ -151,14 +151,12 @@ function loadModelFile(file){
         var fileContent = event.target.result;
 
         if (endsWith(fileNameLowercase,".obj")){
-            load(fileContent,fileName,KICK.importer.ObjImporter.import);
+            load(fileContent,fileName,KICK.importer.ObjImporter.import,rotateAroundX);
         } else if (endsWith(fileNameLowercase,".dae")){
             var parser=new DOMParser();
-            load(parser.parseFromString(fileContent,"text/xml"),fileName,KICK.importer.ColladaImporter.import);
+            load(parser.parseFromString(fileContent,"text/xml"),fileName,KICK.importer.ColladaImporter.import,rotateAroundX);
         } else if (endsWith(fileNameLowercase, ".kickjs")){
             loadKickJSModel(fileContent);
-        } else {
-            alert("Unsupported file type. ");
         }
     };
 
@@ -172,7 +170,7 @@ function loadModelFile(file){
     }
 }
 
-function loadClicked(files){
+function loadClicked(files,rotateAroundX,model){
     var URL = window.webkitURL || window.URL;
     var isPNG = function(arrayBuffer){
         var uInt8 = new Uint8Array(arrayBuffer);
@@ -193,13 +191,13 @@ function loadClicked(files){
     for (var i=0;i<files.length;i++){
         var file = files[i];
         var fileLowerCase = file.fileName.toLowerCase();
-        if (endsWith(fileLowerCase,".dae") ||
+        if (model && (endsWith(fileLowerCase,".dae") ||
             endsWith(fileLowerCase,".obj") ||
-            endsWith(fileLowerCase,".kickjs")){
-            loadModelFile(file);
-        } else if (endsWith(fileLowerCase,".jpg") ||
+            endsWith(fileLowerCase,".kickjs"))){
+            loadModelFile(file,rotateAroundX);
+        } else if (!model && (endsWith(fileLowerCase,".jpg") ||
             endsWith(fileLowerCase,".jpeg") ||
-            endsWith(fileLowerCase,".png")){
+            endsWith(fileLowerCase,".png"))){
 
             var img = document.createElement("img");
             img.onload = function(e) {
@@ -207,6 +205,8 @@ function loadClicked(files){
                 URL.revokeObjectURL(this.src);
             };
             img.src = URL.createObjectURL(file);
+        } else {
+            alert("Unsupported file type. ");
         }
     }
 }
@@ -602,14 +602,24 @@ window.addEventListener("load",function(){
     document.getElementById("teapotButton").addEventListener("click", teapotClicked,false);
     document.getElementById("pauseButton").addEventListener("click", pauseResume,false);
     document.getElementById("backgroundButton").addEventListener("click", toogleBackground,false);
-    document.getElementById("localFileButton").addEventListener("click", window.openFileDialog,false);
+    document.getElementById("loadModelButton").addEventListener("click", function(){
+        window.openFileDialog(true);
+    },false);
+    document.getElementById("loadTextureButton").addEventListener("click", function(){
+        window.openFileDialog(false);
+    },false);
     document.getElementById("exportButton").addEventListener("click", window.exportDialog,false);
 
 },false);
 
 YUI().use("panel", function (Y) {
-    window.openFileDialog = function(){
-        var description = "Open a local file. <br>Collada (.dae) files and Wavefront (.obj) or KickJS (.kickjs) are supported for models. <br>JPEG and PNG are supported for textures.";
+    window.openFileDialog = function(model){
+        var description = model?
+            "Open a local model. <br>Collada (.dae) files and Wavefront (.obj) or KickJS (.kickjs) are supported.":
+            "Open a local texture. <br>JPEG and PNG are supported.";
+        if (model){
+            description += "<br><input type=\"checkbox\" id=\"RotateAroundX\">&nbsp;<label for=\"RotateAroundX\">Rotate model 90 degress around x-axis</label>";
+        }
         var nestedPanel = new Y.Panel({
             headerContent: "Load local file",
             bodyContent: description+'<br><br><input type="file" id="file" multiple/>',
@@ -630,8 +640,10 @@ YUI().use("panel", function (Y) {
             ]
         });
         document.getElementById("file").onchange = function() {
+            var element = Y.one("#RotateAroundX");
+            var rotateAroundX = element && element.get("checked");
             nestedPanel.hide();
-            loadClicked(this.files);
+            loadClicked(this.files,rotateAroundX,model);
         };
     };
 
