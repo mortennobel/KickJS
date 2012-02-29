@@ -3212,8 +3212,8 @@ KICK.namespace = function (ns_string) {
      * @method extractPlanes
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {Boolean} normalize normalize plane normal
-     * @param {Array[32]} dest
-     * @return {Array[32]} 6 plane equations
+     * @param {Array[24]} dest
+     * @return {Array[24]} 6 plane equations
      * @static
      */
     frustum.extractPlanes = function(modelViewMatrix, normalize, dest){
