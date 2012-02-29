@@ -150,6 +150,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                 }
+
                 meshData.vertex = meshDataVertices;
                 if (meshDataNormals.length){
                     meshData.normal = meshDataNormals;
@@ -194,6 +195,12 @@ KICK.namespace = function (ns_string) {
                 allGameObjects.push(gameObject);
                 triangles = [];
             };
+
+        var transformMatrix = mat4.identity(mat4.create());
+        if (rotate90x){
+            mat4.rotateX(transformMatrix,-90*KICK.core.Constants._DEGREE_TO_RADIAN);
+        }
+
         for (var i=0;i<linesLength;i++){
             var line = trim(lines[i]);
             var tokenIndex = line.indexOf(' ');
@@ -214,9 +221,13 @@ KICK.namespace = function (ns_string) {
                     submeshes[submeshes.length] = triangles;
                 }
             } else if (token === "v"){
-                vertices.push(strAsArray(value));
+                var vertex = strAsArray(value);
+                mat4.multiplyVec3(transformMatrix,vertex);
+                vertices.push(vertex);
             } else if (token === "vn"){
-                normals.push(strAsArray(value));
+                var normal = strAsArray(value);
+                mat4.multiplyVec3Vector(transformMatrix,normal);
+                normals.push(normal);
             } else if (token === "vt"){
                 textureCoordinates.push(strAsArray(value));
             } else if (token === "f"){

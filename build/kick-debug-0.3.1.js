@@ -15655,6 +15655,20 @@ KICK.namespace = function (ns_string) {
                 node = node.nextElementSibling;
             }
         }
+        if (rotate90x){
+            // ideally it would be better to transform the geometry
+            // instead of introducing a new parent
+            var parent = scene.createGameObject({name:"Collada Parent"});
+            var parentTransform = parent.transform;
+            parentTransform.localRotationEuler = [-90,0,0];
+            for (i=0;i<allGameObjects.length;i++){
+                var goTransform = allGameObjects[i].transform;
+                if (!goTransform.parent){
+                    goTransform.parent = parentTransform;
+                }
+            }
+            allGameObjects.push(parent);
+        }
         return {mesh:allMeshes, gameObjects:allGameObjects, materials:allMaterials};
     };
 })();/*!
@@ -15809,6 +15823,7 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                 }
+
                 meshData.vertex = meshDataVertices;
                 if (meshDataNormals.length){
                     meshData.normal = meshDataNormals;
@@ -15853,6 +15868,12 @@ KICK.namespace = function (ns_string) {
                 allGameObjects.push(gameObject);
                 triangles = [];
             };
+
+        var transformMatrix = mat4.identity(mat4.create());
+        if (rotate90x){
+            mat4.rotateX(transformMatrix,-90*0.01745329251994);
+        }
+
         for (var i=0;i<linesLength;i++){
             var line = trim(lines[i]);
             var tokenIndex = line.indexOf(' ');
@@ -15873,9 +15894,13 @@ KICK.namespace = function (ns_string) {
                     submeshes[submeshes.length] = triangles;
                 }
             } else if (token === "v"){
-                vertices.push(strAsArray(value));
+                var vertex = strAsArray(value);
+                mat4.multiplyVec3(transformMatrix,vertex);
+                vertices.push(vertex);
             } else if (token === "vn"){
-                normals.push(strAsArray(value));
+                var normal = strAsArray(value);
+                mat4.multiplyVec3Vector(transformMatrix,normal);
+                normals.push(normal);
             } else if (token === "vt"){
                 textureCoordinates.push(strAsArray(value));
             } else if (token === "f"){

@@ -470,6 +470,20 @@ KICK.namespace = function (ns_string) {
                 node = node.nextElementSibling;
             }
         }
+        if (rotate90x){
+            // ideally it would be better to transform the geometry
+            // instead of introducing a new parent
+            var parent = scene.createGameObject({name:"Collada Parent"});
+            var parentTransform = parent.transform;
+            parentTransform.localRotationEuler = [-90,0,0];
+            for (i=0;i<allGameObjects.length;i++){
+                var goTransform = allGameObjects[i].transform;
+                if (!goTransform.parent){
+                    goTransform.parent = parentTransform;
+                }
+            }
+            allGameObjects.push(parent);
+        }
         return {mesh:allMeshes, gameObjects:allGameObjects, materials:allMaterials};
     };
 })();
