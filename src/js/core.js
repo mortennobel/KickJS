@@ -1404,7 +1404,7 @@ KICK.namespace = function (ns_string) {
          */
         this.shadows = config.shadows || false;
         /**
-         * The maximum distance shadows are displayed (the smaller the better shadow map).
+         * The maximum distance shadows are displayed from camera (the smaller the better quality of shadow map).
          * Default value is 20
          * @property shadowDistance
          * @type Number

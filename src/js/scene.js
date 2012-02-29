@@ -1270,6 +1270,14 @@ KICK.namespace = function (ns_string) {
             renderableComponentsOverlay = [],
             renderableComponentsArray = [renderableComponentsBackGroundAndGeometry,renderableComponentsTransparent,renderableComponentsOverlay],
             _normalizedViewportRect = vec4.create([0,0,1,1]),
+            offsetMatrix = mat4.create([
+                0.5,0  ,0  ,0,
+                0  ,0.5,0  ,0,
+                0  ,0  ,0.5,0,
+                0.5,0.5,0.5,1
+            ]),
+            shadowLightProjection,
+            shadowLightOffsetFromCamera,
             isNumber = function (o) {
                 return typeof (o) === "number";
             },
@@ -1436,23 +1444,28 @@ KICK.namespace = function (ns_string) {
                 setupClearColor([0,0,0,0]);
                 gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
-                mat4.ortho(-5, 5, -5, 5, // todo replace with fitting
-                    -20, 20, projectionMatrix);
+                // fitting:
+                // Using a sphere with the center in front of the camera (based on 0.5 * engine.config.shadowDistance)
+                // The actual light volume is a bit larget than the sphere (to include the corners).
+                // The near plane of the light volume is extended by the engine.config.shadowNearMultiplier
+                // Note that this is a very basic fitting algorithm with rooms for improvement
+                mat4.set(shadowLightProjection, projectionMatrix)
 
-                var globalMatrixInv = directionalLightTransform.getGlobalTRSInverse(); // // todo replace with fitting
-                mat4.set(globalMatrixInv, viewMatrix);
+                // find the position of the light 'center' in world space
+                var transformedOffsetFromCamera =quat4.multiplyVec3(transform.rotation,[0,0,-shadowLightOffsetFromCamera]);
+                var cameraPosition = vec3.add(transformedOffsetFromCamera,transform.position);
+                // adjust to reduce flicker when rotating camera
+                cameraPosition[0] = Math.round(cameraPosition[0]);
+                cameraPosition[1] = Math.round(cameraPosition[1]);
+                cameraPosition[2] = Math.round(cameraPosition[2]);
+
+                mat4.setTRSInverse(cameraPosition,directionalLightTransform.localRotation, [1,1,1],viewMatrix);
 
                 mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
 
                 // update light matrix (will be used when scene is rendering with shadow map shader)
-                var offsetMatrix = mat4.create([
-                    0.5,0  ,0  ,0,
-                    0  ,0.5,0  ,0,
-                    0  ,0  ,0.5,0,
-                    0.5  ,0.5  ,0.5  ,1
-                ]);
                 mat4.multiply(mat4.multiply(offsetMatrix,projectionMatrix,lightMatrix),
-                    globalMatrixInv,lightMatrix);
+                    viewMatrix,lightMatrix);
 
                 renderSceneObjects(sceneLightObj,_shadowmapShader);
 
@@ -1503,13 +1516,21 @@ KICK.namespace = function (ns_string) {
 
             if (engine.config.shadows){
                 _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
+
+                // calculate the shadow projection based on engine.config parameters
+                shadowLightOffsetFromCamera = engine.config.shadowDistance*0.5; // first find radius
+                var  shadowRadius = shadowLightOffsetFromCamera*1.55377397403004; // sqrt(2+sqrt(2))
+                var nearPlanePosition = -shadowRadius*engine.config.shadowNearMultiplier;
+                shadowLightProjection = mat4.create();
+                mat4.ortho(-shadowRadius, shadowRadius, -shadowRadius, shadowRadius,
+                    nearPlanePosition, shadowRadius, shadowLightProjection);
+
             } else if (_renderShadow){
                 _renderShadow = false; // disable render shadow
                 if (ASSERT){
                     fail("engine.config.shadows must be enabled for shadows");
                 }
             }
-
         };
 
         /**
