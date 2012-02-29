@@ -5952,8 +5952,8 @@ KICK.namespace = function (ns_string) {
      * @method extractPlanes
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {Boolean} normalize normalize plane normal
-     * @param {Array[32]} dest
-     * @return {Array[32]} 6 plane equations
+     * @param {Array[24]} dest
+     * @return {Array[24]} 6 plane equations
      * @static
      */
     frustum.extractPlanes = function(modelViewMatrix, normalize, dest){
@@ -10088,6 +10088,8 @@ KICK.namespace = function (ns_string) {
         quat4 = KICK.namespace("KICK.math.quat4"),
         vec4 = KICK.namespace("KICK.math.vec4"),
         mat4 = KICK.namespace("KICK.math.mat4"),
+        aabb = KICK.namespace("KICK.math.aabb"),
+        frustum = KICK.namespace("KICK.math.frustum"),
         constants = KICK.core.Constants,
         DEBUG = true,
         ASSERT = true,
@@ -10387,6 +10389,13 @@ KICK.namespace = function (ns_string) {
      * Components with largest priority are invoked first. (optional - default 0). Cannot be modified after creation.
      * @property scriptPriority
      * @type Number
+     */
+
+    /**
+     * Defines the axis aligned bounding box used for view frustum culling
+     * May be undefined or null.
+     * @property aabb
+     * @type KICK.math.aabb
      */
 
     /**
@@ -11427,18 +11436,35 @@ KICK.namespace = function (ns_string) {
              * @param shader
              * @private
              */
-            renderSceneObjects = function(sceneLightObj,shader){
-                var render = function(renderableComponents){
-                    var length = renderableComponents.length;
-                    for (var j=0;j<length;j++){
-                        renderableComponents[j].render(engineUniforms,shader);
-                    }
+            renderSceneObjects = (function(){
+                var aabbWorldSpace = KICK.math.aabb.create(),
+                    frustumPlanes = new Float32Array(24);
+                return function(sceneLightObj,shader){
+                    var render = function(renderableComponents){
+                        var length = renderableComponents.length;
+                        for (var j=0;j<length;j++){
+                            var renderableComponent = renderableComponents[j];
+                            if (!cullByViewFrustum(renderableComponent)){
+                                renderableComponent.render(engineUniforms,shader);
+                            }
+                        }
+                    },
+                        cullByViewFrustum = function(component){
+                            var componentAabb = component.aabb;
+                            if (componentAabb){
+                                aabb.transform(componentAabb,component.gameObject.transform.getGlobalMatrix(),aabbWorldSpace);
+                                return frustum.intersectAabb(frustumPlanes,aabbWorldSpace) === frustum.OUTSIDE;
+                            }
+                            return false;
+                        };
+                    // update frustum planes
+                    frustum.extractPlanes(engineUniforms.viewProjectionMatrix,false,frustumPlanes);
+                    engineUniforms.sceneLights=sceneLightObj;
+                    render(renderableComponentsBackGroundAndGeometry);
+                    render(renderableComponentsTransparent);
+                    render(renderableComponentsOverlay);
                 };
-                engineUniforms.sceneLights=sceneLightObj;
-                render(renderableComponentsBackGroundAndGeometry);
-                render(renderableComponentsTransparent);
-                render(renderableComponentsOverlay);
-            },
+            })(),
             renderShadowMap = function(sceneLightObj){
                 var directionalLight = sceneLightObj.directionalLight,
                     directionalLightTransform = directionalLight.gameObject.transform,
@@ -12026,6 +12052,12 @@ KICK.namespace = function (ns_string) {
         };
 
         Object.defineProperties(this,{
+            // inherit documentation from component
+            aabb:{
+                get:function(){
+                    return _mesh.aabb;
+                }
+            },
             // inherit documentation from component
             renderOrder:{
                 get:function(){

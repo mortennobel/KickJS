@@ -5,7 +5,7 @@
     <title>Sierpinsky Pyramid</title>
 </head>
 <body>
-    <script type="text/javascript" src="../../build/kick-min-0.3.1.js"></script>
+    <script type="text/javascript" src="../../build/kick-debug-0.3.1.js"></script>
     <h1>Sierpinsky Pyramid (Elements: <span id="elements"></span>)</h1>
        Performance test of rendering much data. Currently view volume culling is not suported by KickJS, so the
        performance may not be impresive.
@@ -171,6 +171,8 @@
                meshData = window.meshData;
            }
 
+
+
            var mesh = new KICK.mesh.Mesh(engine);
            mesh.meshData = meshData;
            return mesh;
@@ -180,7 +182,6 @@
     <button onclick="startTest(6,3);">6x3</button>
     <button onclick="startTest(6,4);">6x4</button>
     <button onclick="startTest(7,4);">7x4</button>
-    <button onclick="startTest(16,16);">16x16</button>
     <button onclick="startTest(16,16);">16x16</button>
     <button onclick="startTest(16,20);">16x20</button>
     <button onclick="startTest(16,24);">16x24</button>
