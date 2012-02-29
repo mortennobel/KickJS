@@ -58,7 +58,6 @@ $nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/buil
 $nodejs $project/preprocessor/preprocessor $project/src/js/chunk.js $project/build/pre/chunk.js $version true true
 $nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js $version true true
 $nodejs $project/preprocessor/preprocessor $project/src/js/mesh.js $project/build/pre/mesh.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/renderer.js $project/build/pre/renderer.js $version true true
 $nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/build/pre/material.js $version true true
 $nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js $version true true
 $nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js $version true true
@@ -69,7 +68,7 @@ cp $project/src/js/constants.js $project/build/pre/constants.js
 cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 
 echo "Creating kick-debug.js"
-cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/chunk.js $project/build/pre/mesh.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/renderer.js $project/build/pre/material.js $project/build/pre/meshfactory.js $project/build/pre/collada.js $project/build/pre/obj.js $project/build/pre/resource.js > $project/build/kick-debug-$version.js
+cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/chunk.js $project/build/pre/mesh.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/material.js $project/build/pre/meshfactory.js $project/build/pre/collada.js $project/build/pre/obj.js $project/build/pre/resource.js > $project/build/kick-debug-$version.js
 
 
 ##############################################################################
@@ -87,7 +86,6 @@ $nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/buil
 $nodejs $project/preprocessor/preprocessor $project/src/js/chunk.js $project/build/pre/chunk.js $version false false
 $nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js $version false false
 $nodejs $project/preprocessor/preprocessor $project/src/js/mesh.js $project/build/pre/mesh.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/renderer.js $project/build/pre/renderer.js $version false false
 $nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/build/pre/material.js $version false false
 $nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js $version false false
 $nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js $version false false
@@ -103,7 +101,6 @@ cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 ## cp $project/src/js/chunk.js $project/build/pre/chunk.js
 ## cp $project/src/js/scene.js $project/build/pre/scene.js
 ## cp $project/src/js/mesh.js $project/build/pre/mesh.js
-## cp $project/src/js/renderer.js $project/build/pre/renderer.js
 ## cp $project/src/js/material.js $project/build/pre/material.js
 ## cp $project/src/js/meshfactory.js $project/build/pre/meshfactory.js
 ## cp $project/src/js/texture.js $project/build/pre/texture.js
@@ -116,8 +113,7 @@ cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 ##############################################################################
 
 echo "Running Google Clojure compiler"
-java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/glslconstants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/chunk.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/mesh.js --js $project/build/pre/renderer.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --js $project/build/pre/collada.js --js $project/build/pre/obj.js --js $project/build/pre/resource.js --language_in ECMASCRIPT5_STRICT
-
+java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/glslconstants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/chunk.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/mesh.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --js $project/build/pre/collada.js --js $project/build/pre/obj.js --js $project/build/pre/resource.js --language_in ECMASCRIPT5_STRICT
 
 ##############################################################################
 echo "Adding license info compiler"

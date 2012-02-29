@@ -1240,7 +1240,6 @@ KICK.namespace = function (ns_string) {
             _currentClearFlags,
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
-            _renderer = new KICK.renderer.ForwardRenderer(),
             _shadowmapShader,
             _scene,
             pickingQueue = null,
@@ -1387,10 +1386,16 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             renderSceneObjects = function(sceneLightObj,shader){
+                var render = function(renderableComponents){
+                    var length = renderableComponents.length;
+                    for (var j=0;j<length;j++){
+                        renderableComponents[j].render(engineUniforms,shader);
+                    }
+                };
                 engineUniforms.sceneLights=sceneLightObj;
-                _renderer.render(renderableComponentsBackGroundAndGeometry,engineUniforms,shader);
-                _renderer.render(renderableComponentsTransparent,engineUniforms,shader);
-                _renderer.render(renderableComponentsOverlay,engineUniforms,shader);
+                render(renderableComponentsBackGroundAndGeometry);
+                render(renderableComponentsTransparent);
+                render(renderableComponentsOverlay);
             },
             renderShadowMap = function(sceneLightObj){
                 var directionalLight = sceneLightObj.directionalLight,
@@ -1630,24 +1635,6 @@ KICK.namespace = function (ns_string) {
                         }
                     } else {
                         _renderShadow = newValue;
-                    }
-                }
-            },
-            /**
-             * @property renderer
-             * @type KICK.renderer.Renderer
-             */
-            renderer:{
-                get:function(){ return _renderer;},
-                set:function(newValue){
-                    if (typeof newValue === "string"){
-                        var constructor = KICK.namespace(newValue);
-                        newValue = new constructor();
-                    }
-                    if (newValue && typeof newValue.render === "function"){
-                        _renderer = newValue;
-                    } else if (c._ASSERT){
-                        KICK.core.Util.fail("Camera.renderer should be a KICK.renderer.Renderer (must implement render function)");
                     }
                 }
             },
@@ -1906,7 +1893,6 @@ KICK.namespace = function (ns_string) {
                 config:{
                     enabled: _enabled,
                     renderShadow: _renderShadow,
-                    renderer:_renderer.name,
                     layerMask:_layerMask,
                     renderTarget:KICK.core.Util.getJSONReference(engine,_renderTarget),
                     fieldOfView:_fieldOfView,
