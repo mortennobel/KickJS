@@ -68,8 +68,8 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             _config = config || {},
             framebuffer = gl.createFramebuffer(),
-            colorTexture = _config.colorTexture,
-            _dimension = config.dimension,
+            colorTexture = null,
+            _dimension = vec2.create(),
             renderBuffers = [],
             thisObj = this,
             _name = "",
@@ -132,13 +132,18 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
-             * Read only. Computed the the active texture(s)
              * @property dimension
              * @type KICK.math.vec2
              */
             dimension:{
                 get:function(){
                     return _dimension;
+                },
+                set:function(newValue){
+                    _dimension = newValue;
+                    if (_dimension){
+                        initFBO();
+                    }
                 }
             },
             /**
