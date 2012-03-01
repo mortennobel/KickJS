@@ -22,7 +22,6 @@
 
         var LAYER_VISIBLE_OBJECTS = 1;
         var LAYER_SHADOWMAP_DEPTH = 2;
-        var LAYER_SHADOWMAP_RAW = 4;
 
         function CameraMover(){
             var transform,
@@ -210,14 +209,15 @@
         function LightRotator(){
             var transform,
                     keyInput,
-                    rotationSpeed = 1;
+                    rotationSpeed = 1,
+                    rotationEuler;
             this.activated = function(){
                 transform = this.gameObject.transform;
                 keyInput = this.gameObject.engine.keyInput;
+                rotationEuler = transform.localRotationEuler;
             };
 
             this.update = function(){
-                var rotationEuler = transform.localRotationEuler;
                 if (keyInput.isKey("J".charCodeAt(0))){
                     rotationEuler[1] += rotationSpeed;
                 }
@@ -513,7 +513,7 @@
 </head>
 <body onload="initKick();">
 <h1>Shadow map test</h1>
-    AWSD = move, QE = rotate, T=Toggle light volume<br>
+    AWSD = move, QE = rotate, T=Toggle light volume, JIKL = Rotate light source<br>
     <script language="vertexShader" id="vertexDepthShader">
 attribute vec3 vertex;
 attribute vec2 uv1;

@@ -1441,7 +1441,7 @@ KICK.namespace = function (ns_string) {
                 setupViewport(0,0,renderTextureWidth,renderTextureHeight);
 
                 shadowRenderTexture.bind();
-                setupClearColor([0,0,0,0]);
+                setupClearColor([1,1,1,1]);
                 gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
                 // fitting:
