@@ -257,8 +257,6 @@ KICK.namespace = function (ns_string) {
             if (_textureType === constants.GL_TEXTURE_2D){
                 gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
                 gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
-            } else {
-
             }
             gl.texParameteri(_textureType, constants.GL_TEXTURE_MAG_FILTER, _magFilter);
             gl.texParameteri(_textureType, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
@@ -269,11 +267,8 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (gl.currentTexture[textureSlot] !== _textureId){
-                gl.currentTexture[textureSlot] = _textureId;
-                gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(_textureType, _textureId);
-            }
+            gl.activeTexture(texture0+textureSlot);
+            gl.bindTexture(_textureType, _textureId);
         };
 
         /**
@@ -696,10 +691,6 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // create active texture cache on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
-            }
             // apply
             applyConfig(thisObj, config);
 
@@ -739,11 +730,9 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (gl.currentTexture[textureSlot] !== _textureId){
-                gl.currentTexture[textureSlot] = _textureId;
-                gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
-            }
+            gl.activeTexture(texture0+textureSlot);
+            gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
+
             if (lastGrappedFrame < timer.frame && _videoElement){
                 lastGrappedFrame = timer.frame+_skipFrames;
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -984,11 +973,6 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // create active texture cache on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
-            }
-
             // apply
             applyConfig(thisObj, config);
 

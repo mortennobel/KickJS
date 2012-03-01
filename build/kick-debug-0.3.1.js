@@ -12931,8 +12931,6 @@ KICK.namespace = function (ns_string) {
             if (_textureType === 3553){
                 gl.texParameteri(3553, 10242, _wrapS);
                 gl.texParameteri(3553, 10243, _wrapT);
-            } else {
-
             }
             gl.texParameteri(_textureType, 10240, _magFilter);
             gl.texParameteri(_textureType, 10241, _minFilter);
@@ -12943,11 +12941,8 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (gl.currentTexture[textureSlot] !== _textureId){
-                gl.currentTexture[textureSlot] = _textureId;
-                gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(_textureType, _textureId);
-            }
+            gl.activeTexture(texture0+textureSlot);
+            gl.bindTexture(_textureType, _textureId);
         };
 
         /**
@@ -13370,10 +13365,6 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // create active texture cache on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
-            }
             // apply
             applyConfig(thisObj, config);
 
@@ -13413,11 +13404,9 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function(textureSlot){
-            if (gl.currentTexture[textureSlot] !== _textureId){
-                gl.currentTexture[textureSlot] = _textureId;
-                gl.activeTexture(texture0+textureSlot);
-                gl.bindTexture(3553, _textureId);
-            }
+            gl.activeTexture(texture0+textureSlot);
+            gl.bindTexture(3553, _textureId);
+
             if (lastGrappedFrame < timer.frame && _videoElement){
                 lastGrappedFrame = timer.frame+_skipFrames;
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
@@ -13658,11 +13647,6 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init(){
-            // create active texture cache on glContext
-            if (!gl.currentTexture){
-                gl.currentTexture = {};
-            }
-
             // apply
             applyConfig(thisObj, config);
 
