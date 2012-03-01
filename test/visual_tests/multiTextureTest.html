@@ -27,8 +27,8 @@
 
         function initMaterials(vertexShaderId, fragmentShaderId){
             var shader = new KICK.material.Shader(engine);
-            shader.vertexShaderSrc = document.getElementById('vs').innerText;
-            shader.fragmentShaderSrc = document.getElementById('fs').innerText;
+            shader.vertexShaderSrc = document.getElementById('vs').innerHTML;
+            shader.fragmentShaderSrc = document.getElementById('fs').innerHTML;
             shader.errorLog = console.log;
             shader.apply();
             var missingAttributes = meshRenderer.mesh.verify(shader);
