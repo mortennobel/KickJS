@@ -1209,6 +1209,7 @@ KICK.namespace = function (ns_string) {
      * @method createDefault
      * @param {KICK.core.Engine} engine
      * @static
+     * @return {KICK.scene.Scene}
      */
     scene.Scene.createDefault = function(engine){
         var newScene = new scene.Scene(engine);
