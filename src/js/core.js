@@ -2510,7 +2510,7 @@ KICK.namespace = function (ns_string) {
                 window.msRequestAnimationFrame     ||
                 function (/* function */ callback, /* DOMElement */ element) {
                     var fps60 = 16.7;
-                    return window.setTimeout(callback, fps60);
+                    return window.setTimeout(callback, fps60, new Date().getTime());
                 };
         })();
 

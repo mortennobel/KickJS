@@ -8588,7 +8588,7 @@ KICK.namespace = function (ns_string) {
                 window.msRequestAnimationFrame     ||
                 function (/* function */ callback, /* DOMElement */ element) {
                     var fps60 = 16.7;
-                    return window.setTimeout(callback, fps60);
+                    return window.setTimeout(callback, fps60, new Date().getTime());
                 };
         })();
 
@@ -11272,6 +11272,7 @@ KICK.namespace = function (ns_string) {
      * @method createDefault
      * @param {KICK.core.Engine} engine
      * @static
+     * @return {KICK.scene.Scene}
      */
     scene.Scene.createDefault = function(engine){
         var newScene = new scene.Scene(engine);
