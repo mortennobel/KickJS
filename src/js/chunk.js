@@ -267,11 +267,12 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Uses a Float32Array for storing the number. Note that potentially precision can get lost.
          * @method setNumber
          * @param {Number} num
          */
         this.setNumber = function(chunkId, num){
-            var array = new Float64Array([num]);
+            var array = new Float32Array([num]);
             thisObj.set(chunkId,array);
         };
 
