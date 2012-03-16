@@ -1449,7 +1449,7 @@ KICK.namespace = function (ns_string) {
          * All elements of the drawing buffer (color, depth and stencil) are cleared.
          * If the value is true the buffers will not be cleared and will preserve their
          * values until cleared or overwritten by the author.
-         * @property enableDebugContext
+         * @property preserveDrawingBuffer
          * @type Boolean
          */
         this.preserveDrawingBuffer = config.preserveDrawingBuffer || false;
