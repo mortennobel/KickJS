@@ -498,7 +498,7 @@ var initSnake = function(){
     function documentResized(){
         var canvas = document.getElementById('canvas');
         canvas.width = document.width || document.body.clientWidth;
-        canvas.height = (document.height || document.body.clientHeight)-canvas.offsetTop;
+        canvas.height = Math.max(600,(document.height || document.body.clientHeight)-canvas.offsetTop);
         engine.canvasResized();
     }
     documentResized();

@@ -6170,7 +6170,7 @@ KICK.namespace = function (ns_string) {
              * @type String
              */
             version:{
-                value:"0.3.1"
+                value:"0.3.2"
             },
             /**
              * @property resourceManager
@@ -7441,7 +7441,7 @@ KICK.namespace = function (ns_string) {
          * (engine,config) parameters.<br>
          * If the resource object has a init function, this is also invoked.
          * @method instantiate
-         * @param {KICK.core.Engine} engine
+         * @param {KICK.core.Engine} engine
          * @return {Object} instance of the resource
          */
         this.instantiate = function(engine){
@@ -7527,7 +7527,7 @@ KICK.namespace = function (ns_string) {
          * All elements of the drawing buffer (color, depth and stencil) are cleared.
          * If the value is true the buffers will not be cleared and will preserve their
          * values until cleared or overwritten by the author.
-         * @property enableDebugContext
+         * @property preserveDrawingBuffer
          * @type Boolean
          */
         this.preserveDrawingBuffer = config.preserveDrawingBuffer || false;
@@ -8320,7 +8320,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Scales the image by drawing the image on a canvas object.
          * @method scaleImage
-         * @param {Image} imageObj
+         * @param {Image} imageObj
          * @param {Number} newWidth
          * @param {Number} newHeight
          * @return {Canvas} return a Canvas object (acts as a image)
@@ -8449,7 +8449,7 @@ KICK.namespace = function (ns_string) {
          * This uses the === to compare the two elements.
          * @static
          * @param {Array} array
-         * @param {Object} element
+         * @param {Object} element
          * @return {boolean} array contains element
          */
         contains : function(array,element){
@@ -8588,7 +8588,7 @@ KICK.namespace = function (ns_string) {
                 window.msRequestAnimationFrame     ||
                 function (/* function */ callback, /* DOMElement */ element) {
                     var fps60 = 16.7;
-                    return window.setTimeout(callback, fps60);
+                    return window.setTimeout(callback, fps60, new Date().getTime());
                 };
         })();
 
@@ -8883,11 +8883,12 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Uses a Float32Array for storing the number. Note that potentially precision can get lost.
          * @method setNumber
          * @param {Number} num
          */
         this.setNumber = function(chunkId, num){
-            var array = new Float64Array([num]);
+            var array = new Float32Array([num]);
             thisObj.set(chunkId,array);
         };
 
@@ -11272,6 +11273,7 @@ KICK.namespace = function (ns_string) {
      * @method createDefault
      * @param {KICK.core.Engine} engine
      * @static
+     * @return {KICK.scene.Scene}
      */
     scene.Scene.createDefault = function(engine){
         var newScene = new scene.Scene(engine);
@@ -11479,9 +11481,11 @@ KICK.namespace = function (ns_string) {
                         }
                     },
                         cullByViewFrustum = function(component){
-                            var componentAabb = component.aabb;
-                            if (componentAabb){
-                                aabb.transform(componentAabb,component.gameObject.transform.getGlobalMatrix(),aabbWorldSpace);
+                            var componentAabb = component.aabb,
+                                gameObject = component.gameObject;
+
+                            if (componentAabb && gameObject){
+                                aabb.transform(componentAabb,gameObject.transform.getGlobalMatrix(),aabbWorldSpace);
                                 return frustum.intersectAabb(frustumPlanes,aabbWorldSpace) === frustum.OUTSIDE;
                             }
                             return false;
@@ -16046,7 +16050,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method addResourceProvider
-         * @param {KICK.resource.ResourceProvider} resourceProvider
+         * @param {KICK.resource.ResourceProvider} resourceProvider
          */
         this.addResourceProvider = function(resourceProvider){
             resourceProviders.push(resourceProvider);
@@ -16054,7 +16058,7 @@ KICK.namespace = function (ns_string) {
 
         /**
          * @method removeResourceProvider
-         * @param {KICK.resource.ResourceProvider} resourceProvider
+         * @param {KICK.resource.ResourceProvider} resourceProvider
          */
         this.removeResourceProvider = function(resourceProvider){
             for (var i=resourceProvider.length-1;i>=0;i--){

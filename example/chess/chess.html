@@ -2,19 +2,20 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>KickJS cloth simulation</title>
+    <title>KickJS chess</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0pr2/build/cssreset/reset-min.css&3.5.0pr2/build/cssfonts/fonts-min.css&3.5.0pr2/build/cssgrids/grids-min.css&3.5.0pr2/build/cssbase/base-min.css&3.5.0pr2/build/cssbutton/cssbutton.css">
     <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
     <link href='/style.css' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="../common/common.js"></script>
+
 </head>
 <body class="yui3-skin-sam">
 <header></header>
-<h1>KickJS cloth simulation</h1>
-Based on <a href="http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-coding-tutorial/">Mosegaards Cloth Simulation Coding Tutorial</a><br>
-(And yes it should be optimized to run on fully on the GPU)<br>
+<h1>KickJS chess</h1>
 <canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
+<!-- Emscripten -->
+<script type="text/javascript" src="tscp181.js"></script>
 <script type="text/javascript">
     if (location.search === "?debug"){
         document.write('<script type="text/javascript" src="../js/webgl-debug.js"></s'+'cript>');
@@ -22,9 +23,8 @@ Based on <a href="http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-
     } else {
         document.write('<script type="text/javascript" src="../js/kick-min-0.3.2.js"></s'+'cript>');
     }
-    document.write('<script src="cloth_simulation.js"></s'+'cript>');
+    document.write('<script src="chess.js"></s'+'cript>');
 </script>
 
-<script type="text/javascript" src="/header.js"></script>
 </body>
 </html>
