@@ -1417,9 +1417,11 @@ KICK.namespace = function (ns_string) {
                         }
                     },
                         cullByViewFrustum = function(component){
-                            var componentAabb = component.aabb;
-                            if (componentAabb){
-                                aabb.transform(componentAabb,component.gameObject.transform.getGlobalMatrix(),aabbWorldSpace);
+                            var componentAabb = component.aabb,
+                                gameObject = component.gameObject;
+
+                            if (componentAabb && gameObject){
+                                aabb.transform(componentAabb,gameObject.transform.getGlobalMatrix(),aabbWorldSpace);
                                 return frustum.intersectAabb(frustumPlanes,aabbWorldSpace) === frustum.OUTSIDE;
                             }
                             return false;
