@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
+    <script type="text/javascript">
+        var engine;
+        var meshRenderer;
+        var materials = [];
+        var materialIndex = 0;
+        
+        var log = function (output) {
+            var element = document.getElementById("output");
+            element.innerHTML = element.innerHTML+output+"<br>";
+        };
+
+        var clearLog = function(){
+            var element = document.getElementById("output");
+            element.innerHTML = "";
+        };
+
+        function setMaterial(vertexShaderId, fragmentShaderId){
+            clearLog();
+            var vs = document.getElementById(vertexShaderId).value;
+            var fs = document.getElementById(fragmentShaderId).value;
+            var shader = new KICK.material.Shader(engine);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.apply();
+            var missingAttributes = meshRenderer.mesh.verify(shader);
+            if (missingAttributes){
+                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                return;
+            }
+
+            return new KICK.material.Material(engine,{
+                name:"Some material",
+                shader:shader
+            });
+        }
+
+        function recalculateNormals(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateNormals();
+            mesh.updateData();
+        }
+
+        function recalculateTangents(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateTangents();
+            mesh.updateData();
+        }
+
+        function addRotatorComponent(gameObject){
+            var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = 0.05,
+                    rotation = transform.localRotationEuler;
+            gameObject.addComponent({
+                update: function(){
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                }
+            });
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
+            var cameraObject = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0,0,0,1],
+                perspective: false,
+                near:-1,
+                far:1
+            });
+            cameraObject.addComponent(camera);
+
+            var gameObject = engine.activeScene.createGameObject();
+            meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            materials[0] = setMaterial('vertexShaderColor','fragmentShader');
+            materials[1] = new KICK.material.Material(engine,{
+                shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
+                    uniforms:{
+                        mainTexture:{
+                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                            type:KICK.core.Constants.GL_SAMPLER_2D
+                        },
+                        mainColor:{
+                            value:[1,1,1,0.5],
+                            type:KICK.core.Constants.GL_FLOAT_VEC4
+                        }
+                    }
+                }
+            );
+            updateMaterial();
+            gameObject.addComponent(meshRenderer);
+            addRotatorComponent(gameObject);
+
+            var gameObject2 = engine.activeScene.createGameObject();
+            meshRenderer2 = new KICK.scene.MeshRenderer();
+            meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer2.material = materials[0];
+            gameObject2.transform.localPosition = [0,0,-1];
+            gameObject2.transform.localScale = [1,2,1];
+            gameObject2.addComponent(meshRenderer2);
+        }
+
+        function updateMaterial(){
+            meshRenderer.material = materials[materialIndex];
+            materialIndex = (materialIndex+1)%2;
+        }
+    </script>
+</head>
+<body onload="initKick();">
+    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
+
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example shows how a cube is rotated.
+  <br>
+
+  <h2>Output</h2>
+  <div id="output" style="color: red;">
+  </div>
+  <button onclick="updateMaterial();">Update material</button>
+    <div id="example" class="yui3-skin-sam"></div>
+
+  <div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec4 color;
+
+uniform mat4 _mvProj;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vColor = color.xyz;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+</div>
+  <br/>
+</body>
+</html>

@@ -215,6 +215,15 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
+         * Invoked when component updated (such as material change).
+         * @method notifyComponentUpdated
+         * @param {KICK.scene.Component} component
+         */
+        this.notifyComponentUpdated = function(component){
+            scene.notifyComponentUpdated(component);
+        };
+
+        /**
          * Destroys game object after next frame.
          * Removes all components instantly.
          * This method will call destroyObject on the associated scene.
@@ -887,6 +896,13 @@ KICK.namespace = function (ns_string) {
                 return gameObject;
             };
 
+
+        this.notifyComponentUpdated = function(component){
+            for (i=componentListenes.length-1; i >= 0; i--) {
+                componentListenes[i].componentUpdated(component);
+            }
+        };
+
         /**
          * @method destroy
          */
@@ -909,6 +925,12 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("Component listener does not have the correct interface. " +
                         "It should contain the two functions: " +
                         "componentsAdded(components) and componentsRemoved(components)");
+            }
+            if (!componentListener.componentUpdated){
+                componentListener.componentUpdated = function(){};
+                if (DEBUG){
+                    warn("componentListener has no componentUpdated method");
+                }
             }
             componentListenes.push(componentListener);
             // add current components to component listener
@@ -1472,6 +1494,54 @@ KICK.namespace = function (ns_string) {
 
                 renderSceneObjects(sceneLightObj,_shadowmapShader);
 
+            },
+            componentListener = {
+                /**
+                 * Add components that implements the render function and match the camera layerMask to cameras renderable components
+                 * @method componentsAdded
+                 * @param {Array[KICK.scene.Component]} components
+                 * @private
+                 */
+                componentsAdded : function( components ){
+                    for (var i=components.length-1; i>=0; i--) {
+                        var component = components[i];
+                        if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
+                            var renderOrder = component.renderOrder || 1000;
+                            var array;
+                            if (renderOrder < 2000){
+                                array = renderableComponentsBackGroundAndGeometry;
+                            } else if (renderOrder >= 3000){
+                                array = renderableComponentsOverlay;
+                            } else {
+                                array = renderableComponentsTransparent;
+                            }
+                            if (!KICK.core.Util.contains(array,component)){
+                                insertSorted(component,array,compareRenderOrder);
+                            }
+                        }
+                    }
+                },
+
+                /**
+                 * @method componentsRemoved
+                 * @param {Array[KICK.scene.Component]} components
+                 * @private
+                 */
+                componentsRemoved : function ( components ){
+                    for (var i=components.length-1; i>=0; i--) {
+                        var component = components[i];
+                        if (typeof(component.render) === "function") {
+                            for (var j=renderableComponentsArray.length-1;j>=0;j--){
+                                core.Util.removeElementFromArray(renderableComponentsArray[j],component);
+                            }
+                        }
+                    }
+                },
+                componentUpdated : function(component){
+                    var wrap = [component];
+                    componentListener.componentsRemoved(wrap);
+                    componentListener.componentsAdded(wrap);
+                }
             };
 
         /**
@@ -1515,7 +1585,7 @@ KICK.namespace = function (ns_string) {
             transform = gameObject.transform;
             gl = engine.gl;
             _scene = gameObject.scene;
-            _scene.addComponentListener(thisObj);
+            _scene.addComponentListener(componentListener);
 
             if (engine.config.shadows){
                 _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
@@ -1542,46 +1612,6 @@ KICK.namespace = function (ns_string) {
          */
         this.deactivated = function(){
             _scene.removeComponentListener(thisObj);
-        };
-
-        /**
-         * Add components that implements the render function and match the camera layerMask to cameras renderable components
-         * @method componentsAdded
-         * @param {Array[KICK.scene.Component]} components
-         */
-        this.componentsAdded = function( components ){
-            for (var i=components.length-1; i>=0; i--) {
-                var component = components[i];
-                if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
-                    var renderOrder = component.renderOrder || 1000;
-                    var array;
-                    if (renderOrder < 2000){
-                        array = renderableComponentsBackGroundAndGeometry;
-                    } else if (renderOrder >= 3000){
-                        array = renderableComponentsOverlay;
-                    } else {
-                        array = renderableComponentsTransparent;
-                    }
-                    if (!KICK.core.Util.contains(array,component)){
-                        insertSorted(component,array,compareRenderOrder);
-                    }
-                }
-            }
-        };
-
-        /**
-         * @method componentsRemoved
-         * @param {Array[KICK.scene.Component]} components
-         */
-        this.componentsRemoved = function ( components ){
-            for (var i=components.length-1; i>=0; i--) {
-                var component = components[i];
-                if (typeof(component.render) === "function") {
-                    for (var j=renderableComponentsArray.length-1;j>=0;j--){
-                        core.Util.removeElementFromArray(renderableComponentsArray[j],component);
-                    }
-                }
-            }
         };
 
         /**
@@ -2072,6 +2102,9 @@ KICK.namespace = function (ns_string) {
                     }
                     _materials[0] = newValue;
                     _renderOrder = _materials[0].renderOrder;
+                    if (thisObj.gameObject){
+                        thisObj.gameObject.notifyComponentUpdated(thisObj);
+                    }
                 }
             },
             /**
@@ -2093,6 +2126,9 @@ KICK.namespace = function (ns_string) {
                         }
                         _materials[i] = newValue[i];
                         _renderOrder = _materials[i].renderOrder;
+                    }
+                    if (thisObj.gameObject){
+                        thisObj.gameObject.notifyComponentUpdated(thisObj);
                     }
                 },
                 enumerable: true
