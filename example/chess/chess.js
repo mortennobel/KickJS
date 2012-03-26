@@ -1,5 +1,6 @@
-var doMove,
-    engine,
+"use strict";
+
+var engine,
     vec2 = KICK.math.vec2,
     vec3 = KICK.math.vec3,
     vec4 = KICK.math.vec4,
@@ -15,6 +16,55 @@ var ChessPieceType = {
     Knight:6
 };
 
+var GameBoard = function(){
+    var thisObj = this;
+    var piecesLocations = [];
+    var fieldsLocations = [];
+    for (var x=0;x<8;x++){
+        piecesLocations[x] = [];
+        fieldsLocations[x] = [];
+        for (var y= 0;y<8;y++){
+            piecesLocations[x][y] = null;
+            fieldsLocations[x][y] = null;
+        }
+    }
+
+    this.addPiece = function(piece){
+        piecesLocations[piece.location[0]][piece.location[1]] = piece;
+    };
+
+    this.addField = function(field){
+        fieldsLocations[field.location[0]][field.location[1]] = field;
+    };
+
+    this.movePiece = function(piece, newLocation){
+        var existingPiece = thisObj.getPiece(newLocation);
+        if (existingPiece){
+            existingPiece.gameObject.destroy();
+        }
+        if (piece.type === ChessPieceType.King && Math.abs(piece.location[0]-newLocation[0])>1){
+            // Castling
+            var direction = piece.location[0]-newLocation[0]<0?-1:1;
+            var rook = thisObj.getPiece([direction>0?0:7,piece.location[1]]);
+            var dest = [direction>0?3:5,piece.location[1]];
+            thisObj.movePiece(rook,dest);
+        }
+        piecesLocations[piece.location[0]][piece.location[1]] = null;
+        piece.location = newLocation;
+        piecesLocations[piece.location[0]][piece.location[1]] = piece;
+
+
+    };
+
+    this.getPiece = function(location){
+        return piecesLocations[location[0]][location[1]];
+    };
+
+    this.getField = function(location){
+        return fieldsLocations[location[0]][location[1]];
+    };
+};
+
 var ChessField = function(location2d){
     var meshRenderer,
         material,
@@ -24,12 +74,11 @@ var ChessField = function(location2d){
         var gameObject = this.gameObject;
         var transform = gameObject.transform;
         transform.localRotationEuler= [-90,0,0];
-        transform.localPosition = [location2d[0]-3.5,0,location2d[1]-3.5];
-
+        transform.localPosition = [-(location2d[0]-3.5),0,location2d[1]-3.5];
         meshRenderer = new KICK.scene.MeshRenderer();
         meshRenderer.mesh = engine.project.loadByName("ChessBoardField");
         var even = (location2d[0]+location2d[1])%2;
-        meshRenderer.material = material = engine.project.loadByName(even?"BoardBlack":"BoardWhite");
+        meshRenderer.material = material = engine.project.loadByName(even?"BoardWhite":"BoardBlack");
         selectedMaterial = engine.project.loadByName("BoardSelected");
         gameObject.addComponent(meshRenderer);
     };
@@ -37,7 +86,13 @@ var ChessField = function(location2d){
     Object.defineProperties(this,{
         selected:{
             set:function(newValue){
+                debugger;
                 meshRenderer.material = newValue?selectedMaterial:material;
+            }
+        },
+        location:{
+            get:function(){
+                return vec2.create(location2d);
             }
         }
     });
@@ -45,7 +100,8 @@ var ChessField = function(location2d){
 
 // Chess piece class
 var ChessPiece = function(type, color, initialLocation){
-    var location = vec2.create(),
+    var location = vec2.create(initialLocation),
+        transform,
         getMeshName = function(type){
             for (var name in ChessPieceType){
                 if (ChessPieceType[name] === type){
@@ -58,7 +114,7 @@ var ChessPiece = function(type, color, initialLocation){
             if (!dest){
                 dest = vec3.create();
             }
-            dest[0] = position2d[0]-3.5;
+            dest[0] = -(position2d[0]-3.5);
             dest[2] = position2d[1]-3.5;
             dest[1] = height;
             return dest;
@@ -76,20 +132,27 @@ var ChessPiece = function(type, color, initialLocation){
             },
             set:function(newvalue){
                 vec2.set(newvalue,location);
+                var newPos = getPosition3D(location,0);
+                transform.localPosition = newPos;
             }
         }
     });
 
     this.activated = function(){
         var gameObject = this.gameObject;
-        var transform = gameObject.transform;
-        transform.localRotationEuler= [-90,0,0];
+        transform = gameObject.transform;
+        var yRotation = 0;
+        if (type === ChessPieceType.Knight){
+            yRotation = -90+180*color;
+        } else if (type === ChessPieceType.Bishop){
+            yRotation = 45+90*color;
+        }
+        transform.localRotationEuler= [-90,yRotation,0];
         transform.localPosition = getPosition3D(initialLocation,0);
-
 
         var meshRenderer = new KICK.scene.MeshRenderer();
         meshRenderer.mesh = engine.project.loadByName(getMeshName(type));
-        meshRenderer.material = engine.project.loadByName(color?"ChessWhite":"ChessBlack");
+        meshRenderer.material = engine.project.loadByName(color?"ChessBlack":"ChessWhite");
         gameObject.addComponent(meshRenderer);
     }
 };
@@ -101,7 +164,7 @@ var ChessCameraMovementListener = function(){
             mouseRotationSpeed = 0.01,
             mouseInput,
             cartesianCoordinates = vec3.create(),
-            sphericalCoordinates = vec3.create([14,0,0]);
+            sphericalCoordinates = vec3.create([14,1.5707963267949,1]);
 
     this.activated = function(){
         var gameObject = thisObj.gameObject,
@@ -126,8 +189,83 @@ var ChessCameraMovementListener = function(){
     };
 };
 
+var SelectionListener = function(chessGame){
+    var mouseInput,
+        camera,
+        gameObjectsPicked = function(gameObject){
+            var chessPiece = gameObject.getComponentOfType(ChessPiece);
+            var location;
+            if (chessPiece){
+                location = chessPiece.location;
+            } else {
+                var chessField = gameObject.getComponentOfType(ChessField);
+                if (chessField){
+                    location = chessField.location;
+                }
+            }
+            if (location){
+                chessGame.locationSelected(location);
+            }
+        };
+    this.activated = function(){
+        mouseInput = engine.mouseInput;
+        camera = this.gameObject.scene.findComponentsOfType(KICK.scene.Camera)[0];
+    };
+
+    this.update = function(){
+        if (mouseInput.isButtonDown(0)){
+            camera.pick(gameObjectsPicked, mouseInput.mousePosition[0],mouseInput.mousePosition[1]);
+        }
+    };
+};
+
 var ChessGame = function(){
-    var cameraGameObject;
+    var worker = new Worker("chess_web_worker.js"),
+        cameraGameObject,
+        thisObj = this,
+        gameBoard = new GameBoard(),
+        isPlayersTurn = true,
+        isWorking = false,
+        doPlayerMove = null,
+        playerColor = 0, // white
+        selectedPiece = null,
+        locationToChessStr = function(location){
+            return String.fromCharCode("a".charCodeAt(0)+location[0])+(location[1]+1);
+        },
+        chessStrToLocation = function(str){
+            return [str.charCodeAt(0)-'a'.charCodeAt(0),
+                str.charCodeAt(1)-'1'.charCodeAt(0)];
+        },
+        doComputerMove = function(moveStr){
+            var moveFrom = chessStrToLocation(moveStr.substring(0,2));
+            var moveTo = chessStrToLocation(moveStr.substring(2,4));
+            var piece = gameBoard.getPiece(moveFrom);
+            gameBoard.movePiece(piece,moveTo);
+        };
+
+    worker.onmessage = function(event) {
+        var data = event.data;
+        if (isPlayersTurn){
+            if (data===""){
+                doPlayerMove();
+                isPlayersTurn = false;
+                worker.postMessage(""); // do computer move
+            } else {
+                alert(data);
+                selectedPiece = null;
+                isWorking = false;
+            }
+        } else {
+            doComputerMove(data);
+            isWorking = false;
+            isPlayersTurn = true;
+        }
+    };
+
+    worker.onerror = function(error) {
+        alert("Worker error: " + error.message + "\n");
+        throw error;
+    };
 
     function initMeshData(){
         var meshNames = ["Rook", "Bishop", "Chessboard", "ChessBoardField", "Pawn", "Queen", "King", "Knight"];
@@ -141,7 +279,20 @@ var ChessGame = function(){
     }
 
     function buildScene(){
-        var scene = engine.activeScene;
+        var scene = engine.activeScene,
+            addPiece = function(type, color, location){
+                var name;
+                for (name in ChessPieceType){
+                    if (type == ChessPieceType[name]){
+                        break;
+                    }
+                }
+                var chessPieceGameObject = scene.createGameObject({name:name});
+                var chessPieceComponent = new ChessPiece(type,color,location);
+                chessPieceGameObject.addComponent(chessPieceComponent);
+
+                gameBoard.addPiece(chessPieceComponent);
+            };
         cameraGameObject = scene.createGameObject({name:"Camera"});
         cameraGameObject.addComponent(new KICK.scene.Camera());
         cameraGameObject.addComponent(new ChessCameraMovementListener());
@@ -160,10 +311,8 @@ var ChessGame = function(){
             for (var y=0;y<8;y++){
                 var field = scene.createGameObject({name:"Field "+x+","+y});
                 var chessField = new ChessField([x,y]);
-                setTimeout(function(){
-                    console.log("Set selected");
-                    chessField.selected = true;},Math.random()*100000);
                 field.addComponent(chessField);
+                gameBoard.addField(chessField);
             }
         }
 
@@ -171,30 +320,49 @@ var ChessGame = function(){
             // create pawns
             var row = 1+color*5;
             for (var i=0;i<8;i++){
-                var pawnGameObject = scene.createGameObject({name:"Pawn "+i});
-                pawnGameObject.addComponent(new ChessPiece(ChessPieceType.Pawn,color,[i,row]));
+                addPiece(ChessPieceType.Pawn,color,[i,row]);
             }
             row = color*7;
             for (var i=0;i<8;i+=7){
-                var rookGameObject = scene.createGameObject({name:"Rook "+i});
-                rookGameObject.addComponent(new ChessPiece(ChessPieceType.Rook,color,[i,row]));
+                addPiece(ChessPieceType.Rook,color,[i,row]);
             }
             for (var i=1;i<8;i+=5){
-                var knightObject = scene.createGameObject({name:"Knight "+i});
-                knightObject.addComponent(new ChessPiece(ChessPieceType.Knight,color,[i,row]));
+                addPiece(ChessPieceType.Knight,color,[i,row]);
             }
             for (var i=2;i<8;i+=3){
-                var bishopObject = scene.createGameObject({name:"Bishop "+i});
-                bishopObject.addComponent(new ChessPiece(ChessPieceType.Bishop,color,[i,row]));
+                addPiece(ChessPieceType.Bishop,color,[i,row]);
             }
-            var queenObject = scene.createGameObject({name:"Queen"});
-            queenObject.addComponent(new ChessPiece(ChessPieceType.Queen,color,[3,row]));
-
-            var kingObject = scene.createGameObject({name:"King"});
-            kingObject.addComponent(new ChessPiece(ChessPieceType.King,color,[4,row]));
-
+            addPiece(ChessPieceType.Queen,color,[3,row]);
+            addPiece(ChessPieceType.King,color,[4,row]);
         }
+
+        var selectionListener = scene.createGameObject({name:"SelectionListener"});
+        selectionListener.addComponent(new SelectionListener(thisObj));
     }
+
+    this.locationSelected = function(location){
+        if (!isPlayersTurn || isWorking){
+            return;
+        }
+        var piece = gameBoard.getPiece(location);
+        if (piece && piece.color == playerColor){
+            if (selectedPiece){
+                gameBoard.getField(selectedPiece.location).selected = false;
+            }
+            selectedPiece = piece;
+            gameBoard.getField(location).selected = true;
+        } else if (selectedPiece){
+            var move = locationToChessStr (selectedPiece.location)+locationToChessStr (location);
+            doPlayerMove = function(){
+                gameBoard.getField(selectedPiece.location).selected = false;
+                gameBoard.movePiece(selectedPiece,location);
+            };
+            isWorking = true;
+            worker.postMessage(move);
+        } else {
+            console.log("Clicked "+locationToChessStr (location));
+        }
+    };
 
     // init
     initMeshData();
@@ -204,6 +372,7 @@ var ChessGame = function(){
 function initKick(){
     engine = new KICK.core.Engine('canvas',{
         shadows:false,
+        antialias:true,
         enableDebugContext: location.search === "?debug" // debug enabled if query == debug
     });
     var projectLoaded = function(){
@@ -215,16 +384,7 @@ function initKick(){
     engine.project.loadProjectByURL("project.json", projectLoaded, projectLoadError);
 }
 
-function initChess(){
-    var maxTime = 1<<25;
-    var maxDepth = 4;
-    ccall('initChessEngine','void',['number','number'],[maxTime,maxDepth]);
-    doMove = cwrap('doMove', 'string', ['string']);
-
-    initKick();
-
-}
 
 window.addEventListener("load",function(){
-    initChess();
+    initKick();
 },false);

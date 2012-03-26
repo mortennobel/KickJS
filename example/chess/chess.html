@@ -13,9 +13,11 @@
 <body class="yui3-skin-sam">
 <header></header>
 <h1>KickJS chess</h1>
+<div style="padding: 5px;">
+Chess engine created based on <a href="http://www.tckerrigan.com/Chess/TSCP">Tom Kerrigan's Simple Chess Program (TSCP)</a> Copyright 1997 Tom Kerrigan<br>
+Left click to select (and to move). Right click to change view.<br>
+</div><br>
 <canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
-<!-- Emscripten -->
-<script type="text/javascript" src="tscp181.js"></script>
 <script type="text/javascript">
     if (location.search === "?debug"){
         document.write('<script type="text/javascript" src="../js/webgl-debug.js"></s'+'cript>');
@@ -25,6 +27,6 @@
     }
     document.write('<script src="chess.js"></s'+'cript>');
 </script>
-
+<script type="text/javascript" src="/header.js"></script>
 </body>
 </html>
