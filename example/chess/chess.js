@@ -388,3 +388,15 @@ function initKick(){
 window.addEventListener("load",function(){
     initKick();
 },false);
+
+function onFullscreenButton(){
+    if (engine.isFullScreenSupported()){
+        engine.setFullscreen(true);
+    } else {
+        alert("Fullscreen is not supported in this browser");
+    }
+}
+
+YUI().use('tabview','console', "panel", "datatable-base", "dd-plugin",function(Y) {
+    Y.one("#fullscreen").on("click",onFullscreenButton);
+});
