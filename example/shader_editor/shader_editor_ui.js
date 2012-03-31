@@ -288,7 +288,7 @@
                 var currentTextures = document.getElementById('currentTextures'),
                     selectedIndex = currentTextures.selectedIndex,
                     c = KICK.core.Constants;
-                if (selectedIndex<0){
+                if (selectedIndex < 0){
                     console.log("No texture selected");
                     return;
                 }

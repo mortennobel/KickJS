@@ -172,6 +172,7 @@ window.shaderEditor = new (function(){
 
         shaderData.material.shader = shader;
         _meshRenderer.material = new KICK.material.Material(_engine,shaderData.material);
+        console.log(shaderData.material);
     };
 
     //
@@ -258,6 +259,43 @@ window.shaderEditor = new (function(){
         }
     };
 
+    function addMissingUniforms(){
+        var material = _meshRenderer.material;
+        for (var name in shader.lookupUniform){
+            if (shader.lookupUniform.hasOwnProperty(name)){
+                if (name.substring(0,1)!=="_" && !material.uniforms[name]){
+                    var missingUniform = shader.lookupUniform[name];
+                    var defaultUniform = {};
+                    switch (missingUniform.type){
+                        case KICK.core.Constants.GL_SAMPLER_2D:
+                        case KICK.core.Constants.GL_SAMPLER_CUBE:
+                            defaultUniform.type = missingUniform.type;
+                            for (var i=0;i<thisObj.textures;i++){
+                                if (thisObj.textures[i].textureType === missingUniform.type){
+                                    defaultUniform.value = thisObj.textures[i];
+                                }
+                            }
+                            var isFound = defaultUniform.value;
+                            if (!isFound){
+                                var texture;
+                                if (missingUniform.type === KICK.core.Constants.GL_SAMPLER_2D){
+                                    texture = engine.project.load(engine.project.ENGINE_TEXTURE_WHITE);
+                                } else {
+                                    texture = engine.project.load(engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
+                                }
+                                thisObj.textures.push(texture);
+                                defaultUniform.value = texture;
+                            }
+                            break;
+                    }
+                    if (defaultUniform.value){
+                        material.uniforms[name] = defaultUniform;
+                    }
+                }
+            }
+        }
+    }
+
     this.apply = function(vs,fs){
         shader.vertexShaderSrc = vs;
         shader.fragmentShaderSrc = fs;
@@ -272,6 +310,8 @@ window.shaderEditor = new (function(){
         if (!res){
             onError();
             return;
+        } else {
+            addMissingUniforms();
         }
         var missingAttributes = _meshRenderer.mesh.verify(shader);
         if (missingAttributes){
