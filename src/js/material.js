@@ -604,7 +604,7 @@ KICK.namespace = function (ns_string) {
             this.activeUniforms = new Array(activeUniforms);
             /**
              * Lookup of uniform based on name.
-             * @property uniformMap
+             * @property lookupUniform
              * @type Object
              */
             this.lookupUniform = {};
