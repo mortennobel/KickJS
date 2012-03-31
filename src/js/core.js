@@ -686,7 +686,8 @@ KICK.namespace = function (ns_string) {
                         name:getUrlAsResourceName(url),
                         uid:uid
                     })
-                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_LOGO){
+                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE){
+                    var isCubemap = uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE;
                     switch (uid){
                         case p.ENGINE_TEXTURE_BLACK:
                             url = "kickjs://texture/black/";
@@ -700,21 +701,49 @@ KICK.namespace = function (ns_string) {
                         case p.ENGINE_TEXTURE_LOGO:
                             url = "kickjs://texture/logo/";
                             break;
+                        case p.ENGINE_TEXTURE_CUBEMAP_WHITE:
+                            // do nothing
+                            break;
                         default:
                             if (ASSERT){
                                 core.Util.fail("uid not mapped "+uid);
                             }
                             return null;
                     }
-                    res = new KICK.texture.Texture(engine,
-                        {
-                            dataURI:url,
-                            name:getUrlAsResourceName(url),
-                            minFilter: constants.GL_NEAREST,
-                            magFilter: constants.GL_NEAREST,
-                            generateMipmaps: false,
-                            uid:uid
-                        });
+                    if (isCubemap){
+                        res = new KICK.texture.Texture(engine,
+                            {
+                                name:"cubemap_white",
+                                minFilter: constants.GL_NEAREST,
+                                magFilter: constants.GL_NEAREST,
+                                generateMipmaps: false,
+                                uid:uid,
+                                textureType: constants.GL_TEXTURE_CUBE_MAP
+                            });
+
+                        // create white image
+                        var canvas = document.createElement("canvas");
+                        canvas.width = 12;
+                        canvas.height = 2;
+                        var ctx = canvas.getContext("2d");
+
+                        ctx.fillStyle = "rgb(255,255,255)";
+                        ctx.fillRect (0, 0, 12, 2);
+                        res.setImage(canvas, "memory://cubemap_white/");
+
+                    } else {
+                        res = new KICK.texture.Texture(engine,
+                            {
+                                name:getUrlAsResourceName(url),
+                                minFilter: constants.GL_NEAREST,
+                                magFilter: constants.GL_NEAREST,
+                                generateMipmaps: false,
+                                uid:uid,
+                                textureType: constants.GL_TEXTURE_2D,
+                                dataURI:url
+                            });
+                    }
+
                 } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE){
                     switch (uid){
                         case p.ENGINE_MESH_TRIANGLE:
@@ -1228,6 +1257,13 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_TEXTURE_LOGO = -203;
+
+    /**
+     * @property ENGINE_TEXTURE_CUBEMAP_WHITE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_TEXTURE_CUBEMAP_WHITE = -204;
 
     /**
      * @property ENGINE_MESH_TRIANGLE

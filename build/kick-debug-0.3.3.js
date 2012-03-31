@@ -6764,7 +6764,8 @@ KICK.namespace = function (ns_string) {
                         name:getUrlAsResourceName(url),
                         uid:uid
                     })
-                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_LOGO){
+                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE){
+                    var isCubemap = uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE;
                     switch (uid){
                         case p.ENGINE_TEXTURE_BLACK:
                             url = "kickjs://texture/black/";
@@ -6778,21 +6779,49 @@ KICK.namespace = function (ns_string) {
                         case p.ENGINE_TEXTURE_LOGO:
                             url = "kickjs://texture/logo/";
                             break;
+                        case p.ENGINE_TEXTURE_CUBEMAP_WHITE:
+                            // do nothing
+                            break;
                         default:
                             if (ASSERT){
                                 core.Util.fail("uid not mapped "+uid);
                             }
                             return null;
                     }
-                    res = new KICK.texture.Texture(engine,
-                        {
-                            dataURI:url,
-                            name:getUrlAsResourceName(url),
-                            minFilter: 9728,
-                            magFilter: 9728,
-                            generateMipmaps: false,
-                            uid:uid
-                        });
+                    if (isCubemap){
+                        res = new KICK.texture.Texture(engine,
+                            {
+                                name:"cubemap_white",
+                                minFilter: 9728,
+                                magFilter: 9728,
+                                generateMipmaps: false,
+                                uid:uid,
+                                textureType: 34067
+                            });
+
+                        // create white image
+                        var canvas = document.createElement("canvas");
+                        canvas.width = 12;
+                        canvas.height = 2;
+                        var ctx = canvas.getContext("2d");
+
+                        ctx.fillStyle = "rgb(255,255,255)";
+                        ctx.fillRect (0, 0, 12, 2);
+                        res.setImage(canvas, "memory://cubemap_white/");
+
+                    } else {
+                        res = new KICK.texture.Texture(engine,
+                            {
+                                name:getUrlAsResourceName(url),
+                                minFilter: 9728,
+                                magFilter: 9728,
+                                generateMipmaps: false,
+                                uid:uid,
+                                textureType: 3553,
+                                dataURI:url
+                            });
+                    }
+
                 } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE){
                     switch (uid){
                         case p.ENGINE_MESH_TRIANGLE:
@@ -7306,6 +7335,13 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_TEXTURE_LOGO = -203;
+
+    /**
+     * @property ENGINE_TEXTURE_CUBEMAP_WHITE
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_TEXTURE_CUBEMAP_WHITE = -204;
 
     /**
      * @property ENGINE_MESH_TRIANGLE
@@ -12915,7 +12951,10 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Encapsulate a texture object and its configuration. Note that the texture configuration
-     * must be set prior to assigning the texture (using either init, setImage or setImageData)
+     * must be set prior to assigning the texture (using either init, setImage or setImageData).<br>
+     *
+     * Cubemaps must have dimensions width = height * 6 and the order of the cubemap is
+     * positiveX, negativeX, positiveY, negativeY, positiveZ, negativeZ
      * @class Texture
      * @namespace KICK.texture
      * @constructor
@@ -13406,7 +13445,11 @@ KICK.namespace = function (ns_string) {
 
         (function init(){
             // apply
-            applyConfig(thisObj, config);
+            applyConfig(thisObj, config, ["dataURI"]);
+            if (config.dataURI){
+                // set dataURI last to make sure that object is configured before initialization
+                thisObj.dataURI = config.dataURI;
+            }
 
             engine.project.registerObject(thisObj, "KICK.texture.Texture");
         })();
@@ -14299,7 +14342,7 @@ KICK.namespace = function (ns_string) {
             this.activeUniforms = new Array(activeUniforms);
             /**
              * Lookup of uniform based on name.
-             * @property uniformMap
+             * @property lookupUniform
              * @type Object
              */
             this.lookupUniform = {};
@@ -14491,9 +14534,7 @@ KICK.namespace = function (ns_string) {
         var gl = this.gl,
             uniformName,
             materialUniforms = material.uniforms,
-            materialUniforms = material.uniforms,
             timeObj,
-            uniformName,
             shaderUniform,
             uniform,
             value,
@@ -16495,8 +16536,9 @@ KICK.namespace = function (ns_string) {
          * @param textureDestination
          */
         this.getImageData = function(uri,textureDestination){
-            var data;
-
+            var data,
+                width = 2,
+                height = 2;
             if (uri.indexOf("kickjs://texture/black/") === 0){
                 data = new Uint8Array([0, 0, 0, 255,
                                          0,   0,   0,255,
@@ -16534,7 +16576,7 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("Unknown uri "+uri);
                 return null;
             }
-            textureDestination.setImageData( 2, 2, 0, 5121,data, uri);
+            textureDestination.setImageData(width, height, 0, 5121,data, uri);
         };
 
         /**

@@ -120,9 +120,15 @@
 
             addRotatorComponent(cameraObject);
         }
+
+        function setDefaultCubemap(){
+            meshRenderer.material.uniforms.skybox.value = engine.project.load(engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
+        }
     </script>
 </head>
 <body onload="initKick();">
+<br>
+<button onclick="setDefaultCubemap();">Set default cubemap</button><br>
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
   This example shows how a cube is rotated.
   <br>
