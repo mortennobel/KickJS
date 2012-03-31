@@ -201,7 +201,10 @@ KICK.namespace = function (ns_string) {
 
     /**
      * Encapsulate a texture object and its configuration. Note that the texture configuration
-     * must be set prior to assigning the texture (using either init, setImage or setImageData)
+     * must be set prior to assigning the texture (using either init, setImage or setImageData).<br>
+     *
+     * Cubemaps must have dimensions width = height * 6 and the order of the cubemap is
+     * positiveX, negativeX, positiveY, negativeY, positiveZ, negativeZ
      * @class Texture
      * @namespace KICK.texture
      * @constructor
@@ -692,7 +695,11 @@ KICK.namespace = function (ns_string) {
 
         (function init(){
             // apply
-            applyConfig(thisObj, config);
+            applyConfig(thisObj, config, ["dataURI"]);
+            if (config.dataURI){
+                // set dataURI last to make sure that object is configured before initialization
+                thisObj.dataURI = config.dataURI;
+            }
 
             engine.project.registerObject(thisObj, "KICK.texture.Texture");
         })();
