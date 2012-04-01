@@ -6765,7 +6765,7 @@ KICK.namespace = function (ns_string) {
                         uid:uid
                     })
                 } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE){
-                    var isCubemap = uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE;
+                    var isCubemap = uid === p.ENGINE_TEXTURE_CUBEMAP_WHITE;
                     switch (uid){
                         case p.ENGINE_TEXTURE_BLACK:
                             url = "kickjs://texture/black/";
@@ -13446,7 +13446,7 @@ KICK.namespace = function (ns_string) {
         (function init(){
             // apply
             applyConfig(thisObj, config, ["dataURI"]);
-            if (config.dataURI){
+            if (config && config.dataURI){
                 // set dataURI last to make sure that object is configured before initialization
                 thisObj.dataURI = config.dataURI;
             }
@@ -16536,9 +16536,8 @@ KICK.namespace = function (ns_string) {
          * @param textureDestination
          */
         this.getImageData = function(uri,textureDestination){
-            var data,
-                width = 2,
-                height = 2;
+            var data;
+
             if (uri.indexOf("kickjs://texture/black/") === 0){
                 data = new Uint8Array([0, 0, 0, 255,
                                          0,   0,   0,255,
@@ -16576,7 +16575,7 @@ KICK.namespace = function (ns_string) {
                 KICK.core.Util.fail("Unknown uri "+uri);
                 return null;
             }
-            textureDestination.setImageData(width, height, 0, 5121,data, uri);
+            textureDestination.setImageData( 2, 2, 0, 5121,data, uri);
         };
 
         /**

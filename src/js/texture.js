@@ -696,7 +696,7 @@ KICK.namespace = function (ns_string) {
         (function init(){
             // apply
             applyConfig(thisObj, config, ["dataURI"]);
-            if (config.dataURI){
+            if (config && config.dataURI){
                 // set dataURI last to make sure that object is configured before initialization
                 thisObj.dataURI = config.dataURI;
             }
