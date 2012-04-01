@@ -687,7 +687,7 @@ KICK.namespace = function (ns_string) {
                         uid:uid
                     })
                 } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE){
-                    var isCubemap = uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE;
+                    var isCubemap = uid === p.ENGINE_TEXTURE_CUBEMAP_WHITE;
                     switch (uid){
                         case p.ENGINE_TEXTURE_BLACK:
                             url = "kickjs://texture/black/";
