@@ -3304,40 +3304,37 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     frustum.intersectAabb = (function(){
-            var c = vec3.create();
-            var h = vec3.create();
-            return function(frustumPlanes,aabbIn){
-                    var result = frustum.INSIDE,
-                        testResult;
-
-                    c = aabb.center(aabbIn,c);
-                    h = aabb.halfVec3(aabbIn,h);
-                        // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
-                    var planeAabbIntersect = function(planeIndex){
-                            var offset = planeIndex*4,
-                                nx = frustumPlanes[offset],
-                                ny = frustumPlanes[offset+1],
-                                nz = frustumPlanes[offset+2],
-                                d = frustumPlanes[offset+3],
-                                e = h[0]*Math.abs(nx)+h[1]*Math.abs(ny)+h[2]*Math.abs(nz),
-                                s = c[0]*nx + c[1]*ny + c[2]*nz + d;
-                            // Note that the following is reverse than in [Akenine-Moller's Real-Time Rendering 3rd Ed],
-                            // since we define outside as the negative halfspace
-                            if (s-e > 0) return frustum.INSIDE;
-                            if (s+e < 0) return frustum.OUTSIDE;
-                            return frustum.INTERSECTING;
-                        };
-                    for (var i=0;i<6;i++){
-                        testResult = planeAabbIntersect(i);
-                        if (testResult === frustum.OUTSIDE){
-                            return testResult;
-                        } else if (testResult === frustum.INTERSECTING) {
-                            result = frustum.INTERSECTING;
-                        }
-                    }
-                    return result;
+        var center = vec3.create();
+        var halfVector = vec3.create();
+        return function(frustumPlanes,aabbIn){
+            var result = frustum.INSIDE,
+                testResult,
+                // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
+                planeAabbIntersect = function(planeIndex){
+                    var offset = planeIndex*4,
+                        nx = frustumPlanes[offset],
+                        ny = frustumPlanes[offset+1],
+                        nz = frustumPlanes[offset+2],
+                        d = frustumPlanes[offset+3],
+                        e = halfVector[0]*Math.abs(nx)+halfVector[1]*Math.abs(ny)+halfVector[2]*Math.abs(nz),
+                        s = center[0]*nx + center[1]*ny + center[2]*nz + d;
+                    // Note that the following is reverse than in [Akenine-Moller's Real-Time Rendering 3rd Ed],
+                    // since we define outside as the negative halfspace
+                    if (s-e > 0) return frustum.INSIDE;
+                    if (s+e < 0) return frustum.OUTSIDE;
+                    return frustum.INTERSECTING;
                 };
-        })();
-
-
+            aabb.center(aabbIn,center);
+            aabb.halfVec3(aabbIn,halfVector);
+            for (var i=0;i<6;i++){
+                testResult = planeAabbIntersect(i);
+                if (testResult === frustum.OUTSIDE){
+                    return testResult;
+                } else if (testResult === frustum.INTERSECTING) {
+                    result = frustum.INTERSECTING;
+                }
+            }
+            return result;
+        };
+    })();
 })();
