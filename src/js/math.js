@@ -3119,12 +3119,15 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     aabb.addPoint = function(aabb,vec3Point){
-        aabb[0] = min(aabb[0],vec3Point[0]);
-        aabb[1] = min(aabb[1],vec3Point[1]);
-        aabb[2] = min(aabb[2],vec3Point[2]);
-        aabb[3] = max(aabb[3],vec3Point[0]);
-        aabb[4] = max(aabb[4],vec3Point[1]);
-        aabb[5] = max(aabb[5],vec3Point[2]);
+        var vpX = vec3Point[0],
+            vpY = vec3Point[1],
+            vpZ = vec3Point[2];
+        aabb[0] = min(aabb[0],vpX);
+        aabb[1] = min(aabb[1],vpY);
+        aabb[2] = min(aabb[2],vpZ);
+        aabb[3] = max(aabb[3],vpX);
+        aabb[4] = max(aabb[4],vpY);
+        aabb[5] = max(aabb[5],vpZ);
         return aabb;
     };
 
@@ -3305,11 +3308,12 @@ KICK.namespace = function (ns_string) {
             var h = vec3.create();
             return function(frustumPlanes,aabbIn){
                     var result = frustum.INSIDE,
-                        testResult,
-                        c = aabb.center(aabbIn,c),
-                        h = aabb.halfVec3(aabbIn,h),
+                        testResult;
+
+                    c = aabb.center(aabbIn,c);
+                    h = aabb.halfVec3(aabbIn,h);
                         // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
-                        planeAabbIntersect = function(planeIndex){
+                    var planeAabbIntersect = function(planeIndex){
                             var offset = planeIndex*4,
                                 nx = frustumPlanes[offset],
                                 ny = frustumPlanes[offset+1],
