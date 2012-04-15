@@ -5859,12 +5859,15 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     aabb.addPoint = function(aabb,vec3Point){
-        aabb[0] = min(aabb[0],vec3Point[0]);
-        aabb[1] = min(aabb[1],vec3Point[1]);
-        aabb[2] = min(aabb[2],vec3Point[2]);
-        aabb[3] = max(aabb[3],vec3Point[0]);
-        aabb[4] = max(aabb[4],vec3Point[1]);
-        aabb[5] = max(aabb[5],vec3Point[2]);
+        var vpX = vec3Point[0],
+            vpY = vec3Point[1],
+            vpZ = vec3Point[2];
+        aabb[0] = min(aabb[0],vpX);
+        aabb[1] = min(aabb[1],vpY);
+        aabb[2] = min(aabb[2],vpZ);
+        aabb[3] = max(aabb[3],vpX);
+        aabb[4] = max(aabb[4],vpY);
+        aabb[5] = max(aabb[5],vpZ);
         return aabb;
     };
 
@@ -6041,41 +6044,47 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     frustum.intersectAabb = (function(){
-            var c = vec3.create();
-            var h = vec3.create();
-            return function(frustumPlanes,aabbIn){
-                    var result = frustum.INSIDE,
-                        testResult,
-                        c = aabb.center(aabbIn,c),
-                        h = aabb.halfVec3(aabbIn,h),
-                        // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
-                        planeAabbIntersect = function(planeIndex){
-                            var offset = planeIndex*4,
-                                nx = frustumPlanes[offset],
-                                ny = frustumPlanes[offset+1],
-                                nz = frustumPlanes[offset+2],
-                                d = frustumPlanes[offset+3],
-                                e = h[0]*Math.abs(nx)+h[1]*Math.abs(ny)+h[2]*Math.abs(nz),
-                                s = c[0]*nx + c[1]*ny + c[2]*nz + d;
-                            // Note that the following is reverse than in [Akenine-Moller's Real-Time Rendering 3rd Ed],
-                            // since we define outside as the negative halfspace
-                            if (s-e > 0) return frustum.INSIDE;
-                            if (s+e < 0) return frustum.OUTSIDE;
-                            return frustum.INTERSECTING;
-                        };
-                    for (var i=0;i<6;i++){
-                        testResult = planeAabbIntersect(i);
-                        if (testResult === frustum.OUTSIDE){
-                            return testResult;
-                        } else if (testResult === frustum.INTERSECTING) {
-                            result = frustum.INTERSECTING;
-                        }
-                    }
-                    return result;
+        var center = vec3.create();
+        var halfVector = vec3.create();
+        return function(frustumPlanes,aabbIn){
+            var result = frustum.INSIDE,
+                testResult,
+                centerX,centerY,centerZ,
+                halfVectorX,halfVectorY,halfVectorZ,
+                // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
+                planeAabbIntersect = function(planeIndex){
+                    var offset = planeIndex*4,
+                        nx = frustumPlanes[offset],
+                        ny = frustumPlanes[offset+1],
+                        nz = frustumPlanes[offset+2],
+                        d = frustumPlanes[offset+3],
+                        e = halfVectorX*Math.abs(nx)+halfVectorY*Math.abs(ny)+halfVectorZ*Math.abs(nz),
+                        s = centerX*nx + centerY*ny + centerZ*nz + d;
+                    // Note that the following is reverse than in [Akenine-Moller's Real-Time Rendering 3rd Ed],
+                    // since we define outside as the negative halfspace
+                    if (s-e > 0) return frustum.INSIDE;
+                    if (s+e < 0) return frustum.OUTSIDE;
+                    return frustum.INTERSECTING;
                 };
-        })();
-
-
+            aabb.center(aabbIn,center);
+            aabb.halfVec3(aabbIn,halfVector);
+            centerX = center[0];
+            centerY = center[1];
+            centerZ = center[2];
+            halfVectorX = halfVector[0];
+            halfVectorY = halfVector[1];
+            halfVectorZ = halfVector[2];
+            for (var i=0;i<6;i++){
+                testResult = planeAabbIntersect(i);
+                if (testResult === frustum.OUTSIDE){
+                    return testResult;
+                } else if (testResult === frustum.INTERSECTING) {
+                    result = frustum.INTERSECTING;
+                }
+            }
+            return result;
+        };
+    })();
 })();/*!
  * New BSD License
  *
@@ -14697,12 +14706,7 @@ KICK.namespace = function (ns_string) {
                 }
                 gl.uniform4fv(gameObjectUID.location, uidAsVec4);
             }
-            if (shadowMapTexture){
-                if (ASSERT){
-                    if (!directionalLight){
-                        KICK.core.Util.fail("No directional light found in scene - but shader needs it");
-                    }
-                }
+            if (shadowMapTexture && directionalLight && directionalLight.shadowTexture){
                 directionalLight.shadowTexture.bind(currentTexture);
                 gl.uniform1i(shadowMapTexture.location,currentTexture);
                 currentTexture ++;
