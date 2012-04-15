@@ -3,8 +3,6 @@
 var engine,
     vec2 = KICK.math.vec2,
     vec3 = KICK.math.vec3,
-    vec4 = KICK.math.vec4,
-    mat4 = KICK.math.mat4,
     quat4 = KICK.math.quat4;
 
 var ChessPieceType = {
@@ -86,7 +84,6 @@ var ChessField = function(location2d){
     Object.defineProperties(this,{
         selected:{
             set:function(newValue){
-                debugger;
                 meshRenderer.material = newValue?selectedMaterial:material;
             }
         },
@@ -245,6 +242,7 @@ var ChessGame = function(){
 
     worker.onmessage = function(event) {
         var data = event.data;
+        console.log("Chess result",data);
         if (isPlayersTurn){
             if (data===""){
                 doPlayerMove();
@@ -252,6 +250,7 @@ var ChessGame = function(){
                 worker.postMessage(""); // do computer move
             } else {
                 alert(data);
+                gameBoard.getField(selectedPiece.location).selected = false;
                 selectedPiece = null;
                 isWorking = false;
             }
@@ -279,6 +278,7 @@ var ChessGame = function(){
     }
 
     function buildScene(){
+        var i;
         var scene = engine.activeScene,
             addPiece = function(type, color, location){
                 var name;
@@ -300,7 +300,7 @@ var ChessGame = function(){
         // enable shadow on light
         var light = scene.getGameObjectByName("Light");
         var lightComponents = light.getComponentsOfType(KICK.scene.Light);
-        for (var i=0;i<lightComponents.length;i++){
+        for (i=0;i<lightComponents.length;i++){
             if (lightComponents[i].type ===  KICK.scene.Light.TYPE_DIRECTIONAL){
                 lightComponents[i].shadow = false;
             }
@@ -319,17 +319,17 @@ var ChessGame = function(){
         for (var color = 0;color<2;color++){
             // create pawns
             var row = 1+color*5;
-            for (var i=0;i<8;i++){
+            for (i=0;i<8;i++){
                 addPiece(ChessPieceType.Pawn,color,[i,row]);
             }
             row = color*7;
-            for (var i=0;i<8;i+=7){
+            for (i=0;i<8;i+=7){
                 addPiece(ChessPieceType.Rook,color,[i,row]);
             }
-            for (var i=1;i<8;i+=5){
+            for (i=1;i<8;i+=5){
                 addPiece(ChessPieceType.Knight,color,[i,row]);
             }
-            for (var i=2;i<8;i+=3){
+            for (i=2;i<8;i+=3){
                 addPiece(ChessPieceType.Bishop,color,[i,row]);
             }
             addPiece(ChessPieceType.Queen,color,[3,row]);
@@ -397,6 +397,6 @@ function onFullscreenButton(){
     }
 }
 
-YUI().use('tabview','console', "panel", "datatable-base", "dd-plugin",function(Y) {
-    Y.one("#fullscreen").on("click",onFullscreenButton);
-});
+//YUI().use('tabview','console', "panel", "datatable-base", "dd-plugin",function(Y) {
+//    Y.one("#fullscreen").on("click",onFullscreenButton);
+//});
