@@ -1,0 +1,252 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Shadow map test</title>
+
+    <!--<script type="text/javascript" src="../src/js-dependencies/webgl-debug.js"></script>-->
+    <script type="text/javascript" src="../../src/js/constants.js"></script>
+    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
+    <script type="text/javascript" src="../../src/js/core.js"></script>
+    <script type="text/javascript" src="../../src/js/resource.js"></script>
+    <script type="text/javascript" src="../../src/js/math.js"></script>
+    <script type="text/javascript" src="../../src/js/mesh.js"></script>
+    <script type="text/javascript" src="../../src/js/scene.js"></script>
+    <script type="text/javascript" src="../../src/js/material.js"></script>
+    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
+    <script type="text/javascript" src="../../src/js/texture.js"></script>
+    <script type="text/javascript">
+        "use strict";
+        var engine;
+        var meshRenderer;
+
+        function CameraMover(){
+            var transform,
+                    keyInput,
+                    position,
+                    rotation,
+                    movementSpeed = 0.01,
+                    rotationSpeed = .2,
+                    time;
+            this.activated = function(){
+                transform = this.gameObject.transform;
+                keyInput = this.gameObject.engine.keyInput;
+                time = this.gameObject.engine.time;
+                position = transform.localPosition;
+                rotation = transform.localRotationEuler;
+            };
+
+            this.update = function(){
+                var deltaPosition = [0,0,0];
+                if (keyInput.isKey("W".charCodeAt(0))){
+                    deltaPosition[2] -= time.deltaTime*movementSpeed;
+                }
+                if (keyInput.isKey("S".charCodeAt(0))){
+                    deltaPosition[2] += time.deltaTime*movementSpeed;
+                }
+                if (keyInput.isKey("A".charCodeAt(0))){
+                    deltaPosition[0] -= time.deltaTime*movementSpeed;
+                }
+                if (keyInput.isKey("D".charCodeAt(0))){
+                    deltaPosition[0] += time.deltaTime*movementSpeed;
+                }
+                KICK.math.quat4.multiplyVec3(transform.localRotation, deltaPosition);
+                KICK.math.vec3.add(position,deltaPosition);
+                transform.localPosition = position;
+                if (keyInput.isKey("Q".charCodeAt(0))){
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                }
+                if (keyInput.isKey("E".charCodeAt(0))){
+                    rotation[1] -= time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                }
+
+            };
+        }
+
+        function setMaterial(meshRenderer, color){
+            // create material
+            var material = new KICK.material.Material(engine,{
+                name:"Some material",
+                shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
+                uniforms:{
+                    mainColor: {
+                        value: color,
+                        type: KICK.core.Constants.GL_FLOAT_VEC3
+                    },
+                    mainTexture: {
+                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                        type: KICK.core.Constants.GL_SAMPLER_2D
+                    }
+                }
+            });
+            meshRenderer.material = material;
+        }
+
+        function addRotatorComponent(gameObject){
+            var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = 0.05,
+                    position = transform.localPosition,
+                    positionY = position[1],
+                    offset = Math.random()*10000,
+                    rotation = transform.localRotationEuler;
+            gameObject.addComponent({
+                update: function(){
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                    position[1] = positionY+Math.sin((time.time+offset)*0.001)*3.5;
+                    transform.localPosition = position;
+                }
+            });
+        }
+        var camera;
+        function addMainCamera(){
+            var cameraObject = engine.activeScene.createGameObject();
+            camera = new KICK.scene.Camera({
+                clearColor: [0,0,1,1],
+                perspective: true
+            //    renderShadow:true
+            });
+            cameraObject.addComponent(camera);
+            cameraObject.transform.localPosition = [0,1,5];
+            cameraObject.addComponent(new CameraMover());
+
+            // visualize the camera
+            var meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
+            setMaterial(meshRenderer, [.7,.9,.5,1]);
+            cameraObject.addComponent(meshRenderer);
+
+            return cameraObject;
+        }
+
+        function addMovingBall(position){
+            var gameObject = engine.activeScene.createGameObject();
+            gameObject.transform.localPosition = position;
+            meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
+            setMaterial(meshRenderer, [.7,.9,.5,1]);
+            gameObject.addComponent(meshRenderer);
+            addRotatorComponent(gameObject);
+        }
+
+        function addWorld(){
+            addMovingBall([0,3,0]);
+
+            // add shadow receiver
+            var plane = engine.activeScene.createGameObject();
+            plane.transform.rotationEuler = [-90,0,0];
+            plane.transform.localScale = [5,5,5];
+            var planeMeshRenderer = new KICK.scene.MeshRenderer();
+
+            planeMeshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
+            setMaterial(planeMeshRenderer,[.9,.7,.4,1]);
+            plane.addComponent(planeMeshRenderer);
+
+            // add shadow receiver
+            var plane2 = engine.activeScene.createGameObject();
+            plane2.transform.rotationEuler = [-90,0,0];
+            plane2.transform.localScale = [100,100,100];
+            plane2.transform.localPosition = [0,-5,0];
+            var planeMeshRenderer2 = new KICK.scene.MeshRenderer();
+
+            planeMeshRenderer2.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
+            setMaterial(planeMeshRenderer2,[.4,.9,.9,1]);
+            plane2.addComponent(planeMeshRenderer2);
+        }
+        var lightObj;
+        var directionalLight;
+
+        function addLightComponents(){
+            // add light components
+            lightObj = engine.activeScene.createGameObject();
+            directionalLight = new KICK.scene.Light({
+                type : KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+                color: [1.0,1.0,1.0],
+                intensity: 1
+            });
+
+            lightObj.addComponent(new LightRotator());
+            lightObj.addComponent(directionalLight);
+            lightObj.transform.rotationEuler = [-70,0,10];
+            lightObj.transform.position = [1,10,1];
+            lightObj.addComponent(new KICK.scene.Light({
+                type : KICK.core.Constants._LIGHT_TYPE_AMBIENT,
+                color: [1.0,1.0,1.0],
+                intensity: 0.4
+            }));
+            return lightObj;
+        }
+
+        function LightRotator(){
+            var transform,
+                    keyInput,
+                    rotationSpeed = 1,
+                    rotationEuler;
+            this.activated = function(){
+                transform = this.gameObject.transform;
+                keyInput = this.gameObject.engine.keyInput;
+                rotationEuler = transform.localRotationEuler;
+            };
+
+            this.update = function(){
+                if (keyInput.isKey("J".charCodeAt(0))){
+                    rotationEuler[1] += rotationSpeed;
+                }
+                if (keyInput.isKey("L".charCodeAt(0))){
+                    rotationEuler[1] -= rotationSpeed;
+                }
+                if (keyInput.isKey("I".charCodeAt(0))){
+                    rotationEuler[0] += rotationSpeed;
+                }
+                if (keyInput.isKey("K".charCodeAt(0))){
+                    rotationEuler[0] -= rotationSpeed;
+                }
+                transform.localRotationEuler = rotationEuler;
+            };
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true,
+                shadows:true
+            });
+
+            addMainCamera();
+            addWorld();
+
+            addLightComponents();
+        }
+
+        function enableShadow(){
+            directionalLight.shadow = true;
+            camera.renderShadow = true;
+        }
+
+        function addAlotOfShadowCasters(){
+            var count =0;
+            for (var x=-20;x<=20;x+=3){
+                for (var z = -20;z<=20;z+=3){
+                    addMovingBall([x,3,z]);
+                    count ++;
+                }
+            }
+            console.log("Adding "+count);
+        }
+    </script>
+</head>
+<body onload="initKick();">
+<h1>Shadow map test</h1>
+    AWSD = move, QE = rotate, T=Toggle light volume, JIKL = Rotate light source<br>
+    <button onclick="enableShadow();">Enable shadow</button><br>
+    <button onclick="addAlotOfShadowCasters();">Add shadow casters</button><br>
+    <div style="position: relative;">
+        <canvas id="canvas" style="position: absolute; x:0; top:0;border: none;" width="900" height="700"></canvas>
+    </div>
+  <br/>
+</body>
+</html>
