@@ -3309,6 +3309,8 @@ KICK.namespace = function (ns_string) {
         return function(frustumPlanes,aabbIn){
             var result = frustum.INSIDE,
                 testResult,
+                centerX,centerY,centerZ,
+                halfVectorX,halfVectorY,halfVectorZ,
                 // based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.10.1
                 planeAabbIntersect = function(planeIndex){
                     var offset = planeIndex*4,
@@ -3316,8 +3318,8 @@ KICK.namespace = function (ns_string) {
                         ny = frustumPlanes[offset+1],
                         nz = frustumPlanes[offset+2],
                         d = frustumPlanes[offset+3],
-                        e = halfVector[0]*Math.abs(nx)+halfVector[1]*Math.abs(ny)+halfVector[2]*Math.abs(nz),
-                        s = center[0]*nx + center[1]*ny + center[2]*nz + d;
+                        e = halfVectorX*Math.abs(nx)+halfVectorY*Math.abs(ny)+halfVectorZ*Math.abs(nz),
+                        s = centerX*nx + centerY*ny + centerZ*nz + d;
                     // Note that the following is reverse than in [Akenine-Moller's Real-Time Rendering 3rd Ed],
                     // since we define outside as the negative halfspace
                     if (s-e > 0) return frustum.INSIDE;
@@ -3326,6 +3328,12 @@ KICK.namespace = function (ns_string) {
                 };
             aabb.center(aabbIn,center);
             aabb.halfVec3(aabbIn,halfVector);
+            centerX = center[0];
+            centerY = center[1];
+            centerZ = center[2];
+            halfVectorX = halfVector[0];
+            halfVectorY = halfVector[1];
+            halfVectorZ = halfVector[2];
             for (var i=0;i<6;i++){
                 testResult = planeAabbIntersect(i);
                 if (testResult === frustum.OUTSIDE){
