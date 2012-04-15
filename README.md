@@ -8,6 +8,7 @@ programming in a browser easy.
 
 ## Examples
 
+<a href="http://www.kickjs.org/example/chess/chess.html" title="KickJS Chess"><img src="http://www.kickjs.org/images/example_chess.jpg"></a>
 <a href="http://editor.kickjs.org/" title="KickJS Editor"><img src="http://www.kickjs.org/images/example_editor_beta.jpg"></a>
 <a href="http://www.kickjs.org/example/shader_editor/shader_editor.html" title="GLSL Editor"><img src="http://www.kickjs.org/images/example_glsl_editor.jpg"></a>
 <a href="http://www.kickjs.org/example/video_ascii_art/Video_Ascii_Art.html" title="Video ascii art"><img src="http://www.kickjs.org/images/example_video_ascii_art.jpg"></a>
