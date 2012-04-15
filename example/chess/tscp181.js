@@ -1,3 +1,12 @@
+// The following code is crosscompiled from the chess engine TSCP (C++).
+// The code is used by permission from Tom Kerrigan
+//
+// License
+//
+// TSCP is copyrighted. You have my permission to download it, look at the code, and run it. If you want to do anything else with TSCP you must get my explicit permission. This includes redistributing TSCP, creating a derivative work, or using any of its code for any reason.
+//
+// To get permission, just e-mail me at tom.kerrigan@gmail.com. As long as you aren't trying to proft off my work or take credit for it, I will almost certainly give you permission.
+
 // Note: Some Emscripten settings will significantly limit the speed of the generated code.
 // Note: Some Emscripten settings may limit the speed of the generated code.
 // TODO: " u s e   s t r i c t ";
