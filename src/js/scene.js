@@ -1525,22 +1525,27 @@ KICK.namespace = function (ns_string) {
                 /**
                  * @method componentsRemoved
                  * @param {Array[KICK.scene.Component]} components
+                 * @return {Boolean}
                  * @private
                  */
                 componentsRemoved : function ( components ){
+                    var removed = false;
                     for (var i=components.length-1; i>=0; i--) {
                         var component = components[i];
                         if (typeof(component.render) === "function") {
                             for (var j=renderableComponentsArray.length-1;j>=0;j--){
-                                core.Util.removeElementFromArray(renderableComponentsArray[j],component);
+                                removed |= core.Util.removeElementFromArray(renderableComponentsArray[j],component);
                             }
                         }
                     }
+                    return removed;
                 },
                 componentUpdated : function(component){
                     var wrap = [component];
-                    componentListener.componentsRemoved(wrap);
-                    componentListener.componentsAdded(wrap);
+                    var isRemoved = componentListener.componentsRemoved(wrap);
+                    if (isRemoved){ // only add if component also removed
+                        componentListener.componentsAdded(wrap);
+                    }
                 }
             };
 
@@ -2058,7 +2063,6 @@ KICK.namespace = function (ns_string) {
             _materials = [],
             _mesh,
             _renderOrder,
-            gl,
             thisObj = this;
 
         /**
@@ -2066,7 +2070,6 @@ KICK.namespace = function (ns_string) {
          */
         this.activated = function(){
             transform = thisObj.gameObject.transform;
-            gl = thisObj.gameObject.engine.gl
         };
 
         Object.defineProperties(this,{

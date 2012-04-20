@@ -5,9 +5,9 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Shader Editor</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0pr2/build/cssreset/reset-min.css&3.5.0pr2/build/cssfonts/fonts-min.css&3.5.0pr2/build/cssgrids/grids-min.css&3.5.0pr2/build/cssbase/base-min.css&3.5.0pr2/build/cssbutton/cssbutton.css">
-    <!--<script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui-min.js"></script>-->
-    <script src="http://yui.yahooapis.com/3.5.0pr2/build/yui/yui.js"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0/build/cssreset/reset-min.css&3.5.0/build/cssfonts/fonts-min.css&3.5.0/build/cssgrids/grids-min.css&3.5.0/build/cssbase/base-min.css&3.5.0/build/cssbutton/cssbutton.css">
+    <!--<script src="http://yui.yahooapis.com/3.5.0/build/yui/yui-min.js"></script>-->
+    <script src="http://yui.yahooapis.com/3.5.0/build/yui/yui-min.js"></script>
     <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
     <script src="ace/mode-glsl_es.js" type="text/javascript" charset="utf-8"></script>
@@ -53,8 +53,15 @@
     </style>
 
     <!--<script type="text/javascript" src="../js/webgl-debug.js"></script>-->
-    <!--<script type="text/javascript" src="../js/kick-min-0.3.3.js"></script>-->
-    <script type="text/javascript" src="../js/kick-debug-0.3.3.js"></script>
+    <!--<script type="text/javascript" src="../js/kick-min-0.3.4.js"></script>-->
+    <script type="text/javascript">
+        if (location.search === "?debug"){
+            document.write('<script type="text/javascript" src="../js/webgl-debug.js"></s'+'cript>');
+            document.write('<script type="text/javascript" src="../js/kick-debug-0.3.4.js"></s'+'cript>');
+        } else {
+            document.write('<script type="text/javascript" src="../js/kick-min-0.3.4.js"></s'+'cript>');
+        }
+    </script>
     <script type="text/javascript" src="shader_editor_default.js"></script>
     <script type="text/javascript" src="shader_editor.js"></script>
     <script type="text/javascript" src="shader_editor_ui.js"></script>
