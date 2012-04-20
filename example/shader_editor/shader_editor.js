@@ -279,9 +279,9 @@ window.shaderEditor = new (function(){
                             if (!isFound){
                                 var texture;
                                 if (missingUniform.type === KICK.core.Constants.GL_SAMPLER_2D){
-                                    texture = engine.project.load(engine.project.ENGINE_TEXTURE_WHITE);
+                                    texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_WHITE);
                                 } else {
-                                    texture = engine.project.load(engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
+                                    texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
                                 }
                                 thisObj.textures.push(texture);
                                 defaultUniform.value = texture;
