@@ -1,6 +1,7 @@
 
 (function(){
     "use strict";
+    var shader;
     var shaderEditor = window.shaderEditor;
     var username,logoutURL,loginURL;
     var shaderid = "";
@@ -22,7 +23,6 @@
         }
 
         function onLoginButton(){
-            controller.saveLocally();
             document.location = loginURL;
         }
 
@@ -191,7 +191,6 @@
                     var fsNew = fragmentShaderSession.getValue();
                     if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force){
                         shaderEditor.apply(vsNew,fsNew);
-                        controller.saveLocally();
                     }
                 }
             }
@@ -846,8 +845,8 @@
             oReq.send();
         };
 
-        this.setShader = function(shader){
-            window.shader = shader;
+        this.setShader = function(shaderNew){
+            shader = shaderNew;
             var currentTextures = document.getElementById('currentTextures');
             while (currentTextures.options.length>0){
                 currentTextures.remove(0);
@@ -855,10 +854,10 @@
             document.getElementById('textureDetails').style.display = 'none';
             document.getElementById('texturePreview').style.display = 'none';
 
-            glslEditorPanel.setShaderSource(shader.shader.vertexShaderSrc,shader.shader.fragmentShaderSrc)
-            shaderEditor.loadMaterial(shader);
-            settingsPanel.setSettingsData(shader.settingsData);
-            descriptionPanel.setShaderNameAndDescription(shader.name,shader.about);
+            glslEditorPanel.setShaderSource(shaderNew.shader.vertexShaderSrc,shaderNew.shader.fragmentShaderSrc)
+            shaderEditor.loadMaterial(shaderNew);
+            settingsPanel.setSettingsData(shaderNew.settingsData);
+            descriptionPanel.setShaderNameAndDescription(shaderNew.name,shaderNew.about);
             glslEditorPanel.shaderChangeListener(true);
         };
 
@@ -874,33 +873,12 @@
             };
         };
 
-        this.saveLocally = function (){
-            var jsonData = thisObj.getData();
-            localStorage.setItem("shader",JSON.stringify(jsonData));
-        };
-
         /**
-         * Loads a shader (if not found - use the default material).
-         * This will replace the global window.shader - but not change UI or update shader
+         * Loads default material.
          */
-        this.loadLocally = function(){
-            try{
-                var shaderData = JSON.parse(window.defaultMaterial);
-                window.shader = shaderData;
-
-                var shaderStr = localStorage.getItem("shader");
-                if (shaderStr){
-                    var shaderDataTmp = JSON.parse(shaderStr);
-                    if (shaderDataTmp){
-                        window.shader = shaderData;
-                        shaderData = shaderDataTmp;
-                    }
-                }
-            } catch (e){
-                console.log(e);
-                window.shader = JSON.parse(window.defaultMaterial);
-            }
-            return window.shader;
+        this.loadDefault = function(){
+            shader = JSON.parse(window.defaultMaterial);
+            return shader;
         };
 
         tabview.on("selectionChange", function(e){
@@ -1000,7 +978,7 @@
             }
 
             if (shader==null){
-                shader = controller.loadLocally();
+                shader = controller.loadDefault();
             }
             controller.setShader( shader );
         });

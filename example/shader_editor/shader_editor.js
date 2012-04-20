@@ -1,4 +1,4 @@
-window.shaderEditor = new (function(){
+var shaderEditor = new (function(){
     "use strict";
 
     var _engine,
@@ -90,6 +90,7 @@ window.shaderEditor = new (function(){
      * @return {KICK.texture.Texture}
      */
     this.updateTexture = function(texture,config, fnSetImageSrc){
+        console.log(config.dataURI);
         for (var name in config){
             if (typeof name === 'string' && name !== "dataURI"){
                 try{
@@ -214,7 +215,7 @@ window.shaderEditor = new (function(){
         _engine.canvasResized();
     };
 
-    this.initKick = function(onComplete) {
+    this.initKick = function(onComplete, shader) {
         try{
             _engine = new KICK.core.Engine('canvas',{
                 preserveDrawingBuffer:true,
@@ -233,9 +234,9 @@ window.shaderEditor = new (function(){
                 var gameObject = _engine.activeScene.createGameObject();
                 _meshRenderer = new KICK.scene.MeshRenderer();
                 setMesh("kickjs://mesh/plane/");
-                if (window.shader){
+                if (shader){
                     // load saved content
-                    loadMaterial(window.shader);
+                    loadMaterial(shader);
                 }
 
                 gameObject.addComponent(_meshRenderer);

@@ -8,7 +8,16 @@ Object.defineProperty(window,"defaultMaterial",{
             "material":{
                 "name":"Default material",
                 "shader":1,
-                "uniforms":{}
+                "uniforms":{
+                    "tex": {
+                        "type": 35678,
+                        "value": {
+                            "name": "Texture",
+                            "ref": 2,
+                            "reftype": "project"
+                        }
+                    }
+                }
             },
             "textureData":[{
                 "uid":2,
