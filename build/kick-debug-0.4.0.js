@@ -6182,17 +6182,6 @@ KICK.namespace = function (ns_string) {
                 value:"0.4.0"
             },
             /**
-             * @property resourceManager
-             * @deprecated
-             * @type KICK.core.ResourceManager
-             */
-            resourceManager:{
-                get: function(){
-                    KICK.core.Util.warn("Engine.resourceManager is deprecated"); // todo remove
-                    return thisObj.resourceLoader;
-                }
-            },
-            /**
              * Resource manager of the engine. Loads and cache resources.
              * @property resourceManager
              * @type KICK.core.ResourceManager
@@ -16073,17 +16062,6 @@ KICK.namespace = function (ns_string) {
         };
 
     /**
-     * ResourceManager is renamed to ResourceLoader
-     * @class ResourceManager
-     * @namespace KICK.core
-     * @constructor
-     * @deprecated
-     */
-    core.ResourceManager = function(engine){
-        console.log("ResourceManager is deprecated. Renamed to ResourceLoader");
-    };
-
-    /**
      * Responsible for loading of resources.
      * @class ResourceLoader
      * @namespace KICK.core
@@ -16181,24 +16159,6 @@ KICK.namespace = function (ns_string) {
      * @method getShaderData
      * @param {String} uri
      * @param {KICK.material.Shader} shaderDestination
-     */
-    /**
-     * @method getMesh
-     * @param {String} url
-     * @return {KICK.mesh.Mesh}
-     * @deprecated
-     */
-    /**
-     * @method getShader
-     * @param {String} url
-     * @return {KICK.material.Shader}
-     * @deprecated
-     */
-    /**
-     * @method getTexture
-     * @param {String} url
-     * @return {KICK.texture.Texture}
-     * @deprecated
      */
 
 
@@ -16335,52 +16295,6 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Creates a Mesh object based on a url.<br>
-         * The following resources can be created:<br>
-         * <ul>
-         * <li><b>Triangle</b> Url: kickjs://mesh/triangle/</li>
-         * <li><b>Plane</b> Url: kickjs://mesh/plane/<br></li>
-         * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
-         * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
-         * </ul>
-         * @method getMesh
-         * @param {String} url
-         * @return {KICK.mesh.Mesh}
-         * @deprecated
-         */
-        this.getMesh = function(url){
-            console.log("getMesh is deprecated. Use getMeshData instead");
-            var meshDataObj,
-                getParameterInt = core.Util.getParameterInt,
-                getParameterFloat = core.Util.getParameterFloat,
-                config = {
-                    name: getUrlAsResourceName(url)
-                };
-            if (url.indexOf("kickjs://mesh/triangle/")==0){
-                meshDataObj = mesh.MeshFactory.createTriangleData();
-            } else if (url.indexOf("kickjs://mesh/plane/")==0){
-                meshDataObj = mesh.MeshFactory.createPlaneData();
-            } else if (url.indexOf("kickjs://mesh/uvsphere/")==0){
-                var slices = getParameterInt(url, "slices"),
-                    stacks = getParameterInt(url, "stacks"),
-                    radius = getParameterFloat(url, "radius");
-                meshDataObj = mesh.MeshFactory.createUVSphereData(slices, stacks, radius);
-            } else if (url.indexOf("kickjs://mesh/cube/")==0){
-                var length = getParameterFloat(url, "length");
-                meshDataObj = mesh.MeshFactory.createCubeData(length);
-            } else {
-                return null;
-            }
-
-
-            if (meshDataObj){
-                config.meshData = meshDataObj;
-                config.dataURI = url;
-                return new mesh.Mesh(engine,config);
-            }
-        };
-
-        /**
          * Create a default shader config based on a URL<br>
          * The following shaders are available:
          *  <ul>
@@ -16502,35 +16416,6 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Create a default shader based on a URL<br>
-         * The following shaders are available:
-         *  <ul>
-         *  <li><b>Default</b> Url: kickjs://shader/default/</li>
-         *  <li><b>Diffuse</b> Url: kickjs://shader/diffuse/</li>
-         *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
-         *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
-         *  <li><b>Unlit</b> Url: kickjs://shader/unlit_vertex_color/</li>
-         *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>
-         *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
-         *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
-         *  <li><b>Pick</b> Url: kickjs://shader/__pick/</li>
-         *  <li><b>Error</b> Url: kickjs://shader/__error/<br></li>
-         *  </ul>
-         * @method getShader
-         * @param {String} url
-         * @return {KICK.material.Shader} Shader or null if not found
-         * @deprecated
-         */
-        this.getShader = function(url,errorLog){
-            console.log("getShader is deprecated");
-            var shader = new KICK.material.Shader(engine);
-            this.getShaderData(url,shader);
-            shader.name = getUrlAsResourceName(url);
-            shader.dataURI = url;
-            return shader;
-        };
-
-        /**
          * Create a default texture based on a URL.<br>
          * The following default textures exists:
          *  <ul>
@@ -16583,34 +16468,6 @@ KICK.namespace = function (ns_string) {
                 return null;
             }
             textureDestination.setImageData( 2, 2, 0, 5121,data, uri);
-        };
-
-        /**
-         * Create a default texture based on a URL.<br>
-         * The following default textures exists:
-         *  <ul>
-         *  <li><b>Black</b> Url: kickjs://texture/black/</li>
-         *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
-         *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
-         *  </ul>
-         * @method getTexture
-         * @param {String} url
-         * @return {KICK.texture.Texture} Texture object - or null if no texture is found for the specified url
-         * @deprecated
-         */
-        this.getTexture = function(url){
-            console.log("getTexture is deprecated!");
-            var name = getUrlAsResourceName(url);
-            var texture = new KICK.texture.Texture(engine,{
-                name:name,
-                minFilter: 9728,
-                magFilter: 9728,
-                generateMipmaps: false,
-                internalFormat: 6408
-            });
-            thisObj.getImageData(url,texture);
-
-            return texture;
         };
     };
 })();

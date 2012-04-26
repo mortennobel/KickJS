@@ -6182,17 +6182,6 @@ KICK.namespace = function (ns_string) {
                 value:"0.3.4"
             },
             /**
-             * @property resourceManager
-             * @deprecated
-             * @type KICK.core.ResourceManager
-             */
-            resourceManager:{
-                get: function(){
-                    KICK.core.Util.warn("Engine.resourceManager is deprecated"); // todo remove
-                    return thisObj.resourceLoader;
-                }
-            },
-            /**
              * Resource manager of the engine. Loads and cache resources.
              * @property resourceManager
              * @type KICK.core.ResourceManager
