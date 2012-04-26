@@ -11,7 +11,7 @@ googleClojure=$3
 #Location of Node.js
 nodejs=$4
 
-version=0_3_4
+version=0_4_0
 
 # The location of the files to parse.  Parses subdirectories, but will fail if
 # there are duplicate file names in these directories.  You can specify multiple
@@ -30,7 +30,7 @@ generator_out=$project/API/generator
 template=$project/build-asset/doc-template
 
 # The version of your project to display within the documentation.
-version=0.3.4
+version=0.4.0
 
 # The version of YUI the project is using.  This effects the output for
 # YUI configuration attributes.  This should start with '2' or '3'.
