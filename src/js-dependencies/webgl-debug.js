@@ -1,7 +1,26 @@
 // https://cvs.khronos.org/svn/repos/registry/trunk/public/webgl/sdk/debug/webgl-debug.js
-//Copyright (c) 2009 The Chromium Authors. All rights reserved.
-//Use of this source code is governed by a BSD-style license that can be
-//found in the LICENSE file.
+/*
+** Copyright (c) 2012 The Khronos Group Inc.
+**
+** Permission is hereby granted, free of charge, to any person obtaining a
+** copy of this software and/or associated documentation files (the
+** "Materials"), to deal in the Materials without restriction, including
+** without limitation the rights to use, copy, modify, merge, publish,
+** distribute, sublicense, and/or sell copies of the Materials, and to
+** permit persons to whom the Materials are furnished to do so, subject to
+** the following conditions:
+**
+** The above copyright notice and this permission notice shall be included
+** in all copies or substantial portions of the Materials.
+**
+** THE MATERIALS ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+** EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+** MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+** IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+** CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+** TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
+*/
 
 // Various functions for helping debug WebGL apps.
 
@@ -14,6 +33,18 @@ WebGLDebugUtils = function() {
 var log = function(msg) {
   if (window.console && window.console.log) {
     window.console.log(msg);
+  }
+};
+
+/**
+ * Wrapped error logging function.
+ * @param {string} msg Message to log.
+ */
+var error = function(msg) {
+  if (window.console && window.console.error) {
+    window.console.error(msg);
+  } else {
+    log(msg);
   }
 };
 
@@ -95,7 +126,7 @@ var glValidEnumContexts = {
   // Culling
 
   'cullFace': { 0:true },
-  'frontFace': { 0:true }
+  'frontFace': { 0:true },
 };
 
 /**
@@ -171,8 +202,33 @@ function glFunctionArgToString(functionName, argumentIndex, value) {
       return glEnumToString(value);
     }
   }
-  return value.toString();
+  if (value === null) {
+    return "null";
+  } else if (value === undefined) {
+    return "undefined";
+  } else {
+    return value.toString();
+  }
 }
+
+/**
+ * Converts the arguments of a WebGL function to a string.
+ * Attempts to convert enum arguments to strings.
+ *
+ * @param {string} functionName the name of the WebGL function.
+ * @param {number} args The arguments.
+ * @return {string} The arguments as a string.
+ */
+function glFunctionArgsToString(functionName, args) {
+  // apparently we can't do args.join(",");
+  var argStr = "";
+  for (var ii = 0; ii < args.length; ++ii) {
+    argStr += ((ii == 0) ? '' : ', ') +
+        glFunctionArgToString(functionName, ii, args[ii]);
+  }
+  return argStr;
+};
+
 
 function makePropertyWrapper(wrapper, original, propertyName) {
   //log("wrap prop: " + propertyName);
@@ -209,8 +265,11 @@ function makeFunctionWrapper(original, functionName) {
  *        The function to call when gl.getError returns an
  *        error. If not specified the default function calls
  *        console.log with a message.
+ * @param {!function(funcName, args): void} opt_onFunc The
+ *        function to call when each webgl function is called.
+ *        You can use this to log all calls for example.
  */
-function makeDebugContext(ctx, opt_onErrorFunc) {
+function makeDebugContext(ctx, opt_onErrorFunc, opt_onFunc) {
   init(ctx);
   opt_onErrorFunc = opt_onErrorFunc || function(err, functionName, args) {
         // apparently we can't do args.join(",");
@@ -219,8 +278,8 @@ function makeDebugContext(ctx, opt_onErrorFunc) {
           argStr += ((ii == 0) ? '' : ', ') +
               glFunctionArgToString(functionName, ii, args[ii]);
         }
-        log("WebGL error "+ glEnumToString(err) + " in "+ functionName +
-            "(" + argStr + ")");
+        error("WebGL error "+ glEnumToString(err) + " in "+ functionName +
+              "(" + argStr + ")");
       };
 
   // Holds booleans for each GL error so after we get the error ourselves
@@ -230,6 +289,9 @@ function makeDebugContext(ctx, opt_onErrorFunc) {
   // Makes a function that calls a WebGL function and then calls getError.
   function makeErrorWrapper(ctx, functionName) {
     return function() {
+      if (opt_onFunc) {
+        opt_onFunc(functionName, arguments);
+      }
       var result = ctx[functionName].apply(ctx, arguments);
       var err = ctx.getError();
       if (err != 0) {
@@ -255,11 +317,11 @@ function makeDebugContext(ctx, opt_onErrorFunc) {
   wrapper.getError = function() {
     for (var err in glErrorShadow) {
       if (glErrorShadow.hasOwnProperty(err)) {
-      if (glErrorShadow[err]) {
-        glErrorShadow[err] = false;
-        return err;
+        if (glErrorShadow[err]) {
+          glErrorShadow[err] = false;
+          return err;
+        }
       }
-    }
     }
     return ctx.NO_ERROR;
   };
@@ -742,6 +804,16 @@ return {
   'glFunctionArgToString': glFunctionArgToString,
 
   /**
+   * Converts the arguments of a WebGL function to a string.
+   * Attempts to convert enum arguments to strings.
+   *
+   * @param {string} functionName the name of the WebGL function.
+   * @param {number} args The arguments.
+   * @return {string} The arguments as a string.
+   */
+  'glFunctionArgsToString': glFunctionArgsToString,
+
+  /**
    * Given a WebGL context returns a wrapped context that calls
    * gl.getError after every command and calls a function if the
    * result is not NO_ERROR.
@@ -761,6 +833,9 @@ return {
    * @param {!function(err, funcName, args): void} opt_onErrorFunc The function
    *     to call when gl.getError returns an error. If not specified the default
    *     function calls console.log with a message.
+   * @param {!function(funcName, args): void} opt_onFunc The
+   *     function to call when each webgl function is called. You
+   *     can use this to log all calls for example.
    */
   'makeDebugContext': makeDebugContext,
 
