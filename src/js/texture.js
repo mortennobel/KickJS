@@ -450,6 +450,13 @@ KICK.namespace = function (ns_string) {
 
         Object.defineProperties(this,{
             /**
+             * @property engine
+             * @type KICK.core.Engine
+             */
+            engine:{
+                value:engine
+            },
+            /**
              * @property textureId
              * @type Number
              * @protected
