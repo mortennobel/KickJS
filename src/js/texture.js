@@ -22,6 +22,7 @@
  */
 var KICK = KICK || {};
 KICK.namespace = function (ns_string) {
+    "use strict"; // force strict ECMAScript 5
     var parts = ns_string.split("."),
         parent = window,
         i;
@@ -44,11 +45,12 @@ KICK.namespace = function (ns_string) {
         constants = core.Constants,
         vec2 = KICK.math.vec2,
         isPowerOfTwo = function (x) {
-            return (x & (x - 1)) == 0;
+            return (x & (x - 1)) === 0;
         },
         nextHighestPowerOfTwo = function (x) {
+            var i;
             --x;
-            for (var i = 1; i < 32; i <<= 1) {
+            for (i = 1; i < 32; i <<= 1) {
                 x = x | x >> i;
             }
             return x + 1;
@@ -64,7 +66,7 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config Optional
      * @extends KICK.core.ProjectAsset
      */
-    texture.RenderTexture = function(engine, config){
+    texture.RenderTexture = function (engine, config) {
         var gl = engine.gl,
             _config = config || {},
             framebuffer = gl.createFramebuffer(),
@@ -73,18 +75,20 @@ KICK.namespace = function (ns_string) {
             renderBuffers = [],
             thisObj = this,
             _name = "",
-            cleanUpRenderBuffers = function(){
-                for (var i=0;i<renderBuffers.length;i++){
+            cleanUpRenderBuffers = function () {
+                var i;
+                for (i = 0; i < renderBuffers.length; i++) {
                     gl.deleteRenderbuffer(renderBuffers[i]);
                 }
             },
-            initFBO = function (){
-                var renderbuffer;
+            initFBO = function () {
+                var renderbuffer,
+                    frameBufferStatus;
                 _dimension = colorTexture ? colorTexture.dimension : _dimension;
                 cleanUpRenderBuffers();
                 gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
 
-                if (colorTexture){
+                if (colorTexture) {
                     gl.framebufferTexture2D(constants.GL_FRAMEBUFFER, constants.GL_COLOR_ATTACHMENT0, constants.GL_TEXTURE_2D, colorTexture.textureId, 0);
                 } else {
                     renderbuffer = gl.createRenderbuffer();
@@ -100,22 +104,22 @@ KICK.namespace = function (ns_string) {
                 gl.framebufferRenderbuffer(constants.GL_FRAMEBUFFER, constants.GL_DEPTH_ATTACHMENT, constants.GL_RENDERBUFFER, renderbuffer);
                 renderBuffers.push(renderbuffer);
 
-                if (constants._ASSERT){
-                    var frameBufferStatus = gl.checkFramebufferStatus( constants.GL_FRAMEBUFFER );
-                    if (frameBufferStatus !== constants.GL_FRAMEBUFFER_COMPLETE){
-                        switch (frameBufferStatus){
-                            case constants.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-                                break;
-                            case constants.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-                                break;
-                            case constants.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-                                KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-                                break;
-                            case constants.GL_FRAMEBUFFER_UNSUPPORTED:
-                                KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
-                                break;
+                if (constants._ASSERT) {
+                    frameBufferStatus = gl.checkFramebufferStatus(constants.GL_FRAMEBUFFER);
+                    if (frameBufferStatus !== constants.GL_FRAMEBUFFER_COMPLETE) {
+                        switch (frameBufferStatus) {
+                        case constants.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                            break;
+                        case constants.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                            break;
+                        case constants.GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+                            KICK.core.Util.fail("FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
+                            break;
+                        case constants.GL_FRAMEBUFFER_UNSUPPORTED:
+                            KICK.core.Util.fail("FRAMEBUFFER_UNSUPPORTED");
+                            break;
                         }
                     }
                 }
@@ -125,23 +129,23 @@ KICK.namespace = function (ns_string) {
         /**
          * @method bind
          */
-        this.bind = function(){
+        this.bind = function () {
             gl.renderTarget = thisObj;
             gl.bindFramebuffer(constants.GL_FRAMEBUFFER, framebuffer);
         };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * @property dimension
              * @type KICK.math.vec2
              */
-            dimension:{
-                get:function(){
+            dimension: {
+                get: function () {
                     return _dimension;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     _dimension = newValue;
-                    if (_dimension){
+                    if (_dimension) {
                         initFBO();
                     }
                 }
@@ -150,11 +154,11 @@ KICK.namespace = function (ns_string) {
              * @property colorTexture
              * @type KICK.texture.Texture
              */
-            colorTexture:{
-                get: function(){ return colorTexture; },
-                set: function(newValue){
+            colorTexture: {
+                get: function () { return colorTexture; },
+                set: function (newValue) {
                     colorTexture = newValue;
-                    if (colorTexture){
+                    if (colorTexture) {
                         initFBO();
                     }
                 }
@@ -163,17 +167,17 @@ KICK.namespace = function (ns_string) {
              * @property name
              * @type String
              */
-            name:{
-                get: function(){ return _name;},
-                set: function(newValue){ _name = newValue;}
+            name: {
+                get: function () { return _name; },
+                set: function (newValue) { _name = newValue; }
             }
         });
 
         /**
          * @method destroy
          */
-        this.destroy = function(){
-            if (framebuffer !== null){
+        this.destroy = function () {
+            if (framebuffer !== null) {
                 cleanUpRenderBuffers();
                 gl.deleteFramebuffer(framebuffer);
                 framebuffer = null;
@@ -184,7 +188,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method toJSON
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             return {
                 uid: thisObj.uid,
                 name: _name,
@@ -192,11 +196,11 @@ KICK.namespace = function (ns_string) {
             };
         };
 
-        (function init(){
+        (function init() {
             // apply
             applyConfig(thisObj, config);
             engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
-        })();
+        }());
     };
 
     /**
@@ -233,8 +237,8 @@ KICK.namespace = function (ns_string) {
              * @method recreateTextureIfDifferentType
              * @private
              */
-            recreateTextureIfDifferentType = function(){
-                if (_boundTextureType !== null && _boundTextureType !== _textureType){
+            recreateTextureIfDifferentType = function () {
+                if (_boundTextureType !== null && _boundTextureType !== _textureType) {
                     gl.deleteTexture(_textureId);
                     _textureId = gl.createTexture();
                 }
@@ -245,9 +249,9 @@ KICK.namespace = function (ns_string) {
          * Trigger getImageData if dataURI is defined
          * @method init
          */
-        this.init = function(){
-            if (_dataURI){
-                engine.resourceLoader.getImageData(_dataURI,thisObj);
+        this.init = function () {
+            if (_dataURI) {
+                engine.resourceLoader.getImageData(_dataURI, thisObj);
             }
         };
 
@@ -255,9 +259,9 @@ KICK.namespace = function (ns_string) {
          * Applies the texture settings
          * @method apply
          */
-        this.apply = function(){
+        this.apply = function () {
             thisObj.bind(0); // bind to texture slot 0
-            if (_textureType === constants.GL_TEXTURE_2D){
+            if (_textureType === constants.GL_TEXTURE_2D) {
                 gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
                 gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
             }
@@ -269,8 +273,8 @@ KICK.namespace = function (ns_string) {
          * Bind the current texture
          * @method bind
          */
-        this.bind = function(textureSlot){
-            gl.activeTexture(texture0+textureSlot);
+        this.bind = function (textureSlot) {
+            gl.activeTexture(texture0 + textureSlot);
             gl.bindTexture(_textureType, _textureId);
         };
 
@@ -278,8 +282,8 @@ KICK.namespace = function (ns_string) {
          * Deallocates the texture from memory
          * @method destroy
          */
-        this.destroy = function(){
-            if (_textureId !== null){
+        this.destroy = function () {
+            if (_textureId !== null) {
                 gl.deleteTexture(_textureId);
                 _textureId = null;
                 engine.project.removeResourceDescriptor(thisObj.uid);
@@ -298,19 +302,19 @@ KICK.namespace = function (ns_string) {
          * @param {Image} imageObj image object to import
          * @param {String} dataURI String representing the image
          */
-        this.setImage = function(imageObj, dataURI){
-            var width, height;
+        this.setImage = function (imageObj, dataURI) {
+            var width, height, cubemapOrder, srcWidth, srcHeight, canvas, ctx, i;
             _dataURI = dataURI;
             recreateTextureIfDifferentType();
             thisObj.bind(0); // bind to texture slot 0
-            if (_textureType === constants.GL_TEXTURE_2D){
+            if (_textureType === constants.GL_TEXTURE_2D) {
                 if (!isPowerOfTwo(imageObj.width) || !isPowerOfTwo(imageObj.height)) {
                     width = nextHighestPowerOfTwo(imageObj.width);
                     height = nextHighestPowerOfTwo(imageObj.height);
-                    imageObj = core.Util.scaleImage(imageObj,width,height);
+                    imageObj = core.Util.scaleImage(imageObj, width, height);
                 }
 
-                if (_flipY){
+                if (_flipY) {
                     gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, true);
                 } else {
                     gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, false);
@@ -318,36 +322,36 @@ KICK.namespace = function (ns_string) {
                 gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
                 gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, _intFormat, constants.GL_UNSIGNED_BYTE, imageObj);
 
-                vec2.set([imageObj.width,imageObj.height],_dimension);
+                vec2.set([imageObj.width, imageObj.height], _dimension);
             } else {
-                 var cubemapOrder = [
-                     constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                     constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-                     constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-                     constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-                     constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-                     constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-                 ];
-                var srcWidth = imageObj.width/6;
-                var srcHeight = imageObj.height;
+                cubemapOrder = [
+                    constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                    constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                    constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                    constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                    constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                    constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
+                ];
+                srcWidth = imageObj.width / 6;
+                srcHeight = imageObj.height;
                 height = nextHighestPowerOfTwo(imageObj.height);
                 width = height;
-                var canvas = document.createElement("canvas");
+                canvas = document.createElement("canvas");
                 canvas.width = width;
                 canvas.height = height;
-                var ctx = canvas.getContext("2d");
-                for (var i=0;i<6;i++){
+                ctx = canvas.getContext("2d");
+                for (i = 0; i < 6; i++) {
                     ctx.drawImage(imageObj,
-                        i*srcWidth, 0, srcWidth, srcHeight,
+                        i * srcWidth, 0, srcWidth, srcHeight,
                         0, 0, width, height);
                     gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, false);
                     gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
                     gl.texImage2D(cubemapOrder[i], 0, _intFormat, _intFormat, constants.GL_UNSIGNED_BYTE, canvas);
                 }
-                vec2.set([width,height],_dimension);
+                vec2.set([width, height], _dimension);
             }
             thisObj.apply();
-            if (_generateMipmaps){
+            if (_generateMipmaps) {
                 gl.generateMipmap(_textureType);
             }
             gl.currentMaterial = null; // for material to rebind
@@ -358,9 +362,9 @@ KICK.namespace = function (ns_string) {
          * @method isFPTexturesSupported
          * @return {Boolean}
          */
-        this.isFPTexturesSupported = function(){
+        this.isFPTexturesSupported = function () {
             var res = gl.isTexFloatEnabled;
-            if (typeof res !== 'boolean'){
+            if (typeof res !== 'boolean') {
                 res = gl.getExtension("OES_texture_float"); // this has the side effect of enabling the extension
                 gl.isTexFloatEnabled = res;
             }
@@ -378,31 +382,32 @@ KICK.namespace = function (ns_string) {
          * @param {Array} pixels array of pixels (may be null)
          * @param {String} dataURI String representing the image
          */
-        this.setImageData = function(width, height, border, type, pixels, dataURI){
+        this.setImageData = function (width, height, border, type, pixels, dataURI) {
+            var format;
             recreateTextureIfDifferentType();
-            if (type === constants.GL_FLOAT && !gl.isTexFloatEnabled){
+            if (type === constants.GL_FLOAT && !gl.isTexFloatEnabled) {
                 var res = thisObj.isFPTexturesSupported(); // enable extension
-                if (!res){
+                if (!res) {
                     KICK.core.Util.fail("OES_texture_float unsupported on the platform. Using GL_UNSIGNED_BYTE instead of GL_FLOAT.");
                     type = constants.GL_UNSIGNED_BYTE;
                 }
             }
-            if (constants._ASSERT){
+            if (constants._ASSERT) {
                 if (type !== constants.GL_FLOAT &&
                     type !== constants.GL_UNSIGNED_BYTE &&
                     type !== constants.GL_UNSIGNED_SHORT_4_4_4_4  &&
                     type !== constants.GL_UNSIGNED_SHORT_5_5_5_1 &&
-                    type !== constants.GL_UNSIGNED_SHORT_5_6_5 ){
+                    type !== constants.GL_UNSIGNED_SHORT_5_6_5) {
                     KICK.core.Util.fail("Texture.setImageData (type) should be either GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5");
                 }
             }
-            if (_textureType !== constants.GL_TEXTURE_2D){
+            if (_textureType !== constants.GL_TEXTURE_2D) {
                 KICK.core.Util.fail("Texture.setImageData only supported by TEXTURE_2D");
                 return;
             }
-            var format = _intFormat;
+            format = _intFormat;
 
-            vec2.set([width,height],_dimension);
+            vec2.set([width, height], _dimension);
             _dataURI = dataURI;
 
             thisObj.bind(0); // bind to texture slot 0
@@ -412,7 +417,7 @@ KICK.namespace = function (ns_string) {
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
-            if (_generateMipmaps){
+            if (_generateMipmaps) {
                 gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
             gl.currentMaterial = null; // for material to rebind
@@ -422,14 +427,14 @@ KICK.namespace = function (ns_string) {
          * Creates a 2x2 temporary image (checkerboard)
          * @method setTemporaryTexture
          */
-        this.setTemporaryTexture = function(){
+        this.setTemporaryTexture = function () {
             var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,
                                              0,   0,   0,
                                              0,   0,   0,
                                              255, 255, 255]),
                 oldIntFormat = _intFormat;
             _intFormat = constants.GL_RGB;
-            this.setImageData( 2, 2, 0, constants.GL_UNSIGNED_BYTE,blackWhiteCheckerboard, "tempTexture");
+            this.setImageData(2, 2, 0, constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "tempTexture");
             _intFormat = oldIntFormat;
         };
 
@@ -439,41 +444,41 @@ KICK.namespace = function (ns_string) {
          * @param newValue
          * @param automaticGetTextureData
          */
-        this.setDataURI = function( newValue , automaticGetTextureData ){
-            if (newValue !== _dataURI){
+        this.setDataURI = function (newValue, automaticGetTextureData) {
+            if (newValue !== _dataURI) {
                 _dataURI = newValue;
-                if (automaticGetTextureData){
-                    engine.resourceLoader.getImageData(_dataURI,thisObj);
+                if (automaticGetTextureData) {
+                    engine.resourceLoader.getImageData(_dataURI, thisObj);
                 }
             }
         };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * @property engine
              * @type KICK.core.Engine
              */
-            engine:{
-                value:engine
+            engine: {
+                value: engine
             },
             /**
              * @property textureId
              * @type Number
              * @protected
              */
-            textureId:{
-                value:_textureId
+            textureId: {
+                value: _textureId
             },
             /**
              * @property name
              * @type String
              */
-            name:{
-                get:function(){
+            name: {
+                get: function () {
                     return _name;
                 },
-                set:function(newValue){
-                     _name = newValue;
+                set: function (newValue) {
+                    _name = newValue;
                 }
             },
             /**
@@ -482,8 +487,8 @@ KICK.namespace = function (ns_string) {
              * @property dimension
              * @type {vec2}
              */
-            dimension:{
-                get:function(){
+            dimension: {
+                get: function () {
                     return _dimension;
                 }
             },
@@ -495,12 +500,12 @@ KICK.namespace = function (ns_string) {
              * @property dataURI
              * @type String
              */
-            dataURI:{
-                get:function(){
+            dataURI: {
+                get: function () {
                     return _dataURI;
                 },
-                set:function(newValue){
-                    thisObj.setDataURI(newValue,true);
+                set: function (newValue) {
+                    thisObj.setDataURI(newValue, true);
                 }
             },
             /**
@@ -509,14 +514,14 @@ KICK.namespace = function (ns_string) {
              * @property wrapS
              * @type Object
              */
-            wrapS:{
-                get: function(){
+            wrapS: {
+                get: function () {
                     return _wrapS;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_CLAMP_TO_EDGE &&
-                            value !== constants.GL_REPEAT){
+                            value !== constants.GL_REPEAT) {
                             KICK.core.Util.fail("Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
                         }
                     }
@@ -529,14 +534,14 @@ KICK.namespace = function (ns_string) {
              * @property wrapT
              * @type Object
              */
-            wrapT:{
-                get: function(){
+            wrapT: {
+                get: function () {
                     return _wrapT;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_CLAMP_TO_EDGE &&
-                            value !== constants.GL_REPEAT){
+                            value !== constants.GL_REPEAT) {
                             KICK.core.Util.fail("Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
                         }
                     }
@@ -550,18 +555,18 @@ KICK.namespace = function (ns_string) {
              * @property minFilter
              * @type Object
              */
-            minFilter:{
-                get: function(){
+            minFilter: {
+                get: function () {
                     return _minFilter;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_NEAREST &&
                             value !== constants.GL_LINEAR &&
                             value !== constants.GL_NEAREST_MIPMAP_NEAREST &&
                             value !== constants.GL_LINEAR_MIPMAP_NEAREST &&
                             value !== constants.GL_NEAREST_MIPMAP_LINEAR &&
-                            value !== constants.GL_LINEAR_MIPMAP_LINEAR){
+                            value !== constants.GL_LINEAR_MIPMAP_LINEAR) {
                             KICK.core.Util.fail("Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR");
                         }
                     }
@@ -574,14 +579,14 @@ KICK.namespace = function (ns_string) {
              * @property magFilter
              * @type Object
              */
-            magFilter:{
-                get: function(){
+            magFilter: {
+                get: function () {
                     return _magFilter;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_NEAREST &&
-                            value !== constants.GL_LINEAR){
+                            value !== constants.GL_LINEAR) {
                             KICK.core.Util.fail("Texture.magFilter should be either GL_NEAREST or GL_LINEAR");
                         }
                     }
@@ -594,13 +599,13 @@ KICK.namespace = function (ns_string) {
              * @property generateMipmaps
              * @type Boolean
              */
-            generateMipmaps:{
-                get: function(){
+            generateMipmaps: {
+                get: function () {
                     return _generateMipmaps;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
-                        if (typeof value !== 'boolean'){
+                set: function (value) {
+                    if (constants._ASSERT) {
+                        if (typeof value !== 'boolean') {
                             KICK.core.Util.fail("Texture.generateMipmaps was not a boolean");
                         }
                     }
@@ -614,13 +619,13 @@ KICK.namespace = function (ns_string) {
              * @property flipY
              * @type Boolean
              */
-            flipY:{
-                get: function(){
+            flipY: {
+                get: function () {
                     return _flipY;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
-                        if (typeof value !== 'boolean'){
+                set: function (value) {
+                    if (constants._ASSERT) {
+                        if (typeof value !== 'boolean') {
                             KICK.core.Util.fail("Texture.flipY was not a boolean");
                         }
                     }
@@ -639,16 +644,16 @@ KICK.namespace = function (ns_string) {
              * @property internalFormat
              * @type Number
              */
-            internalFormat:{
-                get:function(){
+            internalFormat: {
+                get: function () {
                     return _intFormat;
                 },
-                set:function(value){
+                set: function (value) {
                     if (value !== constants.GL_ALPHA &&
                         value !== constants.GL_RGB  &&
                         value !== constants.GL_RGBA &&
                         value !== constants.GL_LUMINANCE &&
-                        value !== constants.GL_LUMINANCE_ALPHA){
+                        value !== constants.GL_LUMINANCE_ALPHA) {
                         KICK.core.Util.fail("Texture.internalFormat should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
                     }
                     _intFormat = value;
@@ -663,13 +668,13 @@ KICK.namespace = function (ns_string) {
              * @property textureType
              * @type Number
              */
-            textureType:{
-                get:function(){
+            textureType: {
+                get: function () {
                     return _textureType;
                 },
-                set:function(value){
+                set: function (value) {
                     if (value !== constants.GL_TEXTURE_2D &&
-                        value !== constants.GL_TEXTURE_CUBE_MAP){
+                        value !== constants.GL_TEXTURE_CUBE_MAP) {
                         KICK.core.Util.fail("Texture.textureType should be either GL_TEXTURE_2D or GL_TEXTURE_CUBE_MAP");
                     }
                     _textureType = value;
@@ -684,32 +689,32 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {Object} config element
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             return {
                 uid: thisObj.uid,
-                wrapS:_wrapS,
-                wrapT:_wrapT,
-                minFilter:_minFilter,
-                magFilter:_magFilter,
-                name:_name,
-                generateMipmaps:_generateMipmaps,
-                flipY:_flipY,
-                internalFormat:_intFormat,
-                textureType:_textureType,
-                dataURI:_dataURI
+                wrapS: _wrapS,
+                wrapT: _wrapT,
+                minFilter: _minFilter,
+                magFilter: _magFilter,
+                name: _name,
+                generateMipmaps: _generateMipmaps,
+                flipY: _flipY,
+                internalFormat: _intFormat,
+                textureType: _textureType,
+                dataURI: _dataURI
             };
         };
 
-        (function init(){
+        (function init() {
             // apply
             applyConfig(thisObj, config, ["dataURI"]);
-            if (config && config.dataURI){
+            if (config && config.dataURI) {
                 // set dataURI last to make sure that object is configured before initialization
                 thisObj.dataURI = config.dataURI;
             }
 
             engine.project.registerObject(thisObj, "KICK.texture.Texture");
-        })();
+        }());
     };
 
     /**
@@ -743,16 +748,16 @@ KICK.namespace = function (ns_string) {
          * And update the texture from the video element (unless it has already been updated in this frame)
          * @method bind
          */
-        this.bind = function(textureSlot){
-            gl.activeTexture(texture0+textureSlot);
+        this.bind = function (textureSlot) {
+            gl.activeTexture(texture0 + textureSlot);
             gl.bindTexture(constants.GL_TEXTURE_2D, _textureId);
 
-            if (lastGrappedFrame < timer.frame && _videoElement){
-                lastGrappedFrame = timer.frame+_skipFrames;
+            if (lastGrappedFrame < timer.frame && _videoElement) {
+                lastGrappedFrame = timer.frame + _skipFrames;
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
                     gl.UNSIGNED_BYTE, _videoElement);
-                if (_generateMipmaps){
+                if (_generateMipmaps) {
                     gl.generateMipmap(constants.GL_TEXTURE_2D);
                 }
             }
@@ -762,8 +767,8 @@ KICK.namespace = function (ns_string) {
          * Deallocates the texture from memory
          * @method destroy
          */
-        this.destroy = function(){
-            if (_textureId !== null){
+        this.destroy = function () {
+            if (_textureId !== null) {
                 gl.currentMaterial = null; // for material to rebind
                 gl.deleteTexture(_textureId);
                 _textureId = null;
@@ -775,8 +780,8 @@ KICK.namespace = function (ns_string) {
          * Creates a 2x2 temporary image (checkerboard)
          * @method setTemporaryTexture
          */
-        this.setTemporaryTexture = function(){
-            var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,0,0,0,0,0,0,255, 255, 255]);
+        this.setTemporaryTexture = function () {
+            var blackWhiteCheckerboard = new Uint8Array([255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255, 255]);
             thisObj.bind(0); // bind to texture slot 0
             gl.pixelStorei(constants.GL_UNPACK_ALIGNMENT, 1);
             gl.texImage2D(constants.GL_TEXTURE_2D, 0, _intFormat, 2, 2, 0, constants.GL_RGB, constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard);
@@ -787,17 +792,17 @@ KICK.namespace = function (ns_string) {
             gl.currentMaterial = null; // for material to rebind
         };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * @property name
              * @type String
              */
-            name:{
-                get:function(){
+            name: {
+                get: function () {
                     return _name;
                 },
-                set:function(newValue){
-                     _name = newValue;
+                set: function (newValue) {
+                    _name = newValue;
                 }
             },
             /**
@@ -805,11 +810,11 @@ KICK.namespace = function (ns_string) {
              * @property skipFrames
              * @type {Number}
              */
-            skipFrames:{
-                get:function(){
+            skipFrames: {
+                get: function () {
                     return _skipFrames;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     _skipFrames = newValue;
                 }
             },
@@ -817,11 +822,11 @@ KICK.namespace = function (ns_string) {
              * @property videoElement
              * @type {VideoElement}
              */
-            videoElement:{
-                get:function(){
+            videoElement: {
+                get: function () {
                     return _videoElement;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     _videoElement = newValue;
                 }
             },
@@ -832,13 +837,13 @@ KICK.namespace = function (ns_string) {
              * @property generateMipmaps
              * @type Boolean
              */
-            generateMipmaps:{
-                get: function(){
+            generateMipmaps: {
+                get: function () {
                     return _generateMipmaps;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
-                        if (typeof value !== 'boolean'){
+                set: function (value) {
+                    if (constants._ASSERT) {
+                        if (typeof value !== 'boolean') {
                             KICK.core.Util.fail("MovieTexture.generateMipmaps was not a boolean");
                         }
                     }
@@ -850,8 +855,8 @@ KICK.namespace = function (ns_string) {
              * @type {Number}
              * @protected
              */
-            textureId:{
-                value:_textureId
+            textureId: {
+                value: _textureId
             },
             /**
              * Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
@@ -859,14 +864,14 @@ KICK.namespace = function (ns_string) {
              * @property wrapS
              * @type Object
              */
-            wrapS:{
-                get: function(){
+            wrapS: {
+                get: function () {
                     return _wrapS;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_CLAMP_TO_EDGE &&
-                            value !== constants.GL_REPEAT){
+                            value !== constants.GL_REPEAT) {
                             KICK.core.Util.fail("Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
                         }
                     }
@@ -879,14 +884,14 @@ KICK.namespace = function (ns_string) {
              * @property wrapT
              * @type Object
              */
-            wrapT:{
-                get: function(){
+            wrapT: {
+                get: function () {
                     return _wrapT;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_CLAMP_TO_EDGE &&
-                            value !== constants.GL_REPEAT){
+                            value !== constants.GL_REPEAT) {
                             KICK.core.Util.fail("Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT");
                         }
                     }
@@ -900,18 +905,18 @@ KICK.namespace = function (ns_string) {
              * @property minFilter
              * @type Object
              */
-            minFilter:{
-                get: function(){
+            minFilter: {
+                get: function () {
                     return _minFilter;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_NEAREST &&
                             value !== constants.GL_LINEAR &&
                             value !== constants.GL_NEAREST_MIPMAP_NEAREST &&
                             value !== constants.GL_LINEAR_MIPMAP_NEAREST &&
                             value !== constants.GL_NEAREST_MIPMAP_LINEAR &&
-                            value !== constants.GL_LINEAR_MIPMAP_LINEAR){
+                            value !== constants.GL_LINEAR_MIPMAP_LINEAR) {
                             KICK.core.Util.fail("Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR");
                         }
                     }
@@ -924,14 +929,14 @@ KICK.namespace = function (ns_string) {
              * @property magFilter
              * @type Object
              */
-            magFilter:{
-                get: function(){
+            magFilter: {
+                get: function () {
                     return _magFilter;
                 },
-                set: function(value){
-                    if (constants._ASSERT){
+                set: function (value) {
+                    if (constants._ASSERT) {
                         if (value !== constants.GL_NEAREST &&
-                            value !== constants.GL_LINEAR){
+                            value !== constants.GL_LINEAR) {
                             KICK.core.Util.fail("Texture.magFilter should be either GL_NEAREST or GL_LINEAR");
                         }
                     }
@@ -950,16 +955,16 @@ KICK.namespace = function (ns_string) {
              * @property internalFormat
              * @type Number
              */
-            internalFormat:{
-                get:function(){
+            internalFormat: {
+                get: function () {
                     return _intFormat;
                 },
-                set:function(value){
+                set: function (value) {
                     if (value !== constants.GL_ALPHA &&
                         value !== constants.GL_RGB  &&
                         value !== constants.GL_RGBA &&
                         value !== constants.GL_LUMINANCE &&
-                        value !== constants.GL_LUMINANCE_ALPHA){
+                        value !== constants.GL_LUMINANCE_ALPHA) {
                         KICK.core.Util.fail("Texture.internalFormat should be either GL_ALPHA, GL_RGB, GL_RGBA, GL_LUMINANCE, or LUMINANCE_ALPHA");
                     }
                     _intFormat = value;
@@ -974,23 +979,23 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {Object} config element
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             return {
                 uid: thisObj.uid,
-                wrapS:_wrapS,
-                wrapT:_wrapT,
-                minFilter:_minFilter,
-                name:_name,
-                magFilter:_magFilter,
-                internalFormat:_intFormat
+                wrapS: _wrapS,
+                wrapT: _wrapT,
+                minFilter: _minFilter,
+                name: _name,
+                magFilter: _magFilter,
+                internalFormat: _intFormat
             };
         };
 
-        (function init(){
+        (function init() {
             // apply
             applyConfig(thisObj, config);
 
             engine.project.registerObject(thisObj, "KICK.texture.MovieTexture");
-        })();
+        }());
     };
-})();
+}());
