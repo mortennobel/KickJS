@@ -112,7 +112,7 @@ KICK.namespace = function (ns_string) {
      * See KICK.math.vec4.wrapArray
      * @method wrapArray
      * @param {Float32Array} array
-     * @return {Array[KICK.math.vec2]} of vec2
+     * @return {Array_KICK.math.vec2} of vec2
      * @static
      */
     vec2.wrapArray = function(array){
@@ -140,7 +140,7 @@ KICK.namespace = function (ns_string) {
      * Creates a new instance of a vec2 using the default array type
      * Any javascript array containing at least 2 numeric elements can serve as a vec2
      * @method create
-     * @param {Array[Number]} vec Optional, vec2 containing values to initialize with
+     * @param {Array_Number} vec Optional, vec2 containing values to initialize with
      * @return {KICK.math.vec2} New vec2
      * @static
      */
@@ -277,7 +277,7 @@ KICK.namespace = function (ns_string) {
      * See KICK.math.vec4.wrapArray
      * @method wrapArray
      * @param {Float32Array} array
-     * @return {Array[KICK.math.vec3]} of vec3
+     * @return {Array_KICK.math.vec3} of vec3
      * @static
      */
     vec3.wrapArray = function(array){
@@ -318,7 +318,7 @@ KICK.namespace = function (ns_string) {
      * Creates a new instance of a vec3 using the default array type
      * Any javascript array containing at least 3 numeric elements can serve as a vec3
      * @method create
-     * @param {Array[Number]} vec Optional, vec3 containing values to initialize with
+     * @param {Array_Number} vec Optional, vec3 containing values to initialize with
      * @return {KICK.math.vec3} New vec3
      * @static
      */
@@ -770,7 +770,7 @@ KICK.namespace = function (ns_string) {
      * </pre>
      * @method wrapArray
      * @param {Float32Array} array
-     * @return {Array[KICK.math.vec4]}
+     * @return {Array_KICK.math.vec4}
      * @static
      */
     vec4.wrapArray = function(array){
@@ -809,7 +809,7 @@ KICK.namespace = function (ns_string) {
      * Creates a new instance of a vec4 using the default array type<br>
      * Any javascript array containing at least 4 numeric elements can serve as a vec4
      * @method create
-     * @param {Array[Number]} vec Optional, vec4 containing values to initialize with
+     * @param {Array_Number} vec Optional, vec4 containing values to initialize with
      * @return {KICK.math.vec4} New vec4
      * @static
      */
@@ -1029,7 +1029,7 @@ KICK.namespace = function (ns_string) {
      * Creates a new instance of a mat3 using the default array type<br>
      * Any javascript array containing at least 9 numeric elements can serve as a mat3
      * @method create
-     * @param {Array[Number]} mat Optional, mat3 containing values to initialize with
+     * @param {Array_Number} mat Optional, mat3 containing values to initialize with
      * @return {KICK.math.mat3} New mat3
      * @static
      */
@@ -1247,7 +1247,7 @@ KICK.namespace = function (ns_string) {
      * Creates a new instance of a mat4 using the default array type<br>
      * Any javascript array containing at least 16 numeric elements can serve as a mat4
      * @method create
-     * @param {Array[Number]} mat Optional, mat4 containing values to initialize with
+     * @param {Array_Number} mat Optional, mat4 containing values to initialize with
      * @return {KICK.math.mat4} New mat4
      * @static
      */
@@ -2310,12 +2310,13 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Returns array with translate, rotate scale
      * @method decompose
      * @param {KICK.math.mat4} mat mat4 to decompose
      * @param {KICK.math.vec3} translate Optional
      * @param {KICK.math.quat4} rotate Optional
      * @param {KICK.math.vec3} scale Optional
-     * @return Array[tranlate,rotate,scale]
+     * @return Array_tranlate_rotate_scale
      * @static
      */
     mat4.decompose = (function(){
@@ -2464,7 +2465,7 @@ KICK.namespace = function (ns_string) {
      * Creates a new instance of a quat4 using the default array type<br>
      * Any javascript array containing at least 4 numeric elements can serve as a quat4
      * @method create
-     * @param {Array[Number]} quat Optional, quat4 containing values to initialize with
+     * @param {Array_Number} quat Optional, quat4 containing values to initialize with
      * @return {KICK.math.quat4} New quat4
      * @static
      */
@@ -3003,8 +3004,8 @@ KICK.namespace = function (ns_string) {
     /**
      * Default value is min=MAX, max=MIN (meaning that it has a negative size)
      * @method create
-     * @param {Array[Number] | KICK.math.aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
-     * @param {Array[Number]} vec3Max Optional, vec3Max containing values to initialize maximum values with
+     * @param {Array_Number | KICK.math.aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
+     * @param {Array_Number} vec3Max Optional, vec3Max containing values to initialize maximum values with
      * @return {KICK.math.aabb} New aabb
      * @static
      */
@@ -3215,8 +3216,8 @@ KICK.namespace = function (ns_string) {
      * @method extractPlanes
      * @param {KICK.math.mat4} modelViewMatrix
      * @param {Boolean} normalize normalize plane normal
-     * @param {Array[24]} dest
-     * @return {Array[24]} 6 plane equations
+     * @param {Array_24} dest
+     * @return {Array_24} 6 plane equations
      * @static
      */
     frustum.extractPlanes = function(modelViewMatrix, normalize, dest){

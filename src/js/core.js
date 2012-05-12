@@ -785,7 +785,7 @@ KICK.namespace = function (ns_string) {
             /**
              * List the asset uids of project
              * @property resourceDescriptorUIDs
-             * @type Array[Number]
+             * @type Array_Number
              */
             resourceDescriptorUIDs:{
                 get:function(){
@@ -1023,7 +1023,7 @@ KICK.namespace = function (ns_string) {
          * Returns the buildin engine resources
          * @method getEngineResourceDescriptorsByType
          * @param {String} type
-         * @return {Array[KICK.core.ResourceDescriptor]}
+         * @return {Array_KICK.core.ResourceDescriptor}
          */
         this.getEngineResourceDescriptorsByType = function(type){
             var res = [];
@@ -1055,7 +1055,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method getResourceDescriptorsByType
          * @param {String} type
-         * @return {Array[KICK.core.ResourceDescriptor]}
+         * @return {Array_KICK.core.ResourceDescriptor}
          */
         this.getResourceDescriptorsByType = function(type){
             var res = [];
@@ -1070,7 +1070,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method getResourceDescriptorsByName
          * @param {String} type
-         * @return {Array[KICK.core.ResourceDescriptor]}
+         * @return {Array_KICK.core.ResourceDescriptor}
          */
         this.getResourceDescriptorsByName = function(name){
             var res = [];
@@ -2009,7 +2009,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method deepCopy 
          * @param {Object} src
-         * @param {Array[Classes]} passthroughClasses Optional. Don't attempt to clone object of these classes (uses instanceof operator)
+         * @param {Array_Classes} passthroughClasses Optional. Don't attempt to clone object of these classes (uses instanceof operator)
          * @return Object
          */
         deepCopy : function(object, passthroughClasses){
@@ -2199,7 +2199,7 @@ KICK.namespace = function (ns_string) {
          * @method applyConfig
          * @param {Object} object
          * @param {Object} config
-         * @param {Array[String]} excludeFilter
+         * @param {Array_String} excludeFilter
          * @static
          */
         applyConfig: function(object,config,excludeFilter){
@@ -2307,7 +2307,7 @@ KICK.namespace = function (ns_string) {
          * @method typedArrayToArray
          * @static
          * @param {TypedArray} typedArray
-         * @return {Array[Number]}
+         * @return {Array_Number}
          */
         typedArrayToArray: function(typedArray){
             var length = typedArray.length,
@@ -2441,7 +2441,7 @@ KICK.namespace = function (ns_string) {
          * Unpacks an array of uint8 into a Uint32
          * @static
          * @method vec4uint8ToUint32
-         * @param {Array[Number]}
+         * @param {Array_Number}
          */
         vec4uint8ToUint32 : function(vec4uint8){
             for (var i=0;i<4;i++){

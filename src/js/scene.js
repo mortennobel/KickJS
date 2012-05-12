@@ -270,7 +270,7 @@ KICK.namespace = function (ns_string) {
          * </pre>
          * @method getComponentsOfType
          * @param {Object} type the constructor of the wanted component
-         * @return {Array[Object]} arrays of components of specified type
+         * @return {Array} arrays of components of specified type
          */
         this.getComponentsOfType = function (type) {
             var component,
@@ -588,7 +588,7 @@ KICK.namespace = function (ns_string) {
             /**
              * Array of children. The children should not be modified directly. Instead use the parent property
              * @property children
-             * @type Array[KICK.scene.Transform]
+             * @type Array_KICK.scene.Transform
              */
             children:{
                 value: children
@@ -942,7 +942,7 @@ KICK.namespace = function (ns_string) {
          * method is slow - do not run in the the update function.
          * @method findComponentsOfType
          * @param {Function} componentType
-         * @return {Array[KICK.scene.Component]} components
+         * @return {Array_KICK.scene.Component} components
          */
         this.findComponentsOfType = function(componentType){
             if (ASSERT){
@@ -1499,7 +1499,7 @@ KICK.namespace = function (ns_string) {
                 /**
                  * Add components that implements the render function and match the camera layerMask to cameras renderable components
                  * @method componentsAdded
-                 * @param {Array[KICK.scene.Component]} components
+                 * @param {Array_KICK.scene.Component} components
                  * @private
                  */
                 componentsAdded : function( components ){
@@ -1524,7 +1524,7 @@ KICK.namespace = function (ns_string) {
 
                 /**
                  * @method componentsRemoved
-                 * @param {Array[KICK.scene.Component]} components
+                 * @param {Array_KICK.scene.Component} components
                  * @return {Boolean}
                  * @private
                  */
@@ -1960,7 +1960,7 @@ KICK.namespace = function (ns_string) {
              * Normalized viewport rect [xOffset,yOffset,xWidth,yHeight]<br>
              * Default is [0,0,1,1]
              * @property normalizedViewportRect
-             * @type Array[Number]
+             * @type Array_Number
              */
             normalizedViewportRect:{
                 get:function(){
@@ -2029,11 +2029,11 @@ KICK.namespace = function (ns_string) {
     scene.ComponentChangedListener = {
         /**
          * @method componentsAdded
-         * @param {Array[KICK.scene.Components]} components
+         * @param {Array_KICK.scene.Components} components
          */
         /**
          * @method componentsRemoved
-         * @param {Array[KICK.scene.Components]} components
+         * @param {Array_KICK.scene.Components} components
          */
         /**
          * @method isComponentListener
@@ -2113,7 +2113,7 @@ KICK.namespace = function (ns_string) {
             /**
              *
              * @property materias
-             * @type Array[KICK.material.Material]
+             * @type Array_KICK.material.Material
              */
             materials:{
                 get:function(){

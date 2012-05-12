@@ -389,70 +389,70 @@ KICK.namespace = function (ns_string) {
              * Vertex attribute.
              * Vertex (vec3)
              * @property vertex
-             * @type Array[Number]
+             * @type Array_Number
              */
             vertex:createGetterSetter(constants.GL_FLOAT, "vertex"),
             /**
              * Vertex attribute.
              * Normal (vec3)
              * @property normal
-             * @type Array[Number]
+             * @type Array_Number
              */
             normal:createGetterSetter(constants.GL_FLOAT, "normal"),
             /**
              * Vertex attribute.
              * UV1 (vec2)
              * @property uv1
-             * @type Array[Number]
+             * @type Array_Number
              */
             uv1:createGetterSetter(constants.GL_FLOAT, "uv1"),
             /**
              * Vertex attribute.
              * UV2 (vec2)
              * @property uv2
-             * @type Array[Number]
+             * @type Array_Number
              */
             uv2:createGetterSetter(constants.GL_FLOAT, "uv2"),
             /**
              * Vertex attribute.
              * Tangent (vec4)
              * @property tangent
-             * @type Array[Number]
+             * @type Array_Number
              */
             tangent:createGetterSetter(constants.GL_FLOAT, "tangent"),
             /**
              * Vertex attribute.
              * Color (vec4)
              * @property color
-             * @type Array[Number]
+             * @type Array_Number
              */
             color:createGetterSetter(constants.GL_FLOAT, "color"),
             /**
              * Vertex attribute.
              * Integer attribute (onw Int32)
              * @property int1
-             * @type Array[Number]
+             * @type Array_Number
              */
             int1:createGetterSetter(constants.GL_INT, "int1"),
             /**
              * Vertex attribute.
              * Integer attribute (two Int32)
              * @property int2
-             * @type Array[Number]
+             * @type Array_Number
              */
             int2:createGetterSetter(constants.GL_INT, "int2"),
             /**
              * Vertex attribute.
              * Integer attribute (three Int32)
              * @property int3
-             * @type Array[Number]
+             * @type Array_Number
              */
             int3:createGetterSetter(constants.GL_INT, "int3"),
             /**
              * Vertex attribute.
              * Integer attribute (four Int32)
              * @property int4
-             * @type Array[Number]
+             * @type Array_Number
              */
             int4:createGetterSetter(constants.GL_INT, "int4"),
             /**
@@ -460,7 +460,7 @@ KICK.namespace = function (ns_string) {
              * indices (integer).
              * indices is shortcut for subMeshes[0]
              * @property indices
-             * @type Array[Number]
+             * @type Array_Number
              */
             indices:{
                 get:function(){
@@ -484,7 +484,7 @@ KICK.namespace = function (ns_string) {
             /**
              * indices (integer)
              * @property subMeshes
-             * @type Array[Array[Number]]
+             * @type Array_Array_Number
              */
             subMeshes:{
                 get:function(){
@@ -982,7 +982,7 @@ KICK.namespace = function (ns_string) {
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
          * @method verify
          * @param {KICK.material.Shader} shader
-         * @return {Array[String]} list of missing vertex attributes in mesh or null if no missing attributes
+         * @return {Array_String} list of missing vertex attributes in mesh or null if no missing attributes
          */
         this.verify = function (shader){
             var missingVertexAttributes = [],

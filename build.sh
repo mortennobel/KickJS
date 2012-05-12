@@ -1,6 +1,6 @@
 #!/bin/sh
 # The location of your yuidoc install
-yuidoc_home=$1
+yuidoc_bin=$1
 
 #Location of project
 project=$2
@@ -72,9 +72,15 @@ cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/gl
 
 
 ##############################################################################
-echo "Generating documentation (YUI Doc)"
-echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
-$yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
+# echo "Generating documentation (YUI Doc)"
+# echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
+# $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
+
+# Unix specific and specific for (!!!)
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH
+
+echo $yuidoc_bin $parser_in -o $generator_out
+$yuidoc_bin $parser_in -o $generator_out
 
 ##############################################################################
 echo "Running Precompiler release"

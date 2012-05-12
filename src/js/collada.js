@@ -99,7 +99,7 @@ KICK.namespace = function (ns_string) {
              * to speed up performance in case of interleaved data
              * @method getArrayElementById
              * @param {String} id
-             * @return {Array[Number]} data
+             * @return {Array_Number} data
              * @private
              */
             getArrayElementById = function(id){
@@ -204,7 +204,7 @@ KICK.namespace = function (ns_string) {
                          * @method addVertexAttributes
                          * @param {Number} index Source index in vertex array (the p element)
                          * @param {Object} outVertexAttributes Destination vertex index array
-                         * @param {Array[Number]} outTriangleIndices Destination vertex index array
+                         * @param {Array_Number} outTriangleIndices Destination vertex index array
                          * @private
                          */
                         var addVertexAttributes = function(index,outVertexAttributes,outTriangleIndices){
