@@ -26,6 +26,7 @@
  */
 var KICK = KICK || {};
 KICK.namespace = function (ns_string) {
+    "use strict"; // force strict ECMAScript 5
     var parts = ns_string.split("."),
         parent = window,
         i;
@@ -63,9 +64,9 @@ KICK.namespace = function (ns_string) {
     core.Engine = function (idOrElement, config) {
         var gl = null,
             canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
-            webGlContextNames = ["experimental-webgl","webgl"],
+            webGlContextNames = ["experimental-webgl", "webgl"],
             thisObj = this,
-            lastTime = new Date().getTime()-16, // ensures valid delta time in next frame
+            lastTime = new Date().getTime() - 16, // ensures valid delta time in next frame
             deltaTime = 0,
             timeObj = new core.Time(),
             timeSinceStart = 0,
@@ -78,28 +79,28 @@ KICK.namespace = function (ns_string) {
             mouseInput = null,
             keyInput = null,
             activeScene,
-            activeSceneNull = {updateAndRender:function(){}},
+            activeSceneNull = {updateAndRender: function () {}},
             animationFrameObj = {},
             wrapperFunctionToMethodOnObject = function (time_) {
                 thisObj._gameLoop(time_);
             },
             vec2 = KICK.math.vec2;
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * The current version of KickJS
              * @property version
              * @type String
              */
-            version:{
-                value:constants._VERSION
+            version: {
+                value: constants._VERSION
             },
             /**
              * Resource manager of the engine. Loads and cache resources.
              * @property resourceManager
              * @type KICK.core.ResourceManager
              */
-            resourceLoader:{
+            resourceLoader: {
                 value: new core.ResourceLoader(this)
             },
             /**
@@ -107,7 +108,7 @@ KICK.namespace = function (ns_string) {
              * @property project
              * @type KICK.core.Project
              */
-            project:{
+            project: {
                 value: project
             },
             /**
@@ -116,14 +117,14 @@ KICK.namespace = function (ns_string) {
              * @type WebGLContext
              */
             gl: {
-                get: function () {return gl;}
+                get: function () { return gl; }
             },
             /**
              * The canvas element (readonly)
              * @property canvas
              * @type HTML-Element
              */
-            canvas:{
+            canvas: {
                 value: canvas
             },
             /**
@@ -131,15 +132,15 @@ KICK.namespace = function (ns_string) {
              * @property activeScene
              * @type KICK.scene.Scene
              */
-            activeScene:{
-                get: function(){
-                    if (activeScene === activeSceneNull){
+            activeScene: {
+                get: function () {
+                    if (activeScene === activeSceneNull) {
                         return null;
                     }
                     return activeScene;
                 },
-                set: function(value){
-                    if (value === null || typeof value === "undefined"){
+                set: function (value) {
+                    if (value === null || typeof value === "undefined") {
                         activeScene = activeSceneNull;
                     } else {
                         activeScene = value;
@@ -151,9 +152,9 @@ KICK.namespace = function (ns_string) {
              * @property mouseInput
              * @type KICK.core.MouseInput
              */
-            mouseInput:{
-                get:function(){
-                    if (!mouseInput){
+            mouseInput: {
+                get: function () {
+                    if (!mouseInput) {
                         mouseInput = new core.MouseInput(thisObj);
                         this.addFrameListener(mouseInput);
                     }
@@ -165,9 +166,9 @@ KICK.namespace = function (ns_string) {
              * @property keyInput
              * @type KICK.core.KeyInput
              */
-            keyInput:{
-                get: function(){
-                    if (!keyInput){
+            keyInput: {
+                get: function () {
+                    if (!keyInput) {
                         keyInput = new core.KeyInput();
                         this.addFrameListener(keyInput);
                     }
@@ -178,8 +179,8 @@ KICK.namespace = function (ns_string) {
              * @property eventQueue
              * @type KICK.core.EventQueue
              */
-            eventQueue:{
-                get:function(){
+            eventQueue: {
+                get: function () {
                     return eventQueue;
                 }
             },
@@ -188,8 +189,8 @@ KICK.namespace = function (ns_string) {
              * @property time
              * @type KICK.core.Time
              */
-            time:{
-                value:timeObj
+            time: {
+                value: timeObj
             },
             /**
              * Configuration of the engine
@@ -204,19 +205,19 @@ KICK.namespace = function (ns_string) {
              * @property paused
              * @type boolean
              */
-            paused:{
-                get:function(){
+            paused: {
+                get: function () {
                     return animationFrameObj === null;
                 },
-                set:function(pause){
+                set: function (pause) {
                     var currentValue = thisObj.paused;
-                    if (pause != currentValue){
-                        if (pause){
+                    if (pause !== currentValue) {
+                        if (pause) {
                             cancelRequestAnimFrame(animationFrameObj);
                             animationFrameObj = null;
                         } else {
-                            lastTime = new Date().getTime()-16; // ensures valid delta time in next frame
-                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,thisObj.canvas);
+                            lastTime = new Date().getTime() - 16; // ensures valid delta time in next frame
+                            animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                         }
                     }
                 }
@@ -227,7 +228,7 @@ KICK.namespace = function (ns_string) {
          * @method isFullScreenSupported
          * @return Boolean
          */
-        this.isFullScreenSupported = function(){
+        this.isFullScreenSupported = function () {
             return canvas.requestFullscreen || canvas.webkitRequestFullScreen || canvas.mozRequestFullScreen;
         };
 
@@ -237,14 +238,14 @@ KICK.namespace = function (ns_string) {
          * @method setFullscreen
          * @param {Boolean} fullscreen
          */
-        this.setFullscreen = function(fullscreen){
-            if (thisObj.isFullScreenSupported()){
-                if (fullscreen){
-                    if (canvas.requestFullscreen){
+        this.setFullscreen = function (fullscreen) {
+            if (thisObj.isFullScreenSupported()) {
+                if (fullscreen) {
+                    if (canvas.requestFullscreen) {
                         canvas.requestFullscreen();
-                    } else if (canvas.webkitRequestFullScreen){
-                        canvas.onwebkitfullscreenchange = function() {
-                            if(document.webkitIsFullScreen) {
+                    } else if (canvas.webkitRequestFullScreen) {
+                        canvas.onwebkitfullscreenchange = function () {
+                            if (document.webkitIsFullScreen) {
                                 canvas.originalWidth = canvas.width;
                                 canvas.originalHeight = canvas.height;
                                 canvas.width = screen.width;
@@ -256,15 +257,15 @@ KICK.namespace = function (ns_string) {
                             thisObj.canvasResized();
                         };
                         canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-                    } else if (canvas.mozRequestFullScreen){
+                    } else if (canvas.mozRequestFullScreen) {
                         canvas.mozRequestFullScreen();
                     }
                 } else {
-                    if (document.exitFullscreen){
+                    if (document.exitFullscreen) {
                         document.exitFullscreen();
-                    } else if (document.webkitCancelFullScreen){
+                    } else if (document.webkitCancelFullScreen) {
                         document.webkitCancelFullScreen();
-                    } else if (document.webkitCancelFullScreen){
+                    } else if (document.webkitCancelFullScreen) {
                         document.webkitCancelFullScreen();
                     }
                 }
@@ -277,21 +278,21 @@ KICK.namespace = function (ns_string) {
          * @private
          */
         this._gameLoop = function (time) {
-            deltaTime = time-lastTime;
+            var i;
+            deltaTime = time - lastTime;
             lastTime = time;
             deltaTime *= timeScale;
             timeSinceStart += deltaTime;
             frame += 1;
-            
             eventQueue.run();
 
             activeScene.updateAndRender();
-            for (var i=frameListeners.length-1;i>=0;i--){
+            for (i = frameListeners.length - 1; i >= 0; i--) {
                 frameListeners[i].frameUpdated();
             }
 
-            if (animationFrameObj !== null){
-                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject,thisObj.canvas);
+            if (animationFrameObj !== null) {
+                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
             }
         };
 
@@ -301,9 +302,9 @@ KICK.namespace = function (ns_string) {
          * @method addFrameListener
          * @param {Object} frameListener
          */
-        this.addFrameListener = function(frameListener){
-            if (ASSERT){
-                if (typeof frameListener.frameUpdated !== "function"){
+        this.addFrameListener = function (frameListener) {
+            if (ASSERT) {
+                if (typeof frameListener.frameUpdated !== "function") {
                     KICK.core.Util.fail("frameListener must define the method frameUpdated");
                 }
             }
@@ -315,18 +316,17 @@ KICK.namespace = function (ns_string) {
          * @param {Object} frameListener
          * @return {boolean} element removed
          */
-        this.removeFrameListener = function(frameListener){
-            return core.Util.removeElementFromArray(frameListeners,frameListener);
+        this.removeFrameListener = function (frameListener) {
+            return core.Util.removeElementFromArray(frameListeners, frameListener);
         };
 
         /**
          * @method addContextListener
          * @param {Object} contextLostListener implements contextLost() and contextRestored(gl)
          */
-        this.addContextListener = function(contextLostListener){
-            if (ASSERT){
-                if ((typeof contextLostListener.contextLost !== "function") ||
-                    (typeof contextLostListener.contextRestored !== "function")){
+        this.addContextListener = function (contextLostListener) {
+            if (ASSERT) {
+                if ((typeof contextLostListener.contextLost !== "function") || (typeof contextLostListener.contextRestored !== "function")) {
                     KICK.core.Util.fail("contextLostListener must define the functions contextLost() and contextRestored(gl)");
                 }
             }
@@ -337,8 +337,8 @@ KICK.namespace = function (ns_string) {
          * @method removeContextListener
          * @param contextLostListener
          */
-        this.removeContextListener = function(contextLostListener){
-            return core.Util.removeElementFromArray(contextListeners,contextLostListener);
+        this.removeContextListener = function (contextLostListener) {
+            return core.Util.removeElementFromArray(contextListeners, contextLostListener);
         };
 
 
@@ -347,7 +347,7 @@ KICK.namespace = function (ns_string) {
          * @method createUID
          * @return {Number} uniq id
          */
-        this.createUID = function(){
+        this.createUID = function () {
             return ++project.maxUID;
         };
 
@@ -357,8 +357,8 @@ KICK.namespace = function (ns_string) {
          * @param {Object} object
          * @return {String}
          */
-        this.getUID = function(object){
-            if (!object.uid){
+        this.getUID = function (object) {
+            if (!object.uid) {
                 object.uid = thisObj.createUID();
             }
             return object.uid;
@@ -371,9 +371,9 @@ KICK.namespace = function (ns_string) {
          * checkCanvasResizeInterval can also be set to support automatically checks
          * @method canvasResized
          */
-        this.canvasResized = function(){
+        this.canvasResized = function () {
             gl.viewportSize = vec2.create([canvas.width,canvas.height]);
-            if (mouseInput){
+            if (mouseInput) {
                 mouseInput.updateCanvasElementPosition();
             }
         };
@@ -385,11 +385,12 @@ KICK.namespace = function (ns_string) {
         (function init() {
             var c = KICK.core.Constants,
                 i,
+                success,
                 wasPaused,
-                initGL = function(){
-                    for (i = webGlContextNames.length-1; i >= 0; i--) {
+                initGL = function () {
+                    for (i = webGlContextNames.length - 1; i >= 0; i--) {
                         try {
-                            gl = canvas.getContext(webGlContextNames[i],thisObj.config);
+                            gl = canvas.getContext(webGlContextNames[i], thisObj.config);
                             if (gl) {
                                 break;
                             }
@@ -401,8 +402,8 @@ KICK.namespace = function (ns_string) {
                     if (!gl) {
                         return false;
                     }
-                    if (thisObj.config.enableDebugContext){
-                        if (window["WebGLDebugUtils"]){
+                    if (thisObj.config.enableDebugContext) {
+                        if (window["WebGLDebugUtils"]) {
                             gl = WebGLDebugUtils.makeDebugContext(gl);
                         } else {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
@@ -412,57 +413,57 @@ KICK.namespace = function (ns_string) {
                     gl.enable(c.GL_SCISSOR_TEST);
                     return true;
                 };
-            var success = initGL();
-            if (!success){
+            success = initGL();
+            if (!success) {
                 thisObj.config.webglNotFoundFn(canvas);
                 return;
             }
 
-            canvas.addEventListener("webglcontextlost", function(event) {
+            canvas.addEventListener("webglcontextlost", function (event) {
                 wasPaused = thisObj.paused;
                 thisObj.pause();
-                for (i=0;i<contextListeners.length;i++){
+                for (i = 0; i < contextListeners.length; i++) {
                     contextListeners[i].contextLost();
                 }
                 event.preventDefault();
             }, false);
-            canvas.addEventListener("webglcontextrestored", function(event) {
+            canvas.addEventListener("webglcontextrestored", function (event) {
                 initGL();
-                for (i=0;i<contextListeners.length;i++){
+                for (i = 0; i < contextListeners.length; i++) {
                     contextListeners[i].contextRestored(gl);
                 }
                 // restart rendering loop
-                if (!wasPaused){
+                if (!wasPaused) {
                     thisObj.resume();
                 }
                 event.preventDefault();
             }, false);
             
             thisObj.canvasResized();
-            if (thisObj.config.checkCanvasResizeInterval){
-                setInterval(function(){
-                    if( canvas.height !== gl.viewportSize[0] || canvas.width !== gl.viewportSize[1] ){
+            if (thisObj.config.checkCanvasResizeInterval) {
+                setInterval(function () {
+                    if (canvas.height !== gl.viewportSize[0] || canvas.width !== gl.viewportSize[1]) {
                         thisObj.canvasResized();
                     }
                 }, thisObj.config.checkCanvasResizeInterval);
             }
 
             // API documentation of Time is found in KICK.core.Time
-            Object.defineProperties(timeObj,{
-                time:{
-                    get: function(){return timeSinceStart;}
+            Object.defineProperties(timeObj, {
+                time: {
+                    get: function () { return timeSinceStart; }
                 },
-                deltaTime:{
-                    get: function(){return deltaTime;}
+                deltaTime: {
+                    get: function () { return deltaTime; }
                 },
-                frame:{
-                    get: function(){return frame;}
+                frame: {
+                    get: function () { return frame; }
                 },
-                scale:{
-                    get: function(){
+                scale: {
+                    get: function () {
                         return timeScale;
                     },
-                    set:function(newValue){
+                    set: function (newValue) {
                         timeScale = newValue;
                     }
                 }
@@ -487,9 +488,9 @@ KICK.namespace = function (ns_string) {
      * @namespace KICK.core
      * @param {KICK.core.Engine} engine
      */
-    core.EventQueue = function(engine){
+    core.EventQueue = function (engine) {
         var queue = [],
-            queueSortFn = function(a,b){
+            queueSortFn = function (a, b) {
                 return a.timeStart - b.timeStart;
             },
             time = engine.time;
@@ -502,14 +503,14 @@ KICK.namespace = function (ns_string) {
          * @param {Number} timeEnd Optional (defaults to timeStart). Number of milliseconds from current time
          * @return {Object} event object (used for 'cancel' event)
          */
-        this.add = function(task, timeStart, timeEnd){
-            var currentTime = time.time+1, // schedule for one millisecond in the future - this makes it legal for event call backs to schedule new events
+        this.add = function (task, timeStart, timeEnd) {
+            var currentTime = time.time + 1, // schedule for one millisecond in the future - this makes it legal for event call backs to schedule new events
                 queueElement = {
-                task:task,
-                timeStart: timeStart+currentTime,
-                timeEnd: (timeEnd || timeStart)+currentTime
-            };
-            core.Util.insertSorted(queueElement,queue,queueSortFn);
+                    task: task,
+                    timeStart: timeStart + currentTime,
+                    timeEnd: (timeEnd || timeStart) + currentTime
+                };
+            core.Util.insertSorted(queueElement, queue, queueSortFn);
             return queueElement;
         };
 
@@ -518,8 +519,8 @@ KICK.namespace = function (ns_string) {
          * @method cancel
          * @param {Object} eventObject (should be the object returned from the EventQueue.add method
          */
-        this.cancel = function(eventObject){
-            core.Util.removeElementFromArray(queue,eventObject);
+        this.cancel = function (eventObject) {
+            core.Util.removeElementFromArray(queue, eventObject);
         };
 
         /**
@@ -527,15 +528,15 @@ KICK.namespace = function (ns_string) {
          * @protected
          * @method run
          */
-        this.run = function(){
-            var i=0,
+        this.run = function () {
+            var i,
                 currentTime = time.time,
                 queueLength = queue.length,
                 queueElement;
-            for (;i<queueLength && (queueElement = queue[i]).timeStart<currentTime;i++){
+            for (i = 0; i < queueLength && (queueElement = queue[i]).timeStart < currentTime; i++) {
                 queueElement.task();
-                if (queueElement.timeEnd<currentTime){
-                    queue.splice(i,1);
+                if (queueElement.timeEnd < currentTime) {
+                    queue.splice(i, 1);
                     queueLength--;
                 }
             }
@@ -545,7 +546,7 @@ KICK.namespace = function (ns_string) {
          * Clears the queue
          * @method clear
          */
-        this.clear = function(){
+        this.clear = function () {
             queue = [];
         };
     };
@@ -555,13 +556,13 @@ KICK.namespace = function (ns_string) {
      * @class ResourceTracker
      * @param {KICK.core.Project} project
      */
-    core.ResourceTracker = function(project){
+    core.ResourceTracker = function (project) {
         var thisObj = this;
         /**
          * Calls project.removeResourceTracker
          * @method resourceReady
          */
-        this.resourceReady = function(){
+        this.resourceReady = function () {
             project.removeResourceTracker(thisObj);
         };
 
@@ -569,9 +570,9 @@ KICK.namespace = function (ns_string) {
          * Calls project.removeResourceTracker
          * @method resourceFailed
          */
-        this.resourceFailed = function(){
+        this.resourceFailed = function () {
             project.removeResourceTracker(thisObj);
-        }
+        };
     };
 
 
@@ -595,169 +596,173 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Engine} engine
      * @param {JSON} json project data
      */
-    core.Project = function(engine){
+    core.Project = function (engine) {
         var resourceDescriptorsByUID = {},
             resourceCache = {},
             thisObj = this,
             _maxUID = 0,
             resourceTrackers = [],
             resourceTrackerListeners = [],
-            notifyTrackedResourcesChanged = function(){
-                for (var i=0;i<resourceTrackerListeners.length;i++){
+            notifyTrackedResourcesChanged = function () {
+                var i;
+                for (i = 0; i < resourceTrackerListeners.length; i++) {
                     resourceTrackerListeners[i].resourceTrackerChanged();
                 }
             },
-            refreshResourceDescriptor = function(uid,filter){
-                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor){
+            refreshResourceDescriptor = function (uid, filter) {
+                if (resourceDescriptorsByUID[uid] instanceof core.ResourceDescriptor) {
                     var liveObject = resourceCache[uid];
-                    if (liveObject){
-                        resourceDescriptorsByUID[uid].updateConfig(liveObject,filter);
+                    if (liveObject) {
+                        resourceDescriptorsByUID[uid].updateConfig(liveObject, filter);
                     }
                 }
             },
-            getUrlAsResourceName = function(url){
+            getUrlAsResourceName = function (url) {
                 var name = url.split('/');
-                if (name.length>2){
-                    name = name[name.length-2];
-                    name = name.substring(0,1).toUpperCase()+name.substring(1);
+                if (name.length > 2) {
+                    name = name[name.length - 2];
+                    name = name.substring(0, 1).toUpperCase() + name.substring(1);
                 } else {
                     name = url;
                 }
                 return name;
             },
-            loadEngineAsset = function(uid){
+            loadEngineAsset = function (uid) {
                 var p = core.Project,
                     res,
-                    url;
-                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_UNLIT_VERTEX_COLOR){
-                    switch (uid){
-                        case p.ENGINE_SHADER_DEFAULT:
-                            url = "kickjs://shader/default/";
-                            break;
-                        case p.ENGINE_SHADER_SPECULAR:
-                            url = "kickjs://shader/specular/";
-                            break;
-                        case p.ENGINE_SHADER_DIFFUSE:
-                            url = "kickjs://shader/diffuse/";
-                            break;
-                        case p.ENGINE_SHADER_UNLIT:
-                            url = "kickjs://shader/unlit/";
-                            break;
-                        case p.ENGINE_SHADER_UNLIT_VERTEX_COLOR:
-                            url = "kickjs://shader/unlit_vertex_color/";
-                            break;
-                        case p.ENGINE_SHADER_TRANSPARENT_SPECULAR:
-                            url = "kickjs://shader/transparent_specular/";
-                            break;
-                        case p.ENGINE_SHADER_TRANSPARENT_DIFFUSE:
-                            url = "kickjs://shader/transparent_diffuse/";
-                            break;
-                        case p.ENGINE_SHADER_TRANSPARENT_UNLIT:
-                            url = "kickjs://shader/transparent_unlit/";
-                            break;
-                        case p.ENGINE_SHADER___SHADOWMAP:
-                            url = "kickjs://shader/__shadowmap/";
-                            break;
-                        case p.ENGINE_SHADER___PICK:
-                            url = "kickjs://shader/__pick/";
-                            break;
-                        case p.ENGINE_SHADER___ERROR :
-                            url = "kickjs://shader/__error/";
-                            break;
-                        default:
-                            if (ASSERT){
-                                core.Util.fail("uid not mapped "+uid);
-                            }
-                            return null;
+                    url,
+                    isCubemap,
+                    canvas,
+                    ctx;
+                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_UNLIT_VERTEX_COLOR) {
+                    switch (uid) {
+                    case p.ENGINE_SHADER_DEFAULT:
+                        url = "kickjs://shader/default/";
+                        break;
+                    case p.ENGINE_SHADER_SPECULAR:
+                        url = "kickjs://shader/specular/";
+                        break;
+                    case p.ENGINE_SHADER_DIFFUSE:
+                        url = "kickjs://shader/diffuse/";
+                        break;
+                    case p.ENGINE_SHADER_UNLIT:
+                        url = "kickjs://shader/unlit/";
+                        break;
+                    case p.ENGINE_SHADER_UNLIT_VERTEX_COLOR:
+                        url = "kickjs://shader/unlit_vertex_color/";
+                        break;
+                    case p.ENGINE_SHADER_TRANSPARENT_SPECULAR:
+                        url = "kickjs://shader/transparent_specular/";
+                        break;
+                    case p.ENGINE_SHADER_TRANSPARENT_DIFFUSE:
+                        url = "kickjs://shader/transparent_diffuse/";
+                        break;
+                    case p.ENGINE_SHADER_TRANSPARENT_UNLIT:
+                        url = "kickjs://shader/transparent_unlit/";
+                        break;
+                    case p.ENGINE_SHADER___SHADOWMAP:
+                        url = "kickjs://shader/__shadowmap/";
+                        break;
+                    case p.ENGINE_SHADER___PICK:
+                        url = "kickjs://shader/__pick/";
+                        break;
+                    case p.ENGINE_SHADER___ERROR:
+                        url = "kickjs://shader/__error/";
+                        break;
+                    default:
+                        if (ASSERT) {
+                            core.Util.fail("uid not mapped " + uid);
+                        }
+                        return null;
                     }
-                    res = new KICK.material.Shader(engine,{
-                        dataURI:url,
-                        name:getUrlAsResourceName(url),
-                        uid:uid
-                    })
-                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE){
-                    var isCubemap = uid === p.ENGINE_TEXTURE_CUBEMAP_WHITE;
-                    switch (uid){
-                        case p.ENGINE_TEXTURE_BLACK:
-                            url = "kickjs://texture/black/";
-                            break;
-                        case p.ENGINE_TEXTURE_WHITE:
-                            url = "kickjs://texture/white/";
-                            break;
-                        case p.ENGINE_TEXTURE_GRAY:
-                            url = "kickjs://texture/gray/";
-                            break;
-                        case p.ENGINE_TEXTURE_LOGO:
-                            url = "kickjs://texture/logo/";
-                            break;
-                        case p.ENGINE_TEXTURE_CUBEMAP_WHITE:
-                            // do nothing
-                            break;
-                        default:
-                            if (ASSERT){
-                                core.Util.fail("uid not mapped "+uid);
-                            }
-                            return null;
+                    res = new KICK.material.Shader(engine, {
+                        dataURI: url,
+                        name: getUrlAsResourceName(url),
+                        uid: uid
+                    });
+                } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE) {
+                    isCubemap = uid === p.ENGINE_TEXTURE_CUBEMAP_WHITE;
+                    switch (uid) {
+                    case p.ENGINE_TEXTURE_BLACK:
+                        url = "kickjs://texture/black/";
+                        break;
+                    case p.ENGINE_TEXTURE_WHITE:
+                        url = "kickjs://texture/white/";
+                        break;
+                    case p.ENGINE_TEXTURE_GRAY:
+                        url = "kickjs://texture/gray/";
+                        break;
+                    case p.ENGINE_TEXTURE_LOGO:
+                        url = "kickjs://texture/logo/";
+                        break;
+                    case p.ENGINE_TEXTURE_CUBEMAP_WHITE:
+                        // do nothing
+                        break;
+                    default:
+                        if (ASSERT) {
+                            core.Util.fail("uid not mapped " + uid);
+                        }
+                        return null;
                     }
-                    if (isCubemap){
+                    if (isCubemap) {
                         res = new KICK.texture.Texture(engine,
                             {
-                                name:"cubemap_white",
+                                name: "cubemap_white",
                                 minFilter: constants.GL_NEAREST,
                                 magFilter: constants.GL_NEAREST,
                                 generateMipmaps: false,
-                                uid:uid,
+                                uid: uid,
                                 textureType: constants.GL_TEXTURE_CUBE_MAP
                             });
 
                         // create white image
-                        var canvas = document.createElement("canvas");
+                        canvas = document.createElement("canvas");
                         canvas.width = 12;
                         canvas.height = 2;
-                        var ctx = canvas.getContext("2d");
+                        ctx = canvas.getContext("2d");
 
                         ctx.fillStyle = "rgb(255,255,255)";
-                        ctx.fillRect (0, 0, 12, 2);
+                        ctx.fillRect(0, 0, 12, 2);
                         res.setImage(canvas, "memory://cubemap_white/");
 
                     } else {
                         res = new KICK.texture.Texture(engine,
                             {
-                                name:getUrlAsResourceName(url),
+                                name: getUrlAsResourceName(url),
                                 minFilter: constants.GL_NEAREST,
                                 magFilter: constants.GL_NEAREST,
                                 generateMipmaps: false,
-                                uid:uid,
+                                uid: uid,
                                 textureType: constants.GL_TEXTURE_2D,
-                                dataURI:url
+                                dataURI: url
                             });
                     }
 
-                } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE){
-                    switch (uid){
-                        case p.ENGINE_MESH_TRIANGLE:
-                            url = "kickjs://mesh/triangle/";
-                            break;
-                        case p.ENGINE_MESH_PLANE:
-                            url = "kickjs://mesh/plane/";
-                            break;
-                        case p.ENGINE_MESH_UVSPHERE:
-                            url = "kickjs://mesh/uvsphere/";
-                            break;
-                        case p.ENGINE_MESH_CUBE:
-                            url = "kickjs://mesh/cube/";
-                            break;
-                        default:
-                            if (ASSERT){
-                                core.Util.fail("uid not mapped "+uid);
-                            }
-                            return null;
+                } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE) {
+                    switch (uid) {
+                    case p.ENGINE_MESH_TRIANGLE:
+                        url = "kickjs://mesh/triangle/";
+                        break;
+                    case p.ENGINE_MESH_PLANE:
+                        url = "kickjs://mesh/plane/";
+                        break;
+                    case p.ENGINE_MESH_UVSPHERE:
+                        url = "kickjs://mesh/uvsphere/";
+                        break;
+                    case p.ENGINE_MESH_CUBE:
+                        url = "kickjs://mesh/cube/";
+                        break;
+                    default:
+                        if (ASSERT) {
+                            core.Util.fail("uid not mapped " + uid);
+                        }
+                        return null;
                     }
                     res = new KICK.mesh.Mesh(engine,
                         {
-                            dataURI:url,
-                            name:getUrlAsResourceName(url),
-                            uid:uid
+                            dataURI: url,
+                            name: getUrlAsResourceName(url),
+                            uid: uid
                         });
                 }
 
@@ -765,7 +770,7 @@ KICK.namespace = function (ns_string) {
                 return res;
             };
 
-        core.Util.copyStaticPropertiesToObject(thisObj,core.Project);
+        core.Util.copyStaticPropertiesToObject(thisObj, core.Project);
 
 
         Object.defineProperties(this, {
@@ -774,11 +779,11 @@ KICK.namespace = function (ns_string) {
              * @property maxUID
              * @type Number
              */
-            maxUID:{
-                get:function(){
+            maxUID: {
+                get: function () {
                     return _maxUID;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     _maxUID = newValue;
                 }
             },
@@ -787,12 +792,14 @@ KICK.namespace = function (ns_string) {
              * @property resourceDescriptorUIDs
              * @type Array_Number
              */
-            resourceDescriptorUIDs:{
-                get:function(){
+            resourceDescriptorUIDs: {
+                get: function () {
                     var uids = [],
                         uid;
-                    for (uid in resourceDescriptorsByUID){
-                        uids.push(uid);
+                    for (uid in resourceDescriptorsByUID) {
+                        if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
+                            uids.push(uid);
+                        }
                     }
                     return uids;
                 }
@@ -803,8 +810,8 @@ KICK.namespace = function (ns_string) {
          * Creates a new empty project.
          * @method newProject
          */
-        this.newProject = function(){
-            thisObj.loadProject({maxUID:0,resourceDescriptors:[]});
+        this.newProject = function () {
+            thisObj.loadProject({maxUID: 0, resourceDescriptors: []});
         };
 
         /**
@@ -815,25 +822,25 @@ KICK.namespace = function (ns_string) {
          * @param {Function} onSuccess
          * @param {Function} onFail
          */
-        this.loadProjectByURL = function(url, onSuccess, onError){
-            var voidFunction = function(){
-                if (DEBUG){
-                    console.log(arguments);
-                }
-            }
-                ;
-            onSuccess = onSuccess || voidFunction ;
-            onError = onError || voidFunction ;
+        this.loadProjectByURL = function (url, onSuccess, onError) {
+            var voidFunction = function () {
+                    if (DEBUG) {
+                        console.log(arguments);
+                    }
+                },
+                oXHR;
+            onSuccess = onSuccess || voidFunction;
+            onError = onError || voidFunction;
 
-            var oXHR = new XMLHttpRequest();
+            oXHR = new XMLHttpRequest();
             oXHR.open("GET", url, true);
             oXHR.onreadystatechange = function (oEvent) {
                 if (oXHR.readyState === 4) {
                     if (oXHR.status === 200) {
                         var value = JSON.parse(oXHR.responseText);
-                        try{
-                            thisObj.loadProject(value,onSuccess,onError);
-                        } catch(e) {
+                        try {
+                            thisObj.loadProject(value, onSuccess, onError);
+                        } catch (e) {
                             debugger;
                             onError(e);
                         }
@@ -849,7 +856,7 @@ KICK.namespace = function (ns_string) {
          * @method createResourceTracker
          * @return {KICK.core.ResourceTracker}
          */
-        this.createResourceTracker = function(){
+        this.createResourceTracker = function () {
             var newResourceTracker = new KICK.core.ResourceTracker(thisObj);
             resourceTrackers.push(newResourceTracker);
             notifyTrackedResourcesChanged();
@@ -860,9 +867,9 @@ KICK.namespace = function (ns_string) {
          * @method removeResourceTracker
          * @param {KICK.core.ResourceTracker} resourceTracker
          */
-        this.removeResourceTracker = function(resourceTracker){
+        this.removeResourceTracker = function (resourceTracker) {
             var removed = KICK.core.Util.removeElementFromArray(resourceTrackers, resourceTracker);
-            if (removed){
+            if (removed) {
                 notifyTrackedResourcesChanged();
             }
         };
@@ -874,43 +881,47 @@ KICK.namespace = function (ns_string) {
          * @param {Function} onSuccess
          * @param {Function} onFail
          */
-        this.loadProject = function(config, onSuccess, onError){
-            if (_maxUID>0){
+        this.loadProject = function (config, onSuccess, onError) {
+            if (_maxUID > 0) {
                 thisObj.closeProject();
             }
             config = config || {};
-            var resourceDescriptors = config.resourceDescriptors || [];
+            var resourceDescriptors = config.resourceDescriptors || [],
+                i,
+                uid,
+                onComplete,
+                resourceLoadedListener;
             _maxUID = config.maxUID || 0;
-            for (var i=0;i<resourceDescriptors.length;i++){
+            for (i = 0; i < resourceDescriptors.length; i++) {
                 thisObj.addResourceDescriptor(resourceDescriptors[i]);
             }
 
             // preload all resources
-            for (var uid in resourceDescriptorsByUID){
-                if (resourceDescriptorsByUID.hasOwnProperty(uid)){
-                    try{
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
+                    try {
                         thisObj.load(uid);
-                    }catch(e){
-                        onError ? onError(e) : KICK.core.Util.warn(e);
+                    } catch (e) {
+                        onError ? onError(e) : core.Util.warn(e);
                     }
                 }
             }
 
-            var onComplete = function(){
+            onComplete = function () {
                 _maxUID = config.maxUID || 0; // reset maxUID
-                if (config.activeScene){
+                if (config.activeScene) {
                     engine.activeScene = thisObj.load(config.activeScene);
                 } else {
                     engine.activeScene = null;
                 }
-                if (onSuccess){
+                if (onSuccess) {
                     onSuccess();
                 }
             };
-            var resourceLoadedListener = {
-                resourceTrackerChanged : function(){
-                    if (resourceTrackers.length==0){
-                        KICK.core.Util.removeElementFromArray(resourceTrackerListeners,resourceLoadedListener);
+            resourceLoadedListener = {
+                resourceTrackerChanged : function () {
+                    if (resourceTrackers.length === 0) {
+                        KICK.core.Util.removeElementFromArray(resourceTrackerListeners, resourceLoadedListener);
                         onComplete();
                     }
                 }
@@ -923,9 +934,12 @@ KICK.namespace = function (ns_string) {
          * Close all resources in the project and remove all resource descriptors
          * @method closeProject
          */
-        this.closeProject = function(){
-            for (var uid in resourceDescriptorsByUID){
-                thisObj.removeResourceDescriptor(uid);
+        this.closeProject = function () {
+            var uid;
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
+                    thisObj.removeResourceDescriptor(uid);
+                }
             }
             resourceDescriptorsByUID = {};
             resourceCache = {};
@@ -938,13 +952,14 @@ KICK.namespace = function (ns_string) {
          * @param {String} uid
          * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
-        this.load = function(uid){
-            var resourceObject = resourceCache[uid];
-            if (resourceObject){
+        this.load = function (uid) {
+            var resourceObject = resourceCache[uid],
+                resourceConfig;
+            if (resourceObject) {
                 return resourceObject;
             }
-            var resourceConfig = resourceDescriptorsByUID[uid];
-            if (resourceConfig){
+            resourceConfig = resourceDescriptorsByUID[uid];
+            if (resourceConfig) {
                 resourceObject = resourceConfig.instantiate(engine);
                 resourceCache[uid] = resourceObject;
                 return resourceObject;
@@ -959,8 +974,8 @@ KICK.namespace = function (ns_string) {
          * @method removeCacheReference
          * @param {Number} uid
          */
-        this.removeCacheReference = function(uid){
-            if (resourceCache[uid]){
+        this.removeCacheReference = function (uid) {
+            if (resourceCache[uid]) {
                 delete resourceCache[uid];
             }
         };
@@ -974,12 +989,16 @@ KICK.namespace = function (ns_string) {
          * @param {String} type Optional: limit the search to a specific type
          * @return {KICK.core.ProjectAsset} resource or null if resource is not found
          */
-        this.loadByName = function(name,type){
-            for (var uid in resourceDescriptorsByUID){
-                var resource = resourceDescriptorsByUID[uid];
-                if (resource.name === name){
-                    if (!type || resource.type === type){
-                        return thisObj.load(resource.uid);
+        this.loadByName = function (name, type) {
+            var uid,
+                resource;
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
+                    resource = resourceDescriptorsByUID[uid];
+                    if (resource.name === name) {
+                        if (!type || resource.type === type) {
+                            return thisObj.load(resource.uid);
+                        }
                     }
                 }
             }
@@ -992,17 +1011,17 @@ KICK.namespace = function (ns_string) {
          * @param {Object} object
          * @param {String} type
          */
-        this.registerObject = function(object, type){
+        this.registerObject = function (object, type) {
             var uid = engine.getUID(object);
-            if (resourceCache[uid]){
+            if (resourceCache[uid]) {
                 return;
             }
             resourceCache[uid] = object;
-            if (!resourceDescriptorsByUID[uid]){ // only update if new object
+            if (!resourceDescriptorsByUID[uid]) { // only update if new object
                 resourceDescriptorsByUID[uid] = new core.ResourceDescriptor({
-                    uid:uid,
-                    type:type,
-                    config:{name:object.name} // will be generated on serialization
+                    uid: uid,
+                    type: type,
+                    config: {name: object.name} // will be generated on serialization
                 });
             }
         };
@@ -1012,10 +1031,13 @@ KICK.namespace = function (ns_string) {
          * @method refreshResourceDescriptors
          * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          */
-        this.refreshResourceDescriptors = function(filter){
-            filter = filter || function(){return true;};
-            for (var uid in resourceDescriptorsByUID){
-                refreshResourceDescriptor(uid,filter);
+        this.refreshResourceDescriptors = function (filter) {
+            var uid;
+            filter = filter || function () { return true; };
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
+                    refreshResourceDescriptor(uid, filter);
+                }
             }
         };
 
@@ -1025,27 +1047,31 @@ KICK.namespace = function (ns_string) {
          * @param {String} type
          * @return {Array_KICK.core.ResourceDescriptor}
          */
-        this.getEngineResourceDescriptorsByType = function(type){
-            var res = [];
-            var searchFor;
-            if (type === "KICK.mesh.Mesh"){
+        this.getEngineResourceDescriptorsByType = function (type) {
+            var res = [],
+                searchFor,
+                name,
+                uid,
+                name;
+            if (type === "KICK.mesh.Mesh") {
                 searchFor = "ENGINE_MESH_";
-            } else if (type === "KICK.material.Shader"){
+            } else if (type === "KICK.material.Shader") {
                 searchFor = "ENGINE_SHADER_";
-            } else if (type === "KICK.texture.Texture"){
+            } else if (type === "KICK.texture.Texture") {
                 searchFor = "ENGINE_TEXTURE_";
             }
-            if (searchFor){
-                for (var name in core.Project){
-                    if (typeof core.Project[name] === "number" && core.Project.hasOwnProperty(name) && name.indexOf(searchFor) === 0){
-                        var uid = core.Project[name];
-                        var name = core.Util.toCamelCase(name.substr(searchFor.length)," ");
+            if (searchFor) {
+                for (name in core.Project) {
+                    if (typeof core.Project[name] === "number" && core.Project.hasOwnProperty(name) && name.indexOf(searchFor) === 0) {
+                        uid = core.Project[name];
+                        name = core.Util.toCamelCase(name.substr(searchFor.length), " ");
                         res.push(new core.ResourceDescriptor({
                             type: type,
-                            config:{
+                            config: {
                                 name: name,
                                 uid: uid
-                            }}));
+                            }
+                        }));
                     }
                 }
             }
@@ -1057,10 +1083,11 @@ KICK.namespace = function (ns_string) {
          * @param {String} type
          * @return {Array_KICK.core.ResourceDescriptor}
          */
-        this.getResourceDescriptorsByType = function(type){
-            var res = [];
-            for (var uid in resourceDescriptorsByUID){
-                if (resourceDescriptorsByUID[uid].type === type){
+        this.getResourceDescriptorsByType = function (type) {
+            var res = [],
+                uid;
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid) && resourceDescriptorsByUID[uid].type === type) {
                     res.push(resourceDescriptorsByUID[uid]);
                 }
             }
@@ -1072,10 +1099,11 @@ KICK.namespace = function (ns_string) {
          * @param {String} type
          * @return {Array_KICK.core.ResourceDescriptor}
          */
-        this.getResourceDescriptorsByName = function(name){
-            var res = [];
-            for (var uid in resourceDescriptorsByUID){
-                if (resourceDescriptorsByUID[uid].name === name){
+        this.getResourceDescriptorsByName = function (name) {
+            var res = [],
+                uid;
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid) && resourceDescriptorsByUID[uid].name === name) {
                     res.push(resourceDescriptorsByUID[uid]);
                 }
             }
@@ -1089,7 +1117,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} uid
          * @return {KICK.core.ResourceDescriptor} resource descriptor (or null if not found)
          */
-        this.getResourceDescriptor = function(uid){
+        this.getResourceDescriptor = function (uid) {
             refreshResourceDescriptor(uid);
             return resourceDescriptorsByUID[uid];
         };
@@ -1099,8 +1127,8 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
          * @return {KICK.core.ResourceDescriptor}
          */
-        this.addResourceDescriptor = function(resourceDescriptor){
-            if (!(resourceDescriptor instanceof core.ResourceDescriptor)){
+        this.addResourceDescriptor = function (resourceDescriptor) {
+            if (!(resourceDescriptor instanceof core.ResourceDescriptor)) {
                 resourceDescriptor = new core.ResourceDescriptor(resourceDescriptor);
             }
 
@@ -1113,14 +1141,14 @@ KICK.namespace = function (ns_string) {
          * @method removeResourceDescriptor
          * @param {Number} uid
          */
-        this.removeResourceDescriptor = function(uid){
+        this.removeResourceDescriptor = function (uid) {
             // destroy the resource
             var resource = resourceCache[uid];
-            if (resource){
+            if (resource) {
                 // remove references
                 delete resourceCache[uid];
                 // call destroy if exist
-                if (resource.destroy){
+                if (resource.destroy) {
                     resource.destroy();
                 }
             }
@@ -1133,23 +1161,25 @@ KICK.namespace = function (ns_string) {
          * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @return Object
          */
-        this.toJSON = function(filter){
-            var res = [];
-            filter = filter || function(){return true;};
+        this.toJSON = function (filter) {
+            var res = [],
+                uid,
+                resourceDescriptor;
+            filter = filter || function () { return true; };
             thisObj.refreshResourceDescriptors(filter);
-            for (var uid in resourceDescriptorsByUID){
-                if (uid>=0){ // don't serialize engine assets (since they are static)
-                    var rd = resourceDescriptorsByUID[uid];
-                    if (rd instanceof core.ResourceDescriptor && filter(rd)){
-                        res.push(rd.toJSON(filter));
+            for (uid in resourceDescriptorsByUID) {
+                if (resourceDescriptorsByUID.hasOwnProperty(uid) && uid >= 0) { // don't serialize engine assets (since they are static)
+                    resourceDescriptor = resourceDescriptorsByUID[uid];
+                    if (resourceDescriptor instanceof core.ResourceDescriptor && filter(resourceDescriptor)) {
+                        res.push(resourceDescriptor.toJSON(filter));
                     }
                 }
             }
             return {
-                engineVersion:engine.version,
-                maxUID:_maxUID,
+                engineVersion: engine.version,
+                maxUID: _maxUID,
                 activeScene: engine.activeScene ? engine.activeScene.uid : 0,
-                resourceDescriptors:res
+                resourceDescriptors: res
             };
         };
     };
@@ -1306,23 +1336,27 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {Object} config an object which attributes matches the properties of ResourceDescriptor
      */
-    core.ResourceDescriptor = function(config){
+    core.ResourceDescriptor = function (config) {
         var _config = config || {},
             type = _config.type,
             uid = _config.uid,
             resourceConfig = _config.config,
             hasProperty = core.Util.hasProperty,
-            createConfigInitialized = function(engine,config){
-                var res = {};
-                for (var name in config){
-                    if (hasProperty(config,name)){
-                        var value = config[name];
-                        var reftype = value?value.reftype:null;
-                        var ref = value?value.ref:null;
-                        if (value && ref && reftype){
-                            if (reftype === "resource"){
+            createConfigInitialized = function (engine, config) {
+                var res = {},
+                    name,
+                    value,
+                    reftype,
+                    ref;
+                for (name in config) {
+                    if (hasProperty(config, name)) {
+                        value = config[name];
+                        reftype = value ? value.reftype : null;
+                        ref = value ? value.ref : null;
+                        if (value && ref && reftype) {
+                            if (reftype === "resource") {
                                 value = engine.resourceLoader[value.refMethod](ref);
-                            } else if (reftype === "project"){
+                            } else if (reftype === "project") {
                                 value = engine.project.load(ref);
                             }
                         }
@@ -1332,17 +1366,17 @@ KICK.namespace = function (ns_string) {
                 res.uid = uid;
                 return res;
             };
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * The name may contain '/' as folder separator. The name property is a shorthand for config.name
              * @property name
              * @type String
              */
-            name:{
-                get: function(){
+            name: {
+                get: function () {
                     return resourceConfig.name;
                 },
-                set: function(newValue){
+                set: function (newValue) {
                     resourceConfig.name = newValue;
                 }
             },
@@ -1351,7 +1385,7 @@ KICK.namespace = function (ns_string) {
              * @property type
              * @type String
              */
-            type:{
+            type: {
                 value: type
             },
             /**
@@ -1360,14 +1394,14 @@ KICK.namespace = function (ns_string) {
              * @property config
              * @type Object
              */
-            config:{
-                get: function(){return resourceConfig;}
+            config: {
+                get: function () { return resourceConfig; }
             },
             /**
              * @property uid
              * @type Number
              */
-            uid:{
+            uid: {
                 value: uid
             }
         });
@@ -1379,7 +1413,7 @@ KICK.namespace = function (ns_string) {
          * @param {Object} object
          * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          */
-        this.updateConfig = function(object,filter){
+        this.updateConfig = function (object, filter) {
             resourceConfig = object.toJSON ? object.toJSON(filter) : object;
         };
 
@@ -1391,9 +1425,9 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.core.Engine} engine
          * @return {Object} instance of the resource
          */
-        this.instantiate = function(engine){
-            var resourceClass = KICK.namespace(type);
-            var resource = new resourceClass(engine,createConfigInitialized(engine,resourceConfig));
+        this.instantiate = function (engine) {
+            var resourceClass = KICK.namespace(type),
+                resource = new resourceClass(engine, createConfigInitialized(engine, resourceConfig));
             if (typeof resource.init === 'function'){
                 resource.init();
             }
@@ -1404,11 +1438,11 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {Object} A json data object
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             return {
-                type:type,
-                uid:uid,
-                config:resourceConfig
+                type: type,
+                uid: uid,
+                config: resourceConfig
             };
         };
     };
@@ -1420,7 +1454,7 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {Config} config defines one or more properties
      */
-    core.Config = function(config){
+    core.Config = function (config) {
         /**
          * Use shadow maps to generate realtime shadows.<br>
          * Default value is false.
@@ -1454,7 +1488,7 @@ KICK.namespace = function (ns_string) {
          * @property maxNumerOfLights
          * @type Number
          */
-        this.maxNumerOfLights = typeof(config.maxNumerOfLights) === 'number' ? config.maxNumerOfLights : 1;
+        this.maxNumerOfLights = typeof (config.maxNumerOfLights) === 'number' ? config.maxNumerOfLights : 1;
 
         /**
          * Checks for WebGL errors after each webgl function is called.
@@ -1463,7 +1497,7 @@ KICK.namespace = function (ns_string) {
          * @property enableDebugContext
          * @type Boolean
          */
-        this.enableDebugContext = typeof(config.enableDebugContext) === 'boolean' ? config.enableDebugContext  : false;
+        this.enableDebugContext = typeof (config.enableDebugContext) === 'boolean' ? config.enableDebugContext  : false;
 
         /**
          * Allows grabbing the content of the canvas using canvasObj.toDataURL(...).<br>
@@ -1486,7 +1520,7 @@ KICK.namespace = function (ns_string) {
          * @property alpha
          * @type Boolean
          */
-        this.alpha = typeof(config.alpha) === 'boolean' ? config.alpha : true;
+        this.alpha = typeof (config.alpha) === 'boolean' ? config.alpha : true;
 
         /**
          * WebGL spec: Default: true. If the value is true, the drawing buffer has a depth buffer of at least 16 bits.
@@ -1494,7 +1528,7 @@ KICK.namespace = function (ns_string) {
          * @property alpha
          * @type Boolean
          */
-        this.depth = typeof(config.depth) === 'boolean' ? config.depth : true;
+        this.depth = typeof (config.depth) === 'boolean' ? config.depth : true;
 
         /**
          * WebGL spec: Default: false. If the value is true, the drawing buffer has a stencil buffer of at least 8 bits.
@@ -1502,7 +1536,7 @@ KICK.namespace = function (ns_string) {
          * @property stencil
          * @type Boolean
          */
-        this.stencil = typeof(config.stencil) === 'boolean' ? config.stencil : false;
+        this.stencil = typeof (config.stencil) === 'boolean' ? config.stencil : false;
 
         /**
          * WebGL spec: Default: true. If the value is true and the implementation supports antialiasing the drawing
@@ -1511,7 +1545,7 @@ KICK.namespace = function (ns_string) {
          * @property antialias
          * @type Boolean
          */
-        this.antialias = typeof(config.antialias) === 'boolean' ? config.antialias : true;
+        this.antialias = typeof (config.antialias) === 'boolean' ? config.antialias : true;
 
         /**
          * WebGL spec: Default: true. If the value is true the page compositor will assume the drawing buffer contains
@@ -1521,7 +1555,7 @@ KICK.namespace = function (ns_string) {
          * @property premultipliedAlpha
          * @type Boolean
          */
-        this.premultipliedAlpha = typeof(config.premultipliedAlpha) === 'boolean' ? config.premultipliedAlpha : true;
+        this.premultipliedAlpha = typeof (config.premultipliedAlpha) === 'boolean' ? config.premultipliedAlpha : true;
 
         /**
          * Polling of canvas resize. Default is 0 (meaning not polling)
@@ -1537,24 +1571,31 @@ KICK.namespace = function (ns_string) {
          * @property webglNotFoundFn
          * @type Function_or_String
          */
-        this.webglNotFoundFn = config.webglNotFoundFn ?
-            (typeof (config.webglNotFoundFn) === "string"?
-                KICK.namespace(config.webglNotFoundFn):
-                config.webglNotFoundFn) :
-            function(domElement){
+        this.webglNotFoundFn = (function () {
+            if (config.webglNotFoundFn) {
+                if (typeof (config.webglNotFoundFn) === "string") {
+                    return KICK.namespace(config.webglNotFoundFn);
+                } else {
+                    return config.webglNotFoundFn;
+                }
+            }
+            return function (domElement) {
+                var errorMessage;
                 domElement.innerHTML = "";
-                var errorMessage = document.createElement("div");
-                errorMessage.style.cssText = domElement.style.cssText+";width:"+domElement.width+"px;height:"+domElement.height+"px;display: table-cell;vertical-align: middle;background:#ffeeee;";
+                errorMessage = document.createElement("div");
+                errorMessage.style.cssText = domElement.style.cssText + ";width:" + domElement.width + "px;height:" + domElement.height +
+                    "px;display: table-cell;vertical-align: middle;background:#ffeeee;";
                 errorMessage.innerHTML = "<div style='padding:12px;text-align: center;'><img src='http://www.khronos.org/assets/images/api_logos/webgl.png' style='width:74px;35px;margin-bottom: 10px;margin-left: auto;'><br clear='all'>It doesn't appear your computer can support WebGL.<br><br><a href=\"http://get.webgl.org/troubleshooting/\">Click here for more information.</a></div>";
                 domElement.parentNode.replaceChild(errorMessage, domElement);
             };
+        }());
 
-        if (core.Constants._DEBUG){
-            for (var name in config){
-                if (! this.hasOwnProperty(name)){
+        if (core.Constants._DEBUG) {
+            for (var name in config) {
+                if (! this.hasOwnProperty(name)) {
                     var supportedProperties = "Supported properties for KICK.core.Config are: ";
                     for (var n2 in this){
-                        if (this.hasOwnProperty(n2) && typeof this[n2] !== "function"){
+                        if (this.hasOwnProperty(n2) && typeof this[n2] !== "function") {
                             supportedProperties += "\n - "+n2;
                         }
                     }
@@ -1576,22 +1617,25 @@ KICK.namespace = function (ns_string) {
          * @property time
          * @type Number
          */
+        this.time = 0;
         /**
          * Millis between this frame and last frame. Read only
          * @property deltaTime
          * @type Number
          */
+        this.deltaTime = 0;
         /**
          * Number of frames since start. Read only
          * @property frame
          * @type Number
          */
+        this.frame = 0;
         /**
          * Default value is 1.0. Can be used for implementing pause or slow-motion sequences
          * @property scale
          * @type Number
          */
-
+        this.scale = 0;
     };
 
     /**
@@ -1615,7 +1659,7 @@ KICK.namespace = function (ns_string) {
      * @class MouseInput
      * @namespace KICK.core
      */
-    core.MouseInput = function(engine){
+    core.MouseInput = function (engine) {
         var vec2 = KICK.math.vec2,
             mouse = [],
             mouseUp = [],
@@ -1634,59 +1678,60 @@ KICK.namespace = function (ns_string) {
             body = document.body,
             isFirefox = navigator.userAgent.indexOf("Firefox") !== -1,
             isChrome = navigator.userAgent.indexOf("Chrome") !== -1,
-            mouseContextMenuHandler = function(e){
+            mouseContextMenuHandler = function(e) {
                 e.preventDefault();
                 return false;
             },
-            mouseMovementHandler = function(e){
+            mouseMovementHandler = function(e) {
                 mousePosition[0] = e.clientX - objectPosition[0] + body.scrollLeft;
                 mousePosition[1] = e.clientY - objectPosition[1] + body.scrollTop;
-                if (deltaMovement){
+                if (deltaMovement) {
                     vec2.subtract(mousePosition,lastMousePosition,deltaMovement);
                 } else {
                     deltaMovement = vec2.create();
                 }
                 vec2.set(mousePosition,lastMousePosition);
             },
-            mouseWheelHandler = function(e){
-                if (isChrome){
+            mouseWheelHandler = function (e) {
+                if (isChrome) {
                     mouseWheelDelta[0] += e.wheelDeltaX;
                     mouseWheelDelta[1] += e.wheelDeltaY;
                 } else {
-                    if (e.axis===1){ // horizontal
+                    if (e.axis === 1) { // horizontal
                         mouseWheelDelta[0] -= e.detail;
                     } else {
                         mouseWheelDelta[1] -= e.detail;
                     }
                 }
-                if (mouseWheelPreventDefaultAction){
+                if (mouseWheelPreventDefaultAction) {
                     e.preventDefault();
                     return false;
                 }
             },
-            mouseDownHandler = function(e){
+            mouseDownHandler = function (e) {
                 var mouseButton = e.button;
-                if (!contains(mouse,mouseButton)){
+                if (!contains(mouse,mouseButton)) {
                     mouseDown.push(mouseButton);
                     mouse.push(mouseButton);
                 }
-                if (!mouseMovementListening){  // also update mouse position if not listening for mouse movement
+                if (!mouseMovementListening) {  // also update mouse position if not listening for mouse movement
                     mouseMovementHandler();
                 }
             },
-            mouseUpHandler = function(e){
+            mouseUpHandler = function (e) {
                 var mouseButton = e.button;
                 mouseUp.push(mouseButton);
                 removeElementFromArray(mouse,mouseButton);
-                if (!mouseMovementListening){ // also update mouse position if not listening for mouse movement
+                if (!mouseMovementListening) { // also update mouse position if not listening for mouse movement
                     mouseMovementHandler();
                 }
             },
-            mouseOutHandler = function(e){
-                if (releaseMouseButtonOnMouseOut){
+            mouseOutHandler = function (e) {
+                var i;
+                if (releaseMouseButtonOnMouseOut) {
                     // simulate mouse up events
-                    for (var i=mouse.length-1;i>=0;i--){
-                        mouseUpHandler({button:mouse[i]});
+                    for (i = mouse.length-1; i >= 0; i--) {
+                        mouseUpHandler({button: mouse[i]});
                     }
                 }
             },
@@ -1702,10 +1747,8 @@ KICK.namespace = function (ns_string) {
                     top = 0;
 
                 while (object.offsetParent) {
-
                     left += object.offsetLeft;
                     top += object.offsetTop;
-
                     object = object.offsetParent;
                 }
 
@@ -1715,14 +1758,14 @@ KICK.namespace = function (ns_string) {
                 objectPosition[0] = left;
                 objectPosition[1] = top;
             };
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * Returns the mouse position of the canvas element, where 0,0 is in the upper left corner.
              * @property mousePosition
              * @type KICK.math.vec2
              */
             mousePosition:{
-                get:function(){
+                get:function() {
                     return mousePosition;
                 }
             },
@@ -1731,8 +1774,8 @@ KICK.namespace = function (ns_string) {
              * @property deltaMovement
              * @type KICK.math.vec2
              */
-            deltaMovement:{
-                get:function(){
+            deltaMovement: {
+                get:function() {
                     return deltaMovement || vec2.create();
                 }
             },
@@ -1741,8 +1784,8 @@ KICK.namespace = function (ns_string) {
              * @property deltaWheel
              * @type KICK.math.vec2
              */
-            deltaWheel:{
-                get:function(){
+            deltaWheel: {
+                get:function() {
                     return mouseWheelDelta;
                 }
             },
@@ -1753,11 +1796,11 @@ KICK.namespace = function (ns_string) {
              * @property mouseWheelPreventDefaultAction
              * @type Boolean
              */
-            mouseWheelPreventDefaultAction:{
-                get:function(){
+            mouseWheelPreventDefaultAction: {
+                get:function () {
                     return mouseWheelPreventDefaultAction;
                 },
-                set:function(newValue){
+                set:function (newValue) {
                     mouseWheelPreventDefaultAction = newValue;
                 }
             },
@@ -1769,14 +1812,14 @@ KICK.namespace = function (ns_string) {
              * @property releaseMouseButtonOnMouseOut
              * @type Boolean
              */
-            releaseMouseButtonOnMouseOut:{
-                get:function(){
+            releaseMouseButtonOnMouseOut: {
+                get: function () {
                     return releaseMouseButtonOnMouseOut;
                 },
-                set:function(newValue){
-                    if (newValue !== releaseMouseButtonOnMouseOut){
+                set: function (newValue) {
+                    if (newValue !== releaseMouseButtonOnMouseOut) {
                         releaseMouseButtonOnMouseOut = newValue;
-                        if (releaseMouseButtonOnMouseOut){
+                        if (releaseMouseButtonOnMouseOut) {
                             canvas.addEventListener( "mouseout", mouseOutHandler, false);
                         } else {
                             canvas.removeEventListener( "mouseout", mouseOutHandler, false);
@@ -1789,12 +1832,12 @@ KICK.namespace = function (ns_string) {
              * @property mouseMovementEventsEnabled
              * @type Boolean
              */
-            mouseMovementEventsEnabled:{
-               get:function(){ return mouseMovementListening; },
-               set:function(value){
-                   if (mouseMovementListening !== value){
+            mouseMovementEventsEnabled: {
+               get: function() { return mouseMovementListening; },
+               set: function (value) {
+                   if (mouseMovementListening !== value) {
                        mouseMovementListening = value;
-                       if (mouseMovementListening){
+                       if (mouseMovementListening) {
                            canvas.addEventListener( "mousemove", mouseMovementHandler, false);
                        } else {
                            canvas.removeEventListener( "mousemove", mouseMovementHandler, false);
@@ -1810,7 +1853,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} mouseButton
          * @return {boolean} true if mouse button is pressed down in this frame
          */
-        this.isButtonDown = function(mouseButton){
+        this.isButtonDown = function (mouseButton) {
             return contains(mouseDown,mouseButton);
         };
 
@@ -1819,7 +1862,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} mouseButton
          * @return {boolean} true if mouseButton is released in this frame
          */
-        this.isButtonUp = function(mouseButton){
+        this.isButtonUp = function (mouseButton) {
             return contains(mouseUp,mouseButton);
         };
 
@@ -1828,7 +1871,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} mouseButton
          * @return {boolean} true if mouseButton is down
          */
-        this.isButton = function(mouseButton){
+        this.isButton = function (mouseButton) {
             return contains(mouse,mouseButton);
         };
 
@@ -1837,12 +1880,12 @@ KICK.namespace = function (ns_string) {
          * @method frameUpdated
          * @private
          */
-        this.frameUpdated = function(){
+        this.frameUpdated = function () {
             mouseDown.length = 0;
             mouseUp.length = 0;
             mouseWheelDelta[0] = 0;
             mouseWheelDelta[1] = 0;
-            if (deltaMovement){
+            if (deltaMovement) {
                 deltaMovement[0] = 0;
                 deltaMovement[1] = 0;
             }
@@ -1857,7 +1900,7 @@ KICK.namespace = function (ns_string) {
          */
         this.updateCanvasElementPosition = updateCanvasElementPositionPrivate;
 
-        (function init(){
+        (function init () {
             updateCanvasElementPositionPrivate();
             var canvas = engine.canvas;
             canvas.addEventListener( "mousedown", mouseDownHandler, true);
@@ -1865,14 +1908,14 @@ KICK.namespace = function (ns_string) {
             canvas.addEventListener( "mousemove", mouseMovementHandler, true);
             canvas.addEventListener( "mouseout", mouseOutHandler, true);
             canvas.addEventListener( "contextmenu", mouseContextMenuHandler, true);
-            if (isFirefox){
+            if (isFirefox) {
                 canvas.addEventListener( 'MozMousePixelScroll', mouseWheelHandler, true); // Firefox
-            } else if (isChrome){
+            } else if (isChrome) {
                 canvas.addEventListener( 'mousewheel', mouseWheelHandler, true); // Chrome
             } else {
                 canvas.addEventListener( 'DOMMouseScroll', mouseWheelHandler, true); // Firefox
             }
-        })();
+        }());
     };
 
     /**
@@ -1909,20 +1952,20 @@ KICK.namespace = function (ns_string) {
      * @class KeyInput
      * @namespace KICK.core
      */
-    core.KeyInput = function(){
+    core.KeyInput = function () {
         var keyDown = [],
             keyUp = [],
             key = [],
             removeElementFromArray = core.Util.removeElementFromArray,
             contains = core.Util.contains,
-            keyDownHandler = function(e){
+            keyDownHandler = function (e) {
                 var keyCode = e.keyCode;
-                if (!contains(key,keyCode)){
+                if (!contains(key,keyCode)) {
                     keyDown.push(keyCode);
                     key.push(keyCode);
                 }
             },
-            keyUpHandler = function(e){
+            keyUpHandler = function (e) {
                 var keyCode = e.keyCode;
                 keyUp.push(keyCode);
                 removeElementFromArray(key,keyCode);
@@ -1933,7 +1976,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} keyCode
          * @return {boolean} true if key is pressed down in this frame
          */
-        this.isKeyDown = function(keyCode){
+        this.isKeyDown = function (keyCode) {
             return contains(keyDown,keyCode);
         };
 
@@ -1942,7 +1985,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} keyCode
          * @return {boolean} true if key is release in this frame
          */
-        this.isKeyUp = function(keyCode){
+        this.isKeyUp = function (keyCode) {
             return contains(keyUp,keyCode);
         };
 
@@ -1952,7 +1995,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} keyCode
          * @return {boolean} true if key is down
          */
-        this.isKey = function(keyCode){
+        this.isKey = function (keyCode) {
             return contains(key,keyCode);
         };
 
@@ -1961,15 +2004,15 @@ KICK.namespace = function (ns_string) {
          * @method update
          * @private
          */
-        this.frameUpdated = function(){
+        this.frameUpdated = function () {
             keyDown.length = 0;
             keyUp.length = 0;
         };
 
-        (function init(){
-            document.addEventListener( "keydown", keyDownHandler, false);
-            document.addEventListener( "keyup", keyUpHandler, false);
-        })();
+        (function init () {
+            document.addEventListener("keydown", keyDownHandler, false);
+            document.addEventListener("keyup", keyUpHandler, false);
+        }());
     };
 
     /**
@@ -1985,21 +2028,22 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.engine.Engine} engine usef for looking up references to project assets
          * @param {KICK.scene.Scene} scene used for looking up references to gameObjects and components
          */
-        deserializeConfig: function(config, engine, scene){
+        deserializeConfig: function (config, engine, scene) {
+            var i;
             if (typeof config === 'number'){
                 return config;
             }
-            if (Array.isArray(config)){
+            if (Array.isArray(config)) {
                 var destArray = new Array(config.length);
-                for (var i=0;i<config.length;i++){
-                    destArray [i] = core.Util.deserializeConfig(config[i], engine, scene);
+                for (i = 0; i < config.length; i++){
+                    destArray[i] = core.Util.deserializeConfig(config[i], engine, scene);
                 }
                 config = destArray;
-            } else if (config){
-                if (config && config.ref && config.reftype){
-                    if (config.reftype === "project"){
+            } else if (config) {
+                if (config && config.ref && config.reftype) {
+                    if (config.reftype === "project") {
                         config = engine.project.load(config.ref);
-                    } else if (config.reftype === "gameobject" || config.reftype === "component"){
+                    } else if (config.reftype === "gameobject" || config.reftype === "component") {
                         config = scene.getObjectByUID(config.ref);
                     }
                 }
@@ -2012,41 +2056,39 @@ KICK.namespace = function (ns_string) {
          * @param {Array_Classes} passthroughClasses Optional. Don't attempt to clone object of these classes (uses instanceof operator)
          * @return Object
          */
-        deepCopy : function(object, passthroughClasses){
+        deepCopy : function(object, passthroughClasses) {
             var res,
                 isPassthrough = false,
                 i;
             passthroughClasses = passthroughClasses || [];
 
-            for (i=0;i<passthroughClasses.length;i++){
-                if (object instanceof passthroughClasses[i]){
+            for (i = 0; i < passthroughClasses.length; i++) {
+                if (object instanceof passthroughClasses[i]) {
                     isPassthrough = true;
                     break;
                 }
             }
 
             var typeOfValue = typeof object;
-            if (isPassthrough){
+            if (isPassthrough) {
                 res = object;
-            } else if (object === null || typeof(object)==="undefined"){
+            } else if (object === null || typeof (object) === "undefined") {
                 res = null;
-            } else if (Array.isArray(object)
-                || object.buffer instanceof ArrayBuffer){ // treat typed arrays as normal arrays
+            } else if (Array.isArray(object) || object.buffer instanceof ArrayBuffer) { // treat typed arrays as normal arrays
                 res = [];
-                for (i=0;i<object.length;i++){
-                    res[i] = core.Util.deepCopy(object[i],passthroughClasses);
+                for (i = 0; i < object.length; i++){
+                    res[i] = core.Util.deepCopy(object[i], passthroughClasses);
                 }
-            } else if (typeOfValue === "object"){
+            } else if (typeOfValue === "object") {
                 res = {};
-                for (var name in object){
-                    if (object.hasOwnProperty(name)){
-                        res[name] = core.Util.deepCopy(object[name],passthroughClasses);
+                for (var name in object) {
+                    if (object.hasOwnProperty(name)) {
+                        res[name] = core.Util.deepCopy(object[name], passthroughClasses);
                     }
                 }
             } else {
                 res = object;
             }
-
             return res;
         },
         /**
@@ -2058,7 +2100,7 @@ KICK.namespace = function (ns_string) {
         copyStaticPropertiesToObject : function(object, type){
             for (var name in type){
                 if (type.hasOwnProperty(name)){
-                    Object.defineProperty(object,name,{
+                    Object.defineProperty(object, name,{
                         value:type[name]
                     });
                 }
@@ -2087,23 +2129,24 @@ KICK.namespace = function (ns_string) {
             // skip initial underscore
             var i,
                 wasLastCharSpace = true,
-                char,
-                resStr = "";
-            for (i=0;i<str.length;i++){
-                char = str.charAt(i);
-                if (char !== "_"){
+                charVal,
+                resStr = "",
+                isSpace;
+            for (i = 0; i < str.length; i++){
+                charVal = str.charAt(i);
+                if (charVal !== "_"){
                     break;
                 }
-                resStr += char;
+                resStr += charVal;
             }
 
-            for (;i<str.length;i++){
-                var char = str.charAt(i);
-                var isSpace = char === '_';
-                if (isSpace){
-                    char = wordSeparator;
+            for (; i < str.length; i++){
+                charVal = str.charAt(i);
+                isSpace = charVal === '_';
+                if (isSpace) {
+                    charVal = wordSeparator;
                 }
-                resStr += wasLastCharSpace ? char.toUpperCase() : char.toLowerCase();
+                resStr += wasLastCharSpace ? charVal.toUpperCase() : charVal.toLowerCase();
                 wasLastCharSpace = isSpace;
             }
             return resStr;
@@ -2114,30 +2157,29 @@ KICK.namespace = function (ns_string) {
          * @param {Object} object
          * @return {JSON}
          */
-        getJSONReference: function(engine,object){
-            if (object == null){
+        getJSONReference: function (engine, object) {
+            if (object === null){
                 return null;
             }
-            if (DEBUG){
-                if (!engine instanceof KICK.core.Engine){
+            if (DEBUG) {
+                if (!engine instanceof KICK.core.Engine) {
                     KICK.core.Util.fail("getJSONReference - engine not defined");
                 }
             }
             var isGameObject = object instanceof KICK.scene.GameObject;
             var isComponent = !isGameObject && object.gameObject instanceof KICK.scene.GameObject;
-            if (isComponent || isGameObject){
+            if (isComponent || isGameObject) {
                 return {
                     ref: engine.getUID(object),
                     name: typeof object.name === 'string'? object.name : "",
                     reftype: isGameObject?"gameobject":"component"
-                }
-
+                };
             } else {
                 // project type
                 return {
-                    ref:object.uid,
-                    name:object.name,
-                    reftype:"project"
+                    ref: object.uid,
+                    name: object.name,
+                    reftype: "project"
                 };
             }
         },
@@ -2148,7 +2190,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} componentType Optional defaults to component.constructor.name
          * @return {JSON}
          */
-        componentToJSON: function(engine, component,componentType){
+        componentToJSON: function(engine, component, componentType) {
             var name,
                 config = {},
                 functionReturnType = {},
@@ -2156,25 +2198,28 @@ KICK.namespace = function (ns_string) {
                     type: componentType || component.constructor.name,
                     uid: engine.getUID(component),
                     config:config
-                };
-            if (res.type === ""){
+                },
+                o,
+                serializedObject;
+            if (res.type === "") {
                 core.Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
             }
-            var serializeObject = function(o){
-                if (Array.isArray(o)){
-                    var result = [];
-                    for (var i=0;i<o.length;i++){
-                        var r = serializeObject(o[i]);
+            var serializeObject = function(o) {
+                var result, i, r, typeofO;
+                if (Array.isArray(o)) {
+                    result = [];
+                    for (i=0;i<o.length;i++) {
+                        r = serializeObject(o[i]);
                         result.push(r);
                     }
                     return result;
                 }
-                var typeofO = typeof o;
-                if (typeofO !== 'function'){
-                    if (o && o.buffer instanceof ArrayBuffer){
+                typeofO = typeof o;
+                if (typeofO !== 'function') {
+                    if (o && o.buffer instanceof ArrayBuffer) {
                         // is typed array
                         return core.Util.typedArrayToArray(o);
-                    } else if (typeofO === 'object'){
+                    } else if (typeofO === 'object') {
                         return core.Util.getJSONReference(engine,o);
                     } else {
                         return o;
@@ -2183,11 +2228,11 @@ KICK.namespace = function (ns_string) {
                 return functionReturnType;
             };
             // init config object
-            for (name in component){
-                if (core.Util.hasProperty(component,name) && name !== "gameObject"){
-                    var o = component[name];
-                    var serializedObject = serializeObject(o);
-                    if (serializedObject !== functionReturnType){
+            for (name in component) {
+                if (core.Util.hasProperty(component,name) && name !== "gameObject") {
+                    o = component[name];
+                    serializedObject = serializeObject(o);
+                    if (serializedObject !== functionReturnType) {
                         config[name] = serializedObject;
                     }
                 }
@@ -2202,18 +2247,18 @@ KICK.namespace = function (ns_string) {
          * @param {Array_String} excludeFilter
          * @static
          */
-        applyConfig: function(object,config,excludeFilter){
+        applyConfig: function (object, config, excludeFilter) {
             var contains = core.Util.contains,
                 hasProperty = core.Util.hasProperty;
             config = config || {};
             excludeFilter = excludeFilter || [];
-            for (var name in config){
-                if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)){
+            for (var name in config) {
+                if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)) {
                     object[name] = config[name];
                 }
             }
             // force setting uid
-            if (config.uid && config.uid !== object.uid){
+            if (config.uid && config.uid !== object.uid) {
                 object.uid = config.uid;
             }
         },
@@ -2225,14 +2270,15 @@ KICK.namespace = function (ns_string) {
          * @return {String} parameter value or null if not found.
          * @static
          */
-        getParameter: function(url, parameterName){
-            var regexpStr = "[\\?&]"+parameterName+"=([^&#]*)",
-                regexp = new RegExp( regexpStr ),
-                res = regexp.exec( url );
-            if( res == null )
+        getParameter: function (url, parameterName) {
+            var regexpStr = "[\\?&]" + parameterName + "=([^&#]*)",
+                regexp = new RegExp(regexpStr),
+                res = regexp.exec(url);
+            if( res === null ) {
                 return null;
-            else
+            } else {
                 return res[1];
+            }
         },
         /**
          * Reads a int parameter from a url string.
@@ -2242,12 +2288,13 @@ KICK.namespace = function (ns_string) {
          * @return {String} parameter value or null if not found.
          * @static
          */
-        getParameterInt: function(url, parameterName, notFoundValue){
+        getParameterInt: function(url, parameterName, notFoundValue) {
             var res = core.Util.getParameter(url,parameterName);
-            if( res === null )
+            if (res === null) {
                 return notFoundValue;
-            else
-                return parseInt(res);
+            } else {
+                return parseInt(res, 10);
+            }
         },
         /**
          * Reads a float parameter from a url string.
@@ -2257,12 +2304,13 @@ KICK.namespace = function (ns_string) {
          * @return {String} parameter value or null if not found.
          * @static
          */
-        getParameterFloat: function(url, parameterName, notFoundValue){
+        getParameterFloat: function(url, parameterName, notFoundValue) {
             var res = core.Util.getParameter(url,parameterName);
-            if( res === null )
+            if (res === null) {
                 return notFoundValue;
-            else
+            } else {
                 return parseFloat(res);
+            }
         },
         /**
          * Scales the image by drawing the image on a canvas object.
@@ -2273,12 +2321,13 @@ KICK.namespace = function (ns_string) {
          * @return {Canvas} return a Canvas object (acts as a image)
          * @static
          */
-        scaleImage: function(imageObj, newWidth, newHeight){
+        scaleImage: function (imageObj, newWidth, newHeight) {
             // from http://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
-            var canvas = document.createElement("canvas");
+            var canvas = document.createElement("canvas"),
+                ctx;
             canvas.width = newWidth;
             canvas.height = newHeight;
-            var ctx = canvas.getContext("2d");
+            ctx = canvas.getContext("2d");
             ctx.drawImage(imageObj,
                 0, 0, imageObj.width, imageObj.height,
                 0, 0, canvas.width, canvas.height);
@@ -2289,7 +2338,7 @@ KICK.namespace = function (ns_string) {
          * @method warn
          * @static
          */
-        warn:function(message){
+        warn:function (message) {
             debugger;
             console.log(message);
         },
@@ -2298,7 +2347,7 @@ KICK.namespace = function (ns_string) {
          * @method fail
          * @static
          */
-        fail:function(message){
+        fail:function (message) {
             debugger;
             console.error(message);
         },
@@ -2309,10 +2358,11 @@ KICK.namespace = function (ns_string) {
          * @param {TypedArray} typedArray
          * @return {Array_Number}
          */
-        typedArrayToArray: function(typedArray){
+        typedArrayToArray: function (typedArray) {
             var length = typedArray.length,
-                res = new Array(length);
-            for (var i=0;i<length;i++){
+                res = new Array(length),
+                i;
+            for (i = 0; i < length; i++){
                 res[i] = typedArray[i];
             }
             return res;
@@ -2328,8 +2378,9 @@ KICK.namespace = function (ns_string) {
          * @return {boolean} elementRemoved
          */
         removeElementFromArray: function (array, removeValue, deleteAll) {
-            var elementRemoved = false;
-            for(var i=array.length-1; i>=0; i--) {
+            var elementRemoved = false,
+                i;
+            for(i = array.length-1; i >= 0; i--) {
                 if(array[i] === removeValue) {
                     elementRemoved = true;
                     array.splice(i, 1);
@@ -2350,9 +2401,9 @@ KICK.namespace = function (ns_string) {
          */
         removeElementsFromArray: function (array, removeValues) {
             var i,j;
-            for(i=array.length-1; i>=0; i--) {
-                for (j=removeValues.length-1;j>=0;j--) {
-                    if(array[i] === removeValues[j]) {
+            for (i = array.length-1; i >= 0; i--) {
+                for (j = removeValues.length - 1; j >= 0; j--) {
+                    if (array[i] === removeValues[j]) {
                         array.splice(i, 1);
                     }
                 }
@@ -2374,11 +2425,11 @@ KICK.namespace = function (ns_string) {
             // assuming that the array is relative small
             for (i = sortedArray.length-1; i >= 0; i--) {
                 if (sortFunc(sortedArray[i],element) <= 0) {
-                    sortedArray.splice(i+1,0,element);
+                    sortedArray.splice(i+1, 0, element);
                     return;
                 }
             }
-            sortedArray.unshift( element );
+            sortedArray.unshift(element);
         },
         /**
          * Returns a-b
@@ -2388,8 +2439,8 @@ KICK.namespace = function (ns_string) {
          * @param {Number} b
          * @return {Number} a-b
          */
-        numberSortFunction : function (a,b) {
-            return a-b;
+        numberSortFunction : function (a, b) {
+            return a - b;
         },
         /**
          * Loops through array and return true if any array element strict equals the element.
@@ -2399,9 +2450,10 @@ KICK.namespace = function (ns_string) {
          * @param {Object} element
          * @return {boolean} array contains element
          */
-        contains : function(array,element){
-            for (var i=array.length-1;i>=0;i--){
-                if (array[i]===element){
+        contains : function (array, element) {
+            var i;
+            for (i = array.length - 1; i >= 0; i--) {
+                if (array[i] === element) {
                     return true;
                 }
             }
@@ -2415,13 +2467,14 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.math.vec4} dest
          * @return {KICK.math.vec4}
          */
-        uint32ToVec4 : function(uint32, dest){
-            if (!dest){
+        uint32ToVec4 : function(uint32, dest) {
+            var i;
+            if (!dest) {
                 dest = new Float32Array(4);
             }
             packIntToFloatInt32Buffer[0] = uint32;
-            for (var i=0;i<4;i++){
-                dest[i] = packIntToFloatUint8Buffer[i]/255;
+            for (i = 0; i < 4; i++) {
+                dest[i] = packIntToFloatUint8Buffer[i] / 255;
             }
             return dest;
         },
@@ -2431,9 +2484,10 @@ KICK.namespace = function (ns_string) {
          * @method vec4ToUint32
          * @param {KICK.math.vec4} vec4
          */
-        vec4ToUint32 : function(vec4){
-            for (var i=0;i<4;i++){
-                packIntToFloatUint8Buffer[i] = vec4[i]*255;
+        vec4ToUint32 : function(vec4) {
+            var i;
+            for (i = 0; i < 4; i++) {
+                packIntToFloatUint8Buffer[i] = vec4[i] * 255;
             }
             return packIntToFloatInt32Buffer[0];
         },
@@ -2443,8 +2497,9 @@ KICK.namespace = function (ns_string) {
          * @method vec4uint8ToUint32
          * @param {Array_Number}
          */
-        vec4uint8ToUint32 : function(vec4uint8){
-            for (var i=0;i<4;i++){
+        vec4uint8ToUint32 : function (vec4uint8) {
+            var i;
+            for (i = 0; i < 4; i++){
                 packIntToFloatUint8Buffer[i] = vec4uint8[i];
             }
             return packIntToFloatInt32Buffer[0];
@@ -2455,22 +2510,24 @@ KICK.namespace = function (ns_string) {
          * @param {String} str
          * @return Uint8Array
          */
-        utf8Encode:function(str){
-            var res = [];
-            for (var i=0;i<str.length;i++){
-                var charCode = str.charCodeAt(i);
-                if (charCode < 0x007F){
+        utf8Encode:function (str) {
+            var res = [],
+                i,
+                charCode;
+            for (i = 0; i < str.length; i++) {
+                charCode = str.charCodeAt(i);
+                if (charCode < 0x007F) {
                     res.push(charCode);
-                } else if (charCode <= 0x07FF){
+                } else if (charCode <= 0x07FF) {
                     res.push(0xC0 + (charCode >> 6));
                     res.push(0x80 + (charCode & 0x3F));
-                } else if (charCode <= 0xFFFF){
+                } else if (charCode <= 0xFFFF) {
                     res.push(0xE0 + (charCode >> 12));
-                    res.push(0x80 + ((charCode>>6) & 0x3F));
+                    res.push(0x80 + ((charCode >> 6) & 0x3F));
                     res.push(0x80 + (charCode & 0x3F));
                 } else {
-                    if (ASSERT){
-                        core.Util.fail("Unsupported character. Charcode "+charCode);
+                    if (ASSERT) {
+                        core.Util.fail("Unsupported character. Charcode " + charCode);
                     }
                 }
             }
@@ -2482,31 +2539,36 @@ KICK.namespace = function (ns_string) {
          * @param {Uint8Array} bytes
          * @return String
          */
-        utf8Decode:function(bytes){
-            var str = "";
-            for (var i=0;i<bytes.length;i++){
-                var byte = bytes[i];
-                if ((byte & 0x80) === 0){ // Bytes 0xxxxxxx
-                    str += String.fromCharCode(byte);
-                } else if ((byte & 0xE0) === 0xC0){ // Bytes 110xxxxx
+        utf8Decode: function (bytes) {
+            var str = "",
+                i,
+                byteVal,
+                byte2,
+                byte3,
+                charValue;
+            for (i = 0; i < bytes.length; i++) {
+                byteVal = bytes[i];
+                if ((byteVal & 0x80) === 0) { // Bytes 0xxxxxxx
+                    str += String.fromCharCode(byteVal);
+                } else if ((byteVal & 0xE0) === 0xC0) { // Bytes 110xxxxx
                     i++;
-                    var byte2 = bytes[i];
-                    byte = (byte & 0x1F) << 6;
+                    byte2 = bytes[i];
+                    byteVal = (byteVal & 0x1F) << 6;
                     byte2 = byte2 & 0x3F;
-                    var char = byte + byte2;
-                    str += String.fromCharCode(char);
-                } else if ((byte & 0xF0) === 0xE0){ // Bytes 1110xxxx
+                    charValue = byteVal + byte2;
+                    str += String.fromCharCode(charValue);
+                } else if ((byteVal & 0xF0) === 0xE0) { // Bytes 1110xxxx
                     i++;
-                    var byte2 = bytes[i];
+                    byte2 = bytes[i];
                     i++;
-                    var byte3 = bytes[i];
-                    byte = (byte & 0x1F) << 12;
+                    byte3 = bytes[i];
+                    byteVal = (byteVal & 0x1F) << 12;
                     byte2 = (byte2 & 0x3F) << 6;
                     byte3 = byte3 & 0x3F;
-                    var char = byte + byte2 + byte3;
-                    str += String.fromCharCode(char);
+                    charValue = byteVal + byte2 + byte3;
+                    str += String.fromCharCode(charValue);
                 } else {
-                    if (ASSERT){
+                    if (ASSERT) {
                         core.Util.fail("Unsupported encoding");
                     }
                 }
@@ -2528,7 +2590,7 @@ KICK.namespace = function (ns_string) {
 // shim layer with setTimeout fallback
     if (typeof window.requestAnimationFrame === "undefined") {
         window.requestAnimationFrame = (function () {
-            return  window.requestAnimationFrame       ||
+            return  window.requestAnimationFrame   ||
                 window.webkitRequestAnimationFrame ||
                 window.mozRequestAnimationFrame    ||
                 window.oRequestAnimationFrame      ||
@@ -2558,6 +2620,6 @@ KICK.namespace = function (ns_string) {
     if (typeof window.console.log === "undefined") {
         window.console.log = function (v) {
             alert (v);
-        }
+        };
     }
 })();
