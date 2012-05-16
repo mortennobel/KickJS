@@ -23,8 +23,7 @@ The key down event and key up event will change the color of the objects.<br><br
                 transform,
                 time,
                 material,
-                currentSpeed = 0,
-                uniforms;
+                currentSpeed = 0;
 
         this.rotationSpeed = config.rotationSpeed;
         this.keyCode = config.keyCode;
@@ -37,16 +36,15 @@ The key down event and key up event will change the color of the objects.<br><br
             transform = gameObject.transform;
             keyInput = engine.keyInput;
             material = gameObject.getComponentOfType(KICK.scene.MeshRenderer).material;
-            uniforms = material.uniforms;
         };
 
         this.update = function(){
             var deltaTime = time.deltaTime;
             if (keyInput.isKeyDown(thisObj.keyCode)){ // test if key has been pressed down in this frame
-                uniforms.mainColor.value = thisObj.rotationColor;
+                material.setUniform("mainColor", thisObj.rotationColor);
             }
             if (keyInput.isKeyUp(thisObj.keyCode)){ // test if key has been released in this frame
-                uniforms.mainColor.value = [1,1,1,1];
+                material.setUniform("mainColor", [1,1,1,1]);
             }
             if (keyInput.isKey(thisObj.keyCode)){ // test if key is being pressed
                 // accelerate

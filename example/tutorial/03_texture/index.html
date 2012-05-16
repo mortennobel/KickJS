@@ -41,11 +41,8 @@ image: /images/webgl.png.<br>
     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
     var material = new KICK.material.Material(engine,{
         shader: shader,
-        uniforms:{
-            mainTexture: {
-                value: texture,
-                type: KICK.core.Constants.GL_SAMPLER_2D
-            }
+        uniformData:{
+            mainTexture: texture
         }
     });
 

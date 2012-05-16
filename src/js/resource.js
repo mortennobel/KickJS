@@ -336,22 +336,10 @@ KICK.namespace = function (ns_string) {
 
                         if (shaderName==="specular" || shaderName==="transparent_specular"){
                             defaultUniforms = {
-                                mainColor: {
-                                    value: [1,1,1,1],
-                                    type: KICK.core.Constants.GL_FLOAT_VEC4
-                                },
-                                mainTexture: {
-                                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                                    type: KICK.core.Constants.GL_SAMPLER_2D
-                                },
-                                specularColor: {
-                                    value: [1,1,1,1],
-                                    type: KICK.core.Constants.GL_FLOAT_VEC4
-                                },
-                                specularExponent: {
-                                    value: 50,
-                                    type: KICK.core.Constants.GL_FLOAT
-                                }
+                                mainColor: [1,1,1,1],
+                                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                                specularColor: [1,1,1,1],
+                                specularExponent: 50
                             };
                         }
                         if (shaderName==="diffuse" ||
@@ -360,14 +348,8 @@ KICK.namespace = function (ns_string) {
                             shaderName==="unlit_vertex_color" ||
                             shaderName==="transparent_unlit"){
                             defaultUniforms = {
-                                mainColor: {
-                                    value: [1,1,1,1],
-                                    type: KICK.core.Constants.GL_FLOAT_VEC4
-                                },
-                                mainTexture: {
-                                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                                    type: KICK.core.Constants.GL_SAMPLER_2D
-                                }
+                                mainColor: [1,1,1,1],
+                                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                             };
                         }
 

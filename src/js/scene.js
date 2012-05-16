@@ -22,6 +22,7 @@
  */
 var KICK = KICK || {};
 KICK.namespace = function (ns_string) {
+    "use strict"; // force strict ECMAScript 5
     var parts = ns_string.split("."),
         parent = window,
         i;
@@ -80,24 +81,24 @@ KICK.namespace = function (ns_string) {
                  * @property scene
                  * @type KICK.scene.Scene
                  */
-                scene:{
-                    value:scene
+                scene: {
+                    value: scene
                 },
                 /**
                  * Reference to the engine
                  * @property engine
                  * @type KICK.core.Engine
                  */
-                engine:{
-                    value:scene.engine
+                engine: {
+                    value: scene.engine
                 },
                 /**
                  * Reference to the transform
                  * @property transform
                  * @type KICK.scene.Transform
                  */
-                transform:{
-                    value:_transform
+                transform: {
+                    value: _transform
                 },
                 /**
                  * Layer bit flag. The default value is 1.
@@ -105,13 +106,13 @@ KICK.namespace = function (ns_string) {
                  * @property layer
                  * @type Number
                  */
-                layer:{
-                    get:function(){
+                layer: {
+                    get: function () {
                         return _layer;
                     },
-                    set:function(newValue){
-                        if (typeof newValue !== 'number'){
-                            KICK.core.Util.fail("GameObject.layer must be a Number")
+                    set: function (newValue) {
+                        if (typeof newValue !== 'number') {
+                            KICK.core.Util.fail("GameObject.layer must be a Number");
                         }
                         _layer = newValue;
                     }
@@ -120,11 +121,11 @@ KICK.namespace = function (ns_string) {
                  * @property name
                  * @type String
                  */
-                name:{
-                    get:function(){
+                name: {
+                    get: function () {
                         return _name;
                     },
-                    set:function(newValue){
+                    set: function (newValue) {
                         _name = newValue;
                     }
                 },
@@ -133,11 +134,11 @@ KICK.namespace = function (ns_string) {
                  * @property uid
                  * @type Number
                  */
-                uid:{
-                    get:function(){
+                uid: {
+                    get: function () {
                         return _uid;
                     },
-                    set:function(newValue){
+                    set: function (newValue) {
                         _uid = newValue;
                     }
                 },
@@ -146,8 +147,8 @@ KICK.namespace = function (ns_string) {
                  * @property numberOfComponents
                  * @type Number
                  */
-                numberOfComponents:{
-                    get:function(){
+                numberOfComponents: {
+                    get: function () {
                         return _components.length;
                     }
                 },
@@ -155,13 +156,12 @@ KICK.namespace = function (ns_string) {
                  * @property destroyed
                  * @type Boolean
                  */
-                destroyed:{
-                    get:function(){
-                        return _components.length==0;
+                destroyed: {
+                    get: function () {
+                        return _components.length === 0;
                     }
                 }
-            }
-        );
+            });
 
         /**
          * Get component by index.
@@ -169,7 +169,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} index
          * @return {KICK.scene.Component}
          */
-        this.getComponent = function(index){
+        this.getComponent = function (index) {
             return _components[index];
         };
 
@@ -179,8 +179,8 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.Component} component
          */
         this.addComponent = function (component) {
-            if (component instanceof KICK.scene.Transform){
-                if (ASSERT){
+            if (component instanceof KICK.scene.Transform) {
+                if (ASSERT) {
                     KICK.core.Util.fail("Cannot add another Transform to a GameObject");
                 }
                 return;
@@ -188,7 +188,7 @@ KICK.namespace = function (ns_string) {
             if (component.gameObject) {
                 throw {
                     name: "Error",
-                    message: "Component "+component+" already added to gameObject "+component.gameObject
+                    message: "Component " + component + " already added to gameObject " + component.gameObject
                 };
             }
             if (!component.scriptPriority) {
@@ -207,10 +207,10 @@ KICK.namespace = function (ns_string) {
         this.removeComponent =  function (component) {
             try {
                 delete component.gameObject;
-            } catch (e){
+            } catch (e) {
                 // ignore if gameObject cannot be deleted
             }
-            core.Util.removeElementFromArray(_components,component);
+            core.Util.removeElementFromArray(_components, component);
             scene.removeComponent(component);
         };
 
@@ -219,7 +219,7 @@ KICK.namespace = function (ns_string) {
          * @method notifyComponentUpdated
          * @param {KICK.scene.Component} component
          */
-        this.notifyComponentUpdated = function(component){
+        this.notifyComponentUpdated = function (component) {
             scene.notifyComponentUpdated(component);
         };
 
@@ -231,7 +231,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             var i;
-            for (i = _components.length-1; i >= 0 ; i--) {
+            for (i = _components.length - 1; i >= 0 ; i--) {
                 thisObj.removeComponent(_components[i]);
             }
             scene.destroyObject(thisObj);
@@ -250,9 +250,9 @@ KICK.namespace = function (ns_string) {
         this.getComponentOfType = function (type) {
             var component,
                 i;
-            for (i=_components.length-1;i>=0;i--){
+            for (i =_components.length - 1; i >= 0; i--) {
                 component = _components[i];
-                if (component instanceof type){
+                if (component instanceof type) {
                     return component;
                 }
             }
@@ -276,9 +276,9 @@ KICK.namespace = function (ns_string) {
             var component,
                 i,
                 res = [];
-            for (i=_components.length-1;i>=0;i--){
+            for (i = _components.length - 1; i >= 0; i--) {
                 component = _components[i];
-                if (component instanceof type){
+                if (component instanceof type) {
                     res.push(component);
                 }
             }
@@ -289,32 +289,33 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return JSON object
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             var componentsJSON = [],
-                component;
-            for (var i=0;i<_components.length;i++){
+                component,
+                i,
+                componentJSON;
+            for (i = 0; i < _components.length; i++) {
                 component = _components[i];
-                if (!component.toJSON){
-                    componentsJSON.push(KICK.core.Util.componentToJSON(scene.engine,component));
+                if (!component.toJSON) {
+                    componentsJSON.push(KICK.core.Util.componentToJSON(scene.engine, component));
                 } else {
-                    var componentJSON = component.toJSON();
-                    if (componentJSON){
+                    componentJSON = component.toJSON();
+                    if (componentJSON) {
                         componentsJSON.push(componentJSON);
                     }
                 }
-
             }
             return {
                 name: _name,
                 layer: _layer,
-                uid:_uid,
-                components:componentsJSON
+                uid: _uid,
+                components: componentsJSON
             };
         };
 
-        (function init(){
-            applyConfig(thisObj,config,["uid"]);
-        })();
+        (function init() {
+            applyConfig(thisObj, config, ["uid"]);
+        }());
     };
 
     /**
@@ -400,11 +401,11 @@ KICK.namespace = function (ns_string) {
             globalMatrix = mat4.identity(mat4.create()),
             localMatrixInverse = mat4.identity(mat4.create()),
             globalMatrixInverse = mat4.identity(mat4.create()),
-            globalPosition = vec3.create([0,0,0]),
-            localPosition = vec3.create([0,0,0]),
-            globalRotationQuat = quat4.create([0,0,0,1]),
-            localRotationQuat = quat4.create([0,0,0,1]),
-            localScale = vec3.create([1,1,1]),
+            globalPosition = vec3.create([0, 0, 0]),
+            localPosition = vec3.create([0, 0, 0]),
+            globalRotationQuat = quat4.create([0, 0, 0, 1]),
+            localRotationQuat = quat4.create([0, 0, 0, 1]),
+            localScale = vec3.create([1, 1, 1]),
             // the dirty parameter let the
             LOCAL = 0,
             LOCAL_INV = 1,
@@ -422,19 +423,19 @@ KICK.namespace = function (ns_string) {
                 dirty[GLOBAL_INV] = 1;
                 dirty[GLOBAL_POSITION] = 1;
                 dirty[GLOBAL_ROTATION] = 1;
-                for (i=children.length-1;i>=0;i--) {
+                for (i = children.length - 1; i >= 0; i--) {
                     children[i]._markGlobalDirty();
                 }
             },
-            markLocalDirty = function(){
+            markLocalDirty = function () {
                 dirty[LOCAL] = 1;
                 dirty[LOCAL_INV] = 1;
                 markGlobalDirty();
             };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             // inherit description from GameObject
-            gameObject:{
+            gameObject: {
                 value: gameObject
             },
             /**
@@ -442,30 +443,30 @@ KICK.namespace = function (ns_string) {
              * @property position
              * @type KICK.math.vec3
              */
-            position:{
-                get: function(){
+            position: {
+                get: function () {
                     // if no parent - use local position
-                    if (parentTransform === null){
+                    if (parentTransform === null) {
                         return vec3.create(localPosition);
                     }
-                    if (dirty[GLOBAL_POSITION]){
-                        mat4.multiplyVec3(thisObj.getGlobalMatrix(),[0,0,0],globalPosition);
+                    if (dirty[GLOBAL_POSITION]) {
+                        mat4.multiplyVec3(thisObj.getGlobalMatrix(), [0, 0, 0], globalPosition);
                         dirty[GLOBAL_POSITION] = 0;
                     }
                     return vec3.create(globalPosition);
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     var currentPosition;
-                    if (parentTransform === null){
+                    if (parentTransform === null) {
                         thisObj.localPosition = newValue;
                         return;
                     }
                     currentPosition = thisObj.position;
-                    vec3.set(newValue,localPosition);
+                    vec3.set(newValue, localPosition);
                     thisObj.localPosition = [
-                        localPosition[0]+currentPosition[0]-newValue[0],
-                        localPosition[1]+currentPosition[1]-newValue[1],
-                        localPosition[2]+currentPosition[2]-newValue[2]
+                        localPosition[0] + currentPosition[0] - newValue[0],
+                        localPosition[1] + currentPosition[1] - newValue[1],
+                        localPosition[2] + currentPosition[2] - newValue[2]
                     ];
                     markLocalDirty();
                 }
@@ -475,12 +476,12 @@ KICK.namespace = function (ns_string) {
              * @property localPosition
              * @type KICK.math.vec3
              */
-            localPosition:{
-                get: function(){
+            localPosition: {
+                get: function () {
                     return vec3.create(localPosition);
                 },
-                set: function(newValue){
-                    vec3.set(newValue,localPosition);
+                set: function (newValue) {
+                    vec3.set(newValue, localPosition);
                     markLocalDirty();
                 }
             },
@@ -490,13 +491,13 @@ KICK.namespace = function (ns_string) {
              * @type KICK.math.vec3
              */
             localRotationEuler: {
-                get: function(){
+                get: function () {
                     var vec = vec3.create();
-                    quat4.toEuler(localRotationQuat,vec);
+                    quat4.toEuler(localRotationQuat, vec);
                     return vec;
                 },
-                set: function(newValue){
-                    quat4.setEuler(newValue,localRotationQuat);
+                set: function (newValue) {
+                    quat4.setEuler(newValue, localRotationQuat);
                     markLocalDirty();
                 }
             },
@@ -506,14 +507,14 @@ KICK.namespace = function (ns_string) {
              * @type KICK.math.vec3
              */
             rotationEuler: {
-                get: function(){
+                get: function () {
                     var vec = vec3.create();
-                    quat4.toEuler(thisObj.rotation,vec);
+                    quat4.toEuler(thisObj.rotation, vec);
                     return vec;
                 },
-                set: function(newValue){
+                set: function (newValue) {
                     var tmp = quat4.create();
-                    quat4.setEuler(newValue,tmp);
+                    quat4.setEuler(newValue, tmp);
                     this.rotation = tmp;
                 }
             },
@@ -523,31 +524,31 @@ KICK.namespace = function (ns_string) {
              * @property rotation
              * @type KICK.math.quat4
              */
-            rotation:{
-                get: function(){
+            rotation: {
+                get: function () {
                     var parentIterator = null;
-                    if (parentTransform === null){
+                    if (parentTransform === null) {
                         return quat4.create(localRotationQuat);
                     }
-                    if (dirty[GLOBAL_ROTATION]){
+                    if (dirty[GLOBAL_ROTATION]) {
                         quat4.set(localRotationQuat,globalRotationQuat);
                         parentIterator = thisObj.parent;
-                        while (parentIterator != null){
-                            quat4.multiply(parentIterator.localRotation,globalRotationQuat,globalRotationQuat);
+                        while (parentIterator !== null) {
+                            quat4.multiply(parentIterator.localRotation, globalRotationQuat, globalRotationQuat);
                             parentIterator = parentIterator.parent;
                         }
                         dirty[GLOBAL_ROTATION] = false;
                     }
                     return globalRotationQuat;
                 },
-                set: function(newValue){
-                    if (parentTransform == null){
+                set: function (newValue) {
+                    if (parentTransform === null) {
                         this.localRotation = newValue;
                         return;
                     }
                     var rotationDifference = quat4.create();
-                    quat4.difference(newValue,thisObj.rotation,rotationDifference);
-                    this.localRotation = quat4.multiply(localRotationQuat,rotationDifference);
+                    quat4.difference(newValue, thisObj.rotation, rotationDifference);
+                    this.localRotation = quat4.multiply(localRotationQuat, rotationDifference);
                 }
             },
             /**
@@ -556,11 +557,11 @@ KICK.namespace = function (ns_string) {
              * @type KICK.math.quat4
              */
             localRotation: {
-                get: function(){
+                get: function () {
                     return localRotationQuat;
                 },
-                set: function(newValue){
-                    quat4.set(newValue,localRotationQuat);
+                set: function (newValue) {
+                    quat4.set(newValue, localRotationQuat);
                     markLocalDirty();
                 }
             },
@@ -571,14 +572,15 @@ KICK.namespace = function (ns_string) {
              * @type KICK.math.vec3
              */
             localScale: {
-                get: function(){
+                get: function () {
                     return vec3.create(localScale);
                 },
-                set: function(newValue){
-                    vec3.set(newValue,localScale);
+                set: function (newValue) {
+                    var i;
+                    vec3.set(newValue, localScale);
                     // replace 0 value with epsilon to prevent a singular matrix
-                    for (var i=0;i<localScale.length;i++){
-                        if (localScale[i] === 0){
+                    for (i = 0; i < localScale.length; i++) {
+                        if (localScale[i] === 0) {
                             localScale[i] = KICK.core.Constants._EPSILON;
                         }
                     }
@@ -590,7 +592,7 @@ KICK.namespace = function (ns_string) {
              * @property children
              * @type Array_KICK.scene.Transform
              */
-            children:{
+            children: {
                 value: children
             },
             /**
@@ -598,23 +600,23 @@ KICK.namespace = function (ns_string) {
              * @property parent
              * @type KICK.scene.Transform
              */
-            parent:{
-                get: function(){
+            parent: {
+                get: function () {
                     return parentTransform;
                 },
-                set: function(newParent){
+                set: function (newParent) {
                     if (newParent === this) {
                         KICK.core.Util.fail('Cannot assign parent to self');
                     }
-                    if (ASSERT){
-                        if (typeof newParent === 'undefined'){
+                    if (ASSERT) {
+                        if (typeof newParent === 'undefined') {
                             fail("Cannot set newParent to undefined - should be null");
                         }
                     }
-                    if (newParent !== parentTransform){
-                        if (newParent === null){
+                    if (newParent !== parentTransform) {
+                        if (newParent === null) {
                             parentTransform = null;
-                            core.Util.removeElementFromArray(newParent.children,this);
+                            core.Util.removeElementFromArray(newParent.children, this);
                         } else {
                             parentTransform = newParent;
                             newParent.children.push(this);
@@ -632,7 +634,7 @@ KICK.namespace = function (ns_string) {
          */
         this.getLocalMatrix = function () {
             if (dirty[LOCAL]) {
-                mat4.setTRS(localPosition,localRotationQuat,localScale,localMatrix);
+                mat4.setTRS(localPosition, localRotationQuat, localScale, localMatrix);
                 dirty[LOCAL] = 0;
             }
             return localMatrix;
@@ -645,7 +647,7 @@ KICK.namespace = function (ns_string) {
          */
         this.getLocalTRSInverse = function () {
             if (dirty[LOCAL_INV]) {
-                mat4.setTRSInverse(localPosition,localRotationQuat,localScale,localMatrixInverse);
+                mat4.setTRSInverse(localPosition, localRotationQuat, localScale, localMatrixInverse);
                 dirty[LOCAL_INV] = 0;
             }
             return localMatrixInverse;
@@ -661,7 +663,7 @@ KICK.namespace = function (ns_string) {
 
                 var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
-                    mat4.multiply(transformIterator.getLocalMatrix(),globalMatrix,globalMatrix);
+                    mat4.multiply(transformIterator.getLocalMatrix(), globalMatrix, globalMatrix);
                     transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL] = 0;
@@ -679,7 +681,7 @@ KICK.namespace = function (ns_string) {
                 mat4.set(thisObj.getLocalTRSInverse(), globalMatrixInverse);
                 var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
-                    mat4.multiply(globalMatrixInverse,transformIterator.getLocalTRSInverse(),globalMatrixInverse);
+                    mat4.multiply(globalMatrixInverse, transformIterator.getLocalTRSInverse(), globalMatrixInverse);
                     transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL_INV] = 0;
@@ -700,21 +702,21 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {Object} JSON formatted object
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             var typedArrayToArray = KICK.core.Util.typedArrayToArray;
-            if (ASSERT){
-                if (!thisObj.gameObject || !thisObj.gameObject.engine){
+            if (ASSERT) {
+                if (!thisObj.gameObject || !thisObj.gameObject.engine) {
                     fail("Cannot serialize a Transform object that has no reference to gameObject/engine");
                 }
             }
             return {
-                type:"KICK.scene.Transform",
+                type: "KICK.scene.Transform",
                 uid: gameObject.engine.getUID(thisObj),
-                config:{
+                config: {
                     localPosition: typedArrayToArray(localPosition),
                     localRotation: typedArrayToArray(localRotationQuat),
                     localScale: typedArrayToArray(localScale),
-                    parent: parentTransform ? KICK.core.Util.getJSONReference(thisObj.gameObject.engine,parentTransform): null
+                    parent: parentTransform ? KICK.core.Util.getJSONReference(thisObj.gameObject.engine, parentTransform) : null
                 }
             };
         };
@@ -722,7 +724,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method
          */
-        this.str = function(){
+        this.str = function () {
             return JSON.stringify(thisObj.toJSON());
         };
     };
@@ -742,7 +744,7 @@ KICK.namespace = function (ns_string) {
             activeGameObjects = [],
             gameObjectsNew = [],
             gameObjectsDelete = [],
-            updateableComponents= [],
+            updateableComponents = [],
             componentsNew = [],
             componentsDelete = [],
             componentListenes = [],
@@ -755,19 +757,19 @@ KICK.namespace = function (ns_string) {
             gl,
             i,
             thisObj = this,
-            addLight = function(light){
-                if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
+            addLight = function (light) {
+                if (light.type === core.Constants._LIGHT_TYPE_AMBIENT) {
                     sceneLightObj.ambientLight = light;
-                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
+                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL) {
                     sceneLightObj.directionalLight = light;
                 } else {
                     sceneLightObj.addPointLight(light);
                 }
             },
-            removeLight = function(light){
-                if (light.type == core.Constants._LIGHT_TYPE_AMBIENT){
+            removeLight = function (light) {
+                if (light.type === core.Constants._LIGHT_TYPE_AMBIENT) {
                     sceneLightObj.ambientLight = null;
-                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL){
+                } else if (light.type === core.Constants._LIGHT_TYPE_DIRECTIONAL) {
                     sceneLightObj.directionalLight = null;
                 } else {
                     sceneLightObj.removePointLight(light);
@@ -781,8 +783,8 @@ KICK.namespace = function (ns_string) {
              * @return {Number} order of a,b
              * @private
              */
-            sortByScriptPriority = function (a,b) {
-                return a.scriptPriority-b.scriptPriority;
+            sortByScriptPriority = function (a, b) {
+                return a.scriptPriority - b.scriptPriority;
             },
             /**
              * Compares two camera objects by their cameraIndex attribute
@@ -792,7 +794,7 @@ KICK.namespace = function (ns_string) {
              * @param {Number} difference
              * @private
              */
-            cameraSortFunc = function(a,b){
+            cameraSortFunc = function (a, b) {
                 return b.cameraIndex - a.cameraIndex;
             },
             /**
@@ -803,36 +805,37 @@ KICK.namespace = function (ns_string) {
              */
             addNewGameObjects = function () {
                 var i,
-                    component;
+                    component,
+                    componentsNewCopy;
                 if (gameObjectsNew.length > 0) {
                     activeGameObjects = activeGameObjects.concat(gameObjectsNew);
                     gameObjectsNew.length = 0;
                 }
                 if (componentsNew.length > 0) {
-                    var componentsNewCopy = componentsNew;
+                    componentsNewCopy = componentsNew;
                     componentsNew = [];
-                    for (i = componentsNewCopy.length-1; i >= 0; i--) {
+                    for (i = componentsNewCopy.length - 1; i >= 0; i--) {
                         component = componentsNewCopy[i];
                         componentsAll.push(component);
-                        if (typeof(component.activated) === "function") {
+                        if (typeof (component.activated) === "function") {
                             component.activated();
                         }
-                        if (typeof(component.update) === "function") {
-                            core.Util.insertSorted(component,updateableComponents,sortByScriptPriority);
+                        if (typeof (component.update) === "function") {
+                            core.Util.insertSorted(component, updateableComponents, sortByScriptPriority);
                         }
-                        if (typeof(component.render) === "function") {
+                        if (typeof (component.render) === "function") {
                             renderableComponents.push(component);
                         }
-                        if (typeof(component.render) === "function") {
-                            core.Util.removeElementFromArray(renderableComponents,component);
+                        if (typeof (component.render) === "function") {
+                            core.Util.removeElementFromArray(renderableComponents, component);
                         }
-                        if (component instanceof scene.Camera){
-                            KICK.core.Util.insertSorted(component,cameras,cameraSortFunc);
-                        } else if (component instanceof scene.Light){
+                        if (component instanceof scene.Camera) {
+                            KICK.core.Util.insertSorted(component, cameras, cameraSortFunc);
+                        } else if (component instanceof scene.Light) {
                             addLight(component);
                         }
                     }
-                    for (i=componentListenes.length-1; i >= 0; i--) {
+                    for (i = componentListenes.length - 1; i >= 0; i--) {
                         componentListenes[i].componentsAdded(componentsNewCopy);
                     }
                 }
@@ -844,52 +847,53 @@ KICK.namespace = function (ns_string) {
              */
             cleanupGameObjects = function () {
                 var i,
-                    component;
+                    component,
+                    componentsDeleteCopy;
                 if (gameObjectsDelete.length > 0) {
-                    core.Util.removeElementsFromArray(activeGameObjects,gameObjectsDelete);
-                    core.Util.removeElementsFromArray(gameObjects,gameObjectsDelete);
+                    core.Util.removeElementsFromArray(activeGameObjects, gameObjectsDelete);
+                    core.Util.removeElementsFromArray(gameObjects, gameObjectsDelete);
                     gameObjectsDelete.length = 0;
                 }
                 if (componentsDelete.length > 0) {
-                    var componentsDeleteCopy = componentsDelete;
+                    componentsDeleteCopy = componentsDelete;
                     componentsDelete = [];
-                    for (i = componentsDeleteCopy.length-1; i >= 0; i--) {
+                    for (i = componentsDeleteCopy.length - 1; i >= 0; i--) {
                         component = componentsDeleteCopy[i];
-                        core.Util.removeElementFromArray(componentsAll,component);
-                        if (typeof(component.deactivated) === "function") {
+                        core.Util.removeElementFromArray(componentsAll, component);
+                        if (typeof (component.deactivated) === "function") {
                             component.deactivated();
                         }
-                        if (typeof(component.update) === "function") {
-                            core.Util.removeElementFromArray(updateableComponents,component);
+                        if (typeof (component.update) === "function") {
+                            core.Util.removeElementFromArray(updateableComponents, component);
                         }
-                        if (component instanceof scene.Camera){
-                            core.Util.removeElementFromArray(cameras,component);
-                        } else if (component instanceof scene.Light){
+                        if (component instanceof scene.Camera) {
+                            core.Util.removeElementFromArray(cameras, component);
+                        } else if (component instanceof scene.Light) {
                             removeLight(component);
                         }
                     }
-                    for (i=componentListenes.length-1; i >= 0; i--) {
+                    for (i = componentListenes.length - 1; i >= 0; i--) {
                         componentListenes[i].componentsRemoved(componentsDeleteCopy);
                     }
                 }
             },
-            updateComponents = function(){
+            updateComponents = function () {
                 cleanupGameObjects();
                 addNewGameObjects();
                 var i;
-                for (i=updateableComponents.length-1; i >= 0; i--) {
+                for (i = updateableComponents.length - 1; i >= 0; i--) {
                     updateableComponents[i].update();
                 }
             },
-            renderComponents = function(){
+            renderComponents = function () {
                 var i;
-                for (i=cameras.length-1; i >= 0; i--) {
+                for (i = cameras.length - 1; i >= 0; i--) {
                     cameras[i].renderScene(sceneLightObj);
                 }
                 engine.gl.flush();
             },
-            createGameObjectPrivate = function(config){
-                var gameObject = new scene.GameObject(thisObj,config);
+            createGameObjectPrivate = function(config) {
+                var gameObject = new scene.GameObject(thisObj, config);
                 gameObjectsNew.push(gameObject);
                 gameObjects.push(gameObject);
                 objectsById[gameObject.uid] = gameObject;
@@ -897,8 +901,8 @@ KICK.namespace = function (ns_string) {
             };
 
 
-        this.notifyComponentUpdated = function(component){
-            for (i=componentListenes.length-1; i >= 0; i--) {
+        this.notifyComponentUpdated = function (component) {
+            for (i = componentListenes.length - 1; i >= 0; i--) {
                 componentListenes[i].componentUpdated(component);
             }
         };
@@ -906,9 +910,9 @@ KICK.namespace = function (ns_string) {
         /**
          * @method destroy
          */
-        this.destroy = function(){
+        this.destroy = function () {
             engine.project.removeResourceDescriptor(thisObj.uid);
-            if (thisObj === engine.activeScene){
+            if (thisObj === engine.activeScene) {
                 engine.activeScene = null;
             }
         };
@@ -921,14 +925,14 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.ComponentChangedListener} componentListener
          */
         this.addComponentListener = function (componentListener) {
-            if (!scene.ComponentChangedListener.isComponentListener(componentListener) ) {
+            if (!scene.ComponentChangedListener.isComponentListener(componentListener)) {
                 KICK.core.Util.fail("Component listener does not have the correct interface. " +
                         "It should contain the two functions: " +
                         "componentsAdded(components) and componentsRemoved(components)");
             }
-            if (!componentListener.componentUpdated){
-                componentListener.componentUpdated = function(){};
-                if (DEBUG){
+            if (!componentListener.componentUpdated) {
+                componentListener.componentUpdated = function () {};
+                if (DEBUG) {
                     warn("componentListener has no componentUpdated method");
                 }
             }
@@ -944,16 +948,19 @@ KICK.namespace = function (ns_string) {
          * @param {Function} componentType
          * @return {Array_KICK.scene.Component} components
          */
-        this.findComponentsOfType = function(componentType){
-            if (ASSERT){
-                if (typeof componentType !== 'function'){
+        this.findComponentsOfType = function (componentType) {
+            if (ASSERT) {
+                if (typeof componentType !== 'function') {
                     KICK.core.Util.fail("Scene.findComponentsOfType expects a function");
                 }
             }
-            var res = [];
-            for (var i=gameObjects.length-1;i>=0;i--){
-                var component = gameObjects[i].getComponentsOfType(componentType);
-                for (var j=0;j<component.length;j++){
+            var res = [],
+                i,
+                j,
+                component;
+            for (i = gameObjects.length - 1; i >= 0; i--) {
+                component = gameObjects[i].getComponentsOfType(componentType);
+                for (j = 0; j < component.length; j++) {
                     res.push(component[j]);
                 }
             }
@@ -966,7 +973,7 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene.ComponentChangedListener} componentListener
          */
         this.removeComponentListener = function (componentListener) {
-            core.Util.removeElementFromArray(componentListenes,componentListener);
+            core.Util.removeElementFromArray(componentListenes, componentListener);
         };
 
         /**
@@ -979,11 +986,11 @@ KICK.namespace = function (ns_string) {
          * @protected
          */
         this.addComponent = function (component) {
-            core.Util.insertSorted(component,componentsNew,sortByScriptPriority);
+            core.Util.insertSorted(component, componentsNew, sortByScriptPriority);
             var uid = engine.getUID(component);
-            if (ASSERT){
-                if (objectsById[uid]){
-                    core.Util.fail("Component with uid "+uid+" already exist");
+            if (ASSERT) {
+                if (objectsById[uid]) {
+                    core.Util.fail("Component with uid " + uid + " already exist");
                 }
             }
             objectsById[uid] = component;
@@ -994,7 +1001,7 @@ KICK.namespace = function (ns_string) {
          * @param {Number} uid
          * @return {Object} GameObject or component
          */
-        this.getObjectByUID = function(uid){
+        this.getObjectByUID = function (uid) {
             return objectsById[uid];
         };
 
@@ -1004,10 +1011,12 @@ KICK.namespace = function (ns_string) {
          * @param {String} name
          * @return {KICK.scene.GameObject} GameObject or undefined if not found
          */
-        this.getGameObjectByName = function(name){
-            for (var i=gameObjects.length-1;i>=0;i--){
-                var gameObject = gameObjects[i];
-                if (gameObject.name === name){
+        this.getGameObjectByName = function (name) {
+            var i,
+                gameObject;
+            for (i = gameObjects.length - 1; i >= 0; i--) {
+                gameObject = gameObjects[i];
+                if (gameObject.name === name) {
                     return gameObject;
                 }
             }
@@ -1019,30 +1028,30 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.scene} component
          */
         this.removeComponent = function (component) {
-            core.Util.removeElementFromArray(componentsNew,component);
+            core.Util.removeElementFromArray(componentsNew, component);
             componentsDelete.push(component);
             delete objectsById[component.uid];
         };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * Reference to the engine
              * @property engine
              * @type KICK.core.Engine
              */
-            engine:{
-                value:engine
+            engine: {
+                value: engine
             },
             /**
              * Name of the scene
              * @property name
              * @type String
              */
-            name:{
-                get:function(){
+            name: {
+                get: function () {
                     return _name;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     _name = newValue;
                 }
 
@@ -1051,14 +1060,14 @@ KICK.namespace = function (ns_string) {
              * @property uid
              * @type Number
              */
-            uid:{
-                get:function(){
+            uid: {
+                get: function () {
                     return _uid;
                 },
-                set:function(newValue){
-                    if (ASSERT){
-                        if (_uid){
-                            fail("Reassigning uid")
+                set: function (newValue) {
+                    if (ASSERT) {
+                        if (_uid) {
+                            fail("Reassigning uid");
                         }
                     }
                     _uid = newValue;
@@ -1086,11 +1095,11 @@ KICK.namespace = function (ns_string) {
          */
         this.destroyObject = function (gameObject) {
             var isMarkedForDeletion = core.Util.contains(gameObjectsDelete, gameObject);
-            if (!isMarkedForDeletion){
+            if (!isMarkedForDeletion) {
                 gameObjectsDelete.push(gameObject);
                 delete objectsById[gameObject.uid];
             }
-            if (!gameObject.destroyed){
+            if (!gameObject.destroyed) {
                 gameObject.destroy();
             }
         };
@@ -1126,12 +1135,14 @@ KICK.namespace = function (ns_string) {
          * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
          * @return {Object}
          */
-        this.toJSON = function (filterFn){
-            var gameObjectsCopy = [];
-            filterFn = filterFn || function(){return true;}
-            for (var i=0;i<gameObjects.length;i++){
-                var gameObject = gameObjects[i];
-                if (filterFn(gameObject)){
+        this.toJSON = function (filterFn) {
+            var gameObjectsCopy = [],
+                i,
+                gameObject;
+            filterFn = filterFn || function () { return true; };
+            for (i = 0; i < gameObjects.length; i++) {
+                gameObject = gameObjects[i];
+                if (filterFn(gameObject)) {
                     gameObjectsCopy.push(gameObject.toJSON());
                 }
             }
@@ -1142,12 +1153,25 @@ KICK.namespace = function (ns_string) {
             };
         };
 
-        (function init(){
-
+        (function init() {
             var gameObject,
                 hasProperty = KICK.core.Util.hasProperty,
-                applyConfig = KICK.core.Util.applyConfig;
-            if (config){
+                applyConfig = KICK.core.Util.applyConfig,
+                i,
+                createConfigWithReferences = function (config) {
+                    var configCopy = {},
+                        name,
+                        value;
+                    for (name in config) {
+                        if (config.hasOwnProperty(name) && hasProperty(config, name)) {
+                            value = config[name];
+                            value = KICK.core.Util.deserializeConfig(value, engine, thisObj);
+                            configCopy[name] = value;
+                        }
+                    }
+                    return configCopy;
+                };
+            if (config) {
                 _uid = config.uid;
                 _name = config.name || "Scene";
                 var gameObjects = config.gameObjects || [],
@@ -1155,52 +1179,46 @@ KICK.namespace = function (ns_string) {
                     newGameObjects = [],
                     configs = {};
                 // create game objects
-                (function createGameObjects(){
-                    for (var i=0;i<gameObjects.length;i++){
+                (function createGameObjects() {
+                    for (i = 0; i < gameObjects.length; i++) {
                         gameObject = config.gameObjects[i];
                         newGameObjects[i] = createGameObjectPrivate(gameObject);
                         mappingUidToObject[gameObject.uid] = newGameObjects[i];
                     }
-                })();
+                }());
 
-                var createConfigWithReferences = function (config){
-                    var configCopy = {};
-                    for (var name in config){
-                        if (hasProperty(config,name)){
-                            var value = config[name];
-                            value = KICK.core.Util.deserializeConfig(value,engine,thisObj);
-                            configCopy[name] = value;
-                        }
-                    }
-                    return configCopy;
-                };
-
-                (function createComponents(){
+                (function createComponents() {
                     var component,
                         componentObj,
                         type,
-                        gameObjectConfig;
-                    var gameObjects = config.gameObjects || [];
+                        gameObjectConfig,
+                        gameObjects = config.gameObjects || [],
+                        j,
+                        i,
+                        uid,
+                        originalConf,
+                        conf,
+                        obj;
 
-                    for (var j=0;j<gameObjects.length;j++){
+                    for (j = 0; j < gameObjects.length; j++) {
                         gameObjectConfig = config.gameObjects[j];
                         gameObject = newGameObjects[j];
                         // build components
-                        for (var i=0;gameObjectConfig.components && i<gameObjectConfig.components.length;i++){
+                        for (i = 0; gameObjectConfig.components && i < gameObjectConfig.components.length; i++) {
                             component = gameObjectConfig.components[i];
-                            if (component.type === "KICK.scene.Transform"){
+                            if (component.type === "KICK.scene.Transform") {
                                 componentObj = gameObject.transform;
                                 componentObj.uid = component.uid;
                                 // register transform object to objectsById
                                 objectsById[componentObj.uid] = componentObj;
                             } else {
                                 type = KICK.namespace(component.type);
-                                if (typeof type === 'function'){
-                                    componentObj = new type({uid:component.uid});
+                                if (typeof type === 'function') {
+                                    componentObj = new type({uid: component.uid});
                                     componentObj.uid = component.uid;
                                     gameObject.addComponent(componentObj);
                                 } else {
-                                    KICK.core.Util.warn("Cannot find Class "+component.type);
+                                    KICK.core.Util.warn("Cannot find Class " + component.type);
                                     continue;
                                 }
                             }
@@ -1210,20 +1228,20 @@ KICK.namespace = function (ns_string) {
                     }
 
                     // apply config
-                    for (var uid in mappingUidToObject){
-                        if (hasProperty(mappingUidToObject,uid)){
-                            var originalConf = configs[uid];
-                            if (originalConf){
-                                var conf = createConfigWithReferences(originalConf);
-                                var obj = mappingUidToObject[uid];
-                                applyConfig(obj,conf);
+                    for (uid in mappingUidToObject) {
+                        if (mappingUidToObject.hasOwnProperty(uid) && hasProperty(mappingUidToObject, uid)) {
+                            originalConf = configs[uid];
+                            if (originalConf) {
+                                conf = createConfigWithReferences(originalConf);
+                                obj = mappingUidToObject[uid];
+                                applyConfig(obj, conf);
                             }
                         }
                     }
-                })();
+                }());
             }
             engine.project.registerObject(thisObj, "KICK.scene.Scene");
-        })();
+        }());
     };
 
     /**
@@ -1233,9 +1251,9 @@ KICK.namespace = function (ns_string) {
      * @static
      * @return {KICK.scene.Scene}
      */
-    scene.Scene.createDefault = function(engine){
-        var newScene = new scene.Scene(engine);
-        var gameObject = newScene.createGameObject();
+    scene.Scene.createDefault = function (engine) {
+        var newScene = new scene.Scene(engine),
+            gameObject = newScene.createGameObject();
         gameObject.addComponent(new scene.Camera());
         return newScene;
     };
@@ -1264,7 +1282,7 @@ KICK.namespace = function (ns_string) {
             _right = 1,
             _bottom = -1,
             _top = 1,
-            _clearColor = [0,0,0,1],
+            _clearColor = [0, 0, 0, 1],
             _perspective = true,
             _clearFlagColor = true,
             _clearFlagDepth = true,
@@ -1283,31 +1301,31 @@ KICK.namespace = function (ns_string) {
             viewProjectionMatrix = mat4.create(),
             lightMatrix = mat4.create(),
             engineUniforms = {
-                    viewMatrix: viewMatrix,
-                    projectionMatrix: projectionMatrix,
-                    viewProjectionMatrix:viewProjectionMatrix,
-                    lightMatrix:lightMatrix
-                },
+                viewMatrix: viewMatrix,
+                projectionMatrix: projectionMatrix,
+                viewProjectionMatrix: viewProjectionMatrix,
+                lightMatrix: lightMatrix
+            },
             renderableComponentsBackGroundAndGeometry = [],
             renderableComponentsTransparent = [],
             renderableComponentsOverlay = [],
-            renderableComponentsArray = [renderableComponentsBackGroundAndGeometry,renderableComponentsTransparent,renderableComponentsOverlay],
-            _normalizedViewportRect = vec4.create([0,0,1,1]),
+            renderableComponentsArray = [renderableComponentsBackGroundAndGeometry, renderableComponentsTransparent, renderableComponentsOverlay],
+            _normalizedViewportRect = vec4.create([0, 0, 1, 1]),
             offsetMatrix = mat4.create([
-                0.5,0  ,0  ,0,
-                0  ,0.5,0  ,0,
-                0  ,0  ,0.5,0,
-                0.5,0.5,0.5,1
+                0.5, 0, 0, 0,
+                0, 0.5, 0, 0,
+                0, 0, 0.5, 0,
+                0.5, 0.5, 0.5, 1
             ]),
             shadowLightProjection,
             shadowLightOffsetFromCamera,
             isNumber = function (o) {
                 return typeof (o) === "number";
             },
-            isBoolean = function(o){
+            isBoolean = function (o) {
                 return typeof (o) === "boolean";
             },
-            computeClearFlag = function(){
+            computeClearFlag = function () {
                 _currentClearFlags = (_clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) | (_clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
             },
             setupClearColor = function (color) {
@@ -1316,14 +1334,14 @@ KICK.namespace = function (ns_string) {
                     gl.clearColor(color[0], color[1], color[2], color[3]);
                 }
             },
-            assertNumber = function(newValue,name){
-                if (!isNumber(newValue)){
-                    KICK.core.Util.fail("Camera."+name+" must be number");
+            assertNumber = function (newValue, name) {
+                if (!isNumber(newValue)) {
+                    KICK.core.Util.fail("Camera." + name + " must be number");
                 }
             },
-            setupViewport = function(offsetX,offsetY,width,height){
-                gl.viewport(offsetX,offsetY,width,height);
-                gl.scissor(offsetX,offsetY,width,height);
+            setupViewport = function (offsetX, offsetY, width, height) {
+                gl.viewport(offsetX, offsetY, width, height);
+                gl.scissor(offsetX, offsetY, width, height);
             },
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
@@ -1331,18 +1349,19 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             setupCamera = function () {
-                var viewportDimension = _renderTarget?_renderTarget.dimension:gl.viewportSize,
+                var viewportDimension = _renderTarget ? _renderTarget.dimension : gl.viewportSize,
                     viewPortWidth = viewportDimension[0],
                     viewPortHeight = viewportDimension[1],
-                    offsetX = viewPortWidth*_normalizedViewportRect[0],
-                    offsetY = viewPortHeight*_normalizedViewportRect[1],
-                    width = viewPortWidth*_normalizedViewportRect[2],
-                    height = viewPortHeight*_normalizedViewportRect[3];
-                setupViewport(offsetX,offsetY,width,height);
+                    offsetX = viewPortWidth * _normalizedViewportRect[0],
+                    offsetY = viewPortHeight * _normalizedViewportRect[1],
+                    width = viewPortWidth * _normalizedViewportRect[2],
+                    height = viewPortHeight * _normalizedViewportRect[3],
+                    globalMatrixInv;
+                setupViewport(offsetX, offsetY, width, height);
                 gl.currentMaterial = null; // clear current material
                 // setup render target
-                if (gl.renderTarget !== _renderTarget){
-                    if (_renderTarget){
+                if (gl.renderTarget !== _renderTarget) {
+                    if (_renderTarget) {
                         _renderTarget.bind();
                     } else {
                         gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
@@ -1361,10 +1380,10 @@ KICK.namespace = function (ns_string) {
                         _near, _far, projectionMatrix);
                 }
 
-                var globalMatrixInv = transform.getGlobalTRSInverse();
+                globalMatrixInv = transform.getGlobalTRSInverse();
                 mat4.set(globalMatrixInv, viewMatrix);
 
-                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
+                mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
             },
             /**
              * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
@@ -1375,47 +1394,52 @@ KICK.namespace = function (ns_string) {
              * @return Number
              * @private
              */
-            compareRenderOrder = function(a,b){
+            compareRenderOrder = function (a, b) {
                 var aRenderOrder = a.renderOrder || 1000,
-                    bRenderOrder = b.renderOrder || 1000;
-                var getMeshShaderUid = function(o, defaultValue){
-                    var names = ["material","shader","uid"];
-                    for (var i=0;i<names.length;i++){
-                        o = o[names[i]];
-                        if (!o){
-                            if (DEBUG){
-                                debugger;
-                                warn("Cannot find uid of "+o);
+                    bRenderOrder = b.renderOrder || 1000,
+                    getMeshUid,
+                    getMeshShaderUid = function (o, defaultValue) {
+                        var names = ["material", "shader", "uid"],
+                            i;
+                        for (i = 0; i < names.length; i++) {
+                            o = o[names[i]];
+                            if (!o) {
+                                if (DEBUG) {
+                                    debugger;
+                                    warn("Cannot find uid of " + o);
+                                }
+                                return defaultValue;
                             }
-                            return defaultValue;
                         }
-                    }
-                    return o;
-                };
-                var getMeshUid = function(o, defaultValue){
+                        return o;
+                    };
+                getMeshUid = function (o, defaultValue) {
                     return o.mesh.uid || defaultValue;
                 };
-                if (aRenderOrder === bRenderOrder && a.material && b.material){
-                    aRenderOrder = getMeshShaderUid(a,aRenderOrder);
-                    bRenderOrder = getMeshShaderUid(b,aRenderOrder);
+                if (aRenderOrder === bRenderOrder && a.material && b.material) {
+                    aRenderOrder = getMeshShaderUid(a, aRenderOrder);
+                    bRenderOrder = getMeshShaderUid(b, aRenderOrder);
                 }
-                if (aRenderOrder === bRenderOrder && a.mesh && b.mesh){
-                    aRenderOrder = getMeshUid(a,aRenderOrder);
-                    bRenderOrder = getMeshUid(b,aRenderOrder);
+                if (aRenderOrder === bRenderOrder && a.mesh && b.mesh) {
+                    aRenderOrder = getMeshUid(a, aRenderOrder);
+                    bRenderOrder = getMeshUid(b, aRenderOrder);
                 }
-                return aRenderOrder-bRenderOrder;
+                return aRenderOrder - bRenderOrder;
             },
-            sortTransparentBackToFront = function(){
+            sortTransparentBackToFront = function () {
                 // calculate distances
-                var temp = vec3.create();
-                var cameraPosition = transform.position;
-                for (var i=renderableComponentsTransparent.length-1;i>=0;i--){
-                    var object = renderableComponentsTransparent[i];
-                    var objectPosition = object.gameObject.transform.position;
+                var temp = vec3.create(),
+                    cameraPosition = transform.position,
+                    i,
+                    object,
+                    objectPosition;
+                for (i = renderableComponentsTransparent.length - 1; i >= 0; i--) {
+                    object = renderableComponentsTransparent[i];
+                    objectPosition = object.gameObject.transform.position;
                     object.distanceToCamera = vec3.lengthSqr(vec3.subtract(objectPosition, cameraPosition, temp));
                 }
-                function compareDistanceToCamera(a,b){
-                    return b.distanceToCamera-a.distanceToCamera;
+                function compareDistanceToCamera(a, b) {
+                    return b.distanceToCamera - a.distanceToCamera;
                 }
                 renderableComponentsTransparent.sort(compareDistanceToCamera);
             },
@@ -1425,74 +1449,77 @@ KICK.namespace = function (ns_string) {
              * @param shader
              * @private
              */
-            renderSceneObjects = (function(){
+            renderSceneObjects = (function () {
                 var aabbWorldSpace = KICK.math.aabb.create(),
                     frustumPlanes = new Float32Array(24);
-                return function(sceneLightObj,shader){
-                    var render = function(renderableComponents){
-                        var length = renderableComponents.length;
-                        for (var j=0;j<length;j++){
-                            var renderableComponent = renderableComponents[j];
-                            if (!cullByViewFrustum(renderableComponent)){
-                                renderableComponent.render(engineUniforms,shader);
-                            }
-                        }
-                    },
-                        cullByViewFrustum = function(component){
+                return function (sceneLightObj, shader) {
+                    var cullByViewFrustum = function (component) {
                             var componentAabb = component.aabb,
                                 gameObject = component.gameObject;
-
-                            if (componentAabb && gameObject){
-                                aabb.transform(componentAabb,gameObject.transform.getGlobalMatrix(),aabbWorldSpace);
-                                return frustum.intersectAabb(frustumPlanes,aabbWorldSpace) === frustum.OUTSIDE;
+                            if (componentAabb && gameObject) {
+                                aabb.transform(componentAabb, gameObject.transform.getGlobalMatrix(), aabbWorldSpace);
+                                return frustum.intersectAabb(frustumPlanes, aabbWorldSpace) === frustum.OUTSIDE;
                             }
                             return false;
+                        },
+                        render = function (renderableComponents) {
+                            var length = renderableComponents.length,
+                                j,
+                                renderableComponent;
+                            for (j = 0; j < length; j++) {
+                                renderableComponent = renderableComponents[j];
+                                if (!cullByViewFrustum(renderableComponent)) {
+                                    renderableComponent.render(engineUniforms, shader);
+                                }
+                            }
                         };
                     // update frustum planes
-                    frustum.extractPlanes(engineUniforms.viewProjectionMatrix,false,frustumPlanes);
-                    engineUniforms.sceneLights=sceneLightObj;
+                    frustum.extractPlanes(engineUniforms.viewProjectionMatrix, false, frustumPlanes);
+                    engineUniforms.sceneLights = sceneLightObj;
                     render(renderableComponentsBackGroundAndGeometry);
                     render(renderableComponentsTransparent);
                     render(renderableComponentsOverlay);
                 };
-            })(),
-            renderShadowMap = function(sceneLightObj){
+            }()),
+            renderShadowMap = function (sceneLightObj) {
                 var directionalLight = sceneLightObj.directionalLight,
                     directionalLightTransform = directionalLight.gameObject.transform,
                     shadowRenderTexture = directionalLight.shadowRenderTexture,
                     renderTextureDimension = shadowRenderTexture.dimension,
                     renderTextureWidth = renderTextureDimension[0],
-                    renderTextureHeight = renderTextureDimension[1];
-                setupViewport(0,0,renderTextureWidth,renderTextureHeight);
+                    renderTextureHeight = renderTextureDimension[1],
+                    transformedOffsetFromCamera,
+                    cameraPosition;
+                setupViewport(0, 0, renderTextureWidth, renderTextureHeight);
 
                 shadowRenderTexture.bind();
-                setupClearColor([1,1,1,1]);
+                setupClearColor([1, 1, 1, 1]);
                 gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
                 // fitting:
                 // Using a sphere with the center in front of the camera (based on 0.5 * engine.config.shadowDistance)
-                // The actual light volume is a bit larget than the sphere (to include the corners).
+                // The actual light volume is a bit larger than the sphere (to include the corners).
                 // The near plane of the light volume is extended by the engine.config.shadowNearMultiplier
                 // Note that this is a very basic fitting algorithm with rooms for improvement
-                mat4.set(shadowLightProjection, projectionMatrix)
+                mat4.set(shadowLightProjection, projectionMatrix);
 
                 // find the position of the light 'center' in world space
-                var transformedOffsetFromCamera =quat4.multiplyVec3(transform.rotation,[0,0,-shadowLightOffsetFromCamera]);
-                var cameraPosition = vec3.add(transformedOffsetFromCamera,transform.position);
+                transformedOffsetFromCamera = quat4.multiplyVec3(transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
+                cameraPosition = vec3.add(transformedOffsetFromCamera, transform.position);
                 // adjust to reduce flicker when rotating camera
                 cameraPosition[0] = Math.round(cameraPosition[0]);
                 cameraPosition[1] = Math.round(cameraPosition[1]);
                 cameraPosition[2] = Math.round(cameraPosition[2]);
 
-                mat4.setTRSInverse(cameraPosition,directionalLightTransform.localRotation, [1,1,1],viewMatrix);
+                mat4.setTRSInverse(cameraPosition, directionalLightTransform.localRotation, [1, 1, 1], viewMatrix);
 
-                mat4.multiply(projectionMatrix,viewMatrix,viewProjectionMatrix);
+                mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
 
                 // update light matrix (will be used when scene is rendering with shadow map shader)
-                mat4.multiply(mat4.multiply(offsetMatrix,projectionMatrix,lightMatrix),
-                    viewMatrix,lightMatrix);
+                mat4.multiply(mat4.multiply(offsetMatrix, projectionMatrix, lightMatrix),
+                    viewMatrix, lightMatrix);
 
-                renderSceneObjects(sceneLightObj,_shadowmapShader);
+                renderSceneObjects(sceneLightObj, _shadowmapShader);
 
             },
             componentListener = {
@@ -1502,21 +1529,24 @@ KICK.namespace = function (ns_string) {
                  * @param {Array_KICK.scene.Component} components
                  * @private
                  */
-                componentsAdded : function( components ){
-                    for (var i=components.length-1; i>=0; i--) {
-                        var component = components[i];
-                        if (typeof(component.render) === "function" && (component.gameObject.layer & _layerMask)) {
-                            var renderOrder = component.renderOrder || 1000;
-                            var array;
-                            if (renderOrder < 2000){
+                componentsAdded : function (components) {
+                    var i,
+                        component,
+                        renderOrder,
+                        array;
+                    for (i = components.length - 1; i >= 0; i--) {
+                        component = components[i];
+                        if (typeof (component.render) === "function" && (component.gameObject.layer & _layerMask)) {
+                            renderOrder = component.renderOrder || 1000;
+                            if (renderOrder < 2000) {
                                 array = renderableComponentsBackGroundAndGeometry;
-                            } else if (renderOrder >= 3000){
+                            } else if (renderOrder >= 3000) {
                                 array = renderableComponentsOverlay;
                             } else {
                                 array = renderableComponentsTransparent;
                             }
-                            if (!KICK.core.Util.contains(array,component)){
-                                insertSorted(component,array,compareRenderOrder);
+                            if (!KICK.core.Util.contains(array, component)) {
+                                insertSorted(component, array, compareRenderOrder);
                             }
                         }
                     }
@@ -1528,22 +1558,25 @@ KICK.namespace = function (ns_string) {
                  * @return {Boolean}
                  * @private
                  */
-                componentsRemoved : function ( components ){
-                    var removed = false;
-                    for (var i=components.length-1; i>=0; i--) {
-                        var component = components[i];
-                        if (typeof(component.render) === "function") {
-                            for (var j=renderableComponentsArray.length-1;j>=0;j--){
-                                removed |= core.Util.removeElementFromArray(renderableComponentsArray[j],component);
+                componentsRemoved : function (components) {
+                    var removed = false,
+                        i,
+                        j,
+                        component;
+                    for (i = components.length - 1; i >= 0; i--) {
+                        component = components[i];
+                        if (typeof (component.render) === "function") {
+                            for (j = renderableComponentsArray.length - 1; j >= 0; j--) {
+                                removed |= core.Util.removeElementFromArray(renderableComponentsArray[j], component);
                             }
                         }
                     }
                     return removed;
                 },
-                componentUpdated : function(component){
-                    var wrap = [component];
-                    var isRemoved = componentListener.componentsRemoved(wrap);
-                    if (isRemoved){ // only add if component also removed
+                componentUpdated : function (component) {
+                    var wrap = [component],
+                        isRemoved = componentListener.componentsRemoved(wrap);
+                    if (isRemoved) { // only add if component also removed
                         componentListener.componentsAdded(wrap);
                     }
                 }
@@ -1559,23 +1592,23 @@ KICK.namespace = function (ns_string) {
          * @param {Number} width Optional (default 1)
          * @param {Number} height Optional (default 1)
          */
-        this.pick = function(gameObjectPickedFn,x,y,width,height){
+        this.pick = function (gameObjectPickedFn, x, y, width, height) {
             width = width || 1;
             height = height || 1;
-            if (!pickingQueue){
+            if (!pickingQueue) {
                 pickingQueue = [];
                 pickingShader = engine.project.load(engine.project.ENGINE_SHADER___PICK);
-                pickingRenderTarget = new KICK.texture.RenderTexture(engine,{
+                pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
                     dimension: gl.viewportSize
                 });
                 pickingRenderTarget.name = "__pickRenderTexture";
             }
             pickingQueue.push({
-                gameObjectPickedFn:gameObjectPickedFn,
-                x:x,
-                y:gl.viewportSize[1]-y,
-                width:width,
-                height:height
+                gameObjectPickedFn: gameObjectPickedFn,
+                x: x,
+                y: gl.viewportSize[1] - y,
+                width: width,
+                height: height
             });
         };
 
@@ -1584,28 +1617,30 @@ KICK.namespace = function (ns_string) {
          * Also register component listener on scene
          * @method activated
          */
-        this.activated = function(){
-            var gameObject = this.gameObject;
+        this.activated = function () {
+            var gameObject = this.gameObject,
+                shadowRadius,
+                nearPlanePosition;
             engine = gameObject.engine;
             transform = gameObject.transform;
             gl = engine.gl;
             _scene = gameObject.scene;
             _scene.addComponentListener(componentListener);
 
-            if (engine.config.shadows){
+            if (engine.config.shadows) {
                 _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
 
                 // calculate the shadow projection based on engine.config parameters
-                shadowLightOffsetFromCamera = engine.config.shadowDistance*0.5; // first find radius
-                var  shadowRadius = shadowLightOffsetFromCamera*1.55377397403004; // sqrt(2+sqrt(2))
-                var nearPlanePosition = -shadowRadius*engine.config.shadowNearMultiplier;
+                shadowLightOffsetFromCamera = engine.config.shadowDistance * 0.5; // first find radius
+                shadowRadius = shadowLightOffsetFromCamera * 1.55377397403004; // sqrt(2+sqrt(2))
+                nearPlanePosition = -shadowRadius * engine.config.shadowNearMultiplier;
                 shadowLightProjection = mat4.create();
                 mat4.ortho(-shadowRadius, shadowRadius, -shadowRadius, shadowRadius,
                     nearPlanePosition, shadowRadius, shadowLightProjection);
 
-            } else if (_renderShadow){
+            } else if (_renderShadow) {
                 _renderShadow = false; // disable render shadow
-                if (ASSERT){
+                if (ASSERT) {
                     fail("engine.config.shadows must be enabled for shadows");
                 }
             }
@@ -1615,7 +1650,7 @@ KICK.namespace = function (ns_string) {
          * Deregister component listener on scene
          * @method deactivated
          */
-        this.deactivated = function(){
+        this.deactivated = function () {
             _scene.removeComponentListener(thisObj);
         };
 
@@ -1623,104 +1658,112 @@ KICK.namespace = function (ns_string) {
          * @method renderScene
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
-        this.renderScene = function(sceneLightObj){
-            if (!_enabled){
+        this.renderScene = function (sceneLightObj) {
+            var i,
+                textureId;
+            if (!_enabled) {
                 return;
             }
-            if (_renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow){
+            if (_renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow) {
                 gl.currentMaterial = null; // clear current material
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
 
             sceneLightObj.recomputeLight(viewMatrix);
-            if (renderableComponentsTransparent.length>0){
+            if (renderableComponentsTransparent.length > 0) {
                 sortTransparentBackToFront();
             }
-            renderSceneObjects(sceneLightObj,_replacementShader);
+            renderSceneObjects(sceneLightObj, _replacementShader);
 
-            if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps ){
-                var textureId = _renderTarget.colorTexture.textureId;
+            if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps) {
+                textureId = _renderTarget.colorTexture.textureId;
                 gl.bindTexture(gl.TEXTURE_2D, textureId);
                 gl.generateMipmap(gl.TEXTURE_2D);
             }
-            if (pickingQueue && pickingQueue.length>0){
+            if (pickingQueue && pickingQueue.length > 0) {
                 gl.currentMaterial = null; // clear current material
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
-                renderSceneObjects(sceneLightObj,pickingShader);
-                for (var i=pickingQueue.length-1;i>=0;i--){
+                renderSceneObjects(sceneLightObj, pickingShader);
+                for (i = pickingQueue.length - 1; i >= 0; i--){
                     // create clojure
-                    (function(){
+                    (function () {
                         var pick = pickingQueue[i],
-                            pickArrayLength = pick.width*pick.width*4,
-                            array = new Uint8Array(pickArrayLength);
-                        gl.readPixels( pick.x, pick.y, pick.width,pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE,array);
-                        var objects = [];
-                        var objectCount = {};
-                        for (var j = 0;j<pickArrayLength;j+=4){
-                            var subArray = array.subarray(j,j+4),
-                                uid = vec4uint8ToUint32(subArray);
-                            if (uid>0){
-                                if (objectCount[uid]){
+                            pickArrayLength = pick.width * pick.width * 4,
+                            array = new Uint8Array(pickArrayLength),
+                            objects = [],
+                            objectCount = {},
+                            j,
+                            subArray,
+                            uid,
+                            foundObj;
+                        gl.readPixels(pick.x, pick.y, pick.width, pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, array);
+                        for (j = 0; j < pickArrayLength; j += 4) {
+                            subArray = array.subarray(j, j + 4);
+                            uid = vec4uint8ToUint32(subArray);
+                            if (uid > 0) {
+                                if (objectCount[uid]) {
                                     objectCount[uid]++;
                                 } else {
-                                    var foundObj = _scene.getObjectByUID(uid);
-                                    if (foundObj){
+                                    foundObj = _scene.getObjectByUID(uid);
+                                    if (foundObj) {
                                         objects.push(foundObj);
                                         objectCount[uid] = 1;
                                     }
                                 }
                             }
                         }
-                        if (objects.length){
-                            engine.eventQueue.add(function(){
-                                for (var i=0;i<objects.length;i++){
-                                    var obj = objects[i];
+                        if (objects.length) {
+                            engine.eventQueue.add(function () {
+                                var i,
+                                    obj;
+                                for (i = 0; i < objects.length; i++) {
+                                    obj = objects[i];
                                     pick.gameObjectPickedFn(obj, objectCount[obj.uid]);
                                 }
-                            },0);
+                            }, 0);
                         }
-                    })();
+                    }());
                 }
                 pickingQueue.length = 0;
             }
         };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * Allows usage of replacement shader on camera rendering
              * Default value is null.
              * @property replacementShader
              * @type KICK.material.Shader
              */
-            replacementShader:{
-                get:function(){return _replacementShader; },
-                set:function(newValue){_replacementShader = newValue;}
+            replacementShader: {
+                get: function () { return _replacementShader; },
+                set: function (newValue) { _replacementShader = newValue; }
             },
             /**
              * Default is true
              * @property enabled
              * @type Boolean
              */
-            enabled:{
-                get:function(){ return _enabled;},
-                set:function(newValue){ _enabled = newValue;}
+            enabled: {
+                get: function () { return _enabled; },
+                set: function (newValue) { _enabled = newValue; }
             },
             /**
              * Default false
              * @property renderShadow
              * @type Boolean
              */
-            renderShadow:{
-                get:function(){return _renderShadow;},
-                set:function(newValue){
-                    if (engine){ // if object is initialized
-                        if (engine.config.shadows){
+            renderShadow: {
+                get: function () { return _renderShadow; },
+                set: function (newValue) {
+                    if (engine) { // if object is initialized
+                        if (engine.config.shadows) {
                             _renderShadow = newValue;
                         } else if (newValue) {
-                            if (ASSERT){
+                            if (ASSERT) {
                                 fail("engine.config.shadows must be enabled for shadows");
                             }
                         }
@@ -1734,11 +1777,11 @@ KICK.namespace = function (ns_string) {
              * @property layerMask
              * @type Number
              */
-            layerMask:{
-                get:function(){ return _layerMask;},
-                set:function(newValue){
-                    if (c._ASSERT){
-                        if (!isNumber(newValue)){
+            layerMask: {
+                get: function () { return _layerMask; },
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        if (!isNumber(newValue)) {
                             KICK.core.Util.fail("Camera.layerMask should be a number");
                         }
                     }
@@ -1750,11 +1793,11 @@ KICK.namespace = function (ns_string) {
              * @property renderTarget
              * @type KICK.texture.RenderTexture
              */
-            renderTarget:{
-                get:function(){ return _renderTarget;},
-                set:function(newValue){
-                    if (c._ASSERT){
-                        if (newValue != null && !(newValue instanceof KICK.texture.RenderTexture)){
+            renderTarget: {
+                get: function () { return _renderTarget; },
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        if (newValue !== null && !(newValue instanceof KICK.texture.RenderTexture)) {
                             KICK.core.Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
                         }
                     }
@@ -1768,13 +1811,13 @@ KICK.namespace = function (ns_string) {
              * @property fieldOfView
              * @type Number
              */
-            fieldOfView:{
-                get:function(){ return _fieldOfView;},
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"fieldOfView");
+            fieldOfView: {
+                get: function () { return _fieldOfView; },
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "fieldOfView");
                     }
-                    _fieldOfView = Math.min(179,Math.max(newValue,1));
+                    _fieldOfView = Math.min(179, Math.max(newValue, 1));
                 }
             },
             /**
@@ -1784,13 +1827,13 @@ KICK.namespace = function (ns_string) {
              * @property near
              * @type Number
              */
-            near:{
-                get:function(){
+            near: {
+                get: function () {
                     return _near;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"near");
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "near");
                     }
                     _near = newValue;
                 }
@@ -1802,13 +1845,13 @@ KICK.namespace = function (ns_string) {
              * @property far
              * @type Number
              */
-            far:{
-                get:function(){
+            far: {
+                get: function () {
                     return _far;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"far");
+                set: function(newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "far");
                     }
                     _far = newValue;
                 }
@@ -1819,13 +1862,13 @@ KICK.namespace = function (ns_string) {
              * @property perspective
              * @type Boolean
              */
-            perspective:{
-                get:function(){
+            perspective: {
+                get: function () {
                     return _perspective;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        if (!isBoolean(newValue)){
+                set: function(newValue) {
+                    if (c._ASSERT) {
+                        if (!isBoolean(newValue)) {
                             KICK.core.Util.fail("Camera.perspective must be a boolean");
                         }
                     }
@@ -1837,13 +1880,13 @@ KICK.namespace = function (ns_string) {
              * @property left
              * @type Number
              */
-            left:{
-                get:function(){
+            left: {
+                get: function () {
                     return _left;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"left");
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "left");
                     }
                     _left = newValue;
                 }
@@ -1853,15 +1896,15 @@ KICK.namespace = function (ns_string) {
              * @property left
              * @type Number
              */
-            right:{
-                get:function(){
+            right: {
+                get: function () {
                     return _right;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"right");
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "right");
                     }
-                    _right= newValue;
+                    _right = newValue;
                 }
             },
             /**
@@ -1869,13 +1912,13 @@ KICK.namespace = function (ns_string) {
              * @property bottom
              * @type Number
              */
-            bottom:{
-                get:function(){
+            bottom: {
+                get: function () {
                     return _bottom;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"bottom");
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "bottom");
                     }
                     _bottom = newValue;
                 }
@@ -1885,13 +1928,13 @@ KICK.namespace = function (ns_string) {
              * @property top
              * @type Number
              */
-            top:{
-                get:function(){
+            top: {
+                get: function () {
                     return _top;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"top");
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "top");
                     }
                     _top = newValue;
                 }
@@ -1902,13 +1945,13 @@ KICK.namespace = function (ns_string) {
              * @property cameraIndex
              * @type Number
              */
-            cameraIndex:{
-                get:function(){
+            cameraIndex: {
+                get: function () {
                     return _cameraIndex;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        assertNumber(newValue,"cameraIndex");
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        assertNumber(newValue, "cameraIndex");
                     }
                     _cameraIndex = newValue;
                 }
@@ -1918,11 +1961,11 @@ KICK.namespace = function (ns_string) {
              * @property clearColor
              * @type KICK.math.vec4
              */
-            clearColor:{
-                get:function(){
+            clearColor: {
+                get: function () {
                     return vec4.create(_clearColor);
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     _clearColor = vec4.create(newValue);
                 }
             },
@@ -1932,11 +1975,11 @@ KICK.namespace = function (ns_string) {
              * @property clearFlagColor
              * @type Boolean
              */
-            clearFlagColor:{
-                get:function(){
+            clearFlagColor: {
+                get: function () {
                     return _clearFlagColor;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     computeClearFlag();
                     _clearFlagColor = newValue;
                 }
@@ -1947,11 +1990,11 @@ KICK.namespace = function (ns_string) {
              * @property clearFlagDepth
              * @type Boolean
              */
-            clearFlagDepth:{
-                get:function(){
+            clearFlagDepth: {
+                get: function () {
                     return _clearFlagDepth;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     computeClearFlag();
                     _clearFlagDepth = newValue;
                 }
@@ -1962,48 +2005,48 @@ KICK.namespace = function (ns_string) {
              * @property normalizedViewportRect
              * @type Array_Number
              */
-            normalizedViewportRect:{
-                get:function(){
+            normalizedViewportRect: {
+                get: function () {
                     return _normalizedViewportRect;
                 },
-                set:function(newValue){
-                    if (c._ASSERT){
-                        if (newValue.length !== 4){
+                set: function (newValue) {
+                    if (c._ASSERT) {
+                        if (newValue.length !== 4) {
                             KICK.core.Util.fail("Camera.normalizedViewportRect must be Float32Array of length 4");
                         }
                     }
-                    vec4.set(newValue,_normalizedViewportRect);
+                    vec4.set(newValue, _normalizedViewportRect);
                 }
             }
         });
 
-        this.toJSON = function(){
+        this.toJSON = function () {
             return {
-                type:"KICK.scene.Camera",
-                uid: thisObj.uid || (engine?engine.getUID(thisObj):0),
-                config:{
+                type: "KICK.scene.Camera",
+                uid: thisObj.uid || (engine ? engine.getUID(thisObj) : 0),
+                config: {
                     enabled: _enabled,
                     renderShadow: _renderShadow,
-                    layerMask:_layerMask,
-                    renderTarget:KICK.core.Util.getJSONReference(engine,_renderTarget),
-                    fieldOfView:_fieldOfView,
-                    near:_near,
-                    far:_far,
-                    perspective:_perspective,
-                    left:_left,
-                    right:_right,
-                    bottom:_bottom,
-                    top:_top,
-                    cameraIndex:_cameraIndex,
-                    clearColor:KICK.core.Util.typedArrayToArray(_clearColor),
-                    clearFlagColor:_clearFlagColor,
-                    clearFlagDepth:_clearFlagDepth,
-                    normalizedViewportRect:KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
+                    layerMask: _layerMask,
+                    renderTarget: KICK.core.Util.getJSONReference(engine,_renderTarget),
+                    fieldOfView: _fieldOfView,
+                    near: _near,
+                    far: _far,
+                    perspective: _perspective,
+                    left: _left,
+                    right: _right,
+                    bottom: _bottom,
+                    top: _top,
+                    cameraIndex: _cameraIndex,
+                    clearColor: KICK.core.Util.typedArrayToArray(_clearColor),
+                    clearFlagColor: _clearFlagColor,
+                    clearFlagDepth: _clearFlagDepth,
+                    normalizedViewportRect: KICK.core.Util.typedArrayToArray(_normalizedViewportRect)
                 }
             };
         };
 
-        applyConfig(this,config);
+        applyConfig(this, config);
         computeClearFlag();
     };
 
@@ -2013,7 +2056,7 @@ KICK.namespace = function (ns_string) {
      * @param {Boolean} clearColor
      * @param {Boolean} clearDepth
      */
-    scene.Camera.prototype.setupClearFlags = function (clearColor,clearDepth) {
+    scene.Camera.prototype.setupClearFlags = function (clearColor, clearDepth) {
         this.clearColor = clearColor;
         this.clearDepth = clearDepth;
         delete this._currentClearFlags;
@@ -2042,8 +2085,8 @@ KICK.namespace = function (ns_string) {
          */
         isComponentListener: function (obj) {
             return obj &&
-                typeof(obj.componentsAdded) === "function" &&
-                typeof(obj.componentsRemoved) === "function";
+                typeof (obj.componentsAdded) === "function" &&
+                typeof (obj.componentsRemoved) === "function";
         }
     };
 
@@ -2068,20 +2111,20 @@ KICK.namespace = function (ns_string) {
         /**
          * @method activated
          */
-        this.activated = function(){
+        this.activated = function () {
             transform = thisObj.gameObject.transform;
         };
 
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             // inherit documentation from component
-            aabb:{
-                get:function(){
+            aabb: {
+                get: function () {
                     return _mesh.aabb;
                 }
             },
             // inherit documentation from component
-            renderOrder:{
-                get:function(){
+            renderOrder: {
+                get: function () {
                     return _renderOrder;
                 }
             },
@@ -2090,22 +2133,22 @@ KICK.namespace = function (ns_string) {
              * @property material
              * @type KICK.material.Material
              */
-            material:{
-                get:function(){
-                    if (_materials.length === 0){
+            material: {
+                get: function () {
+                    if (_materials.length === 0) {
                         return null;
                     }
                     return _materials[0];
                 },
-                set:function(newValue){
-                    if (ASSERT){
-                        if (!(newValue instanceof KICK.material.Material)){
+                set: function (newValue) {
+                    if (ASSERT) {
+                        if (!(newValue instanceof KICK.material.Material)) {
                             KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
                         }
                     }
                     _materials[0] = newValue;
                     _renderOrder = _materials[0].renderOrder;
-                    if (thisObj.gameObject){
+                    if (thisObj.gameObject) {
                         thisObj.gameObject.notifyComponentUpdated(thisObj);
                     }
                 }
@@ -2115,22 +2158,23 @@ KICK.namespace = function (ns_string) {
              * @property materias
              * @type Array_KICK.material.Material
              */
-            materials:{
-                get:function(){
+            materials: {
+                get: function () {
                     return _materials;
                 },
-                set:function(newValue){
+                set: function (newValue) {
+                    var i;
                     _materials = [];
-                    for (var i=0;i<newValue.length;i++){
-                        if (ASSERT){
-                            if (!(newValue[i] instanceof KICK.material.Material)){
+                    for (i = 0; i < newValue.length; i++) {
+                        if (ASSERT) {
+                            if (!(newValue[i] instanceof KICK.material.Material)) {
                                 KICK.core.Util.fail("MeshRenderer.material must be a KICK.material.Material");
                             }
                         }
                         _materials[i] = newValue[i];
                         _renderOrder = _materials[i].renderOrder;
                     }
-                    if (thisObj.gameObject){
+                    if (thisObj.gameObject) {
                         thisObj.gameObject.notifyComponentUpdated(thisObj);
                     }
                 },
@@ -2140,13 +2184,13 @@ KICK.namespace = function (ns_string) {
              * @property mesh
              * @type KICK.mesh.Mesh
              */
-            mesh:{
-                get:function(){
+            mesh: {
+                get: function () {
                     return _mesh;
                 },
-                set:function(newValue){
-                    if (ASSERT){
-                        if (!(newValue instanceof KICK.mesh.Mesh)){
+                set: function (newValue) {
+                    if (ASSERT) {
+                        if (!(newValue instanceof KICK.mesh.Mesh)) {
                             KICK.core.Util.fail("MeshRenderer.mesh must be a KICK.mesh.Mesh");
                         }
                     }
@@ -2162,12 +2206,14 @@ KICK.namespace = function (ns_string) {
          * @param engineUniforms
          * @param {KICK.material.Shader} overwriteShader Optional
          */
-        this.render = function (engineUniforms,overwriteShader) {
-            var length = _materials.length;
-            for (var i=0;i<length;i++){
-                var shader = overwriteShader || _materials[i].shader;
+        this.render = function (engineUniforms, overwriteShader) {
+            var length = _materials.length,
+                i,
+                shader;
+            for (i = 0; i < length; i++) {
+                shader = overwriteShader || _materials[i].shader;
                 _mesh.bind(shader);
-                shader.bindUniform(_materials[i],engineUniforms,transform);
+                shader.bindUniform(_materials[i], engineUniforms, transform);
                 _mesh.render(i);
             }
         };
@@ -2184,7 +2230,7 @@ KICK.namespace = function (ns_string) {
             }
         };
 
-        applyConfig(this,config);
+        applyConfig(this, config);
     };
 
     /**
@@ -2199,7 +2245,7 @@ KICK.namespace = function (ns_string) {
      */
     scene.Light = function (config) {
         var thisObj = this,
-            color = vec3.create([1.0,1.0,1.0]),
+            color = vec3.create([1.0, 1.0, 1.0]),
             engine,
             type = core.Constants._LIGHT_TYPE_POINT,
             _shadow = false,
@@ -2207,49 +2253,49 @@ KICK.namespace = function (ns_string) {
             _shadowBias = 0.05,
             _shadowTexture = null,
             _shadowRenderTexture = null,
-            attenuation = vec3.create([1,0,0]),
+            attenuation = vec3.create([1, 0, 0]),
             intensity = 1,
             transform,
-            colorIntensity = vec3.create([1.0,1.0,1.0]),
-            updateIntensity = function(){
-                vec3.set([color[0]*intensity,color[1]*intensity,color[2]*intensity],colorIntensity);
+            colorIntensity = vec3.create([1.0, 1.0, 1.0]),
+            updateIntensity = function () {
+                vec3.set([color[0] * intensity, color[1] * intensity, color[2] * intensity], colorIntensity);
             },
             gameObject,
             scriptPriority,
-            updateShadowTexture = function(){
-                if (_shadow){
-                    if (!_shadowTexture){
-                        _shadowTexture = new KICK.texture.Texture(engine,{
-                            minFilter:KICK.core.Constants.GL_NEAREST,
-                            magFilter:KICK.core.Constants.GL_NEAREST,
-                            wrapS:KICK.core.Constants.GL_CLAMP_TO_EDGE,
-                            wrapT:KICK.core.Constants.GL_CLAMP_TO_EDGE,
+            updateShadowTexture = function () {
+                if (_shadow) {
+                    if (!_shadowTexture) {
+                        _shadowTexture = new KICK.texture.Texture(engine, {
+                            minFilter: KICK.core.Constants.GL_NEAREST,
+                            magFilter: KICK.core.Constants.GL_NEAREST,
+                            wrapS: KICK.core.Constants.GL_CLAMP_TO_EDGE,
+                            wrapT: KICK.core.Constants.GL_CLAMP_TO_EDGE,
                             flipY: false,
-                            generateMipmaps:false
+                            generateMipmaps: false
                         });
                         var maxTextureSize = Math.min(engine.gl.getParameter(KICK.core.Constants.GL_MAX_RENDERBUFFER_SIZE),
                             engine.gl.getParameter(KICK.core.Constants.GL_MAX_TEXTURE_SIZE));
-                        maxTextureSize = Math.min(maxTextureSize,4096)*engine.config.shadowMapQuality;
-                        _shadowTexture.setImageData(maxTextureSize,maxTextureSize,0,KICK.core.Constants.GL_UNSIGNED_BYTE,null,"");
-                        _shadowRenderTexture = new KICK.texture.RenderTexture (engine,{
-                            colorTexture:_shadowTexture
+                        maxTextureSize = Math.min(maxTextureSize, 4096) * engine.config.shadowMapQuality;
+                        _shadowTexture.setImageData(maxTextureSize, maxTextureSize, 0, KICK.core.Constants.GL_UNSIGNED_BYTE, null, "");
+                        _shadowRenderTexture = new KICK.texture.RenderTexture(engine, {
+                            colorTexture: _shadowTexture
                         });
                     }
-                } else if (_shadowRenderTexture){
+                } else if (_shadowRenderTexture) {
                     _shadowRenderTexture.destroy();
                     _shadowTexture.destroy();
                     _shadowRenderTexture = null;
                     _shadowTexture = null;
                 }
             };
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * Short for lightObj.gameObject.transform
              * @property transform
              * @type KICK.scene.Transform
              */
-            transform:{
-                get:function(){
+            transform: {
+                get: function () {
                     return transform;
                 }
             },
@@ -2257,8 +2303,8 @@ KICK.namespace = function (ns_string) {
              * @property shadowRenderTexture
              * @type KICK.texture.RenderTexture
              */
-            shadowRenderTexture:{
-                get:function(){
+            shadowRenderTexture: {
+                get: function () {
                     return _shadowRenderTexture;
                 }
             },
@@ -2266,8 +2312,8 @@ KICK.namespace = function (ns_string) {
              * @property shadowTexture
              * @type KICK.texture.Texture
              */
-            shadowTexture:{
-                get:function(){
+            shadowTexture: {
+                get: function () {
                     return _shadowTexture;
                 }
             },
@@ -2278,13 +2324,13 @@ KICK.namespace = function (ns_string) {
              * @type boolean
              */
             shadow: {
-                get: function(){
+                get: function () {
                     return _shadow;
                 },
-                set: function(value){
-                    if (value !== _shadow){
+                set: function (value) {
+                    if (value !== _shadow) {
                         _shadow = value;
-                        if (engine){
+                        if (engine) {
                             updateShadowTexture();
                         }
                     }
@@ -2296,11 +2342,11 @@ KICK.namespace = function (ns_string) {
              * @property shadowStrength
              * @type Number
              */
-            shadowStrength:{
-                get: function(){
+            shadowStrength: {
+                get: function () {
                     return _shadowStrength;
                 },
-                set: function(value){
+                set: function (value) {
                     _shadowStrength = value;
                 },
                 enumerable: true
@@ -2310,11 +2356,11 @@ KICK.namespace = function (ns_string) {
              * @property shadowBias
              * @type Number
              */
-            shadowBias:{
-                get:function(){
+            shadowBias: {
+                get: function () {
                     return _shadowBias;
                 },
-                set:function(value){
+                set: function (value) {
                     _shadowBias = value;
                 },
                 enumerable: true
@@ -2325,16 +2371,16 @@ KICK.namespace = function (ns_string) {
              * @type KICK.math.vec3
              */
             color: {
-                get: function(){
+                get: function () {
                     return vec3.create(color);
                 },
-                set: function(value){
-                    if (ASSERT){
-                        if (value.length !== 3){
+                set: function (value) {
+                    if (ASSERT) {
+                        if (value.length !== 3) {
                             KICK.core.Util.fail("Light color must be vec3");
                         }
                     }
-                    vec3.set(value,color);
+                    vec3.set(value, color);
                     updateIntensity();
                 },
                 enumerable: true
@@ -2352,14 +2398,14 @@ KICK.namespace = function (ns_string) {
              * @final
              */
             type: {
-                get: function(){
+                get: function () {
                     return type;
                 },
-                set: function(newValue){
-                    if (!engine){
+                set: function (newValue) {
+                    if (!engine) {
                         type = newValue;
                     } else {
-                        if (ASSERT){
+                        if (ASSERT) {
                             KICK.core.Util.fail("Light type cannot be changed after initialization");
                         }
                     }
@@ -2372,10 +2418,10 @@ KICK.namespace = function (ns_string) {
              * @type Number
              */
             intensity: {
-                get: function(){
+                get: function () {
                     return intensity;
                 },
-                set: function(value){
+                set: function (value) {
                     intensity = value;
                     updateIntensity();
                 },
@@ -2390,12 +2436,12 @@ KICK.namespace = function (ns_string) {
              * @property attenuation
              * @type KICK.math.vec3
              */
-            attenuation:{
-                get:function(){
+            attenuation: {
+                get: function () {
                     return attenuation;
                 },
-                set:function(newValue){
-                    vec3.set(newValue,attenuation)
+                set: function (newValue) {
+                    vec3.set(newValue, attenuation);
                 },
                 enumerable: true
             },
@@ -2408,36 +2454,36 @@ KICK.namespace = function (ns_string) {
              * @final
              */
             colorIntensity: {
-                get: function(){
+                get: function () {
                     return colorIntensity;
                 },
-                set:function(newValue){
+                set: function (newValue) {
                     colorIntensity = newValue;
                 },
                 enumerable: true
             },
             // inherited interface from component
-            gameObject:{
-                get:function(){
+            gameObject: {
+                get: function () {
                     return gameObject;
                 },
-                set:function(value){
+                set: function (value) {
                     gameObject = value;
                 }
             },
             // inherited interface from component
-            scriptPriority:{
-                get:function(){
+            scriptPriority: {
+                get: function () {
                     return scriptPriority;
                 },
-                set:function(value){
+                set: function (value) {
                     scriptPriority = value;
                 },
                 enumerable: true
             }
         });
 
-        this.activated = function(){
+        this.activated = function () {
             var gameObject = thisObj.gameObject;
             engine = gameObject.engine;
             transform = gameObject.transform;
@@ -2484,18 +2530,18 @@ KICK.namespace = function (ns_string) {
      * @constructor
      * @param {Number} maxNumerOfLights (value from config)
      */
-    scene.SceneLights = function(maxNumerOfLights){
+    scene.SceneLights = function (maxNumerOfLights) {
         var ambientLight = null,
             directionalLight = null,
             directionalLightData = KICK.math.mat3.create(), // column matrix with the columns lightDirection,colorIntensity,halfVector
-            directionalLightDirection = directionalLightData.subarray(0,3),
-            directionalLightColorIntensity = directionalLightData.subarray(3,6),
-            directionalHalfVector = directionalLightData.subarray(6,9),
+            directionalLightDirection = directionalLightData.subarray(0, 3),
+            directionalLightColorIntensity = directionalLightData.subarray(3, 6),
+            directionalHalfVector = directionalLightData.subarray(6, 9),
             directionalLightTransform = null,
-            pointLightData = new Float32Array(9*maxNumerOfLights), // mat3*maxNumerOfLights
+            pointLightData = new Float32Array(9 * maxNumerOfLights), // mat3*maxNumerOfLights
             pointLightDataVec3 = vec3.wrapArray(pointLightData),
             pointLights = [],
-            lightDirection = [0,0,1],
+            lightDirection = [0, 0, 1],
             /**
              * Set the point light to have not contribution this means setting the position 1,1,1, the color to 0,0,0
              * and attenuation to 1,0,0.<br>
@@ -2504,24 +2550,25 @@ KICK.namespace = function (ns_string) {
              * @param {Number} index of point light
              * @private
              */
-            resetPointLight = function(index){
-                for (var i=0;i<3;i++){
-                    vec3.set([0,0,0],pointLightDataVec3[index*3+i]);
+            resetPointLight = function (index) {
+                var i;
+                for (i = 0; i < 3; i++) {
+                    vec3.set([0, 0, 0], pointLightDataVec3[index * 3 + i]);
                 }
             };
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * The ambient light in the scene.
              * @property ambientLight
              * @type KICK.scene.Light
              */
             ambientLight: {
-                get:function (){
+                get: function () {
                     return ambientLight;
                 },
-                set:function(value){
-                    if (ASSERT){
-                        if (value && ambientLight){
+                set: function (value) {
+                    if (ASSERT) {
+                        if (value && ambientLight) {
                             throw Error("Cannot have multiple ambient lights in the scene");
                         }
                     }
@@ -2533,22 +2580,22 @@ KICK.namespace = function (ns_string) {
              * @property directionalLight
              * @type KICK.scene.Light
              */
-            directionalLight:{
-                get: function(){
+            directionalLight: {
+                get: function () {
                     return directionalLight;
                 },
-                set: function(value){
-                    if (ASSERT){
-                        if (value && directionalLight){
+                set: function (value) {
+                    if (ASSERT) {
+                        if (value && directionalLight) {
                             throw Error("Cannot have multiple directional lights in the scene");
                         }
                     }
                     directionalLight = value;
-                    if (value !== null){
+                    if (value !== null) {
                         directionalLightTransform = directionalLight.gameObject.transform;
                     } else {
                         directionalLightTransform = null;
-                        KICK.math.mat3.set([0,0,0,0,0,0,0,0,0],directionalLightData);
+                        KICK.math.mat3.set([0, 0, 0, 0, 0, 0, 0, 0, 0], directionalLightData);
                     }
                 }
             },
@@ -2558,8 +2605,8 @@ KICK.namespace = function (ns_string) {
              * @property directionalLightData
              * @type KICK.math.mat3
              */
-            directionalLightData:{
-                get:function(){
+            directionalLightData: {
+                get: function () {
                     return directionalLightData;
                 }
             },
@@ -2569,8 +2616,8 @@ KICK.namespace = function (ns_string) {
              * Column 2 vector: color intensity<br>
              * Column 3 vector: attenuation vector
              */
-            pointLightData:{
-                get: function(){
+            pointLightData: {
+                get: function () {
                     return pointLightData;
                 }
             }
@@ -2580,11 +2627,11 @@ KICK.namespace = function (ns_string) {
          * @method addPointLight
          * @param {KICK.scene.Light} pointLight
          */
-        this.addPointLight = function(pointLight){
-            if (!KICK.core.Util.contains(pointLights,pointLight)){
-                if (pointLights.length==maxNumerOfLights){
-                    if (ASSERT){
-                        fail("Only "+maxNumerOfLights+" point lights allowed in scene");
+        this.addPointLight = function (pointLight) {
+            if (!KICK.core.Util.contains(pointLights, pointLight)) {
+                if (pointLights.length === maxNumerOfLights) {
+                    if (ASSERT) {
+                        fail("Only " + maxNumerOfLights + " point lights allowed in scene");
                     }
                 } else {
                     pointLights.push(pointLight);
@@ -2596,13 +2643,13 @@ KICK.namespace = function (ns_string) {
          * @method removePointLight
          * @param {KICK.scene.Light} pointLight
          */
-        this.removePointLight = function(pointLight){
+        this.removePointLight = function (pointLight) {
             var index = pointLights.indexOf(pointLight);
-            if (index >=0){
+            if (index >= 0) {
                 // remove element at position index
                 pointLights.splice(index, 1);
             } else {
-                if (ASSERT){
+                if (ASSERT) {
                     fail("Error removing point light");
                 }
             }
@@ -2615,39 +2662,43 @@ KICK.namespace = function (ns_string) {
          * @method recomputeLight
          * @param {KICK.math.mat4} viewMatrix
          */
-        this.recomputeLight = function(viewMatrix){
-            if (directionalLight !== null){
+        this.recomputeLight = function (viewMatrix) {
+            if (directionalLight !== null) {
                 // compute light direction
-                quat4.multiplyVec3(directionalLightTransform.rotation,lightDirection,directionalLightDirection);
+                quat4.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirection);
 
                 // transform to eye space
-                mat4.multiplyVec3Vector(viewMatrix,directionalLightDirection);
+                mat4.multiplyVec3Vector(viewMatrix, directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
                 // compute half vector
                 vec3.add(lightDirection, directionalLightDirection, directionalHalfVector);
                 vec3.normalize(directionalHalfVector);
 
-                vec3.set(directionalLight.colorIntensity,directionalLightColorIntensity);
+                vec3.set(directionalLight.colorIntensity, directionalLightColorIntensity);
             }
-            if (maxNumerOfLights){ // only run if max number of lights are 1 or above (otherwise JIT compiler will skip it)
-                var index = 0;
-                for (var i=pointLights.length-1;i>=0;i--){
-                    var pointLight = pointLights[i];
-                    var pointLightPosition = pointLight.transform.position;
+            if (maxNumerOfLights) { // only run if max number of lights are 1 or above (otherwise JIT compiler will skip it)
+                var index = 0,
+                    i,
+                    pointLight,
+                    pointLightPosition;
+                for (i = pointLights.length - 1; i >= 0; i--) {
+                    pointLight = pointLights[i];
+                    pointLightPosition = pointLight.transform.position;
 
-                    mat4.multiplyVec3(viewMatrix, pointLightPosition,pointLightDataVec3[index]);
-                    vec3.set(pointLight.colorIntensity, pointLightDataVec3[index+1]);
-                    vec3.set(pointLight.attenuation, pointLightDataVec3[index+2]);
+                    mat4.multiplyVec3(viewMatrix, pointLightPosition, pointLightDataVec3[index]);
+                    vec3.set(pointLight.colorIntensity, pointLightDataVec3[index + 1]);
+                    vec3.set(pointLight.attenuation, pointLightDataVec3[index + 2]);
                     index += 3;
                 }
             }
         };
 
-        (function init(){
-            for (var i=0;i<maxNumerOfLights;i++){
+        (function init() {
+            var i;
+            for (i = 0; i < maxNumerOfLights; i++) {
                 resetPointLight(i);
             }
-        })();
+        }());
     };
- })();
+}());

@@ -54,11 +54,8 @@ This example demonstrate how to script update that runs in every frame (slightly
         var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
         var material = new KICK.material.Material(engine,{
             shader: shader,
-            uniforms:{
-                mainColor: {
-                    value: [1,1,1,1],
-                    type: KICK.core.Constants.GL_FLOAT_VEC4
-                }
+            uniformData:{
+                mainColor: [1,1,1,1]
             }
         });
 
