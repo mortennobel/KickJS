@@ -143,23 +143,11 @@
             for (var i = 0;i<5;i++){
                 var material = new KICK.material.Material(engine, {
                     shader:shader,
-                    uniforms:{
-                        mainColor:{
-                            value:[1.0,0.0,0.9,0.5],
-                            type:KICK.core.Constants.GL_FLOAT_VEC4
-                        },
-                        mainTexture:{
-                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                            type:KICK.core.Constants.GL_SAMPLER_2D
-                        },
-                        specularExponent:{
-                            value: 1+i/5*50,
-                            type:KICK.core.Constants.GL_FLOAT
-                        },
-                        specularColor:{
-                            value: [1,1,1,1],
-                            type:KICK.core.Constants.GL_FLOAT_VEC4
-                        }
+                    uniformData:{
+                        mainColor:[1.0,0.0,0.9,0.5],
+                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                        specularExponent: 1+i/5*50,
+                        specularColor:[1,1,1,1]
                     }
                 });
                 var position = [-1+(i/5)*3,0,0];
@@ -169,15 +157,9 @@
             for (var i = 0;i<5;i++){
                 var material = new KICK.material.Material(engine, {
                     shader:shader,
-                    uniforms:{
-                        mainColor:{
-                            value:[i/5,0.0,0.9,0.5],
-                            type:KICK.core.Constants.GL_FLOAT_VEC4
-                        },
-                        mainTexture:{
-                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                            type:KICK.core.Constants.GL_SAMPLER_2D
-                        }
+                    uniformData:{
+                        mainColor:[i/5,0.0,0.9,0.5],
+                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                     }
                 });
                 var position = [-1+(i/5)*3,.75,0];
@@ -187,15 +169,9 @@
             for (var i = 0;i<5;i++){
                 var material = new KICK.material.Material(engine, {
                     shader:shader,
-                    uniforms:{
-                        mainColor:{
-                            value:[i/5,0.0,0.9,0.5],
-                            type:KICK.core.Constants.GL_FLOAT_VEC4
-                        },
-                        mainTexture:{
-                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                            type:KICK.core.Constants.GL_SAMPLER_2D
-                        }
+                    uniformData:{
+                        mainColor:[i/5,0.0,0.9,0.5],
+                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                     }
                 });
                 var position = [-1+(i/5)*3,-.75,0];
@@ -205,15 +181,9 @@
             for (var i = 0;i<5;i++){
                 var material = new KICK.material.Material(engine, {
                     shader:shader,
-                    uniforms:{
-                        mainColor:{
-                            value:[i/5,0.0,0.9,0.5],
-                            type:KICK.core.Constants.GL_FLOAT_VEC4
-                        },
-                        mainTexture:{
-                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                            type:KICK.core.Constants.GL_SAMPLER_2D
-                        }
+                    uniformData:{
+                        mainColor:[i/5,0.0,0.9,0.5],
+                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                     }
                 });
                 var position = [-1+(i/5)*3,-1.5,0];

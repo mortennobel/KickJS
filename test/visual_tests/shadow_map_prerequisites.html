@@ -73,15 +73,9 @@
             var material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                uniforms:{
-                    mainColor: {
-                        value: color,
-                        type: KICK.core.Constants.GL_FLOAT_VEC3
-                    },
-                    mainTexture: {
-                        value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
+                uniformData:{
+                    mainColor: color,
+                    mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                 }
             });
             meshRenderer.material = material;
@@ -260,11 +254,8 @@
             planeMeshRenderer2.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-                uniforms:{
-                    mainColor: {
-                        value: [1,0,1,1],
-                        type: KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor: [1,0,1,1]
                 }
             });
         }
@@ -393,11 +384,8 @@
             meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-                uniforms:{
-                    mainColor: {
-                        value: [1,1,0,1],
-                        type: KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor: [1,1,0,1]
                 }
             });
             lightObj.addComponent(meshRenderer);
@@ -413,10 +401,7 @@
             var material = new KICK.material.Material(engine,{
                                     shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
                                     uniforms:{
-                                        mainColor:{
-                                            value:[0,1,1,.3],
-                                            type: KICK.core.Constants.GL_FLOAT_VEC4
-                                        }
+                                        mainColor:[0,1,1,.3]
                                     }
                                 });
             var meshRenderer = new KICK.scene.MeshRenderer({
@@ -453,16 +438,13 @@
             var meshRenderer = new KICK.scene.MeshRenderer({
                 mesh: engine.project.load(engine.project.ENGINE_MESH_PLANE),
                 material: new KICK.material.Material(engine,{
-                    shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-                    uniforms:{}
+                    shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT)
                 })
             });
             cameraObject.addComponent(meshRenderer);
             cameraObject.addComponent({
                 update:function(){
-                    meshRenderer.material.uniforms.mainTexture = {
-                        value: directionalLight.shadowTexture
-                    };
+                    meshRenderer.material.setUniform("mainTexture",directionalLight.shadowTexture);
                 }
             });
         }

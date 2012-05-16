@@ -85,15 +85,9 @@
                 meshRendererSphere.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
                 meshRendererSphere.material = new KICK.material.Material(engine,{
                     shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
-                    uniforms:{
-                        mainTexture:{
-                            value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                            type:KICK.core.Constants.GL_SAMPLER_2D
-                        },
-                        mainColor:{
-                            value:color,
-                            type:KICK.core.Constants.GL_FLOAT_VEC4
-                        }
+                    uniformData:{
+                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                        mainColor:color
                     }
                 });
                 gameObjectSphere.addComponent(meshRendererSphere);

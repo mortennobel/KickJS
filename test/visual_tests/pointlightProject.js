@@ -316,39 +316,31 @@ var pointProject = {
                "name": "Specular",
                "reftype": "project"
             },
-            "uniforms": {
-               "mainColor": {
-                  "type": 35665,
-                  "value": [
+            "uniformData": {
+               "mainColor":[
                      1,
                      0,
                      0,
                      1
                   ]
-               },
+               ,
                "mainTexture": {
-                  "type": 35678,
-                  "value": {
                      "ref": -201,
                      "name": "White",
                      "reftype": "project"
                   }
-               },
-               "specularColor": {
-                  "type": 35666,
-                  "value": [
+               ,
+               "specularColor": [
                      1,
                      1,
                      1,
                      1
                   ]
-               },
-               "specularExponent": {
-                  "type": 5126,
-                  "value": [
+               ,
+               "specularExponent": [
                      50
                   ]
-               }
+
             }
          }
       },
@@ -363,24 +355,20 @@ var pointProject = {
                "name": "Unlit",
                "reftype": "project"
             },
-            "uniforms": {
-               "mainColor": {
-                  "type": 35665,
-                  "value": [
+            "uniformData": {
+               "mainColor": [
                      1,
                      1,
                      0,
                      1
                   ]
-               },
+               ,
                "mainTexture": {
-                  "type": 35678,
-                  "value": {
                      "ref": -201,
                      "name": "White",
                      "reftype": "project"
                   }
-               }
+
             }
          }
       },
@@ -395,39 +383,31 @@ var pointProject = {
                "name": "Specular",
                "reftype": "project"
             },
-            "uniforms": {
-               "mainColor": {
-                  "type": 35665,
-                  "value": [
+            "uniformData": {
+               "mainColor": [
                      0,
                      1,
                      0,
                      1
                   ]
-               },
+               ,
                "mainTexture": {
-                  "type": 35678,
-                  "value": {
                      "ref": -201,
                      "name": "White",
                      "reftype": "project"
                   }
-               },
-               "specularColor": {
-                  "type": 35666,
-                  "value": [
+               ,
+               "specularColor": [
                      1,
                      1,
                      1,
                      1
                   ]
-               },
-               "specularExponent": {
-                  "type": 5126,
-                  "value": [
+               ,
+               "specularExponent": [
                      50
                   ]
-               }
+
             }
          }
       },
@@ -442,39 +422,20 @@ var pointProject = {
                "name": "Specular",
                "reftype": "project"
             },
-            "uniforms": {
-               "mainColor": {
-                  "type": 35665,
-                  "value": [
-                     0,
-                     0,
-                     1,
-                     1
-                  ]
-               },
-               "mainTexture": {
-                  "type": 35678,
-                  "value": {
+            "uniformData": {
+                "mainColor":[0,0,1,1],
+            "mainTexture": {
                      "ref": -201,
                      "name": "White",
                      "reftype": "project"
-                  }
-               },
-               "specularColor": {
-                  "type": 35666,
-                  "value": [
+                  },
+            "specularColor": [
                      1,
                      1,
                      1,
                      1
-                  ]
-               },
-               "specularExponent": {
-                  "type": 5126,
-                  "value": [
-                     50
-                  ]
-               }
+                  ],
+            "specularExponent": [50]
             }
          }
       },

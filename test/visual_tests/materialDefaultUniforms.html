@@ -143,11 +143,8 @@
 
             var material = new KICK.material.Material(engine, {
                 shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1.0,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor:[1.0,0.0,0.9,0.5]
                 }
             });
             console.log(material.uniforms);
@@ -157,11 +154,8 @@
             var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
             var material = new KICK.material.Material(engine, {
                 shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor:[1,0.0,0.9,0.5]
                 }
             });
             var position = [0,.75,0];
@@ -171,11 +165,8 @@
 
             var material = new KICK.material.Material(engine, {
                 shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor:[1,0.0,0.9,0.5]
                 }
             });
             var position = [0,-.75,0];
@@ -184,11 +175,8 @@
             var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
             var material = new KICK.material.Material(engine, {
                 shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor:[1,0.0,0.9,0.5]
                 }
             });
             var position = [0,-1.5,0];

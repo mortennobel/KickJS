@@ -31,9 +31,7 @@
         var clearLog = function(){
             var element = document.getElementById("output");
             element.innerHTML = "";
-        }
-
-
+        };
 
         function initMaterials(vertexShaderId, fragmentShaderId){
             clearLog();
@@ -54,10 +52,7 @@
                     name:"Some material "+i,
                     shader:shader,
                     uniforms: {
-                        uColor: {
-                            value: [i==0?1:0,i==1?1:0,i==2?1:0],
-                            type: KICK.core.Constants.FLOAT_VEC3
-                        }
+                        uColor: [i==0?1:0,i==1?1:0,i==2?1:0]
                     }
                 });
                 materials.push(material);
@@ -106,7 +101,7 @@
         }
 
         function setColor(color){
-            meshRenderer.material.uniforms.uColor.value = new Float32Array(color);
+            meshRenderer.material.setUniform("uColor", new Float32Array(color));
         }
 
         function useNormalShader(){

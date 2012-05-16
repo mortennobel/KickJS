@@ -50,7 +50,7 @@
             meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader,
-                uniforms: materialUniforms
+                uniformData: materialUniforms
             });
         }
 
@@ -134,10 +134,7 @@
             meshRenderer2 = new KICK.scene.MeshRenderer();
             meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderTex','fragmentShaderTex',meshRenderer2, {
-                    tex: {
-                        value: texture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
+                    tex:  texture
                 });
             gameObject2.addComponent(meshRenderer2);
 

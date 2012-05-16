@@ -74,15 +74,9 @@
         // create material
         var material = new KICK.material.Material(engine,{
             shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-            uniforms:{
-                mainColor: {
-                    value: colors[i],
-                    type: KICK.core.Constants.GL_FLOAT_VEC3
-                },
-                mainTexture: {
-                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                    type: KICK.core.Constants.GL_SAMPLER_2D
-                }
+            uniformData:{
+                mainColor: colors[i],
+                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
             }
         });
         gameObject.transform.position = [x,y,0];

@@ -42,21 +42,15 @@
             new KICK.material.Material(engine,{
                 name:"Material.002",
                 shader:shader,
-                uniforms:{
-                     color: {
-                         value: [1,0,0],
-                         type: KICK.core.Constants.FLOAT_VEC3
-                     }
+                uniformData:{
+                     color:  [1,0,0]
                 }
             });
             new KICK.material.Material(engine,{
                 name:"Material.003",
                 shader:shader,
-                uniforms:{
-                     color: {
-                         value: [0,1,0],
-                         type: KICK.core.Constants.FLOAT_VEC3
-                     }
+                uniformData:{
+                     color: [0,1,0]
                 }
             });
         };

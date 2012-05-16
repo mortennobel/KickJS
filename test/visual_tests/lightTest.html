@@ -61,23 +61,11 @@
             shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
             material = new KICK.material.Material(engine, {
                 shader:shader,
-                uniforms:{
-                    mainColor:{
-                        value:[1.0,0.0,0.9,0.5],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
-                    },
-                    mainTexture:{
-                        value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                        type:KICK.core.Constants.GL_SAMPLER_2D
-                    },
-                    specularExponent:{
-                        value: 50,
-                        type:KICK.core.Constants.GL_FLOAT
-                    },
-                    specularColor:{
-                        value: [1,1,1,1],
-                        type:KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor:[1.0,0.0,0.9,0.5],
+                    mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                    specularExponent:50,
+                    specularColor:[1,1,1,1]
                 }
             });
             addSphere();

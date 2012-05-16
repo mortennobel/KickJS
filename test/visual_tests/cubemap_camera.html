@@ -41,11 +41,8 @@
             meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader,
-                uniforms:{
-                    skybox:{
-                        value:texture,
-                        type:KICK.core.Constants.GL_SAMPLER_CUBE
-                    }
+                uniformData:{
+                    skybox:texture
                 }
             });
         }

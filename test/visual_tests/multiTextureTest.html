@@ -43,15 +43,9 @@
             material = new KICK.material.Material(engine,{
                 name:"Some material ",
                 shader:shader,
-                uniforms: {
-                    mainTexture: {
-                        value: texture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    },
-                    texture2:{
-                        value: texture2,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
+                uniformData: {
+                    mainTexture: texture,
+                    texture2: texture2
                 }
             });
 

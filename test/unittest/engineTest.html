@@ -424,6 +424,56 @@ YUI().use('node', 'console', 'test', function (Y) {
             red = engine.activeScene.getGameObjectByName('Red');
             green = engine.activeScene.getGameObjectByName('Green');
             Assert.areSame(red.transform.parent, green.transform);
+        },
+        testDefaultShaderValue:function(){
+            var Assert = Y.Assert;
+
+            var shader = new KICK.material.Shader(engine);
+
+            shader.vertexShaderSrc = "attribute vec3 vertex;\n"+
+                "uniform mat4 _mvProj;\n"+
+                "void main(void) {\n"+
+                "   gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+                "}";
+            shader.fragmentShaderSrc = "precision highp float;\n"+
+                "uniform vec4 color;\n"+
+                "void main(void){\n"+
+                "   gl_FragColor = color;\n"+
+            	"}";
+            shader.errorLog = function(msg){Assert.fail(msg);};
+            shader.name = "Depth";
+            shader.apply();
+
+            Assert.isNotUndefined(shader.defaultUniforms,"#1");
+            Assert.isNotUndefined(shader.defaultUniforms.color,"#2"+JSON.stringify(shader.defaultUniforms));
+            Assert.isTrue(shader.defaultUniforms.color instanceof Float32Array,"#3");
+            Assert.isTrue(shader.defaultUniforms.color.length==4,"#4");
+        },
+        testUniformShaderValue:function(){
+            var Assert = Y.Assert;
+
+            var shader = new KICK.material.Shader(engine);
+
+            shader.vertexShaderSrc = "attribute vec3 vertex;\n"+
+                    "uniform mat4 _mvProj;\n"+
+                    "void main(void) {\n"+
+                    "   gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+                    "}";
+            shader.fragmentShaderSrc = "precision highp float;\n"+
+                    "uniform vec4 color;\n"+
+                    "void main(void){\n"+
+                    "   gl_FragColor = color;\n"+
+                    "}";
+            shader.errorLog = function(msg){Assert.fail(msg);};
+            shader.name = "Depth";
+            shader.apply();
+            Assert.isTrue(Array.isArray(shader.engineUniforms) ,"#1");
+            Assert.isTrue(Array.isArray(shader.materialUniforms) ,"#2");
+            Assert.areEqual(1,shader.engineUniforms.length, "#3");
+            Assert.areEqual(1,shader.materialUniforms.length ,"#4");
+            Assert.areEqual("_mvProj",shader.engineUniforms[0].name, "#3");
+            Assert.areEqual("color",shader.materialUniforms[0].name, "#4");
+
         }
     });
 
