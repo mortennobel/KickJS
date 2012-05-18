@@ -79,7 +79,6 @@ KICK.namespace = function (ns_string) {
         frustum = KICK.namespace("KICK.math.frustum"),
         min = Math.min,
         max = Math.max,
-        sqrt = Math.sqrt,
         cos = Math.cos,
         acos = Math.acos,
         sin = Math.sin,
@@ -250,7 +249,7 @@ KICK.namespace = function (ns_string) {
 
         x = vec[0];
         y = vec[1];
-        len = sqrt(x * x + y * y);
+        len = Math.sqrt(x * x + y * y);
 
         if (!len) {
             dest[0] = 0;
@@ -549,7 +548,7 @@ KICK.namespace = function (ns_string) {
      */
     vec3.length = function (vec) {
         var x = vec[0], y = vec[1], z = vec[2];
-        return sqrt(x * x + y * y + z * z);
+        return Math.sqrt(x * x + y * y + z * z);
     };
 
     /**
@@ -591,7 +590,7 @@ KICK.namespace = function (ns_string) {
         var x = vec[0] - vec2[0],
             y = vec[1] - vec2[1],
             z = vec[2] - vec2[2],
-            len = sqrt(x * x + y * y + z * z);
+            len = Math.sqrt(x * x + y * y + z * z);
 
         if (!len) {
             dest[0] = 0;
@@ -727,7 +726,7 @@ KICK.namespace = function (ns_string) {
             dest = vec3.create();
         }
 
-        dest[0] = sphericalX = sqrt(x * x + y * y + z * z);
+        dest[0] = sphericalX = Math.sqrt(x * x + y * y + z * z);
         dest[1] = -atan(z / x);
         if (x < 0) {
             dest[1] += PI;
@@ -973,7 +972,7 @@ KICK.namespace = function (ns_string) {
      */
     vec4.length = function (vec) {
         var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
-        return sqrt(x * x + y * y + z * z + w * w);
+        return Math.sqrt(x * x + y * y + z * z + w * w);
     };
 
     /**
@@ -1188,26 +1187,26 @@ KICK.namespace = function (ns_string) {
             dest = quat4.create();
         }
         if (trace > 0) {
-            s = 0.5 / sqrt(trace + 1.0);
+            s = 0.5 / Math.sqrt(trace + 1.0);
             dest[0] = (m21 - m12) * s;
             dest[1] = (m02 - m20) * s;
             dest[2] = (m10 - m01) * s;
             dest[3] = 0.25 / s;
         } else {
             if (m00 > m11 && m00 > m22) {
-                s = 2.0 * sqrt(1.0 + m00 - m11 - m22);
+                s = 2.0 * Math.sqrt(1.0 + m00 - m11 - m22);
                 dest[0] = 0.25 * s;
                 dest[1] = (m01 + m10) / s;
                 dest[2] = (m02 + m20) / s;
                 dest[3] = (m21 - m12) / s;
             } else if (m11 > m22) {
-                s = 2.0 * sqrt(1.0 + m11 - m00 - m22);
+                s = 2.0 * Math.sqrt(1.0 + m11 - m00 - m22);
                 dest[0] = (m01 + m10) / s;
                 dest[1] = 0.25 * s;
                 dest[2] = (m12 + m21) / s;
                 dest[3] = (m02 - m20) / s;
             } else {
-                s = 2.0 * sqrt(1.0 + m22 - m00 - m11);
+                s = 2.0 * Math.sqrt(1.0 + m22 - m00 - m11);
                 dest[0] = (m02 + m20) / s;
                 dest[1] = (m12 + m21) / s;
                 dest[2] = 0.25 * s;
@@ -1948,7 +1947,7 @@ KICK.namespace = function (ns_string) {
             b00, b01, b02,
             b10, b11, b12,
             b20, b21, b22,
-            len = sqrt(x * x + y * y + z * z);
+            len = Math.sqrt(x * x + y * y + z * z);
         if (!len) { return null; }
         if (len !== 1) {
             len = 1 / len;
@@ -2244,7 +2243,7 @@ KICK.namespace = function (ns_string) {
         z2 = eyez - center[2];
 
         // normalize (no check needed for 0 because of early return)
-        len = 1 / sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+        len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
         z0 *= len;
         z1 *= len;
         z2 *= len;
@@ -2253,7 +2252,7 @@ KICK.namespace = function (ns_string) {
         x0 = upy * z2 - upz * z1;
         x1 = upz * z0 - upx * z2;
         x2 = upx * z1 - upy * z0;
-        len = sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+        len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
         if (!len) {
             x0 = 0;
             x1 = 0;
@@ -2270,7 +2269,7 @@ KICK.namespace = function (ns_string) {
         y1 = z2 * x0 - z0 * x2;
         y2 = z0 * x1 - z1 * x0;
 
-        len = sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+        len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
         if (!len) {
             y0 = 0;
             y1 = 0;
@@ -2486,7 +2485,7 @@ KICK.namespace = function (ns_string) {
      */
     quat4.calculateW = function (quat, dest) {
         var x = quat[0], y = quat[1], z = quat[2],
-            w = -sqrt(abs(1.0 - x * x - y * y - z * z));
+            w = -Math.sqrt(abs(1.0 - x * x - y * y - z * z));
 
         if (!dest || quat === dest) {
             quat[3] = w;
@@ -2929,7 +2928,7 @@ KICK.namespace = function (ns_string) {
         }
 
         halfTheta = acos(cosHalfTheta);
-        sinHalfTheta = sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+        sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta * cosHalfTheta);
 
         if (abs(sinHalfTheta) < 0.001) {
             dest[0] = (quat[0] * 0.5 + quat2[0] * 0.5);
