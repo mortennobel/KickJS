@@ -2819,7 +2819,6 @@ KICK.namespace = function (ns_string) {
         frustum = KICK.namespace("KICK.math.frustum"),
         min = Math.min,
         max = Math.max,
-        sqrt = Math.sqrt,
         cos = Math.cos,
         acos = Math.acos,
         sin = Math.sin,
@@ -2990,7 +2989,7 @@ KICK.namespace = function (ns_string) {
 
         x = vec[0];
         y = vec[1];
-        len = sqrt(x * x + y * y);
+        len = Math.sqrt(x * x + y * y);
 
         if (!len) {
             dest[0] = 0;
@@ -3289,7 +3288,7 @@ KICK.namespace = function (ns_string) {
      */
     vec3.length = function (vec) {
         var x = vec[0], y = vec[1], z = vec[2];
-        return sqrt(x * x + y * y + z * z);
+        return Math.sqrt(x * x + y * y + z * z);
     };
 
     /**
@@ -3331,7 +3330,7 @@ KICK.namespace = function (ns_string) {
         var x = vec[0] - vec2[0],
             y = vec[1] - vec2[1],
             z = vec[2] - vec2[2],
-            len = sqrt(x * x + y * y + z * z);
+            len = Math.sqrt(x * x + y * y + z * z);
 
         if (!len) {
             dest[0] = 0;
@@ -3467,7 +3466,7 @@ KICK.namespace = function (ns_string) {
             dest = vec3.create();
         }
 
-        dest[0] = sphericalX = sqrt(x * x + y * y + z * z);
+        dest[0] = sphericalX = Math.sqrt(x * x + y * y + z * z);
         dest[1] = -atan(z / x);
         if (x < 0) {
             dest[1] += PI;
@@ -3713,7 +3712,7 @@ KICK.namespace = function (ns_string) {
      */
     vec4.length = function (vec) {
         var x = vec[0], y = vec[1], z = vec[2], w = vec[3];
-        return sqrt(x * x + y * y + z * z + w * w);
+        return Math.sqrt(x * x + y * y + z * z + w * w);
     };
 
     /**
@@ -3928,26 +3927,26 @@ KICK.namespace = function (ns_string) {
             dest = quat4.create();
         }
         if (trace > 0) {
-            s = 0.5 / sqrt(trace + 1.0);
+            s = 0.5 / Math.sqrt(trace + 1.0);
             dest[0] = (m21 - m12) * s;
             dest[1] = (m02 - m20) * s;
             dest[2] = (m10 - m01) * s;
             dest[3] = 0.25 / s;
         } else {
             if (m00 > m11 && m00 > m22) {
-                s = 2.0 * sqrt(1.0 + m00 - m11 - m22);
+                s = 2.0 * Math.sqrt(1.0 + m00 - m11 - m22);
                 dest[0] = 0.25 * s;
                 dest[1] = (m01 + m10) / s;
                 dest[2] = (m02 + m20) / s;
                 dest[3] = (m21 - m12) / s;
             } else if (m11 > m22) {
-                s = 2.0 * sqrt(1.0 + m11 - m00 - m22);
+                s = 2.0 * Math.sqrt(1.0 + m11 - m00 - m22);
                 dest[0] = (m01 + m10) / s;
                 dest[1] = 0.25 * s;
                 dest[2] = (m12 + m21) / s;
                 dest[3] = (m02 - m20) / s;
             } else {
-                s = 2.0 * sqrt(1.0 + m22 - m00 - m11);
+                s = 2.0 * Math.sqrt(1.0 + m22 - m00 - m11);
                 dest[0] = (m02 + m20) / s;
                 dest[1] = (m12 + m21) / s;
                 dest[2] = 0.25 * s;
@@ -4688,7 +4687,7 @@ KICK.namespace = function (ns_string) {
             b00, b01, b02,
             b10, b11, b12,
             b20, b21, b22,
-            len = sqrt(x * x + y * y + z * z);
+            len = Math.sqrt(x * x + y * y + z * z);
         if (!len) { return null; }
         if (len !== 1) {
             len = 1 / len;
@@ -4984,7 +4983,7 @@ KICK.namespace = function (ns_string) {
         z2 = eyez - center[2];
 
         // normalize (no check needed for 0 because of early return)
-        len = 1 / sqrt(z0 * z0 + z1 * z1 + z2 * z2);
+        len = 1 / Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
         z0 *= len;
         z1 *= len;
         z2 *= len;
@@ -4993,7 +4992,7 @@ KICK.namespace = function (ns_string) {
         x0 = upy * z2 - upz * z1;
         x1 = upz * z0 - upx * z2;
         x2 = upx * z1 - upy * z0;
-        len = sqrt(x0 * x0 + x1 * x1 + x2 * x2);
+        len = Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
         if (!len) {
             x0 = 0;
             x1 = 0;
@@ -5010,7 +5009,7 @@ KICK.namespace = function (ns_string) {
         y1 = z2 * x0 - z0 * x2;
         y2 = z0 * x1 - z1 * x0;
 
-        len = sqrt(y0 * y0 + y1 * y1 + y2 * y2);
+        len = Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
         if (!len) {
             y0 = 0;
             y1 = 0;
@@ -5226,7 +5225,7 @@ KICK.namespace = function (ns_string) {
      */
     quat4.calculateW = function (quat, dest) {
         var x = quat[0], y = quat[1], z = quat[2],
-            w = -sqrt(abs(1.0 - x * x - y * y - z * z));
+            w = -Math.sqrt(abs(1.0 - x * x - y * y - z * z));
 
         if (!dest || quat === dest) {
             quat[3] = w;
@@ -5669,7 +5668,7 @@ KICK.namespace = function (ns_string) {
         }
 
         halfTheta = acos(cosHalfTheta);
-        sinHalfTheta = sqrt(1.0 - cosHalfTheta * cosHalfTheta);
+        sinHalfTheta = Math.sqrt(1.0 - cosHalfTheta * cosHalfTheta);
 
         if (abs(sinHalfTheta) < 0.001) {
             dest[0] = (quat[0] * 0.5 + quat2[0] * 0.5);
@@ -9162,36 +9161,38 @@ KICK.namespace = function (ns_string) {
             _vertexAttrLength,
             _meshType,
             _name,
-            clearInterleavedData = function(){
+            clearInterleavedData = function() {
                 _interleavedArray = null;
                 _interleavedArrayFormat = null;
                 _vertexAttrLength = null;
             },
-            isVertexDataInitialized = function(){
+            isVertexDataInitialized = function() {
                 return data.vertex;
             },
             isInterleavedDataInitialized = function(){
                 return _interleavedArray;
             },
-            createVertexDataFromInterleavedData = function(){
-                var vertexLength = _interleavedArray.byteLength / (_vertexAttrLength),
-                    i,j,
+            createVertexDataFromInterleavedData = function() {
+                var vertexLength = _interleavedArray.byteLength / (_vertexAttrLength), i, j,
                     attributeName,
                     attributeConfig,
                     offset = 0,
+                    arrayType,
                     floatView;
                 data = {};
-                for (i=0;i<vertexLength;i++){
-                    for (attributeName in _interleavedArrayFormat){
-                        attributeConfig = _interleavedArrayFormat[attributeName];
-                        var arrayType = attributeConfig.type === 5126?Float32Array:Int32Array;
-                        if (i===0){
-                            data[attributeName] = new arrayType(vertexLength*attributeConfig.size);
-                        }
+                for (i = 0; i < vertexLength; i++) {
+                    for (attributeName in _interleavedArrayFormat) {
+                        if (_interleavedArrayFormat.hasOwnProperty(attributeName)) {
+                            attributeConfig = _interleavedArrayFormat[attributeName];
+                            arrayType = attributeConfig.type === 5126 ? Float32Array : Int32Array;
+                            if (i === 0) {
+                                data[attributeName] = new arrayType(vertexLength * attributeConfig.size);
+                            }
 
-                        floatView = new arrayType(_interleavedArray,offset+attributeConfig.pointer);
-                        for (j=0;j<attributeConfig.size;j++){
-                            data[attributeName][i*attributeConfig.size+j] = floatView[j];
+                            floatView = new arrayType(_interleavedArray, offset + attributeConfig.pointer);
+                            for (j = 0; j < attributeConfig.size; j++) {
+                                data[attributeName][i * attributeConfig.size + j] = floatView[j];
+                            }
                         }
                     }
                     offset += _vertexAttrLength;
@@ -9203,19 +9204,19 @@ KICK.namespace = function (ns_string) {
              * @param {Number} type 5126 or 5124
              * @param {string} name
              */
-            createGetterSetter = function(type,name){
-                if (type === 5126 || type===5124){
-                    var typedArrayType = (type === 5126)? Float32Array:Int32Array;
+            createGetterSetter = function (type, name) {
+                if (type === 5126 || type === 5124) {
+                    var typedArrayType = (type === 5126) ? Float32Array : Int32Array;
                     return {
-                        get:function(){
+                        get: function () {
                             if (!isVertexDataInitialized() && isInterleavedDataInitialized()){
                                 createVertexDataFromInterleavedData();
                             }
                             return data[name];
                         },
-                        set:function(newValue){
-                            if (newValue){
-                                if (data[name] && data[name].length == newValue.length){
+                        set: function (newValue) {
+                            if (newValue) {
+                                if (data[name] && data[name].length === newValue.length) {
                                     data[name].set(newValue);
                                 } else {
                                     data[name] = new typedArrayType(newValue);
@@ -9226,7 +9227,7 @@ KICK.namespace = function (ns_string) {
                             clearInterleavedData();
                         }
                     };
-                } else if (ASSERT){
+                } else if (ASSERT) {
                     fail("Unexpected type");
                 }
             },
@@ -9234,67 +9235,68 @@ KICK.namespace = function (ns_string) {
              * @method createInterleavedData
              * @private
              */
-             createInterleavedData = function () {
-                 var lengthOfVertexAttributes = [],
-                     names = [],
-                     types = [],
-                     length = 0,
-                     vertexAttributes = [],
-                     data,
-                     i,
-                     vertex = thisObj.vertex,
-                     vertexLen = vertex ?  vertex.length/3 : 0,
-                     description = {},
-                     addAttributes = function (name,size,type){
-                         var array = thisObj[name];
+            createInterleavedData = function () {
+                var lengthOfVertexAttributes = [],
+                    names = [],
+                    types = [],
+                    length = 0,
+                    vertexAttributes = [],
+                    data,
+                    i,
+                    vertex = thisObj.vertex,
+                    vertexLen = vertex ?  vertex.length / 3 : 0,
+                    description = {},
+                    addAttributes = function (name, size, type) {
+                        var array = thisObj[name];
 
-                         if (array){
-                             lengthOfVertexAttributes.push(size);
-                             names.push(name);
-                             types.push(type);
-                             vertexAttributes.push(array);
-                             description[name] = {
-                                 pointer: length*4,
-                                 size: size,
-                                 normalized: false,
-                                 type: type
-                             };
-                             length += size;
-                         }
-                     };
+                        if (array) {
+                            lengthOfVertexAttributes.push(size);
+                            names.push(name);
+                            types.push(type);
+                            vertexAttributes.push(array);
+                            description[name] = {
+                                pointer: length * 4,
+                                size: size,
+                                normalized: false,
+                                type: type,
+                                name: name
+                            };
+                            length += size;
+                        }
+                    };
 
-                 addAttributes("vertex",3,5126);
-                 addAttributes("normal",3,5126);
-                 addAttributes("uv1",2,5126);
-                 addAttributes("uv2",2,5126);
-                 addAttributes("tangent",4,5126);
-                 addAttributes("color",4,5126);
-                 addAttributes("int1",1,5124);
-                 addAttributes("int2",2,5124);
-                 addAttributes("int3",3,5124);
-                 addAttributes("int4",4,5124);
+                addAttributes("vertex", 3, 5126);
+                addAttributes("normal", 3, 5126);
+                addAttributes("uv1", 2, 5126);
+                addAttributes("uv2", 2, 5126);
+                addAttributes("tangent", 4, 5126);
+                addAttributes("color", 4, 5126);
+                addAttributes("int1", 1, 5124);
+                addAttributes("int2", 2, 5124);
+                addAttributes("int3", 3, 5124);
+                addAttributes("int4", 4, 5124);
 
-                 // copy data into array
-                 var dataArrayBuffer = new ArrayBuffer(length*vertexLen*4);
-                 for (i=0;i<vertexLen;i++){
-                     var vertexOffset = i*length*4;
-                     for (var j=0;j<names.length;j++){
-                         if (types[j] === 5126){
+                // copy data into array
+                var dataArrayBuffer = new ArrayBuffer(length * vertexLen * 4);
+                for (i = 0; i < vertexLen; i++) {
+                    var vertexOffset = i * length * 4;
+                    for (var j = 0;j<names.length;j++){
+                        if (types[j] === 5126){
                             data = new Float32Array(dataArrayBuffer,vertexOffset);
-                         } else {
-                             data = new Int32Array(dataArrayBuffer,vertexOffset);
-                         }
-                         var dataSrc = vertexAttributes[j];
-                         var dataSrcLen = lengthOfVertexAttributes[j];
-                         for (var k=0;k<dataSrcLen;k++){
-                             data[k] = dataSrc[i*dataSrcLen+k];
-                             vertexOffset += 4;
-                         }
-                     }
-                 }
-                 _interleavedArray = dataArrayBuffer;
-                 _interleavedArrayFormat = description;
-                 _vertexAttrLength = length*4;
+                        } else {
+                            data = new Int32Array(dataArrayBuffer,vertexOffset);
+                        }
+                        var dataSrc = vertexAttributes[j];
+                        var dataSrcLen = lengthOfVertexAttributes[j];
+                        for (var k=0;k<dataSrcLen;k++){
+                            data[k] = dataSrc[i*dataSrcLen+k];
+                            vertexOffset += 4;
+                        }
+                    }
+                }
+                _interleavedArray = dataArrayBuffer;
+                _interleavedArrayFormat = description;
+                _vertexAttrLength = length * 4;
             };
 
         /**
@@ -9924,6 +9926,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
+            interleavedArrayFormatArray = [],
             meshVertexIndexBuffers = [],
             _name,
             _meshData,
@@ -9954,6 +9957,19 @@ KICK.namespace = function (ns_string) {
                 meshElements.length = 0;
                 meshVertexIndexBuffers.length = 0;
             },
+            createInterleavedArrayFormatArray = function(){
+                var obj;
+                interleavedArrayFormatArray.length = 0;
+                for (var descName in interleavedArrayFormat) {
+                    if (interleavedArrayFormat.hasOwnProperty(descName)){
+                        obj = interleavedArrayFormat[descName];
+                        if (!obj.name){
+                            obj.name = descName;
+                        }
+                        interleavedArrayFormatArray.push(obj);
+                    }
+                }
+            },
             /**
              * Copy data to the vertex buffer object (VBO)
              * @method updateData
@@ -9965,6 +9981,7 @@ KICK.namespace = function (ns_string) {
                 deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
+                createInterleavedArrayFormatArray();
                 vertexAttrLength = _meshData.vertexAttrLength;
                 meshType = _meshData.meshType;
 
@@ -10099,6 +10116,7 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.material.Shader} shader
          */
         this.bind = function (shader) {
+            var i;
             shader.bind();
 
             if (gl.meshBuffer !== meshVertexAttBuffer || gl.meshShader !== shader){
@@ -10106,21 +10124,23 @@ KICK.namespace = function (ns_string) {
                 gl.meshShader = shader;
                 gl.bindBuffer(34962, meshVertexAttBuffer);
 
-                for (var descName in interleavedArrayFormat) {
-                    if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
-                        var desc = interleavedArrayFormat[descName];
-                        var attributeIndex = shader.lookupAttribute[descName];
-                        gl.enableVertexAttribArray(attributeIndex);
-                        gl.vertexAttribPointer(attributeIndex, desc.size,
-                           desc.type, false, vertexAttrLength, desc.pointer);
+                for (i = 0; i < interleavedArrayFormatArray.length; i++){
+                    var interleavedDataDescriptor = interleavedArrayFormatArray[i];
+                    var name = interleavedDataDescriptor.name;
+                    var shaderAttribute = shader.lookupAttribute[name];
+                    if (typeof(shaderAttribute) !== 'undefined') {
+                        gl.enableVertexAttribArray(shaderAttribute );
+                        gl.vertexAttribPointer(shaderAttribute , interleavedDataDescriptor.size,
+                            interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
                     }
                 }
+
                 if (ASSERT){
-                    for (var i = shader.activeAttributes.length-1;i>=0;i--){
+                    for (i = shader.activeAttributes.length-1;i>=0;i--){
                         var activeAttribute = shader.activeAttributes[i];
                         if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])){
                             KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
-                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
+                            var attributeIndex = shader.lookupAttribute[activeAttribute.name];
                             gl.disableVertexAttribArray(attributeIndex);
                             switch(activeAttribute.type){
                                 case 5126:
@@ -14628,7 +14648,6 @@ KICK.namespace = function (ns_string) {
             gl.meshShader = -1;
         };
 
-
         /**
          * Updates the shader (must be called after any shader state is changed to apply changes)
          * @method apply
@@ -14664,7 +14683,7 @@ KICK.namespace = function (ns_string) {
 
             gl.useProgram(_shaderProgramId);
             gl.boundShader = _shaderProgramId;
-            numberOfActiveUniforms = gl.getProgramParameter( _shaderProgramId, 35718);
+            numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, 35718);
             updateActiveUniforms(numberOfActiveUniforms);
 
             activeAttributes = gl.getProgramParameter( _shaderProgramId, 35721);
@@ -14673,7 +14692,7 @@ KICK.namespace = function (ns_string) {
              * @property activeAttributes
              * @type Array_Object
              */
-            this.activeAttributes = new Array(activeAttributes);
+            this.activeAttributes = [];
             /**
              * Lookup of attribute location based on name.
              * @property lookupAttribute
@@ -14791,6 +14810,11 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     material.Shader.getPrecompiledSource = function (engine, sourcecode) {
+        var name,
+            source,
+            version = "#version 100",
+            lineOffset = 1,
+            indexOfNewline;
         if (true) {
             // insert #line nn after each #pragma include to give meaning full lines in error console
             var linebreakPosition = [],
@@ -14809,27 +14833,27 @@ KICK.namespace = function (ns_string) {
                 }
             }
         }
-        for (var name in material.GLSLConstants){
-            if (typeof (name) === "string"){
-                var source = material.GLSLConstants[name];
-                sourcecode = sourcecode.replace("#pragma include \""+name+"\"",source);
-                sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
+        for (name in material.GLSLConstants) {
+            if (material.GLSLConstants.hasOwnProperty(name)) {
+                if (typeof (name) === "string") {
+                    source = material.GLSLConstants[name];
+                    sourcecode = sourcecode.replace("#pragma include \"" + name + "\"", source);
+                    sourcecode = sourcecode.replace("#pragma include \'" + name + "\'", source);
+                }
             }
         }
-        var version = "#version 100";
-        var lineOffset = 1;
         // if shader already contain version tag, then reuse this version information
-        if (sourcecode.indexOf("#version ")===0){
-            var indexOfNewline = sourcecode.indexOf('\n');
-            version = sourcecode.substring(0,indexOfNewline); // save version info
-            sourcecode = sourcecode.substring(indexOfNewline+1); // strip version info
+        if (sourcecode.indexOf("#version ") === 0) {
+            indexOfNewline = sourcecode.indexOf('\n');
+            version = sourcecode.substring(0, indexOfNewline); // save version info
+            sourcecode = sourcecode.substring(indexOfNewline + 1); // strip version info
             lineOffset = 2;
         }
         sourcecode =
-            version + "\n"+
-                "#define SHADOWS "+(engine.config.shadows===true)+"\n"+
-                "#define LIGHTS "+(engine.config.maxNumerOfLights)+"\n"+
-                "#line "+lineOffset+"\n"+
+            version + "\n" +
+                "#define SHADOWS " + (engine.config.shadows === true) + "\n" +
+                "#define LIGHTS " + (engine.config.maxNumerOfLights) + "\n" +
+                "#line " + lineOffset + "\n" +
                 sourcecode;
         return sourcecode;
     };
@@ -14843,13 +14867,7 @@ KICK.namespace = function (ns_string) {
     material.Shader.prototype.bindMaterialUniform = function (material, engineUniforms) {
         // lookup uniforms
         var gl = this.gl,
-            uniformName,
-            materialUniforms = material.uniforms,
             timeObj,
-            shaderUniform,
-            uniform,
-            value,
-            location,
             sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLightData = sceneLights.directionalLightData,
@@ -14861,30 +14879,31 @@ KICK.namespace = function (ns_string) {
             time = lookupUniforms._time,
             viewport = lookupUniforms._viewport,
             lightUniformAmbient =  lookupUniforms._ambient,
-            currentTexture = 0;
+            currentTexture = 0,
+            ambientLlightValue;
 
 
         currentTexture = material.bind(currentTexture);
 
-        if (proj){
-            gl.uniformMatrix4fv(proj.location,false,engineUniforms.projectionMatrix);
+        if (proj) {
+            gl.uniformMatrix4fv(proj.location, false, engineUniforms.projectionMatrix);
         }
-        if (lightUniformAmbient){
-            var ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
+        if (lightUniformAmbient) {
+            ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
             gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
 
-        if (directionalLightUniform){
+        if (directionalLightUniform) {
             gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
         }
-        if (pointLightUniform){
+        if (pointLightUniform) {
             gl.uniformMatrix3fv(pointLightUniform.location, false, pointLightData);
         }
-        if (time){
+        if (time) {
             timeObj = this.engine.time;
             gl.uniform1f(time.location, timeObj.time);
         }
-        if (viewport){
+        if (viewport) {
             gl.uniform2fv(viewport.location, gl.viewportSize);
         }
         return currentTexture;
@@ -14913,57 +14932,60 @@ KICK.namespace = function (ns_string) {
             directionalLight = sceneLights.directionalLight,
             globalTransform,
             i,
+            uidAsVec4,
+            modelView,
+            normalMatrix,
             currentTexture = 0;
-        if (gl.currentMaterial !== material)
+        if (gl.currentMaterial !== material) {
         // shared material uniforms
-        {
+
             gl.currentMaterial = material;
             currentTexture = this.bindMaterialUniform(material, engineUniforms);
         }
 
         // mesh instance uniforms
-        if (modelMatrix || mv || norm){
+        if (modelMatrix || mv || norm) {
             globalTransform = transform.getGlobalMatrix();
-            if (modelMatrix){
-                gl.uniformMatrix4fv(modelMatrix.location,false,globalTransform);
+            if (modelMatrix) {
+                gl.uniformMatrix4fv(modelMatrix.location, false, globalTransform);
             }
-            var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
-            if (mv){
-                gl.uniformMatrix4fv(mv.location,false,modelView);
+            modelView = mat4.multiply(engineUniforms.viewMatrix, globalTransform, tempMat4);
+            if (mv) {
+                gl.uniformMatrix4fv(mv.location, false, modelView);
             }
-            if (norm){
+            if (norm) {
                 // note this can be simplified to
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                 //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
-                if (ASSERT){
-                    if (!normalMatrix){
+                normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
+                if (ASSERT) {
+                    if (!normalMatrix) {
                         KICK.core.Util.fail("Singular matrix");
                     }
                 }
-                gl.uniformMatrix3fv(norm.location,false,normalMatrix);
+                gl.uniformMatrix3fv(norm.location, false, normalMatrix);
             }
         }
-        if (mvProj){
+        if (mvProj) {
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(mvProj.location, false, mat4.multiply(engineUniforms.viewProjectionMatrix, globalTransform, tempMat4));
         }
-        if (gameObjectUID){
-            var uidAsVec4 = uint32ToVec4(transform.gameObject.uid,tmpVec4);
-            if (this.engine.time.frame < 3){
-                console.log("transform.gameObject.uid "+transform.gameObject.uid);
+        if (gameObjectUID) {
+            uidAsVec4 = uint32ToVec4(transform.gameObject.uid, tmpVec4);
+            if (this.engine.time.frame < 3) {
+                console.log("transform.gameObject.uid " + transform.gameObject.uid);
             }
             gl.uniform4fv(gameObjectUID.location, uidAsVec4);
         }
-        if (shadowMapTexture && directionalLight && directionalLight.shadowTexture){
+        if (shadowMapTexture && directionalLight && directionalLight.shadowTexture) {
             directionalLight.shadowTexture.bind(currentTexture);
-            gl.uniform1i(shadowMapTexture.location,currentTexture);
+            gl.uniform1i(shadowMapTexture.location, currentTexture);
             currentTexture++;
         }
-        if (_lightMat){
+        if (_lightMat) {
             globalTransform = transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(engineUniforms.lightMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(_lightMat.location, false, mat4.multiply(engineUniforms.lightMatrix, globalTransform, tempMat4));
         }
     };
 

@@ -70,36 +70,38 @@ KICK.namespace = function (ns_string) {
             _vertexAttrLength,
             _meshType,
             _name,
-            clearInterleavedData = function(){
+            clearInterleavedData = function() {
                 _interleavedArray = null;
                 _interleavedArrayFormat = null;
                 _vertexAttrLength = null;
             },
-            isVertexDataInitialized = function(){
+            isVertexDataInitialized = function() {
                 return data.vertex;
             },
             isInterleavedDataInitialized = function(){
                 return _interleavedArray;
             },
-            createVertexDataFromInterleavedData = function(){
-                var vertexLength = _interleavedArray.byteLength / (_vertexAttrLength),
-                    i,j,
+            createVertexDataFromInterleavedData = function() {
+                var vertexLength = _interleavedArray.byteLength / (_vertexAttrLength), i, j,
                     attributeName,
                     attributeConfig,
                     offset = 0,
+                    arrayType,
                     floatView;
                 data = {};
-                for (i=0;i<vertexLength;i++){
-                    for (attributeName in _interleavedArrayFormat){
-                        attributeConfig = _interleavedArrayFormat[attributeName];
-                        var arrayType = attributeConfig.type === constants.GL_FLOAT?Float32Array:Int32Array;
-                        if (i===0){
-                            data[attributeName] = new arrayType(vertexLength*attributeConfig.size);
-                        }
+                for (i = 0; i < vertexLength; i++) {
+                    for (attributeName in _interleavedArrayFormat) {
+                        if (_interleavedArrayFormat.hasOwnProperty(attributeName)) {
+                            attributeConfig = _interleavedArrayFormat[attributeName];
+                            arrayType = attributeConfig.type === constants.GL_FLOAT ? Float32Array : Int32Array;
+                            if (i === 0) {
+                                data[attributeName] = new arrayType(vertexLength * attributeConfig.size);
+                            }
 
-                        floatView = new arrayType(_interleavedArray,offset+attributeConfig.pointer);
-                        for (j=0;j<attributeConfig.size;j++){
-                            data[attributeName][i*attributeConfig.size+j] = floatView[j];
+                            floatView = new arrayType(_interleavedArray, offset + attributeConfig.pointer);
+                            for (j = 0; j < attributeConfig.size; j++) {
+                                data[attributeName][i * attributeConfig.size + j] = floatView[j];
+                            }
                         }
                     }
                     offset += _vertexAttrLength;
@@ -111,19 +113,19 @@ KICK.namespace = function (ns_string) {
              * @param {Number} type GL_FLOAT or GL_INT
              * @param {string} name
              */
-            createGetterSetter = function(type,name){
-                if (type === constants.GL_FLOAT || type===constants.GL_INT){
-                    var typedArrayType = (type === constants.GL_FLOAT)? Float32Array:Int32Array;
+            createGetterSetter = function (type, name) {
+                if (type === constants.GL_FLOAT || type === constants.GL_INT) {
+                    var typedArrayType = (type === constants.GL_FLOAT) ? Float32Array : Int32Array;
                     return {
-                        get:function(){
+                        get: function () {
                             if (!isVertexDataInitialized() && isInterleavedDataInitialized()){
                                 createVertexDataFromInterleavedData();
                             }
                             return data[name];
                         },
-                        set:function(newValue){
-                            if (newValue){
-                                if (data[name] && data[name].length == newValue.length){
+                        set: function (newValue) {
+                            if (newValue) {
+                                if (data[name] && data[name].length === newValue.length) {
                                     data[name].set(newValue);
                                 } else {
                                     data[name] = new typedArrayType(newValue);
@@ -134,7 +136,7 @@ KICK.namespace = function (ns_string) {
                             clearInterleavedData();
                         }
                     };
-                } else if (ASSERT){
+                } else if (ASSERT) {
                     fail("Unexpected type");
                 }
             },
@@ -142,67 +144,68 @@ KICK.namespace = function (ns_string) {
              * @method createInterleavedData
              * @private
              */
-             createInterleavedData = function () {
-                 var lengthOfVertexAttributes = [],
-                     names = [],
-                     types = [],
-                     length = 0,
-                     vertexAttributes = [],
-                     data,
-                     i,
-                     vertex = thisObj.vertex,
-                     vertexLen = vertex ?  vertex.length/3 : 0,
-                     description = {},
-                     addAttributes = function (name,size,type){
-                         var array = thisObj[name];
+            createInterleavedData = function () {
+                var lengthOfVertexAttributes = [],
+                    names = [],
+                    types = [],
+                    length = 0,
+                    vertexAttributes = [],
+                    data,
+                    i,
+                    vertex = thisObj.vertex,
+                    vertexLen = vertex ?  vertex.length / 3 : 0,
+                    description = {},
+                    addAttributes = function (name, size, type) {
+                        var array = thisObj[name];
 
-                         if (array){
-                             lengthOfVertexAttributes.push(size);
-                             names.push(name);
-                             types.push(type);
-                             vertexAttributes.push(array);
-                             description[name] = {
-                                 pointer: length*4,
-                                 size: size,
-                                 normalized: false,
-                                 type: type
-                             };
-                             length += size;
-                         }
-                     };
+                        if (array) {
+                            lengthOfVertexAttributes.push(size);
+                            names.push(name);
+                            types.push(type);
+                            vertexAttributes.push(array);
+                            description[name] = {
+                                pointer: length * 4,
+                                size: size,
+                                normalized: false,
+                                type: type,
+                                name: name
+                            };
+                            length += size;
+                        }
+                    };
 
-                 addAttributes("vertex",3,constants.GL_FLOAT);
-                 addAttributes("normal",3,constants.GL_FLOAT);
-                 addAttributes("uv1",2,constants.GL_FLOAT);
-                 addAttributes("uv2",2,constants.GL_FLOAT);
-                 addAttributes("tangent",4,constants.GL_FLOAT);
-                 addAttributes("color",4,constants.GL_FLOAT);
-                 addAttributes("int1",1,constants.GL_INT);
-                 addAttributes("int2",2,constants.GL_INT);
-                 addAttributes("int3",3,constants.GL_INT);
-                 addAttributes("int4",4,constants.GL_INT);
+                addAttributes("vertex", 3, constants.GL_FLOAT);
+                addAttributes("normal", 3, constants.GL_FLOAT);
+                addAttributes("uv1", 2, constants.GL_FLOAT);
+                addAttributes("uv2", 2, constants.GL_FLOAT);
+                addAttributes("tangent", 4, constants.GL_FLOAT);
+                addAttributes("color", 4, constants.GL_FLOAT);
+                addAttributes("int1", 1, constants.GL_INT);
+                addAttributes("int2", 2, constants.GL_INT);
+                addAttributes("int3", 3, constants.GL_INT);
+                addAttributes("int4", 4, constants.GL_INT);
 
-                 // copy data into array
-                 var dataArrayBuffer = new ArrayBuffer(length*vertexLen*4);
-                 for (i=0;i<vertexLen;i++){
-                     var vertexOffset = i*length*4;
-                     for (var j=0;j<names.length;j++){
-                         if (types[j] === constants.GL_FLOAT){
+                // copy data into array
+                var dataArrayBuffer = new ArrayBuffer(length * vertexLen * 4);
+                for (i = 0; i < vertexLen; i++) {
+                    var vertexOffset = i * length * 4;
+                    for (var j = 0;j<names.length;j++){
+                        if (types[j] === constants.GL_FLOAT){
                             data = new Float32Array(dataArrayBuffer,vertexOffset);
-                         } else {
-                             data = new Int32Array(dataArrayBuffer,vertexOffset);
-                         }
-                         var dataSrc = vertexAttributes[j];
-                         var dataSrcLen = lengthOfVertexAttributes[j];
-                         for (var k=0;k<dataSrcLen;k++){
-                             data[k] = dataSrc[i*dataSrcLen+k];
-                             vertexOffset += 4;
-                         }
-                     }
-                 }
-                 _interleavedArray = dataArrayBuffer;
-                 _interleavedArrayFormat = description;
-                 _vertexAttrLength = length*4;
+                        } else {
+                            data = new Int32Array(dataArrayBuffer,vertexOffset);
+                        }
+                        var dataSrc = vertexAttributes[j];
+                        var dataSrcLen = lengthOfVertexAttributes[j];
+                        for (var k=0;k<dataSrcLen;k++){
+                            data[k] = dataSrc[i*dataSrcLen+k];
+                            vertexOffset += 4;
+                        }
+                    }
+                }
+                _interleavedArray = dataArrayBuffer;
+                _interleavedArrayFormat = description;
+                _vertexAttrLength = length * 4;
             };
 
         /**
@@ -832,6 +835,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             meshVertexAttBuffer,
             interleavedArrayFormat,
+            interleavedArrayFormatArray = [],
             meshVertexIndexBuffers = [],
             _name,
             _meshData,
@@ -862,6 +866,19 @@ KICK.namespace = function (ns_string) {
                 meshElements.length = 0;
                 meshVertexIndexBuffers.length = 0;
             },
+            createInterleavedArrayFormatArray = function(){
+                var obj;
+                interleavedArrayFormatArray.length = 0;
+                for (var descName in interleavedArrayFormat) {
+                    if (interleavedArrayFormat.hasOwnProperty(descName)){
+                        obj = interleavedArrayFormat[descName];
+                        if (!obj.name){
+                            obj.name = descName;
+                        }
+                        interleavedArrayFormatArray.push(obj);
+                    }
+                }
+            },
             /**
              * Copy data to the vertex buffer object (VBO)
              * @method updateData
@@ -873,6 +890,7 @@ KICK.namespace = function (ns_string) {
                 deleteBuffers();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
+                createInterleavedArrayFormatArray();
                 vertexAttrLength = _meshData.vertexAttrLength;
                 meshType = _meshData.meshType;
 
@@ -1007,6 +1025,7 @@ KICK.namespace = function (ns_string) {
          * @param {KICK.material.Shader} shader
          */
         this.bind = function (shader) {
+            var i;
             shader.bind();
 
             if (gl.meshBuffer !== meshVertexAttBuffer || gl.meshShader !== shader){
@@ -1014,21 +1033,23 @@ KICK.namespace = function (ns_string) {
                 gl.meshShader = shader;
                 gl.bindBuffer(constants.GL_ARRAY_BUFFER, meshVertexAttBuffer);
 
-                for (var descName in interleavedArrayFormat) {
-                    if (typeof(shader.lookupAttribute[descName]) !== 'undefined') {
-                        var desc = interleavedArrayFormat[descName];
-                        var attributeIndex = shader.lookupAttribute[descName];
-                        gl.enableVertexAttribArray(attributeIndex);
-                        gl.vertexAttribPointer(attributeIndex, desc.size,
-                           desc.type, false, vertexAttrLength, desc.pointer);
+                for (i = 0; i < interleavedArrayFormatArray.length; i++){
+                    var interleavedDataDescriptor = interleavedArrayFormatArray[i];
+                    var name = interleavedDataDescriptor.name;
+                    var shaderAttribute = shader.lookupAttribute[name];
+                    if (typeof(shaderAttribute) !== 'undefined') {
+                        gl.enableVertexAttribArray(shaderAttribute );
+                        gl.vertexAttribPointer(shaderAttribute , interleavedDataDescriptor.size,
+                            interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
                     }
                 }
+
                 if (ASSERT){
-                    for (var i = shader.activeAttributes.length-1;i>=0;i--){
+                    for (i = shader.activeAttributes.length-1;i>=0;i--){
                         var activeAttribute = shader.activeAttributes[i];
                         if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])){
                             KICK.core.Util.fail("Shader wants "+activeAttribute.name+" but mesh does not have it.");
-                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
+                            var attributeIndex = shader.lookupAttribute[activeAttribute.name];
                             gl.disableVertexAttribArray(attributeIndex);
                             switch(activeAttribute.type){
                                 case c.GL_FLOAT:
