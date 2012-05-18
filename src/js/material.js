@@ -735,7 +735,6 @@ KICK.namespace = function (ns_string) {
             gl.meshShader = -1;
         };
 
-
         /**
          * Updates the shader (must be called after any shader state is changed to apply changes)
          * @method apply
@@ -771,7 +770,7 @@ KICK.namespace = function (ns_string) {
 
             gl.useProgram(_shaderProgramId);
             gl.boundShader = _shaderProgramId;
-            numberOfActiveUniforms = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_UNIFORMS);
+            numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             updateActiveUniforms(numberOfActiveUniforms);
 
             activeAttributes = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
@@ -780,7 +779,7 @@ KICK.namespace = function (ns_string) {
              * @property activeAttributes
              * @type Array_Object
              */
-            this.activeAttributes = new Array(activeAttributes);
+            this.activeAttributes = [];
             /**
              * Lookup of attribute location based on name.
              * @property lookupAttribute
@@ -898,6 +897,11 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     material.Shader.getPrecompiledSource = function (engine, sourcecode) {
+        var name,
+            source,
+            version = "#version 100",
+            lineOffset = 1,
+            indexOfNewline;
         if (c._DEBUG) {
             // insert #line nn after each #pragma include to give meaning full lines in error console
             var linebreakPosition = [],
@@ -916,27 +920,27 @@ KICK.namespace = function (ns_string) {
                 }
             }
         }
-        for (var name in material.GLSLConstants){
-            if (typeof (name) === "string"){
-                var source = material.GLSLConstants[name];
-                sourcecode = sourcecode.replace("#pragma include \""+name+"\"",source);
-                sourcecode = sourcecode.replace("#pragma include \'"+name+"\'",source);
+        for (name in material.GLSLConstants) {
+            if (material.GLSLConstants.hasOwnProperty(name)) {
+                if (typeof (name) === "string") {
+                    source = material.GLSLConstants[name];
+                    sourcecode = sourcecode.replace("#pragma include \"" + name + "\"", source);
+                    sourcecode = sourcecode.replace("#pragma include \'" + name + "\'", source);
+                }
             }
         }
-        var version = "#version 100";
-        var lineOffset = 1;
         // if shader already contain version tag, then reuse this version information
-        if (sourcecode.indexOf("#version ")===0){
-            var indexOfNewline = sourcecode.indexOf('\n');
-            version = sourcecode.substring(0,indexOfNewline); // save version info
-            sourcecode = sourcecode.substring(indexOfNewline+1); // strip version info
+        if (sourcecode.indexOf("#version ") === 0) {
+            indexOfNewline = sourcecode.indexOf('\n');
+            version = sourcecode.substring(0, indexOfNewline); // save version info
+            sourcecode = sourcecode.substring(indexOfNewline + 1); // strip version info
             lineOffset = 2;
         }
         sourcecode =
-            version + "\n"+
-                "#define SHADOWS "+(engine.config.shadows===true)+"\n"+
-                "#define LIGHTS "+(engine.config.maxNumerOfLights)+"\n"+
-                "#line "+lineOffset+"\n"+
+            version + "\n" +
+                "#define SHADOWS " + (engine.config.shadows === true) + "\n" +
+                "#define LIGHTS " + (engine.config.maxNumerOfLights) + "\n" +
+                "#line " + lineOffset + "\n" +
                 sourcecode;
         return sourcecode;
     };
@@ -950,13 +954,7 @@ KICK.namespace = function (ns_string) {
     material.Shader.prototype.bindMaterialUniform = function (material, engineUniforms) {
         // lookup uniforms
         var gl = this.gl,
-            uniformName,
-            materialUniforms = material.uniforms,
             timeObj,
-            shaderUniform,
-            uniform,
-            value,
-            location,
             sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
             directionalLightData = sceneLights.directionalLightData,
@@ -968,30 +966,31 @@ KICK.namespace = function (ns_string) {
             time = lookupUniforms._time,
             viewport = lookupUniforms._viewport,
             lightUniformAmbient =  lookupUniforms._ambient,
-            currentTexture = 0;
+            currentTexture = 0,
+            ambientLlightValue;
 
 
         currentTexture = material.bind(currentTexture);
 
-        if (proj){
-            gl.uniformMatrix4fv(proj.location,false,engineUniforms.projectionMatrix);
+        if (proj) {
+            gl.uniformMatrix4fv(proj.location, false, engineUniforms.projectionMatrix);
         }
-        if (lightUniformAmbient){
-            var ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
+        if (lightUniformAmbient) {
+            ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
             gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
 
-        if (directionalLightUniform){
+        if (directionalLightUniform) {
             gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
         }
-        if (pointLightUniform){
+        if (pointLightUniform) {
             gl.uniformMatrix3fv(pointLightUniform.location, false, pointLightData);
         }
-        if (time){
+        if (time) {
             timeObj = this.engine.time;
             gl.uniform1f(time.location, timeObj.time);
         }
-        if (viewport){
+        if (viewport) {
             gl.uniform2fv(viewport.location, gl.viewportSize);
         }
         return currentTexture;
@@ -1020,57 +1019,60 @@ KICK.namespace = function (ns_string) {
             directionalLight = sceneLights.directionalLight,
             globalTransform,
             i,
+            uidAsVec4,
+            modelView,
+            normalMatrix,
             currentTexture = 0;
-        if (gl.currentMaterial !== material)
+        if (gl.currentMaterial !== material) {
         // shared material uniforms
-        {
+
             gl.currentMaterial = material;
             currentTexture = this.bindMaterialUniform(material, engineUniforms);
         }
 
         // mesh instance uniforms
-        if (modelMatrix || mv || norm){
+        if (modelMatrix || mv || norm) {
             globalTransform = transform.getGlobalMatrix();
-            if (modelMatrix){
-                gl.uniformMatrix4fv(modelMatrix.location,false,globalTransform);
+            if (modelMatrix) {
+                gl.uniformMatrix4fv(modelMatrix.location, false, globalTransform);
             }
-            var modelView = mat4.multiply(engineUniforms.viewMatrix,globalTransform,tempMat4);
-            if (mv){
-                gl.uniformMatrix4fv(mv.location,false,modelView);
+            modelView = mat4.multiply(engineUniforms.viewMatrix, globalTransform, tempMat4);
+            if (mv) {
+                gl.uniformMatrix4fv(mv.location, false, modelView);
             }
-            if (norm){
+            if (norm) {
                 // note this can be simplified to
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                 //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                var normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
-                if (ASSERT){
-                    if (!normalMatrix){
+                normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
+                if (ASSERT) {
+                    if (!normalMatrix) {
                         KICK.core.Util.fail("Singular matrix");
                     }
                 }
-                gl.uniformMatrix3fv(norm.location,false,normalMatrix);
+                gl.uniformMatrix3fv(norm.location, false, normalMatrix);
             }
         }
-        if (mvProj){
+        if (mvProj) {
             globalTransform = globalTransform || transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(mvProj.location,false,mat4.multiply(engineUniforms.viewProjectionMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(mvProj.location, false, mat4.multiply(engineUniforms.viewProjectionMatrix, globalTransform, tempMat4));
         }
-        if (gameObjectUID){
-            var uidAsVec4 = uint32ToVec4(transform.gameObject.uid,tmpVec4);
-            if (this.engine.time.frame < 3){
-                console.log("transform.gameObject.uid "+transform.gameObject.uid);
+        if (gameObjectUID) {
+            uidAsVec4 = uint32ToVec4(transform.gameObject.uid, tmpVec4);
+            if (this.engine.time.frame < 3) {
+                console.log("transform.gameObject.uid " + transform.gameObject.uid);
             }
             gl.uniform4fv(gameObjectUID.location, uidAsVec4);
         }
-        if (shadowMapTexture && directionalLight && directionalLight.shadowTexture){
+        if (shadowMapTexture && directionalLight && directionalLight.shadowTexture) {
             directionalLight.shadowTexture.bind(currentTexture);
-            gl.uniform1i(shadowMapTexture.location,currentTexture);
+            gl.uniform1i(shadowMapTexture.location, currentTexture);
             currentTexture++;
         }
-        if (_lightMat){
+        if (_lightMat) {
             globalTransform = transform.getGlobalMatrix();
-            gl.uniformMatrix4fv(_lightMat.location,false,mat4.multiply(engineUniforms.lightMatrix,globalTransform,tempMat4));
+            gl.uniformMatrix4fv(_lightMat.location, false, mat4.multiply(engineUniforms.lightMatrix, globalTransform, tempMat4));
         }
     };
 
