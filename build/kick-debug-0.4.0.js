@@ -14918,7 +14918,7 @@ KICK.namespace = function (ns_string) {
      * @param {Object} engineUniforms
      * @param {KICK.scene.Transform) transform
         */
-    material.Shader.prototype.bindUniform = function(material, engineUniforms, transform){
+    material.Shader.prototype.bindUniform = function (material, engineUniforms, transform) {
         var lookupUniform = this.lookupUniform,
             gl = this.gl,
             modelMatrix = lookupUniform._m,
@@ -15000,30 +15000,13 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      * @extends KICK.core.ProjectAsset
      */
-    material.Material = function (engine,config) {
+    material.Material = function (engine, config) {
         var _name = "Material",
             _shader = null,
             _uniforms = [],
             thisObj = this,
             gl = engine.gl,
             _renderOrder = 0,
-            /*inheritDefaultUniformsFromShader = function(){
-                var shaderDefaultUniforms = _shader.defaultUniforms;
-                var dirty = false;
-                for (var name in shaderDefaultUniforms){
-                    if (!_uniforms[name]){
-                        var defaultValue = shaderDefaultUniforms[name];
-                        _uniforms[name] = {
-                            value: defaultValue.value,
-                            type: defaultValue.type
-                        };
-                        dirty = true;
-                    }
-                }
-                if (dirty){
-                    verifyUniforms();
-                }
-            },*/
             /**
              * Called when a shader is set or changed.
              * Add location and type information to each uniform.
@@ -15034,8 +15017,10 @@ KICK.namespace = function (ns_string) {
              */
             decorateUniforms = function () {
                 var i, uniform,
-                    foundUniformNames = {};
-                for (i =_uniforms.length - 1; i >= 0; i--) {
+                    foundUniformNames = {},
+                    name,
+                    element;
+                for (i = _uniforms.length - 1; i >= 0; i--) {
                     uniform = _shader.lookupUniform[_uniforms[i].name];
                     if (uniform) {
                         _uniforms[i].type = uniform.type;
@@ -15046,86 +15031,50 @@ KICK.namespace = function (ns_string) {
                     }
                 }
                 // add items not found
-                for (i=0;i<_shader.materialUniforms.length;i++) {
+                for (i = 0; i < _shader.materialUniforms.length; i++) {
                     uniform = _shader.materialUniforms[i];
-                    var name = uniform.name;
+                    name = uniform.name;
                     if (!foundUniformNames.hasOwnProperty(name)) {
                         // add default name
-                        var element = thisObj.setUniform(name, _shader.defaultUniforms[name]);
+                        element = thisObj.setUniform(name, _shader.defaultUniforms[name]);
                         element.location = uniform.location;
                         element.type = uniform.type;
                     }
                 }
-            }//,
-            /*
-             * The method replaces any invalid uniform (Array or numbers) with a wrapped one (Float32Array or Int32Array)
-             * @method verifyUniforms
-             * @private
-             */
-            /*verifyUniforms = function(){
-                var uniformName,
-                    type,
-                    uniformValue,
-                    c = KICK.core.Constants;
+            };
 
-                for (uniformName in _uniforms){
-                    uniformValue = _uniforms[uniformName].value;
-                    type = _uniforms[uniformName].type;
-                    if (type === 35678 || type ===35680 ){
-                        if (uniformValue && typeof uniformValue.ref === 'number'){
-                            _uniforms[uniformName].value = engine.project.load(uniformValue.ref);
-                        }
-                        if (true){
-                            if (!(_uniforms[uniformName].value instanceof KICK.texture.Texture)){
-                                KICK.core.Util.fail("Uniform value should be a texture object but was "+uniformValue);
-                            }
-                        }
-                    }
-                    if (Array.isArray(uniformValue) || typeof uniformValue === 'number'){
-                        var array = uniformValue;
-                        if (typeof array === 'number'){
-                            array = [array];
-                        }
-                        if (type === 5124 || type===35667 || type===35668 || type===35669){
-                            _uniforms[uniformName].value = new Int32Array(array);
-                        } else {
-                            _uniforms[uniformName].value = new Float32Array(array);
-                        }
-                    }
-                }
-            }*/;
-        Object.defineProperties(this,{
+        Object.defineProperties(this, {
             /**
              * @property engine
              * @type KICK.core.Engine
              */
-            engine:{
-                value:engine
+            engine: {
+                value: engine
             },
-             /**
-              * @property name
-              * @type String
-              */
-             name:{
-                 get:function(){return _name;},
-                 set:function(newValue){_name = newValue;}
-             },
+            /**
+             * @property name
+             * @type String
+             */
+            name: {
+                get: function () { return _name; },
+                set: function (newValue) { _name = newValue; }
+            },
             /**
 
              * @property shader
              * @type KICK.material.Shader
              */
-            shader:{
-                get:function(){
+            shader: {
+                get: function () {
                     return _shader;
                 },
-                set:function(newValue){
-                    if (!newValue instanceof KICK.material.Shader){
+                set: function (newValue) {
+                    if (!newValue instanceof KICK.material.Shader) {
                         fail("KICK.material.Shader expected");
                     }
-                    if (_shader !==newValue){
+                    if (_shader !== newValue) {
                         _shader = newValue;
-                        if (_shader){
+                        if (_shader) {
                             thisObj.init();
                             _renderOrder = _shader.renderOrder;
                             decorateUniforms();
@@ -15138,45 +15087,15 @@ KICK.namespace = function (ns_string) {
              * @property uniforms
              * @type Object
              */
-            uniforms:{
-                value:null
+            uniforms: {
+                value: null
             },
-            /*
-             * Object with of uniforms.
-             * The object has a number of named properties one for each uniform. The uniform object contains value and type.
-             * The value is always an array<br>
-             * Note when updating the a uniform through a reference to uniforms, it is important to call the material.shader.markUniformUpdated().
-             * When the material.uniform is set to something the markUniformUpdated function is implicit called.
-             * @property uniforms
-             * @type Object
-             */
-            /*uniforms:{
-                get:function(){
-                    return _uniforms;
-                },
-                set:function(newValue){
-                    if (newValue != _uniforms){
-                        newValue = newValue || {};
-                        for (var name in newValue){
-                            if (newValue.hasOwnProperty(name)){
-                                var excludeClasses = [KICK.texture.Texture,KICK.texture.MovieTexture,KICK.texture.RenderTexture];
-                                _uniforms[name] = KICK.core.Util.deepCopy(newValue[name], excludeClasses);
-                            }
-                        }
-                        verifyUniforms();
-                    }
-
-                    if (_shader){
-                        _shader.markUniformUpdated();
-                    }
-                }
-            },*/
             /**
              * @property renderOrder
              * @type Number
              */
-            renderOrder:{
-                get:function(){
+            renderOrder: {
+                get: function () {
                     return _renderOrder;
                 }
             }
@@ -15189,50 +15108,53 @@ KICK.namespace = function (ns_string) {
          * @protected
          * @return {Number}
          */
-        this.bind = function(currentTexture){
-            for (var i=0;i<_uniforms.length;i++){
-                var value = _uniforms[i].value,
-                    location = _uniforms[i].location;
-                switch (_uniforms[i].type){
-                    case 5126:
-                        gl.uniform1fv(location,value);
-                        break;
-                    case 35674:
-                        gl.uniformMatrix2fv(location,false,value);
-                        break;
-                    case 35675:
-                        gl.uniformMatrix3fv(location,false,value);
-                        break;
-                    case 35676:
-                        gl.uniformMatrix4fv(location,false,value);
-                        break;
-                    case 35664:
-                        gl.uniform2fv(location,value);
-                        break;
-                    case 35665:
-                        gl.uniform3fv(location,value);
-                        break;
-                    case 35666:
-                        gl.uniform4fv(location,value);
-                        break;
-                    case 5124:
-                        gl.uniform1iv(location,value);
-                        break;
-                    case 35667:
-                        gl.uniform2iv(location,value);
-                        break;
-                    case 35668:
-                        gl.uniform3iv(location,value);
-                        break;
-                    case 35669:
-                        gl.uniform4iv(location,value);
-                        break;
-                    case 35680:
-                    case 35678:
-                        value.bind(currentTexture);
-                        gl.uniform1i(location,currentTexture);
-                        currentTexture ++;
-                        break;
+        this.bind = function (currentTexture) {
+            var i,
+                value,
+                location;
+            for (i = 0; i < _uniforms.length; i++) {
+                value = _uniforms[i].value;
+                location = _uniforms[i].location;
+                switch (_uniforms[i].type) {
+                case 5126:
+                    gl.uniform1fv(location, value);
+                    break;
+                case 35674:
+                    gl.uniformMatrix2fv(location, false, value);
+                    break;
+                case 35675:
+                    gl.uniformMatrix3fv(location, false, value);
+                    break;
+                case 35676:
+                    gl.uniformMatrix4fv(location, false, value);
+                    break;
+                case 35664:
+                    gl.uniform2fv(location, value);
+                    break;
+                case 35665:
+                    gl.uniform3fv(location, value);
+                    break;
+                case 35666:
+                    gl.uniform4fv(location, value);
+                    break;
+                case 5124:
+                    gl.uniform1iv(location, value);
+                    break;
+                case 35667:
+                    gl.uniform2iv(location, value);
+                    break;
+                case 35668:
+                    gl.uniform3iv(location, value);
+                    break;
+                case 35669:
+                    gl.uniform4iv(location, value);
+                    break;
+                case 35680:
+                case 35678:
+                    value.bind(currentTexture);
+                    gl.uniform1i(location, currentTexture);
+                    currentTexture++;
+                    break;
                 }
             }
             return currentTexture;
@@ -15246,9 +15168,10 @@ KICK.namespace = function (ns_string) {
          * @return {KICK.material.MaterialUniform}
          */
         this.setUniform = function (name, value) {
-            var foundElement;
-            for (var i = 0; i < _uniforms.length && !foundElement; i++) {
-                if (_uniforms[i].name===name){
+            var foundElement,
+                i;
+            for (i = 0; i < _uniforms.length && !foundElement; i++) {
+                if (_uniforms[i].name === name) {
                     foundElement = _uniforms[i];
                     foundElement.value = value;
                 }
@@ -15258,14 +15181,14 @@ KICK.namespace = function (ns_string) {
                 _shader.markUniformUpdated();
             } else if (!foundElement) {
                 foundElement = new material.MaterialUniform({
-                    name:name,
-                    value:value
+                    name: name,
+                    value: value
                 });
                 _uniforms.push(foundElement);
             }
-            if (ASSERT){
-                if (_shader){
-                    if (typeof (value) === "undefined" ){
+            if (ASSERT) {
+                if (_shader) {
+                    if (typeof (value) === "undefined") {
                         fail("Type of value is undefined");
                     }
                 }
@@ -15279,7 +15202,8 @@ KICK.namespace = function (ns_string) {
          * @return {Float32Array|Int32Array|KICK.texture.Texture}
          */
         this.getUniform = function (name) {
-            for (var i = 0; i < _uniforms.length; i++) {
+            var i;
+            for (i = 0; i < _uniforms.length; i++) {
                 if (_uniforms[i].name === name) {
                     return _uniforms[i].value;
                 }
@@ -15290,7 +15214,7 @@ KICK.namespace = function (ns_string) {
         /**
          * @method destroy
          */
-        this.destroy = function(){
+        this.destroy = function () {
             engine.project.removeResourceDescriptor(thisObj.uid);
         };
 
@@ -15300,9 +15224,9 @@ KICK.namespace = function (ns_string) {
          * If shader is invalid, the error shader is used
          * @method init
          */
-        this.init = function(){
-            if (!_shader){
-                KICK.core.Util.fail("Cannot initiate shader in material "+_name);
+        this.init = function () {
+            if (!_shader) {
+                KICK.core.Util.fail("Cannot initiate shader in material " + _name);
                 thisObj._shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
             }
         };
@@ -15312,34 +15236,35 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {string}
          */
-        this.toJSON = function(){
-            var serializedUniforms = {};
-            for (var i=0;i<_uniforms.length;i++){
+        this.toJSON = function () {
+            var i,
+                serializedUniforms = {};
+            for (i = 0; i < _uniforms.length; i++) {
                 serializedUniforms[_uniforms[i].name] = _uniforms[i].toJSON();
             }
             return {
                 uid: thisObj.uid,
-                name:_name,
+                name: _name,
                 shader: KICK.core.Util.getJSONReference(engine,_shader),
                 uniformData: serializedUniforms // uniformData only used during serialization
             };
         };
 
-        (function init(){
+        (function init() {
             var uniformData = config.uniformData,
                 name,
                 value;
-            if (uniformData){
+            if (uniformData) {
                 delete config.uniformData;
             }
-            if (config.uniforms){
+            if (config.uniforms) {
                 console.log("Warn - Material.uniforms is deprecated");
                 delete config.uniforms;
             }
-            applyConfig(thisObj,config);
-            if (uniformData){
-                for (name in uniformData){
-                    if (uniformData.hasOwnProperty(name)){
+            applyConfig(thisObj, config);
+            if (uniformData) {
+                for (name in uniformData) {
+                    if (uniformData.hasOwnProperty(name)) {
                         value = uniformData[name];
                         value = convertUniformValue(_shader.lookupUniform[name].type, value, engine);
                         thisObj.setUniform(name, value);
@@ -15347,7 +15272,7 @@ KICK.namespace = function (ns_string) {
                 }
             }
             engine.project.registerObject(thisObj, "KICK.material.Material");
-        })();
+        }());
     };
 
     /**
@@ -15390,11 +15315,11 @@ KICK.namespace = function (ns_string) {
                  * @property value
                  * @type Float32Array|Int32Array|KICK.texture.Texture
                  */
-                value:{
-                    get:function(){
+                value: {
+                    get: function () {
                         return value;
                     },
-                    set:function(newValue){
+                    set: function (newValue) {
                         value = newValue;
                     }
                 }
@@ -15406,25 +15331,25 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {string}
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             var value = thisObj.value;
             if (value instanceof Float32Array || value instanceof Int32Array) {
                 value = core.Util.typedArrayToArray(value);
             } else {
-                if (true){
-                    if (!value instanceof KICK.texture.Texture){
+                if (true) {
+                    if (!value instanceof KICK.texture.Texture) {
                         KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                     }
                 }
-                value = KICK.core.Util.getJSONReference(value.engine,value);
+                value = KICK.core.Util.getJSONReference(value.engine, value);
             }
             return {
                 name: thisObj.name,
                 value: value
             };
-        }
+        };
     };
-})();
+}());
 /*!
  * New BSD License
  *

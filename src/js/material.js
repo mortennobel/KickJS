@@ -531,7 +531,7 @@ KICK.namespace = function (ns_string) {
                 get: function () {
                     return _polygonOffsetFactor;
                 },
-                set: function (value){
+                set: function (value) {
                     _polygonOffsetFactor = value;
                 }
             },
@@ -540,11 +540,11 @@ KICK.namespace = function (ns_string) {
              * @property polygonOffsetUnits
              * @type Number
              */
-            polygonOffsetUnits:{
-                get:function(){
+            polygonOffsetUnits: {
+                get: function () {
                     return _polygonOffsetUnits;
                 },
-                set:function(value){
+                set: function (value) {
                     _polygonOffsetUnits = value;
                 }
             },
@@ -563,7 +563,7 @@ KICK.namespace = function (ns_string) {
                         if (newValue !== core.Constants.GL_FRONT &&
                             newValue !== core.Constants.GL_FRONT_AND_BACK &&
                             newValue !== core.Constants.GL_BACK &&
-                            newValue !== core.Constants.GL_NONE ) {
+                            newValue !== core.Constants.GL_NONE) {
                             KICK.core.Util.fail("Shader.faceCulling must be KICK.material.Shader.FRONT, " +
                                 "KICK.material.Shader.BACK (default), KICK.material.Shader.NONE");
                         }
@@ -611,7 +611,7 @@ KICK.namespace = function (ns_string) {
                             newValue !== core.Constants.GL_GREATER &&
                             newValue !== core.Constants.GL_NOTEQUAL &&
                             newValue !== core.Constants.GL_GEQUAL &&
-                            newValue !== core.Constants.GL_ALWAYS){
+                            newValue !== core.Constants.GL_ALWAYS) {
                             KICK.core.Util.fail("Shader.zTest must be KICK.core.Constants.GL_NEVER, " +
                                 "KICK.core.Constants.GL_LESS,KICK.core.Constants.GL_EQUAL,KICK.core.Constants.GL_LEQUAL," +
                                 "KICK.core.Constants.GL_GREATER,KICK.core.Constants.GL_NOTEQUAL,KICK.core.Constants.GL_GEQUAL, " +
@@ -773,7 +773,7 @@ KICK.namespace = function (ns_string) {
             numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             updateActiveUniforms(numberOfActiveUniforms);
 
-            activeAttributes = gl.getProgramParameter( _shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
+            activeAttributes = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
             /**
              * Array of JSON data with size,type and name
              * @property activeAttributes
@@ -903,22 +903,25 @@ KICK.namespace = function (ns_string) {
             lineOffset = 1,
             indexOfNewline;
         if (c._DEBUG) {
-            // insert #line nn after each #pragma include to give meaning full lines in error console
-            var linebreakPosition = [],
-                position = sourcecode.indexOf('\n'),
-                i;
-            while (position !== -1) {
-                position++;
-                linebreakPosition.push(position);
-                position = sourcecode.indexOf('\n', position);
-            }
-            for (i = linebreakPosition.length - 2; i >= 0; i--) {
-                position = linebreakPosition[i];
-                var nextPosition = linebreakPosition[i + 1];
-                if (sourcecode.substring(position).indexOf("#pragma include") === 0) {
-                    sourcecode = sourcecode.substring(0, nextPosition) + ("#line  " + (i + 2) + "\n") + sourcecode.substring(nextPosition);
+            (function () {
+                // insert #line nn after each #pragma include to give meaning full lines in error console
+                var linebreakPosition = [],
+                    position = sourcecode.indexOf('\n'),
+                    i,
+                    nextPosition;
+                while (position !== -1) {
+                    position++;
+                    linebreakPosition.push(position);
+                    position = sourcecode.indexOf('\n', position);
                 }
-            }
+                for (i = linebreakPosition.length - 2; i >= 0; i--) {
+                    position = linebreakPosition[i];
+                    nextPosition = linebreakPosition[i + 1];
+                    if (sourcecode.substring(position).indexOf("#pragma include") === 0) {
+                        sourcecode = sourcecode.substring(0, nextPosition) + ("#line  " + (i + 2) + "\n") + sourcecode.substring(nextPosition);
+                    }
+                }
+            }());
         }
         for (name in material.GLSLConstants) {
             if (material.GLSLConstants.hasOwnProperty(name)) {
@@ -1045,7 +1048,7 @@ KICK.namespace = function (ns_string) {
                 // var normalMatrix = math.mat4.toMat3(finalModelView);
                 // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                 //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                normalMatrix = mat4.toNormalMat3(modelView,tempMat3);
+                normalMatrix = mat4.toNormalMat3(modelView, tempMat3);
                 if (ASSERT) {
                     if (!normalMatrix) {
                         KICK.core.Util.fail("Singular matrix");
@@ -1114,7 +1117,7 @@ KICK.namespace = function (ns_string) {
                         _uniforms[i].location = uniform.location;
                         foundUniformNames[_uniforms[i].name] = true;
                     } else {
-                        _uniforms.splice(i,1); // remove element from array
+                        _uniforms.splice(i, 1); // remove element from array
                     }
                 }
                 // add items not found
@@ -1332,7 +1335,7 @@ KICK.namespace = function (ns_string) {
             return {
                 uid: thisObj.uid,
                 name: _name,
-                shader: KICK.core.Util.getJSONReference(engine,_shader),
+                shader: KICK.core.Util.getJSONReference(engine, _shader),
                 uniformData: serializedUniforms // uniformData only used during serialization
             };
         };
