@@ -7,20 +7,20 @@ var engine,
     vec3 = KICK.math.vec3,
     vec4 = KICK.math.vec4,
     DAMPING = 0.01, // how much to damp the cloth simulation each frame
-    TIME_STEPSIZE2  = 0.5*0.5, // how large time step each particle takes each frame
+    TIME_STEPSIZE2  = 0.5 * 0.5, // how large time step each particle takes each frame
     CONSTRAINT_ITERATIONS = 4,
     ball_radius = 2, // the radius of our one ball
-    vec3Zero = [0,0,0], // how many iterations of constraint satisfaction each frame (more is rigid, less is soft);
-    gravityForce = vec3.create([0,-0.2*TIME_STEPSIZE2,0]),
-    windForce = vec3.create([0.2*TIME_STEPSIZE2,0,0.05*TIME_STEPSIZE2]);
+    vec3Zero = [0, 0, 0], // how many iterations of constraint satisfaction each frame (more is rigid, less is soft);
+    gravityForce = vec3.create([0, -0.2 * TIME_STEPSIZE2, 0]),
+    windForce = vec3.create([0.2 * TIME_STEPSIZE2, 0, 0.05 * TIME_STEPSIZE2]);
 function initKick() {
-    engine = new KICK.core.Engine('canvas',{
+    engine = new KICK.core.Engine('canvas', {
         enableDebugContext: location.search === "?debug" // debug enabled if query == debug
     });
     buildScene();
 }
 
-function buildScene(){
+function buildScene() {
     var scene = engine.activeScene;
     buildCamera(scene);
     buildLight(scene);
@@ -29,67 +29,49 @@ function buildScene(){
     buildCloth(scene);
 }
 
-function buildCamera(scene){
-    var cameraGO = scene.createGameObject({name:"Camera"});
+function buildCamera(scene) {
+    var cameraGO = scene.createGameObject({name: "Camera"});
     var camera = new KICK.scene.Camera({
         fieldOfView: 60
     });
     camera.clearColor = [0.2, 0.2, 0.4, 1];
     cameraGO.addComponent(camera);
     var cameraTransform = cameraGO.transform;
-    cameraTransform.localPosition = [-5.5,-5.5,13.0];
-    cameraTransform.localRotationEuler = [0,-40,0];
+    cameraTransform.localPosition = [-5.5, -5.5, 13.0];
+    cameraTransform.localRotationEuler = [0, -40, 0];
 }
 
-function buildCloth(scene){
-    var clothGO = scene.createGameObject({name:"Cloth"});
-    clothGO.addComponent(new ClothComponent(14,10,13,13));
+function buildCloth(scene) {
+    var clothGO = scene.createGameObject({name: "Cloth"});
+    clothGO.addComponent(new ClothComponent(14, 10, 13, 13));
     var clothMeshRenderer = new KICK.scene.MeshRenderer();
     var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
     clothMeshRenderer.material = new KICK.material.Material(engine, {
         shader:shader,
-        uniforms:{
-            mainColor:{
-                value:[1.0,1.0,1.0,1.0],
-                type:KICK.core.Constants.GL_FLOAT_VEC4
-            },
-            mainTexture:{
-                value: engine.project.load(engine.project.ENGINE_TEXTURE_LOGO),
-                type:KICK.core.Constants.GL_SAMPLER_2D
-            }
+        uniformData:{
+            mainColor: [1.0, 1.0, 1.0, 1.0],
+            mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_LOGO)
         }
     });
     clothGO.addComponent(clothMeshRenderer);
 }
 
 function buildBall(scene){
-    var ballGO = scene.createGameObject({name:"Ball"});
+    var ballGO = scene.createGameObject({name: "Ball"});
     var ballMeshRenderer = new KICK.scene.MeshRenderer();
     ballMeshRenderer.mesh = new KICK.mesh.Mesh(engine,
         {
-            dataURI:"kickjs://mesh/uvsphere/?slices=25&stacks=50&radius="+(ball_radius-0.2),
-            name:"Default object"
+            dataURI: "kickjs://mesh/uvsphere/?slices=25&stacks=50&radius=" + (ball_radius - 0.2),
+            name: "Default object"
         });
     var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
     ballMeshRenderer.material = new KICK.material.Material(engine, {
-        shader:shader,
-        uniforms:{
-            mainColor:{
-                value:[1.0,0.0,0.9,0.5],
-                type:KICK.core.Constants.GL_FLOAT_VEC4
-            },
-            mainTexture:{
-                value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                type:KICK.core.Constants.GL_SAMPLER_2D
-            },
-            specularExponent:{
-                value: 80,
-                type:KICK.core.Constants.GL_FLOAT
-            },
-            specularColor:{
-                value: [1,1,1,1],
-                type:KICK.core.Constants.GL_FLOAT_VEC4
-            }
+        shader: shader,
+        uniformData: {
+            mainColor: [1.0, 0.0, 0.9, 0.5],
+            mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+            specularExponent: 80,
+            specularColor: [1, 1, 1, 1]
         }
     });
     ballGO.addComponent(ballMeshRenderer);
@@ -97,11 +79,11 @@ function buildBall(scene){
 }
 
 function buildLight(scene){
-    var lightGO = scene.createGameObject({name:"Light"});
-    var light = new KICK.scene.Light({
-        type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
-        color: [1.0,1.0,1.0]
-    });
+    var lightGO = scene.createGameObject({name:"Light"}),
+        light = new KICK.scene.Light({
+            type: KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+            color: [1.0, 1.0, 1.0]
+        });
     lightGO.addComponent(light);
     lightGO.transform.localRotationEuler = [0,0,0];
 
@@ -113,13 +95,13 @@ function buildLight(scene){
 }
 
 function buildBackground(scene){
-    var backgroundGO = scene.createGameObject({name:"Background"});
-    var backgroundMeshRenderer = new KICK.scene.MeshRenderer();
+    var backgroundGO = scene.createGameObject({name:"Background"}),
+        backgroundMeshRenderer = new KICK.scene.MeshRenderer();
 
     backgroundMeshRenderer.mesh = new KICK.mesh.Mesh(engine,
         {
-            dataURI:"kickjs://mesh/plane/",
-            name:"Default object"
+            dataURI: "kickjs://mesh/plane/",
+            name: "Default object"
         });
     // modify the mesh to add colors in the corners (which will be interpolated as a smooth background)
     var meshData = backgroundMeshRenderer.mesh.meshData;
@@ -134,38 +116,32 @@ function buildBackground(scene){
     backgroundMeshRenderer.mesh.meshData = meshData;
     var shaderUnlit = engine.project.load(engine.project.ENGINE_SHADER_UNLIT_VERTEX_COLOR);
     backgroundMeshRenderer.material = new KICK.material.Material(engine, {
-        shader:shaderUnlit,
-        uniforms:{
-            mainColor:{
-                value:[1.0,1.0,1.0,1.0],
-                type:KICK.core.Constants.GL_FLOAT_VEC4
-            },
-            mainTexture:{
-                value:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                type:KICK.core.Constants.GL_SAMPLER_2D
-            }
+        shader: shaderUnlit,
+        uniformData: {
+            mainColor: [1.0, 1.0, 1.0, 1.0],
+            mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
         }
     });
     backgroundGO.addComponent(backgroundMeshRenderer);
     var transform = backgroundGO.transform;
-    transform.localScale = [50,50,50];
-    transform.localPosition = [10,0,-10];
+    transform.localScale = [50, 50, 50];
+    transform.localPosition = [10, 0, -10];
 }
 
-function BallUpdater(){
+function BallUpdater() {
     var time,
         thisObj = this,
         thisTransform,
-        ballPosition = [7,-5,0],
+        ballPosition = [7, -5, 0],
         ball_time = 0;
 
-    this.activated = function(){
+    this.activated = function () {
         time = thisObj.gameObject.engine.time;
         thisTransform = thisObj.gameObject.transform;
     };
 
-    this.update = function(){
-        ballPosition[2] = Math.cos(ball_time++/50.0)*7;
+    this.update = function () {
+        ballPosition[2] = Math.cos(ball_time++ / 50.0) * 7;
         thisTransform.position = ballPosition;
     };
 }
@@ -181,53 +157,53 @@ var Particle = function (newPos){
         thisObj = this; // an accumulated normal (i.e. non normalized), used for OpenGL soft shading
 
     // The reason to use properties this way is to maintain the original memory layout
-    Object.defineProperties(this,{
-        movable:{
-            get:function(){
+    Object.defineProperties(this, {
+        movable: {
+            get: function () {
                 return floatSubArray[0];
             },
-            set:function(newValue){
+            set: function (newValue) {
                 floatSubArray[0] = newValue;
             }
         },
-        mass:{
-            get:function(){
+        mass: {
+            get: function () {
                 return floatSubArray[1];
             },
-            set:function(newValue){
+            set: function (newValue) {
                 floatSubArray[1] = newValue;
             }
         },
-        pos:{
-            get:function(){
+        pos: {
+            get: function () {
                 return pos;
             },
-            set:function(newValue){
-                vec3.set(newValue,pos);
+            set: function (newValue) {
+                vec3.set(newValue, pos);
             }
         },
-        old_pos:{
-            get:function(){
+        old_pos: {
+            get: function () {
                 return old_pos;
             },
-            set:function(newValue){
-                vec3.set(newValue,old_pos);
+            set: function (newValue) {
+                vec3.set(newValue, old_pos);
             }
         },
-        acceleration:{
-            get:function(){
+        acceleration: {
+            get: function () {
                 return acceleration;
             },
-            set:function(newValue){
-                vec3.set(newValue,acceleration);
+            set: function (newValue) {
+                vec3.set(newValue, acceleration);
             }
         },
-        accumulated_normal:{
-            get:function(){
+        accumulated_normal: {
+            get: function () {
                 return accumulated_normal;
             },
-            set:function(newValue){
-                vec3.set(newValue,accumulated_normal);
+            set: function (newValue) {
+                vec3.set(newValue, accumulated_normal);
             }
         }
     });
@@ -236,10 +212,10 @@ var Particle = function (newPos){
      *
      * @param {vec3} f
      */
-    this.addForce = function(f){
-        var invMass = 1/thisObj.mass;
-        vec3.scale(f,invMass,temp);
-        vec3.add(acceleration,temp,acceleration);
+    this.addForce = function (f) {
+        var invMass = 1 / thisObj.mass;
+        vec3.scale(f, invMass, temp);
+        vec3.add(acceleration, temp, acceleration);
     };
 
     /* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
