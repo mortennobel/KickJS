@@ -22,6 +22,7 @@
  */
 var KICK = KICK || {};
 KICK.namespace = function (ns_string) {
+    "use strict"; // force strict ECMAScript 5
     var parts = ns_string.split("."),
         parent = window,
         i;
