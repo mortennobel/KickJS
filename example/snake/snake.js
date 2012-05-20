@@ -15,11 +15,8 @@ var initSnake = function(){
                 material = new KICK.material.Material(engine,{
                     shader:shader,
                     name:"SnakeFood material",
-                    uniforms:{
-                        mainColor: {
-                            value: [108/255,93/255,36/255,1],
-                            type: KICK.core.Constants.GL_FLOAT_VEC4
-                        }
+                    uniformData:{
+                        mainColor: [108/255,93/255,36/255,1]
                     }
                 }),
                 mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE );
@@ -108,11 +105,8 @@ var initSnake = function(){
             material = new KICK.material.Material(engine,{
                 shader:shader,
                 name:"Snake material",
-                uniforms:{
-                    mainColor: {
-                        value: color,
-                        type: KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor: color
                 }
             }),
             mesh = new KICK.mesh.Mesh(engine,
@@ -301,11 +295,8 @@ var initSnake = function(){
             material = new KICK.material.Material(engine,{
                 shader:shader,
                 name:"Snake level material",
-                uniforms:{
-                    mainColor: {
-                        value: [56/255,67/255,51/255,1],
-                        type: KICK.core.Constants.GL_FLOAT_VEC4
-                    }
+                uniformData:{
+                    mainColor: [56/255,67/255,51/255,1]
                 }
             });
 
