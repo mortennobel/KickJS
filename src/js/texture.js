@@ -383,10 +383,11 @@ KICK.namespace = function (ns_string) {
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function (width, height, border, type, pixels, dataURI) {
-            var format;
+            var format,
+                res;
             recreateTextureIfDifferentType();
             if (type === constants.GL_FLOAT && !gl.isTexFloatEnabled) {
-                var res = thisObj.isFPTexturesSupported(); // enable extension
+                res = thisObj.isFPTexturesSupported(); // enable extension
                 if (!res) {
                     KICK.core.Util.fail("OES_texture_float unsupported on the platform. Using GL_UNSIGNED_BYTE instead of GL_FLOAT.");
                     type = constants.GL_UNSIGNED_BYTE;
