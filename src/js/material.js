@@ -1173,6 +1173,7 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Instead call setUniform
              * @deprecated
              * @property uniforms
              * @type Object
@@ -1253,7 +1254,7 @@ KICK.namespace = function (ns_string) {
         /**
          * Bind material uniforms
          * @method setUniform
-         * @parem {String} name
+         * @param {String} name
          * @param {Float32Array|Int32Array|KICK.texture.Texture}
          * @return {KICK.material.MaterialUniform}
          */
