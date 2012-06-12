@@ -74,18 +74,11 @@
                meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
                meshRenderer.material = new KICK.material.Material(engine,{
                    shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                   uniforms:{
-                       mainColor: {
-                           value: [Math.random(),Math.random(),Math.random(),Math.random()],
-                           type: KICK.core.Constants.GL_FLOAT_VEC4
-                       },
-                       mainTexture: {
-                           value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                           type: KICK.core.Constants.GL_SAMPLER_2D
-                       }
+                   uniformData:{
+                       mainColor: [Math.random(),Math.random(),Math.random(),Math.random()],
+                       mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                    }
                });
-               console.log(meshRenderer.material.uniforms.mainColor.value);
                gameObject.addComponent(meshRenderer);
            }
 

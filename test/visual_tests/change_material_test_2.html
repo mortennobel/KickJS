@@ -4,9 +4,9 @@
 <head>
     <title></title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.5.1/build/cssgrids/grids-min.css">
 
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <script src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
     <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
     <script type="text/javascript" src="../../src/js/constants.js"></script>
     <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
@@ -38,7 +38,7 @@
             return new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                uniforms:{
+                uniformData:{
                     mainColor: color
                 }
             });
@@ -109,7 +109,6 @@
             gameObject3.transform.localPosition = [0,0,-1];
             gameObject3.transform.localScale = [1.5,1.5,1];
             gameObject3.addComponent(meshRenderer3);
-
 
             var lightComponent = new KICK.scene.Light({
                 type:KICK.scene.Light.TYPE_AMBIENT,
