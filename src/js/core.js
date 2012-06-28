@@ -421,7 +421,7 @@ KICK.namespace = function (ns_string) {
 
             canvas.addEventListener("webglcontextlost", function (event) {
                 wasPaused = thisObj.paused;
-                thisObj.pause();
+                thisObj.pause = true;
                 for (i = 0; i < contextListeners.length; i++) {
                     contextListeners[i].contextLost();
                 }
@@ -434,7 +434,7 @@ KICK.namespace = function (ns_string) {
                 }
                 // restart rendering loop
                 if (!wasPaused) {
-                    thisObj.resume();
+                    thisObj.pause = false;
                 }
                 event.preventDefault();
             }, false);
