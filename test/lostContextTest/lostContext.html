@@ -1,0 +1,59 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Lost Context Test</title>
+</head>
+<body>
+
+<script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+<script type="text/javascript" src="../../build/kick-debug-0.4.0.js"></script>
+<canvas id="canvas" style="border: none;" width="500" height="500"></canvas><br/>
+<button onclick="canvas.setRestoreTimeout(0);canvas.loseContext();">loseContext (restore immediately)</button>
+<button onclick="canvas.setRestoreTimeout(5000);canvas.loseContext();">loseContext (restore 5 seconds)</button>
+<script type="text/javascript">
+    // init engine (create 3d context)
+    var canvas = document.getElementById('canvas');
+    canvas = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas);
+    var engine = new KICK.core.Engine(canvas);
+
+    // create a game object in [0,0,0] facing down the -z axis
+    var cameraObject = engine.activeScene.createGameObject();
+    cameraObject.transform.position = [0,0,5];
+    // create a perspective camera
+    var camera = new KICK.scene.Camera({
+        perspective: false,
+        left:-5,
+        right:5,
+        top:5,
+        bottom:-5
+    });
+    cameraObject.addComponent(camera);
+
+    // create texture
+    var texture = new KICK.texture.Texture(engine);
+    texture.dataURI = "http://lobbydata.com/Content/images/bg_price2.gif";
+    texture.init();
+
+    // create material
+    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+    var material = new KICK.material.Material(engine,{
+        shader: shader,
+        uniformData:{
+            mainTexture: texture
+        }
+    });
+
+    // create meshes
+    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
+    for (var i=0;i<meshes.length;i++){
+        var gameObject = engine.activeScene.createGameObject();
+        gameObject.transform.position = [-2.0+4*i,0,0];
+        var meshRenderer = new KICK.scene.MeshRenderer();
+        meshRenderer.mesh = engine.project.load(meshes[i]);
+        meshRenderer.material = material;
+        gameObject.addComponent(meshRenderer);
+    }
+</script>
+</body>
+</html>
