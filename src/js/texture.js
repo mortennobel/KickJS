@@ -218,7 +218,10 @@ KICK.namespace = function (ns_string) {
      */
     texture.Texture = function (engine, config) {
         var gl = engine.gl,
+            glState = engine.glState,
             texture0 = constants.GL_TEXTURE0,
+            createImageFunction,
+            createImageFunctionParameters,
             _textureId = gl.createTexture(),
             _name = "Texture",
             _wrapS =  constants.GL_REPEAT,
@@ -243,6 +246,18 @@ KICK.namespace = function (ns_string) {
                     _textureId = gl.createTexture();
                 }
                 _boundTextureType = _textureType;
+            },
+            contextListener = {
+                contextLost: function () {
+                    gl = null;
+                },
+                contextRestored: function (newGl) {
+                    gl = newGl;
+                    _textureId = gl.createTexture();
+                    if (createImageFunction) {
+                    //    createImageFunction.apply(thisObj, createImageFunctionParameters);
+                    }
+                }
             };
 
         /**
@@ -288,6 +303,9 @@ KICK.namespace = function (ns_string) {
                 _textureId = null;
                 engine.project.removeResourceDescriptor(thisObj.uid);
             }
+            createImageFunction = null;
+            createImageFunctionParameters = null;
+            engine.removeContextListener(contextListener);
         };
 
         /**
@@ -303,6 +321,8 @@ KICK.namespace = function (ns_string) {
          * @param {String} dataURI String representing the image
          */
         this.setImage = function (imageObj, dataURI) {
+            createImageFunction = thisObj.setImage;
+            createImageFunctionParameters = arguments;
             var width, height, cubemapOrder, srcWidth, srcHeight, canvas, ctx, i;
             _dataURI = dataURI;
             recreateTextureIfDifferentType();
@@ -354,7 +374,7 @@ KICK.namespace = function (ns_string) {
             if (_generateMipmaps) {
                 gl.generateMipmap(_textureType);
             }
-            gl.currentMaterial = null; // for material to rebind
+            glState.currentMaterial = null; // for material to rebind
         };
 
         /**
@@ -383,6 +403,8 @@ KICK.namespace = function (ns_string) {
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function (width, height, border, type, pixels, dataURI) {
+            createImageFunction = thisObj.setImage;
+            createImageFunctionParameters = arguments;
             var format,
                 res;
             recreateTextureIfDifferentType();
@@ -421,7 +443,7 @@ KICK.namespace = function (ns_string) {
             if (_generateMipmaps) {
                 gl.generateMipmap(constants.GL_TEXTURE_2D);
             }
-            gl.currentMaterial = null; // for material to rebind
+            glState.currentMaterial = null; // for material to rebind
         };
 
         /**
@@ -707,6 +729,7 @@ KICK.namespace = function (ns_string) {
         };
 
         (function init() {
+            engine.addContextListener(contextListener);
             // apply
             applyConfig(thisObj, config, ["dataURI"]);
             if (config && config.dataURI) {
@@ -729,6 +752,7 @@ KICK.namespace = function (ns_string) {
      */
     texture.MovieTexture = function (engine, config) {
         var gl = engine.gl,
+            glState = engine.glState,
             texture0 = constants.GL_TEXTURE0,
             _name = "MovieTexture",
             _videoElement = null,
@@ -770,7 +794,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             if (_textureId !== null) {
-                gl.currentMaterial = null; // for material to rebind
+                glState.currentMaterial = null; // for material to rebind
                 gl.deleteTexture(_textureId);
                 _textureId = null;
                 engine.project.removeResourceDescriptor(thisObj.uid);
@@ -790,7 +814,7 @@ KICK.namespace = function (ns_string) {
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_MIN_FILTER, _minFilter);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
-            gl.currentMaterial = null; // for material to rebind
+            glState.currentMaterial = null; // for material to rebind
         };
 
         Object.defineProperties(this, {

@@ -11,6 +11,7 @@
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas><br/>
 <button onclick="canvas.setRestoreTimeout(0);canvas.loseContext();">loseContext (restore immediately)</button>
 <button onclick="canvas.setRestoreTimeout(5000);canvas.loseContext();">loseContext (restore 5 seconds)</button>
+<button onclick="canvas.setRestoreTimeout(-1);canvas.loseContext();">loseContext (no restore)</button>
 <script type="text/javascript">
     // init engine (create 3d context)
     var canvas = document.getElementById('canvas');
@@ -26,7 +27,8 @@
         left:-5,
         right:5,
         top:5,
-        bottom:-5
+        bottom:-5,
+        clearColor:[1,0,0,1]
     });
     cameraObject.addComponent(camera);
 
@@ -36,6 +38,7 @@
     texture.init();
 
     // create material
+
     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
     var material = new KICK.material.Material(engine,{
         shader: shader,

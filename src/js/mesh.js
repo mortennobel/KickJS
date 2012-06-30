@@ -70,18 +70,18 @@ KICK.namespace = function (ns_string) {
             _vertexAttrLength,
             _meshType,
             _name,
-            clearInterleavedData = function() {
+            clearInterleavedData = function () {
                 _interleavedArray = null;
                 _interleavedArrayFormat = null;
                 _vertexAttrLength = null;
             },
-            isVertexDataInitialized = function() {
+            isVertexDataInitialized = function () {
                 return data.vertex;
             },
-            isInterleavedDataInitialized = function(){
+            isInterleavedDataInitialized = function () {
                 return _interleavedArray;
             },
-            createVertexDataFromInterleavedData = function() {
+            createVertexDataFromInterleavedData = function () {
                 var vertexLength = _interleavedArray.byteLength / (_vertexAttrLength), i, j,
                     attributeName,
                     attributeConfig,
@@ -833,6 +833,7 @@ KICK.namespace = function (ns_string) {
      */
     mesh.Mesh = function (engine,config) {
         var gl = engine.gl,
+            glState = engine.glState,
             meshVertexAttBuffer,
             interleavedArrayFormat,
             interleavedArrayFormatArray = [],
@@ -847,10 +848,12 @@ KICK.namespace = function (ns_string) {
             meshType,
             meshElements = [],
             contextListener = {
-                contextLost: function(){},
-                contextRestored: function(newGl){
-                    meshVertexIndexBuffers = null;
+                contextLost: function(){
+                    meshVertexIndexBuffers.length = 0;
                     meshVertexAttBuffer = null;
+                    gl = null;
+                },
+                contextRestored: function(newGl){
                     gl = newGl;
                     updateData();
                 }
@@ -1028,9 +1031,9 @@ KICK.namespace = function (ns_string) {
             var i;
             shader.bind();
 
-            if (gl.meshBuffer !== meshVertexAttBuffer || gl.meshShader !== shader){
-                gl.meshBuffer = meshVertexAttBuffer;
-                gl.meshShader = shader;
+            if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader){
+                glState.meshBuffer = meshVertexAttBuffer;
+                glState.meshShader = shader;
                 gl.bindBuffer(constants.GL_ARRAY_BUFFER, meshVertexAttBuffer);
 
                 for (i = 0; i < interleavedArrayFormatArray.length; i++){

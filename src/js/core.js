@@ -62,7 +62,8 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Config} config Optional, configuration object
      */
     core.Engine = function (idOrElement, config) {
-        var gl = null,
+        var glState = {},
+            gl = null,
             canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
             webGlContextNames = ["experimental-webgl", "webgl"],
             thisObj = this,
@@ -110,6 +111,15 @@ KICK.namespace = function (ns_string) {
              */
             project: {
                 value: project
+            },
+            /**
+             * The WebGL state(readonly). (Only used to keep track on webgl state across different objects)
+             * @property glState
+             * @type Object
+             * @protected
+             */
+            glState: {
+                get: function () { return glState; }
             },
             /**
              * The WebGL context (readonly)
@@ -366,13 +376,13 @@ KICK.namespace = function (ns_string) {
 
         /**
          * This method should be invoked when the canvas is resized.<br>
-         * This will change the viewport size of the WebGL context.<br>
+         * This will change the viewport size of the WebGL state.<br>
          * Instead of calling this method explicit, the configuration parameter
          * checkCanvasResizeInterval can also be set to support automatically checks
          * @method canvasResized
          */
         this.canvasResized = function () {
-            gl.viewportSize = vec2.create([canvas.width,canvas.height]);
+            glState.viewportSize = vec2.create([canvas.width, canvas.height]);
             if (mouseInput) {
                 mouseInput.updateCanvasElementPosition();
             }
@@ -409,6 +419,7 @@ KICK.namespace = function (ns_string) {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
                     }
+                    Object.freeze(gl);
                     gl.enable(c.GL_DEPTH_TEST);
                     gl.enable(c.GL_SCISSOR_TEST);
                     return true;
@@ -421,20 +432,23 @@ KICK.namespace = function (ns_string) {
 
             canvas.addEventListener("webglcontextlost", function (event) {
                 wasPaused = thisObj.paused;
-                thisObj.pause = true;
+                thisObj.paused = true;
                 for (i = 0; i < contextListeners.length; i++) {
                     contextListeners[i].contextLost();
                 }
                 event.preventDefault();
+                gl = null;
             }, false);
             canvas.addEventListener("webglcontextrestored", function (event) {
+                core.Util.removeAllProperties(glState); // clear gl state
+                thisObj.canvasResized(); // reset viewportSize
                 initGL();
                 for (i = 0; i < contextListeners.length; i++) {
                     contextListeners[i].contextRestored(gl);
                 }
                 // restart rendering loop
                 if (!wasPaused) {
-                    thisObj.pause = false;
+                    thisObj.paused = false;
                 }
                 event.preventDefault();
             }, false);
@@ -442,7 +456,7 @@ KICK.namespace = function (ns_string) {
             thisObj.canvasResized();
             if (thisObj.config.checkCanvasResizeInterval) {
                 setInterval(function () {
-                    if (canvas.height !== gl.viewportSize[0] || canvas.width !== gl.viewportSize[1]) {
+                    if (canvas.height !== glState.viewportSize[0] || canvas.width !== glState.viewportSize[1]) {
                         thisObj.canvasResized();
                     }
                 }, thisObj.config.checkCanvasResizeInterval);
@@ -2534,6 +2548,18 @@ KICK.namespace = function (ns_string) {
             return new Uint8Array(res);
         },
         /**
+         * Removes all properties (methods and attributes) of an object
+         * @method removeAllProperties
+         * @param {Object} obj
+         */
+        removeAllProperties: function (obj) {
+            for (var name in obj) {
+                if (obj.hasOwnProperty(name)) {
+                    delete obj[name];
+                }
+            }
+        },
+        /**
          * Supports up to 3 byte UTF-8 encoding (including Basic Multilingual Plane)
          * @method utf8Decode
          * @param {Uint8Array} bytes
@@ -2607,7 +2633,7 @@ KICK.namespace = function (ns_string) {
                 window.mozCancelRequestAnimationFrame       ||
                 window.oCancelRequestAnimationFrame     ||
                 window.msCancelRequestAnimationFrame        ||
-                clearTimeout
+                clearTimeout;
         } )();
     }
 

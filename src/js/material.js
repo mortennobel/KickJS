@@ -152,6 +152,7 @@ KICK.namespace = function (ns_string) {
      */
     material.Shader = function (engine, config) {
         var gl = engine.gl,
+            glState = engine.glState,
             thisObj = this,
             _shaderProgramId = -1,
             _depthMask = true,
@@ -216,7 +217,7 @@ KICK.namespace = function (ns_string) {
                 return shader;
             },
             updateCullFace = function () {
-                var currentFaceCulling = gl.faceCulling;
+                var currentFaceCulling = glState.faceCulling;
                 if (currentFaceCulling !== _faceCulling) {
                     if (_faceCulling === core.Constants.GL_NONE) {
                         gl.disable(c.GL_CULL_FACE);
@@ -226,22 +227,22 @@ KICK.namespace = function (ns_string) {
                         }
                         gl.cullFace(_faceCulling);
                     }
-                    gl.faceCulling = _faceCulling;
+                    glState.faceCulling = _faceCulling;
                 }
             },
             updateDepthProperties = function () {
-                if (gl.zTest !== _zTest) {
+                if (glState.zTest !== _zTest) {
                     gl.depthFunc(_zTest);
-                    gl.zTest = _zTest;
+                    glState.zTest = _zTest;
                 }
-                if (gl.depthMaskCache !== _depthMask) {
+                if (glState.depthMaskCache !== _depthMask) {
                     gl.depthMask(_depthMask);
-                    gl.depthMaskCache = _depthMask;
+                    glState.depthMaskCache = _depthMask;
                 }
             },
             updateBlending = function () {
-                if (gl.blendKey !== blendKey) {
-                    gl.blendKey = blendKey;
+                if (glState.blendKey !== blendKey) {
+                    glState.blendKey = blendKey;
                     if (_blend) {
                         gl.enable(KICK.core.Constants.GL_BLEND);
                     } else {
@@ -251,8 +252,8 @@ KICK.namespace = function (ns_string) {
                 }
             },
             updatePolygonOffset = function () {
-                if (gl.polygonOffsetEnabled !== _polygonOffsetEnabled) {
-                    gl.polygonOffsetEnabled = _polygonOffsetEnabled;
+                if (glState.polygonOffsetEnabled !== _polygonOffsetEnabled) {
+                    glState.polygonOffsetEnabled = _polygonOffsetEnabled;
                     if (_polygonOffsetEnabled) {
                         gl.enable(KICK.core.Constants.GL_POLYGON_OFFSET_FILL);
                     } else {
@@ -336,6 +337,32 @@ KICK.namespace = function (ns_string) {
                 }
             };
 
+        /**
+         * @method contextLost
+         * @protected
+         */
+        this.contextLost = function () {
+            gl = null;
+            _shaderProgramId = -1;
+            _activeUniforms.length = 0;
+            _engineUniforms.length = 0;
+            _materialUniforms.length = 0;
+        };
+
+        /**
+         * This method is public and may be called multiple times (both from materials using the shader and from the engine)
+         * @method contextRestored
+         * @protected
+         */
+        this.contextRestored = function (newGL) {
+            if (!gl) {
+                gl = newGL;
+                thisObj.apply();
+            }
+        };
+
+        engine.addContextListener(this);
+
         Object.defineProperties(this, {
             /**
              * Lookup of uniform based on name.
@@ -402,6 +429,14 @@ KICK.namespace = function (ns_string) {
              */
             gl: {
                 value: gl
+            },
+            /**
+             * Get the gl state
+             * @property glState
+             * @type Object
+             */
+            glState: {
+                value: glState
             },
             /**
              * Get default configuration of shader uniforms
@@ -731,8 +766,8 @@ KICK.namespace = function (ns_string) {
          * @method markUniformUpdated
          */
         this.markUniformUpdated = function () {
-            gl.boundShader = -1;
-            gl.meshShader = -1;
+            glState.boundShader = -1;
+            glState.meshShader = -1;
         };
 
         /**
@@ -769,7 +804,7 @@ KICK.namespace = function (ns_string) {
             }
 
             gl.useProgram(_shaderProgramId);
-            gl.boundShader = _shaderProgramId;
+            glState.boundShader = _shaderProgramId;
             numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_UNIFORMS);
             updateActiveUniforms(numberOfActiveUniforms);
 
@@ -808,6 +843,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             if (_shaderProgramId !== -1) {
+                engine.removeContextListener(thisObj);
                 gl.deleteProgram(_shaderProgramId);
                 _shaderProgramId = -1;
                 engine.project.removeResourceDescriptor(thisObj.uid);
@@ -832,8 +868,8 @@ KICK.namespace = function (ns_string) {
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
             }
-            if (gl.boundShader !== _shaderProgramId) {
-                gl.boundShader = _shaderProgramId;
+            if (glState.boundShader !== _shaderProgramId) {
+                glState.boundShader = _shaderProgramId;
                 gl.useProgram(_shaderProgramId);
                 updateCullFace();
                 updateDepthProperties();
@@ -957,6 +993,7 @@ KICK.namespace = function (ns_string) {
     material.Shader.prototype.bindMaterialUniform = function (material, engineUniforms) {
         // lookup uniforms
         var gl = this.gl,
+            glState = this.glState,
             timeObj,
             sceneLights = engineUniforms.sceneLights,
             ambientLight = sceneLights.ambientLight,
@@ -994,7 +1031,7 @@ KICK.namespace = function (ns_string) {
             gl.uniform1f(time.location, timeObj.time);
         }
         if (viewport) {
-            gl.uniform2fv(viewport.location, gl.viewportSize);
+            gl.uniform2fv(viewport.location, glState.viewportSize);
         }
         return currentTexture;
     };
@@ -1011,6 +1048,7 @@ KICK.namespace = function (ns_string) {
     material.Shader.prototype.bindUniform = function (material, engineUniforms, transform) {
         var lookupUniform = this.lookupUniform,
             gl = this.gl,
+            glState = this.glState,
             modelMatrix = lookupUniform._m,
             mv = lookupUniform._mv,
             mvProj = lookupUniform._mvProj,
@@ -1026,10 +1064,10 @@ KICK.namespace = function (ns_string) {
             modelView,
             normalMatrix,
             currentTexture = 0;
-        if (gl.currentMaterial !== material) {
+        if (glState.currentMaterial !== material) {
         // shared material uniforms
 
-            gl.currentMaterial = material;
+            glState.currentMaterial = material;
             currentTexture = this.bindMaterialUniform(material, engineUniforms);
         }
 
@@ -1097,6 +1135,20 @@ KICK.namespace = function (ns_string) {
             thisObj = this,
             gl = engine.gl,
             _renderOrder = 0,
+            contextListener = {
+                contextLost: function () {
+                },
+                contextRestored: function (newGL) {
+                    gl = newGL;
+                    // force shader update (will re-initialize uniforms)
+                    if (_shader) {
+                        _shader.contextRestored(newGL);
+                        var s = _shader;
+                        _shader = null;
+                        thisObj.shader = s;
+                    }
+                }
+            },
             /**
              * Called when a shader is set or changed.
              * Add location and type information to each uniform.
@@ -1307,6 +1359,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             engine.project.removeResourceDescriptor(thisObj.uid);
+            engine.removeContextListener(contextListener);
         };
 
         /**
@@ -1345,6 +1398,7 @@ KICK.namespace = function (ns_string) {
             var uniformData = config.uniformData,
                 name,
                 value;
+            engine.addContextListener(contextListener);
             if (uniformData) {
                 delete config.uniformData;
             }

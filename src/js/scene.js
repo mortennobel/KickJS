@@ -1268,6 +1268,7 @@ KICK.namespace = function (ns_string) {
      */
     scene.Camera = function (config) {
         var gl,
+            glState,
             thisObj = this,
             transform,
             engine,
@@ -1306,6 +1307,15 @@ KICK.namespace = function (ns_string) {
                 viewProjectionMatrix: viewProjectionMatrix,
                 lightMatrix: lightMatrix
             },
+            isContextListenerRegistered = false,
+            contextListener = {
+                contextLost: function () {
+                    gl = null;
+                },
+                contextRestored: function (newGL) {
+                    gl = newGL;
+                }
+            },
             renderableComponentsBackGroundAndGeometry = [],
             renderableComponentsTransparent = [],
             renderableComponentsOverlay = [],
@@ -1329,8 +1339,8 @@ KICK.namespace = function (ns_string) {
                 _currentClearFlags = (_clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) | (_clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
             },
             setupClearColor = function (color) {
-                if (gl.currentClearColor !== color) {
-                    gl.currentClearColor = color;
+                if (glState.currentClearColor !== color) {
+                    glState.currentClearColor = color;
                     gl.clearColor(color[0], color[1], color[2], color[3]);
                 }
             },
@@ -1349,7 +1359,7 @@ KICK.namespace = function (ns_string) {
              * @private
              */
             setupCamera = function () {
-                var viewportDimension = _renderTarget ? _renderTarget.dimension : gl.viewportSize,
+                var viewportDimension = _renderTarget ? _renderTarget.dimension : glState.viewportSize,
                     viewPortWidth = viewportDimension[0],
                     viewPortHeight = viewportDimension[1],
                     offsetX = viewPortWidth * _normalizedViewportRect[0],
@@ -1358,22 +1368,22 @@ KICK.namespace = function (ns_string) {
                     height = viewPortHeight * _normalizedViewportRect[3],
                     globalMatrixInv;
                 setupViewport(offsetX, offsetY, width, height);
-                gl.currentMaterial = null; // clear current material
+                glState.currentMaterial = null; // clear current material
                 // setup render target
-                if (gl.renderTarget !== _renderTarget) {
+                if (glState.renderTarget !== _renderTarget) {
                     if (_renderTarget) {
                         _renderTarget.bind();
                     } else {
                         gl.bindFramebuffer(constants.GL_FRAMEBUFFER, null);
                     }
-                    gl.renderTarget = _renderTarget;
+                    glState.renderTarget = _renderTarget;
                 }
 
                 setupClearColor(_clearColor);
                 gl.clear(_currentClearFlags);
 
                 if (_perspective) {
-                    mat4.perspective(_fieldOfView, gl.viewportSize[0] / gl.viewportSize[1],
+                    mat4.perspective(_fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
                         _near, _far, projectionMatrix);
                 } else {
                     mat4.ortho(_left, _right, _bottom, _top,
@@ -1599,14 +1609,14 @@ KICK.namespace = function (ns_string) {
                 pickingQueue = [];
                 pickingShader = engine.project.load(engine.project.ENGINE_SHADER___PICK);
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
-                    dimension: gl.viewportSize
+                    dimension: glState.viewportSize
                 });
                 pickingRenderTarget.name = "__pickRenderTexture";
             }
             pickingQueue.push({
                 gameObjectPickedFn: gameObjectPickedFn,
                 x: x,
-                y: gl.viewportSize[1] - y,
+                y: glState.viewportSize[1] - y,
                 width: width,
                 height: height
             });
@@ -1622,8 +1632,13 @@ KICK.namespace = function (ns_string) {
                 shadowRadius,
                 nearPlanePosition;
             engine = gameObject.engine;
+            if (!isContextListenerRegistered) {
+                isContextListenerRegistered = true;
+                engine.addContextListener(contextListener);
+            }
             transform = gameObject.transform;
             gl = engine.gl;
+            glState = engine.glState;
             _scene = gameObject.scene;
             _scene.addComponentListener(componentListener);
 
@@ -1665,7 +1680,7 @@ KICK.namespace = function (ns_string) {
                 return;
             }
             if (_renderShadow && sceneLightObj.directionalLight && sceneLightObj.directionalLight.shadow) {
-                gl.currentMaterial = null; // clear current material
+                glState.currentMaterial = null; // clear current material
                 renderShadowMap(sceneLightObj);
             }
             setupCamera();
@@ -1682,7 +1697,7 @@ KICK.namespace = function (ns_string) {
                 gl.generateMipmap(gl.TEXTURE_2D);
             }
             if (pickingQueue && pickingQueue.length > 0) {
-                gl.currentMaterial = null; // clear current material
+                glState.currentMaterial = null; // clear current material
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
@@ -2020,6 +2035,22 @@ KICK.namespace = function (ns_string) {
             }
         });
 
+        /**
+         * Destroy camera component
+         * @method destroy
+         */
+        this.destroy = function () {
+            if (isContextListenerRegistered) {
+                isContextListenerRegistered = false;
+                engine.removeContextListener(contextListener);
+            }
+        };
+
+        /**
+         * Serialize object
+         * @method toJSON
+         * @return {Object} data object
+         */
         this.toJSON = function () {
             return {
                 type: "KICK.scene.Camera",
