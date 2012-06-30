@@ -13029,6 +13029,7 @@ KICK.namespace = function (ns_string) {
      */
     texture.RenderTexture = function (engine, config) {
         var gl = engine.gl,
+            glState = engine.glState,
             _config = config || {},
             framebuffer = gl.createFramebuffer(),
             colorTexture = null,
@@ -13091,7 +13092,7 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function () {
-            gl.renderTarget = thisObj;
+            glState.renderTarget = thisObj;
             gl.bindFramebuffer(36160, framebuffer);
         };
 
