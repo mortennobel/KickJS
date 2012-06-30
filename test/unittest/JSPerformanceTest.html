@@ -126,7 +126,7 @@ YUI().use('node', 'console', 'test', function (Y) {
             var sumY = y[0]+y[1]+y[2]+y[3]+y[4]+y[5]+y[6]+y[7]+y[8]+y[9]+y[10];
             Assert.areNotEqual(sumY, y[0], "Browser does not perform calculations with double presision");
         },
-        /*testReflectSimple: function () {
+        testReflectSimple: function () {
             var sum = 0;
             var result = vec3.create();
             var L = vec3.create([1,2,3]);
@@ -147,10 +147,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 sum += result[0];
             }
             console.log("Equal "+sum);
-        }*/
-        /*
-        ,
-
+        },
         testTestImplicitTypecast: function () {
             var equal = 0;
             for (var i=0;i<largeArrayA.length;i++){
@@ -196,7 +193,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 sum += largeArrayInt8[i];
             }
             console.log("Equal "+sum);
-        } */
+        }
     });
 
     var ExampleSuite = new Y.Test.Suite("Example Suite");
