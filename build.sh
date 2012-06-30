@@ -5,7 +5,7 @@ yuidoc_bin=$1
 #Location of project
 project=$2
 
-#Location of Google Clojure Compiler
+#Location of Google Clojure Compiler (http://code.google.com/p/closure-compiler/)
 googleClojure=$3
 
 #Location of Node.js
