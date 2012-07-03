@@ -141,7 +141,7 @@ function teapotClicked(){
 
 function loadModelFile(file,rotateAroundX){
     var reader = new FileReader(),
-        fileName = file.fileName,
+        fileName = file.fileName || file.name,
         fileNameLowercase = fileName.toLowerCase();
     var endsWith = function(str,search) {
         return (str.match(search+"$")==search)
@@ -190,7 +190,8 @@ function loadClicked(files,rotateAroundX,model){
     };
     for (var i=0;i<files.length;i++){
         var file = files[i];
-        var fileLowerCase = file.fileName.toLowerCase();
+        var filename = file.fileName || file.name;
+        var fileLowerCase = filename.toLowerCase();
         if (model && (endsWith(fileLowerCase,".dae") ||
             endsWith(fileLowerCase,".obj") ||
             endsWith(fileLowerCase,".kickjs"))){
@@ -323,10 +324,7 @@ function initDuckTexture(){
     texture = new KICK.texture.Texture(engine);
     texture.setTemporaryTexture();
     texture.dataURI = "duckCM.jpg";
-    material.uniforms.mainTexture = {
-        value:texture,
-        type: KICK.core.Constants.GL_SAMPLER_2D
-    };
+    material.setUniform("mainTexture", texture);
 }
 
 function initLights(){
