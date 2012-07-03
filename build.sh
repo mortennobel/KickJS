@@ -80,7 +80,7 @@ cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/gl
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH
 
 echo $yuidoc_bin $parser_in -o $generator_out
-$yuidoc_bin $parser_in -o $generator_out
+$yuidoc_bin -c $project/yuidoc.json $parser_in -o $generator_out
 
 ##############################################################################
 echo "Running Precompiler release"
