@@ -18,7 +18,7 @@ window.onload = function(){
             meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader,
-                uniforms: materialUniforms
+                uniformData: materialUniforms
             });
         }
 
@@ -63,15 +63,9 @@ window.onload = function(){
         texture.setTemporaryTexture();
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
         setMaterial('vertexShaderTex','fragmentShaderAscii',meshRenderer, {
-                    tex: {
-                        value: texture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    },
-                    ascii: {
-                        value: asciiTexture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
-                });
+            tex:  texture,
+            ascii:  asciiTexture
+        });
         gameObject.addComponent(meshRenderer);
 
         gameObject = activeScene.createGameObject();
@@ -79,10 +73,7 @@ window.onload = function(){
         gameObject.addComponent(meshRenderer);
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
         setMaterial('vertexShaderTex','fragmentShaderTex',meshRenderer, {
-                    tex: {
-                        value: texture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
+                    tex:  texture
                 });
         gameObject.transform.position = [.9,.9,0.1];
         gameObject.transform.localScale = [0.1,0.1,0.1];
@@ -123,8 +114,8 @@ window.onload = function(){
 
             var file = document.createElement("input");
             file.type = "file";
-            file.onchange = function() {
-                if (this.files.length==0){
+            file.onchange = function () {
+                if (this.files.length === 0) {
                     return;
                 }
                 window.currentDialog.hide();
@@ -165,12 +156,12 @@ window.onload = function(){
         buildLoadVideoDialog();
     });
 
-    function documentResized(){
+    function documentResized () {
         var canvas = document.getElementById('canvas');
         canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight-canvas.offsetTop;
+        canvas.height = window.innerHeight - canvas.offsetTop;
         
-        if (engine){
+        if (engine) {
             engine.canvasResized();
         }
     }
