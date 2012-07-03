@@ -40,7 +40,7 @@ This example demonstrate how to script update that runs in every frame (slightly
     // create a game object in [0,0,0] facing down the -z axis
     var cameraObject = engine.activeScene.createGameObject();
     cameraObject.transform.position = [0,0,5];
-    // create a perspective camera
+    // create a orthographic camera
     var camera = new KICK.scene.Camera({
         perspective: false,
         left:-5,

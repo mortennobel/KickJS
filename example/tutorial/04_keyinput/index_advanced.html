@@ -65,7 +65,7 @@ The key down event and key up event will change the color of the objects.<br><br
     // create a game object in [0,0,0] facing down the -z axis
     var cameraObject = engine.activeScene.createGameObject();
     cameraObject.transform.position = [0,0,5];
-    // create a perspective camera
+    // create a orthographic camera
     var camera = new KICK.scene.Camera({
         perspective: false,
         left:-5,

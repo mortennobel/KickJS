@@ -36,16 +36,13 @@ a camera.<br>
             mainColor: [1,1,1,1]
         }
     });
-    // create meshes
-    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
-    for (var i=0;i<meshes.length;i++){
-        var gameObject = engine.activeScene.createGameObject();
-        gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.project.load(meshes[i]);
-        meshRenderer.material = material;
-        gameObject.addComponent(meshRenderer);
-    }
+    // create cube
+    var gameObject = engine.activeScene.createGameObject();
+    gameObject.transform.position = [0.0,0,0];
+    var meshRenderer = new KICK.scene.MeshRenderer();
+    meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
+    meshRenderer.material = material;
+    gameObject.addComponent(meshRenderer);
 </script>
 <!-- Tutorial end -->
 </body>
