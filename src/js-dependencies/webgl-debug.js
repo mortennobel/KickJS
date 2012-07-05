@@ -576,8 +576,13 @@ function makeLostContextSimulatingCanvas(canvas) {
         //  glErrorShadow_[wrappedContext_.INVALID_OPERATION] = true;
         //  return;
         //}
+          try{
         var result = f.apply(ctx, arguments);
         return result;
+          }catch (e){
+              debugger;
+              return null;
+          }
       }
     };
   }
