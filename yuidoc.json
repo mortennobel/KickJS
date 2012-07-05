@@ -4,5 +4,6 @@
     "version": "0.4.0",
     "url": "http://www.kickjs.org/",
     "options": {
+        "outdir": "../build/apidocs"
     }
 }
