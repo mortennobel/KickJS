@@ -250,13 +250,16 @@ KICK.namespace = function (ns_string) {
             },
             contextListener = {
                 contextLost: function () {
+                    console.log("_textureId ", _textureId, gl);
                     gl = null;
                 },
                 contextRestored: function (newGl) {
+                    var isNew = (gl !== newGl);
                     gl = newGl;
                     _textureId = gl.createTexture();
+                    console.log("_textureId ", _textureId, isNew);
                     if (createImageFunction) {
-                    //    createImageFunction.apply(thisObj, createImageFunctionParameters);
+                        createImageFunction.apply(thisObj, createImageFunctionParameters);
                     }
                 }
             };
@@ -404,7 +407,7 @@ KICK.namespace = function (ns_string) {
          * @param {String} dataURI String representing the image
          */
         this.setImageData = function (width, height, border, type, pixels, dataURI) {
-            createImageFunction = thisObj.setImage;
+            createImageFunction = thisObj.setImageData;
             createImageFunctionParameters = arguments;
             var format,
                 res;

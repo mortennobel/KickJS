@@ -1,0 +1,38 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Lost Context Test</title>
+</head>
+<body>
+
+<script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
+<script type="text/javascript" src="../../build/kick-debug-0.4.1.js"></script>
+<canvas id="canvas" style="border: none;" width="500" height="500"></canvas><br/>
+<button onclick="canvas.setRestoreTimeout(0);canvas.loseContext();">loseContext (restore immediately)</button>
+<button onclick="canvas.setRestoreTimeout(5000);canvas.loseContext();">loseContext (restore 5 seconds)</button>
+<button onclick="canvas.setRestoreTimeout(-1);canvas.loseContext();">loseContext (no restore)</button>
+<button onclick="camera.clearColor = [0,1,0,1];">Change background color</button><br>
+Simple restores gl component and clear the color
+<script type="text/javascript">
+    // init engine (create 3d context)
+    var canvas = document.getElementById('canvas');
+    canvas = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas);
+    var engine = new KICK.core.Engine(canvas);
+
+    // create a game object in [0,0,0] facing down the -z axis
+    var cameraObject = engine.activeScene.createGameObject();
+    cameraObject.transform.position = [0,0,5];
+    // create a perspective camera
+    var camera = new KICK.scene.Camera({
+        perspective: false,
+        left:-5,
+        right:5,
+        top:5,
+        bottom:-5,
+        clearColor:[1,0,0,1]
+    });
+    cameraObject.addComponent(camera);
+</script>
+</body>
+</html>

@@ -234,7 +234,9 @@ KICK.namespace = function (ns_string) {
                 fail("Exception when loading image " + uri);
                 resourceTracker.resourceFailed();
             };
-            img.crossOrigin = "anonymous"; // Ask for a CORS image
+            if (uri.indexOf('data:') !== 0) {
+                img.crossOrigin = "anonymous"; // Ask for a CORS image except when using data
+            }
             img.src = uri;
         };
     };
