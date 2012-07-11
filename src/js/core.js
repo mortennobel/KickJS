@@ -413,8 +413,19 @@ KICK.namespace = function (ns_string) {
                         return false;
                     }
                     if (thisObj.config.enableDebugContext) {
-                        if (window["WebGLDebugUtils"]) {
-                            gl = WebGLDebugUtils.makeDebugContext(gl);
+                        if (window.WebGLDebugUtils) {
+                            // Checking that none of the WebGL arguments are undefined
+                            // http://www.khronos.org/webgl/wiki/Debugging#Checking_that_none_of_your_arguments_are_undefined
+                            var validateNoneOfTheArgsAreUndefined = function (functionName, args) {
+                                var ii;
+                                for (ii = 0; ii < args.length; ++ii) {
+                                    if (args[ii] === undefined) {
+                                        console.error("undefined passed to gl." + functionName + "(" +
+                                            window.WebGLDebugUtils.glFunctionArgsToString(functionName, args) + ")");
+                                    }
+                                }
+                            };
+                            gl = window.WebGLDebugUtils.makeDebugContext(gl, undefined, validateNoneOfTheArgsAreUndefined);
                         } else {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
