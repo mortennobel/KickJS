@@ -658,6 +658,7 @@ KICK.namespace = function (ns_string) {
                     url,
                     isCubemap,
                     canvas,
+                    shader,
                     ctx;
                 if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_UNLIT_VERTEX_COLOR) {
                     switch (uid) {
@@ -789,6 +790,12 @@ KICK.namespace = function (ns_string) {
                             name: getUrlAsResourceName(url),
                             uid: uid
                         });
+                } else if (uid <= p.ENGINE_MATERIAL_DEFAULT) {
+                    shader = loadEngineAsset(p.ENGINE_SHADER_UNLIT);
+                    res = new KICK.material.Material(engine, {
+                        shader: shader,
+                        name: "Default material"
+                    });
                 }
 
                 resourceCache[uid] = res;
@@ -1336,6 +1343,14 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_MESH_CUBE = -303;
+
+    /**
+     * Default material is using ENGINE_SHADER_UNLIT and is white
+     * @property ENGINE_MATERIAL_DEFAULT
+     * @type {Number}
+     * @static
+     */
+    core.Project.ENGINE_MATERIAL_DEFAULT = -400;
 
     /**
      * A project is a container of all resources and assets used in a game.<br>
