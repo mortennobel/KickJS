@@ -28,7 +28,7 @@ http://www.kickjs.org/api/
 ## Features:
  - Collada DAE and Wavefront OBJ models
  - Built-in shaders
- - Persistency model
+ - Persistence model
  - View frustum culling
  - Shadow maps
  - Picking
