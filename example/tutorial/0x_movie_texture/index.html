@@ -2,7 +2,7 @@
 <head>
 <script type="text/javascript" src="../common/common.js"></script>
 
-<script type="text/javascript" src="../../js/kick-min-0.4.0.js"></script>
+<script type="text/javascript" src="../../js/kick-min-0.4.1.js"></script>
 <script type="text/javascript">
 // KickJS code
     var engine;
@@ -48,15 +48,9 @@
          // create material
         meshRenderer.material = new KICK.material.Material(engine,{
             shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-            uniforms:{
-                mainColor: {
-                    value: [1,.8,1,1], // change the color slightly (to give a very simple effect)
-                    type: KICK.core.Constants.GL_FLOAT_VEC4
-                },
-                mainTexture: {
-                    value: texture,
-                    type: KICK.core.Constants.GL_SAMPLER_2D
-                }
+            uniformData:{
+                mainColor: [1,.8,1,1], // change the color slightly (to give a very simple effect)
+                mainTexture: texture
             }
         });
         gameObject.addComponent(meshRenderer);
