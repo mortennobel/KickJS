@@ -2140,10 +2140,15 @@ KICK.namespace = function (ns_string) {
             thisObj = this;
 
         /**
+         * If no materials are assigned, the ENGINE_MATERIAL_DEFAULT is assigned as material.
          * @method activated
          */
         this.activated = function () {
             transform = thisObj.gameObject.transform;
+            if (_materials.length === 0) {
+                var project = thisObj.gameObject.engine.project;
+                thisObj.material = project.load(project.ENGINE_MATERIAL_DEFAULT);
+            }
         };
 
         Object.defineProperties(this, {
