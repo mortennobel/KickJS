@@ -38,6 +38,7 @@ http://www.kickjs.org/api/
  - Event queue
  - Keyboard and mouse input
  - Serialization
+ - Context lost handling
 
 ## Getting started
 
