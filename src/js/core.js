@@ -597,6 +597,10 @@ KICK.namespace = function (ns_string) {
          * @type KICK.math.vec2
          */
         this.viewportSize = null;
+
+        if (ASSERT) {
+            Object.preventExtensions(this);
+        }
     };
 
     /**
