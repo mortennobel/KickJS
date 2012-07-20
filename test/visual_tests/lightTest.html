@@ -116,8 +116,9 @@
 
         function setTexture(url,button){
             setSelectedButton(button,2);
-            material.uniforms.mainTexture.value.dataURI = url;
-            material.uniforms.mainTexture.value.init();
+            var texture = material.getUniform("mainTexture");
+            texture.dataURI = url;
+            texture.init();
         }
 
         function setRotation(rotation, button){
