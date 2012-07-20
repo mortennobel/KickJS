@@ -133,7 +133,8 @@ YUI().use('node', 'console', 'test', function (Y) {
             var chunkData2 = new KICK.core.ChunkData();
             chunkData2.deserialize(serializedData);
             var recievedNumber = chunkData2.getNumber(1);
-            Assert.isTrue(recievedNumber === value);
+            var diff = recievedNumber - value;
+            Assert.isTrue(Math.abs(diff)<0.0001);
         },
         testGetSetArrayBuffer : function () {
             var Assert = Y.Assert;
