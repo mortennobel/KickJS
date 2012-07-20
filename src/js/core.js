@@ -451,7 +451,7 @@ KICK.namespace = function (ns_string) {
                 gl = null;
             }, false);
             canvas.addEventListener("webglcontextrestored", function (event) {
-                core.Util.removeAllProperties(glState); // clear gl state
+                glState.clear();
                 thisObj.canvasResized(); // reset viewportSize
                 initGL();
                 for (i = 0; i < contextListeners.length; i++) {
@@ -517,6 +517,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Engine} engine
      */
     core.GLState = function () {
+        var thisObj = this;
         /**
          * The current clear color
          * @property currentClearColor
@@ -597,6 +598,19 @@ KICK.namespace = function (ns_string) {
          * @type KICK.math.vec2
          */
         this.viewportSize = null;
+
+        /**
+         * Sets all properties to null
+         * @method clear
+         */
+        this.clear = function () {
+            var name;
+            for (name in thisObj) {
+                if (thisObj.hasOwnProperty(name) && name !== "clear") {
+                    thisObj[name] = null;
+                }
+            }
+        };
 
         if (ASSERT) {
             Object.preventExtensions(this);
