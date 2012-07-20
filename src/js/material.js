@@ -133,6 +133,8 @@ KICK.namespace = function (ns_string) {
      *          <li><code>_mvProj</code> (mat4) Model view projection matrix</li>
      *          <li><code>_m</code> (mat4) Model matrix</li>
      *          <li><code>_mv</code> (mat4) Model view matrix</li>
+     *          <li><code>_worldCamPos</code> (vec4) Camera position in world coordinate</li>
+     *          <li><code>_world2object</code> (mat4) World to Object coordinate transformation</li>
      *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
      *          <li><code>_time</code> (float) Run time of engine</li>
      *          <li><code>_ambient</code> (vec3) Ambient light</li>
@@ -1051,6 +1053,8 @@ KICK.namespace = function (ns_string) {
             glState = this.glState,
             modelMatrix = lookupUniform._m,
             mv = lookupUniform._mv,
+            worldCamPos = lookupUniform._worldCamPos,
+            world2object = lookupUniform._world2object,
             mvProj = lookupUniform._mvProj,
             norm = lookupUniform._norm,
             gameObjectUID = lookupUniform._gameObjectUID,
@@ -1065,8 +1069,6 @@ KICK.namespace = function (ns_string) {
             normalMatrix,
             currentTexture = 0;
         if (glState.currentMaterial !== material) {
-        // shared material uniforms
-
             glState.currentMaterial = material;
             currentTexture = this.bindMaterialUniform(material, engineUniforms);
         }
@@ -1094,6 +1096,12 @@ KICK.namespace = function (ns_string) {
                 }
                 gl.uniformMatrix3fv(norm.location, false, normalMatrix);
             }
+        }
+        if (worldCamPos) {
+            gl.uniform3fv(worldCamPos.location, engineUniforms.currentCameraTransform.position);
+        }
+        if (world2object) {
+            gl.uniformMatrix4fv(world2object.location, false, transform.getGlobalTRSInverse());
         }
         if (mvProj) {
             globalTransform = globalTransform || transform.getGlobalMatrix();
@@ -1202,7 +1210,6 @@ KICK.namespace = function (ns_string) {
                 set: function (newValue) { _name = newValue; }
             },
             /**
-
              * @property shader
              * @type KICK.material.Shader
              */
@@ -1384,7 +1391,7 @@ KICK.namespace = function (ns_string) {
             var i,
                 serializedUniforms = {};
             for (i = 0; i < _uniforms.length; i++) {
-                serializedUniforms[_uniforms[i].name] = _uniforms[i].toJSON();
+                serializedUniforms[_uniforms[i].name] = _uniforms[i].toJSON().value;
             }
             return {
                 uid: thisObj.uid,
@@ -1410,9 +1417,13 @@ KICK.namespace = function (ns_string) {
             if (uniformData) {
                 for (name in uniformData) {
                     if (uniformData.hasOwnProperty(name)) {
-                        value = uniformData[name];
-                        value = convertUniformValue(_shader.lookupUniform[name].type, value, engine);
-                        thisObj.setUniform(name, value);
+                        if (_shader.lookupUniform[name]) { // if found in shader
+                            value = uniformData[name];
+                            value = convertUniformValue(_shader.lookupUniform[name].type, value, engine);
+                            thisObj.setUniform(name, value);
+                        } else {
+                            delete uniformData[name]; // remove unused uniform
+                        }
                     }
                 }
             }

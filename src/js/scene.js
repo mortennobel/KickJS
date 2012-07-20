@@ -1305,7 +1305,9 @@ KICK.namespace = function (ns_string) {
                 viewMatrix: viewMatrix,
                 projectionMatrix: projectionMatrix,
                 viewProjectionMatrix: viewProjectionMatrix,
-                lightMatrix: lightMatrix
+                lightMatrix: lightMatrix,
+                currentCamera: thisObj,
+                currentCameraTransform: null
             },
             isContextListenerRegistered = false,
             contextListener = {
@@ -1394,6 +1396,7 @@ KICK.namespace = function (ns_string) {
                 mat4.set(globalMatrixInv, viewMatrix);
 
                 mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
+
             },
             /**
              * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
@@ -1631,6 +1634,7 @@ KICK.namespace = function (ns_string) {
             var gameObject = this.gameObject,
                 shadowRadius,
                 nearPlanePosition;
+            engineUniforms.currentCameraTransform = gameObject.transform;
             engine = gameObject.engine;
             if (!isContextListenerRegistered) {
                 isContextListenerRegistered = true;
