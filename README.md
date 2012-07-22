@@ -40,9 +40,9 @@ http://www.kickjs.org/api/
  - Serialization
  - Context lost handling
 
-## Getting started
+## Getting started tutorial
 
-Take a look at the files in the <a href="https://github.com/mortennobel/KickJS/tree/master/example/tutorial">tutorial folder</a>. Each of these files contains code that uses a single or a few features.
+Take a look at the <a href="http://www.kickjs.org/tutorial/index.html">tutorial</a>, which gives a gentle introduction to the concepts used in the game engine.
 
 ## Bugs
 
