@@ -2,9 +2,11 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>Replacement shader test</title>
-</head>
-<body>
+    <title></title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
+
+    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
     <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
     <script type="text/javascript" src="../../src/js/constants.js"></script>
     <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
@@ -13,84 +15,60 @@
     <script type="text/javascript" src="../../src/js/math.js"></script>
     <script type="text/javascript" src="../../src/js/mesh.js"></script>
     <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
     <script type="text/javascript" src="../../src/js/material.js"></script>
     <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
     <script type="text/javascript" src="../../src/js/texture.js"></script>
-    <h1>Picking test</h1>
-    Click on the objects to enlarge them.
-    <br>
-<canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
-<script type="text/javascript">
-    // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
+    <script type="text/javascript">
+        function initKick(){
+            // init engine (create 3d context)
+            var engine = new KICK.core.Engine('canvas',{
+                            enableDebugContext: true
+                        });
+            // create a game object in [0,0,0] facing down the -z axis
+            var cameraObject = engine.activeScene.createGameObject();
+            cameraObject.transform.position = [0,0,5];
+            // create a orthographic camera
+            var camera = new KICK.scene.Camera({
+                perspective: false,
+                left:-5,
+                right:5,
+                top:5,
+                bottom:-5
             });
-
-    var ClickListener = function(){
-        this.update = function(){
-            var mouseInput = this.gameObject.engine.mouseInput;
-            if (mouseInput.isButtonDown(0)){
-                function callback(gameObject, count){
-                    console.log("gameObject "+gameObject.name+" count "+count);
-                    var transform = gameObject.transform;
-                    var scale = transform.localScale;
-                    for (var i=0;i<3;i++){
-                        scale[i] += 0.1;
+            cameraObject.addComponent(camera);
+            // create material
+            var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+            var materials = [
+                new KICK.material.Material(engine,{
+                    shader: shader,
+                    uniformData:{
+                        mainColor: [1,0,0,1]
                     }
-                    transform.localScale = scale;
-                }
-                camera.pick(callback,mouseInput.mousePosition[0],mouseInput.mousePosition[1],3,3);
+                }),
+                new KICK.material.Material(engine,{
+                    shader: shader,
+                    uniformData:{
+                        mainColor: [0,0,1,1]
+                    }
+                })];
+
+            // create meshes
+            var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
+            for (var i=0;i<meshes.length;i++){
+                var gameObject = engine.activeScene.createGameObject();
+                gameObject.transform.position = [-2.0+4*i,0,0];
+                var meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer.mesh = engine.project.load(meshes[i]);
+                meshRenderer.material = materials[i];
+                gameObject.addComponent(meshRenderer);
             }
+
+            camera.replacementShader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
         }
-    };
+    </script>
 
-    // create a game object in [0,0,0] facing down the -z axis
-    var cameraObject = engine.activeScene.createGameObject();
-    cameraObject.transform.position = [0,0,5];
-    // create a perspective camera
-    var camera = new KICK.scene.Camera({
-        perspective: false,
-        left:-5,
-        right:5,
-        top:5,
-        bottom:-5
-    });
-    cameraObject.addComponent(camera);
-    cameraObject.addComponent(new ClickListener());
-
-    // create meshes
-    var meshes = [
-        engine.project.ENGINE_MESH_TRIANGLE,
-        engine.project.ENGINE_MESH_CUBE,
-        engine.project.ENGINE_MESH_TRIANGLE,
-        engine.project.ENGINE_MESH_CUBE];
-    var colors = [[1,1,0,1],[1,0,0,1],[0,1,0,1],[0,0,1,1]];
-    for (var i=0;i<meshes.length;i++){
-        var gameObject = engine.activeScene.createGameObject();
-        gameObject.name = "Object "+(i+1);
-        var x = -2.0+4*(i%2);
-        var y = -2.0+4*Math.floor(i/2);
-        // create material
-        var material = new KICK.material.Material(engine,{
-            shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-            uniformData:{
-                mainColor: colors[i],
-                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-            }
-        });
-        gameObject.transform.position = [x,y,0];
-        var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.project.load(meshes[i]);
-        meshRenderer.material = material;
-        gameObject.addComponent(meshRenderer);
-
-        // spawn unused ids
-        for (var j=0;j<30;j++){
-            var someObj = engine.activeScene.createGameObject();
-            someObj.name = "Random object "+j+" - "+i;
-        }
-    }
-</script>
+</head>
+<body onload="initKick();">
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
 </body>
 </html>
