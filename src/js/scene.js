@@ -2141,6 +2141,8 @@ KICK.namespace = function (ns_string) {
             _materials = [],
             _mesh,
             _renderOrder,
+            _overwriteShaderMaterials = null,
+            engine,
             thisObj = this;
 
         /**
@@ -2148,6 +2150,7 @@ KICK.namespace = function (ns_string) {
          * @method activated
          */
         this.activated = function () {
+            engine = thisObj.gameObject.engine;
             transform = thisObj.gameObject.transform;
             if (_materials.length === 0) {
                 var project = thisObj.gameObject.engine.project;
@@ -2188,6 +2191,7 @@ KICK.namespace = function (ns_string) {
                     }
                     _materials[0] = newValue;
                     _renderOrder = _materials[0].renderOrder;
+                    _overwriteShaderMaterials = null;
                     if (thisObj.gameObject) {
                         thisObj.gameObject.notifyComponentUpdated(thisObj);
                     }
@@ -2250,11 +2254,23 @@ KICK.namespace = function (ns_string) {
             var length = _materials.length,
                 i,
                 shader;
-            for (i = 0; i < length; i++) {
-                shader = overwriteShader || _materials[i].shader;
-                _mesh.bind(shader);
-                shader.bindUniform(_materials[i], engineUniforms, transform);
-                _mesh.render(i);
+            if (overwriteShader) {
+                if (!_overwriteShaderMaterials || _overwriteShaderMaterials.shader !== overwriteShader) {
+                    _overwriteShaderMaterials = new KICK.material.Material(engine, {shader: overwriteShader});
+                }
+                shader = overwriteShader;
+                for (i = 0; i < length; i++) {
+                    _mesh.bind(shader);
+                    shader.bindUniform(_overwriteShaderMaterials, engineUniforms, transform);
+                    _mesh.render(i);
+                }
+            } else {
+                for (i = 0; i < length; i++) {
+                    shader = _materials[i].shader;
+                    _mesh.bind(shader);
+                    shader.bindUniform(_materials[i], engineUniforms, transform);
+                    _mesh.render(i);
+                }
             }
         };
 

@@ -49,6 +49,7 @@ KICK.namespace = function (ns_string) {
         c = KICK.core.Constants,
         ASSERT = c._ASSERT,
         fail = core.Util.fail,
+        warn = core.Util.warn,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
@@ -1224,7 +1225,6 @@ KICK.namespace = function (ns_string) {
                     if (_shader !== newValue) {
                         _shader = newValue;
                         if (_shader) {
-                            thisObj.init();
                             _renderOrder = _shader.renderOrder;
                             decorateUniforms();
                         }
@@ -1370,19 +1370,6 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Initialize the material
-         * If the shader property is a string the shader is found in the engine.project.
-         * If shader is invalid, the error shader is used
-         * @method init
-         */
-        this.init = function () {
-            if (!_shader) {
-                KICK.core.Util.fail("Cannot initiate shader in material " + _name);
-                thisObj._shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
-            }
-        };
-
-        /**
          * Returns a JSON representation of the material<br>
          * @method toJSON
          * @return {string}
@@ -1414,6 +1401,12 @@ KICK.namespace = function (ns_string) {
                 delete config.uniforms;
             }
             applyConfig(thisObj, config);
+            if (!_shader || !_shader.isValid()) {
+                if (config.shader) {
+                    warn("Problem using shader in material. ", config.shader);
+                }
+                thisObj._shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
+            }
             if (uniformData) {
                 for (name in uniformData) {
                     if (uniformData.hasOwnProperty(name)) {
@@ -1426,6 +1419,8 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                 }
+            } else {
+                decorateUniforms();
             }
             engine.project.registerObject(thisObj, "KICK.material.Material");
         }());
