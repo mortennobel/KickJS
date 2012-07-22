@@ -72,7 +72,7 @@ cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/gl
 
 
 ##############################################################################
-# echo "Generating documentation (YUI Doc)"
+echo "Generating documentation (YUI Doc)"
 # echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 # $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 
@@ -81,6 +81,11 @@ export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH
 cd $parser_in
 echo $yuidoc_bin $parser_in -o $generator_out
 $yuidoc_bin -c $project/yuidoc.json . -o $generator_out
+
+##############################################################################
+echo "Zipping Documentation (YUI Doc)"
+rm $project/API.zip
+zip -r $project/API $project/API
 
 ##############################################################################
 echo "Running Precompiler release"
