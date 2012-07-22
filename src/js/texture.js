@@ -337,7 +337,6 @@ KICK.namespace = function (ns_string) {
                     height = nextHighestPowerOfTwo(imageObj.height);
                     imageObj = core.Util.scaleImage(imageObj, width, height);
                 }
-
                 if (_flipY) {
                     gl.pixelStorei(constants.GL_UNPACK_FLIP_Y_WEBGL, true);
                 } else {
@@ -461,7 +460,7 @@ KICK.namespace = function (ns_string) {
                                              255, 255, 255]),
                 oldIntFormat = _intFormat;
             _intFormat = constants.GL_RGB;
-            this.setImageData(2, 2, 0, constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "tempTexture");
+            this.setImageData(2, 2, 0, constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "kickjs://texture/checkerboard/");
             _intFormat = oldIntFormat;
         };
 

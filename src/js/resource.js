@@ -414,6 +414,7 @@ KICK.namespace = function (ns_string) {
          *  <li><b>Black</b> Url: kickjs://texture/black/</li>
          *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
          *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
+         *  <li><b>Checkerboard</b>  Url: kickjs://texture/checkerboard/<br></li>
          *  <li><b>KickJS logo</b>  Url: kickjs://texture/logo/<br></li>
          *  </ul>
          * @param uri
@@ -427,26 +428,31 @@ KICK.namespace = function (ns_string) {
 
             if (uri.indexOf("kickjs://texture/black/") === 0) {
                 data = new Uint8Array([0, 0, 0, 255,
-                                         0,   0,   0, 255,
-                                         0,   0,   0, 255,
-                                         0,   0,   0, 255]);
+                    0,   0,   0, 255,
+                    0,   0,   0, 255,
+                    0,   0,   0, 255]);
             } else if (uri.indexOf("kickjs://texture/white/") === 0) {
                 data = new Uint8Array([255, 255, 255, 255,
-                                         255,   255,   255, 255,
-                                         255,   255,   255, 255,
-                                         255,   255,   255, 255]);
+                    255,   255,   255, 255,
+                    255,   255,   255, 255,
+                    255,   255,   255, 255]);
             } else if (uri.indexOf("kickjs://texture/gray/") === 0) {
                 data = new Uint8Array([127, 127, 127, 255,
-                                         127,   127,   127, 255,
-                                         127,   127,   127, 255,
-                                         127,   127,   127, 255]);
+                    127,   127,   127, 255,
+                    127,   127,   127, 255,
+                    127,   127,   127, 255]);
+            } else if (uri.indexOf("kickjs://texture/checkerboard/") === 0) {
+                data = new Uint8Array([255, 255, 255, 255,
+                    0,   0,   0, 255,
+                    0,   0,   0, 255,
+                    255, 255, 255, 255]);
             } else if (uri.indexOf("kickjs://texture/logo/") === 0) {
                 textureDestination.setTemporaryTexture();
                 img = document.createElement("img");
                 resourceTracker = engine.project.createResourceTracker();
                 img.onload = function () {
                     textureDestination.generateMipmaps = true;
-                    textureDestination.internalFormat = KICK.core.Constants.GL_RGB;
+                    textureDestination.internalFormat = KICK.core.Constants.GL_RGBA     ;
                     textureDestination.magFilter = KICK.core.Constants.GL_LINEAR;
                     textureDestination.minFilter = KICK.core.Constants.GL_LINEAR_MIPMAP_LINEAR;
                     textureDestination.setImage(img, "kickjs://texture/logo/");
