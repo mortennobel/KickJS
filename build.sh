@@ -84,8 +84,11 @@ $yuidoc_bin -c $project/yuidoc.json . -o $generator_out
 
 ##############################################################################
 echo "Zipping Documentation (YUI Doc)"
-rm $project/API.zip
-zip -r $project/API $project/API
+cd $project/API
+mv generator API_$version
+rm $project/API_$version.zip
+zip -r ../API_$version.zip API_$version
+mv API_$version generator
 
 ##############################################################################
 echo "Running Precompiler release"
