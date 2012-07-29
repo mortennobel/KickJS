@@ -133,7 +133,7 @@
                 perspective: true,
                 normalizedViewportRect:[0,0,1/3,0.5],
                 layerMask:LAYER_VISIBLE_OBJECTS,
-                replacementShader: shader,
+                replacementMaterial: new KICK.material.Material(engine, {shader:shader}),
                 renderShadow:true // even though shadows are not used here, we still need to set the light transform
             });
             cameraObject.addComponent(camera);
@@ -228,7 +228,7 @@
             };
         }
 
-        function addNormalCameraOnLightSource(viewport,replacementShader){
+        function addNormalCameraOnLightSource(viewport,replacementMaterial){
             var camera2 = new KICK.scene.Camera({
                 clearColor: [0,0,0,0.5],
                 perspective: false,
@@ -240,7 +240,7 @@
                 bottom:-5,
                 far:20,
                 near:-20,
-                replacementShader:replacementShader
+                replacementMaterial:replacementMaterial
             });
             lightObj.addComponent(camera2);
         }
@@ -464,7 +464,7 @@
                 layerMask:LAYER_SHADOWMAP_DEPTH,
                 far:1,
                 near:-1,
-                replacementShader:shader
+                replacementMaterial:new KICK.material.Material(engine, {shader:shader})
             });
             camera.debug= true;
             var cameraObject = engine.activeScene.createGameObject(camera);

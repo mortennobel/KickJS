@@ -1287,7 +1287,7 @@ KICK.namespace = function (ns_string) {
             _perspective = true,
             _clearFlagColor = true,
             _clearFlagDepth = true,
-            _replacementShader = null,
+            _replacementMaterial = null,
             _currentClearFlags,
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
@@ -1698,7 +1698,7 @@ KICK.namespace = function (ns_string) {
             if (renderableComponentsTransparent.length > 0) {
                 sortTransparentBackToFront();
             }
-            renderSceneObjects(sceneLightObj, _replacementShader);
+            renderSceneObjects(sceneLightObj, _replacementMaterial);
 
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps) {
                 textureId = _renderTarget.colorTexture.textureId;
@@ -1761,10 +1761,21 @@ KICK.namespace = function (ns_string) {
              * Default value is null.
              * @property replacementShader
              * @type KICK.material.Shader
+             * @deprecated
              */
             replacementShader: {
-                get: function () { return _replacementShader; },
-                set: function (newValue) { _replacementShader = newValue; }
+                get: function () { KICK.core.Util.fail("KICK.scene.Camera.replacementShader is replaced with KICK.scene.Camera.replacementShader replacementMaterial"); },
+                set: function (newValue) { KICK.core.Util.fail("KICK.scene.Camera.replacementShader is replaced with KICK.scene.Camera.replacementShader replacementMaterial"); }
+            },
+            /**
+             * Allows usage of replacement shader on camera rendering
+             * Default value is null.
+             * @property replacementShader
+             * @type KICK.material.Shader
+             */
+            replacementMaterial: {
+                get: function () { return _replacementMaterial; },
+                set: function (newValue) { _replacementMaterial = newValue; }
             },
             /**
              * Default is true
@@ -2550,11 +2561,11 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {JSON}
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.Light");
         };
 
-        applyConfig(this,config);
+        applyConfig(this, config);
         KICK.core.Util.copyStaticPropertiesToObject(this, scene.Light);
     };
 
