@@ -231,7 +231,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             var i;
-            for (i = _components.length - 1; i >= 0 ; i--) {
+            for (i = _components.length - 1; i >= 0; i--) {
                 thisObj.removeComponent(_components[i]);
             }
             scene.destroyObject(thisObj);
@@ -250,7 +250,7 @@ KICK.namespace = function (ns_string) {
         this.getComponentOfType = function (type) {
             var component,
                 i;
-            for (i =_components.length - 1; i >= 0; i--) {
+            for (i = _components.length - 1; i >= 0; i--) {
                 component = _components[i];
                 if (component instanceof type) {
                     return component;
@@ -531,7 +531,7 @@ KICK.namespace = function (ns_string) {
                         return quat4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]) {
-                        quat4.set(localRotationQuat,globalRotationQuat);
+                        quat4.set(localRotationQuat, globalRotationQuat);
                         parentIterator = thisObj.parent;
                         while (parentIterator !== null) {
                             quat4.multiply(parentIterator.localRotation, globalRotationQuat, globalRotationQuat);
@@ -892,7 +892,7 @@ KICK.namespace = function (ns_string) {
                 }
                 engine.gl.flush();
             },
-            createGameObjectPrivate = function(config) {
+            createGameObjectPrivate = function (config) {
                 var gameObject = new scene.GameObject(thisObj, config);
                 gameObjectsNew.push(gameObject);
                 gameObjects.push(gameObject);
@@ -1291,7 +1291,7 @@ KICK.namespace = function (ns_string) {
             _currentClearFlags,
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
-            _shadowmapShader,
+            _shadowmapMaterial,
             _scene,
             pickingQueue = null,
             pickingShader = null,
@@ -1465,7 +1465,7 @@ KICK.namespace = function (ns_string) {
             renderSceneObjects = (function () {
                 var aabbWorldSpace = KICK.math.aabb.create(),
                     frustumPlanes = new Float32Array(24);
-                return function (sceneLightObj, shader) {
+                return function (sceneLightObj, replacementMaterial) {
                     var cullByViewFrustum = function (component) {
                             var componentAabb = component.aabb,
                                 gameObject = component.gameObject;
@@ -1482,7 +1482,7 @@ KICK.namespace = function (ns_string) {
                             for (j = 0; j < length; j++) {
                                 renderableComponent = renderableComponents[j];
                                 if (!cullByViewFrustum(renderableComponent)) {
-                                    renderableComponent.render(engineUniforms, shader);
+                                    renderableComponent.render(engineUniforms, replacementMaterial);
                                 }
                             }
                         };
@@ -1532,7 +1532,7 @@ KICK.namespace = function (ns_string) {
                 mat4.multiply(mat4.multiply(offsetMatrix, projectionMatrix, lightMatrix),
                     viewMatrix, lightMatrix);
 
-                renderSceneObjects(sceneLightObj, _shadowmapShader);
+                renderSceneObjects(sceneLightObj, _shadowmapMaterial);
 
             },
             componentListener = {
@@ -1647,7 +1647,12 @@ KICK.namespace = function (ns_string) {
             _scene.addComponentListener(componentListener);
 
             if (engine.config.shadows) {
-                _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
+                var _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP),
+                    materialConfig = {
+                        name: "Shadow map material",
+                        shader: _shadowmapShader
+                    };
+                _shadowmapMaterial = new KICK.material.Material(engine, materialConfig);
 
                 // calculate the shadow projection based on engine.config parameters
                 shadowLightOffsetFromCamera = engine.config.shadowDistance * 0.5; // first find radius
@@ -1706,7 +1711,7 @@ KICK.namespace = function (ns_string) {
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
                 renderSceneObjects(sceneLightObj, pickingShader);
-                for (i = pickingQueue.length - 1; i >= 0; i--){
+                for (i = pickingQueue.length - 1; i >= 0; i--) {
                     // create clojure
                     (function () {
                         var pick = pickingQueue[i],
@@ -1868,7 +1873,7 @@ KICK.namespace = function (ns_string) {
                 get: function () {
                     return _far;
                 },
-                set: function(newValue) {
+                set: function (newValue) {
                     if (c._ASSERT) {
                         assertNumber(newValue, "far");
                     }
@@ -1885,7 +1890,7 @@ KICK.namespace = function (ns_string) {
                 get: function () {
                     return _perspective;
                 },
-                set: function(newValue) {
+                set: function (newValue) {
                     if (c._ASSERT) {
                         if (!isBoolean(newValue)) {
                             KICK.core.Util.fail("Camera.perspective must be a boolean");
@@ -2063,7 +2068,7 @@ KICK.namespace = function (ns_string) {
                     enabled: _enabled,
                     renderShadow: _renderShadow,
                     layerMask: _layerMask,
-                    renderTarget: KICK.core.Util.getJSONReference(engine,_renderTarget),
+                    renderTarget: KICK.core.Util.getJSONReference(engine, _renderTarget),
                     fieldOfView: _fieldOfView,
                     near: _near,
                     far: _far,
@@ -2141,7 +2146,6 @@ KICK.namespace = function (ns_string) {
             _materials = [],
             _mesh,
             _renderOrder,
-            _overwriteShaderMaterials = null,
             engine,
             thisObj = this;
 
@@ -2191,7 +2195,6 @@ KICK.namespace = function (ns_string) {
                     }
                     _materials[0] = newValue;
                     _renderOrder = _materials[0].renderOrder;
-                    _overwriteShaderMaterials = null;
                     if (thisObj.gameObject) {
                         thisObj.gameObject.notifyComponentUpdated(thisObj);
                     }
@@ -2248,20 +2251,17 @@ KICK.namespace = function (ns_string) {
          * This method may not be called (the renderer could make the same calls)
          * @method render
          * @param engineUniforms
-         * @param {KICK.material.Shader} overwriteShader Optional
+         * @param {KICK.material.Material} overwriteMaterial Optional
          */
-        this.render = function (engineUniforms, overwriteShader) {
+        this.render = function (engineUniforms, overwriteMaterial) {
             var length = _materials.length,
                 i,
                 shader;
-            if (overwriteShader) {
-                if (!_overwriteShaderMaterials || _overwriteShaderMaterials.shader !== overwriteShader) {
-                    _overwriteShaderMaterials = new KICK.material.Material(engine, {shader: overwriteShader});
-                }
-                shader = overwriteShader;
+            if (overwriteMaterial) {
+                shader = overwriteMaterial.shader;
                 for (i = 0; i < length; i++) {
                     _mesh.bind(shader);
-                    shader.bindUniform(_overwriteShaderMaterials, engineUniforms, transform);
+                    shader.bindUniform(overwriteMaterial, engineUniforms, transform);
                     _mesh.render(i);
                 }
             } else {
@@ -2278,8 +2278,8 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {JSON}
          */
-        this.toJSON = function(){
-            if (!thisObj.gameObject){
+        this.toJSON = function () {
+            if (!thisObj.gameObject) {
                 return null; // component is destroyed
             } else {
                 return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
@@ -2555,7 +2555,7 @@ KICK.namespace = function (ns_string) {
         };
 
         applyConfig(this,config);
-        KICK.core.Util.copyStaticPropertiesToObject(this,scene.Light);
+        KICK.core.Util.copyStaticPropertiesToObject(this, scene.Light);
     };
 
     /**
@@ -2625,7 +2625,7 @@ KICK.namespace = function (ns_string) {
                 set: function (value) {
                     if (ASSERT) {
                         if (value && ambientLight) {
-                            throw Error("Cannot have multiple ambient lights in the scene");
+                            throw new Error("Cannot have multiple ambient lights in the scene");
                         }
                     }
                     ambientLight = value;
@@ -2643,7 +2643,7 @@ KICK.namespace = function (ns_string) {
                 set: function (value) {
                     if (ASSERT) {
                         if (value && directionalLight) {
-                            throw Error("Cannot have multiple directional lights in the scene");
+                            throw new Error("Cannot have multiple directional lights in the scene");
                         }
                     }
                     directionalLight = value;
