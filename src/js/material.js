@@ -48,6 +48,7 @@ KICK.namespace = function (ns_string) {
         applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants,
         ASSERT = c._ASSERT,
+        DEBUG = c._DEBUG,
         fail = core.Util.fail,
         warn = core.Util.warn,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
@@ -56,6 +57,8 @@ KICK.namespace = function (ns_string) {
         tmpVec4 = vec4.create(),
         vec3Zero = math.vec3.create(),
         isMaterialUniformName = function (name) {return name.charAt(0) !== "_"; },
+        shaderUniqueNameCounter = 0,
+        shaderUniqueVertionCounter = 0,
         /*
          * If the uniform value is not in a valid format, the
          * @param {Number} type
@@ -157,6 +160,7 @@ KICK.namespace = function (ns_string) {
         var gl = engine.gl,
             glState = engine.glState,
             thisObj = this,
+            listeners = [],
             _shaderProgramId = -1,
             _depthMask = true,
             _faceCulling = core.Constants.GL_BACK,
@@ -180,13 +184,26 @@ KICK.namespace = function (ns_string) {
             _fragmentShaderSrc = glslConstants["__error_fs.glsl"],
             _defaultUniforms,
             _errorLog = KICK.core.Util.fail,
+            uniqueVersionCounter = -1,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
              * The key is used to fast determine if the blend settings needs to be updated
-             * @method getBlendKey
+             * @method updateBlendKey
+             * @private
              */
             updateBlendKey = function () {
                 blendKey = (_blendSFactor + _blendDFactor * 10000) * (_blend ? -1 : 1);
+            },
+            /**
+             * Calls the listeners registered for this shader
+             * @method notifyListeners
+             * @private
+             */
+            notifyListeners = function () {
+                var i;
+                for (i = 0; i < listeners.length; i++) {
+                    listeners[i]();
+                }
             },
             /**
              * Invoke shader compilation
@@ -322,6 +339,10 @@ KICK.namespace = function (ns_string) {
                 for (i = 0; i < numberOfActiveUniforms; i++) {
                     uniform = gl.getActiveUniform(_shaderProgramId, i);
                     uniformLocation = gl.getUniformLocation(_shaderProgramId, uniform.name);
+                    if (DEBUG) {
+                        uniformLocation.shader = thisObj;
+                        uniformLocation.shaderVersion = uniqueVersionCounter;
+                    }
                     uniformDescriptor = new material.UniformDescriptor(uniform.name, uniform.type, uniform.size, uniformLocation);
                     Object.freeze(uniformDescriptor);
                     _activeUniforms[i] = uniformDescriptor;
@@ -339,6 +360,34 @@ KICK.namespace = function (ns_string) {
                     thisObj.defaultUniforms = oldDefaultUniforms;
                 }
             };
+
+        /**
+         * Registers a listener to the shader.
+         * @method addListener
+         * @param {Function} listenerFn a function called when shader is updated
+         */
+        this.addListener = function (listenerFn) {
+            if (ASSERT) {
+                if (typeof listenerFn !== "function") {
+                    warn("Shader.addListener: listenerFn not function");
+                }
+            }
+            listeners.push(listenerFn);
+        };
+
+        /**
+         * Removes a listener to the shader.
+         * @method removeListener
+         * @param {Function} listenerFn a function called when shader is updated
+         */
+        this.removeListener = function (listenerFn) {
+            if (ASSERT) {
+                if (typeof listenerFn !== "function") {
+                    warn("Shader.removeListener: listenerFn not function");
+                }
+            }
+            KICK.core.Util.removeElementFromArray(listeners, listenerFn, true);
+        };
 
         /**
          * @method contextLost
@@ -512,7 +561,7 @@ KICK.namespace = function (ns_string) {
                     return _errorLog;
                 },
                 set: function (value) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         if (value && typeof value !== 'function') {
                             KICK.core.Util.fail("Shader.errorLog should be a function (or null)");
                         }
@@ -597,7 +646,7 @@ KICK.namespace = function (ns_string) {
             faceCulling: {
                 get: function () { return _faceCulling; },
                 set: function (newValue) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         if (newValue !== core.Constants.GL_FRONT &&
                             newValue !== core.Constants.GL_FRONT_AND_BACK &&
                             newValue !== core.Constants.GL_BACK &&
@@ -617,7 +666,7 @@ KICK.namespace = function (ns_string) {
             depthMask: {
                 get: function () { return _depthMask; },
                 set: function (newValue) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         if (typeof newValue !== 'boolean') {
                             KICK.core.Util.fail("Shader.depthMask must be a boolean. Was " + (typeof newValue));
                         }
@@ -641,7 +690,7 @@ KICK.namespace = function (ns_string) {
             zTest: {
                 get: function () { return _zTest; },
                 set: function (newValue) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         if (newValue !== core.Constants.GL_NEVER &&
                             newValue !== core.Constants.GL_LESS &&
                             newValue !== core.Constants.GL_EQUAL &&
@@ -670,7 +719,7 @@ KICK.namespace = function (ns_string) {
             blend: {
                 get: function () { return _blend; },
                 set: function (value) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         if (typeof value !== 'boolean') {
                             KICK.core.Util.fail("Shader.blend must be a boolean");
                         }
@@ -693,7 +742,7 @@ KICK.namespace = function (ns_string) {
             blendSFactor: {
                 get: function () { return _blendSFactor; },
                 set: function (value) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         var c = KICK.core.Constants;
                         if (value !== c.GL_ZERO &&
                             value !== c.GL_ONE &&
@@ -735,7 +784,7 @@ KICK.namespace = function (ns_string) {
             blendDFactor: {
                 get: function () { return _blendDFactor; },
                 set: function (value) {
-                    if (KICK.core.Constants._ASSERT) {
+                    if (ASSERT) {
                         var c = KICK.core.Constants;
                         if (value !== c.GL_ZERO &&
                             value !== c.GL_ONE &&
@@ -759,6 +808,16 @@ KICK.namespace = function (ns_string) {
                     }
                     _blendDFactor = value;
                     updateBlendKey();
+                }
+            },
+            /**
+             * Unique shader version (this number will change whenever apply is invoked). The value may be different after serialization.
+             * @property shaderVersion
+             * @type Number
+             */
+            shaderVersion : {
+                get: function () {
+                    return uniqueVersionCounter;
                 }
             }
         });
@@ -806,6 +865,8 @@ KICK.namespace = function (ns_string) {
                 return false;
             }
 
+            uniqueVersionCounter = (shaderUniqueVertionCounter++);
+
             gl.useProgram(_shaderProgramId);
             glState.boundShader = _shaderProgramId;
             numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_UNIFORMS);
@@ -817,24 +878,26 @@ KICK.namespace = function (ns_string) {
              * @property activeAttributes
              * @type Array_Object
              */
-            this.activeAttributes = [];
+            thisObj.activeAttributes = [];
             /**
              * Lookup of attribute location based on name.
              * @property lookupAttribute
              * @type Object
              */
-            this.lookupAttribute = {};
+            thisObj.lookupAttribute = {};
             for (i = 0; i < activeAttributes; i++) {
                 attribute = gl.getActiveAttrib(_shaderProgramId, i);
-                this.activeAttributes[i] = {
+                thisObj.activeAttributes[i] = {
                     size: attribute.size,
                     type: attribute.type,
                     name: attribute.name
                 };
-                this.lookupAttribute[attribute.name] = i;
+                thisObj.lookupAttribute[attribute.name] = i;
             }
 
             thisObj.markUniformUpdated();
+
+            notifyListeners();
 
             return !compileError;
         };
@@ -866,7 +929,7 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function () {
-            if (KICK.core.Constants._ASSERT) {
+            if (ASSERT) {
                 if (!(thisObj.isValid)) {
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
@@ -923,6 +986,10 @@ KICK.namespace = function (ns_string) {
             } else {
                 updateBlendKey();
                 thisObj.apply();
+            }
+            if (_name === "") {
+                _name = "Shader_" + shaderUniqueNameCounter;
+                shaderUniqueNameCounter++;
             }
         }());
     };
@@ -1223,10 +1290,14 @@ KICK.namespace = function (ns_string) {
                         fail("KICK.material.Shader expected");
                     }
                     if (_shader !== newValue) {
+                        if (_shader) {
+                            _shader.removeListener(decorateUniforms);
+                        }
                         _shader = newValue;
                         if (_shader) {
                             _renderOrder = _shader.renderOrder;
                             decorateUniforms();
+                            _shader.addListener(decorateUniforms);
                         }
                     }
                 }
@@ -1365,6 +1436,7 @@ KICK.namespace = function (ns_string) {
          * @method destroy
          */
         this.destroy = function () {
+            thisObj.shader = null;
             engine.project.removeResourceDescriptor(thisObj.uid);
             engine.removeContextListener(contextListener);
         };
@@ -1487,7 +1559,7 @@ KICK.namespace = function (ns_string) {
             if (value instanceof Float32Array || value instanceof Int32Array) {
                 value = core.Util.typedArrayToArray(value);
             } else {
-                if (KICK.core.Constants._ASSERT) {
+                if (ASSERT) {
                     if (!value instanceof KICK.texture.Texture) {
                         KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                     }
