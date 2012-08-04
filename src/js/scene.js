@@ -2592,6 +2592,7 @@ KICK.namespace = function (ns_string) {
             directionalLightDirection = directionalLightData.subarray(0, 3),
             directionalLightColorIntensity = directionalLightData.subarray(3, 6),
             directionalHalfVector = directionalLightData.subarray(6, 9),
+            directionalLightDirectionWorld = vec3.create([1, 0, 0]),
             directionalLightTransform = null,
             pointLightData = new Float32Array(9 * maxNumerOfLights), // mat3*maxNumerOfLights
             pointLightDataVec3 = vec3.wrapArray(pointLightData),
@@ -2666,6 +2667,16 @@ KICK.namespace = function (ns_string) {
                 }
             },
             /**
+             * Return the directional light in world space
+             * @property directionalLightWorld
+             * @type KICK.math.vec3
+             */
+            directionalLightWorld: {
+                get: function () {
+                    return directionalLightDirectionWorld;
+                }
+            },
+            /**
              * Matrices of point light data. Each matrix (mat3) contains:<br>
              * Column 1 vector: point light position in eye coordinates<br>
              * Column 2 vector: color intensity<br>
@@ -2720,10 +2731,10 @@ KICK.namespace = function (ns_string) {
         this.recomputeLight = function (viewMatrix) {
             if (directionalLight !== null) {
                 // compute light direction
-                quat4.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirection);
+                quat4.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirectionWorld);
 
                 // transform to eye space
-                mat4.multiplyVec3Vector(viewMatrix, directionalLightDirection);
+                mat4.multiplyVec3Vector(viewMatrix, directionalLightDirectionWorld, directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
                 // compute half vector

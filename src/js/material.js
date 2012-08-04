@@ -146,10 +146,12 @@ KICK.namespace = function (ns_string) {
      *          <li><code>_dLight[0]</code> (vec3) Directional light direction in eye coordinates.</li>
      *          <li><code>_dLight[1]</code> (vec3) Directional light color intensity</li>
      *          <li><code>_dLight[2]</code> (vec3) Directional light half vector</li>
+     *          <li><code>_dLightWorldDir</code> (vec3) Directional light world direction</li>
      *          <li><code>_pLights[n]</code> (mat3) Point light matrix</li>
      *          <li><code>_pLights[n][0]</code> (mat3) Point light id n position</li>
      *          <li><code>_pLights[n][1]</code> (mat3) Point light id n color intensity</li>
      *          <li><code>_pLights[n][2]</code> (mat3) Point light id n attenuation vector [const, linear, quadratic]</li>
+     *
      *      </ul>
      *     </li>
      *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
@@ -1073,12 +1075,11 @@ KICK.namespace = function (ns_string) {
             glState = this.glState,
             timeObj,
             sceneLights = engineUniforms.sceneLights,
-            ambientLight = sceneLights.ambientLight,
-            directionalLightData = sceneLights.directionalLightData,
-            pointLightData = sceneLights.pointLightData,
+            ambientLight,
             lookupUniforms = this.lookupUniform,
             proj = lookupUniforms._proj,
             directionalLightUniform = lookupUniforms._dLight,
+            directionalLightWorldUniform = lookupUniforms._dLightWorldDir,
             pointLightUniform = lookupUniforms["_pLights[0]"],
             time = lookupUniforms._time,
             viewport = lookupUniforms._viewport,
@@ -1086,22 +1087,26 @@ KICK.namespace = function (ns_string) {
             currentTexture = 0,
             ambientLlightValue;
 
-
         currentTexture = material.bind(currentTexture);
 
         if (proj) {
             gl.uniformMatrix4fv(proj.location, false, engineUniforms.projectionMatrix);
         }
         if (lightUniformAmbient) {
+            ambientLight = sceneLights.ambientLight;
             ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
             gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
 
         if (directionalLightUniform) {
-            gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
+            gl.uniformMatrix3fv(directionalLightUniform.location, false, sceneLights.directionalLightData);
         }
+        if (directionalLightWorldUniform) {
+            gl.uniform3fv(directionalLightWorldUniform.location, sceneLights.directionalLightWorld);
+        }
+
         if (pointLightUniform) {
-            gl.uniformMatrix3fv(pointLightUniform.location, false, pointLightData);
+            gl.uniformMatrix3fv(pointLightUniform.location, false, sceneLights.pointLightData);
         }
         if (time) {
             timeObj = this.engine.time;
