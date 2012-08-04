@@ -189,19 +189,15 @@
             fragmentShaderSession.setMode(new GLSL_ES_Mode());
 
             this.shaderChangeListener = function (force) {
-                var meshRenderer,
-                    shader,
+                var shader,
                     vsNew,
                     fsNew;
                 if (vertexShaderSession && fragmentShaderSession) {
-                    meshRenderer = shaderEditor.meshRenderer;
-                    if (meshRenderer) {
-                        shader = meshRenderer.material.shader;
-                        vsNew = vertexShaderSession.getValue();
-                        fsNew = fragmentShaderSession.getValue();
-                        if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force) {
-                            shaderEditor.apply(vsNew, fsNew);
-                        }
+                    shader = shaderEditor.material.shader;
+                    vsNew = vertexShaderSession.getValue();
+                    fsNew = fragmentShaderSession.getValue();
+                    if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force) {
+                        shaderEditor.apply(vsNew, fsNew);
                     }
                 }
             };
@@ -559,7 +555,7 @@
                 updateUniformSampler = function () {
                     var uniform_sampler = document.getElementById('uniform_sampler'),
                         selectedSampler = uniform_sampler.selectedIndex,
-                        material = shaderEditor.meshRenderer.material,
+                        material = shaderEditor.material,
                         activeUniforms = material.shader.activeUniforms,
                         uniformDetail = document.getElementById('uniformDetail'),
                         currentUniforms = document.getElementById('currentUniforms'),
@@ -572,7 +568,7 @@
                 },
                 updateUniformNumber = function () {
                     var uniform_sampler = document.getElementById('uniform_sampler'),
-                        material = shaderEditor.meshRenderer.material,
+                        material = shaderEditor.material,
                         activeUniforms = material.shader.activeUniforms,
                         uniformDetail = document.getElementById('uniformDetail'),
                         currentUniforms = document.getElementById('currentUniforms'),
@@ -583,7 +579,7 @@
                     material.shader.markUniformUpdated();
                 },
                 uniformSelected = function () {
-                    var material = shaderEditor.meshRenderer.material,
+                    var material = shaderEditor.material,
                         activeUniforms = material.shader.activeUniforms,
                         uniformDetail = document.getElementById('uniformDetail'),
                         currentUniforms = document.getElementById('currentUniforms'),
@@ -638,7 +634,7 @@
                 };
 
             this.refreshUniforms = function () {
-                var activeUniforms = shaderEditor.meshRenderer.material.shader.activeUniforms,
+                var activeUniforms = shaderEditor.material.shader.activeUniforms,
                     i,
                     currentUniforms = document.getElementById('currentUniforms'),
                     uniformDetail = document.getElementById('uniformDetail'),
@@ -862,10 +858,10 @@
             };
 
             this.getData = function () {
-                shaderEditor.meshRenderer.material.shader.dataURI = null; // force shader to be serialized
+                shaderEditor.material.shader.dataURI = null; // force shader to be serialized
                 return {
-                    shader: shaderEditor.meshRenderer.material.shader.toJSON(),
-                    material: shaderEditor.meshRenderer.material.toJSON(),
+                    shader: shaderEditor.material.shader.toJSON(),
+                    material: shaderEditor.material.toJSON(),
                     textureData: texturePanel.getTextureData(),
                     settingsData: settingsPanel.getSettingsData(),
                     name: document.getElementById('shadername').value,

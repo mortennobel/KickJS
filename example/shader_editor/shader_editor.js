@@ -6,6 +6,7 @@ var ShaderEditor = function () {
         _meshRenderer,
         previousShaderError = false,
         _light,
+        lastValidMaterial,
         _ambientLight,
         camera,
         _lightTransform,
@@ -49,6 +50,7 @@ var ShaderEditor = function () {
                 t,
                 activeUniforms,
                 materialUniform;
+            shaderData.shader.uid = 0; // set shader uid to 0 (to avoid conflicts)
             shader = new KICK.material.Shader(_engine, shaderData.shader);
             shader.faceCulling = KICK.core.Constants.GL_NONE;
             missingAttributes = _meshRenderer.mesh.verify(shader);
@@ -86,7 +88,11 @@ var ShaderEditor = function () {
             }
             shaderData.material.shader = shader;
             console.log(shaderData.material);
+            if (_meshRenderer.material) {
+                _meshRenderer.material.destroy();
+            }
             _meshRenderer.material = new KICK.material.Material(_engine, shaderData.material);
+            lastValidMaterial = _meshRenderer.material.toJSON();
         },
         addRotatorComponent = function (gameObject) {
             var time = _engine.time,
@@ -112,9 +118,17 @@ var ShaderEditor = function () {
             engine: {
                 get: function () { return _engine; }
             },
-            meshRenderer: {
+            mesh: {
                 get: function () {
-                    return _meshRenderer;
+                    return _meshRenderer.mesh;
+                },
+                set: function (value) {
+                    _meshRenderer.mesh = value;
+                }
+            },
+            material: {
+                get: function () {
+                    return _meshRenderer.material;
                 }
             }
         });
@@ -185,7 +199,7 @@ var ShaderEditor = function () {
         console.log(config.dataURI);
         for (name in config) {
             if (config.hasOwnProperty(name)) {
-                if (typeof name === 'string' && name !== "dataURI") {
+                if (typeof name === 'string' && name !== "dataURI" && name !== "uid") {
                     try {
                         texture[name] = config[name];
                     } catch (ignore) {
@@ -328,18 +342,27 @@ var ShaderEditor = function () {
     }
 
     this.apply = function (vs, fs) {
+        if (!previousShaderError) {
+            lastValidMaterial = _meshRenderer.material.toJSON();
+            if (!lastValidMaterial.uniformData){
+                debugger;
+            }
+            console.log("backup of shader ", lastValidMaterial);
+        }
         shader.vertexShaderSrc = vs;
         shader.fragmentShaderSrc = fs;
         shader.errorLog = logFn;
         var missingAttributes,
-            res = shader.apply(),
+            shaderCompiledSuccessfully = shader.apply(),
             onError = function () {
                 previousShaderError = true;
                 console.log(KICK.material.Shader.getPrecompiledSource(_engine, vs));
                 console.log(KICK.material.Shader.getPrecompiledSource(_engine, fs));
                 document.body.style.backgroundColor = 'pink';
             };
-        if (!res) {
+
+
+        if (!shaderCompiledSuccessfully) {
             onError();
             return;
         } else {
@@ -355,6 +378,15 @@ var ShaderEditor = function () {
             logFn("Shader compiled ok", true);
             document.body.style.backgroundColor = 'white';
             previousShaderError = false;
+            if (lastValidMaterial) {
+                console.log(_engine.project.toJSON());
+                console.log("Restore of ", lastValidMaterial);
+                console.log("Restore of ", JSON.parse(JSON.stringify(lastValidMaterial)));
+                // restore material
+                delete lastValidMaterial.uid;
+                lastValidMaterial.shader = shader;
+                _meshRenderer.material = new KICK.material.Material(_engine, lastValidMaterial);
+            }
         }
     };
 };
