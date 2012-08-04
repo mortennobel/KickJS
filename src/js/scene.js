@@ -1277,7 +1277,7 @@ KICK.namespace = function (ns_string) {
             _shadowmapMaterial,
             _scene,
             pickingQueue = null,
-            pickingShader = null,
+            pickingMaterial = null,
             pickingRenderTarget = null,
             pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
@@ -1593,7 +1593,11 @@ KICK.namespace = function (ns_string) {
             height = height || 1;
             if (!pickingQueue) {
                 pickingQueue = [];
-                pickingShader = engine.project.load(engine.project.ENGINE_SHADER___PICK);
+                pickingMaterial = new KICK.material.Material(engine,
+                    {
+                        shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
+                        name: "Picking material"
+                    });
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
                     dimension: glState.viewportSize
                 });
@@ -1693,7 +1697,7 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
-                renderSceneObjects(sceneLightObj, pickingShader);
+                renderSceneObjects(sceneLightObj, pickingMaterial);
                 for (i = pickingQueue.length - 1; i >= 0; i--) {
                     // create clojure
                     (function () {
