@@ -142,9 +142,14 @@ KICK.namespace = function (ns_string) {
      *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
      *          <li><code>_time</code> (float) Run time of engine</li>
      *          <li><code>_ambient</code> (vec3) Ambient light</li>
-     *          <li><code>_dLight.lDir</code> (vec3) Directional light direction</li>
-     *          <li><code>_dLight.colInt</code> (vec3) Directional light color intensity</li>
-     *          <li><code>_dLight.halfV</code> (vec3) Directional light half vector</li>
+     *          <li><code>_dLight</code> (mat3) Directional light matrix. </li>
+     *          <li><code>_dLight[0]</code> (vec3) Directional light direction in eye coordinates.</li>
+     *          <li><code>_dLight[1]</code> (vec3) Directional light color intensity</li>
+     *          <li><code>_dLight[2]</code> (vec3) Directional light half vector</li>
+     *          <li><code>_pLights[n]</code> (mat3) Point light matrix</li>
+     *          <li><code>_pLights[n][0]</code> (mat3) Point light id n position</li>
+     *          <li><code>_pLights[n][1]</code> (mat3) Point light id n color intensity</li>
+     *          <li><code>_pLights[n][2]</code> (mat3) Point light id n attenuation vector [const, linear, quadratic]</li>
      *      </ul>
      *     </li>
      *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
