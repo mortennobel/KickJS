@@ -455,7 +455,7 @@ KICK.namespace = function (ns_string) {
                     textureDestination.internalFormat = KICK.core.Constants.GL_RGBA     ;
                     textureDestination.magFilter = KICK.core.Constants.GL_LINEAR;
                     textureDestination.minFilter = KICK.core.Constants.GL_LINEAR_MIPMAP_LINEAR;
-                    textureDestination.setImage(img, "kickjs://texture/logo/");
+                    textureDestination.setImage(img, uri);
                     resourceTracker.resourceReady();
                 };
                 img.onerror = function () {
