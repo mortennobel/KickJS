@@ -1746,18 +1746,19 @@ KICK.namespace = function (ns_string) {
             /**
              * Allows usage of replacement shader on camera rendering
              * Default value is null.
+             * Will be removed in
              * @property replacementShader
              * @type KICK.material.Shader
              * @deprecated
              */
-            replacementShader: {
+            replacementShader: { // todo remove in 0.5.x
                 get: function () { KICK.core.Util.fail("KICK.scene.Camera.replacementShader is replaced with KICK.scene.Camera.replacementShader replacementMaterial"); },
                 set: function (newValue) { KICK.core.Util.fail("KICK.scene.Camera.replacementShader is replaced with KICK.scene.Camera.replacementShader replacementMaterial"); }
             },
             /**
-             * Allows usage of replacement shader on camera rendering
+             * Allows usage of replacement material on camera rendering
              * Default value is null.
-             * @property replacementShader
+             * @property replacementMaterial
              * @type KICK.material.Shader
              */
             replacementMaterial: {
