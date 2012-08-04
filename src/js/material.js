@@ -157,6 +157,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Shader = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             thisObj = this,
@@ -1205,6 +1207,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Material = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var _name = "Material",
             _shader = null,
             _uniforms = [],
@@ -1463,16 +1467,17 @@ KICK.namespace = function (ns_string) {
         (function init() {
             var uniformData = config.uniformData,
                 name,
-                value;
+                value,
+                configCopy = {
+                    uid: config.uid || 0,
+                    name: config.name,
+                    shader: config.shader
+                };
             engine.addContextListener(contextListener);
-            if (uniformData) {
-                delete config.uniformData;
-            }
             if (config.uniforms) {
-                console.log("Warn - Material.uniforms is deprecated");
-                delete config.uniforms;
+                warn("Warn - Material.uniforms is deprecated"); // Todo delete in 0.5.x
             }
-            applyConfig(thisObj, config);
+            applyConfig(thisObj, configCopy);
             if (!_shader || !_shader.isValid()) {
                 if (config.shader) {
                     warn("Problem using shader in material. ", config.shader);
@@ -1487,13 +1492,12 @@ KICK.namespace = function (ns_string) {
                             value = convertUniformValue(_shader.lookupUniform[name].type, value, engine);
                             thisObj.setUniform(name, value);
                         } else {
-                            delete uniformData[name]; // remove unused uniform
+                            warn("Cannot find uniform " + name + " in shader. ");
                         }
                     }
                 }
-            } else {
-                decorateUniforms();
             }
+            decorateUniforms();
             engine.project.registerObject(thisObj, "KICK.material.Material");
         }());
     };

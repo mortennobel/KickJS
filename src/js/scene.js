@@ -739,6 +739,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     scene.Scene = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var objectsById = {},
             gameObjects = [],
             activeGameObjects = [],
@@ -753,7 +755,6 @@ KICK.namespace = function (ns_string) {
             renderableComponents = [],
             sceneLightObj = new KICK.scene.SceneLights(engine.config.maxNumerOfLights),
             _name = "Scene",
-            _uid = 0,
             gl,
             i,
             thisObj = this,
@@ -1055,23 +1056,6 @@ KICK.namespace = function (ns_string) {
                     _name = newValue;
                 }
 
-            },
-            /**
-             * @property uid
-             * @type Number
-             */
-            uid: {
-                get: function () {
-                    return _uid;
-                },
-                set: function (newValue) {
-                    if (ASSERT) {
-                        if (_uid) {
-                            fail("Reassigning uid");
-                        }
-                    }
-                    _uid = newValue;
-                }
             }
         });
 
@@ -1172,7 +1156,6 @@ KICK.namespace = function (ns_string) {
                     return configCopy;
                 };
             if (config) {
-                _uid = config.uid;
                 _name = config.name || "Scene";
                 var gameObjects = config.gameObjects || [],
                     mappingUidToObject = {},

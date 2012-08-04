@@ -61,7 +61,7 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      * @constructor
      */
-    mesh.MeshData = function(config){
+    mesh.MeshData = function (config) {
         var data = {},
             thisObj = this,
             _indices = [],
@@ -832,6 +832,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     mesh.Mesh = function (engine,config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             meshVertexAttBuffer,

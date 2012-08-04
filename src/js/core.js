@@ -715,7 +715,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * A project asset is an object that can be serialized into a project and restored at a later state.<br>
-     * The class only exist in documentation and is used to describe the behavior any project asset must implement.<br>
+     * The class is used to describe the behavior any project asset must implement, but instanceof operator does not work.<br>
      * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
      * The config parameter is used to initialize the object and the content should match the output of the
      * toJSON method<br>
@@ -724,6 +724,29 @@ KICK.namespace = function (ns_string) {
      * @class ProjectAsset
      * @namespace KICK.core
      */
+    core.ProjectAsset = function (subClass) {
+        var uid = 0;
+        /**
+         * @property uid
+         * @type Number
+         */
+        Object.defineProperty(subClass, "uid", {
+            get: function () {
+                return uid;
+            },
+            set: function (newValue) {
+                if (ASSERT) {
+                    if (typeof newValue !== "number") {
+                        core.Util.fail("uid must be number");
+                    }
+                    if (uid !== 0 && newValue !== uid) {
+                        core.Util.fail("uid cannot be reassigned");
+                    }
+                }
+                uid = newValue;
+            }
+        });
+    };
 
     /**
      * A project is a container of all resources and assets used in a game.
@@ -1158,6 +1181,10 @@ KICK.namespace = function (ns_string) {
         this.registerObject = function (object, type) {
             var uid = engine.getUID(object);
             if (resourceCache[uid]) {
+                if (KICK.core.Constants._ASSERT) {
+                    KICK.core.Util.warn("Object already registered ", uid, object);
+                    debugger;
+                }
                 return;
             }
             resourceCache[uid] = object;

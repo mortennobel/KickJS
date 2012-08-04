@@ -44,6 +44,9 @@ KICK.namespace = function (ns_string) {
         core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         vec2 = KICK.math.vec2,
+        DEBUG = constants._DEBUG,
+        ASSERT = constants._ASSERT,
+        warn = KICK.core.Util.warn,
         isPowerOfTwo = function (x) {
             return (x & (x - 1)) === 0;
         },
@@ -67,6 +70,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     texture.RenderTexture = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             _config = config || {},
@@ -218,6 +223,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     texture.Texture = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             texture0 = constants.GL_TEXTURE0,
@@ -754,6 +761,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     texture.MovieTexture = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             texture0 = constants.GL_TEXTURE0,
