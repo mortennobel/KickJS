@@ -312,7 +312,9 @@ var ShaderEditor = function () {
                             } else {
                                 texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
                             }
-                            thisObj.textures.push(texture);
+                            if (thisObj.textures.indexOf(texture) < 0) {
+                                thisObj.textures.push(texture);
+                            }
                             defaultUniform = texture;
                         }
                         break;
