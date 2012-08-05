@@ -1,8 +1,8 @@
 <html>
 <head>
     <title></title>
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.5.1/build/cssgrids/grids-min.css">
+    <script src="http://yui.yahooapis.com/3.5.1/build/yui/yui-min.js"></script>
     <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
     <script type="text/javascript" src="../../src/js/constants.js"></script>
     <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
@@ -65,7 +65,7 @@ void main(void)
                     uid:1,
                     config:{
                         name:"Some texture",
-                        dataURI:"http://khm0.googleapis.com/kh?v=95&x=0&y=0&z=0"
+                        dataURI: "kickjs://texture/logo/"
                     }
                 },
                 {
@@ -73,10 +73,7 @@ void main(void)
                     uid:2,
                     config:{
                         name:"White texture",
-                        dataURI:"kickjs://texture/white/",
-                        vertexShaderSrc: document.getElementById("vertexShaderColor").value,
-                        fragmentShaderSrc: document.getElementById("fragmentShader").value
-
+                        dataURI:"kickjs://texture/white/"
                     }
                 },
                 {
@@ -99,19 +96,13 @@ void main(void)
                             ref:3,
                             reftype:"project"
                         },
-                        uniforms: {
+                        uniformData: {
                             mainTexture:{
-                                value:{
                                     ref:2,
                                     name:"White texture",
                                     reftype:"project"
-                                },
-                                type:35678
                             },
-                            mainColor:{
-                                value:[0,0,1],
-                                type:35666
-                            }
+                            mainColor:[0,0,1,1]
                         }
                     }
                 },
@@ -125,11 +116,8 @@ void main(void)
                             ref:3,
                             reftype:"project"
                         },
-                        uniforms: {
-                            mainColor:{
-                                value:[1,0,0],
-                                type:35666
-                            }
+                        uniformData: {
+                            mainColor:[1,0,0,1]
                         }
                     }
                 },
