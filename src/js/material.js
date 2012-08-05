@@ -1396,13 +1396,16 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Bind material uniforms
+         * Bind material uniforms. Returns undefined or null if value is undefined or null (or uniform not found)
          * @method setUniform
          * @param {String} name
          * @param {Float32Array|Int32Array|KICK.texture.Texture}
          * @return {KICK.material.MaterialUniform}
          */
         this.setUniform = function (name, value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
             var foundElement,
                 i;
             for (i = 0; i < _uniforms.length && !foundElement; i++) {

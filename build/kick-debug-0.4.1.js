@@ -6145,7 +6145,7 @@ KICK.namespace = function (ns_string) {
      * @param {KICK.core.Config} config Optional, configuration object
      */
     core.Engine = function (idOrElement, config) {
-        var glState = {},
+        var glState = new core.GLState(),
             gl = null,
             canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
             webGlContextNames = ["experimental-webgl", "webgl"],
@@ -6198,7 +6198,7 @@ KICK.namespace = function (ns_string) {
             /**
              * The WebGL state(readonly). (Only used to keep track on webgl state across different objects)
              * @property glState
-             * @type Object
+             * @type KICK.core.GLState
              * @protected
              */
             glState: {
@@ -6496,8 +6496,19 @@ KICK.namespace = function (ns_string) {
                         return false;
                     }
                     if (thisObj.config.enableDebugContext) {
-                        if (window["WebGLDebugUtils"]) {
-                            gl = WebGLDebugUtils.makeDebugContext(gl);
+                        if (window.WebGLDebugUtils) {
+                            // Checking that none of the WebGL arguments are undefined
+                            // http://www.khronos.org/webgl/wiki/Debugging#Checking_that_none_of_your_arguments_are_undefined
+                            var validateNoneOfTheArgsAreUndefined = function (functionName, args) {
+                                var ii;
+                                for (ii = 0; ii < args.length; ++ii) {
+                                    if (args[ii] === undefined) {
+                                        console.error("undefined passed to gl." + functionName + "(" +
+                                            window.WebGLDebugUtils.glFunctionArgsToString(functionName, args) + ")");
+                                    }
+                                }
+                            };
+                            gl = window.WebGLDebugUtils.makeDebugContext(gl, undefined, validateNoneOfTheArgsAreUndefined);
                         } else {
                             console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                         }
@@ -6523,7 +6534,7 @@ KICK.namespace = function (ns_string) {
                 gl = null;
             }, false);
             canvas.addEventListener("webglcontextrestored", function (event) {
-                core.Util.removeAllProperties(glState); // clear gl state
+                glState.clear();
                 thisObj.canvasResized(); // reset viewportSize
                 initGL();
                 for (i = 0; i < contextListeners.length; i++) {
@@ -6575,6 +6586,118 @@ KICK.namespace = function (ns_string) {
 
             thisObj._gameLoop(lastTime);
         }());
+    };
+
+    /**
+     * This object should only be used by advanced users.
+     * <br>
+     * The GLState object contains properties representing the current WebGL states. This object is useful
+     * when creating component with custom render methods. It is important that any state modified by such
+     * method needs to be reset (set to null).
+     * @class GLState
+     * @constructor
+     * @namespace KICK.core
+     * @param {KICK.core.Engine} engine
+     */
+    core.GLState = function () {
+        var thisObj = this;
+        /**
+         * The current clear color
+         * @property currentClearColor
+         * @type KICK.math.vec4
+         */
+        this.currentClearColor = null;
+        /**
+         * Current bound mesh buffer
+         * @property meshBuffer
+         * @type WebGLBuffer
+         */
+        this.meshBuffer = null;
+        /**
+         * The shader bound by the current mesh
+         * @property meshShader
+         * @type KICK.material.Shader
+         */
+        this.meshShader = null;
+        /**
+         * Represents the current rendertarget state
+         * @property renderTarget
+         * @type KICK.texture.RenderTexture
+         */
+        this.renderTarget = null;
+        /**
+         * Represents the current shader bound
+         * @property boundShader
+         * @type KICK.material.Shader
+         */
+        this.boundShader = null;
+        /**
+         * Represent the material used
+         * @property currentMaterial
+         * @type KICK.material.Material
+         */
+        this.currentMaterial = null;
+
+        /**
+         * Represent the state of CULL_FACE (enabled / disabled) and cullFace (). Values must be one of:
+         * 1028, 1032, 1029 or 0. (If none CULL_FACE is disabled otherwise enabled)
+         * @property faceCulling
+         * @type Number
+         */
+        this.faceCulling = null;
+
+        /**
+         * Represents the current depthFunc used. Must be one of the following values:
+         * 512, 513, 514, 515, 516, 517, 518 or 519.
+         * @property zTest
+         * @type Number
+         */
+        this.zTest = null;
+
+        /**
+         * Represents the current depthMask state.
+         * @property depthMaskCache
+         * @type Boolean
+         */
+        this.depthMaskCache = null;
+
+        /**
+         * Represents if blend is enabled and the current s-factor and d-factor
+         * @property blendKey
+         * @type Object
+         */
+        this.blendKey = null;
+
+        /**
+         * Represents state of polygon offset fill
+         * @property polygonOffsetEnabled
+         * @type Boolean
+         */
+        this.polygonOffsetEnabled = null;
+
+        /**
+         * The size of the current viewport
+         * @property viewportSize
+         * @type KICK.math.vec2
+         */
+        this.viewportSize = null;
+
+        /**
+         * Sets all properties to null
+         * @method clear
+         */
+        this.clear = function () {
+            var name;
+            for (name in thisObj) {
+                if (thisObj.hasOwnProperty(name) && name !== "clear") {
+                    thisObj[name] = null;
+                }
+            }
+        };
+
+        if (ASSERT) {
+            Object.preventExtensions(this);
+        }
     };
 
     /**
@@ -6675,7 +6798,7 @@ KICK.namespace = function (ns_string) {
 
     /**
      * A project asset is an object that can be serialized into a project and restored at a later state.<br>
-     * The class only exist in documentation and is used to describe the behavior any project asset must implement.<br>
+     * The class is used to describe the behavior any project asset must implement, but instanceof operator does not work.<br>
      * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
      * The config parameter is used to initialize the object and the content should match the output of the
      * toJSON method<br>
@@ -6684,6 +6807,29 @@ KICK.namespace = function (ns_string) {
      * @class ProjectAsset
      * @namespace KICK.core
      */
+    core.ProjectAsset = function (subClass) {
+        var uid = 0;
+        /**
+         * @property uid
+         * @type Number
+         */
+        Object.defineProperty(subClass, "uid", {
+            get: function () {
+                return uid;
+            },
+            set: function (newValue) {
+                if (ASSERT) {
+                    if (typeof newValue !== "number") {
+                        core.Util.fail("uid must be number");
+                    }
+                    if (uid !== 0 && newValue !== uid) {
+                        core.Util.fail("uid cannot be reassigned");
+                    }
+                }
+                uid = newValue;
+            }
+        });
+    };
 
     /**
      * A project is a container of all resources and assets used in a game.
@@ -6730,6 +6876,7 @@ KICK.namespace = function (ns_string) {
                     url,
                     isCubemap,
                     canvas,
+                    shader,
                     ctx;
                 if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_UNLIT_VERTEX_COLOR) {
                     switch (uid) {
@@ -6861,6 +7008,12 @@ KICK.namespace = function (ns_string) {
                             name: getUrlAsResourceName(url),
                             uid: uid
                         });
+                } else if (uid <= p.ENGINE_MATERIAL_DEFAULT) {
+                    shader = loadEngineAsset(p.ENGINE_SHADER_UNLIT);
+                    res = new KICK.material.Material(engine, {
+                        shader: shader,
+                        name: "Default material"
+                    });
                 }
 
                 resourceCache[uid] = res;
@@ -7111,6 +7264,10 @@ KICK.namespace = function (ns_string) {
         this.registerObject = function (object, type) {
             var uid = engine.getUID(object);
             if (resourceCache[uid]) {
+                if (true) {
+                    KICK.core.Util.warn("Object already registered ", uid, object);
+                    debugger;
+                }
                 return;
             }
             resourceCache[uid] = object;
@@ -7408,6 +7565,14 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_MESH_CUBE = -303;
+
+    /**
+     * Default material is using ENGINE_SHADER_UNLIT and is white
+     * @property ENGINE_MATERIAL_DEFAULT
+     * @type {Number}
+     * @static
+     */
+    core.Project.ENGINE_MATERIAL_DEFAULT = -400;
 
     /**
      * A project is a container of all resources and assets used in a game.<br>
@@ -9166,7 +9331,7 @@ KICK.namespace = function (ns_string) {
      * @param {Object} config
      * @constructor
      */
-    mesh.MeshData = function(config){
+    mesh.MeshData = function (config) {
         var data = {},
             thisObj = this,
             _indices = [],
@@ -9937,6 +10102,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     mesh.Mesh = function (engine,config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             meshVertexAttBuffer,
@@ -10457,7 +10624,7 @@ KICK.namespace = function (ns_string) {
          */
         this.destroy = function () {
             var i;
-            for (i = _components.length - 1; i >= 0 ; i--) {
+            for (i = _components.length - 1; i >= 0; i--) {
                 thisObj.removeComponent(_components[i]);
             }
             scene.destroyObject(thisObj);
@@ -10476,7 +10643,7 @@ KICK.namespace = function (ns_string) {
         this.getComponentOfType = function (type) {
             var component,
                 i;
-            for (i =_components.length - 1; i >= 0; i--) {
+            for (i = _components.length - 1; i >= 0; i--) {
                 component = _components[i];
                 if (component instanceof type) {
                     return component;
@@ -10757,7 +10924,7 @@ KICK.namespace = function (ns_string) {
                         return quat4.create(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]) {
-                        quat4.set(localRotationQuat,globalRotationQuat);
+                        quat4.set(localRotationQuat, globalRotationQuat);
                         parentIterator = thisObj.parent;
                         while (parentIterator !== null) {
                             quat4.multiply(parentIterator.localRotation, globalRotationQuat, globalRotationQuat);
@@ -10965,6 +11132,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     scene.Scene = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var objectsById = {},
             gameObjects = [],
             activeGameObjects = [],
@@ -10979,7 +11148,6 @@ KICK.namespace = function (ns_string) {
             renderableComponents = [],
             sceneLightObj = new KICK.scene.SceneLights(engine.config.maxNumerOfLights),
             _name = "Scene",
-            _uid = 0,
             gl,
             i,
             thisObj = this,
@@ -11118,7 +11286,7 @@ KICK.namespace = function (ns_string) {
                 }
                 engine.gl.flush();
             },
-            createGameObjectPrivate = function(config) {
+            createGameObjectPrivate = function (config) {
                 var gameObject = new scene.GameObject(thisObj, config);
                 gameObjectsNew.push(gameObject);
                 gameObjects.push(gameObject);
@@ -11281,23 +11449,6 @@ KICK.namespace = function (ns_string) {
                     _name = newValue;
                 }
 
-            },
-            /**
-             * @property uid
-             * @type Number
-             */
-            uid: {
-                get: function () {
-                    return _uid;
-                },
-                set: function (newValue) {
-                    if (ASSERT) {
-                        if (_uid) {
-                            fail("Reassigning uid");
-                        }
-                    }
-                    _uid = newValue;
-                }
             }
         });
 
@@ -11398,7 +11549,6 @@ KICK.namespace = function (ns_string) {
                     return configCopy;
                 };
             if (config) {
-                _uid = config.uid;
                 _name = config.name || "Scene";
                 var gameObjects = config.gameObjects || [],
                     mappingUidToObject = {},
@@ -11513,14 +11663,14 @@ KICK.namespace = function (ns_string) {
             _perspective = true,
             _clearFlagColor = true,
             _clearFlagDepth = true,
-            _replacementShader = null,
+            _replacementMaterial = null,
             _currentClearFlags,
             _cameraIndex = 1,
             _layerMask = 0xffffffff,
-            _shadowmapShader,
+            _shadowmapMaterial,
             _scene,
             pickingQueue = null,
-            pickingShader = null,
+            pickingMaterial = null,
             pickingRenderTarget = null,
             pickingClearColor = vec4.create(),
             projectionMatrix = mat4.create(),
@@ -11531,7 +11681,9 @@ KICK.namespace = function (ns_string) {
                 viewMatrix: viewMatrix,
                 projectionMatrix: projectionMatrix,
                 viewProjectionMatrix: viewProjectionMatrix,
-                lightMatrix: lightMatrix
+                lightMatrix: lightMatrix,
+                currentCamera: thisObj,
+                currentCameraTransform: null
             },
             isContextListenerRegistered = false,
             contextListener = {
@@ -11620,6 +11772,7 @@ KICK.namespace = function (ns_string) {
                 mat4.set(globalMatrixInv, viewMatrix);
 
                 mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
+
             },
             /**
              * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
@@ -11688,7 +11841,7 @@ KICK.namespace = function (ns_string) {
             renderSceneObjects = (function () {
                 var aabbWorldSpace = KICK.math.aabb.create(),
                     frustumPlanes = new Float32Array(24);
-                return function (sceneLightObj, shader) {
+                return function (sceneLightObj, replacementMaterial) {
                     var cullByViewFrustum = function (component) {
                             var componentAabb = component.aabb,
                                 gameObject = component.gameObject;
@@ -11705,7 +11858,7 @@ KICK.namespace = function (ns_string) {
                             for (j = 0; j < length; j++) {
                                 renderableComponent = renderableComponents[j];
                                 if (!cullByViewFrustum(renderableComponent)) {
-                                    renderableComponent.render(engineUniforms, shader);
+                                    renderableComponent.render(engineUniforms, replacementMaterial);
                                 }
                             }
                         };
@@ -11755,7 +11908,7 @@ KICK.namespace = function (ns_string) {
                 mat4.multiply(mat4.multiply(offsetMatrix, projectionMatrix, lightMatrix),
                     viewMatrix, lightMatrix);
 
-                renderSceneObjects(sceneLightObj, _shadowmapShader);
+                renderSceneObjects(sceneLightObj, _shadowmapMaterial);
 
             },
             componentListener = {
@@ -11833,7 +11986,11 @@ KICK.namespace = function (ns_string) {
             height = height || 1;
             if (!pickingQueue) {
                 pickingQueue = [];
-                pickingShader = engine.project.load(engine.project.ENGINE_SHADER___PICK);
+                pickingMaterial = new KICK.material.Material(engine,
+                    {
+                        shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
+                        name: "Picking material"
+                    });
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
                     dimension: glState.viewportSize
                 });
@@ -11857,6 +12014,7 @@ KICK.namespace = function (ns_string) {
             var gameObject = this.gameObject,
                 shadowRadius,
                 nearPlanePosition;
+            engineUniforms.currentCameraTransform = gameObject.transform;
             engine = gameObject.engine;
             if (!isContextListenerRegistered) {
                 isContextListenerRegistered = true;
@@ -11869,7 +12027,12 @@ KICK.namespace = function (ns_string) {
             _scene.addComponentListener(componentListener);
 
             if (engine.config.shadows) {
-                _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
+                var _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP),
+                    materialConfig = {
+                        name: "Shadow map material",
+                        shader: _shadowmapShader
+                    };
+                _shadowmapMaterial = new KICK.material.Material(engine, materialConfig);
 
                 // calculate the shadow projection based on engine.config parameters
                 shadowLightOffsetFromCamera = engine.config.shadowDistance * 0.5; // first find radius
@@ -11915,7 +12078,7 @@ KICK.namespace = function (ns_string) {
             if (renderableComponentsTransparent.length > 0) {
                 sortTransparentBackToFront();
             }
-            renderSceneObjects(sceneLightObj, _replacementShader);
+            renderSceneObjects(sceneLightObj, _replacementMaterial);
 
             if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps) {
                 textureId = _renderTarget.colorTexture.textureId;
@@ -11927,8 +12090,8 @@ KICK.namespace = function (ns_string) {
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
                 gl.clear(16384 | 256);
-                renderSceneObjects(sceneLightObj, pickingShader);
-                for (i = pickingQueue.length - 1; i >= 0; i--){
+                renderSceneObjects(sceneLightObj, pickingMaterial);
+                for (i = pickingQueue.length - 1; i >= 0; i--) {
                     // create clojure
                     (function () {
                         var pick = pickingQueue[i],
@@ -11976,12 +12139,24 @@ KICK.namespace = function (ns_string) {
             /**
              * Allows usage of replacement shader on camera rendering
              * Default value is null.
+             * Will be removed in
              * @property replacementShader
              * @type KICK.material.Shader
+             * @deprecated
              */
-            replacementShader: {
-                get: function () { return _replacementShader; },
-                set: function (newValue) { _replacementShader = newValue; }
+            replacementShader: { // todo remove in 0.5.x
+                get: function () { KICK.core.Util.fail("KICK.scene.Camera.replacementShader is replaced with KICK.scene.Camera.replacementShader replacementMaterial"); },
+                set: function (newValue) { KICK.core.Util.fail("KICK.scene.Camera.replacementShader is replaced with KICK.scene.Camera.replacementShader replacementMaterial"); }
+            },
+            /**
+             * Allows usage of replacement material on camera rendering
+             * Default value is null.
+             * @property replacementMaterial
+             * @type KICK.material.Shader
+             */
+            replacementMaterial: {
+                get: function () { return _replacementMaterial; },
+                set: function (newValue) { _replacementMaterial = newValue; }
             },
             /**
              * Default is true
@@ -12090,7 +12265,7 @@ KICK.namespace = function (ns_string) {
                 get: function () {
                     return _far;
                 },
-                set: function(newValue) {
+                set: function (newValue) {
                     if (true) {
                         assertNumber(newValue, "far");
                     }
@@ -12107,7 +12282,7 @@ KICK.namespace = function (ns_string) {
                 get: function () {
                     return _perspective;
                 },
-                set: function(newValue) {
+                set: function (newValue) {
                     if (true) {
                         if (!isBoolean(newValue)) {
                             KICK.core.Util.fail("Camera.perspective must be a boolean");
@@ -12285,7 +12460,7 @@ KICK.namespace = function (ns_string) {
                     enabled: _enabled,
                     renderShadow: _renderShadow,
                     layerMask: _layerMask,
-                    renderTarget: KICK.core.Util.getJSONReference(engine,_renderTarget),
+                    renderTarget: KICK.core.Util.getJSONReference(engine, _renderTarget),
                     fieldOfView: _fieldOfView,
                     near: _near,
                     far: _far,
@@ -12363,13 +12538,20 @@ KICK.namespace = function (ns_string) {
             _materials = [],
             _mesh,
             _renderOrder,
+            engine,
             thisObj = this;
 
         /**
+         * If no materials are assigned, the ENGINE_MATERIAL_DEFAULT is assigned as material.
          * @method activated
          */
         this.activated = function () {
+            engine = thisObj.gameObject.engine;
             transform = thisObj.gameObject.transform;
+            if (_materials.length === 0) {
+                var project = thisObj.gameObject.engine.project;
+                thisObj.material = project.load(project.ENGINE_MATERIAL_DEFAULT);
+            }
         };
 
         Object.defineProperties(this, {
@@ -12461,17 +12643,26 @@ KICK.namespace = function (ns_string) {
          * This method may not be called (the renderer could make the same calls)
          * @method render
          * @param engineUniforms
-         * @param {KICK.material.Shader} overwriteShader Optional
+         * @param {KICK.material.Material} overwriteMaterial Optional
          */
-        this.render = function (engineUniforms, overwriteShader) {
+        this.render = function (engineUniforms, overwriteMaterial) {
             var length = _materials.length,
                 i,
                 shader;
-            for (i = 0; i < length; i++) {
-                shader = overwriteShader || _materials[i].shader;
-                _mesh.bind(shader);
-                shader.bindUniform(_materials[i], engineUniforms, transform);
-                _mesh.render(i);
+            if (overwriteMaterial) {
+                shader = overwriteMaterial.shader;
+                for (i = 0; i < length; i++) {
+                    _mesh.bind(shader);
+                    shader.bindUniform(overwriteMaterial, engineUniforms, transform);
+                    _mesh.render(i);
+                }
+            } else {
+                for (i = 0; i < length; i++) {
+                    shader = _materials[i].shader;
+                    _mesh.bind(shader);
+                    shader.bindUniform(_materials[i], engineUniforms, transform);
+                    _mesh.render(i);
+                }
             }
         };
 
@@ -12479,8 +12670,8 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {JSON}
          */
-        this.toJSON = function(){
-            if (!thisObj.gameObject){
+        this.toJSON = function () {
+            if (!thisObj.gameObject) {
                 return null; // component is destroyed
             } else {
                 return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
@@ -12751,12 +12942,12 @@ KICK.namespace = function (ns_string) {
          * @method toJSON
          * @return {JSON}
          */
-        this.toJSON = function(){
+        this.toJSON = function () {
             return KICK.core.Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.Light");
         };
 
-        applyConfig(this,config);
-        KICK.core.Util.copyStaticPropertiesToObject(this,scene.Light);
+        applyConfig(this, config);
+        KICK.core.Util.copyStaticPropertiesToObject(this, scene.Light);
     };
 
     /**
@@ -12794,6 +12985,7 @@ KICK.namespace = function (ns_string) {
             directionalLightDirection = directionalLightData.subarray(0, 3),
             directionalLightColorIntensity = directionalLightData.subarray(3, 6),
             directionalHalfVector = directionalLightData.subarray(6, 9),
+            directionalLightDirectionWorld = vec3.create([1, 0, 0]),
             directionalLightTransform = null,
             pointLightData = new Float32Array(9 * maxNumerOfLights), // mat3*maxNumerOfLights
             pointLightDataVec3 = vec3.wrapArray(pointLightData),
@@ -12826,7 +13018,7 @@ KICK.namespace = function (ns_string) {
                 set: function (value) {
                     if (ASSERT) {
                         if (value && ambientLight) {
-                            throw Error("Cannot have multiple ambient lights in the scene");
+                            throw new Error("Cannot have multiple ambient lights in the scene");
                         }
                     }
                     ambientLight = value;
@@ -12844,7 +13036,7 @@ KICK.namespace = function (ns_string) {
                 set: function (value) {
                     if (ASSERT) {
                         if (value && directionalLight) {
-                            throw Error("Cannot have multiple directional lights in the scene");
+                            throw new Error("Cannot have multiple directional lights in the scene");
                         }
                     }
                     directionalLight = value;
@@ -12865,6 +13057,16 @@ KICK.namespace = function (ns_string) {
             directionalLightData: {
                 get: function () {
                     return directionalLightData;
+                }
+            },
+            /**
+             * Return the directional light in world space
+             * @property directionalLightWorld
+             * @type KICK.math.vec3
+             */
+            directionalLightWorld: {
+                get: function () {
+                    return directionalLightDirectionWorld;
                 }
             },
             /**
@@ -12922,10 +13124,10 @@ KICK.namespace = function (ns_string) {
         this.recomputeLight = function (viewMatrix) {
             if (directionalLight !== null) {
                 // compute light direction
-                quat4.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirection);
+                quat4.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirectionWorld);
 
                 // transform to eye space
-                mat4.multiplyVec3Vector(viewMatrix, directionalLightDirection);
+                mat4.multiplyVec3Vector(viewMatrix, directionalLightDirectionWorld, directionalLightDirection);
                 vec3.normalize(directionalLightDirection);
 
                 // compute half vector
@@ -13005,6 +13207,9 @@ KICK.namespace = function (ns_string) {
         core = KICK.namespace("KICK.core"),
         constants = core.Constants,
         vec2 = KICK.math.vec2,
+        DEBUG = true,
+        ASSERT = true,
+        warn = KICK.core.Util.warn,
         isPowerOfTwo = function (x) {
             return (x & (x - 1)) === 0;
         },
@@ -13028,6 +13233,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     texture.RenderTexture = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             _config = config || {},
@@ -13179,6 +13386,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     texture.Texture = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             texture0 = 33984,
@@ -13298,7 +13507,6 @@ KICK.namespace = function (ns_string) {
                     height = nextHighestPowerOfTwo(imageObj.height);
                     imageObj = core.Util.scaleImage(imageObj, width, height);
                 }
-
                 if (_flipY) {
                     gl.pixelStorei(37440, true);
                 } else {
@@ -13422,7 +13630,7 @@ KICK.namespace = function (ns_string) {
                                              255, 255, 255]),
                 oldIntFormat = _intFormat;
             _intFormat = 6407;
-            this.setImageData(2, 2, 0, 5121, blackWhiteCheckerboard, "tempTexture");
+            this.setImageData(2, 2, 0, 5121, blackWhiteCheckerboard, "kickjs://texture/checkerboard/");
             _intFormat = oldIntFormat;
         };
 
@@ -13716,6 +13924,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     texture.MovieTexture = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             texture0 = 33984,
@@ -14038,13 +14248,17 @@ KICK.namespace = function (ns_string) {
         applyConfig = core.Util.applyConfig,
         c = KICK.core.Constants,
         ASSERT = true,
+        DEBUG = true,
         fail = core.Util.fail,
+        warn = core.Util.warn,
         uint32ToVec4 = KICK.core.Util.uint32ToVec4,
         tempMat4 = mat4.create(),
         tempMat3 = mat3.create(),
         tmpVec4 = vec4.create(),
         vec3Zero = math.vec3.create(),
         isMaterialUniformName = function (name) {return name.charAt(0) !== "_"; },
+        shaderUniqueNameCounter = 0,
+        shaderUniqueVertionCounter = 0,
         /*
          * If the uniform value is not in a valid format, the
          * @param {Number} type
@@ -14123,12 +14337,21 @@ KICK.namespace = function (ns_string) {
      *          <li><code>_mvProj</code> (mat4) Model view projection matrix</li>
      *          <li><code>_m</code> (mat4) Model matrix</li>
      *          <li><code>_mv</code> (mat4) Model view matrix</li>
+     *          <li><code>_worldCamPos</code> (vec4) Camera position in world coordinate</li>
+     *          <li><code>_world2object</code> (mat4) World to Object coordinate transformation</li>
      *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
      *          <li><code>_time</code> (float) Run time of engine</li>
      *          <li><code>_ambient</code> (vec3) Ambient light</li>
-     *          <li><code>_dLight.lDir</code> (vec3) Directional light direction</li>
-     *          <li><code>_dLight.colInt</code> (vec3) Directional light color intensity</li>
-     *          <li><code>_dLight.halfV</code> (vec3) Directional light half vector</li>
+     *          <li><code>_dLight</code> (mat3) Directional light matrix. </li>
+     *          <li><code>_dLight[0]</code> (vec3) Directional light direction in eye coordinates.</li>
+     *          <li><code>_dLight[1]</code> (vec3) Directional light color intensity</li>
+     *          <li><code>_dLight[2]</code> (vec3) Directional light half vector</li>
+     *          <li><code>_dLightWorldDir</code> (vec3) Directional light world direction</li>
+     *          <li><code>_pLights[n]</code> (mat3) Point light matrix</li>
+     *          <li><code>_pLights[n][0]</code> (mat3) Point light id n position</li>
+     *          <li><code>_pLights[n][1]</code> (mat3) Point light id n color intensity</li>
+     *          <li><code>_pLights[n][2]</code> (mat3) Point light id n attenuation vector [const, linear, quadratic]</li>
+     *
      *      </ul>
      *     </li>
      *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
@@ -14141,9 +14364,12 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Shader = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var gl = engine.gl,
             glState = engine.glState,
             thisObj = this,
+            listeners = [],
             _shaderProgramId = -1,
             _depthMask = true,
             _faceCulling = 1029,
@@ -14167,13 +14393,26 @@ KICK.namespace = function (ns_string) {
             _fragmentShaderSrc = glslConstants["__error_fs.glsl"],
             _defaultUniforms,
             _errorLog = KICK.core.Util.fail,
+            uniqueVersionCounter = -1,
             /**
              * Updates the blend key that identifies blend+blendSFactor+blendDFactor<br>
              * The key is used to fast determine if the blend settings needs to be updated
-             * @method getBlendKey
+             * @method updateBlendKey
+             * @private
              */
             updateBlendKey = function () {
                 blendKey = (_blendSFactor + _blendDFactor * 10000) * (_blend ? -1 : 1);
+            },
+            /**
+             * Calls the listeners registered for this shader
+             * @method notifyListeners
+             * @private
+             */
+            notifyListeners = function () {
+                var i;
+                for (i = 0; i < listeners.length; i++) {
+                    listeners[i]();
+                }
             },
             /**
              * Invoke shader compilation
@@ -14309,6 +14548,10 @@ KICK.namespace = function (ns_string) {
                 for (i = 0; i < numberOfActiveUniforms; i++) {
                     uniform = gl.getActiveUniform(_shaderProgramId, i);
                     uniformLocation = gl.getUniformLocation(_shaderProgramId, uniform.name);
+                    if (DEBUG) {
+                        uniformLocation.shader = thisObj;
+                        uniformLocation.shaderVersion = uniqueVersionCounter;
+                    }
                     uniformDescriptor = new material.UniformDescriptor(uniform.name, uniform.type, uniform.size, uniformLocation);
                     Object.freeze(uniformDescriptor);
                     _activeUniforms[i] = uniformDescriptor;
@@ -14326,6 +14569,34 @@ KICK.namespace = function (ns_string) {
                     thisObj.defaultUniforms = oldDefaultUniforms;
                 }
             };
+
+        /**
+         * Registers a listener to the shader.
+         * @method addListener
+         * @param {Function} listenerFn a function called when shader is updated
+         */
+        this.addListener = function (listenerFn) {
+            if (ASSERT) {
+                if (typeof listenerFn !== "function") {
+                    warn("Shader.addListener: listenerFn not function");
+                }
+            }
+            listeners.push(listenerFn);
+        };
+
+        /**
+         * Removes a listener to the shader.
+         * @method removeListener
+         * @param {Function} listenerFn a function called when shader is updated
+         */
+        this.removeListener = function (listenerFn) {
+            if (ASSERT) {
+                if (typeof listenerFn !== "function") {
+                    warn("Shader.removeListener: listenerFn not function");
+                }
+            }
+            KICK.core.Util.removeElementFromArray(listeners, listenerFn, true);
+        };
 
         /**
          * @method contextLost
@@ -14499,7 +14770,7 @@ KICK.namespace = function (ns_string) {
                     return _errorLog;
                 },
                 set: function (value) {
-                    if (true) {
+                    if (ASSERT) {
                         if (value && typeof value !== 'function') {
                             KICK.core.Util.fail("Shader.errorLog should be a function (or null)");
                         }
@@ -14584,7 +14855,7 @@ KICK.namespace = function (ns_string) {
             faceCulling: {
                 get: function () { return _faceCulling; },
                 set: function (newValue) {
-                    if (true) {
+                    if (ASSERT) {
                         if (newValue !== 1028 &&
                             newValue !== 1032 &&
                             newValue !== 1029 &&
@@ -14604,7 +14875,7 @@ KICK.namespace = function (ns_string) {
             depthMask: {
                 get: function () { return _depthMask; },
                 set: function (newValue) {
-                    if (true) {
+                    if (ASSERT) {
                         if (typeof newValue !== 'boolean') {
                             KICK.core.Util.fail("Shader.depthMask must be a boolean. Was " + (typeof newValue));
                         }
@@ -14628,7 +14899,7 @@ KICK.namespace = function (ns_string) {
             zTest: {
                 get: function () { return _zTest; },
                 set: function (newValue) {
-                    if (true) {
+                    if (ASSERT) {
                         if (newValue !== 512 &&
                             newValue !== 513 &&
                             newValue !== 514 &&
@@ -14657,7 +14928,7 @@ KICK.namespace = function (ns_string) {
             blend: {
                 get: function () { return _blend; },
                 set: function (value) {
-                    if (true) {
+                    if (ASSERT) {
                         if (typeof value !== 'boolean') {
                             KICK.core.Util.fail("Shader.blend must be a boolean");
                         }
@@ -14680,7 +14951,7 @@ KICK.namespace = function (ns_string) {
             blendSFactor: {
                 get: function () { return _blendSFactor; },
                 set: function (value) {
-                    if (true) {
+                    if (ASSERT) {
                         var c = KICK.core.Constants;
                         if (value !== 0 &&
                             value !== 1 &&
@@ -14722,7 +14993,7 @@ KICK.namespace = function (ns_string) {
             blendDFactor: {
                 get: function () { return _blendDFactor; },
                 set: function (value) {
-                    if (true) {
+                    if (ASSERT) {
                         var c = KICK.core.Constants;
                         if (value !== 0 &&
                             value !== 1 &&
@@ -14746,6 +15017,16 @@ KICK.namespace = function (ns_string) {
                     }
                     _blendDFactor = value;
                     updateBlendKey();
+                }
+            },
+            /**
+             * Unique shader version (this number will change whenever apply is invoked). The value may be different after serialization.
+             * @property shaderVersion
+             * @type Number
+             */
+            shaderVersion : {
+                get: function () {
+                    return uniqueVersionCounter;
                 }
             }
         });
@@ -14793,6 +15074,8 @@ KICK.namespace = function (ns_string) {
                 return false;
             }
 
+            uniqueVersionCounter = (shaderUniqueVertionCounter++);
+
             gl.useProgram(_shaderProgramId);
             glState.boundShader = _shaderProgramId;
             numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, 35718);
@@ -14804,24 +15087,26 @@ KICK.namespace = function (ns_string) {
              * @property activeAttributes
              * @type Array_Object
              */
-            this.activeAttributes = [];
+            thisObj.activeAttributes = [];
             /**
              * Lookup of attribute location based on name.
              * @property lookupAttribute
              * @type Object
              */
-            this.lookupAttribute = {};
+            thisObj.lookupAttribute = {};
             for (i = 0; i < activeAttributes; i++) {
                 attribute = gl.getActiveAttrib(_shaderProgramId, i);
-                this.activeAttributes[i] = {
+                thisObj.activeAttributes[i] = {
                     size: attribute.size,
                     type: attribute.type,
                     name: attribute.name
                 };
-                this.lookupAttribute[attribute.name] = i;
+                thisObj.lookupAttribute[attribute.name] = i;
             }
 
             thisObj.markUniformUpdated();
+
+            notifyListeners();
 
             return !compileError;
         };
@@ -14853,7 +15138,7 @@ KICK.namespace = function (ns_string) {
          * @method bind
          */
         this.bind = function () {
-            if (true) {
+            if (ASSERT) {
                 if (!(thisObj.isValid)) {
                     KICK.core.Util.fail("Cannot bind a shader that is not valid");
                 }
@@ -14910,6 +15195,10 @@ KICK.namespace = function (ns_string) {
             } else {
                 updateBlendKey();
                 thisObj.apply();
+            }
+            if (_name === "") {
+                _name = "Shader_" + shaderUniqueNameCounter;
+                shaderUniqueNameCounter++;
             }
         }());
     };
@@ -14986,12 +15275,11 @@ KICK.namespace = function (ns_string) {
             glState = this.glState,
             timeObj,
             sceneLights = engineUniforms.sceneLights,
-            ambientLight = sceneLights.ambientLight,
-            directionalLightData = sceneLights.directionalLightData,
-            pointLightData = sceneLights.pointLightData,
+            ambientLight,
             lookupUniforms = this.lookupUniform,
             proj = lookupUniforms._proj,
             directionalLightUniform = lookupUniforms._dLight,
+            directionalLightWorldUniform = lookupUniforms._dLightWorldDir,
             pointLightUniform = lookupUniforms["_pLights[0]"],
             time = lookupUniforms._time,
             viewport = lookupUniforms._viewport,
@@ -14999,22 +15287,26 @@ KICK.namespace = function (ns_string) {
             currentTexture = 0,
             ambientLlightValue;
 
-
         currentTexture = material.bind(currentTexture);
 
         if (proj) {
             gl.uniformMatrix4fv(proj.location, false, engineUniforms.projectionMatrix);
         }
         if (lightUniformAmbient) {
+            ambientLight = sceneLights.ambientLight;
             ambientLlightValue = ambientLight !== null ? ambientLight.colorIntensity : vec3Zero;
             gl.uniform3fv(lightUniformAmbient.location, ambientLlightValue);
         }
 
         if (directionalLightUniform) {
-            gl.uniformMatrix3fv(directionalLightUniform.location, false, directionalLightData);
+            gl.uniformMatrix3fv(directionalLightUniform.location, false, sceneLights.directionalLightData);
         }
+        if (directionalLightWorldUniform) {
+            gl.uniform3fv(directionalLightWorldUniform.location, sceneLights.directionalLightWorld);
+        }
+
         if (pointLightUniform) {
-            gl.uniformMatrix3fv(pointLightUniform.location, false, pointLightData);
+            gl.uniformMatrix3fv(pointLightUniform.location, false, sceneLights.pointLightData);
         }
         if (time) {
             timeObj = this.engine.time;
@@ -15041,6 +15333,8 @@ KICK.namespace = function (ns_string) {
             glState = this.glState,
             modelMatrix = lookupUniform._m,
             mv = lookupUniform._mv,
+            worldCamPos = lookupUniform._worldCamPos,
+            world2object = lookupUniform._world2object,
             mvProj = lookupUniform._mvProj,
             norm = lookupUniform._norm,
             gameObjectUID = lookupUniform._gameObjectUID,
@@ -15055,8 +15349,6 @@ KICK.namespace = function (ns_string) {
             normalMatrix,
             currentTexture = 0;
         if (glState.currentMaterial !== material) {
-        // shared material uniforms
-
             glState.currentMaterial = material;
             currentTexture = this.bindMaterialUniform(material, engineUniforms);
         }
@@ -15084,6 +15376,12 @@ KICK.namespace = function (ns_string) {
                 }
                 gl.uniformMatrix3fv(norm.location, false, normalMatrix);
             }
+        }
+        if (worldCamPos) {
+            gl.uniform3fv(worldCamPos.location, engineUniforms.currentCameraTransform.position);
+        }
+        if (world2object) {
+            gl.uniformMatrix4fv(world2object.location, false, transform.getGlobalTRSInverse());
         }
         if (mvProj) {
             globalTransform = globalTransform || transform.getGlobalMatrix();
@@ -15119,6 +15417,8 @@ KICK.namespace = function (ns_string) {
      * @extends KICK.core.ProjectAsset
      */
     material.Material = function (engine, config) {
+        // extend ProjectAsset
+        KICK.core.ProjectAsset(this);
         var _name = "Material",
             _shader = null,
             _uniforms = [],
@@ -15192,7 +15492,6 @@ KICK.namespace = function (ns_string) {
                 set: function (newValue) { _name = newValue; }
             },
             /**
-
              * @property shader
              * @type KICK.material.Shader
              */
@@ -15205,11 +15504,14 @@ KICK.namespace = function (ns_string) {
                         fail("KICK.material.Shader expected");
                     }
                     if (_shader !== newValue) {
+                        if (_shader) {
+                            _shader.removeListener(decorateUniforms);
+                        }
                         _shader = newValue;
                         if (_shader) {
-                            thisObj.init();
                             _renderOrder = _shader.renderOrder;
                             decorateUniforms();
+                            _shader.addListener(decorateUniforms);
                         }
                     }
                 }
@@ -15294,13 +15596,16 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * Bind material uniforms
+         * Bind material uniforms. Returns undefined or null if value is undefined or null (or uniform not found)
          * @method setUniform
          * @param {String} name
          * @param {Float32Array|Int32Array|KICK.texture.Texture}
          * @return {KICK.material.MaterialUniform}
          */
         this.setUniform = function (name, value) {
+            if (value === undefined || value === null) {
+                return null;
+            }
             var foundElement,
                 i;
             for (i = 0; i < _uniforms.length && !foundElement; i++) {
@@ -15348,21 +15653,9 @@ KICK.namespace = function (ns_string) {
          * @method destroy
          */
         this.destroy = function () {
+            thisObj.shader = null;
             engine.project.removeResourceDescriptor(thisObj.uid);
             engine.removeContextListener(contextListener);
-        };
-
-        /**
-         * Initialize the material
-         * If the shader property is a string the shader is found in the engine.project.
-         * If shader is invalid, the error shader is used
-         * @method init
-         */
-        this.init = function () {
-            if (!_shader) {
-                KICK.core.Util.fail("Cannot initiate shader in material " + _name);
-                thisObj._shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
-            }
         };
 
         /**
@@ -15374,7 +15667,7 @@ KICK.namespace = function (ns_string) {
             var i,
                 serializedUniforms = {};
             for (i = 0; i < _uniforms.length; i++) {
-                serializedUniforms[_uniforms[i].name] = _uniforms[i].toJSON();
+                serializedUniforms[_uniforms[i].name] = _uniforms[i].toJSON().value;
             }
             return {
                 uid: thisObj.uid,
@@ -15387,25 +15680,37 @@ KICK.namespace = function (ns_string) {
         (function init() {
             var uniformData = config.uniformData,
                 name,
-                value;
+                value,
+                configCopy = {
+                    uid: config.uid || 0,
+                    name: config.name,
+                    shader: config.shader
+                };
             engine.addContextListener(contextListener);
-            if (uniformData) {
-                delete config.uniformData;
-            }
             if (config.uniforms) {
-                console.log("Warn - Material.uniforms is deprecated");
-                delete config.uniforms;
+                warn("Warn - Material.uniforms is deprecated"); // Todo delete in 0.5.x
             }
-            applyConfig(thisObj, config);
+            applyConfig(thisObj, configCopy);
+            if (!_shader || !_shader.isValid()) {
+                if (config.shader) {
+                    warn("Problem using shader in material. ", config.shader);
+                }
+                thisObj._shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
+            }
             if (uniformData) {
                 for (name in uniformData) {
                     if (uniformData.hasOwnProperty(name)) {
-                        value = uniformData[name];
-                        value = convertUniformValue(_shader.lookupUniform[name].type, value, engine);
-                        thisObj.setUniform(name, value);
+                        if (_shader.lookupUniform[name]) { // if found in shader
+                            value = uniformData[name];
+                            value = convertUniformValue(_shader.lookupUniform[name].type, value, engine);
+                            thisObj.setUniform(name, value);
+                        } else {
+                            warn("Cannot find uniform " + name + " in shader. ");
+                        }
                     }
                 }
             }
+            decorateUniforms();
             engine.project.registerObject(thisObj, "KICK.material.Material");
         }());
     };
@@ -15471,7 +15776,7 @@ KICK.namespace = function (ns_string) {
             if (value instanceof Float32Array || value instanceof Int32Array) {
                 value = core.Util.typedArrayToArray(value);
             } else {
-                if (true) {
+                if (ASSERT) {
                     if (!value instanceof KICK.texture.Texture) {
                         KICK.core.Util.fail("Unknown uniform value type. Expected Texture");
                     }
@@ -17028,6 +17333,7 @@ KICK.namespace = function (ns_string) {
          *  <li><b>Black</b> Url: kickjs://texture/black/</li>
          *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
          *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
+         *  <li><b>Checkerboard</b>  Url: kickjs://texture/checkerboard/<br></li>
          *  <li><b>KickJS logo</b>  Url: kickjs://texture/logo/<br></li>
          *  </ul>
          * @param uri
@@ -17041,29 +17347,34 @@ KICK.namespace = function (ns_string) {
 
             if (uri.indexOf("kickjs://texture/black/") === 0) {
                 data = new Uint8Array([0, 0, 0, 255,
-                                         0,   0,   0, 255,
-                                         0,   0,   0, 255,
-                                         0,   0,   0, 255]);
+                    0,   0,   0, 255,
+                    0,   0,   0, 255,
+                    0,   0,   0, 255]);
             } else if (uri.indexOf("kickjs://texture/white/") === 0) {
                 data = new Uint8Array([255, 255, 255, 255,
-                                         255,   255,   255, 255,
-                                         255,   255,   255, 255,
-                                         255,   255,   255, 255]);
+                    255,   255,   255, 255,
+                    255,   255,   255, 255,
+                    255,   255,   255, 255]);
             } else if (uri.indexOf("kickjs://texture/gray/") === 0) {
                 data = new Uint8Array([127, 127, 127, 255,
-                                         127,   127,   127, 255,
-                                         127,   127,   127, 255,
-                                         127,   127,   127, 255]);
+                    127,   127,   127, 255,
+                    127,   127,   127, 255,
+                    127,   127,   127, 255]);
+            } else if (uri.indexOf("kickjs://texture/checkerboard/") === 0) {
+                data = new Uint8Array([255, 255, 255, 255,
+                    0,   0,   0, 255,
+                    0,   0,   0, 255,
+                    255, 255, 255, 255]);
             } else if (uri.indexOf("kickjs://texture/logo/") === 0) {
                 textureDestination.setTemporaryTexture();
                 img = document.createElement("img");
                 resourceTracker = engine.project.createResourceTracker();
                 img.onload = function () {
                     textureDestination.generateMipmaps = true;
-                    textureDestination.internalFormat = 6407;
+                    textureDestination.internalFormat = 6408     ;
                     textureDestination.magFilter = 9729;
                     textureDestination.minFilter = 9987;
-                    textureDestination.setImage(img, "kickjs://texture/logo/");
+                    textureDestination.setImage(img, uri);
                     resourceTracker.resourceReady();
                 };
                 img.onerror = function () {
