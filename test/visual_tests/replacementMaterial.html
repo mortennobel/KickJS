@@ -62,13 +62,19 @@
                 meshRenderer.material = materials[i];
                 gameObject.addComponent(meshRenderer);
             }
-
-            camera.replacementShader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
+            var material = new KICK.material.Material(engine,
+                    {
+                        shader: engine.project.load(engine.project.ENGINE_SHADER___ERROR),
+                        name: "Replacement material"
+                    });
+            camera.replacementMaterial = material;
         }
     </script>
 
 </head>
 <body onload="initKick();">
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+  <br>
+(Should contain a pink triangle and a pink square)
 </body>
 </html>

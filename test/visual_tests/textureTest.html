@@ -140,6 +140,14 @@
             material.setUniform("mainTexture", texture);
         }
 
+        function setTextureConfig(url){
+            texture = new KICK.texture.Texture(engine, {
+                dataURI: url,
+                name: "Some texture"
+            });
+            material.setUniform("mainTexture", texture);
+        }
+
         function loadTextureFromProject(name){
             texture = engine.project.loadByName(name);
             console.log(texture.name);
@@ -158,6 +166,8 @@
   <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_BLACK); return false;">Black</a>
   <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_WHITE); return false;">White</a>
   <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_GRAY); return false;">Gray</a> |
+  <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_LOGO); return false;">KickJS_Logo</a> |
+  <a href="#" onclick="setTextureConfig('kickjs://texture/logo/'); return false;">KickJS_Logo(2)</a> |
   <a href="#" onclick="loadTextureFromProject('ProjectWhite'); return false;">ProjectWhite</a>
   <!--<a href="#" onclick="loadTextureFromProject('CORS_TEST'); return false;">Cors test (Currently broken)</a>-->
 </body>
