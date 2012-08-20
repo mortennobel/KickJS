@@ -240,7 +240,7 @@ KICK.namespace = function (ns_string) {
                 vertices.push(vertex);
             } else if (token === "vn") {
                 var normal = strAsArray(value);
-                mat4.multiplyVec3Vector(transformMatrix,normal);
+                mat4.multiplyVec3(transformMatrix, normal);
                 normals.push(normal);
             } else if (token === "vt") {
                 textureCoordinates.push(strAsArray(value));
