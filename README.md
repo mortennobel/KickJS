@@ -56,7 +56,7 @@ https://github.com/mortennobel/KickJS/issues
 
 New BSD License
 
-Copyright (c) 2011, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
+Copyright (c) 2011-2012, Morten Nobel-Joergensen, Kickstart Games ( http://www.kickstartgames.com/ )
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
