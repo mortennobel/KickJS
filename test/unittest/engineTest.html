@@ -105,6 +105,32 @@ YUI().use('node', 'console', 'test', function (Y) {
             var texture = engine.project.load(engine.project.ENGINE_TEXTURE_GRAY);
             Assert.areEqual(engine.project.ENGINE_TEXTURE_GRAY,texture.uid);
         },
+        testComputeNormalsDegenerateTriangle : function(){
+            var Assert = Y.Assert;
+            var meshData =  new KICK.mesh.MeshData({
+                            name: "Triangle",
+                            vertex: [
+                                0, 0, 0,
+                                0, 0, 0,
+                                9984, 2007, 8047
+                            ],
+                            uv1: [
+                                0.5, 1,
+                                0.125, 0.25,
+                                1 - 0.125, 0.25
+                            ],
+                            normal: [
+                                0, 0, 1,
+                                0, 0, 1,
+                                0, 0, 1
+                            ],
+                            indices: [0, 1, 2]
+                        });
+            meshData.recalculateNormals();
+            for (var i=0;i<9;i++){
+                Assert.areEqual(0, meshData.normal[i]);
+            }
+        },
         testLoadProject : function(){
             var Assert = Y.Assert;
             var projectConfig = {

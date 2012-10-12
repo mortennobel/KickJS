@@ -693,7 +693,7 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
-     * Recalculate the vertex normals based on the triangle normals
+     * Recalculate the angle weighted vertex normals based on the triangle mesh
      * @method recalculateNormals
      */
     mesh.MeshData.prototype.recalculateNormals = function(){
@@ -706,6 +706,10 @@ KICK.namespace = function (ns_string) {
             normalArray = vec3.array(vertexCount,normalArrayRef),
             v1v2 = vec3.create(),
             v1v3 = vec3.create(),
+            v2v3Alias = v1v3,
+            temp = v1v2,
+            weight1,
+            weight2,
             normal = vec3.create();
 
         for (a=0;a<triangleCount;a++){
@@ -718,13 +722,20 @@ KICK.namespace = function (ns_string) {
                 v3 = vertex[i3];
             vec3.subtract(v2,v1,v1v2);
             vec3.subtract(v3,v1,v1v3);
+            vec3.normalize(v1v2);
+            vec3.normalize(v1v3);
             vec3.cross(v1v2,v1v3,normal);
             vec3.normalize(normal);
-            vec3.add(normalArray[i1],normal);
-            vec3.add(normalArray[i2],normal);
-            vec3.add(normalArray[i3],normal);
+
+            weight1 = Math.acos(Math.max(-1, Math.min(1,vec3.dot(v1v2, v1v3))));
+            vec3.subtract(v3,v2,v2v3Alias);
+            vec3.normalize(v2v3Alias);
+            weight2 = Math.PI-Math.max(-1, Math.min(1,Math.acos(vec3.dot(v1v2, v2v3Alias))));
+            vec3.add(normalArray[i1],vec3.scale(normal,weight1, temp));
+            vec3.add(normalArray[i2],vec3.scale(normal,weight2, temp));
+            vec3.add(normalArray[i3],vec3.scale(normal,Math.PI-weight1-weight2, temp));
         }
-        for (a=0;a<vertexCount;a++){
+        for (a = 0;a<vertexCount;a++){
             vec3.normalize(normalArray[a]);
         }
         this.normal =  normalArrayRef.mem;
