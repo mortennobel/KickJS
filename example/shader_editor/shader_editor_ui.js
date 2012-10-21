@@ -2,7 +2,6 @@
 (function () {
     "use strict";
     var KICK = window.KICK,
-        YUIMessage = window.YUIMessage,
         shader,
         shaderEditor = window.shaderEditor,
         username,
@@ -88,7 +87,7 @@
                     }
                     name = document.getElementById("shadername").value;
                     if (name.trim().length === 0) {
-                        YUIMessage("Shader name not valid", "Change name in the 'about'-tab");
+                        window.YUIMessage("Shader name not valid", "Change name in the 'about'-tab");
                         return;
                     }
 
@@ -148,7 +147,7 @@
                     tweet = document.createTextNode("For tweeting use #KickJS");
                     div.appendChild(tweet);
 
-                    YUIMessage("This shader can be accessed by anyone at:",div);
+                    window.YUIMessage("This shader can be accessed by anyone at:",div);
                     input.focus();
                     input.select();
                 },
