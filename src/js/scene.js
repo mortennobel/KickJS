@@ -722,7 +722,8 @@ KICK.namespace = function (ns_string) {
         };
 
         /**
-         * @method
+         * @method str
+         * @return {String} stringify JSON
          */
         this.str = function () {
             return JSON.stringify(thisObj.toJSON());
