@@ -398,6 +398,13 @@ KICK.namespace = function (ns_string) {
                 success,
                 wasPaused,
                 initGL = function () {
+                    if (thisObj.config.highDPISupport) {
+                        var devicePixelRatio = window.devicePixelRatio || 1;
+
+                        // set the size of the drawingBuffer based on the size it's displayed.
+                        canvas.width = canvas.clientWidth * devicePixelRatio;
+                        canvas.height = canvas.clientHeight * devicePixelRatio;
+                    }
                     for (i = webGlContextNames.length - 1; i >= 0; i--) {
                         try {
                             gl = canvas.getContext(webGlContextNames[i], thisObj.config);
@@ -1605,8 +1612,8 @@ KICK.namespace = function (ns_string) {
          * @return {Object} instance of the resource
          */
         this.instantiate = function (engine) {
-            var resourceClass = KICK.namespace(type),
-                resource = new resourceClass(engine, createConfigInitialized(engine, resourceConfig));
+            var ResourceClass = KICK.namespace(type),
+                resource = new ResourceClass(engine, createConfigInitialized(engine, resourceConfig));
             if (typeof resource.init === 'function'){
                 resource.init();
             }
@@ -1634,6 +1641,13 @@ KICK.namespace = function (ns_string) {
      * @param {Config} config defines one or more properties
      */
     core.Config = function (config) {
+        /**
+         * Adds support for highDPI (such as MacBook Pro retina)
+         * Enabling this will create the canvas in high resolution - and wraps the mouse input as well.
+         * @property highDPISupport
+         * @type {Boolean}
+         */
+        this.highDPISupport = config.highDPISupport || true;
         /**
          * Use shadow maps to generate realtime shadows.<br>
          * Default value is false.
@@ -1850,6 +1864,7 @@ KICK.namespace = function (ns_string) {
             mouseWheelDelta = vec2.create(),
             mouseWheelPreventDefaultAction = false,
             canvas = engine.canvas,
+            devicePixelRatio = engine.config.highDPISupport?(window.devicePixelRatio || 1) : 1,
             removeElementFromArray = core.Util.removeElementFromArray,
             contains = core.Util.contains,
             mouseMovementListening = true,
@@ -1862,8 +1877,8 @@ KICK.namespace = function (ns_string) {
                 return false;
             },
             mouseMovementHandler = function(e) {
-                mousePosition[0] = e.clientX - objectPosition[0] + body.scrollLeft;
-                mousePosition[1] = e.clientY - objectPosition[1] + body.scrollTop;
+                mousePosition[0] = (e.clientX - objectPosition[0] + body.scrollLeft) * devicePixelRatio;
+                mousePosition[1] = (e.clientY - objectPosition[1] + body.scrollTop) * devicePixelRatio;
                 if (deltaMovement) {
                     vec2.subtract(mousePosition,lastMousePosition,deltaMovement);
                 } else {
