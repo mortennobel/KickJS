@@ -67,7 +67,7 @@ KICK.namespace = function (ns_string) {
     importer.ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x) {
 
         if (typeof colladaDOM === 'string') {
-            var parser = new DOMParser();
+            var parser = new window.DOMParser();
             colladaDOM = parser.parseFromString(colladaDOM, "text/xml");
         }
         var dataCache = {},
@@ -88,7 +88,7 @@ KICK.namespace = function (ns_string) {
                 numberString = numberString.replace(/^\s+|\s+$/g, ""); // trim
                 numberString = numberString.replace(/\s{2,}/g, ' '); // remove double white spaces
                 var numberArray = numberString.split(" ").map(Number);
-                if (!type || type === Array){
+                if (!type || type === Array) {
                     return numberArray;
                 } else {
                     // typed array
@@ -125,12 +125,12 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Create accessor object for data
-             * @method buildDataAccessor
+             * @method BuildDataAccessor
              * @param {XML} elementChild
              * @return function of type function(index,paramOffset)
              * @private
              */
-            buildDataAccessor = function (elementChild) {
+            BuildDataAccessor = function (elementChild) {
                 var semantic = elementChild.getAttribute('semantic'),
                     source = getXMLElementById(colladaDOM, elementChild.getAttribute("source").substring(1)),
                     technique_common,
@@ -160,7 +160,7 @@ KICK.namespace = function (ns_string) {
                  * @param {Number} paramOffset (0 means x, 1 means y, etc)
                  * @return {Number}
                  */
-                return function (index,paramOffset) {
+                return function (index, paramOffset) {
                     var arrayIndex = offset + stride * index + paramOffset;
                     return rawData[arrayIndex];
                 };
@@ -195,7 +195,7 @@ KICK.namespace = function (ns_string) {
                     if (tagName === "input") {
                         semantic = polylistChild.getAttribute('semantic');
                         offset = Number(polylistChild.getAttribute('offset'));
-                        dataAccessor.accessors[semantic] = new buildDataAccessor(polylistChild);
+                        dataAccessor.accessors[semantic] = new BuildDataAccessor(polylistChild);
                         dataAccessor.names.push(semantic);
                         dataAccessor.offset[semantic] = offset;
                         dataAccessor.length[semantic] = semantic === "TEXCOORD" ? 2 : 3;
@@ -204,7 +204,9 @@ KICK.namespace = function (ns_string) {
                         }
                     } else if (tagName === "vcount") {
                         vCount = stringToArray(polylistChild.textContent, Int32Array);
-                        vertexCount = function (i) { return vCount[i]; };
+                        vertexCount = function (i) {
+                            return vCount[i];
+                        };
                     } else if (tagName === "p") {
                         offsetCount = offsetSet.length;
 
@@ -380,28 +382,34 @@ KICK.namespace = function (ns_string) {
                     angleAxis,
                     angle,
                     rotationQuat,
-                    currentQuat,
                     matrix,
-                    decomposedMatrix;
+                    decomposedMatrix,
+                    localMatrix = transform.getLocalMatrix(),
+                    newMatrix = mat4.identity(mat4.create());
                 if (tagName === "translate") {
-                    transform.localPosition = stringToArray(node.textContent);
+                    mat4.translate(newMatrix, stringToArray(node.textContent), newMatrix);
                 } else if (tagName === "rotate") {
                     angleAxis = stringToArray(node.textContent);
                     angle = angleAxis[3];
                     if (angle) {
                         rotationQuat = quat4.angleAxis(angle, angleAxis);
-                        currentQuat = transform.localRotation;
-                        transform.localRotation = quat4.multiply(currentQuat, rotationQuat, rotationQuat);
+                        quat4.toMat4(rotationQuat, newMatrix);
+                    } else {
+                        return;
                     }
                 } else if (tagName === "scale") {
-                    transform.localScale = stringToArray(node.textContent);
+                    mat4.scale(newMatrix, stringToArray(node.textContent), newMatrix);
                 } else if (tagName === "matrix") {
-                    matrix = stringToArray(node.textContent);
-                    decomposedMatrix = mat4.decompose(matrix);
-                    transform.localPosition = decomposedMatrix[0];
-                    transform.localRotation = decomposedMatrix[1];
-                    transform.localScale = decomposedMatrix[2];
+                    mat4.transpose(stringToArray(node.textContent), newMatrix);
+                } else {
+                    console.log(tagName + " - unsupported");
+                    return;
                 }
+                mat4.multiply(localMatrix, newMatrix, newMatrix);
+                decomposedMatrix = mat4.decompose(newMatrix);
+                transform.localPosition = decomposedMatrix[0];
+                transform.localRotation = decomposedMatrix[1];
+                transform.localScale = decomposedMatrix[2];
             },
             createMeshRenderer = function (gameObject, node) {
                 var url = node.getAttribute("url"),
@@ -440,29 +448,8 @@ KICK.namespace = function (ns_string) {
                 childNode = node.firstElementChild;
                 while (childNode) {
                     tagName = childNode.tagName;
-                    if (tagName === "translate" ||
-                        tagName === "rotate" ||
-                        tagName === "scale" ||
-                        tagName === "matrix") {
+                    if (tagName === "translate" || tagName === "rotate" || tagName === "scale" || tagName === "matrix") {
                         updateTransform(transform, childNode);
-                        // todo handle situation where a number of transformation is done
-                        // such as
-                        //
-//                        <node id="BarrelChild2" type="NODE">
-//                                    <matrix sid="parentinverse">-1.239744 0.2559972 -2.716832 10.05096 -2.541176 -1.195862 1.046907 -3.691495 -0.1949036 0.5362619 0.1394684 -0.6007659 0 0 0 1</matrix>
-//                                    <translate sid="location">0.02037613 0.3007245 4.455008</translate>
-//                                    <rotate sid="rotationZ">0 0 1 303.8883</rotate>
-//                                    <rotate sid="rotationY">0 1 0 32.78434</rotate>
-//                                    <rotate sid="rotationX">1 0 0 120.9668</rotate>
-//                                    <scale sid="scale">0.333636 0.333636 1.702475</scale>
-//                                    <instance_geometry url="#Torus_002-mesh">
-//                                      <bind_material>
-//                                        <technique_common>
-//                                          <instance_material symbol="Blue_material1" target="#Blue_material-material"/>
-//                                        </technique_common>
-//                                      </bind_material>
-//                                    </instance_geometry>
-//                                  </node>
                     } else if (tagName === "instance_geometry") {
                         createMeshRenderer(gameObject, childNode);
                         /*if (rotate90x){
