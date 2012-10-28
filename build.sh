@@ -76,6 +76,8 @@ echo "Generating documentation (YUI Doc)"
 # echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 # $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
 
+
+# Install (when running NodeJS using sudo npm -g i yuidocjs
 # Unix specific and specific for (!!!)
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH
 cd $parser_in
