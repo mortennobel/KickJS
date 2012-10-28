@@ -96,28 +96,30 @@ window.onload = function(){
             return nestedPanel;
         };
 
-        var onEnd = function(){
+        var onEnd = function () {
             YUIConfirm("End of video", "Reload page to see another video",[]);
         };
 
-        var buildLoadVideoDialog = function(){
+        var buildLoadVideoDialog = function () {
             var div = document.createElement("div");
             div.innerHTML = "WebCam ascii art is a real time post processing effect that will transform a WebCam feed into ASCII art. The effect is created in a shader and uses the KickJS engine.<br><br>"+
-                "Currently only Google Chrome 19 (Canary) is supported - and WebRTC needs to be enabled manually. To do this follow these instruction carefully: <br><a href=http://www.webrtc.org/running-the-demos>Testing WebRTC on Chrome</a><br><br>";
+                "Currently only Google Chrome is support for WebRTC (used for capturing video). (Firefox will have support for WEBRTC from version 18)<br><br>";
 
             var button = document.createElement("button");
             button.innerHTML = "Start WebCam";
             button.style.width = "100%";
-            button.onclick = function() {
+            button.onclick = function () {
                 var video = document.createElement("video");
                 video.style.display = "none";
                 video.width = 320;
                 video.height = 240;
-                var hasUserMedia = navigator.webkitGetUserMedia ? true : false;
-                if (hasUserMedia){
+                navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+                var hasUserMedia = navigator.getUserMedia ? true : false;
+                if (hasUserMedia) {
                     video.autoplay = true;
                     document.body.appendChild(video);
-                    navigator.webkitGetUserMedia({audio:true, video:true}, function(stream){
+
+                    navigator.getUserMedia({audio:false, video:true}, function(stream){
                         video.src = window.webkitURL.createObjectURL(stream);
                     }, function(error){
                         console.log("Failed to get a stream due to", error);
@@ -127,7 +129,7 @@ window.onload = function(){
                     initKick(video);
                     window.currentDialog.hide();
                 } else {
-                    alert("Failed");
+                    alert("Failed - your browser does not support webcam using WebRTC");
                 }
 
             };
