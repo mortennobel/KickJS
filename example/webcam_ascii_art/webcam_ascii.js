@@ -18,7 +18,7 @@ window.onload = function(){
             meshRenderer.material = new KICK.material.Material(engine,{
                 name:"Some material",
                 shader:shader,
-                uniforms: materialUniforms
+                uniformData: materialUniforms
             });
         }
 
@@ -62,15 +62,9 @@ window.onload = function(){
 
         texture.setTemporaryTexture();
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
-        setMaterial('vertexShaderTex','fragmentShaderAscii',meshRenderer, {
-                    tex: {
-                        value: texture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    },
-                    ascii: {
-                        value: asciiTexture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
+        setMaterial('vertexShaderTex', 'fragmentShaderAscii', meshRenderer, {
+                    tex:  texture,
+                    ascii: asciiTexture
                 });
         gameObject.addComponent(meshRenderer);
 
@@ -78,11 +72,8 @@ window.onload = function(){
         meshRenderer = new KICK.scene.MeshRenderer();
         gameObject.addComponent(meshRenderer);
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
-        setMaterial('vertexShaderTex','fragmentShaderTex',meshRenderer, {
-                    tex: {
-                        value: texture,
-                        type: KICK.core.Constants.GL_SAMPLER_2D
-                    }
+        setMaterial('vertexShaderTex', 'fragmentShaderTex', meshRenderer, {
+                    tex: texture
                 });
         gameObject.transform.position = [.9,.9,0.1];
         gameObject.transform.localScale = [0.1,0.1,0.1];
@@ -126,7 +117,7 @@ window.onload = function(){
                 if (hasUserMedia){
                     video.autoplay = true;
                     document.body.appendChild(video);
-                    navigator.webkitGetUserMedia('video', function(stream){
+                    navigator.webkitGetUserMedia({audio:true, video:true}, function(stream){
                         video.src = window.webkitURL.createObjectURL(stream);
                     }, function(error){
                         console.log("Failed to get a stream due to", error);
