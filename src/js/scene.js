@@ -392,6 +392,8 @@ KICK.namespace = function (ns_string) {
     /**
      * Position, rotation and scale of a game object. This component should not be created manually.
      * It is created when a GameObject is created.
+     *
+     * KickJS uses a right handed coordinate system.
      * @namespace KICK.scene
      * @class Transform
      * @extends KICK.scene.Component
