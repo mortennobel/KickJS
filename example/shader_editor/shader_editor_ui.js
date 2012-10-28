@@ -147,7 +147,7 @@
                     tweet = document.createTextNode("For tweeting use #KickJS");
                     div.appendChild(tweet);
 
-                    window.YUIMessage("This shader can be accessed by anyone at:",div);
+                    window.YUIMessage("This shader can be accessed by anyone at:", div);
                     input.focus();
                     input.select();
                 },
@@ -611,7 +611,7 @@
                     }
                     materialUniform = material.getUniform(uniform.name) || {};
                     if (uniformGroup === "number") {
-                        setUniformNumberValue(uniform, materialUniform.value);
+                        setUniformNumberValue(uniform, materialUniform);
                     } else if (uniformGroup === "sampler") {
                         uniform_sampler = document.getElementById('uniform_sampler');
                         // remove all textures
@@ -625,7 +625,7 @@
                             newOption = document.createElement('option');
                             newOption.text = (imageSrc.length < 40) ? imageSrc : imageSrc.substr(0, 40) + '...';
                             uniform_sampler.add(newOption);
-                            if (texture === materialUniform.value) {
+                            if (texture === materialUniform) {
                                 uniform_sampler.selectedIndex = i;
                             }
                         }
