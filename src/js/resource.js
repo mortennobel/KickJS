@@ -62,7 +62,7 @@ KICK.namespace = function (ns_string) {
         };
 
     /**
-     * Responsible for loading of resources.
+     * Responsible for loading of resources. Use the Engine object to obtain a reference to this object.
      * @class ResourceLoader
      * @namespace KICK.core
      * @constructor
