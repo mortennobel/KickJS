@@ -98,8 +98,8 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Resource manager of the engine. Loads and cache resources.
-             * @property resourceManager
-             * @type KICK.core.ResourceManager
+             * @property resourceLoader
+             * @type KICK.core.ResourceLoader
              */
             resourceLoader: {
                 value: new core.ResourceLoader(this)
