@@ -95,8 +95,8 @@ function loadCollada(url){
     var oReq = new XMLHttpRequest();
     function handler()
     {
-        if (oReq.readyState == 4 /* complete */) {
-            if (oReq.status == 200) {
+        if (oReq.readyState === 4 /* complete */) {
+            if (oReq.status === 200) {
                 var xmlDom = oReq.responseXML;
                 load(xmlDom,url,KICK.importer.ColladaImporter.import);
             }
@@ -111,8 +111,8 @@ function loadKickJSModelFromURL(url){
     var oReq = new XMLHttpRequest();
     function handler()
     {
-        if (oReq.readyState == 4 /* complete */) {
-            if (oReq.status == 200) {
+        if (oReq.readyState === 4 /* complete */) {
+            if (oReq.status === 200) {
                 var content = oReq.response;
                 loadKickJSModel(content);
             }
@@ -428,7 +428,7 @@ function getCurrentModelAsJSON(){
                 vertex: typedArrayToArray(meshData.vertex),
                 name: meshRenderer.mesh.name || ""
             };
-            for (var i=0;i<meshData.subMeshes.length;i++){
+            for (var i = 0;i<meshData.subMeshes.length;i++){
                 obj["indices"+i] = typedArrayToArray(meshData.subMeshes[i]);
             }
             if (conf.normals){
