@@ -1247,15 +1247,65 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Result of Camera.pickPoint.
+     *
+     * @param {KICK.scene.GameObject} gameObject
+     * @param {Integer} x
+     * @param {Integer} y
+     * @constructor
+     */
+    scene.PickResult = function (gameObject, x, y) {
+        var normal,
+            uv,
+            readNormalAndUV = function () {
+
+            };
+
+
+        Object.defineProperties(this, {
+            /**
+             * Reference to the found gameObject
+             * @property gameObject
+             * @type KICK.scene.GameObject
+             */
+            gameObject: {
+                value: gameObject
+            },
+            x: {
+                value: x
+            },
+            y: {
+                value: y
+            },
+            normal: {
+                get: function () {
+                    if (!normal) {
+                        readNormalAndUV();
+                    }
+                    return normal;
+                }
+            },
+            uv: {
+                get: function () {
+                    if (!uv) {
+                        readNormalAndUV();
+                    }
+                    return uv;
+                }
+            }
+        });
+    };
+
+    /**
      * Camera picking object used by Camera objects to manage picking
      * @private
      * @param {KICK.core.Engine} engine
      * @param {Function} setupClearColor
      * @param {Function} renderSceneObjects
-     * @param {Scene} scene
+     * @param {Scene} sceneObj
      * @constructor
      */
-    CameraPicking = function (engine, setupClearColor, renderSceneObjects, scene) {
+    CameraPicking = function (engine, setupClearColor, renderSceneObjects, sceneObj) {
         var pickingQueue = null,
             pickingMaterial = null,
             pickingRenderTarget = null,
@@ -1326,8 +1376,11 @@ KICK.namespace = function (ns_string) {
                                 if (objectCount[uid]) {
                                     objectCount[uid]++;
                                 } else {
-                                    foundObj = scene.getObjectByUID(uid);
+                                    foundObj = sceneObj.getObjectByUID(uid);
                                     if (foundObj) {
+                                        if (pick.point) {
+                                            foundObj = new scene.PickResult(foundObj, pick.x, pick.y);
+                                        }
                                         objects.push(foundObj);
                                         objectCount[uid] = 1;
                                     }
