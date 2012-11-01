@@ -770,6 +770,11 @@ KICK.namespace = function (ns_string) {
          * @type KICK.math.mat4
          */
         this.currentCameraTransform = object.currentCameraTransform;
+        /**
+         * @property sceneLights
+         * @type KICK.scene.SceneLights
+         */
+        this.sceneLights = null;
 
         Object.seal(this);
     };
@@ -1316,7 +1321,7 @@ KICK.namespace = function (ns_string) {
                     });
                 setupCamera();
                 pickingRenderTarget.bind();
-
+                engine.gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
                 for (i = 0; i < meshRenderers.length; i++) {
                     meshRenderers[i].render(engineUniforms, material);
                 }
