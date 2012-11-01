@@ -1332,10 +1332,12 @@ KICK.namespace = function (ns_string) {
             readNormal = function () {
                 var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_NORMAL);
                 normal = renderObjectWithShader(shader);
+                normal = [normal[0] / 255, normal[1] / 255, normal[2] / 255];
             },
             readUV = function () {
                 var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_UV);
                 uv = renderObjectWithShader(shader);
+                uv = [uv[0] / 255, uv[1] / 255];
             },
             readPosition = function () {
                 var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_POSITION);
@@ -1369,7 +1371,7 @@ KICK.namespace = function (ns_string) {
                 value: y
             },
             /**
-             * The normal at the pick point
+             * The normal (in object coordinates) at the pick point
              * @property normal
              * @type KICK.math.vec3
              */
@@ -1384,7 +1386,7 @@ KICK.namespace = function (ns_string) {
             /**
              * The uv of the pick point
              * @property uv
-             * @type KICK.math.vec3
+             * @type KICK.math.vec2
              */
             uv: {
                 get: function () {
