@@ -1304,7 +1304,6 @@ KICK.namespace = function (ns_string) {
     scene.PickResult = function (engine, pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
         var normal,
             uv,
-            position,
             /**
              * @private
              * @method renderObjectWithShader
@@ -1338,10 +1337,6 @@ KICK.namespace = function (ns_string) {
                 var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_UV);
                 uv = renderObjectWithShader(shader);
                 uv = [uv[0] / 255, uv[1] / 255];
-            },
-            readPosition = function () {
-                var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_POSITION);
-                position = renderObjectWithShader(shader);
             };
 
 
@@ -1394,19 +1389,6 @@ KICK.namespace = function (ns_string) {
                         readUV();
                     }
                     return uv;
-                }
-            },
-            /**
-             * The world position of the pick point
-             * @property position
-             * @type KICK.math.vec3
-             */
-            position : {
-                get: function () {
-                    if (!position) {
-                        readPosition();
-                    }
-                    return position;
                 }
             }
         });
@@ -1677,7 +1659,6 @@ KICK.namespace = function (ns_string) {
                             o = o[names[i]];
                             if (!o) {
                                 if (DEBUG) {
-                                    debugger;
                                     warn("Cannot find uid of " + o);
                                 }
                                 return defaultValue;
@@ -1889,7 +1870,7 @@ KICK.namespace = function (ns_string) {
             width = width || 1;
             height = height || 1;
             if (!pickingObject) {
-                pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects,_scene);
+                pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects, _scene);
             }
             pickingObject.add({
                 gameObjectPickedFn: gameObjectPickedFn,
@@ -1908,7 +1889,9 @@ KICK.namespace = function (ns_string) {
         this.activated = function () {
             var gameObject = this.gameObject,
                 shadowRadius,
-                nearPlanePosition;
+                nearPlanePosition,
+                _shadowmapShader,
+                materialConfig;
             engineUniforms.currentCameraTransform = gameObject.transform;
             engine = gameObject.engine;
             if (!isContextListenerRegistered) {
@@ -1922,11 +1905,11 @@ KICK.namespace = function (ns_string) {
             _scene.addComponentListener(componentListener);
 
             if (engine.config.shadows) {
-                var _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP),
-                    materialConfig = {
-                        name: "Shadow map material",
-                        shader: _shadowmapShader
-                    };
+                _shadowmapShader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP);
+                materialConfig = {
+                    name: "Shadow map material",
+                    shader: _shadowmapShader
+                };
                 _shadowmapMaterial = new KICK.material.Material(engine, materialConfig);
 
                 // calculate the shadow projection based on engine.config parameters

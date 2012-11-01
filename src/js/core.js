@@ -802,7 +802,7 @@ KICK.namespace = function (ns_string) {
                     canvas,
                     shader,
                     ctx;
-                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER___PICK_POSITION) {
+                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER___PICK_NORMAL) {
                     switch (uid) {
                     case p.ENGINE_SHADER_DEFAULT:
                         url = "kickjs://shader/default/";
@@ -836,9 +836,6 @@ KICK.namespace = function (ns_string) {
                         break;
                     case p.ENGINE_SHADER___PICK_NORMAL:
                         url = "kickjs://shader/__pick_normal/";
-                        break;
-                    case p.ENGINE_SHADER___PICK_POSITION:
-                        url = "kickjs://shader/__pick_position/";
                         break;
                     case p.ENGINE_SHADER___PICK:
                         url = "kickjs://shader/__pick/";
