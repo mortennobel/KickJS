@@ -1010,6 +1010,14 @@
         window.YUILoadExample = function () {
             var elements = [
                     {
+                        id: "http://goo.gl/CkGZY",
+                        name: "Head (unlit)"
+                    },
+                    {
+                        id: "http://goo.gl/pbZIf",
+                        name: "Head (lit)"
+                    },
+                    {
                         id: "http://goo.gl/lLjyf",
                         name: "Phong ligthing"
                     },
