@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset=UTF-8‚Äù>
+    <title>Kick.js | Head modifier</title>
+
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.5.0/build/cssreset/reset-min.css&3.5.0/build/cssfonts/fonts-min.css&3.5.0/build/cssgrids/grids-min.css&3.5.0/build/cssbase/base-min.css&3.5.0/build/cssbutton/cssbutton.css">
+    <style>
+        #glslEditor {
+            position: absolute;
+            width: 800px;
+            height: 400px;
+        }
+         #glslEditorInfo{
+            position: absolute;
+            left: 830px;
+            height: 400px;
+         }
+
+        #desc {
+            margin-bottom:20px;
+            border-bottom:1px dotted #333;
+        }
+        #desc span {
+            background:#a3350d;
+            padding:2px;
+            color:#f27243;
+        }
+
+        .yui3-panel {
+            outline:none;
+
+        }
+
+        .yui3-panel-content .yui3-widget-hd {
+            font-weight:bold;
+        }
+
+        .yui3-panel-content .yui3-widget-bd {
+            padding:15px;
+        }
+        .yui3-panel-content label {
+            margin-right:30px;
+        }
+        .yui3-panel-content fieldset {
+            border:none;
+            padding:0;
+        }
+        .yui3-panel-content input[type="text"] {
+            border:none;
+            border:1px solid #ccc;
+            padding: 3px 7px;
+            -webkit-border-radius:2px;
+            -moz-border-radius:2px;
+            border-radius:2px;
+            font-size:100%;
+            width:200px;
+        }
+    </style>
+    <script src="http://yui.yahooapis.com/3.5.0/build/yui/yui-min.js"></script>
+
+    <link rel="stylesheet" href="reset-min.css">
+    <script type="text/javascript" src="../js/webgl-debug.js"></script>
+    <script type="text/javascript" src="../js/kick-debug-0.5.0.js"></script>
+    <!--<script type="text/javascript" src="../js/kick-min-0.5.0.js"></script>-->
+    <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
+    <!-- Google analytics-->
+    <script type="text/javascript" src="../common/common.js"></script>
+    <style>
+        body{
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="yui3-skin-sam">
+<header id="kickjs-header">
+</header>
+<header>
+</header>
+<article>
+    <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+    <div id="panelContent"></div>
+</article>
+<script type="text/javascript" src="/header.js"></script>
+<script type="text/javascript" src="head-modifier.js"></script>
+</body>
+</html>
