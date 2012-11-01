@@ -56,7 +56,9 @@ KICK.namespace = function (ns_string) {
         fail = KICK.core.Util.fail,
         applyConfig = KICK.core.Util.applyConfig,
         insertSorted = KICK.core.Util.insertSorted,
-        vec4uint8ToUint32 = KICK.core.Util.vec4uint8ToUint32;
+        vec4uint8ToUint32 = KICK.core.Util.vec4uint8ToUint32,
+        // private classes
+        CameraPicking;
 
     /**
      * Game objects. (Always attached to a given scene).
@@ -1245,6 +1247,111 @@ KICK.namespace = function (ns_string) {
     };
 
     /**
+     * Camera picking object used by Camera objects to manage picking
+     * @private
+     * @param {KICK.core.Engine} engine
+     * @param {Function} setupClearColor
+     * @param {Function} renderSceneObjects
+     * @param {Scene} scene
+     * @constructor
+     */
+    CameraPicking = function (engine, setupClearColor, renderSceneObjects, scene) {
+        var pickingQueue = null,
+            pickingMaterial = null,
+            pickingRenderTarget = null,
+            pickingClearColor = vec4.create(),
+            gl = engine.gl,
+            glState = engine.glState,
+            i,
+            init = function () {
+                pickingQueue = [];
+                pickingMaterial = new KICK.material.Material(engine,
+                    {
+                        shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
+                        name: "Picking material"
+                    });
+                pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
+                    dimension: glState.viewportSize
+                });
+                pickingRenderTarget.name = "__pickRenderTexture";
+            };
+
+        init();
+
+        /**
+         * Add an object to the picking queue.
+         * Picking object must have the signature
+         * {gameObjectPickedFn: gameObjectPickedFn,
+         * x: x,
+         * y: glState.viewportSize[1] - y,
+         * width: 1,
+         * height: 1,
+         * point: true
+         * }
+         * @method add
+         * @param {Object} pickingObject
+         */
+        this.add = function (pickingObject) {
+            pickingQueue.push(pickingObject);
+        };
+
+        /**
+         * @method handlePickRequests
+         * @param {KICK.scene.SceneLights} sceneLightObj
+         */
+        this.handlePickRequests = function (sceneLightObj) {
+            if (pickingQueue.length > 0) {
+                glState.currentMaterial = null; // clear current material
+                pickingRenderTarget.bind();
+                setupClearColor(pickingClearColor);
+                gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
+                renderSceneObjects(sceneLightObj, pickingMaterial);
+                for (i = pickingQueue.length - 1; i >= 0; i--) {
+                    // create clojure
+                    (function () {
+                        var pick = pickingQueue[i],
+                            pickArrayLength = pick.width * pick.width * 4,
+                            array = new Uint8Array(pickArrayLength),
+                            objects = [],
+                            objectCount = {},
+                            j,
+                            subArray,
+                            uid,
+                            foundObj;
+                        gl.readPixels(pick.x, pick.y, pick.width, pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, array);
+                        for (j = 0; j < pickArrayLength; j += 4) {
+                            subArray = array.subarray(j, j + 4);
+                            uid = vec4uint8ToUint32(subArray);
+                            if (uid > 0) {
+                                if (objectCount[uid]) {
+                                    objectCount[uid]++;
+                                } else {
+                                    foundObj = scene.getObjectByUID(uid);
+                                    if (foundObj) {
+                                        objects.push(foundObj);
+                                        objectCount[uid] = 1;
+                                    }
+                                }
+                            }
+                        }
+                        if (objects.length) {
+                            engine.eventQueue.add(function () {
+                                var i,
+                                    obj;
+                                for (i = 0; i < objects.length; i++) {
+                                    obj = objects[i];
+                                    pick.gameObjectPickedFn(obj, objectCount[obj.uid]);
+                                }
+                            }, 0);
+                        }
+                    }());
+                }
+                pickingQueue.length = 0;
+            }
+        };
+    };
+
+    /**
      * Creates a game camera
      * @class Camera
      * @namespace KICK.scene
@@ -1279,26 +1386,11 @@ KICK.namespace = function (ns_string) {
             _layerMask = 0xffffffff,
             _shadowmapMaterial,
             _scene,
-            pickingQueue = null,
-            pickingMaterial = null,
-            pickingRenderTarget = null,
-            pickingClearColor = vec4.create(),
+            pickingObject = null,
             projectionMatrix = mat4.create(),
             viewMatrix = mat4.create(),
             viewProjectionMatrix = mat4.create(),
             lightMatrix = mat4.create(),
-            initPicking = function () {
-                pickingQueue = [];
-                pickingMaterial = new KICK.material.Material(engine,
-                    {
-                        shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
-                        name: "Picking material"
-                    });
-                pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
-                    dimension: glState.viewportSize
-                });
-                pickingRenderTarget.name = "__pickRenderTexture";
-            },
             engineUniforms = {
                 viewMatrix: viewMatrix,
                 projectionMatrix: projectionMatrix,
@@ -1603,10 +1695,10 @@ KICK.namespace = function (ns_string) {
          * @param {Number} y coordinate in screen coordinates (between 0 and canvas height - 1)
          */
         this.pickPoint = function (gameObjectPickedFn, x, y) {
-            if (!pickingQueue) {
-                initPicking();
+            if (!pickingObject) {
+                pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects,_scene);
             }
-            pickingQueue.push({
+            pickingObject.add({
                 gameObjectPickedFn: gameObjectPickedFn,
                 x: x,
                 y: glState.viewportSize[1] - y,
@@ -1627,10 +1719,10 @@ KICK.namespace = function (ns_string) {
         this.pick = function (gameObjectPickedFn, x, y, width, height) {
             width = width || 1;
             height = height || 1;
-            if (!pickingQueue) {
-                initPicking();
+            if (!pickingObject) {
+                pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects,_scene);
             }
-            pickingQueue.push({
+            pickingObject.add({
                 gameObjectPickedFn: gameObjectPickedFn,
                 x: x,
                 y: glState.viewportSize[1] - y,
@@ -1719,53 +1811,8 @@ KICK.namespace = function (ns_string) {
                 gl.bindTexture(gl.TEXTURE_2D, textureId);
                 gl.generateMipmap(gl.TEXTURE_2D);
             }
-            if (pickingQueue && pickingQueue.length > 0) {
-                glState.currentMaterial = null; // clear current material
-                pickingRenderTarget.bind();
-                setupClearColor(pickingClearColor);
-                gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
-                renderSceneObjects(sceneLightObj, pickingMaterial);
-                for (i = pickingQueue.length - 1; i >= 0; i--) {
-                    // create clojure
-                    (function () {
-                        var pick = pickingQueue[i],
-                            pickArrayLength = pick.width * pick.width * 4,
-                            array = new Uint8Array(pickArrayLength),
-                            objects = [],
-                            objectCount = {},
-                            j,
-                            subArray,
-                            uid,
-                            foundObj;
-                        gl.readPixels(pick.x, pick.y, pick.width, pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, array);
-                        for (j = 0; j < pickArrayLength; j += 4) {
-                            subArray = array.subarray(j, j + 4);
-                            uid = vec4uint8ToUint32(subArray);
-                            if (uid > 0) {
-                                if (objectCount[uid]) {
-                                    objectCount[uid]++;
-                                } else {
-                                    foundObj = _scene.getObjectByUID(uid);
-                                    if (foundObj) {
-                                        objects.push(foundObj);
-                                        objectCount[uid] = 1;
-                                    }
-                                }
-                            }
-                        }
-                        if (objects.length) {
-                            engine.eventQueue.add(function () {
-                                var i,
-                                    obj;
-                                for (i = 0; i < objects.length; i++) {
-                                    obj = objects[i];
-                                    pick.gameObjectPickedFn(obj, objectCount[obj.uid]);
-                                }
-                            }, 0);
-                        }
-                    }());
-                }
-                pickingQueue.length = 0;
+            if (pickingObject) {
+                pickingObject.handlePickRequests(sceneLightObj);
             }
         };
 
