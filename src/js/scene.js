@@ -350,9 +350,8 @@ KICK.namespace = function (ns_string) {
     /**
      * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
-     * @param (KICK.math.mat4) projectionMatrix
-     * @param {KICK.math.mat4} modelViewMatrix
-     * @param {KICK.math.mat4} modelViewProjectionMatrix modelviewMatrix multiplied with projectionMatrix
+     * @param {KICK.scene.EngineUniforms} engineUniforms
+     * @param {KICK.material.Material} overwriteMaterial Optional
      */
 
     /**
@@ -733,6 +732,49 @@ KICK.namespace = function (ns_string) {
             return JSON.stringify(thisObj.toJSON());
         };
     };
+
+    /**
+     * Data object for engine uniforms used during rendering (in the render method on components)
+     * @class EngineUniforms
+     * @namespace KICK.scene
+     * @constructor
+     */
+    scene.EngineUniforms = function (object) {
+        /**
+         * @property viewMatrix
+         * @type KICK.math.mat4
+         */
+        this.viewMatrix = object.viewMatrix;
+        /**
+         * @property projectionMatrix
+         * @type KICK.math.mat4
+         */
+        this.projectionMatrix = object.projectionMatrix;
+        /**
+         * @property viewProjectionMatrix
+         * @type KICK.math.mat4
+         */
+        this.viewProjectionMatrix = object.viewProjectionMatrix;
+        /**
+         * @property lightMatrix
+         * @type KICK.math.mat4
+         */
+        this.lightMatrix = object.lightMatrix;
+        /**
+         * @property currentCamera
+         * @type KICK.scene.Camera
+         */
+        this.currentCamera = object.currentCamera;
+        /**
+         * @property currentCameraTransform
+         * @type KICK.math.mat4
+         */
+        this.currentCameraTransform = object.currentCameraTransform;
+
+        Object.seal(this);
+    };
+
+
 
     /**
      * A scene objects contains a list of GameObjects
@@ -1254,11 +1296,45 @@ KICK.namespace = function (ns_string) {
      * @param {Integer} y
      * @constructor
      */
-    scene.PickResult = function (gameObject, x, y) {
+    scene.PickResult = function (engine, pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
         var normal,
             uv,
-            readNormalAndUV = function () {
+            position,
+            /**
+             * @private
+             * @method renderObjectWithShader
+             * @param {KICK.material.Shader} shader
+             * @return KICK.math.vec4
+             */
+            renderObjectWithShader = function (shader) {
+                var array = new Uint8Array(4),
+                    meshRenderers = gameObject.getComponentsOfType(KICK.scene.MeshRenderer), // todo - create getComponentsWithMethod
+                    i,
+                    material = new KICK.material.Material(engine, {
+                        name: "PickResult",
+                        shader: shader
+                    });
+                setupCamera();
+                pickingRenderTarget.bind();
 
+                for (i = 0; i < meshRenderers.length; i++) {
+                    meshRenderers[i].render(engineUniforms, material);
+                }
+
+                engine.gl.readPixels(x, y, 1, 1, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, array);
+                return array;
+            },
+            readNormal = function () {
+                var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_NORMAL);
+                normal = renderObjectWithShader(shader);
+            },
+            readUV = function () {
+                var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_UV);
+                uv = renderObjectWithShader(shader);
+            },
+            readPosition = function () {
+                var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_POSITION);
+                position = renderObjectWithShader(shader);
             };
 
 
@@ -1271,26 +1347,59 @@ KICK.namespace = function (ns_string) {
             gameObject: {
                 value: gameObject
             },
+            /**
+             * The x value of the pick
+             * @property x
+             * @type Number
+             */
             x: {
                 value: x
             },
+            /**
+             * The y value of the pick
+             * @property y
+             * @type Number
+             */
             y: {
                 value: y
             },
+            /**
+             * The normal at the pick point
+             * @property normal
+             * @type KICK.math.vec3
+             */
             normal: {
                 get: function () {
                     if (!normal) {
-                        readNormalAndUV();
+                        readNormal();
                     }
                     return normal;
                 }
             },
+            /**
+             * The uv of the pick point
+             * @property uv
+             * @type KICK.math.vec3
+             */
             uv: {
                 get: function () {
                     if (!uv) {
-                        readNormalAndUV();
+                        readUV();
                     }
                     return uv;
+                }
+            },
+            /**
+             * The world position of the pick point
+             * @property position
+             * @type KICK.math.vec3
+             */
+            position : {
+                get: function () {
+                    if (!position) {
+                        readPosition();
+                    }
+                    return position;
                 }
             }
         });
@@ -1305,12 +1414,11 @@ KICK.namespace = function (ns_string) {
      * @param {Scene} sceneObj
      * @constructor
      */
-    CameraPicking = function (engine, setupClearColor, renderSceneObjects, sceneObj) {
+    CameraPicking = function (engine, setupClearColor, renderSceneObjects, sceneObj, setupCamera) {
         var pickingQueue = null,
             pickingMaterial = null,
             pickingRenderTarget = null,
             pickingClearColor = vec4.create(),
-            gl = engine.gl,
             glState = engine.glState,
             i,
             init = function () {
@@ -1322,6 +1430,7 @@ KICK.namespace = function (ns_string) {
                     });
                 pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
                     dimension: glState.viewportSize
+
                 });
                 pickingRenderTarget.name = "__pickRenderTexture";
             };
@@ -1349,12 +1458,12 @@ KICK.namespace = function (ns_string) {
          * @method handlePickRequests
          * @param {KICK.scene.SceneLights} sceneLightObj
          */
-        this.handlePickRequests = function (sceneLightObj) {
+        this.handlePickRequests = function (sceneLightObj, engineUniforms) {
             if (pickingQueue.length > 0) {
                 glState.currentMaterial = null; // clear current material
                 pickingRenderTarget.bind();
                 setupClearColor(pickingClearColor);
-                gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
+                engine.gl.clear(constants.GL_COLOR_BUFFER_BIT | constants.GL_DEPTH_BUFFER_BIT);
                 renderSceneObjects(sceneLightObj, pickingMaterial);
                 for (i = pickingQueue.length - 1; i >= 0; i--) {
                     // create clojure
@@ -1368,7 +1477,7 @@ KICK.namespace = function (ns_string) {
                             subArray,
                             uid,
                             foundObj;
-                        gl.readPixels(pick.x, pick.y, pick.width, pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, array);
+                        engine.gl.readPixels(pick.x, pick.y, pick.width, pick.height, constants.GL_RGBA, constants.GL_UNSIGNED_BYTE, array);
                         for (j = 0; j < pickArrayLength; j += 4) {
                             subArray = array.subarray(j, j + 4);
                             uid = vec4uint8ToUint32(subArray);
@@ -1379,7 +1488,7 @@ KICK.namespace = function (ns_string) {
                                     foundObj = sceneObj.getObjectByUID(uid);
                                     if (foundObj) {
                                         if (pick.point) {
-                                            foundObj = new scene.PickResult(foundObj, pick.x, pick.y);
+                                            foundObj = new scene.PickResult(engine, pickingRenderTarget, foundObj, pick.x, pick.y, setupCamera, engineUniforms);
                                         }
                                         objects.push(foundObj);
                                         objectCount[uid] = 1;
@@ -1444,14 +1553,14 @@ KICK.namespace = function (ns_string) {
             viewMatrix = mat4.create(),
             viewProjectionMatrix = mat4.create(),
             lightMatrix = mat4.create(),
-            engineUniforms = {
+            engineUniforms = new scene.EngineUniforms({
                 viewMatrix: viewMatrix,
                 projectionMatrix: projectionMatrix,
                 viewProjectionMatrix: viewProjectionMatrix,
                 lightMatrix: lightMatrix,
                 currentCamera: thisObj,
                 currentCameraTransform: null
-            },
+            }),
             isContextListenerRegistered = false,
             contextListener = {
                 contextLost: function () {
@@ -1499,7 +1608,7 @@ KICK.namespace = function (ns_string) {
                 gl.scissor(offsetX, offsetY, width, height);
             },
             /**
-             * Clear the screen and set the projectionMatrix and modelViewMatrix on the gl object
+             * Clear the screen and set the projectionMatrix and modelViewMatrix on the glState object
              * @method setupCamera
              * @private
              */
@@ -1749,7 +1858,7 @@ KICK.namespace = function (ns_string) {
          */
         this.pickPoint = function (gameObjectPickedFn, x, y) {
             if (!pickingObject) {
-                pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects,_scene);
+                pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects, _scene, setupCamera);
             }
             pickingObject.add({
                 gameObjectPickedFn: gameObjectPickedFn,
@@ -1865,7 +1974,7 @@ KICK.namespace = function (ns_string) {
                 gl.generateMipmap(gl.TEXTURE_2D);
             }
             if (pickingObject) {
-                pickingObject.handlePickRequests(sceneLightObj);
+                pickingObject.handlePickRequests(sceneLightObj, engineUniforms);
             }
         };
 
@@ -2376,7 +2485,7 @@ KICK.namespace = function (ns_string) {
         /**
          * This method may not be called (the renderer could make the same calls)
          * @method render
-         * @param engineUniforms
+         * @param {KICK.scene.EngineUniforms} engineUniforms
          * @param {KICK.material.Material} overwriteMaterial Optional
          */
         this.render = function (engineUniforms, overwriteMaterial) {

@@ -802,7 +802,7 @@ KICK.namespace = function (ns_string) {
                     canvas,
                     shader,
                     ctx;
-                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER_UNLIT_VERTEX_COLOR) {
+                if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER___PICK_POSITION) {
                     switch (uid) {
                     case p.ENGINE_SHADER_DEFAULT:
                         url = "kickjs://shader/default/";
@@ -830,6 +830,15 @@ KICK.namespace = function (ns_string) {
                         break;
                     case p.ENGINE_SHADER___SHADOWMAP:
                         url = "kickjs://shader/__shadowmap/";
+                        break;
+                    case p.ENGINE_SHADER___PICK_UV:
+                        url = "kickjs://shader/__pick_uv/";
+                        break;
+                    case p.ENGINE_SHADER___PICK_NORMAL:
+                        url = "kickjs://shader/__pick_normal/";
+                        break;
+                    case p.ENGINE_SHADER___PICK_POSITION:
+                        url = "kickjs://shader/__pick_position/";
                         break;
                     case p.ENGINE_SHADER___PICK:
                         url = "kickjs://shader/__pick/";
@@ -1428,7 +1437,24 @@ KICK.namespace = function (ns_string) {
      * @static
      */
     core.Project.ENGINE_SHADER_UNLIT_VERTEX_COLOR = -110;
-
+    /**
+     * @property ENGINE_SHADER___PICK_UV
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER___PICK_UV = -111;
+    /**
+     * @property ENGINE_SHADER___PICK_NORMAL
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER___PICK_NORMAL = -112;
+    /**
+     * @property ENGINE_SHADER___PICK_POSITION
+     * @type Number
+     * @static
+     */
+    core.Project.ENGINE_SHADER___PICK_POSITION = -113;
     /**
      * @property ENGINE_TEXTURE_BLACK
      * @type Number

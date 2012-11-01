@@ -13,7 +13,7 @@ window.onload = function () {
             rotationEuler,
             mouseInput,
             objectPicked = function (pickObject) {
-                console.log("Object picked");
+               console.log(pickObject.uv, pickObject.normal);
             };
         this.activated = function () {
             var gameObject = thisObj.gameObject,
