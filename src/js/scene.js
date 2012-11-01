@@ -1287,6 +1287,18 @@ KICK.namespace = function (ns_string) {
             viewMatrix = mat4.create(),
             viewProjectionMatrix = mat4.create(),
             lightMatrix = mat4.create(),
+            initPicking = function () {
+                pickingQueue = [];
+                pickingMaterial = new KICK.material.Material(engine,
+                    {
+                        shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
+                        name: "Picking material"
+                    });
+                pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
+                    dimension: glState.viewportSize
+                });
+                pickingRenderTarget.name = "__pickRenderTexture";
+            },
             engineUniforms = {
                 viewMatrix: viewMatrix,
                 projectionMatrix: projectionMatrix,
@@ -1583,28 +1595,40 @@ KICK.namespace = function (ns_string) {
 
         /**
          * Schedules a camera picking session. During next repaint a picking session is done. If the pick hits some
+         * game objects, then a callback is added to the event queue (and will run in next frame). The pickObject can
+         * be used for getting UV coordinate for the point (if available)
+         * @method pickPoint
+         * @param {function} gameObjectPickedFn callback function with the signature function(pickObject)
+         * @param {Number} x coordinate in screen coordinates (between 0 and canvas width - 1)
+         * @param {Number} y coordinate in screen coordinates (between 0 and canvas height - 1)
+         */
+        this.pickPoint = function (gameObjectPickedFn, x, y) {
+            if (!pickingQueue) {
+                initPicking();
+            }
+            pickingQueue.push({
+                gameObjectPickedFn: gameObjectPickedFn,
+                x: x,
+                y: glState.viewportSize[1] - y,
+                width: 1,
+                height: 1,
+                point: true
+            });
+        };
+
+        /**
+         * Schedules a camera picking session. During next repaint a picking session is done. If the pick hits some
          * game objects, then a callback is added to the event queue (and will run in next frame).
          * @method pick
          * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
          * @param {Number} x coordinate in screen coordinates (between 0 and canvas width - 1)
          * @param {Number} y coordinate in screen coordinates (between 0 and canvas height - 1)
-         * @param {Number} width Optional (default 1)
-         * @param {Number} height Optional (default 1)
          */
         this.pick = function (gameObjectPickedFn, x, y, width, height) {
             width = width || 1;
             height = height || 1;
             if (!pickingQueue) {
-                pickingQueue = [];
-                pickingMaterial = new KICK.material.Material(engine,
-                    {
-                        shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
-                        name: "Picking material"
-                    });
-                pickingRenderTarget = new KICK.texture.RenderTexture(engine, {
-                    dimension: glState.viewportSize
-                });
-                pickingRenderTarget.name = "__pickRenderTexture";
+                initPicking();
             }
             pickingQueue.push({
                 gameObjectPickedFn: gameObjectPickedFn,
