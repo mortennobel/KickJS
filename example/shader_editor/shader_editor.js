@@ -164,6 +164,9 @@ var ShaderEditor = function () {
             case "teapot":
                 setMeshByName('Teapot');
                 break;
+            case "head":
+                setMeshByName('Head');
+                break;
             default:
                 setMesh('kickjs://mesh/plane/');
                 break;

@@ -20,6 +20,15 @@
             "name": "Teapot",
             "dataURI": "teapot.kickjs"
          }
+      },
+      {
+         "type": "KICK.mesh.Mesh",
+         "uid": 3,
+         "config": {
+            "uid": 3,
+            "name": "Head",
+            "dataURI": "head-model.kickjs"
+         }
       }
    ]
 }
