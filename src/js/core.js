@@ -2149,7 +2149,7 @@ KICK.namespace = function (ns_string) {
      * &nbsp;&nbsp;keyInput = engine.keyInput;
      * &nbsp;};
      * &nbsp;this.update = function(){
-     * &nbsp;&nbsp;var keyCodeForA = 65;
+     * &nbsp;&nbsp;var keyCodeForA = "A".charCodeAt(0);
      * &nbsp;&nbsp;if (keyInput.isKeyDown(keyCodeForA)){
      * &nbsp;&nbsp;&nbsp;console.log("A key is down");
      * &nbsp;&nbsp;}
