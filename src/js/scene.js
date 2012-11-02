@@ -631,6 +631,24 @@ KICK.namespace = function (ns_string) {
         });
 
         /**
+         *
+         * Todo: known issue does not work when thisObj has parent object
+         * @method lookAt
+         * @param {KICK.scene.Transform} transform target object to look at
+         * @param {Object} type the constructor of the wanted component
+         * @return {KICK.math.mat4} local transformation
+         */
+        this.lookAt = function (transform, up) {
+            if (ASSERT) {
+                if (!(transform instanceof KICK.scene.Transform)) {
+                    KICK.core.Util.fail("transform must be a KICK.scene.Transform");
+                }
+            }
+            quat4.lookAt(thisObj.position, transform.position, up, localRotationQuat);
+            markLocalDirty();
+        };
+
+        /**
          * Return the local transformation matrix
          * @method getLocalMatrix
          * @return {KICK.math.mat4} local transformation
