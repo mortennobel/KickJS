@@ -1801,7 +1801,7 @@ KICK.namespace = function (ns_string) {
                 errorMessage = document.createElement("div");
                 errorMessage.style.cssText = domElement.style.cssText + ";width:" + domElement.width + "px;height:" + domElement.height +
                     "px;display: table-cell;vertical-align: middle;background:#ffeeee;";
-                errorMessage.innerHTML = "<div style='padding:12px;text-align: center;'><img src='http://www.khronos.org/assets/images/api_logos/webgl.png' style='width:74px;35px;margin-bottom: 10px;margin-left: auto;'><br clear='all'>It doesn't appear your computer can support WebGL.<br><br><a href=\"http://get.webgl.org/troubleshooting/\">Click here for more information.</a></div>";
+                errorMessage.innerHTML = "<div style='padding:12px;text-align: center;'>It doesn't appear your computer can support WebGL.<br><br><a href=\"http://get.webgl.org/troubleshooting/\">Click here for more information.</a></div>";
                 domElement.parentNode.replaceChild(errorMessage, domElement);
             };
         }());
