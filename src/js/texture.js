@@ -237,6 +237,8 @@ KICK.namespace = function (ns_string) {
             _minFilter = constants.GL_LINEAR,
             _magFilter = constants.GL_LINEAR,
             _generateMipmaps = true,
+            _isMipMapGenerated = false,
+            _hasDataOnGPU = false,
             _dataURI =  "memory://void",
             _flipY =  true,
             _intFormat = constants.GL_RGBA,
@@ -255,16 +257,18 @@ KICK.namespace = function (ns_string) {
                 }
                 _boundTextureType = _textureType;
             },
+            createMipmaps = function () {
+                gl.generateMipmap(_textureType);
+                _isMipMapGenerated = true;
+            },
             contextListener = {
                 contextLost: function () {
                     console.log("_textureId ", _textureId, gl);
                     gl = null;
                 },
                 contextRestored: function (newGl) {
-                    var isNew = (gl !== newGl);
                     gl = newGl;
                     _textureId = gl.createTexture();
-                    console.log("_textureId ", _textureId, isNew);
                     if (createImageFunction) {
                         createImageFunction.apply(thisObj, createImageFunctionParameters);
                     }
@@ -286,6 +290,15 @@ KICK.namespace = function (ns_string) {
          * @method apply
          */
         this.apply = function () {
+            if (DEBUG) {
+                if (!_generateMipmaps) {
+                    if (_minFilter !== constants.GL_NEAREST &&
+                        _minFilter !== constants.GL_LINEAR) {
+                        warn("When generateMipmaps is false min filter must be either GL_NEAREST or GL_LINEAR");
+                    }
+                }
+            }
+
             thisObj.bind(0); // bind to texture slot 0
             if (_textureType === constants.GL_TEXTURE_2D) {
                 gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
@@ -382,8 +395,9 @@ KICK.namespace = function (ns_string) {
             }
             thisObj.apply();
             if (_generateMipmaps) {
-                gl.generateMipmap(_textureType);
+                createMipmaps();
             }
+            _hasDataOnGPU = true;
             glState.currentMaterial = null; // for material to rebind
         };
 
@@ -451,8 +465,9 @@ KICK.namespace = function (ns_string) {
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_S, _wrapS);
             gl.texParameteri(constants.GL_TEXTURE_2D, constants.GL_TEXTURE_WRAP_T, _wrapT);
             if (_generateMipmaps) {
-                gl.generateMipmap(constants.GL_TEXTURE_2D);
+                createMipmaps();
             }
+            _hasDataOnGPU = true;
             glState.currentMaterial = null; // for material to rebind
         };
 
@@ -465,7 +480,7 @@ KICK.namespace = function (ns_string) {
                                              0,   0,   0,
                                              0,   0,   0,
                                              255, 255, 255]),
-                oldIntFormat = _intFormat;
+            oldIntFormat = _intFormat;
             _intFormat = constants.GL_RGB;
             this.setImageData(2, 2, 0, constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "kickjs://texture/checkerboard/");
             _intFormat = oldIntFormat;
@@ -628,7 +643,8 @@ KICK.namespace = function (ns_string) {
             },
             /**
              * Autogenerate mipmap levels<br>
-             * (Default true)
+             * (Default true).
+             * When an existing texture (without mipmaps) has generateMipmaps=true, then mipmaps are created instantly.
              * @property generateMipmaps
              * @type Boolean
              */
@@ -643,6 +659,10 @@ KICK.namespace = function (ns_string) {
                         }
                     }
                     _generateMipmaps = value;
+                    if (_generateMipmaps && !_isMipMapGenerated && _hasDataOnGPU) {
+                        thisObj.bind(0);
+                        createMipmaps();
+                    }
                 }
             },
             /**
