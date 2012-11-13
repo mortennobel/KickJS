@@ -1,0 +1,78 @@
+define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLResourceProvider, BuiltInResourceProvider) {
+    "use strict";
+
+    /**
+     * Responsible for loading of resources. Use the Engine object to obtain a reference to this object.
+     * @class ResourceLoader
+     * @namespace KICK.core
+     * @constructor
+     */
+    return function (engine) {
+        var resourceProviders =
+                [
+                    new URLResourceProvider(engine),
+                    new BuiltInResourceProvider(engine)
+                ],
+            /**
+             * Create a callback function
+             * @method buildCallbackFunc
+             * @private
+             */
+            buildCallbackFunc = function (methodName) {
+                return function (url, destination) {
+                    var i,
+                        resourceProvider,
+                        protocol;
+                    for (i = resourceProviders.length - 1; i >= 0; i--) {
+                        resourceProvider = resourceProviders[i];
+                        protocol = resourceProvider.protocol;
+                        if (url.indexOf(protocol) === 0) {
+                            resourceProvider[methodName](url, destination);
+                            return;
+                        }
+                    }
+                };
+            };
+        /**
+         * @method getMeshData
+         * @param {String} uri
+         * @param {KICK.mesh.Mesh} meshDestination
+         */
+        this.getMeshData = buildCallbackFunc("getMeshData");
+        /**
+         * @method getImageData
+         * @param {String} uri
+         * @param {KICK.texture.Texture} textureDestination
+         */
+        this.getImageData = buildCallbackFunc("getImageData");
+
+        /**
+         * @method getShaderData
+         * @param {String} uri
+         * @param {KICK.material.Shader} shaderDestination
+         */
+        this.getShaderData = buildCallbackFunc("getShaderData");
+
+        /**
+         * @method addResourceProvider
+         * @param {KICK.resource.ResourceProvider} resourceProvider
+         */
+        this.addResourceProvider = function (resourceProvider) {
+            resourceProviders.push(resourceProvider);
+        };
+
+        /**
+         * @method removeResourceProvider
+         * @param {KICK.resource.ResourceProvider} resourceProvider
+         */
+        this.removeResourceProvider = function (resourceProvider) {
+            var i;
+            for (i = resourceProvider.length - 1; i >= 0; i--) {
+                if (resourceProviders[i] === resourceProvider) {
+                    resourceProviders.splice(i, 1);
+                }
+            }
+        };
+    };
+
+});
