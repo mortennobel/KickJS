@@ -1,11 +1,12 @@
-define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "kick/scene/GameObject"], function (require, Constants) {
+define(["require", "./Constants"], function (require, Constants) {
     "use strict";
 
     var ASSERT = Constants._ASSERT,
         DEBUG = Constants._DEBUG,
         packIntToFloatArrayBuffer = new ArrayBuffer(4),
         packIntToFloatInt32Buffer = new Uint32Array(packIntToFloatArrayBuffer),
-        packIntToFloatUint8Buffer = new Uint8Array(packIntToFloatArrayBuffer);
+        packIntToFloatUint8Buffer = new Uint8Array(packIntToFloatArrayBuffer),
+        Util;
 
 
     /**
@@ -13,7 +14,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
      * @class Util
      * @namespace KICK.core
      */
-    return {
+    Util = {
         /**
          * Used for deserializing a configuration (replaces reference objects with actual references)
          * @method deserializeConfig
@@ -30,7 +31,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
             if (Array.isArray(config)) {
                 destArray = new Array(config.length);
                 for (i = 0; i < config.length; i++) {
-                    destArray[i] = this.deserializeConfig(config[i], engine, scene);
+                    destArray[i] = Util.deserializeConfig(config[i], engine, scene);
                 }
                 config = destArray;
             } else if (config) {
@@ -73,13 +74,13 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
             } else if (Array.isArray(object) || object.buffer instanceof ArrayBuffer) { // treat typed arrays as normal arrays
                 res = [];
                 for (i = 0; i < object.length; i++) {
-                    res[i] = this.deepCopy(object[i], passthroughClasses);
+                    res[i] = Util.deepCopy(object[i], passthroughClasses);
                 }
             } else if (typeOfValue === "object") {
                 res = {};
                 for (name in object) {
                     if (object.hasOwnProperty(name)) {
-                        res[name] = this.deepCopy(object[name], passthroughClasses);
+                        res[name] = Util.deepCopy(object[name], passthroughClasses);
                     }
                 }
             } else {
@@ -137,7 +138,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
                 resStr += charVal;
             }
 
-            for (;i < str.length; i++) {
+            for (; i < str.length; i++) {
                 charVal = str.charAt(i);
                 isSpace = charVal === '_';
                 if (isSpace) {
@@ -160,7 +161,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
             }
             if (DEBUG) {
                 if (!engine instanceof require("kick/core/Engine")) {
-                    this.fail("getJSONReference - engine not defined");
+                    Util.fail("getJSONReference - engine not defined");
                 }
             }
             var isGameObject = object instanceof require("kick/scene/GameObject");
@@ -199,7 +200,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
                 o,
                 serializedObject;
             if (res.type === "") {
-                this.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
+                Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
             }
             var serializeObject = function(o) {
                 var result, i, r, typeofO;
@@ -215,9 +216,9 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
                 if (typeofO !== 'function') {
                     if (o && o.buffer instanceof ArrayBuffer) {
                         // is typed array
-                        return this.typedArrayToArray(o);
+                        return Util.typedArrayToArray(o);
                     } else if (typeofO === 'object') {
-                        return this.getJSONReference(engine,o);
+                        return Util.getJSONReference(engine,o);
                     } else {
                         return o;
                     }
@@ -226,7 +227,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
             };
             // init config object
             for (name in component) {
-                if (this.hasProperty(component,name) && name !== "gameObject") {
+                if (Util.hasProperty(component,name) && name !== "gameObject") {
                     o = component[name];
                     serializedObject = serializeObject(o);
                     if (serializedObject !== functionReturnType) {
@@ -245,8 +246,8 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
          * @static
          */
         applyConfig: function (object, config, excludeFilter) {
-            var contains = this.contains,
-                hasProperty = this.hasProperty;
+            var contains = Util.contains,
+                hasProperty = Util.hasProperty;
             config = config || {};
             excludeFilter = excludeFilter || [];
             for (var name in config) {
@@ -286,7 +287,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
          * @static
          */
         getParameterInt: function(url, parameterName, notFoundValue) {
-            var res = this.getParameter(url,parameterName);
+            var res = Util.getParameter(url,parameterName);
             if (res === null) {
                 return notFoundValue;
             } else {
@@ -302,7 +303,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
          * @static
          */
         getParameterFloat: function(url, parameterName, notFoundValue) {
-            var res = this.getParameter(url,parameterName);
+            var res = Util.getParameter(url,parameterName);
             if (res === null) {
                 return notFoundValue;
             } else {
@@ -417,7 +418,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
         insertSorted : function (element,sortedArray,sortFunc) {
             var i;
             if (!sortFunc) {
-                sortFunc = this.numberSortFunction;
+                sortFunc = Util.numberSortFunction;
             }
             // assuming that the array is relative small
             for (i = sortedArray.length-1; i >= 0; i--) {
@@ -524,7 +525,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
                     res.push(0x80 + (charCode & 0x3F));
                 } else {
                     if (ASSERT) {
-                        this.fail("Unsupported character. Charcode " + charCode);
+                        Util.fail("Unsupported character. Charcode " + charCode);
                     }
                 }
             }
@@ -578,7 +579,7 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
                     str += String.fromCharCode(charValue);
                 } else {
                     if (ASSERT) {
-                        this.fail("Unsupported encoding");
+                        Util.fail("Unsupported encoding");
                     }
                 }
             }
@@ -627,4 +628,6 @@ define(["require", "./Constants", "kick/core/Engine", "kick/scene/GameObject", "
         }
 
     };
+
+    return Util;
 });

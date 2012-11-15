@@ -2,6 +2,8 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
     function (GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time) {
         "use strict";
 
+        var ASSERT = Constants._ASSERT;
+
         /**
          * Game engine object
          * @class Engine

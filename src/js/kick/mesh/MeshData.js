@@ -840,4 +840,6 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
             }
             return true;
         };
+
+        return MeshData;
     });
