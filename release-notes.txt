@@ -3,4 +3,4 @@ KickJS Release notes:
 0.5.0
 - Changed class names in math module to start with uppercase (e.g. from vec3 to Vec3)
 - Changed outer module to lowercase (was KICK is now kick)
-- Now all classes must be loaded using require.js
+- Now all classes must be loaded using require.js (this replaces the KICK.namespace method).
