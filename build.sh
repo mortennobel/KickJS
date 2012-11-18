@@ -25,10 +25,6 @@ parser_out=$project/API/parser
 # The directory to put the html file outputted by the generator
 generator_out=$project/API/generator
 
-# The location of the template files.  Any subdirectories here will be copied
-# verbatim to the destination directory.
-template=$project/build-asset/doc-template
-
 # The version of your project to display within the documentation.
 version=0.5.0
 
@@ -50,32 +46,29 @@ $nodejs $project/preprocessor/include_glsl_files $project/src/glsl/ $project/src
 
 ##############################################################################
 echo "Running Precompiler dev"
-mkdir $project/build
-rm -rf $project/build/pre
-mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/js/math.js $project/build/pre/math.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/build/pre/core.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/chunk.js $project/build/pre/chunk.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/mesh.js $project/build/pre/mesh.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/build/pre/material.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/collada.js $project/build/pre/collada.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/obj.js $project/build/pre/obj.js $version true true
-$nodejs $project/preprocessor/preprocessor $project/src/js/resource.js $project/build/pre/resource.js $version true true
-cp $project/src/js/constants.js $project/build/pre/constants.js
-cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
+# mkdir $project/build
+# rm -rf $project/build/pre
+# mkdir $project/build/pre
+# $nodejs $project/preprocessor/preprocessor $project/src/js/math.js $project/build/pre/math.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/build/pre/core.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/chunk.js $project/build/pre/chunk.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/mesh.js $project/build/pre/mesh.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/build/pre/material.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/collada.js $project/build/pre/collada.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/obj.js $project/build/pre/obj.js $version true true
+# $nodejs $project/preprocessor/preprocessor $project/src/js/resource.js $project/build/pre/resource.js $version true true
+# cp $project/src/js/constants.js $project/build/pre/constants.js
+# cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 
-echo "Creating kick-debug.js"
-cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/chunk.js $project/build/pre/mesh.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/material.js $project/build/pre/meshfactory.js $project/build/pre/collada.js $project/build/pre/obj.js $project/build/pre/resource.js > $project/build/kick-debug-$version.js
+# echo "Creating kick-debug.js"
+# cat "$project/license.txt" $project/build/pre/constants.js $project/build/pre/glslconstants.js $project/build/pre/math.js $project/build/pre/core.js $project/build/pre/chunk.js $project/build/pre/mesh.js $project/build/pre/scene.js $project/build/pre/texture.js $project/build/pre/material.js $project/build/pre/meshfactory.js $project/build/pre/collada.js $project/build/pre/obj.js $project/build/pre/resource.js > $project/build/kick-debug-$version.js
 
 
 ##############################################################################
 echo "Generating documentation (YUI Doc)"
-# echo $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
-# $yuidoc_home/bin/yuidoc.py $parser_in -p $parser_out -o $generator_out -t $template -v $version -Y $yuiversion -m "$projectname" -u $projecturl
-
 
 # Install (when running NodeJS using sudo npm -g i yuidocjs
 # Unix specific and specific for (!!!)
