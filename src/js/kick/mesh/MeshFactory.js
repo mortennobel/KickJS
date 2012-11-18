@@ -4,7 +4,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants"]
     /**
      * Class responsible for creating Mesh objects
      * @class MeshFactory
-     * @namespace KICK.mesh
+     * @namespace kick.mesh
      * @static
      */
     return {
@@ -13,7 +13,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants"]
          * Creates a triangle in the XY plane
          * @method createTriangleData
          * @static
-         * @return {KICK.core.MeshData} triangle mesh
+         * @return {kick.core.MeshData} triangle mesh
          */
         createTriangleData : function () {
             var sqrt75 = Math.sqrt(0.75);
@@ -42,7 +42,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants"]
          * Create a plane in the XY plane (made of two triangles). The mesh objects has UVs and normals attributes.
          * @method createPlaneData
          * @static
-         * @return {KICK.mesh.MeshData} plane mesh
+         * @return {kick.mesh.MeshData} plane mesh
          */
         createPlaneData : function () {
             return new MeshData({
@@ -77,7 +77,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants"]
          * @param {Number} slices Optional default value is 64
          * @param {Number} stacks Optional default value is 32
          * @param {Number} radius
-         * @return {KICK.mesh.MeshData} uv-sphere mesh
+         * @return {kick.mesh.MeshData} uv-sphere mesh
          */
         createUVSphereData : function (slices, stacks, radius) {
             if (!slices || slices < 3) {
@@ -163,7 +163,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants"]
          * @method createCubeData
          * @static
          * @param {Number} length Optional, default value is 1.0
-         * @return {KICK.mesh.Mesh} cube mesh
+         * @return {kick.mesh.Mesh} cube mesh
          */
         createCubeData : function (length) {
             if (!length) {

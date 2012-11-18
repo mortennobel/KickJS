@@ -6,8 +6,8 @@ define(["./Util"], function (util) {
      * Component.update() methods.<br>
      * An event can run for either a single frame or for multiple frames.
      * @class EventQueue
-     * @namespace KICK.core
-     * @param {KICK.core.Engine} engine
+     * @namespace kick.core
+     * @param {kick.core.Engine} engine
      */
     return function (engine) {
         var queue = [],

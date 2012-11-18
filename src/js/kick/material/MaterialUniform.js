@@ -6,7 +6,7 @@ define(["kick/core/Util", "kick/core/Constants", "kick/texture/Texture"], functi
     /**
      * Material material uniform object
      * @class MaterialUniform
-     * @namespace KICK.material
+     * @namespace kick.material
      * @constructor
      * @param {Object} configuration
      * @protected
@@ -41,7 +41,7 @@ define(["kick/core/Util", "kick/core/Constants", "kick/texture/Texture"], functi
             {
                 /**
                  * @property value
-                 * @type Float32Array|Int32Array|KICK.texture.Texture
+                 * @type Float32Array|Int32Array|kick.texture.Texture
                  */
                 value: {
                     get: function () {

@@ -24,7 +24,7 @@ define(["kick/core/Constants"], function (constants) {
          * Example
          * <pre class="brush: js">
          * var ref = {};
-         * var v = KICK.math.vec4.array(2,ref);
+         * var v = kick.math.vec4.array(2,ref);
          * v[1][1] = 1;
          * ref.mem[5] == v[1][1];
          * </pre>
@@ -35,7 +35,7 @@ define(["kick/core/Constants"], function (constants) {
          * @method array
          * @param {Number} count Number of vec 3 to be layout in memory
          * @param {Object} ref Optional, if set a memory reference is set to ref.mem
-         * @return {KICK.math.vec3} New vec3
+         * @return {kick.math.vec3} New vec3
          * @static
          */
         array: function (count, ref) {
@@ -51,7 +51,7 @@ define(["kick/core/Constants"], function (constants) {
          * Any javascript array containing at least 4 numeric elements can serve as a vec4
          * @method create
          * @param {Array_Number} vec Optional, vec4 containing values to initialize with
-         * @return {KICK.math.vec4} New vec4
+         * @return {kick.math.vec4} New vec4
          * @static
          */
         create: function (vec) {
@@ -70,9 +70,9 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Copies the values of one vec4 to another
          * @method set
-         * @param {KICK.math.vec4} vec vec4 containing values to copy
-         * @param {KICK.math.vec4} dest vec4 receiving copied values
-         * @return {KICK.math.vec4} dest
+         * @param {kick.math.vec4} vec vec4 containing values to copy
+         * @param {kick.math.vec4} dest vec4 receiving copied values
+         * @return {kick.math.vec4} dest
          * @static
          */
         set: function (vec, dest) {
@@ -87,10 +87,10 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Performs a vector addition
          * @method add
-         * @param {KICK.math.vec4} vec  first operand
-         * @param {KICK.math.vec4} vec2  second operand
-         * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec4} dest if specified, vec otherwise
+         * @param {kick.math.vec4} vec  first operand
+         * @param {kick.math.vec4} vec2  second operand
+         * @param {kick.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec4} dest if specified, vec otherwise
          * @static
          */
         add: function (vec, vec2, dest) {
@@ -128,7 +128,7 @@ define(["kick/core/Constants"], function (constants) {
          * </pre>
          * @method wrapArray
          * @param {Float32Array} array
-         * @return {Array_KICK.math.vec4}
+         * @return {Array_kick.math.vec4}
          * @static
          */
         wrapArray: function (array) {
@@ -138,10 +138,10 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Performs a vector subtraction
          * @method subtract
-         * @param {KICK.math.vec4} vec first operand
-         * @param {KICK.math.vec4} vec2 second operand
-         * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec4} dest if specified, vec otherwise
+         * @param {kick.math.vec4} vec first operand
+         * @param {kick.math.vec4} vec2 second operand
+         * @param {kick.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec4} dest if specified, vec otherwise
          * @static
          */
         subtract: function (vec, vec2, dest) {
@@ -163,8 +163,8 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Test to see if vectors are equal (difference is less than epsilon)
          * @method equal
-         * @param {KICK.math.vec4} vec first operand
-         * @param {KICK.math.vec4} vec2 second operand
+         * @param {kick.math.vec4} vec first operand
+         * @param {kick.math.vec4} vec2 second operand
          * @param {Number} epsilon Optional - default value is
          * @return {Boolean} true if two vectors are equals
          * @static
@@ -185,10 +185,10 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Performs a vector multiplication
          * @method multiply
-         * @param {KICK.math.vec4} vec first operand
-         * @param {KICK.math.vec4} vec2 second operand
-         * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec4} dest if specified, vec otherwise
+         * @param {kick.math.vec4} vec first operand
+         * @param {kick.math.vec4} vec2 second operand
+         * @param {kick.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec4} dest if specified, vec otherwise
          * @static
          */
         multiply: function (vec, vec2, dest) {
@@ -210,9 +210,9 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Negates the components of a vec4
          * @method negate
-         * @param {KICK.math.vec4} vec vec4 to negate
-         * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec4} dest if specified, vec otherwise
+         * @param {kick.math.vec4} vec vec4 to negate
+         * @param {kick.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec4} dest if specified, vec otherwise
          * @static
          */
         negate: function (vec, dest) {
@@ -228,7 +228,7 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Calculates the length of a vec4
          * @method length
-         * @param {KICK.math.vec4} vec vec4 to calculate length of
+         * @param {kick.math.vec4} vec vec4 to calculate length of
          * @return {Number} Length of vec
          * @static
          */
@@ -240,8 +240,8 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Calculates the dot product of two vec3s
          * @method dot
-         * @param {KICK.math.vec4} vec first operand
-         * @param {KICK.math.vec4} vec2 second operand
+         * @param {kick.math.vec4} vec first operand
+         * @param {kick.math.vec4} vec2 second operand
          * @return {Number} Dot product of vec and vec2
          * @static
          */
@@ -252,10 +252,10 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Multiplies the components of a vec4 by a scalar value
          * @method scale
-         * @param {KICK.math.vec4} vec vec4 to scale
+         * @param {kick.math.vec4} vec vec4 to scale
          * @param {Number} val Numeric value to scale by
-         * @param {KICK.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec4} dest if specified, vec otherwise
+         * @param {kick.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec4} dest if specified, vec otherwise
          * @static
          */
         scale: function (vec, val, dest) {
@@ -276,7 +276,7 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Returns a string representation of a vector
          * @method str
-         * @param {KICK.math.vec4} vec vec4 to represent as a string
+         * @param {kick.math.vec4} vec vec4 to represent as a string
          * @return {String} string representation of vec
          * @static
          */

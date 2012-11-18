@@ -7,9 +7,9 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
             /**
              * A project is a container of all resources and assets used in a game.
              * @class Project
-             * @namespace KICK.core
+             * @namespace kick.core
              * @constructor
-             * @param {KICK.core.Engine} engine
+             * @param {kick.core.Engine} engine
              * @param {JSON} json project data
              */
             Project =  function (engine) {
@@ -282,7 +282,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
 
                 /**
                  * @method createResourceTracker
-                 * @return {KICK.core.ResourceTracker}
+                 * @return {kick.core.ResourceTracker}
                  */
                 this.createResourceTracker = function () {
                     var newResourceTracker = new ResourceTracker(thisObj);
@@ -293,7 +293,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
 
                 /**
                  * @method removeResourceTracker
-                 * @param {KICK.core.ResourceTracker} resourceTracker
+                 * @param {kick.core.ResourceTracker} resourceTracker
                  */
                 this.removeResourceTracker = function (resourceTracker) {
                     var removed = util.removeElementFromArray(resourceTrackers, resourceTracker);
@@ -303,7 +303,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 };
 
                 /**
-                 * Load a project of the form {maxUID:number,resourceDescriptors:[KICK.core.ResourceDescriptor],activeScene:number}
+                 * Load a project of the form {maxUID:number,resourceDescriptors:[kick.core.ResourceDescriptor],activeScene:number}
                  * @method loadProject
                  * @param {object} config
                  * @param {Function} onSuccess
@@ -378,7 +378,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                  * Also increases the resource reference counter.
                  * @method load
                  * @param {String} uid
-                 * @return {KICK.core.ProjectAsset} resource or null if resource is not found
+                 * @return {kick.core.ProjectAsset} resource or null if resource is not found
                  */
                 this.load = function (uid) {
                     var resourceObject = resourceCache[uid],
@@ -415,7 +415,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                  * @method loadByName
                  * @param {String} name
                  * @param {String} type Optional: limit the search to a specific type
-                 * @return {KICK.core.ProjectAsset} resource or null if resource is not found
+                 * @return {kick.core.ProjectAsset} resource or null if resource is not found
                  */
                 this.loadByName = function (name, type) {
                     var uid,
@@ -476,18 +476,18 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                  * Returns the buildin engine resources
                  * @method getEngineResourceDescriptorsByType
                  * @param {String} type
-                 * @return {Array_KICK.core.ResourceDescriptor}
+                 * @return {Array_kick.core.ResourceDescriptor}
                  */
                 this.getEngineResourceDescriptorsByType = function (type) {
                     var res = [],
                         searchFor,
                         name,
                         uid;
-                    if (type === "KICK.mesh.Mesh") {
+                    if (type === "kick.mesh.Mesh") {
                         searchFor = "ENGINE_MESH_";
-                    } else if (type === "KICK.material.Shader") {
+                    } else if (type === "kick.material.Shader") {
                         searchFor = "ENGINE_SHADER_";
-                    } else if (type === "KICK.texture.Texture") {
+                    } else if (type === "kick.texture.Texture") {
                         searchFor = "ENGINE_TEXTURE_";
                     }
                     if (searchFor) {
@@ -511,7 +511,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 /**
                  * @method getResourceDescriptorsByType
                  * @param {String} type
-                 * @return {Array_KICK.core.ResourceDescriptor}
+                 * @return {Array_kick.core.ResourceDescriptor}
                  */
                 this.getResourceDescriptorsByType = function (type) {
                     var res = [],
@@ -527,7 +527,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 /**
                  * @method getResourceDescriptorsByName
                  * @param {String} type
-                 * @return {Array_KICK.core.ResourceDescriptor}
+                 * @return {Array_kick.core.ResourceDescriptor}
                  */
                 this.getResourceDescriptorsByName = function (name) {
                     var res = [],
@@ -545,7 +545,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 /**
                  * @method getResourceDescriptor
                  * @param {Number} uid
-                 * @return {KICK.core.ResourceDescriptor} resource descriptor (or null if not found)
+                 * @return {kick.core.ResourceDescriptor} resource descriptor (or null if not found)
                  */
                 this.getResourceDescriptor = function (uid) {
                     refreshResourceDescriptor(uid);
@@ -554,8 +554,8 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
 
                 /**
                  * @method addResourceDescriptor
-                 * @param {KICK.core.ResourceDescriptor_or_Object} resourceDescriptor
-                 * @return {KICK.core.ResourceDescriptor}
+                 * @param {kick.core.ResourceDescriptor_or_Object} resourceDescriptor
+                 * @return {kick.core.ResourceDescriptor}
                  */
                 this.addResourceDescriptor = function (resourceDescriptor) {
                     if (!(resourceDescriptor instanceof ResourceDescriptor)) {

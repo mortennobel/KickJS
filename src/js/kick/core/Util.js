@@ -12,15 +12,15 @@ define(["require", "./Constants"], function (require, Constants) {
     /**
      * Utility class for miscellaneous functions. The class is static and is shared between multiple instances.
      * @class Util
-     * @namespace KICK.core
+     * @namespace kick.core
      */
     Util = {
         /**
          * Used for deserializing a configuration (replaces reference objects with actual references)
          * @method deserializeConfig
          * @param {Object} config
-         * @param {KICK.engine.Engine} engine usef for looking up references to project assets
-         * @param {KICK.scene.Scene} scene used for looking up references to gameObjects and components
+         * @param {kick.engine.Engine} engine usef for looking up references to project assets
+         * @param {kick.scene.Scene} scene used for looking up references to gameObjects and components
          */
         deserializeConfig: function (config, engine, scene) {
             var i,
@@ -151,7 +151,7 @@ define(["require", "./Constants"], function (require, Constants) {
         },
         /**
          * @method getJSONReference
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} object
          * @return {JSON}
          */
@@ -183,8 +183,8 @@ define(["require", "./Constants"], function (require, Constants) {
         },
         /**
          * @method componentToJSON
-         * @param {KICK.core.Engine} engine
-         * @param {KICK.scene.Component} component
+         * @param {kick.core.Engine} engine
+         * @param {kick.scene.Component} component
          * @param {String} componentType Optional defaults to component.constructor.name
          * @return {JSON}
          */
@@ -458,12 +458,12 @@ define(["require", "./Constants"], function (require, Constants) {
             return false;
         },
         /**
-         * Packs a Uint32 into a KICK.math.vec4
+         * Packs a Uint32 into a kick.math.vec4
          * @static
          * @method uint32ToVec4
          * @param {Number} uint32
-         * @param {KICK.math.vec4} dest
-         * @return {KICK.math.vec4}
+         * @param {kick.math.vec4} dest
+         * @return {kick.math.vec4}
          */
         uint32ToVec4 : function(uint32, dest) {
             var i;
@@ -477,10 +477,10 @@ define(["require", "./Constants"], function (require, Constants) {
             return dest;
         },
         /**
-         * Unpacks a KICK.math.vec4 into a Uint32
+         * Unpacks a kick.math.vec4 into a Uint32
          * @static
          * @method vec4ToUint32
-         * @param {KICK.math.vec4} vec4
+         * @param {kick.math.vec4} vec4
          */
         vec4ToUint32 : function(vec4) {
             var i;

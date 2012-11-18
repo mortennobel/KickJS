@@ -6,7 +6,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
          * Camera picking object used by Camera objects to manage picking
          * @private
          * @class CameraPicking
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Function} setupClearColor
          * @param {Function} renderSceneObjects
          * @param {Scene} sceneObj
@@ -54,7 +54,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
 
             /**
              * @method handlePickRequests
-             * @param {KICK.scene.SceneLights} sceneLightObj
+             * @param {kick.scene.SceneLights} sceneLightObj
              */
             this.handlePickRequests = function (sceneLightObj, engineUniforms) {
                 if (pickingQueue.length > 0) {

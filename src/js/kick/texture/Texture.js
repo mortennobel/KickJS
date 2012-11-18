@@ -11,11 +11,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
          * Cubemaps must have dimensions width = height * 6 and the order of the cubemap is
          * positiveX, negativeX, positiveY, negativeY, positiveZ, negativeZ
          * @class Texture
-         * @namespace KICK.texture
+         * @namespace kick.texture
          * @constructor
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} config Optional
-         * @extends KICK.core.ProjectAsset
+         * @extends kick.core.ProjectAsset
          */
         return function (engine, config) {
             // extend ProjectAsset
@@ -299,7 +299,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             Object.defineProperties(this, {
                 /**
                  * @property engine
-                 * @type KICK.core.Engine
+                 * @type kick.core.Engine
                  */
                 engine: {
                     value: engine
@@ -558,7 +558,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     thisObj.dataURI = config.dataURI;
                 }
 
-                engine.project.registerObject(thisObj, "KICK.texture.Texture");
+                engine.project.registerObject(thisObj, "kick.texture.Texture");
             }());
         };
 

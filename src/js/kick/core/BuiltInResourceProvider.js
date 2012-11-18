@@ -7,10 +7,10 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
      * Responsible for providing the built-in resources (such as textures, shaders and mesh data).
      * All build-in resources have the prefix kickjs
      * @class BuiltInResourceProvider
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
-     * @extends KICK.core.ResourceProvider
-     * @param {KICK.core.Engine} engine
+     * @extends kick.core.ResourceProvider
+     * @param {kick.core.Engine} engine
      * @private
      */
     return function (engine) {
@@ -35,7 +35,7 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
          * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
          * </ul>
          * @param {String} url
-         * @param {KICK.mesh.Mesh} meshDestination
+         * @param {kick.mesh.Mesh} meshDestination
          */
         this.getMeshData = function (url, meshDestination) {
             var meshDataObj,
@@ -81,7 +81,7 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
          *  </ul>
          * @method getShaderData
          * @param {String} url
-         * @param {KICK.material.Shader} shaderDestination
+         * @param {kick.material.Shader} shaderDestination
          */
         this.getShaderData = function (url, shaderDestination) {
             var i, config,

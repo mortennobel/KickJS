@@ -4,7 +4,7 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
     /**
      * Responsible for loading of resources. Use the Engine object to obtain a reference to this object.
      * @class ResourceLoader
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
      */
     return function (engine) {
@@ -36,26 +36,26 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
         /**
          * @method getMeshData
          * @param {String} uri
-         * @param {KICK.mesh.Mesh} meshDestination
+         * @param {kick.mesh.Mesh} meshDestination
          */
         this.getMeshData = buildCallbackFunc("getMeshData");
         /**
          * @method getImageData
          * @param {String} uri
-         * @param {KICK.texture.Texture} textureDestination
+         * @param {kick.texture.Texture} textureDestination
          */
         this.getImageData = buildCallbackFunc("getImageData");
 
         /**
          * @method getShaderData
          * @param {String} uri
-         * @param {KICK.material.Shader} shaderDestination
+         * @param {kick.material.Shader} shaderDestination
          */
         this.getShaderData = buildCallbackFunc("getShaderData");
 
         /**
          * @method addResourceProvider
-         * @param {KICK.resource.ResourceProvider} resourceProvider
+         * @param {kick.resource.ResourceProvider} resourceProvider
          */
         this.addResourceProvider = function (resourceProvider) {
             resourceProviders.push(resourceProvider);
@@ -63,7 +63,7 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
 
         /**
          * @method removeResourceProvider
-         * @param {KICK.resource.ResourceProvider} resourceProvider
+         * @param {kick.resource.ResourceProvider} resourceProvider
          */
         this.removeResourceProvider = function (resourceProvider) {
             var i;

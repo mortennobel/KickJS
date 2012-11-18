@@ -2,6 +2,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
     function (Constants, Util, Quat4, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture) {
         "use strict";
 
+        /**
+         * @module kick.scene
+         */
+
         var DEBUG = Constants._DEBUG,
             ASSERT = Constants._ASSERT,
             Camera;
@@ -9,8 +13,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
         /**
          * Creates a game camera
          * @class Camera
-         * @namespace KICK.scene
-         * @extends KICK.scene.Component
+         * @namespace kick.scene
+         * @extends kick.scene.Component
          * @constructor
          * @param {Config} configuration with same properties as the Camera
          */
@@ -283,7 +287,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                     /**
                      * Add components that implements the render function and match the camera layerMask to cameras renderable components
                      * @method componentsAdded
-                     * @param {Array_KICK.scene.Component} components
+                     * @param {Array_kick.scene.Component} components
                      * @private
                      */
                     componentsAdded : function (components) {
@@ -311,7 +315,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
 
                     /**
                      * @method componentsRemoved
-                     * @param {Array_KICK.scene.Component} components
+                     * @param {Array_kick.scene.Component} components
                      * @return {Boolean}
                      * @private
                      */
@@ -442,7 +446,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
 
             /**
              * @method renderScene
-             * @param {KICK.scene.SceneLights} sceneLightObj
+             * @param {kick.scene.SceneLights} sceneLightObj
              */
             this.renderScene = function (sceneLightObj) {
                 var i,
@@ -477,7 +481,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                  * Allows usage of replacement material on camera rendering
                  * Default value is null.
                  * @property replacementMaterial
-                 * @type KICK.material.Shader
+                 * @type kick.material.Shader
                  */
                 replacementMaterial: {
                     get: function () { return _replacementMaterial; },
@@ -532,14 +536,14 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 /**
                  * Set the render target of the camera. Null means screen framebuffer.<br>
                  * @property renderTarget
-                 * @type KICK.texture.RenderTexture
+                 * @type kick.texture.RenderTexture
                  */
                 renderTarget: {
                     get: function () { return _renderTarget; },
                     set: function (newValue) {
                         if (c._ASSERT) {
                             if (newValue !== null && !(newValue instanceof RenderTexture)) {
-                                Util.fail("Camera.renderTarget should be null or a KICK.texture.RenderTexture");
+                                Util.fail("Camera.renderTarget should be null or a kick.texture.RenderTexture");
                             }
                         }
                         _renderTarget = newValue;
@@ -700,7 +704,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 /**
                  * Only used when orthogonal camera type (!cameraTypePerspective). Default [0,0,0,1]
                  * @property clearColor
-                 * @type KICK.math.vec4
+                 * @type kick.math.vec4
                  */
                 clearColor: {
                     get: function () {
@@ -779,7 +783,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
              */
             this.toJSON = function () {
                 return {
-                    type: "KICK.scene.Camera",
+                    type: "kick.scene.Camera",
                     uid: thisObj.uid || (engine ? engine.getUID(thisObj) : 0),
                     config: {
                         enabled: _enabled,

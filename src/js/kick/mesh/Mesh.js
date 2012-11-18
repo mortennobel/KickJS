@@ -1,16 +1,20 @@
 define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./MeshData"], function (ProjectAsset, Constants, Util, MeshData) {
     "use strict";
 
+
+    /**
+     * @module kick.mesh
+     */
     var ASSERT = Constants._ASSERT;
 
     /**
      * A Mesh object allows you to bind and render a MeshData object
      * @class Mesh
-     * @namespace KICK.mesh
+     * @namespace kick.mesh
      * @constructor
-     * @param {KICK.core.Engine} engine
+     * @param {kick.core.Engine} engine
      * @param {Object} config
-     * @extends KICK.core.ProjectAsset
+     * @extends kick.core.ProjectAsset
      */
     return function (engine, config) {
         // extend ProjectAsset
@@ -106,7 +110,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
              * Axis aligned bounding box.
              * Readonly.
              * @property aabb
-             * @type KICK.math.aabb
+             * @type kick.math.aabb
              */
             aabb: {
                 get: function () {
@@ -132,7 +136,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
              * Setting this property to something will update the data in WebGL. Note that
              * changing a MeshData object will not itself update anything.
              * @property meshData
-             * @type KICK.mesh.MeshData
+             * @type kick.mesh.MeshData
              */
             meshData: {
                 get: function () {
@@ -141,7 +145,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 set: function (newValue) {
                     if (ASSERT) {
                         if (newValue && !(newValue instanceof MeshData)) {
-                            Util.fail("Mesh.meshData must be instanceof KICK.mesh.MeshData");
+                            Util.fail("Mesh.meshData must be instanceof kick.mesh.MeshData");
                         }
                     }
                     _meshData = newValue;
@@ -179,13 +183,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
         };
 
         Util.applyConfig(this, config);
-        engine.project.registerObject(this, "KICK.mesh.Mesh");
+        engine.project.registerObject(this, "kick.mesh.Mesh");
 
 
         /**
          * This function verifies that the mesh has the vertex attributes (normals, uvs, tangents) that the shader uses.
          * @method verify
-         * @param {KICK.material.Shader} shader
+         * @param {kick.material.Shader} shader
          * @return {Array_String} list of missing vertex attributes in mesh or null if no missing attributes
          */
         this.verify = function (shader) {
@@ -209,7 +213,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
         /**
          * Bind the vertex attributes of the mesh to the shader
          * @method bind
-         * @param {KICK.material.Shader} shader
+         * @param {kick.material.Shader} shader
          */
         this.bind = function (shader) {
             var i,

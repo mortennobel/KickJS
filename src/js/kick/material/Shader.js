@@ -50,11 +50,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
          * </ul>
          * @class Shader
-         * @namespace KICK.material
+         * @namespace kick.material
          * @constructor
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} config
-         * @extends KICK.core.ProjectAsset
+         * @extends kick.core.ProjectAsset
          */
         Shader = function (engine, config) {
             // extend ProjectAsset
@@ -320,7 +320,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
             Object.defineProperties(this, {
                 /**
                  * Lookup of uniform based on name.
-                 * for each name a KICK.material.UniformDescriptor object exist
+                 * for each name a kick.material.UniformDescriptor object exist
                  * @property lookupUniform
                  * @type Object
                  */
@@ -330,7 +330,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 /**
                  * Array of Object with size,type, name and index properties
                  * @property activeUniforms
-                 * @type Array_KICK.material.UniformDescriptor
+                 * @type Array_kick.material.UniformDescriptor
                  */
                 activeUniforms: {
                     get: function () { return _activeUniforms; }
@@ -338,7 +338,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 /**
                  * Array of Object with size,type, name and index properties
                  * @property engineUniforms
-                 * @type Array Array_KICK.material.UniformDescriptor
+                 * @type Array Array_kick.material.UniformDescriptor
                  */
                 engineUniforms: {
                     get: function () { return _engineUniforms; }
@@ -346,7 +346,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 /**
                  * Array of Object with size,type, name and index properties
                  * @property materialUniforms
-                 * @type Array Array_KICK.material.UniformDescriptor
+                 * @type Array Array_kick.material.UniformDescriptor
                  */
                 materialUniforms: {
                     get: function () { return _materialUniforms; }
@@ -474,7 +474,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 /**
                  * A reference to the engine object
                  * @property engine
-                 * @type KICK.core.Engine
+                 * @type kick.core.Engine
                  */
                 engine: {
                     value: engine
@@ -538,8 +538,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     }
                 },
                 /**
-                 * Must be set to KICK.core.Constants.GL_FRONT, KICK.core.Constants.GL_BACK (default),
-                 * KICK.core.Constants.GL_FRONT_AND_BACK, KICK.core.Constants.NONE<br>
+                 * Must be set to kick.core.Constants.GL_FRONT, kick.core.Constants.GL_BACK (default),
+                 * kick.core.Constants.GL_FRONT_AND_BACK, kick.core.Constants.NONE<br>
                  * Note that in faceCulling = GL_FRONT, GL_BACK or GL_FRONT_AND_BACK with face culling enabled<br>
                  * faceCulling = GL_NONE means face culling disabled
                  * @property faceCulling
@@ -553,8 +553,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                                     newValue !== Constants.GL_FRONT_AND_BACK &&
                                     newValue !== Constants.GL_BACK &&
                                     newValue !== Constants.GL_NONE) {
-                                Util.fail("Shader.faceCulling must be KICK.material.Shader.FRONT, " +
-                                    "KICK.material.Shader.BACK (default), KICK.material.Shader.NONE");
+                                Util.fail("Shader.faceCulling must be kick.material.Shader.FRONT, " +
+                                    "kick.material.Shader.BACK (default), kick.material.Shader.NONE");
                             }
                         }
                         _faceCulling = newValue;
@@ -578,14 +578,14 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * The depth test function. Must be one of
-                 * KICK.core.Constants.GL_NEVER,
-                 * KICK.core.Constants.GL_LESS,
-                 * KICK.core.Constants.GL_EQUAL,
-                 * KICK.core.Constants.GL_LEQUAL,
-                 * KICK.core.Constants.GL_GREATER,
-                 * KICK.core.Constants.GL_NOTEQUAL,
-                 * KICK.core.Constants.GL_GEQUAL,
-                 * KICK.core.Constants.GL_ALWAYS
+                 * kick.core.Constants.GL_NEVER,
+                 * kick.core.Constants.GL_LESS,
+                 * kick.core.Constants.GL_EQUAL,
+                 * kick.core.Constants.GL_LEQUAL,
+                 * kick.core.Constants.GL_GREATER,
+                 * kick.core.Constants.GL_NOTEQUAL,
+                 * kick.core.Constants.GL_GEQUAL,
+                 * kick.core.Constants.GL_ALWAYS
                  * @property zTest
                  * @type Object
                  */
@@ -601,10 +601,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                                     newValue !== Constants.GL_NOTEQUAL &&
                                     newValue !== Constants.GL_GEQUAL &&
                                     newValue !== Constants.GL_ALWAYS) {
-                                Util.fail("Shader.zTest must be KICK.core.Constants.GL_NEVER, " +
-                                    "KICK.core.Constants.GL_LESS,KICK.core.Constants.GL_EQUAL,KICK.core.Constants.GL_LEQUAL," +
-                                    "KICK.core.Constants.GL_GREATER,KICK.core.Constants.GL_NOTEQUAL,KICK.core.Constants.GL_GEQUAL, " +
-                                    "or KICK.core.Constants.GL_ALWAYS");
+                                Util.fail("Shader.zTest must be kick.core.Constants.GL_NEVER, " +
+                                    "kick.core.Constants.GL_LESS,kick.core.Constants.GL_EQUAL,kick.core.Constants.GL_LEQUAL," +
+                                    "kick.core.Constants.GL_GREATER,kick.core.Constants.GL_NOTEQUAL,kick.core.Constants.GL_GEQUAL, " +
+                                    "or kick.core.Constants.GL_ALWAYS");
                             }
                         }
                         _zTest = newValue;
@@ -882,7 +882,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
 
             (function init() {
                 Util.applyConfig(thisObj, config);
-                engine.project.registerObject(thisObj, "KICK.material.Shader");
+                engine.project.registerObject(thisObj, "kick.material.Shader");
                 if (_dataURI && _dataURI.indexOf("memory://") !== 0) {
                     engine.resourceLoader.getShaderData(_dataURI, thisObj);
                 } else {
@@ -899,7 +899,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
 
         /**
          * @method getPrecompiledSource
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {String} sourcecode
          * @return {String} sourcecode after precompiler
          * @static
@@ -1016,9 +1016,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          * The uniforms is expected to be in a valid format.
          * The method will call Shader.bindMaterialUniform if material uniforms needs to be changed.
          * @method bindUniform
-         * @param {KICK.material.Material} material
+         * @param {kick.material.Material} material
          * @param {Object} engineUniforms
-         * @param {KICK.scene.Transform) transform
+         * @param {kick.scene.Transform) transform
             */
         Shader.prototype.bindUniform = function (material, engineUniforms, transform) {
             var lookupUniform = this.lookupUniform,
@@ -1103,7 +1103,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          * @method convertUniformValue
          * @param {Number} type
          * @param {Object} uniformValue
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @static
          */
         Shader.convertUniformValue = function (type, uniformValue, engine) {

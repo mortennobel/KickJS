@@ -5,7 +5,7 @@ define([], function () {
      * Responsible for creating or loading a resource using a given url.
      * Abstract class (only defines the interface - inheritance not supported)
      * @class ResourceProvider
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
      * @param {String} protocol
      */
@@ -19,17 +19,17 @@ define([], function () {
     /**
      * @method getMeshData
      * @param {String} uri
-     * @param {KICK.mesh.Mesh} meshDestination
+     * @param {kick.mesh.Mesh} meshDestination
      */
     /**
      * @method getImageData
      * @param {String} uri
-     * @param {KICK.texture.Texture} textureDestination
+     * @param {kick.texture.Texture} textureDestination
      */
     /**
      * @method getShaderData
      * @param {String} uri
-     * @param {KICK.material.Shader} shaderDestination
+     * @param {kick.material.Shader} shaderDestination
      */
     return {};
 });

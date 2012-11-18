@@ -9,9 +9,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
      * It is created when a GameObject is created.
      *
      * KickJS uses a right handed coordinate system.
-     * @namespace KICK.scene
+     * @namespace kick.scene
      * @class Transform
-     * @extends KICK.scene.Component
+     * @extends kick.scene.Component
      */
     Transform = function (gameObject) {
         var localMatrix = Mat4.identity(Mat4.create()),
@@ -58,7 +58,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global position.
              * @property position
-             * @type KICK.math.vec3
+             * @type kick.math.vec3
              */
             position: {
                 get: function () {
@@ -91,7 +91,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Local position.
              * @property localPosition
-             * @type KICK.math.vec3
+             * @type kick.math.vec3
              */
             localPosition: {
                 get: function () {
@@ -105,7 +105,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Local rotation in euler angles.
              * @property localRotationEuler
-             * @type KICK.math.vec3
+             * @type kick.math.vec3
              */
             localRotationEuler: {
                 get: function () {
@@ -121,7 +121,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global rotation in euler angles.
              * @property rotationEuler
-             * @type KICK.math.vec3
+             * @type kick.math.vec3
              */
             rotationEuler: {
                 get: function () {
@@ -139,7 +139,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global rotation in quaternion.
              * @property rotation
-             * @type KICK.math.quat4
+             * @type kick.math.quat4
              */
             rotation: {
                 get: function () {
@@ -171,7 +171,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Local rotation in quaternion.
              * @property localRotation
-             * @type KICK.math.quat4
+             * @type kick.math.quat4
              */
             localRotation: {
                 get: function () {
@@ -186,7 +186,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
              * Local scale.
              * Any zero value will be replaced with an epsilon value.
              * @property localScale
-             * @type KICK.math.vec3
+             * @type kick.math.vec3
              */
             localScale: {
                 get: function () {
@@ -207,7 +207,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Array of children. The children should not be modified directly. Instead use the parent property
              * @property children
-             * @type Array_KICK.scene.Transform
+             * @type Array_kick.scene.Transform
              */
             children: {
                 value: children
@@ -215,7 +215,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Parent transform. Initial null.
              * @property parent
-             * @type KICK.scene.Transform
+             * @type kick.scene.Transform
              */
             parent: {
                 get: function () {
@@ -248,14 +248,14 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
          *
          * Todo: known issue does not work when thisObj has parent object
          * @method lookAt
-         * @param {KICK.scene.Transform} transform target object to look at
+         * @param {kick.scene.Transform} transform target object to look at
          * @param {Object} type the constructor of the wanted component
-         * @return {KICK.math.mat4} local transformation
+         * @return {kick.math.mat4} local transformation
          */
         this.lookAt = function (transform, up) {
             if (ASSERT) {
                 if (!(transform instanceof Transform)) {
-                    Util.fail("transform must be a KICK.scene.Transform");
+                    Util.fail("transform must be a kick.scene.Transform");
                 }
             }
             Quat4.lookAt(thisObj.position, transform.position, up, localRotationQuat);
@@ -265,7 +265,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
         /**
          * Return the local transformation matrix
          * @method getLocalMatrix
-         * @return {KICK.math.mat4} local transformation
+         * @return {kick.math.mat4} local transformation
          */
         this.getLocalMatrix = function () {
             if (dirty[LOCAL]) {
@@ -278,7 +278,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
         /**
          * Return the local inverse of translate rotate scale
          * @method getLocalTRSInverse
-         * @return {KICK.math.mat4} inverse of local transformation
+         * @return {kick.math.mat4} inverse of local transformation
          */
         this.getLocalTRSInverse = function () {
             if (dirty[LOCAL_INV]) {
@@ -290,7 +290,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
 
         /**
          * @method getGlobalMatrix
-         * @return {KICK.math.mat4} global transform
+         * @return {kick.math.mat4} global transform
          */
         this.getGlobalMatrix = function () {
             if (dirty[GLOBAL]) {
@@ -309,7 +309,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
         /**
          * Return the inverse of global rotate translate transform
          * @method getGlobalTRSInverse
-         * @return {KICK.math.mat4} inverse global transform
+         * @return {kick.math.mat4} inverse global transform
          */
         this.getGlobalTRSInverse = function () {
             if (dirty[GLOBAL_INV]) {
@@ -345,7 +345,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
                 }
             }
             return {
-                type: "KICK.scene.Transform",
+                type: "kick.scene.Transform",
                 uid: gameObject.engine.getUID(thisObj),
                 config: {
                     localPosition: typedArrayToArray(localPosition),

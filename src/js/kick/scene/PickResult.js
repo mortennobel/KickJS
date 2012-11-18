@@ -5,7 +5,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
         /**
          * Result of Camera.pickPoint.
          *
-         * @param {KICK.scene.GameObject} gameObject
+         * @param {kick.scene.GameObject} gameObject
          * @param {Integer} x
          * @param {Integer} y
          * @constructor
@@ -16,8 +16,8 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
                 /**
                  * @private
                  * @method renderObjectWithShader
-                 * @param {KICK.material.Shader} shader
-                 * @return KICK.math.vec4
+                 * @param {kick.material.Shader} shader
+                 * @return kick.math.vec4
                  */
                 renderObjectWithShader = function (shader) {
                     var array = new Uint8Array(4),
@@ -77,7 +77,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
                 /**
                  * The normal (in object coordinates) at the pick point
                  * @property normal
-                 * @type KICK.math.vec3
+                 * @type kick.math.vec3
                  */
                 normal: {
                     get: function () {
@@ -90,7 +90,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
                 /**
                  * The uv of the pick point
                  * @property uv
-                 * @type KICK.math.vec2
+                 * @type kick.math.vec2
                  */
                 uv: {
                     get: function () {

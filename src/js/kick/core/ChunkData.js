@@ -10,7 +10,7 @@ define(["./Util", "./Constants"], function (Util, constants) {
     /**
      * Chunk data format object
      * @class ChunkData
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
      */
     return function () {

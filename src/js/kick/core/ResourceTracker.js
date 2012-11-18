@@ -4,7 +4,7 @@ define([], function () {
     /**
      * Class used for tracking initialization of resources (such as loading, creating, etc.)
      * @class ResourceTracker
-     * @param {KICK.core.Project} project
+     * @param {kick.core.Project} project
      */
     return function (project) {
         var thisObj = this;

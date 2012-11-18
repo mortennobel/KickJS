@@ -9,8 +9,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
          * A light object.<br>
          * Note that each scene can only have one ambient light and one directional light.
          * @class Light
-         * @namespace KICK.scene
-         * @extends KICK.scene.Component
+         * @namespace kick.scene
+         * @extends kick.scene.Component
          * @constructor
          * @param {Object} config
          * @final
@@ -64,7 +64,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 /**
                  * Short for lightObj.gameObject.transform
                  * @property transform
-                 * @type KICK.scene.Transform
+                 * @type kick.scene.Transform
                  */
                 transform: {
                     get: function () {
@@ -73,7 +73,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 },
                 /**
                  * @property shadowRenderTexture
-                 * @type KICK.texture.RenderTexture
+                 * @type kick.texture.RenderTexture
                  */
                 shadowRenderTexture: {
                     get: function () {
@@ -82,7 +82,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 },
                 /**
                  * @property shadowTexture
-                 * @type KICK.texture.Texture
+                 * @type kick.texture.Texture
                  */
                 shadowTexture: {
                     get: function () {
@@ -140,7 +140,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 /**
                  * Color intensity of the light (RGB). Default [1,1,1]
                  * @property color
-                 * @type KICK.math.vec3
+                 * @type kick.math.vec3
                  */
                 color: {
                     get: function () {
@@ -206,7 +206,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * attenuation[2] is quadratic attenuation.<br>
                  * Default value is (1,0,0)
                  * @property attenuation
-                 * @type KICK.math.vec3
+                 * @type kick.math.vec3
                  */
                 attenuation: {
                     get: function () {
@@ -222,7 +222,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * This property exposes a internal value. This value should not be modified.
                  * Instead use the intensity and color property.
                  * @property colorIntensity
-                 * @type KICK.math.vec3
+                 * @type kick.math.vec3
                  * @final
                  */
                 colorIntensity: {
@@ -267,7 +267,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
              * @return {JSON}
              */
             this.toJSON = function () {
-                return Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.Light");
+                return Util.componentToJSON(thisObj.gameObject.engine, this, "kick.scene.Light");
             };
 
             Util.applyConfig(this, config);

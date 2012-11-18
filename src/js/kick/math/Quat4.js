@@ -12,7 +12,7 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Any javascript array containing at least 4 numeric elements can serve as a quat4
          * @method create
          * @param {Array_Number} quat Optional, quat4 containing values to initialize with
-         * @return {KICK.math.quat4} New quat4
+         * @return {kick.math.quat4} New quat4
          * @static
          */
         create: vec4.create,
@@ -20,9 +20,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Copies the values of one quat4 to another
          * @method set
-         * @param {KICK.math.quat4} quat quat4 containing values to copy
-         * @param {KICK.math.quat4} dest quat4 receiving copied values
-         * @return {KICK.math.quat4} dest
+         * @param {kick.math.quat4} quat quat4 containing values to copy
+         * @param {kick.math.quat4} dest quat4 receiving copied values
+         * @return {kick.math.quat4} dest
          * @static
          */
         set: vec4.set,
@@ -32,9 +32,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Assumes that quaternion is 1 unit in length.<br>
          * Any existing W component will be ignored.
          * @method calculateW
-         * @param {KICK.math.quat4} quat quat4 to calculate W component of
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving calculated values. If not specified result is written to quat
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} quat quat4 to calculate W component of
+         * @param {kick.math.quat4} dest Optional, quat4 receiving calculated values. If not specified result is written to quat
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         calculateW: function (quat, dest) {
@@ -56,9 +56,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Calculates the inverse of a quat4.
          * Note that if the quat is normalized, it is much faster to use quat4.conjugate
          * @method inverse
-         * @param {KICK.math.quat4} quat quat4 to calculate inverse of
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} quat quat4 to calculate inverse of
+         * @param {kick.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         inverse: function (quat, dest) {
@@ -81,9 +81,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Calculates the conjugate of a quat4
          * @method conjugate
-         * @param {KICK.math.quat4} quat quat4 to calculate conjugate of
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} quat quat4 to calculate conjugate of
+         * @param {kick.math.quat4} dest Optional, quat4 receiving inverse values. If not specified result is written to quat
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         conjugate: function (quat, dest) {
@@ -103,7 +103,7 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Calculates the length of a quat4
          * @method length
-         * @param {KICK.math.quat4} quat quat4 to calculate length of
+         * @param {kick.math.quat4} quat quat4 to calculate length of
          * @return {Number} Length of quat
          * @static
          */
@@ -112,8 +112,8 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Returns dot product of q1 and q1
          * @method dot
-         * @param {KICK.math.quat4} q1
-         * @param {KICK.math.quat4} q2
+         * @param {kick.math.quat4} q1
+         * @param {kick.math.quat4} q2
          * @return {Number}
          * @static
          */
@@ -123,9 +123,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Generates a unit quaternion of the same direction as the provided quat4<br>
          * If quaternion length is 0, returns [0, 0, 0, 0]
          * @method normalize
-         * @param {KICK.math.quat4} quat quat4 to normalize
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} quat quat4 to normalize
+         * @param {kick.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         normalize: function (quat, dest) {
@@ -152,10 +152,10 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Performs a quaternion multiplication
          * @method multiply
-         * @param {KICK.math.quat4} quat first operand
-         * @param {KICK.math.quat4} quat2 second operand
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} quat first operand
+         * @param {kick.math.quat4} quat2 second operand
+         * @param {kick.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         multiply: function (quat, quat2, dest) {
@@ -175,10 +175,10 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Transforms a vec3 with the given quaternion
          * @method multiplyVec3
-         * @param {KICK.math.quat4} quat quat4 to transform the vector with
-         * @param {KICK.math.vec3} vec vec3 to transform
-         * @param {KICK.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.quat4} quat quat4 to transform the vector with
+         * @param {kick.math.vec3} vec vec3 to transform
+         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec3} dest if specified, vec otherwise
          * @static
          */
         multiplyVec3: function (quat, vec, dest) {
@@ -204,8 +204,8 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Set the identity to the quaternion (0,0,0,1)
          * @method identity
-         * @param {KICK.math.quat4} dest Optional, quat4 to set the identity to
-         * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+         * @param {kick.math.quat4} dest Optional, quat4 to set the identity to
+         * @return {kick.math.quat4} dest if specified, a new quat4 otherwise
          * @static
          */
         identity: function (dest) {
@@ -221,9 +221,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Calculates a rotation represented in Eulers angles (in degrees)
          * Pitch->X axis, Yaw->Y axis, Roll->Z axis
          * @method toEuler
-         * @param {KICK.math.quat4} quat quat4 to create matrix from
-         * @param {KICK.math.vec3} dest Optional, vec3  receiving operation result
-         * @return {KICK.math.vec3} dest if specified, a new vec3 otherwise
+         * @param {kick.math.quat4} quat quat4 to create matrix from
+         * @param {kick.math.vec3} dest Optional, vec3  receiving operation result
+         * @return {kick.math.vec3} dest if specified, a new vec3 otherwise
          * @static
          */
         toEuler: function (quat, dest) {
@@ -244,9 +244,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Set the rotation based on an angle and a axis
          * @method angleAxis
          * @param {Number} angle rotation angle in degrees
-         * @param {KICK.math.vec3} vec normalized axis
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
-         * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+         * @param {kick.math.vec3} vec normalized axis
+         * @param {kick.math.quat4} dest Optional, quat4 receiving operation result
+         * @return {kick.math.quat4} dest if specified, a new quat4 otherwise
          * @static
          */
         angleAxis: function (angle, vec, dest) {
@@ -266,11 +266,11 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Compute the lookAt rotation
          * @method lookAt
-         * @param {KICK.math.vec3} position
-         * @param {KICK.math.vec3} target
-         * @param {KICK.math.vec3} up
-         * @param {KICK.math.quat4} dest optional
-         * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+         * @param {kick.math.vec3} position
+         * @param {kick.math.vec3} target
+         * @param {kick.math.vec3} up
+         * @param {kick.math.quat4} dest optional
+         * @return {kick.math.quat4} dest if specified, a new quat4 otherwise
          * @static
          */
         lookAt: (function () {
@@ -303,9 +303,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Set the rotation based on Eulers angles.
          * Pitch->X axis, Yaw->Y axis, Roll->Z axis
          * @method setEuler
-         * @param {KICK.math.vec3} vec vec3 eulers angles (degrees)
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result
-         * @return {KICK.math.quat4} dest if specified, a new quat4 otherwise
+         * @param {kick.math.vec3} vec vec3 eulers angles (degrees)
+         * @param {kick.math.quat4} dest Optional, quat4 receiving operation result
+         * @return {kick.math.quat4} dest if specified, a new quat4 otherwise
          * @static
          */
         setEuler: function (vec, dest) {
@@ -329,9 +329,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
 
         /**
          * @method setFromRotationMatrix
-         * @param {KICK.math.mat4} mat
-         * @param {KICK.math.quat4} dest Optional
-         * @return {KICK.math.quat4}
+         * @param {kick.math.mat4} mat
+         * @param {kick.math.quat4} dest Optional
+         * @return {kick.math.quat4}
          * @static
          */
         setFromRotationMatrix: function (mat, dest) {
@@ -366,9 +366,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Calculates a 3x3 matrix from the given quat4
          * @method toMat3
-         * @param {KICK.math.quat4} quat quat4 to create matrix from
-         * @param {KICK.math.mat3} dest Optional, mat3 receiving operation result
-         * @return {KICK.math.mat3} dest if specified, a new mat3 otherwise
+         * @param {kick.math.quat4} quat quat4 to create matrix from
+         * @param {kick.math.mat3} dest Optional, mat3 receiving operation result
+         * @return {kick.math.mat3} dest if specified, a new mat3 otherwise
          * @static
          */
         toMat3: function (quat, dest) {
@@ -407,9 +407,9 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Calculates a 4x4 matrix from the given quat4
          * @method toMat4
-         * @param {KICK.math.quat4} quat quat4 to create matrix from
-         * @param {KICK.math.mat4} dest Optional, mat4 receiving operation result
-         * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+         * @param {kick.math.quat4} quat quat4 to create matrix from
+         * @param {kick.math.mat4} dest Optional, mat4 receiving operation result
+         * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
          * @static
          */
         toMat4: function (quat, dest) {
@@ -456,11 +456,11 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Performs a spherical linear interpolation between two quat4
          * @method slerp
-         * @param {KICK.math.quat4} quat first quaternion
-         * @param {KICK.math.quat4} quat2 second quaternion
+         * @param {kick.math.quat4} quat first quaternion
+         * @param {kick.math.quat4} quat2 second quaternion
          * @param {Number} slerp interpolation amount between the two inputs
-         * @param {KICK.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} dest Optional, quat4 receiving operation result. If not specified result is written to quat
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         slerp: function (quat, quat2, slerp, dest) {
@@ -508,10 +508,10 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
          * Return rotation that goes from quat to quat2.<br>
          * It is the same as: quat4.multiply(quat4.inverse(quat),quat2,dest);
          * @method difference
-         * @param {KICK.math.quat4} quat from rotation
-         * @param {KICK.math.quat4} quat2 to rotation
-         * @param {KICK.math.quat4} dest Optional
-         * @return {KICK.math.quat4} dest if specified, quat otherwise
+         * @param {kick.math.quat4} quat from rotation
+         * @param {kick.math.quat4} quat2 to rotation
+         * @param {kick.math.quat4} dest Optional
+         * @return {kick.math.quat4} dest if specified, quat otherwise
          * @static
          */
         difference: function (quat, quat2, dest) {
@@ -531,7 +531,7 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
         /**
          * Returns a string representation of a quaternion
          * @method str
-         * @param {KICK.math.quat4} quat quat4 to represent as a string
+         * @param {kick.math.quat4} quat quat4 to represent as a string
          * @return {String} string representation of quat
          * @static
          */

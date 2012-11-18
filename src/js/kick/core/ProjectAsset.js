@@ -6,13 +6,13 @@ define(["kick/core/Constants", "./Util"], function (Constants, Util) {
     /**
      * A project asset is an object that can be serialized into a project and restored at a later state.<br>
      * The class is used to describe the behavior any project asset must implement, but instanceof operator does not work.<br>
-     * The constructor must take the following two parameters: KICK.core.Engine engine, {Object} config<br>
+     * The constructor must take the following two parameters: kick.core.Engine engine, {Object} config<br>
      * The config parameter is used to initialize the object and the content should match the output of the
      * toJSON method<br>
      * A toJSON method should exist on the object. This method should as a minimum write out the object's uid property.<br>
      * ProjectAsset objects may reference other ProjectAsset objects, however cyclic references are not allowed.
      * @class ProjectAsset
-     * @namespace KICK.core
+     * @namespace kick.core
      */
     return function (subClass) {
         var uid = 0;

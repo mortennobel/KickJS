@@ -6,16 +6,16 @@ define([], function () {
      * Note that object only need to implement the methods componentsAdded and componentsRemoved.<br>
      * However the class does exist and has the static method isComponentListener
      * @class ComponentChangedListener
-     * @namespace KICK.scene
+     * @namespace kick.scene
      */
     return {
         /**
          * @method componentsAdded
-         * @param {Array_KICK.scene.Components} components
+         * @param {Array_kick.scene.Components} components
          */
         /**
          * @method componentsRemoved
-         * @param {Array_KICK.scene.Components} components
+         * @param {Array_kick.scene.Components} components
          */
         /**
          * @method isComponentListener

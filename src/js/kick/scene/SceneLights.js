@@ -7,7 +7,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
         /**
          * Datastructure used pass light information
          * @class SceneLights
-         * @namespace KICK.scene
+         * @namespace kick.scene
          * @constructor
          * @param {Number} maxNumerOfLights (value from config)
          */
@@ -42,7 +42,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 /**
                  * The ambient light in the scene.
                  * @property ambientLight
-                 * @type KICK.scene.Light
+                 * @type kick.scene.Light
                  */
                 ambientLight: {
                     get: function () {
@@ -60,7 +60,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 /**
                  * The directional light in the scene.
                  * @property directionalLight
-                 * @type KICK.scene.Light
+                 * @type kick.scene.Light
                  */
                 directionalLight: {
                     get: function () {
@@ -85,7 +85,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                  * Matrix of directional light data. Column 1 contains the light-direction in eye space,
                  * column 2 color intensity and column 3 half vector
                  * @property directionalLightData
-                 * @type KICK.math.mat3
+                 * @type kick.math.mat3
                  */
                 directionalLightData: {
                     get: function () {
@@ -95,7 +95,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 /**
                  * Return the directional light in world space
                  * @property directionalLightWorld
-                 * @type KICK.math.vec3
+                 * @type kick.math.vec3
                  */
                 directionalLightWorld: {
                     get: function () {
@@ -117,7 +117,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
 
             /**
              * @method addPointLight
-             * @param {KICK.scene.Light} pointLight
+             * @param {kick.scene.Light} pointLight
              */
             this.addPointLight = function (pointLight) {
                 if (!Util.contains(pointLights, pointLight)) {
@@ -133,7 +133,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
 
             /**
              * @method removePointLight
-             * @param {KICK.scene.Light} pointLight
+             * @param {kick.scene.Light} pointLight
              */
             this.removePointLight = function (pointLight) {
                 var index = pointLights.indexOf(pointLight);
@@ -152,7 +152,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
              * Recompute the light based on the view-matrix. This method is called from the camera when the scene is
              * rendered, to transform the light into eye coordinates and compute the half vector for directional light
              * @method recomputeLight
-             * @param {KICK.math.mat4} viewMatrix
+             * @param {kick.math.mat4} viewMatrix
              */
             this.recomputeLight = function (viewMatrix) {
                 if (directionalLight !== null) {

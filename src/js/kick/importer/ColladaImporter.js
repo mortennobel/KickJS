@@ -2,6 +2,10 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
     function (math, Constants, Util, MeshData, Mesh, MeshRenderer, Material) {
         "use strict";
 
+        /**
+         * @module kick.importer
+         */
+
         var quat4 = math.Quat4,
             mat4 = math.Mat4,
             getXMLElementById = function (doc, id) {
@@ -11,15 +15,15 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
             /**
              * Imports a Collada meshes into a scene
              * @class ColladaImporter
-             * @namespace KICK.importer
+             * @namespace kick.importer
              */
                 ColladaImporter = {};
 
         /**
          * @method import
          * @param {XMLDom_or_String} colladaDOM
-         * @param {KICK.core.Engine} engine
-         * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+         * @param {kick.core.Engine} engine
+         * @param {kick.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties(mesh:[], gameObjects:[], materials:[])
          * @static
@@ -129,7 +133,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                  * @method buildFromPolyList
                  * @private
                  * @param {XMLDomElement} polylist
-                 * @param {KICK.mesh.MeshData} destMeshData
+                 * @param {kick.mesh.MeshData} destMeshData
                  */
                     buildFromPolyList = function (polylist, destMeshData, vertexAttributeCache) {
                     var polylistChild = polylist.firstChild,

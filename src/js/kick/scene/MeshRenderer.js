@@ -10,8 +10,8 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
          * render() method.
          * @class MeshRenderer
          * @constructor
-         * @namespace KICK.scene
-         * @extends KICK.scene.Component
+         * @namespace kick.scene
+         * @extends kick.scene.Component
          * @final
          * @param {Object} config configuration
          */
@@ -52,7 +52,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 /**
                  * Shortcut for materials[0]
                  * @property material
-                 * @type KICK.material.Material
+                 * @type kick.material.Material
                  */
                 material: {
                     get: function () {
@@ -64,7 +64,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                     set: function (newValue) {
                         if (ASSERT) {
                             if (!(newValue instanceof Material)) {
-                                Util.fail("MeshRenderer.material must be a KICK.material.Material");
+                                Util.fail("MeshRenderer.material must be a kick.material.Material");
                             }
                         }
                         _materials[0] = newValue;
@@ -77,7 +77,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 /**
                  *
                  * @property materias
-                 * @type Array_KICK.material.Material
+                 * @type Array_kick.material.Material
                  */
                 materials: {
                     get: function () {
@@ -89,7 +89,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                         for (i = 0; i < newValue.length; i++) {
                             if (ASSERT) {
                                 if (!(newValue[i] instanceof Material)) {
-                                    Util.fail("MeshRenderer.material must be a KICK.material.Material");
+                                    Util.fail("MeshRenderer.material must be a kick.material.Material");
                                 }
                             }
                             _materials[i] = newValue[i];
@@ -103,7 +103,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 },
                 /**
                  * @property mesh
-                 * @type KICK.mesh.Mesh
+                 * @type kick.mesh.Mesh
                  */
                 mesh: {
                     get: function () {
@@ -112,7 +112,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                     set: function (newValue) {
                         if (ASSERT) {
                             if (!(newValue instanceof Mesh)) {
-                                Util.fail("MeshRenderer.mesh must be a KICK.mesh.Mesh");
+                                Util.fail("MeshRenderer.mesh must be a kick.mesh.Mesh");
                             }
                         }
                         _mesh = newValue;
@@ -124,8 +124,8 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
             /**
              * This method may not be called (the renderer could make the same calls)
              * @method render
-             * @param {KICK.scene.EngineUniforms} engineUniforms
-             * @param {KICK.material.Material} overwriteMaterial Optional
+             * @param {kick.scene.EngineUniforms} engineUniforms
+             * @param {kick.material.Material} overwriteMaterial Optional
              */
             this.render = function (engineUniforms, overwriteMaterial) {
                 var length = _materials.length,
@@ -156,7 +156,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 if (!thisObj.gameObject) {
                     return null; // component is destroyed
                 } else {
-                    return Util.componentToJSON(thisObj.gameObject.engine, this, "KICK.scene.MeshRenderer");
+                    return Util.componentToJSON(thisObj.gameObject.engine, this, "kick.scene.MeshRenderer");
                 }
             };
 

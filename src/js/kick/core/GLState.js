@@ -9,15 +9,15 @@ define(["kick/core/Constants"], function (constants) {
      * method needs to be reset (set to null).
      * @class GLState
      * @constructor
-     * @namespace KICK.core
-     * @param {KICK.core.Engine} engine
+     * @namespace kick.core
+     * @param {kick.core.Engine} engine
      */
     return function () {
         var thisObj = this;
         /**
          * The current clear color
          * @property currentClearColor
-         * @type KICK.math.vec4
+         * @type kick.math.vec4
          */
         this.currentClearColor = null;
         /**
@@ -29,25 +29,25 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * The shader bound by the current mesh
          * @property meshShader
-         * @type KICK.material.Shader
+         * @type kick.material.Shader
          */
         this.meshShader = null;
         /**
          * Represents the current rendertarget state
          * @property renderTarget
-         * @type KICK.texture.RenderTexture
+         * @type kick.texture.RenderTexture
          */
         this.renderTarget = null;
         /**
          * Represents the current shader bound
          * @property boundShader
-         * @type KICK.material.Shader
+         * @type kick.material.Shader
          */
         this.boundShader = null;
         /**
          * Represent the material used
          * @property currentMaterial
-         * @type KICK.material.Material
+         * @type kick.material.Material
          */
         this.currentMaterial = null;
 
@@ -91,7 +91,7 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * The size of the current viewport
          * @property viewportSize
-         * @type KICK.math.vec2
+         * @type kick.math.vec2
          */
         this.viewportSize = null;
 

@@ -11,12 +11,12 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
      * "Fast Extraction of Viewing Frustum Planes from the WorldView-Projection Matrix" by Gil Grib and Klaus Hartmann
      * http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf
      * @class frustum
-     * @namespace KICK.math
+     * @namespace kick.math
      */
     return {
         /**
          * @method extractPlanes
-         * @param {KICK.math.mat4} modelViewMatrix
+         * @param {kick.math.mat4} modelViewMatrix
          * @param {Boolean} normalize normalize plane normal
          * @param {Array_24} dest
          * @return {Array_24} 6 plane equations
@@ -109,8 +109,8 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
         /**
          * Based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.14.3
          * @method intersectAabb
-         * @param {KICK.math.frustum} frustumPlanes
-         * @param {KICK.math.aabb} aabbIn
+         * @param {kick.math.frustum} frustumPlanes
+         * @param {kick.math.aabb} aabbIn
          * @return {Number} frustum.OUTSIDE = outside(0), frustum.INSIDE = inside(1), frustum.INTERSECTING = intersecting(2)
          * @static
          */

@@ -4,7 +4,7 @@ define([], function () {
     /**
      * Mat3 - 3x3 Matrix
      * @class Mat3
-     * @namespace KICK.math
+     * @namespace kick.math
      */
     return {
         /**
@@ -12,7 +12,7 @@ define([], function () {
          * Any javascript array containing at least 9 numeric elements can serve as a mat3
          * @method create
          * @param {Array_Number} mat Optional, mat3 containing values to initialize with
-         * @return {KICK.math.mat3} New mat3
+         * @return {kick.math.mat3} New mat3
          * @static
          */
         create: function (mat) {
@@ -36,9 +36,9 @@ define([], function () {
         /**
          * Copies the values of one mat3 to another
          * @method set
-         * @param {KICK.math.mat3} mat mat3 containing values to copy
-         * @param {KICK.math.mat3} dest mat3 receiving copied values
-         * @return {KICK.math.mat3} dest
+         * @param {kick.math.mat3} mat mat3 containing values to copy
+         * @param {kick.math.mat3} dest mat3 receiving copied values
+         * @return {kick.math.mat3} dest
          * @static
          */
         set: function (mat, dest) {
@@ -57,8 +57,8 @@ define([], function () {
         /**
          * Sets a mat3 to an identity matrix
          * @method identity
-         * @param {KICK.math.mat3} dest mat3 to set
-         * @return {KICK.math.mat3} dest
+         * @param {kick.math.mat3} dest mat3 to set
+         * @return {kick.math.mat3} dest
          * @static
          */
         identity: function (dest) {
@@ -78,9 +78,9 @@ define([], function () {
         /**
          * Transposes a mat3 (flips the values over the diagonal)
          * @method transpose
-         * @param {KICK.math.mat3} mat mat3 to transpose
-         * @param {KICK.math.mat3} dest Optional, mat3 receiving transposed values. If not specified result is written to mat
-         * @return {KICK.math.mat3} dest is specified, mat otherwise
+         * @param {kick.math.mat3} mat mat3 to transpose
+         * @param {kick.math.mat3} dest Optional, mat3 receiving transposed values. If not specified result is written to mat
+         * @return {kick.math.mat3} dest is specified, mat otherwise
          * @static
          */
         transpose: function (mat, dest) {
@@ -113,9 +113,9 @@ define([], function () {
         /**
          * Copies the elements of a mat3 into the upper 3x3 elements of a mat4
          * @method toMat4
-         * @param {KICK.math.mat3} mat mat3 containing values to copy
-         * @param {KICK.math.mat4} dest Optional, mat4 receiving copied values
-         * @return {KICK.math.mat4} dest if specified, a new mat4 otherwise
+         * @param {kick.math.mat3} mat mat3 containing values to copy
+         * @param {kick.math.mat4} dest Optional, mat4 receiving copied values
+         * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
          * @static
          */
         toMat4: function (mat, dest) {
@@ -146,9 +146,9 @@ define([], function () {
 
         /**
          * Transform a mat3 into a rotation (quaternion).
-         * @param {KICK.math.mat3} mat
-         * @param {KICK.math.quat4} dest
-         * @return {KICK.math.quat4}
+         * @param {kick.math.mat3} mat
+         * @param {kick.math.quat4} dest
+         * @return {kick.math.quat4}
          * @static
          */
         toQuat: function (mat, dest) {
@@ -195,7 +195,7 @@ define([], function () {
         /**
          * Returns a string representation of a mat3
          * @method str
-         * @param {KICK.math.mat3} mat mat3 to represent as a string
+         * @param {kick.math.mat3} mat mat3 to represent as a string
          * @return {String} string representation of mat
          * @static
          */
@@ -208,7 +208,7 @@ define([], function () {
         /**
          * Returns a string representation of a mat3 printed as a 4x4 matrix (on 3 lines)
          * @method strPretty
-         * @param {KICK.math.mat3} mat mat3 to represent as a string
+         * @param {kick.math.mat3} mat mat3 to represent as a string
          * @return {String} string representation of mat
          * @static
          */

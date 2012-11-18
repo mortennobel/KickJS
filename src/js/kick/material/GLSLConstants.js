@@ -5,7 +5,7 @@ define([], function () {
      * Contains glsl source code constants<br>
      * The content of this class is generated from the content of the file folder src/glsl
      * @class GLSLConstants
-     * @namespace KICK.material
+     * @namespace kick.material
      * @static
      */
     // created by include_glsl_files.js - do not edit content

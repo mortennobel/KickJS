@@ -3,7 +3,7 @@ define([], function () {
 
     /**
      * This class only specifies the interface of a component.
-     * @namespace KICK.scene
+     * @namespace kick.scene
      * @class Component
      */
 
@@ -11,7 +11,7 @@ define([], function () {
      * The gameObject owning the component. Initially undefined. The value is set when the Component object is added
      * to a GameObject
      * @property gameObject
-     * @type KICK.scene.GameObject
+     * @type kick.scene.GameObject
      */
 
     /**
@@ -31,8 +31,8 @@ define([], function () {
     /**
      * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
-     * @param {KICK.scene.EngineUniforms} engineUniforms
-     * @param {KICK.material.Material} overwriteMaterial Optional
+     * @param {kick.scene.EngineUniforms} engineUniforms
+     * @param {kick.material.Material} overwriteMaterial Optional
      */
 
     /**
@@ -45,7 +45,7 @@ define([], function () {
      * Defines the axis aligned bounding box used for view frustum culling
      * May be undefined or null.
      * @property aabb
-     * @type KICK.math.aabb
+     * @type kick.math.aabb
      */
 
     /**
@@ -64,8 +64,8 @@ define([], function () {
 
     /**
      * Creates a JSON version of the configuration of the class. May be undefined, if so the
-     * KICK.core.Util.componentToJSON() are used for serializaing of the component.<br>
-     * Note that references to assets, gameObjects or other components should be wrapped by the KICK.core.Util.getJSONReference() method
+     * kick.core.Util.componentToJSON() are used for serializaing of the component.<br>
+     * Note that references to assets, gameObjects or other components should be wrapped by the kick.core.Util.getJSONReference() method
      * @method toJSON
      * @return {Object}
      */

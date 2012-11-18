@@ -4,10 +4,10 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
     /**
      * Fall back handler of resources
      * @class URLResourceProvider
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
-     * @extends KICK.core.ResourceProvider
-     * @param {KICK.core.Engine} engine
+     * @extends kick.core.ResourceProvider
+     * @param {kick.core.Engine} engine
      * @private
      */
     return function (engine) {

@@ -5,11 +5,11 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
         /**
          * Render texture (used for camera's render target)
          * @class RenderTexture
-         * @namespace KICK.texture
+         * @namespace kick.texture
          * @constructor
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} config Optional
-         * @extends KICK.core.ProjectAsset
+         * @extends kick.core.ProjectAsset
          */
         return function (engine, config) {
             // extend ProjectAsset
@@ -85,7 +85,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
             Object.defineProperties(this, {
                 /**
                  * @property dimension
-                 * @type KICK.math.vec2
+                 * @type kick.math.vec2
                  */
                 dimension: {
                     get: function () {
@@ -100,7 +100,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                 },
                 /**
                  * @property colorTexture
-                 * @type KICK.texture.Texture
+                 * @type kick.texture.Texture
                  */
                 colorTexture: {
                     get: function () { return colorTexture; },
@@ -147,7 +147,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
             (function init() {
                 // apply
                 Util.applyConfig(thisObj, config);
-                engine.project.registerObject(thisObj, "KICK.texture.RenderTexture");
+                engine.project.registerObject(thisObj, "kick.texture.RenderTexture");
             }());
         };
 

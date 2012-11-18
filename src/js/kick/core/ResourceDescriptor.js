@@ -10,18 +10,18 @@ define(["./Util"], function (Util) {
      *          shader:"Undefined",
      *          uniforms: {
      *              value:42,
-     *              type: KICK.core.Constants.GL_FLOAT
+     *              type: kick.core.Constants.GL_FLOAT
      *          }
      *      };
      *      var resourceDescriptorConfig = {
-     *          type: "KICK.material.Material",
+     *          type: "kick.material.Material",
      *          config: materialConfig,
      *          uid: 132
      *      };
      *      var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
      * </pre>
      * @class ResourceDescriptor
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
      * @param {Object} config an object which attributes matches the properties of ResourceDescriptor
      */
@@ -70,7 +70,7 @@ define(["./Util"], function (Util) {
                 }
             },
             /**
-             * class name of the resource (such as 'KICK.material.Material')
+             * class name of the resource (such as 'kick.material.Material')
              * @property type
              * @type String
              */
@@ -111,7 +111,7 @@ define(["./Util"], function (Util) {
          * (engine,config) parameters.<br>
          * If the resource object has a init function, this is also invoked.
          * @method instantiate
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @return {Object} instance of the resource
          */
         this.instantiate = function (engine) {

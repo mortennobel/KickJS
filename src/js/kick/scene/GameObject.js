@@ -7,9 +7,9 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
      * Game objects. (Always attached to a given scene).
      * This constructor should not be called directly - Scene.createGameObject() should be used instead.
      * @class GameObject
-     * @namespace KICK.scene
+     * @namespace kick.scene
      * @constructor
-     * @param {KICK.scene.Scene} scene
+     * @param {kick.scene.Scene} scene
      * @param {Object} config configuration for gameObject (components will not be initialized)
      */
     return function (scene, config) {
@@ -24,7 +24,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
                 /**
                  * Reference to the containing scene
                  * @property scene
-                 * @type KICK.scene.Scene
+                 * @type kick.scene.Scene
                  */
                 scene: {
                     value: scene
@@ -32,7 +32,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
                 /**
                  * Reference to the engine
                  * @property engine
-                 * @type KICK.core.Engine
+                 * @type kick.core.Engine
                  */
                 engine: {
                     value: scene.engine
@@ -40,7 +40,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
                 /**
                  * Reference to the transform
                  * @property transform
-                 * @type KICK.scene.Transform
+                 * @type kick.scene.Transform
                  */
                 transform: {
                     value: _transform
@@ -112,7 +112,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
          * Get component by index.
          * @method getComponent
          * @param {Number} index
-         * @return {KICK.scene.Component}
+         * @return {kick.scene.Component}
          */
         this.getComponent = function (index) {
             return _components[index];
@@ -121,7 +121,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
         /**
          * Add the component to a gameObject and set the gameObject field on the component
          * @method addComponent
-         * @param {KICK.scene.Component} component
+         * @param {kick.scene.Component} component
          */
         this.addComponent = function (component) {
             if (component instanceof Transform) {
@@ -147,7 +147,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
         /**
          * Remove the component from a gameObject and clear the gameObject field on the component
          * @method removeComponent
-         * @param {KICK.scene.Component} component
+         * @param {kick.scene.Component} component
          */
         this.removeComponent =  function (component) {
             try {
@@ -162,7 +162,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
         /**
          * Invoked when component updated (such as material change).
          * @method notifyComponentUpdated
-         * @param {KICK.scene.Component} component
+         * @param {kick.scene.Component} component
          */
         this.notifyComponentUpdated = function (component) {
             scene.notifyComponentUpdated(component);
@@ -185,7 +185,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
          * Get the first component of a specified type. Internally uses instanceof.<br>
          * Example usage:<br>
          * <pre class="brush: js">
-         * var meshRenderer = someGameObject.getComponentOfType(KICK.scene.MeshRenderer);
+         * var meshRenderer = someGameObject.getComponentOfType(kick.scene.MeshRenderer);
          * var material = meshRenderer.material;
          * </pre>
          * @method getComponentOfType
@@ -208,7 +208,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
          * Get all component of a specified type. Internally uses instanceof.<br>
          * Example usage:<br>
          * <pre class="brush: js">
-         * var meshRenderer = someGameObject.getComponentsOfType(KICK.scene.MeshRenderer);
+         * var meshRenderer = someGameObject.getComponentsOfType(kick.scene.MeshRenderer);
          * if (meshRenderer.length > 0){
          * material = meshRenderer[0].material;
          * }

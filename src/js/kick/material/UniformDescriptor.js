@@ -3,7 +3,7 @@ define([], function () {
 
     /**
      * @class UniformDescriptor
-     * @namespace KICK.material
+     * @namespace kick.material
      * @constructor
      * @param {String} name
      * @param {Number} type the WebGL Uniform type

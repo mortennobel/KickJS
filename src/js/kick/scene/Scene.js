@@ -9,11 +9,11 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
         /**
          * A scene objects contains a list of GameObjects
          * @class Scene
-         * @namespace KICK.scene
+         * @namespace kick.scene
          * @constructor
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} config
-         * @extends KICK.core.ProjectAsset
+         * @extends kick.core.ProjectAsset
          */
         Scene = function (engine, config) {
             // extend ProjectAsset
@@ -56,8 +56,8 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 /**
                  * Compares two objects based on scriptPriority
                  * @method sortByScriptPriority
-                 * @param {KICK.scene.Component} a
-                 * @param {KICK.scene.Component} b
+                 * @param {kick.scene.Component} a
+                 * @param {kick.scene.Component} b
                  * @return {Number} order of a,b
                  * @private
                  */
@@ -67,8 +67,8 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 /**
                  * Compares two camera objects by their cameraIndex attribute
                  * @method cameraSortFunc
-                 * @param {KICK.scene.Camera} a
-                 * @param {KICK.scene.Camera} b
+                 * @param {kick.scene.Camera} a
+                 * @param {kick.scene.Camera} b
                  * @param {Number} difference
                  * @private
                  */
@@ -200,7 +200,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              * {componentsAdded(components) and componentsRemoved(components)}.
              * Throws an exception if the two required functions does not exist.
              * @method addComponentListener
-             * @param {KICK.scene.ComponentChangedListener} componentListener
+             * @param {kick.scene.ComponentChangedListener} componentListener
              */
             this.addComponentListener = function (componentListener) {
                 if (!ComponentChangedListener.isComponentListener(componentListener)) {
@@ -224,7 +224,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              * method is slow - do not run in the the update function.
              * @method findComponentsOfType
              * @param {Function} componentType
-             * @return {Array_KICK.scene.Component} components
+             * @return {Array_kick.scene.Component} components
              */
             this.findComponentsOfType = function (componentType) {
                 if (ASSERT) {
@@ -248,7 +248,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             /**
              * Removes a component change listener from the scene
              * @method removeComponentListener
-             * @param {KICK.scene.ComponentChangedListener} componentListener
+             * @param {kick.scene.ComponentChangedListener} componentListener
              */
             this.removeComponentListener = function (componentListener) {
                 Util.removeElementFromArray(componentListenes, componentListener);
@@ -260,7 +260,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              * (so it will not recieve any update invocations in the current frame).
              * If the component is renderable (implements), is it added to the renderer's components
              * @method addComponent
-             * @param {KICK.scene.Component} component
+             * @param {kick.scene.Component} component
              * @protected
              */
             this.addComponent = function (component) {
@@ -287,7 +287,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              * Returns a gameobject identified by name
              * @method getGameObjectByName
              * @param {String} name
-             * @return {KICK.scene.GameObject} GameObject or undefined if not found
+             * @return {kick.scene.GameObject} GameObject or undefined if not found
              */
             this.getGameObjectByName = function (name) {
                 var i,
@@ -303,7 +303,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
 
             /**
              * @method removeComponent
-             * @param {KICK.scene} component
+             * @param {kick.scene} component
              */
             this.removeComponent = function (component) {
                 Util.removeElementFromArray(componentsNew, component);
@@ -315,7 +315,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 /**
                  * Reference to the engine
                  * @property engine
-                 * @type KICK.core.Engine
+                 * @type kick.core.Engine
                  */
                 engine: {
                     value: engine
@@ -339,7 +339,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             /**
              * @method createGameObject
              * @param {Object} config Optionally configuration passed to the game objects
-             * @return {KICK.scene.GameObject}
+             * @return {kick.scene.GameObject}
              */
             this.createGameObject = function (config) {
                 var gameObject = createGameObjectPrivate(config),
@@ -352,7 +352,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              * Destroys the game object and delete it from the scene.
              * This call will call destroy on the gameObject
              * @method destroyObject
-             * @param {KICK.scene.GameObject} gameObject
+             * @param {kick.scene.GameObject} gameObject
              */
             this.destroyObject = function (gameObject) {
                 var isMarkedForDeletion = Util.contains(gameObjectsDelete, gameObject);
@@ -376,7 +376,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             /**
              * @method getGameObject
              * @param {Number} index
-             * @return {KICK.scene.GameObject}
+             * @return {kick.scene.GameObject}
              */
             this.getGameObject = function (index) {
                 return gameObjects[index];
@@ -466,7 +466,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                             // build components
                             for (i = 0; gameObjectConfig.components && i < gameObjectConfig.components.length; i++) {
                                 component = gameObjectConfig.components[i];
-                                if (component.type === "KICK.scene.Transform") {
+                                if (component.type === "kick.scene.Transform") {
                                     componentObj = gameObject.transform;
                                     componentObj.uid = component.uid;
                                     // register transform object to objectsById
@@ -500,16 +500,16 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                         }
                     }());
                 }
-                engine.project.registerObject(thisObj, "KICK.scene.Scene");
+                engine.project.registerObject(thisObj, "kick.scene.Scene");
             }());
         };
 
         /**
          * Create empty scene with camera
          * @method createDefault
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @static
-         * @return {KICK.scene.Scene}
+         * @return {kick.scene.Scene}
          */
         Scene.createDefault = function (engine) {
             var newScene = new Scene(engine),

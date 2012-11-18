@@ -9,15 +9,15 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
              * model if available. Note that each import can contains multiple models and each model may have multiple
              * sub-meshes.
              * @class ObjImporter
-             * @namespace KICK.importer
+             * @namespace kick.importer
              */
                 ObjImporter = {};
 
         /**
          * @method import
          * @param {String} objFileContent
-         * @param {KICK.core.Engine} engine
-         * @param {KICK.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+         * @param {kick.core.Engine} engine
+         * @param {kick.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties (mesh:[], gameObjects:[], materials:[])
          * @static
@@ -151,7 +151,7 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
                     for (i = 0; i < meshDataSubmeshes.length; i++) {
                         if (i < materialNames.length) {
                             var materialName = materialNames[i];
-                            var projectMaterial = engine.project.loadByName(materialName, "KICK.material.Material");
+                            var projectMaterial = engine.project.loadByName(materialName, "kick.material.Material");
                             if (projectMaterial) {
                                 materials.push(projectMaterial);
                             } else {

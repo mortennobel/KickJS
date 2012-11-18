@@ -33,7 +33,7 @@ define(["./Util"], function (Util) {
      * multiple frames with 'A key is being held down' and finally one frame
      * with 'A key is up'
      * @class KeyInput
-     * @namespace KICK.core
+     * @namespace kick.core
      */
     return function () {
         var keyDown = [],

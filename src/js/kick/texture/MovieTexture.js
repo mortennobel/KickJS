@@ -3,13 +3,17 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util"],
         "use strict";
 
         /**
+         * @module kick.texture
+         */
+
+        /**
          * A movie texture associated with a video element (or canvas tag) will update the content every frame (when it is bound).
          * @class MovieTexture
-         * @namespace KICK.texture
+         * @namespace kick.texture
          * @constructor
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} config Optional
-         * @extends KICK.core.ProjectAsset
+         * @extends kick.core.ProjectAsset
          */
         return function (engine, config) {
             // extend ProjectAsset
@@ -280,7 +284,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util"],
                 // apply
                 Util.applyConfig(thisObj, config);
 
-                engine.project.registerObject(thisObj, "KICK.texture.MovieTexture");
+                engine.project.registerObject(thisObj, "kick.texture.MovieTexture");
             }());
         };
     });

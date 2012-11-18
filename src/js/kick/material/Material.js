@@ -2,16 +2,20 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
     function (ProjectAsset, Util, Constants, Shader, MaterialUniform) {
         "use strict";
 
+        /**
+         * @module kick.material
+         */
+
         var ASSERT = Constants._ASSERT;
 
         /**
          * Material configuration
          * @class Material
-         * @namespace KICK.material
+         * @namespace kick.material
          * @constructor
-         * @param {KICK.core.Engine} engine
+         * @param {kick.core.Engine} engine
          * @param {Object} config
-         * @extends KICK.core.ProjectAsset
+         * @extends kick.core.ProjectAsset
          */
         return function (engine, config) {
             // extend ProjectAsset
@@ -75,7 +79,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             Object.defineProperties(this, {
                 /**
                  * @property engine
-                 * @type KICK.core.Engine
+                 * @type kick.core.Engine
                  */
                 engine: {
                     value: engine
@@ -90,7 +94,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 },
                 /**
                  * @property shader
-                 * @type KICK.material.Shader
+                 * @type kick.material.Shader
                  */
                 shader: {
                     get: function () {
@@ -98,7 +102,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                     },
                     set: function (newValue) {
                         if (!newValue instanceof Shader) {
-                            Util.fail("KICK.material.Shader expected");
+                            Util.fail("kick.material.Shader expected");
                         }
                         if (_shader !== newValue) {
                             if (_shader) {
@@ -196,8 +200,8 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
              * Bind material uniforms. Returns undefined or null if value is undefined or null (or uniform not found)
              * @method setUniform
              * @param {String} name
-             * @param {Float32Array|Int32Array|KICK.texture.Texture}
-                * @return {KICK.material.MaterialUniform}
+             * @param {Float32Array|Int32Array|kick.texture.Texture}
+                * @return {kick.material.MaterialUniform}
              */
             this.setUniform = function (name, value) {
                 if (value === undefined || value === null) {
@@ -234,7 +238,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             /**
              * @method getUniform
              * @param name
-             * @return {Float32Array|Int32Array|KICK.texture.Texture}
+             * @return {Float32Array|Int32Array|kick.texture.Texture}
              */
             this.getUniform = function (name) {
                 var i;
@@ -308,7 +312,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                     }
                 }
                 decorateUniforms();
-                engine.project.registerObject(thisObj, "KICK.material.Material");
+                engine.project.registerObject(thisObj, "kick.material.Material");
             }());
         };
 

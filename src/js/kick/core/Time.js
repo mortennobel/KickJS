@@ -4,7 +4,7 @@ define([], function () {
     /**
      * A global timer object
      * @class Time
-     * @namespace KICK.core
+     * @namespace kick.core
      */
     return function () {
         /**

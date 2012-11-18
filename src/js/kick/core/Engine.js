@@ -1,8 +1,12 @@
-define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./Shim"],
-    function (GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time) {
+define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./Shim"],
+    function (GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils) {
         "use strict";
 
         var ASSERT = Constants._ASSERT;
+
+        /**
+         * @module kick.core
+         */
 
         /**
          * Game engine object
@@ -10,7 +14,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
          * @namespace kick.core
          * @constructor
          * @param {String} idOrElement elementid of canvas tag or the canvas element
-         * @param {KICK.core.Config} config Optional, configuration object
+         * @param {kick.core.Config} config Optional, configuration object
          */
         return function (idOrElement, config) {
             var glState = new GLState(),
@@ -50,7 +54,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * Resource manager of the engine. Loads and cache resources.
                  * @property resourceLoader
-                 * @type KICK.core.ResourceLoader
+                 * @type kick.core.ResourceLoader
                  */
                 resourceLoader: {
                     value: new ResourceLoader(this)
@@ -58,7 +62,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * Project describes the resources available for a given projects (such as Scenes, Materials, Shader and Meshes)
                  * @property project
-                 * @type KICK.core.Project
+                 * @type kick.core.Project
                  */
                 project: {
                     value: project
@@ -66,7 +70,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * The WebGL state(readonly). (Only used to keep track on webgl state across different objects)
                  * @property glState
-                 * @type KICK.core.GLState
+                 * @type kick.core.GLState
                  * @protected
                  */
                 glState: {
@@ -91,7 +95,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * If null then nothing is rendered
                  * @property activeScene
-                 * @type KICK.scene.Scene
+                 * @type kick.scene.Scene
                  */
                 activeScene: {
                     get: function () {
@@ -111,7 +115,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * Returns a mouseInput object. This object is used to detect mouse input.
                  * @property mouseInput
-                 * @type KICK.core.MouseInput
+                 * @type kick.core.MouseInput
                  */
                 mouseInput: {
                     get: function () {
@@ -138,7 +142,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 },
                 /**
                  * @property eventQueue
-                 * @type KICK.core.EventQueue
+                 * @type kick.core.EventQueue
                  */
                 eventQueue: {
                     get: function () {
@@ -148,7 +152,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * Time object of the engine. Is updated every frame
                  * @property time
-                 * @type KICK.core.Time
+                 * @type kick.core.Time
                  */
                 time: {
                     value: timeObj
@@ -156,7 +160,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 /**
                  * Configuration of the engine
                  * @property config
-                 * @type KICK.core.Config
+                 * @type kick.core.Config
                  */
                 config: {
                     value: new Config(config || {})
@@ -371,7 +375,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                             return false;
                         }
                         if (thisObj.config.enableDebugContext) {
-                            if (window.WebGLDebugUtils) {
+                            if (WebGLDebugUtils && Constants._DEBUG) {
                                 // Checking that none of the WebGL arguments are undefined
                                 // http://www.khronos.org/webgl/wiki/Debugging#Checking_that_none_of_your_arguments_are_undefined
                                 var validateNoneOfTheArgsAreUndefined = function (functionName, args) {
@@ -379,11 +383,11 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                                     for (ii = 0; ii < args.length; ++ii) {
                                         if (args[ii] === undefined) {
                                             console.error("undefined passed to gl." + functionName + "(" +
-                                                window.WebGLDebugUtils.glFunctionArgsToString(functionName, args) + ")");
+                                                WebGLDebugUtils.glFunctionArgsToString(functionName, args) + ")");
                                         }
                                     }
                                 };
-                                gl = window.WebGLDebugUtils.makeDebugContext(gl, undefined, validateNoneOfTheArgsAreUndefined);
+                                gl = WebGLDebugUtils.makeDebugContext(gl, undefined, validateNoneOfTheArgsAreUndefined);
                             } else {
                                 console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                             }
@@ -431,7 +435,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                     }, thisObj.config.checkCanvasResizeInterval);
                 }
 
-                // API documentation of Time is found in KICK.core.Time
+                // API documentation of Time is found in kick.core.Time
                 Object.defineProperties(timeObj, {
                     time: {
                         get: function () { return timeSinceStart; }

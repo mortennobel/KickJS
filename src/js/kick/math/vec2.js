@@ -21,7 +21,7 @@ define(["kick/core/Constants"], function (constants) {
          * See kick.math.vec4.wrapArray
          * @method wrapArray
          * @param {Float32Array} array
-         * @return {Array_KICK.math.Vec2} of vec2
+         * @return {Array_kick.math.Vec2} of vec2
          * @static
          */
         wrapArray: function (array) {
@@ -34,7 +34,7 @@ define(["kick/core/Constants"], function (constants) {
          * @method array
          * @param {Number} count Number of vec 2 to be layed out in memory
          * @param {Object} ref Optional, if set a memory reference is set to ref.mem
-         * @return {KICK.math.vec2} New vec2
+         * @return {kick.math.vec2} New vec2
          * @static
          */
         array: function (count, ref) {
@@ -50,7 +50,7 @@ define(["kick/core/Constants"], function (constants) {
          * Any javascript array containing at least 2 numeric elements can serve as a vec2
          * @method create
          * @param {Array_Number} vec Optional, vec2 containing values to initialize with
-         * @return {KICK.math.vec2} New vec2
+         * @return {kick.math.vec2} New vec2
          * @static
          */
         create: function (vec) {
@@ -67,9 +67,9 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Copies the values of one vec2 to another
          * @method set
-         * @param {KICK.math.vec2} vec vec2 containing values to copy
-         * @param {KICK.math.vec2} dest vec2 receiving copied values
-         * @return {KICK.math.vec2} dest
+         * @param {kick.math.vec2} vec vec2 containing values to copy
+         * @param {kick.math.vec2} dest vec2 receiving copied values
+         * @return {kick.math.vec2} dest
          * @static
          */
         set: function (vec, dest) {
@@ -82,10 +82,10 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Performs a vector addition
          * @method add
-         * @param {KICK.math.vec2} vec  first operand
-         * @param {KICK.math.vec2} vec2  second operand
-         * @param {KICK.math.vec2} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec2} dest if specified, vec otherwise
+         * @param {kick.math.vec2} vec  first operand
+         * @param {kick.math.vec2} vec2  second operand
+         * @param {kick.math.vec2} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec2} dest if specified, vec otherwise
          * @static
          */
         add: function (vec, vec2, dest) {
@@ -103,10 +103,10 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Performs a vector subtraction
          * @method subtract
-         * @param {KICK.math.vec2} vec first operand
-         * @param {KICK.math.vec2} vec2 second operand
-         * @param {KICK.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec2} dest if specified, vec otherwise
+         * @param {kick.math.vec2} vec first operand
+         * @param {kick.math.vec2} vec2 second operand
+         * @param {kick.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec2} dest if specified, vec otherwise
          * @static
          */
         subtract: function (vec, vec2, dest) {
@@ -124,8 +124,8 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * Test to see if vectors are equal (difference is less than epsilon)
          * @method equal
-         * @param {KICK.math.vec2} vec first operand
-         * @param {KICK.math.vec2} vec2 second operand
+         * @param {kick.math.vec2} vec first operand
+         * @param {kick.math.vec2} vec2 second operand
          * @param {Number} epsilon Optional - default value is
          * @return {Boolean} true if two vectors are equals
          * @static
@@ -147,9 +147,9 @@ define(["kick/core/Constants"], function (constants) {
          * Generates a unit vector of the same direction as the provided vec2
          * If vector length is 0, returns [0, 0]
          * @method normalize
-         * @param {KICK.math.vec2} vec vec3 to normalize
-         * @param {KICK.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
-         * @return {KICK.math.vec2} dest if specified, vec otherwise
+         * @param {kick.math.vec2} vec vec3 to normalize
+         * @param {kick.math.vec2} dest Optional, vec2 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.vec2} dest if specified, vec otherwise
          * @static
          */
         normalize: function (vec, dest) {

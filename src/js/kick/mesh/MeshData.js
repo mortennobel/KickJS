@@ -10,7 +10,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          * Allows for modifying mesh object easily.
          * This is a pure data class with no WebGL dependency
          * @class MeshData
-         * @namespace KICK.mesh
+         * @namespace kick.mesh
          * @param {Object} config
          * @constructor
          */
@@ -221,10 +221,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
 
             Object.defineProperties(this, {
                 /**
-                 * Note that this property is not cached. Use KICK.mesh.Mesh.aabb for a cached version.
+                 * Note that this property is not cached. Use kick.mesh.Mesh.aabb for a cached version.
                  * Readonly
                  * @property aabb
-                 * @type KICK.math.aabb
+                 * @type kick.math.aabb
                  */
                 aabb: {
                     get: function () {
@@ -534,8 +534,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
             /**
              * Creates a copy of the mesh and transform the vertex positions of the MeshData with a mat4.
              * Note that normals are not modified - so they may need to renormalized.
-             * @param {KICK.math.mat4} transformMatrix
-             * @return {KICK.mesh.MeshData} transformed mesh
+             * @param {kick.math.mat4} transformMatrix
+             * @return {kick.mesh.MeshData} transformed mesh
              */
             this.transform = function (transformMatrix) {
                 var copy = new MeshData(this),
@@ -552,9 +552,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
              * both mesh objects are transferred<br>
              * Triangle fans cannot be combined
              * @method combine
-             * @param {KICK.mesh.MeshData} secondMesh
-             * @param {KICK.math.mat4} transform Optional transformation matrix
-             * @return {KICK.mesh.MeshData} mesh object or null if incompatible objects
+             * @param {kick.mesh.MeshData} secondMesh
+             * @param {kick.math.mat4} transform Optional transformation matrix
+             * @return {kick.mesh.MeshData} mesh object or null if incompatible objects
              */
             this.combine = function (secondMesh, transform) {
                 if (thisObj.meshType !== secondMesh.meshType || thisObj.meshType === Constants.GL_TRIANGLE_FAN) {

@@ -5,7 +5,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
     /**
      * The global configuration of the engine. Cannot be changed during runtime.
      * @class Config
-     * @namespace KICK.core
+     * @namespace kick.core
      * @constructor
      * @param {Config} config defines one or more properties
      */
@@ -155,13 +155,13 @@ define(["./Util", "./Constants"], function (Util, Constants) {
         if (Constants._DEBUG) {
             for (var name in config) {
                 if (! this.hasOwnProperty(name)) {
-                    var supportedProperties = "Supported properties for KICK.core.Config are: ";
+                    var supportedProperties = "Supported properties for kick.core.Config are: ";
                     for (var n2 in this){
                         if (this.hasOwnProperty(n2) && typeof this[n2] !== "function") {
                             supportedProperties += "\n - "+n2;
                         }
                     }
-                    core.Util.warn("KICK.core.Config does not have any property "+name+"\n"+supportedProperties);
+                    core.Util.warn("kick.core.Config does not have any property "+name+"\n"+supportedProperties);
 
                 }
             }
