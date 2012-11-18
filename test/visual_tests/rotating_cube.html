@@ -4,24 +4,27 @@
 <head>
     <title></title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
+</head>
+<body onload="">
+    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
+
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example shows how a cube is rotated.
+    <script src="../../src/js-dependencies/require.js"></script>
     <script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../src/js/kick'
+            }
+        });
+
+        req(['kick/all'],
+                function (KICK) {
         var engine;
         var meshRenderer;
-        
+
         var log = function (output) {
             var element = document.getElementById("output");
             element.innerHTML = element.innerHTML+output+"<br>";
@@ -101,14 +104,9 @@
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);
         }
-
+                    initKick();
+                });
     </script>
-</head>
-<body onload="initKick();">
-    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
-
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example shows how a cube is rotated.
   <br>
 
   <h2>Output</h2>

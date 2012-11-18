@@ -9,68 +9,82 @@
 <h1>KickJS | Default material </h1>
 
 
-<script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-<script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-<script type="text/javascript" src="../../src/js/constants.js"></script>
-<script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-<script type="text/javascript" src="../../src/js/core.js"></script>
-<script type="text/javascript" src="../../src/js/resource.js"></script>
-<script type="text/javascript" src="../../src/js/math.js"></script>
-<script type="text/javascript" src="../../src/js/mesh.js"></script>
-<script type="text/javascript" src="../../src/js/scene.js"></script>
-<script type="text/javascript" src="../../src/js/material.js"></script>
-<script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-<script type="text/javascript" src="../../src/js/texture.js"></script>
+
 <h1>Test 1 - Explicit loading default material</h1>
 <canvas id="canvas" style="border: none;" width="100" height="100"></canvas>
+<script src="../../src/js-dependencies/require.js"></script>
 <script type="text/javascript">
-    // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas');
-    // create a game object in [0,0,0] facing down the -z axis
-    var cameraObject = engine.activeScene.createGameObject();
-    cameraObject.transform.position = [0,0,5];
-    // create a orthographic camera
-    var camera = new KICK.scene.Camera({
-        perspective: false,
-        left:-5,
-        right:5,
-        top:5,
-        bottom:-5
+    var reqOne = require.config({
+        context: "version1",
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
     });
-    cameraObject.addComponent(camera);
 
-    var material = engine.project.load(engine.project.ENGINE_MATERIAL_DEFAULT);
-    // create cube
-    var gameObject = engine.activeScene.createGameObject();
-    gameObject.transform.position = [0.0,0,0];
-    var meshRenderer = new KICK.scene.MeshRenderer();
-    meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
-    meshRenderer.material = material;
-    gameObject.addComponent(meshRenderer);
+    reqOne(['kick/all'],
+            function (KICK) {
+                "use strict";
+                // init engine (create 3d context)
+                var engine = new KICK.core.Engine('canvas');
+                // create a game object in [0,0,0] facing down the -z axis
+                var cameraObject = engine.activeScene.createGameObject();
+                cameraObject.transform.position = [0,0,5];
+                // create a orthographic camera
+                var camera = new KICK.scene.Camera({
+                    perspective: false,
+                    left:-5,
+                    right:5,
+                    top:5,
+                    bottom:-5
+                });
+                cameraObject.addComponent(camera);
+
+                var material = engine.project.load(engine.project.ENGINE_MATERIAL_DEFAULT);
+                // create cube
+                var gameObject = engine.activeScene.createGameObject();
+                gameObject.transform.position = [0.0,0,0];
+                var meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
+                meshRenderer.material = material;
+                gameObject.addComponent(meshRenderer);
+            });
 </script>
 <h1>Test 2 - Implicit loading default material (by not specifying material)</h1>
 <canvas id="canvas2" style="border: none;" width="100" height="100"></canvas>
 <script type="text/javascript">
-    // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas2');
-    // create a game object in [0,0,0] facing down the -z axis
-    var cameraObject = engine.activeScene.createGameObject();
-    cameraObject.transform.position = [0,0,5];
-    // create a orthographic camera
-    var camera = new KICK.scene.Camera({
-        perspective: false,
-        left:-5,
-        right:5,
-        top:5,
-        bottom:-5
+    var reqTwo = require.config({
+        context: "version2",
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
     });
-    cameraObject.addComponent(camera);
-    // create cube
-    var gameObject = engine.activeScene.createGameObject();
-    gameObject.transform.position = [0.0,0,0];
-    var meshRenderer = new KICK.scene.MeshRenderer();
-    meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
-    gameObject.addComponent(meshRenderer);
+
+    reqTwo(['kick/all'],
+            function (KICK) {
+                "use strict";
+                // init engine (create 3d context)
+                var engine = new KICK.core.Engine('canvas2');
+                // create a game object in [0,0,0] facing down the -z axis
+                var cameraObject = engine.activeScene.createGameObject();
+                cameraObject.transform.position = [0,0,5];
+                // create a orthographic camera
+                var camera = new KICK.scene.Camera({
+                    perspective: false,
+                    left:-5,
+                    right:5,
+                    top:5,
+                    bottom:-5
+                });
+                cameraObject.addComponent(camera);
+                // create cube
+                var gameObject = engine.activeScene.createGameObject();
+                gameObject.transform.position = [0.0,0,0];
+                var meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
+                gameObject.addComponent(meshRenderer);
+            });
 </script>
 
 </body>

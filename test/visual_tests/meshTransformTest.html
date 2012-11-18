@@ -4,145 +4,145 @@
 <head>
     <title>KickJS: Mesh Transform Test</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
-    <script type="text/javascript">
-        var engine;
-
-        var mesh;
-        var material;
-
-        var log = function (output) {
-            var element = document.getElementById("output");
-            element.innerHTML = element.innerHTML+output+"<br>";
-        };
-
-        var clearLog = function(){
-            var element = document.getElementById("output");
-            element.innerHTML = "";
-        };
-
-        function createMaterial(vertexShaderId, fragmentShaderId){
-            clearLog();
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
-            shader.apply();
-            return new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader
-            });
-        }
-
-        function addRotatorComponent(gameObject){
-            var time = engine.time,
-                    transform = gameObject.transform,
-                    rotationSpeed = 0.05,
-                    rotation = transform.localRotationEuler;
-            gameObject.addComponent({
-                update: function(){
-                    rotation[1] += time.deltaTime*rotationSpeed;
-                    transform.localRotationEuler = rotation;
-                }
-            });
-        }
-
-        function addCube(parent){
-            var gameObject = engine.activeScene.createGameObject();
-            var meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = mesh;
-            meshRenderer.material = material;
-            gameObject.addComponent(meshRenderer);
-            addRotatorComponent(gameObject);
-            if (parent){
-                gameObject.transform.parent = parent;
-                gameObject.transform.localPosition = [0,1.2,0];
-            } else {
-                gameObject.transform.localPosition = [0,-5,0];
-            }
-
-            return gameObject.transform;
-        }
-
-        function initKick() {
-            engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-            var cameraObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1],
-                perspective: false,
-                near:-1,
-                far:1,
-                bottom:-10,
-                top:10,
-                left:-10,
-                right:10
-            });
-            cameraObject.addComponent(camera);
-
-            mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            material = createMaterial('vertexShaderColor','fragmentShader');
-
-            var transform = null;
-            for (var i=0;i<5;i++){
-                transform = addCube(transform);
-            }
-        }
-    </script>
 </head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example shows how a cube is rotated.
-  <br>
+<body>
+<canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+<script src="../../src/js-dependencies/require.js"></script>
+<script type="text/javascript">
+    var req = require.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
+    });
 
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Show data</h2>
-  [<a href="#" onclick="refreshData();">Refresh</a>]
-  <div id="example" class="yui3-skin-sam"></div>
+    req(['kick/all'],
+            function (KICK) {
 
-  <div style="display:none;">
-  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
-attribute vec3 vertex;
-attribute vec4 color;
+                var engine;
 
-uniform mat4 _mvProj;
+                var mesh;
+                var material;
 
-varying vec3 vColor;
+                var log = function (output) {
+                    var element = document.getElementById("output");
+                    element.innerHTML = element.innerHTML+output+"<br>";
+                };
 
-void main(void) {
-    gl_Position = _mvProj * vec4(vertex, 1.0);
-    vColor = color.xyz;
-}
-  </textarea>
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 vColor;
-void main(void)
-{
-    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
-}
-  </textarea>
+                var clearLog = function(){
+                    var element = document.getElementById("output");
+                    element.innerHTML = "";
+                };
+
+                function createMaterial(vertexShaderId, fragmentShaderId){
+                    clearLog();
+                    var vs = document.getElementById(vertexShaderId).value;
+                    var fs = document.getElementById(fragmentShaderId).value;
+                    var shader = new KICK.material.Shader(engine);
+                    shader.vertexShaderSrc = vs;
+                    shader.fragmentShaderSrc = fs;
+                    shader.errorLog = log;
+                    shader.apply();
+                    return new KICK.material.Material(engine,{
+                        name:"Some material",
+                        shader:shader
+                    });
+                }
+
+                function addRotatorComponent(gameObject){
+                    var time = engine.time,
+                            transform = gameObject.transform,
+                            rotationSpeed = 0.05,
+                            rotation = transform.localRotationEuler;
+                    gameObject.addComponent({
+                        update: function(){
+                            rotation[1] += time.deltaTime*rotationSpeed;
+                            transform.localRotationEuler = rotation;
+                        }
+                    });
+                }
+
+                function addCube(parent){
+                    var gameObject = engine.activeScene.createGameObject();
+                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    meshRenderer.mesh = mesh;
+                    meshRenderer.material = material;
+                    gameObject.addComponent(meshRenderer);
+                    addRotatorComponent(gameObject);
+                    if (parent){
+                        gameObject.transform.parent = parent;
+                        gameObject.transform.localPosition = [0,1.2,0];
+                    } else {
+                        gameObject.transform.localPosition = [0,-5,0];
+                    }
+
+                    return gameObject.transform;
+                }
+
+                function initKick() {
+                    engine = new KICK.core.Engine('canvas',{
+                        enableDebugContext: true
+                    });
+                    var cameraObject = engine.activeScene.createGameObject();
+                    var camera = new KICK.scene.Camera({
+                        clearColor: [0,0,0,1],
+                        perspective: false,
+                        near:-1,
+                        far:1,
+                        bottom:-10,
+                        top:10,
+                        left:-10,
+                        right:10
+                    });
+                    cameraObject.addComponent(camera);
+
+                    mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                    material = createMaterial('vertexShaderColor','fragmentShader');
+
+                    var transform = null;
+                    for (var i=0;i<5;i++){
+                        transform = addCube(transform);
+                    }
+                }
+                initKick();
+            });
+</script>
+
+This example shows how a cube is rotated.
+<br>
+
+<h2>Output</h2>
+<div id="output" style="color: red;">
 </div>
-  <br/>
+<h2>Show data</h2>
+[<a href="#" onclick="refreshData();">Refresh</a>]
+<div id="example" class="yui3-skin-sam"></div>
+
+<div style="display:none;">
+    <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+        attribute vec3 vertex;
+        attribute vec4 color;
+
+        uniform mat4 _mvProj;
+
+        varying vec3 vColor;
+
+        void main(void) {
+        gl_Position = _mvProj * vec4(vertex, 1.0);
+        vColor = color.xyz;
+        }
+    </textarea>
+    <textarea style="width:500px;height:150px;" id="fragmentShader">
+        #ifdef GL_ES
+        precision highp float;
+        #endif
+        varying vec3 vColor;
+        void main(void)
+        {
+        gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+        }
+    </textarea>
+</div>
+<br/>
 </body>
 </html>

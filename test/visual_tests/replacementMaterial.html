@@ -6,75 +6,76 @@
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
-    <script type="text/javascript">
-        function initKick(){
-            // init engine (create 3d context)
-            var engine = new KICK.core.Engine('canvas',{
-                            enableDebugContext: true
-                        });
-            // create a game object in [0,0,0] facing down the -z axis
-            var cameraObject = engine.activeScene.createGameObject();
-            cameraObject.transform.position = [0,0,5];
-            // create a orthographic camera
-            var camera = new KICK.scene.Camera({
-                perspective: false,
-                left:-5,
-                right:5,
-                top:5,
-                bottom:-5
-            });
-            cameraObject.addComponent(camera);
-            // create material
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-            var materials = [
-                new KICK.material.Material(engine,{
-                    shader: shader,
-                    uniformData:{
-                        mainColor: [1,0,0,1]
-                    }
-                }),
-                new KICK.material.Material(engine,{
-                    shader: shader,
-                    uniformData:{
-                        mainColor: [0,0,1,1]
-                    }
-                })];
-
-            // create meshes
-            var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
-            for (var i=0;i<meshes.length;i++){
-                var gameObject = engine.activeScene.createGameObject();
-                gameObject.transform.position = [-2.0+4*i,0,0];
-                var meshRenderer = new KICK.scene.MeshRenderer();
-                meshRenderer.mesh = engine.project.load(meshes[i]);
-                meshRenderer.material = materials[i];
-                gameObject.addComponent(meshRenderer);
-            }
-            var material = new KICK.material.Material(engine,
-                    {
-                        shader: engine.project.load(engine.project.ENGINE_SHADER___ERROR),
-                        name: "Replacement material"
-                    });
-            camera.replacementMaterial = material;
-        }
-    </script>
 
 </head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
-  <br>
+<body>
+<canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+
+<script src="../../src/js-dependencies/require.js"></script>
+<script type="text/javascript">
+    var req = require.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
+    });
+
+    req(['kick/all'],
+            function (KICK) {
+                function initKick(){
+                    // init engine (create 3d context)
+                    var engine = new KICK.core.Engine('canvas',{
+                        enableDebugContext: true
+                    });
+                    // create a game object in [0,0,0] facing down the -z axis
+                    var cameraObject = engine.activeScene.createGameObject();
+                    cameraObject.transform.position = [0,0,5];
+                    // create a orthographic camera
+                    var camera = new KICK.scene.Camera({
+                        perspective: false,
+                        left:-5,
+                        right:5,
+                        top:5,
+                        bottom:-5
+                    });
+                    cameraObject.addComponent(camera);
+                    // create material
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+                    var materials = [
+                        new KICK.material.Material(engine,{
+                            shader: shader,
+                            uniformData:{
+                                mainColor: [1,0,0,1]
+                            }
+                        }),
+                        new KICK.material.Material(engine,{
+                            shader: shader,
+                            uniformData:{
+                                mainColor: [0,0,1,1]
+                            }
+                        })];
+
+                    // create meshes
+                    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
+                    for (var i=0;i<meshes.length;i++){
+                        var gameObject = engine.activeScene.createGameObject();
+                        gameObject.transform.position = [-2.0+4*i,0,0];
+                        var meshRenderer = new KICK.scene.MeshRenderer();
+                        meshRenderer.mesh = engine.project.load(meshes[i]);
+                        meshRenderer.material = materials[i];
+                        gameObject.addComponent(meshRenderer);
+                    }
+                    var material = new KICK.material.Material(engine,
+                            {
+                                shader: engine.project.load(engine.project.ENGINE_SHADER___ERROR),
+                                name: "Replacement material"
+                            });
+                    camera.replacementMaterial = material;
+                }
+                initKick();
+            });
+</script>
+<br>
 (Should contain a pink triangle and a pink square)
 </body>
 </html>

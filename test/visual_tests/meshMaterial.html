@@ -5,173 +5,183 @@
     <title></title>
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
-    <script type="text/javascript">
-        var engine;
-        var meshRenderer;
-        var lastSelectedMaterial = null;
-
-        var materials = [];
-
-        var log = function (output) {
-            var element = document.getElementById("output");
-            element.innerHTML = element.innerHTML+output+"<br>";
-        };
-
-        var clearLog = function(){
-            var element = document.getElementById("output");
-            element.innerHTML = "";
-        };
-
-        function initMaterials(vertexShaderId, fragmentShaderId){
-            clearLog();
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
-            shader.apply();
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                return;
-            }
-            for (var i=0;i<3;i++){
-                var material = new KICK.material.Material(engine,{
-                    name:"Some material "+i,
-                    shader:shader,
-                    uniformData: {
-                        uColor: [i==0?1:0,i==1?1:0,i==2?1:0]
-                    }
-                });
-                materials.push(material);
-            }
-            meshRenderer.material = materials[0];
-        }
-
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
-        }
-
-        function initKick() {
-            engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-            var cameraObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
-                clearColor: [0.5,1,1,1]
-            });
-            cameraObject.addComponent(camera);
-
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            initMaterials('vertexShader','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-        }
-
-        function setMaterial(index, element){
-            if (lastSelectedMaterial){
-                lastSelectedMaterial.style.backgroundColor = '';
-            }
-            element.style.backgroundColor = "lightGray";
-            lastSelectedMaterial = element;
-            meshRenderer.material = materials[index];
-        }
-
-        function setColor(color){
-            meshRenderer.material.setUniform("uColor", new Float32Array(color));
-        }
-
-        function useNormalShader(){
-            var shader = meshRenderer.material.shader;
-            shader.fragmentShaderSrc = document.getElementById("fragmentShader").value;
-            shader.apply();
-        }
-
-        function useAlternativeShader(){
-            var shader = meshRenderer.material.shader;
-            shader.fragmentShaderSrc = document.getElementById("fragmentShaderAlt").value;
-            shader.apply();
-        }
-    </script>
 </head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example shows how vertex attributes can be visualized.
-  <br>
-  <b>Material</b><br>
-  [<a href="#" onclick="setMaterial(0,this);return false;">Material 1</a>]
-  [<a href="#" onclick="setMaterial(1,this);return false;">Material 2</a>]
-  [<a href="#" onclick="setMaterial(2,this);return false;">Material 3</a>]<br>
-  <b>Set color of current material</b><br>
-  [<a href="#" onclick="setColor([1,0,0]);return false;">Red</a>]
-  [<a href="#" onclick="setColor([0,1,0]);return false;">Green</a>]
-  [<a href="#" onclick="setColor([0,0,1]);return false;">Blue</a>]
-  <br>
-  <b>Test recompile shader</b><br>
-  [<a href="#" onclick="useNormalShader();return false;">Use normal shader</a>]
-  [<a href="#" onclick="useAlternativeShader();return false;">Use bright shader</a>]
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Show data</h2>
-  <div style="display:none;">
-    <textarea style="width:500px;height:150px;" id="vertexShader">
-attribute vec3 vertex;
+<body>
+<canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
 
-uniform vec3 uColor;
-varying vec3 color;
+<script src="../../src/js-dependencies/require.js"></script>
+<script type="text/javascript">
+    var req = require.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
+    });
 
-void main(void) {
-    gl_Position = vec4(vertex, 1.0);
-    color = uColor;
-}
-  </textarea>
+    req(['kick/all'],
+            function (KICK) {
 
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 color;
-void main(void)
-{
-    gl_FragColor = vec4(color.x, color.y, color.z, 1.0);
-}
-  </textarea>
+                var engine;
+                var meshRenderer;
+                var lastSelectedMaterial = null;
 
-  <textarea style="width:500px;height:150px;" id="fragmentShaderAlt">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 color;
-void main(void)
-{
-    gl_FragColor = vec4(color.x+0.5, color.y+0.5, color.z+0.5, 1.0);
-}
-  </textarea>
+                var materials = [];
+
+                var log = function (output) {
+                    var element = document.getElementById("output");
+                    element.innerHTML = element.innerHTML+output+"<br>";
+                };
+
+                var clearLog = function(){
+                    var element = document.getElementById("output");
+                    element.innerHTML = "";
+                };
+
+                function initMaterials(vertexShaderId, fragmentShaderId){
+                    clearLog();
+                    var vs = document.getElementById(vertexShaderId).value;
+                    var fs = document.getElementById(fragmentShaderId).value;
+                    var shader = new KICK.material.Shader(engine);
+                    shader.vertexShaderSrc = vs;
+                    shader.fragmentShaderSrc = fs;
+                    shader.errorLog = log;
+                    shader.apply();
+                    var missingAttributes = meshRenderer.mesh.verify(shader);
+                    if (missingAttributes){
+                        log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                        return;
+                    }
+                    for (var i=0;i<3;i++){
+                        var material = new KICK.material.Material(engine,{
+                            name:"Some material "+i,
+                            shader:shader,
+                            uniformData: {
+                                uColor: [i==0?1:0,i==1?1:0,i==2?1:0]
+                            }
+                        });
+                        materials.push(material);
+                    }
+                    meshRenderer.material = materials[0];
+                }
+
+                function recalculateNormals(){
+                    clearLog();
+                    var mesh = meshRenderer.mesh;
+                    mesh.recalculateNormals();
+                    mesh.updateData();
+                }
+
+                function recalculateTangents(){
+                    clearLog();
+                    var mesh = meshRenderer.mesh;
+                    mesh.recalculateTangents();
+                    mesh.updateData();
+                }
+
+                function initKick() {
+                    engine = new KICK.core.Engine('canvas',{
+                        enableDebugContext: true
+                    });
+                    var cameraObject = engine.activeScene.createGameObject();
+                    var camera = new KICK.scene.Camera({
+                        clearColor: [0.5,1,1,1]
+                    });
+                    cameraObject.addComponent(camera);
+
+                    var gameObject = engine.activeScene.createGameObject();
+                    meshRenderer = new KICK.scene.MeshRenderer();
+                    meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                    initMaterials('vertexShader','fragmentShader');
+                    gameObject.addComponent(meshRenderer);
+                }
+
+                function setMaterial(index, element){
+                    if (lastSelectedMaterial){
+                        lastSelectedMaterial.style.backgroundColor = '';
+                    }
+                    element.style.backgroundColor = "lightGray";
+                    lastSelectedMaterial = element;
+                    meshRenderer.material = materials[index];
+                }
+
+                function setColor(color){
+                    meshRenderer.material.setUniform("uColor", new Float32Array(color));
+                }
+
+                function useNormalShader(){
+                    var shader = meshRenderer.material.shader;
+                    shader.fragmentShaderSrc = document.getElementById("fragmentShader").value;
+                    shader.apply();
+                }
+
+                function useAlternativeShader(){
+                    var shader = meshRenderer.material.shader;
+                    shader.fragmentShaderSrc = document.getElementById("fragmentShaderAlt").value;
+                    shader.apply();
+                }
+
+                initKick();
+                window.setMaterial = setMaterial;
+                window.setColor = setColor;
+                window.useNormalShader = useNormalShader;
+                window.useAlternativeShader = useAlternativeShader;
+
+            });
+</script>
+
+This example shows how vertex attributes can be visualized.
+<br>
+<b>Material</b><br>
+[<a href="#" onclick="setMaterial(0,this);return false;">Material 1</a>]
+[<a href="#" onclick="setMaterial(1,this);return false;">Material 2</a>]
+[<a href="#" onclick="setMaterial(2,this);return false;">Material 3</a>]<br>
+<b>Set color of current material</b><br>
+[<a href="#" onclick="setColor([1,0,0]);return false;">Red</a>]
+[<a href="#" onclick="setColor([0,1,0]);return false;">Green</a>]
+[<a href="#" onclick="setColor([0,0,1]);return false;">Blue</a>]
+<br>
+<b>Test recompile shader</b><br>
+[<a href="#" onclick="useNormalShader();return false;">Use normal shader</a>]
+[<a href="#" onclick="useAlternativeShader();return false;">Use bright shader</a>]
+<h2>Output</h2>
+<div id="output" style="color: red;">
 </div>
-  <br/>
+<h2>Show data</h2>
+<div style="display:none;">
+    <textarea style="width:500px;height:150px;" id="vertexShader">
+        attribute vec3 vertex;
+
+        uniform vec3 uColor;
+        varying vec3 color;
+
+        void main(void) {
+        gl_Position = vec4(vertex, 1.0);
+        color = uColor;
+        }
+    </textarea>
+
+    <textarea style="width:500px;height:150px;" id="fragmentShader">
+        #ifdef GL_ES
+        precision highp float;
+        #endif
+        varying vec3 color;
+        void main(void)
+        {
+        gl_FragColor = vec4(color.x, color.y, color.z, 1.0);
+        }
+    </textarea>
+
+    <textarea style="width:500px;height:150px;" id="fragmentShaderAlt">
+        #ifdef GL_ES
+        precision highp float;
+        #endif
+        varying vec3 color;
+        void main(void)
+        {
+        gl_FragColor = vec4(color.x+0.5, color.y+0.5, color.z+0.5, 1.0);
+        }
+    </textarea>
+</div>
+<br/>
 </body>
 </html>

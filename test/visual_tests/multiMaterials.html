@@ -3,200 +3,203 @@
 <html>
 <head>
     <title>Multi material test</title>
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
-    <script type="text/javascript">
-        var engine,
-                vec3 = KICK.math.vec3,
-                quat4 = KICK.math.quat4,
-                cameraObject,
-                lightGameObject,
-                lightComponents = [];
 
-        function addSphere(material,position,scale){
-            var gameObject = engine.activeScene.createGameObject();
-            var meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
-            meshRenderer.material = material;
-            gameObject.addComponent(meshRenderer);
-            var transform = gameObject.transform;
-            transform.localPosition = position;
-            transform.localScale = scale;
-            return gameObject;
-        }
-
-        function addLightComponent(){
-            lightGameObject = engine.activeScene.createGameObject();
-        }
-
-        function initKick() {
-            engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-            cameraObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({});
-            cameraObject.addComponent(camera);
-            var transform = cameraObject.transform;
-            transform.localPosition = [0,0,-3];
-            transform.localRotation = quat4.lookAt([0,0,-3],[0,0,0],[0,1,0]);
-
-            addLightComponent();
-        }
-
-        function changeShader(shader, button){
-            material.shader = engine.project.load(shader);
-            if (window.debugShader){
-                console.log("__________________vertexShaderSrc__________________");
-                console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
-                console.log("_________________fragmentShaderSrc_________________");
-                console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
-            }
-        }
-
-        function setLight(){
-            var lightComponent;
-            for (var i=0;i<lightComponents.length;i++){
-                lightGameObject.removeComponent(lightComponents[i]);
-            }
-            lightComponents.length = 0;
-            lightComponent = new KICK.scene.Light({
-                type:KICK.scene.Light.TYPE_AMBIENT,
-                color: [0.1,0.1,0.1]
-            });
-            lightGameObject.addComponent(lightComponent);
-            lightComponents.push(lightComponent);
-
-            lightComponent = new KICK.scene.Light({
-                type:KICK.scene.Light.TYPE_DIRECTIONAL,
-                color: [1.0,1.0,1.0]
-            });
-            lightGameObject.addComponent(lightComponent);
-            lightComponents.push(lightComponent);
-        }
-
-        function setTexture(url,button){
-            material.uniforms.mainTexture.value.dataURI = url;
-            material.uniforms.mainTexture.value.init();
-        }
-
-        function setRotation(){
-            lightGameObject.addComponent(new RotatorComponent());
-        }
-
-        function RotatorComponent(){
-            var thisObj = this,
-                time,
-                transform,
-                rotationSpeed = 0.001,
-                upDownSpeed = 0.0001,
-                wheelSpeed = 0.0001,
-                mouseRotationSpeed = 0.01,
-                mouseInput,
-                sphericalCoordinates = vec3.create([2.2,0,0]); // radius, polar, elevation
-                cartesianCoordinates = vec3.create();
-
-            this.activated = function(){
-                var gameObject = thisObj.gameObject,
-                    engine = gameObject.engine;
-                transform = gameObject.transform;
-                time = engine.time;
-                mouseInput = engine.mouseInput;
-                mouseInput.mouseWheelPreventDefaultAction = true;
-            };
-
-            var localRotate = KICK.math.quat4.create();
-            this.update = function(){
-                if (mouseInput.isButton(0)){
-                    var mouseDelta = mouseInput.deltaMovement;
-                    sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
-                    sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
-                    sphericalCoordinates[2] = Math.max(-Math.PI*0.499,sphericalCoordinates[2]);
-                    sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
-                } else {
-                    sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
-                    sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
-                }
-                var wheelY = mouseInput.deltaWheel[1];
-                if (wheelY){
-                    var delta = wheelY*wheelSpeed;
-                    sphericalCoordinates[0] *= 1+delta;
-                }
-                vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
-                transform.position = cartesianCoordinates;
-                transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
-            };
-        }
-
-        function initScene(){
-            setLight();
-
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
-            for (var i = 0;i<5;i++){
-                var material = new KICK.material.Material(engine, {
-                    shader:shader,
-                    uniformData:{
-                        mainColor:[1.0,0.0,0.9,0.5],
-                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                        specularExponent: 1+i/5*50,
-                        specularColor:[1,1,1,1]
-                    }
-                });
-                var position = [-1+(i/5)*3,0,0];
-                addSphere(material, position,[0.25,0.25,0.25]);
-            }
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
-            for (var i = 0;i<5;i++){
-                var material = new KICK.material.Material(engine, {
-                    shader:shader,
-                    uniformData:{
-                        mainColor:[i/5,0.0,0.9,0.5],
-                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-                    }
-                });
-                var position = [-1+(i/5)*3,.75,0];
-                addSphere(material, position,[0.25,0.25,0.25]);
-            }
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-            for (var i = 0;i<5;i++){
-                var material = new KICK.material.Material(engine, {
-                    shader:shader,
-                    uniformData:{
-                        mainColor:[i/5,0.0,0.9,0.5],
-                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-                    }
-                });
-                var position = [-1+(i/5)*3,-.75,0];
-                addSphere(material, position,[0.25,0.25,0.25]);
-            }
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
-            for (var i = 0;i<5;i++){
-                var material = new KICK.material.Material(engine, {
-                    shader:shader,
-                    uniformData:{
-                        mainColor:[i/5,0.0,0.9,0.5],
-                        mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-                    }
-                });
-                var position = [-1+(i/5)*3,-1.5,0];
-                addSphere(material, position,[0.25,0.25,0.25]);
-            }
-
-            setRotation(true);
-        }
-    </script>
 
 </head>
-<body onload="initKick();initScene();">
+<body>
 <h1>Multi material test</h1>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas> <br>
+<script src="../../src/js-dependencies/require.js"></script>
+<script type="text/javascript">
+    var req = require.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
+    });
+
+    req(['kick/all'],
+            function (KICK) {
+                var engine,
+                        vec3 = KICK.math.Vec3,
+                        quat4 = KICK.math.Quat4,
+                        cameraObject,
+                        lightGameObject,
+                        lightComponents = [];
+
+                function addSphere(material,position,scale){
+                    var gameObject = engine.activeScene.createGameObject();
+                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
+                    meshRenderer.material = material;
+                    gameObject.addComponent(meshRenderer);
+                    var transform = gameObject.transform;
+                    transform.localPosition = position;
+                    transform.localScale = scale;
+                    return gameObject;
+                }
+
+                function addLightComponent(){
+                    lightGameObject = engine.activeScene.createGameObject();
+                }
+
+                function initKick() {
+                    engine = new KICK.core.Engine('canvas',{
+                        enableDebugContext: true
+                    });
+                    cameraObject = engine.activeScene.createGameObject();
+                    var camera = new KICK.scene.Camera({});
+                    cameraObject.addComponent(camera);
+                    var transform = cameraObject.transform;
+                    transform.localPosition = [0,0,-3];
+                    transform.localRotation = quat4.lookAt([0,0,-3],[0,0,0],[0,1,0]);
+
+                    addLightComponent();
+                }
+
+                function changeShader(shader, button){
+                    material.shader = engine.project.load(shader);
+                    if (window.debugShader){
+                        console.log("__________________vertexShaderSrc__________________");
+                        console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
+                        console.log("_________________fragmentShaderSrc_________________");
+                        console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
+                    }
+                }
+
+                function setLight(){
+                    var lightComponent;
+                    for (var i=0;i<lightComponents.length;i++){
+                        lightGameObject.removeComponent(lightComponents[i]);
+                    }
+                    lightComponents.length = 0;
+                    lightComponent = new KICK.scene.Light({
+                        type:KICK.scene.Light.TYPE_AMBIENT,
+                        color: [0.1,0.1,0.1]
+                    });
+                    lightGameObject.addComponent(lightComponent);
+                    lightComponents.push(lightComponent);
+
+                    lightComponent = new KICK.scene.Light({
+                        type:KICK.scene.Light.TYPE_DIRECTIONAL,
+                        color: [1.0,1.0,1.0]
+                    });
+                    lightGameObject.addComponent(lightComponent);
+                    lightComponents.push(lightComponent);
+                }
+
+                function setTexture(url,button){
+                    material.uniforms.mainTexture.value.dataURI = url;
+                    material.uniforms.mainTexture.value.init();
+                }
+
+                function setRotation(){
+                    lightGameObject.addComponent(new RotatorComponent());
+                }
+
+                function RotatorComponent(){
+                    var thisObj = this,
+                            time,
+                            transform,
+                            rotationSpeed = 0.001,
+                            upDownSpeed = 0.0001,
+                            wheelSpeed = 0.0001,
+                            mouseRotationSpeed = 0.01,
+                            mouseInput,
+                            sphericalCoordinates = vec3.create([2.2,0,0]); // radius, polar, elevation
+                    cartesianCoordinates = vec3.create();
+
+                    this.activated = function(){
+                        var gameObject = thisObj.gameObject,
+                                engine = gameObject.engine;
+                        transform = gameObject.transform;
+                        time = engine.time;
+                        mouseInput = engine.mouseInput;
+                        mouseInput.mouseWheelPreventDefaultAction = true;
+                    };
+
+                    var localRotate = quat4.create();
+                    this.update = function(){
+                        if (mouseInput.isButton(0)){
+                            var mouseDelta = mouseInput.deltaMovement;
+                            sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
+                            sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
+                            sphericalCoordinates[2] = Math.max(-Math.PI*0.499,sphericalCoordinates[2]);
+                            sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
+                        } else {
+                            sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
+                            sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
+                        }
+                        var wheelY = mouseInput.deltaWheel[1];
+                        if (wheelY){
+                            var delta = wheelY*wheelSpeed;
+                            sphericalCoordinates[0] *= 1+delta;
+                        }
+                        vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+                        transform.position = cartesianCoordinates;
+                        transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
+                    };
+                }
+
+                function initScene(){
+                    setLight();
+
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
+                    for (var i = 0;i<5;i++){
+                        var material = new KICK.material.Material(engine, {
+                            shader:shader,
+                            uniformData:{
+                                mainColor:[1.0,0.0,0.9,0.5],
+                                mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                                specularExponent: 1+i/5*50,
+                                specularColor:[1,1,1,1]
+                            }
+                        });
+                        var position = [-1+(i/5)*3,0,0];
+                        addSphere(material, position,[0.25,0.25,0.25]);
+                    }
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
+                    for (var i = 0;i<5;i++){
+                        var material = new KICK.material.Material(engine, {
+                            shader:shader,
+                            uniformData:{
+                                mainColor:[i/5,0.0,0.9,0.5],
+                                mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
+                            }
+                        });
+                        var position = [-1+(i/5)*3,.75,0];
+                        addSphere(material, position,[0.25,0.25,0.25]);
+                    }
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+                    for (var i = 0;i<5;i++){
+                        var material = new KICK.material.Material(engine, {
+                            shader:shader,
+                            uniformData:{
+                                mainColor:[i/5,0.0,0.9,0.5],
+                                mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
+                            }
+                        });
+                        var position = [-1+(i/5)*3,-.75,0];
+                        addSphere(material, position,[0.25,0.25,0.25]);
+                    }
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
+                    for (var i = 0;i<5;i++){
+                        var material = new KICK.material.Material(engine, {
+                            shader:shader,
+                            uniformData:{
+                                mainColor:[i/5,0.0,0.9,0.5],
+                                mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
+                            }
+                        });
+                        var position = [-1+(i/5)*3,-1.5,0];
+                        addSphere(material, position,[0.25,0.25,0.25]);
+                    }
+
+                    setRotation(true);
+                }
+                initKick();
+                initScene();
+            });
+</script>
 </body>
 </html>

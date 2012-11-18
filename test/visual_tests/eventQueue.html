@@ -3,17 +3,6 @@
 <html>
 <head>
     <title></title>
-        <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
 </head>
 <body>
 <h1>Event queue test</h1>
@@ -24,120 +13,133 @@ Releasing the '1' or '2' will aboard the flicker.
 <br>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
 
+<script src="../../src/js-dependencies/require.js"></script>
 <script type="text/javascript">
-    var RotatorComponent = function(config){
-        var rotationEuler = [0,0,0],
-                thisObj = this,
-                keyInput,
-                transform,
-                time,
-                material,
-                eventQueue,
-                currentSpeed = 0,
-                flickerEvent,
-                flickerEventPost;
-
-        this.rotationSpeed = config.rotationSpeed;
-        this.keyCode = config.keyCode;
-        this.rotationColor = config.rotationColor;
-
-        this.activated = function(){
-            var gameObject = thisObj.gameObject,
-                    engine = gameObject.engine;
-            eventQueue = engine.eventQueue
-            console.log("eventQueue "+eventQueue);
-            time = engine.time;
-            transform = gameObject.transform;
-            keyInput = engine.keyInput;
-            material = gameObject.getComponentOfType(KICK.scene.MeshRenderer).material;
-        };
-
-        this.update = function(){
-            var deltaTime = time.deltaTime,
-                    flip = false;
-
-            if (keyInput.isKeyDown(thisObj.keyCode)){ // test if key has been pressed down in this frame
-                console.log("Key down event at time "+time.time+" frame "+time.frame);
-                flickerEvent = eventQueue.add(function(){
-                    if (flip ){
-                        material.setUniform("mainColor",[0,0,0,1]);
-                    } else {
-                        material.setUniform("mainColor",thisObj.rotationColor);
-                    }
-                    flip = !flip;
-                },1000,6000);
-                flickerEventPost = eventQueue.add(function(){
-                    material.setUniform("mainColor",[1,1,1,1]);
-                },6000);
-            }
-            if (keyInput.isKeyUp(thisObj.keyCode)){
-                eventQueue.cancel(flickerEvent);
-                eventQueue.cancel(flickerEventPost);
-                material.setUniform ("mainColor",[1,1,1,1]);
-                console.log("Key up at time "+time.time+" frame "+time.frame);
-            }
-
-            if (keyInput.isKey(thisObj.keyCode)){ // test if key is being pressed
-                // accelerate
-                currentSpeed += config.rotationSpeed*deltaTime;
-            } else {
-                // de-accelerate
-                currentSpeed = Math.max(0,currentSpeed-config.rotationSpeed*deltaTime);
-            }
-            // apply current rotation
-            rotationEuler[2] += deltaTime*currentSpeed;
-            transform.localRotationEuler = rotationEuler;
-        };
-    };
-
-    // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-
-    // create a game object in [0,0,0] facing down the -z axis
-    var cameraObject = engine.activeScene.createGameObject();
-    cameraObject.transform.position = [0,0,5];
-    // create a perspective camera
-    var camera = new KICK.scene.Camera({
-        perspective: false,
-        left:-5,
-        right:5,
-        top:5,
-        bottom:-5
+    var req = require.config({
+        context: "version1",
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
     });
-    cameraObject.addComponent(camera);
 
-    function createMaterial(){
-        return new KICK.material.Material(engine,{
-            shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),//engine.resourceManager.getShader("kickjs://shader/unlit/"),
-            uniformData:{
-                mainColor: [1,1,1,1],
-                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-            }
-        });
-    }
+    req(['kick/all'],
+            function (KICK) {
+                "use strict";
+                var RotatorComponent = function(config){
+                    var rotationEuler = [0,0,0],
+                            thisObj = this,
+                            keyInput,
+                            transform,
+                            time,
+                            material,
+                            eventQueue,
+                            currentSpeed = 0,
+                            flickerEvent,
+                            flickerEventPost;
 
-    // create meshes
-    var meshes = [engine.project.ENGINE_MESH_TRIANGLE,engine.project.ENGINE_MESH_CUBE];
-    var keyCodes = ["1","2"];
-    var rotationAcceleration = [0.0002,0.00032];
-    var rotationColor = [[1,0,0,1],[0,0,1,1]];
+                    this.rotationSpeed = config.rotationSpeed;
+                    this.keyCode = config.keyCode;
+                    this.rotationColor = config.rotationColor;
 
-    for (var i=0;i<meshes.length;i++){
-        var gameObject = engine.activeScene.createGameObject();
-        gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = engine.project.load(meshes[i]);
-        meshRenderer.material = createMaterial();
-        gameObject.addComponent(meshRenderer);
-        gameObject.addComponent(new RotatorComponent(
-                {
-                    rotationSpeed:rotationAcceleration[i],
-                    keyCode:keyCodes[i].charCodeAt(0),
-                    rotationColor:rotationColor[i]
-                }));
-    }
+                    this.activated = function(){
+                        var gameObject = thisObj.gameObject,
+                                engine = gameObject.engine;
+                        eventQueue = engine.eventQueue
+                        console.log("eventQueue "+eventQueue);
+                        time = engine.time;
+                        transform = gameObject.transform;
+                        keyInput = engine.keyInput;
+                        material = gameObject.getComponentOfType(KICK.scene.MeshRenderer).material;
+                    };
+
+                    this.update = function(){
+                        var deltaTime = time.deltaTime,
+                                flip = false;
+
+                        if (keyInput.isKeyDown(thisObj.keyCode)){ // test if key has been pressed down in this frame
+                            console.log("Key down event at time "+time.time+" frame "+time.frame);
+                            flickerEvent = eventQueue.add(function(){
+                                if (flip ){
+                                    material.setUniform("mainColor",[0,0,0,1]);
+                                } else {
+                                    material.setUniform("mainColor",thisObj.rotationColor);
+                                }
+                                flip = !flip;
+                            },1000,6000);
+                            flickerEventPost = eventQueue.add(function(){
+                                material.setUniform("mainColor",[1,1,1,1]);
+                            },6000);
+                        }
+                        if (keyInput.isKeyUp(thisObj.keyCode)){
+                            eventQueue.cancel(flickerEvent);
+                            eventQueue.cancel(flickerEventPost);
+                            material.setUniform ("mainColor",[1,1,1,1]);
+                            console.log("Key up at time "+time.time+" frame "+time.frame);
+                        }
+
+                        if (keyInput.isKey(thisObj.keyCode)){ // test if key is being pressed
+                            // accelerate
+                            currentSpeed += config.rotationSpeed*deltaTime;
+                        } else {
+                            // de-accelerate
+                            currentSpeed = Math.max(0,currentSpeed-config.rotationSpeed*deltaTime);
+                        }
+                        // apply current rotation
+                        rotationEuler[2] += deltaTime*currentSpeed;
+                        transform.localRotationEuler = rotationEuler;
+                    };
+                };
+
+                // init engine (create 3d context)
+                var engine = new KICK.core.Engine('canvas',{
+                    enableDebugContext: true
+                });
+
+                // create a game object in [0,0,0] facing down the -z axis
+                var cameraObject = engine.activeScene.createGameObject();
+                cameraObject.transform.position = [0,0,5];
+                // create a perspective camera
+                var camera = new KICK.scene.Camera({
+                    perspective: false,
+                    left:-5,
+                    right:5,
+                    top:5,
+                    bottom:-5
+                });
+                cameraObject.addComponent(camera);
+
+                function createMaterial(){
+                    return new KICK.material.Material(engine,{
+                        shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),//engine.resourceManager.getShader("kickjs://shader/unlit/"),
+                        uniformData:{
+                            mainColor: [1,1,1,1],
+                            mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
+                        }
+                    });
+                }
+
+                // create meshes
+                var meshes = [engine.project.ENGINE_MESH_TRIANGLE,engine.project.ENGINE_MESH_CUBE];
+                var keyCodes = ["1","2"];
+                var rotationAcceleration = [0.0002,0.00032];
+                var rotationColor = [[1,0,0,1],[0,0,1,1]];
+
+                for (var i=0;i<meshes.length;i++){
+                    var gameObject = engine.activeScene.createGameObject();
+                    gameObject.transform.position = [-2.0+4*i,0,0];
+                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    meshRenderer.mesh = engine.project.load(meshes[i]);
+                    meshRenderer.material = createMaterial();
+                    gameObject.addComponent(meshRenderer);
+                    gameObject.addComponent(new RotatorComponent(
+                            {
+                                rotationSpeed:rotationAcceleration[i],
+                                keyCode:keyCodes[i].charCodeAt(0),
+                                rotationColor:rotationColor[i]
+                            }));
+                }
+            });
 </script>
 </body>
 </html>

@@ -3,23 +3,22 @@
 <html>
 <head>
     <title>Reuse component</title>
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
 </head>
 <body>
 <h1>Reuse component</h1>
 This test ensured that components can be reused after removed from a game object.<br>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+<script src="../../src/js-dependencies/require.js"></script>
 <script type="text/javascript">
+    var req = require.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
+    });
+
+    req(['kick/all'],
+            function (KICK) {
     // init engine (create 3d context)
     var engine = new KICK.core.Engine('canvas');
 
@@ -69,6 +68,8 @@ This test ensured that components can be reused after removed from a game object
         gameObject.addComponent(meshRenderer);
 
     }
+
+            });
 </script>
 </body>
 </html>

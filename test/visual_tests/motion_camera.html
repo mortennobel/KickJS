@@ -6,212 +6,347 @@
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.4.0/build/cssgrids/grids-min.css">
 
-    <script src="http://yui.yahooapis.com/3.4.0/build/yui/yui-min.js"></script>
-    <script type="text/javascript" src="../../src/js-dependencies/webgl-debug.js"></script>
-    <script type="text/javascript" src="../../src/js/constants.js"></script>
-    <script type="text/javascript" src="../../src/js/glslconstants.js"></script>
-    <script type="text/javascript" src="../../src/js/core.js"></script>
-    <script type="text/javascript" src="../../src/js/resource.js"></script>
-    <script type="text/javascript" src="../../src/js/math.js"></script>
-    <script type="text/javascript" src="../../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../../src/js/scene.js"></script>
-    <script type="text/javascript" src="../../src/js/material.js"></script>
-    <script type="text/javascript" src="../../src/js/meshfactory.js"></script>
-    <script type="text/javascript" src="../../src/js/texture.js"></script>
+    <script src="../../src/js-dependencies/require.js"></script>
     <script type="text/javascript">
-        var engine;
-        var meshRenderer;
-        
-        var log = function (output) {
-            var element = document.getElementById("output");
-            element.innerHTML = element.innerHTML+output+"<br>";
-        };
-
-        var clearLog = function(){
-            var element = document.getElementById("output");
-            element.innerHTML = "";
-        };
-
-        function setMaterial(vertexShaderId, fragmentShaderId){
-            clearLog();
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
-            shader.apply();
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                return;
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../src/js/kick'
             }
+        });
 
-            meshRenderer.material = new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader
-            });
-        }
+        req(['kick/all'],
+                function (KICK) {
+                    var engine;
+                    var meshRenderer;
 
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
+                    var log = function (output) {
+                        var element = document.getElementById("output");
+                        element.innerHTML = element.innerHTML+output+"<br>";
+                    };
 
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
-        }
+                    var clearLog = function(){
+                        var element = document.getElementById("output");
+                        element.innerHTML = "";
+                    };
 
-        function addRotatorComponent(gameObject,id){
-            var locx = document.getElementById(id+'locx'),
-                locy = document.getElementById(id+'locy'),
-                locz = document.getElementById(id+'locz'),
-                rotx = document.getElementById(id+'rotx'),
-                roty = document.getElementById(id+'roty'),
-                rotz = document.getElementById(id+'rotz'),
-                scax = document.getElementById(id+'scax'),
-                scay = document.getElementById(id+'scay'),
-                scaz = document.getElementById(id+'scaz'),
-                mat = document.getElementById(id+'mat'),
-                matinv = document.getElementById(id+'matinv'),
-                transform = gameObject.transform;
-            gameObject.addComponent({
-                update: function(){
-                    
-                    //console.log(translate[0],translate[1]);
-                    //transform.localRotation = rotation;
-                    //transform.localTranslation = translate;
-                    transform.localPosition = [locx.value,locy.value,locz.value];
-                    transform.localRotationEuler = [rotx.value,roty.value,rotz.value];
-                    if (scax){
-                        transform.localScale = [scax.value,scay.value,scaz.value];
+                    function setMaterial(vertexShaderId, fragmentShaderId){
+                        clearLog();
+                        var vs = document.getElementById(vertexShaderId).value;
+                        var fs = document.getElementById(fragmentShaderId).value;
+                        var shader = new KICK.material.Shader(engine);
+                        shader.vertexShaderSrc = vs;
+                        shader.fragmentShaderSrc = fs;
+                        shader.errorLog = log;
+                        shader.apply();
+                        var missingAttributes = meshRenderer.mesh.verify(shader);
+                        if (missingAttributes){
+                            log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                            return;
+                        }
+
+                        meshRenderer.material = new KICK.material.Material(engine,{
+                            name:"Some material",
+                            shader:shader
+                        });
                     }
-                    mat.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix());
-                    matinv.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalTRSInverse());
-                }
-            });
-        }
 
-        function initKick() {
-            engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-            var cameraGameObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
-                clearColor: [0,0,0,1]
-            });
-            cameraGameObject.addComponent(camera);
+                    function recalculateNormals(){
+                        clearLog();
+                        var mesh = meshRenderer.mesh;
+                        mesh.recalculateNormals();
+                        mesh.updateData();
+                    }
 
-            var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
-            setMaterial('vertexShaderColor','fragmentShader');
-            gameObject.addComponent(meshRenderer);
-            addRotatorComponent(cameraGameObject,"");
-            addRotatorComponent(gameObject,"cube_");
-        }
+                    function recalculateTangents(){
+                        clearLog();
+                        var mesh = meshRenderer.mesh;
+                        mesh.recalculateTangents();
+                        mesh.updateData();
+                    }
 
-        var mouseDown = null;
-        var direction = 0;
+                    function addRotatorComponent(gameObject,id){
+                        var locx = document.getElementById(id+'locx'),
+                                locy = document.getElementById(id+'locy'),
+                                locz = document.getElementById(id+'locz'),
+                                rotx = document.getElementById(id+'rotx'),
+                                roty = document.getElementById(id+'roty'),
+                                rotz = document.getElementById(id+'rotz'),
+                                scax = document.getElementById(id+'scax'),
+                                scay = document.getElementById(id+'scay'),
+                                scaz = document.getElementById(id+'scaz'),
+                                mat = document.getElementById(id+'mat'),
+                                matinv = document.getElementById(id+'matinv'),
+                                transform = gameObject.transform;
+                        gameObject.addComponent({
+                            update: function(){
 
-        function increateElementValue(){
-            if (mouseDown){
-                mouseDown.value = (0.1*direction)+new Number(mouseDown.value);
-                setTimeout(increateElementValue,100);
-            }
-        }
+                                //console.log(translate[0],translate[1]);
+                                //transform.localRotation = rotation;
+                                //transform.localTranslation = translate;
+                                transform.localPosition = [locx.value,locy.value,locz.value];
+                                transform.localRotationEuler = [rotx.value,roty.value,rotz.value];
+                                if (scax){
+                                    transform.localScale = [scax.value,scay.value,scaz.value];
+                                }
+                                mat.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix());
+                                matinv.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalTRSInverse());
+                            }
+                        });
+                    }
 
-        function registerListener(id){
-            var elem = document.getElementById(id);
-            elem.onmousedown = function(e){
-                mouseDown = elem;
-                direction = e.button===0?1:-1;
-                increateElementValue();
+                    function initKick() {
+                        engine = new KICK.core.Engine('canvas',{
+                            enableDebugContext: true
+                        });
+                        var cameraGameObject = engine.activeScene.createGameObject();
+                        var camera = new KICK.scene.Camera({
+                            clearColor: [0,0,0,1]
+                        });
+                        cameraGameObject.addComponent(camera);
 
-            };
-        }
+                        var gameObject = engine.activeScene.createGameObject();
+                        meshRenderer = new KICK.scene.MeshRenderer();
+                        meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                        setMaterial('vertexShaderColor','fragmentShader');
+                        gameObject.addComponent(meshRenderer);
+                        addRotatorComponent(cameraGameObject,"");
+                        addRotatorComponent(gameObject,"cube_");
+                    }
 
-        function registerListeners(id){
-            registerListener(id+"x");
-            registerListener(id+"y");
-            registerListener(id+"z");
-        }
+                    var mouseDown = null;
+                    var direction = 0;
 
+                    function increateElementValue(){
+                        if (mouseDown){
+                            mouseDown.value = (0.1*direction)+new Number(mouseDown.value);
+                            setTimeout(increateElementValue,100);
+                        }
+                    }
+
+                    function registerListener(id){
+                        var elem = document.getElementById(id);
+                        elem.onmousedown = function(e){
+                            mouseDown = elem;
+                            direction = e.button===0?1:-1;
+                            increateElementValue();
+
+                        };
+                    }
+
+                    function registerListeners(id){
+                        registerListener(id+"x");
+                        registerListener(id+"y");
+                        registerListener(id+"z");
+                    }
+                });
 
 
     </script>
 </head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example shows how a cube is rotated.
-  <br>
+<body>
+<canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+<script src="../../src/js-dependencies/require.js"></script>
+    <script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../src/js/kick'
+            }
+        });
 
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
-  </div>
-  <h2>Camera position</h2>
-  Location <input id="locx" value="0"><input id="locy" value="0"><input id="locz" value="10"><br>
-  Rotation <input id="rotx" value="0"><input id="roty" value="0"><input id="rotz" value="0"><br>
-    Matrix (read only) [Global and global inverse]:<br>
-  <textarea style="width:100px;height:60px" id="mat" readonly="readonly">
+        req(['kick/all'],
+                function (KICK) {
+                    var engine;
+                    var meshRenderer;
 
-</textarea>
-  <textarea style="width:100px;height:60px" id="matinv" readonly="readonly">
+                    var log = function (output) {
+                        var element = document.getElementById("output");
+                        element.innerHTML = element.innerHTML+output+"<br>";
+                    };
 
-</textarea>
-  <h2>Cube position</h2>
-  Location <input id="cube_locx" value="0"><input id="cube_locy" value="0"><input id="cube_locz" value="0"><br>
-  Rotation <input id="cube_rotx" value="0"><input id="cube_roty" value="0"><input id="cube_rotz" value="0"><br>
-  Scale <input id="cube_scax" value="1"><input id="cube_scay" value="1"><input id="cube_scaz" value="1"><br>
-    Matrix (read only) [Global and global inverse]:<br>
-  <textarea style="width:100px;height:60px" id="cube_mat" readonly="readonly">
+                    var clearLog = function(){
+                        var element = document.getElementById("output");
+                        element.innerHTML = "";
+                    };
 
-</textarea>
-  <textarea style="width:100px;height:60px" id="cube_matinv" readonly="readonly">
+                    function setMaterial(vertexShaderId, fragmentShaderId){
+                        clearLog();
+                        var vs = document.getElementById(vertexShaderId).value;
+                        var fs = document.getElementById(fragmentShaderId).value;
+                        var shader = new KICK.material.Shader(engine);
+                        shader.vertexShaderSrc = vs;
+                        shader.fragmentShaderSrc = fs;
+                        shader.errorLog = log;
+                        shader.apply();
+                        var missingAttributes = meshRenderer.mesh.verify(shader);
+                        if (missingAttributes){
+                            log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                            return;
+                        }
 
-</textarea>
-  <div id="example" class="yui3-skin-sam"></div>
+                        meshRenderer.material = new KICK.material.Material(engine,{
+                            name:"Some material",
+                            shader:shader
+                        });
+                    }
 
-  <div style="display:none;">
-  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
-attribute vec3 vertex;
-attribute vec4 color;
+                    function recalculateNormals(){
+                        clearLog();
+                        var mesh = meshRenderer.mesh;
+                        mesh.recalculateNormals();
+                        mesh.updateData();
+                    }
 
-uniform mat4 _mvProj;
+                    function recalculateTangents(){
+                        clearLog();
+                        var mesh = meshRenderer.mesh;
+                        mesh.recalculateTangents();
+                        mesh.updateData();
+                    }
 
-varying vec3 vColor;
+                    function addRotatorComponent(gameObject,id){
+                        var locx = document.getElementById(id+'locx'),
+                                locy = document.getElementById(id+'locy'),
+                                locz = document.getElementById(id+'locz'),
+                                rotx = document.getElementById(id+'rotx'),
+                                roty = document.getElementById(id+'roty'),
+                                rotz = document.getElementById(id+'rotz'),
+                                scax = document.getElementById(id+'scax'),
+                                scay = document.getElementById(id+'scay'),
+                                scaz = document.getElementById(id+'scaz'),
+                                mat = document.getElementById(id+'mat'),
+                                matinv = document.getElementById(id+'matinv'),
+                                transform = gameObject.transform;
+                        gameObject.addComponent({
+                            update: function(){
 
-void main(void) {
-    gl_Position = _mvProj * vec4(vertex, 1.0);
-    vColor = color.xyz;
-}
-  </textarea>
-  <textarea style="width:500px;height:150px;" id="fragmentShader">
-#ifdef GL_ES
-precision highp float;
-#endif
-varying vec3 vColor;
-void main(void)
-{
-    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
-}
-  </textarea>
+                                //console.log(translate[0],translate[1]);
+                                //transform.localRotation = rotation;
+                                //transform.localTranslation = translate;
+                                transform.localPosition = [locx.value,locy.value,locz.value];
+                                transform.localRotationEuler = [rotx.value,roty.value,rotz.value];
+                                if (scax){
+                                    transform.localScale = [scax.value,scay.value,scaz.value];
+                                }
+                                mat.innerHTML = KICK.math.Mat4.strPretty(transform.getGlobalMatrix());
+                                matinv.innerHTML = KICK.math.Mat4.strPretty(transform.getGlobalTRSInverse());
+                            }
+                        });
+                    }
+
+                    function initKick() {
+                        engine = new KICK.core.Engine('canvas',{
+                            enableDebugContext: true
+                        });
+                        var cameraGameObject = engine.activeScene.createGameObject();
+                        var camera = new KICK.scene.Camera({
+                            clearColor: [0,0,0,1]
+                        });
+                        cameraGameObject.addComponent(camera);
+
+                        var gameObject = engine.activeScene.createGameObject();
+                        meshRenderer = new KICK.scene.MeshRenderer();
+                        meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                        setMaterial('vertexShaderColor','fragmentShader');
+                        gameObject.addComponent(meshRenderer);
+                        addRotatorComponent(cameraGameObject,"");
+                        addRotatorComponent(gameObject,"cube_");
+                    }
+
+                    var mouseDown = null;
+                    var direction = 0;
+
+                    function increateElementValue(){
+                        if (mouseDown){
+                            mouseDown.value = (0.1*direction)+new Number(mouseDown.value);
+                            setTimeout(increateElementValue,100);
+                        }
+                    }
+
+                    function registerListener(id){
+                        var elem = document.getElementById(id);
+                        elem.onmousedown = function(e){
+                            mouseDown = elem;
+                            direction = e.button===0?1:-1;
+                            increateElementValue();
+
+                        };
+                    }
+
+                    function registerListeners(id){
+                        registerListener(id+"x");
+                        registerListener(id+"y");
+                        registerListener(id+"z");
+                    }
+
+                    initKick();
+                    registerListeners("loc");
+                    registerListeners("rot");
+                    registerListeners("cube_loc");
+                    registerListeners("cube_rot");
+                    registerListeners("cube_sca");
+                    document.onmouseup = function(){
+                        mouseDown = null;
+                    };
+                });
+
+
+    </script>
+This example shows how a cube is rotated.
+<br>
+
+<h2>Output</h2>
+<div id="output" style="color: red;">
 </div>
-  <br/>
-<script type="text/javascript">
-     registerListeners("loc");
-        registerListeners("rot");
-        registerListeners("cube_loc");
-        registerListeners("cube_rot");
-        registerListeners("cube_sca");
-        document.onmouseup = function(){
-            mouseDown = null;
-        };
-</script>
+<h2>Camera position</h2>
+Location <input id="locx" value="0"><input id="locy" value="0"><input id="locz" value="10"><br>
+Rotation <input id="rotx" value="0"><input id="roty" value="0"><input id="rotz" value="0"><br>
+Matrix (read only) [Global and global inverse]:<br>
+<textarea style="width:100px;height:60px" id="mat" readonly="readonly">
+
+</textarea>
+<textarea style="width:100px;height:60px" id="matinv" readonly="readonly">
+
+</textarea>
+<h2>Cube position</h2>
+Location <input id="cube_locx" value="0"><input id="cube_locy" value="0"><input id="cube_locz" value="0"><br>
+Rotation <input id="cube_rotx" value="0"><input id="cube_roty" value="0"><input id="cube_rotz" value="0"><br>
+Scale <input id="cube_scax" value="1"><input id="cube_scay" value="1"><input id="cube_scaz" value="1"><br>
+Matrix (read only) [Global and global inverse]:<br>
+<textarea style="width:100px;height:60px" id="cube_mat" readonly="readonly">
+
+</textarea>
+<textarea style="width:100px;height:60px" id="cube_matinv" readonly="readonly">
+
+</textarea>
+<div id="example" class="yui3-skin-sam"></div>
+
+<div style="display:none;">
+    <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+        attribute vec3 vertex;
+        attribute vec4 color;
+
+        uniform mat4 _mvProj;
+
+        varying vec3 vColor;
+
+        void main(void) {
+        gl_Position = _mvProj * vec4(vertex, 1.0);
+        vColor = color.xyz;
+        }
+    </textarea>
+    <textarea style="width:500px;height:150px;" id="fragmentShader">
+        #ifdef GL_ES
+        precision highp float;
+        #endif
+        varying vec3 vColor;
+        void main(void)
+        {
+        gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+        }
+    </textarea>
+</div>
+<br/>
 </body>
 </html>
