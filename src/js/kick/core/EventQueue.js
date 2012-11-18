@@ -18,7 +18,7 @@ define(["./Util"], function (util) {
 
         /**
          * Add a event to the event queue. Using timeStart = 0 will make the event run in the next frame.
-         * @mehtod add
+         * @method add
          * @param {function} task
          * @param {Number} timeStart Number of milliseconds from current time
          * @param {Number} timeEnd Optional (defaults to timeStart). Number of milliseconds from current time

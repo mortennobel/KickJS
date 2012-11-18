@@ -200,8 +200,8 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
              * Bind material uniforms. Returns undefined or null if value is undefined or null (or uniform not found)
              * @method setUniform
              * @param {String} name
-             * @param {Float32Array|Int32Array|kick.texture.Texture}
-                * @return {kick.material.MaterialUniform}
+             * @param {Float32Array|Int32Array|kick.texture.Texture} value
+             * @return {kick.material.MaterialUniform}
              */
             this.setUniform = function (name, value) {
                 if (value === undefined || value === null) {

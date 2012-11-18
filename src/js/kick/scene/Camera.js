@@ -151,9 +151,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                  * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
                  * and finally on mesh.
                  * @method compareRenderOrder
-                 * @param {Component}
-                    * @param {Component}
-                    * @return Number
+                 * @param {Component} a
+                 * @param {Component} b
+                 * @return Number
                  * @private
                  */
                 compareRenderOrder = function (a, b) {

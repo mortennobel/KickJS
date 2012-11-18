@@ -146,6 +146,7 @@ define([], function () {
 
         /**
          * Transform a mat3 into a rotation (quaternion).
+         * @method toQuat
          * @param {kick.math.Mat3} mat
          * @param {kick.math.Quat4} dest
          * @return {kick.math.Quat4}

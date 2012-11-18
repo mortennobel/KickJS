@@ -5,6 +5,7 @@ define(["./Constants"], function (Constants) {
      * This class contains the webgl-debug.js. Note is is only defined in debug builds.
      * @class WebGLDebugUtils
      * @namespace kick.core
+     * @static
      */
     if (!Constants._DEBUG) {
         return {};
@@ -14,7 +15,7 @@ define(["./Constants"], function (Constants) {
         // Various functions for helping debug WebGL apps.
         return function () {
 
-            /**
+            /*
              * Wrapped logging function.
              * @param {string} msg Message to log.
              */
@@ -24,7 +25,7 @@ define(["./Constants"], function (Constants) {
                 }
             };
 
-            /**
+            /*
              * Wrapped error logging function.
              * @param {string} msg Message to log.
              */
@@ -36,7 +37,7 @@ define(["./Constants"], function (Constants) {
                 }
             };
 
-            /**
+            /*
              * Which arguements are enums.
              * @type {!Object.<number, string>}
              */
@@ -117,13 +118,13 @@ define(["./Constants"], function (Constants) {
                 'frontFace': { 0:true },
             };
 
-            /**
+            /*
              * Map of numbers to names.
              * @type {Object}
              */
             var glEnums = null;
 
-            /**
+            /*
              * Initializes this module. Safe to call more than once.
              * @param {!WebGLRenderingContext} ctx A WebGL context. If
              *    you have more than one context it doesn't matter which one
@@ -140,7 +141,7 @@ define(["./Constants"], function (Constants) {
                 }
             }
 
-            /**
+            /*
              * Checks the utils have been initialized.
              */
             function checkInit() {
@@ -149,7 +150,7 @@ define(["./Constants"], function (Constants) {
                 }
             }
 
-            /**
+            /*
              * Returns true or false if value matches any WebGL enum
              * @param {*} value Value to check if it might be an enum.
              * @return {boolean} True if value matches one of the WebGL defined enums
@@ -159,7 +160,7 @@ define(["./Constants"], function (Constants) {
                 return (glEnums[value] !== undefined);
             }
 
-            /**
+            /*
              * Gets an string version of an WebGL enum.
              *
              * Example:
@@ -176,7 +177,7 @@ define(["./Constants"], function (Constants) {
                     ("*UNKNOWN WebGL ENUM (0x" + value.toString(16) + ")");
             }
 
-            /**
+            /*
              * Returns the string version of a WebGL argument.
              * Attempts to convert enum arguments to strings.
              * @param {string} functionName the name of the WebGL function.
@@ -200,7 +201,7 @@ define(["./Constants"], function (Constants) {
                 }
             }
 
-            /**
+            /*
              * Converts the arguments of a WebGL function to a string.
              * Attempts to convert enum arguments to strings.
              *
@@ -243,7 +244,7 @@ define(["./Constants"], function (Constants) {
                 };
             }
 
-            /**
+            /*
              * Given a WebGL context returns a wrapped context that calls
              * gl.getError after every command and calls a function if the
              * result is not gl.NO_ERROR.
@@ -868,7 +869,7 @@ define(["./Constants"], function (Constants) {
 
                 /**
                  * Resets a context to the initial state.
-                 * @resetToInitialState method
+                 * @method resetToInitialState
                  * @param {!WebGLRenderingContext} ctx The webgl context to
                  *     reset.
                  */

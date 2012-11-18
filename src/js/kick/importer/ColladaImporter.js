@@ -119,11 +119,10 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                     arraySource = accessor.getAttribute("source");
                     rawData = getArrayElementById(arraySource);
 
-                    /**
-                     * @param {Number} index (vertex index)
-                     * @param {Number} paramOffset (0 means x, 1 means y, etc)
-                     * @return {Number}
-                     */
+                    //
+                    // param {Number} index (vertex index)
+                    // param {Number} paramOffset (0 means x, 1 means y, etc)
+                    // return {Number}
                     return function (index, paramOffset) {
                         var arrayIndex = offset + stride * index + paramOffset;
                         return rawData[arrayIndex];

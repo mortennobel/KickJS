@@ -444,6 +444,7 @@ define(["require", "./Constants"], function (require, Constants) {
          * Loops through array and return true if any array element strict equals the element.
          * This uses the === to compare the two elements.
          * @static
+         * @method contains
          * @param {Array} array
          * @param {Object} element
          * @return {boolean} array contains element
@@ -493,8 +494,8 @@ define(["require", "./Constants"], function (require, Constants) {
          * Unpacks an array of uint8 into a Uint32
          * @static
          * @method vec4uint8ToUint32
-         * @param {Array_Number}
-            */
+         * @param {Array_Number} vec4uint8
+         */
         vec4uint8ToUint32 : function (vec4uint8) {
             var i;
             for (i = 0; i < 4; i++){

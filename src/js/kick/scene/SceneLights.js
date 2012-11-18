@@ -107,6 +107,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                  * Column 1 vector: point light position in eye coordinates<br>
                  * Column 2 vector: color intensity<br>
                  * Column 3 vector: attenuation vector
+                 * @property pointLightData
+                 * @type Array of Mat3
                  */
                 pointLightData: {
                     get: function () {

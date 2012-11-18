@@ -533,6 +533,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
             /**
              * Creates a copy of the mesh and transform the vertex positions of the MeshData with a mat4.
              * Note that normals are not modified - so they may need to renormalized.
+             * @method transform
              * @param {kick.math.Mat4} transformMatrix
              * @return {kick.mesh.MeshData} transformed mesh
              */

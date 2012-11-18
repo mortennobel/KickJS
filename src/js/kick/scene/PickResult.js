@@ -5,6 +5,9 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
         /**
          * Result of Camera.pickPoint.
          *
+         * @class PickResult
+         * @namespace kick.scene
+         * @constructor
          * @param {kick.scene.GameObject} gameObject
          * @param {Integer} x
          * @param {Integer} y

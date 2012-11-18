@@ -34,6 +34,7 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
          * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
          * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
          * </ul>
+         * @method getMeshData
          * @param {String} url
          * @param {kick.mesh.Mesh} meshDestination
          */
@@ -182,6 +183,7 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
          *  <li><b>Checkerboard</b>  Url: kickjs://texture/checkerboard/<br></li>
          *  <li><b>KickJS logo</b>  Url: kickjs://texture/logo/<br></li>
          *  </ul>
+         * @method getImageData
          * @param uri
          * @param textureDestination
          */

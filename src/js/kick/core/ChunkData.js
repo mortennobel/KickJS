@@ -268,6 +268,7 @@ define(["./Util", "./Constants"], function (Util, constants) {
 
         /**
          * Loads the binary data into the object
+         * @method deserialize
          * @param {ArrayBuffer} binaryData
          * @return {boolean} success
          */
