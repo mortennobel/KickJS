@@ -278,7 +278,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
              * @return {boolean} element removed
              */
             this.removeFrameListener = function (frameListener) {
-                return core.Util.removeElementFromArray(frameListeners, frameListener);
+                return Util.removeElementFromArray(frameListeners, frameListener);
             };
 
             /**
@@ -299,7 +299,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
              * @param contextLostListener
              */
             this.removeContextListener = function (contextLostListener) {
-                return core.Util.removeElementFromArray(contextListeners, contextLostListener);
+                return Util.removeElementFromArray(contextListeners, contextLostListener);
             };
 
 
