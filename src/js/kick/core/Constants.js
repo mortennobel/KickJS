@@ -23,14 +23,13 @@ define(function () {
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
          * Example usage:
-         * <pre class="brush: js">
-         * var constants = kick.core.Constants;
-         * if (constants._ASSERT){
-         *     if (!Number.isNumber(x)){
-         *         kick.core.Util.fail("x should be a number");
+         * @example
+         *     var constants = kick.core.Constants;
+         *     if (constants._ASSERT){
+         *         if (!Number.isNumber(x)){
+         *             kick.core.Util.fail("x should be a number");
+         *         }
          *     }
-         * }
-         * </pre>
          * @property _ASSERT_EDITOR
          * @type Boolean
          * @static
@@ -41,11 +40,11 @@ define(function () {
          * Allows usage of debugging in the script code. The flag can be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
          * Example usage:<br>
-         * <pre class="brush: js">
-         * var constants = kick.core.Constants;
-         * if (constants._DEBUG){
-         *     console.log("X is now "+x);
-         * }
+         * @example
+         *     var constants = kick.core.Constants;
+         *     if (constants._DEBUG){
+         *         console.log("X is now "+x);
+         *     }
          * </pre>
          * @property _DEBUG
          * @type Boolean

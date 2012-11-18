@@ -4,22 +4,22 @@ define(["./Util"], function (Util) {
     /**
      * A project is a container of all resources and assets used in a game.<br>
      * Example usage:
-     * <pre class="brush: js">
-     * var materialConfig = {
-     *          name:"Some material",
-     *          shader:"Undefined",
-     *          uniforms: {
-     *              value:42,
-     *              type: kick.core.Constants.GL_FLOAT
-     *          }
-     *      };
-     *      var resourceDescriptorConfig = {
-     *          type: "kick.material.Material",
-     *          config: materialConfig,
-     *          uid: 132
-     *      };
-     *      var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
-     * </pre>
+     * @example
+     *     var materialConfig = {
+     *              name:"Some material",
+     *              shader:"Undefined",
+     *              uniforms: {
+     *                  value:42,
+     *                  type: kick.core.Constants.GL_FLOAT
+     *              }
+     *          };
+     *          var resourceDescriptorConfig = {
+     *              type: "kick.material.Material",
+     *              config: materialConfig,
+     *              uid: 132
+     *          };
+     *          var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
+     *
      * @class ResourceDescriptor
      * @namespace kick.core
      * @constructor

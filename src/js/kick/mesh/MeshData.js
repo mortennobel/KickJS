@@ -286,19 +286,18 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                  * The description is an object with a number of properties.<br>
                  * Each property name corresponds to the name of the vertex attribute.<br>
                  * Each property has the format <br>
-                 * <pre class="brush: js">
-                 * {
-                 * &nbsp;pointer: 0, // {Number}
-                 * &nbsp;size: 0, //{Number} number of elements
-                 * &nbsp;normalized: 0, // {Boolean} should be normalized or not
-                 * &nbsp;type: 0 // {GL_FLOAT or GL_INT}
-                 * }
-                 * </pre>
+                 * @example
+                 *     {
+                 *         pointer: 0, // {Number}
+                 *         size: 0, //{Number} number of elements
+                 *         normalized: 0, // {Boolean} should be normalized or not
+                 *         type: 0 // {GL_FLOAT or GL_INT}
+                 *     }
                  * <br>
                  * Example:<br>
-                 * <pre class="brush: js">
-                 * var vertexOffset = meshData.interleavedArrayFormat["vertex"].pointer;
-                 * </pre>
+                 * @example
+                 *     var vertexOffset = meshData.interleavedArrayFormat["vertex"].pointer;
+                 *
                  * @property interleavedArrayFormat
                  * @type Object
                  */

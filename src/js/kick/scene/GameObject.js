@@ -184,10 +184,9 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
          * Example usage:<br>
-         * <pre class="brush: js">
-         * var meshRenderer = someGameObject.getComponentOfType(kick.scene.MeshRenderer);
-         * var material = meshRenderer.material;
-         * </pre>
+         * @example
+         *     var meshRenderer = someGameObject.getComponentOfType(kick.scene.MeshRenderer);
+         *     var material = meshRenderer.material;
          * @method getComponentOfType
          * @param {Object} type the constructor of the wanted component
          * @return {Object} component of specified type or null
@@ -207,12 +206,11 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
         /**
          * Get all component of a specified type. Internally uses instanceof.<br>
          * Example usage:<br>
-         * <pre class="brush: js">
-         * var meshRenderer = someGameObject.getComponentsOfType(kick.scene.MeshRenderer);
-         * if (meshRenderer.length > 0){
-         * material = meshRenderer[0].material;
-         * }
-         * </pre>
+         * @example
+         *     var meshRenderer = someGameObject.getComponentsOfType(kick.scene.MeshRenderer);
+         *     if (meshRenderer.length > 0){
+         *         material = meshRenderer[0].material;
+         *     }
          * @method getComponentsOfType
          * @param {Object} type the constructor of the wanted component
          * @return {Array} arrays of components of specified type

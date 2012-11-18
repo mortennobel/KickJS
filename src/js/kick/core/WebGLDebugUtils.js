@@ -163,7 +163,8 @@ define(["./Constants"], function (Constants) {
              * Gets an string version of an WebGL enum.
              *
              * Example:
-             *   var str = WebGLDebugUtil.glEnumToString(ctx.getError());
+             * @example
+             *     var str = WebGLDebugUtil.glEnumToString(ctx.getError());
              *
              * @param {number} value Value to return an enum for
              * @return {string} The string version of the enum.
@@ -773,9 +774,9 @@ define(["./Constants"], function (Constants) {
                 /**
                  * Gets an string version of an WebGL enum.
                  *
-                 * Example:
-                 *   WebGLDebugUtil.init(ctx);
-                 *   var str = WebGLDebugUtil.glEnumToString(ctx.getError());
+                 * @example
+                 *     WebGLDebugUtil.init(ctx);
+                 *     var str = WebGLDebugUtil.glEnumToString(ctx.getError());
                  *
                  * @method glFunctionArgToString
                  * @param {number} value Value to return an enum for
@@ -787,9 +788,9 @@ define(["./Constants"], function (Constants) {
                  * Converts the argument of a WebGL function to a string.
                  * Attempts to convert enum arguments to strings.
                  *
-                 * Example:
-                 *   WebGLDebugUtil.init(ctx);
-                 *   var str = WebGLDebugUtil.glFunctionArgToString('bindTexture', 0, gl.TEXTURE_2D);
+                 * @example
+                 *     WebGLDebugUtil.init(ctx);
+                 *     var str = WebGLDebugUtil.glFunctionArgToString('bindTexture', 0, gl.TEXTURE_2D);
                  *
                  * would return 'TEXTURE_2D'
                  *
@@ -820,13 +821,13 @@ define(["./Constants"], function (Constants) {
                  * You can supply your own function if you want. For example, if you'd like
                  * an exception thrown on any GL error you could do this
                  *
-                 *    function throwOnGLError(err, funcName, args) {
-                 *      throw WebGLDebugUtils.glEnumToString(err) +
-                 *            " was caused by call to " + funcName;
-                 *    };
-                 *
-                 *    ctx = WebGLDebugUtils.makeDebugContext(
-                 *        canvas.getContext("webgl"), throwOnGLError);
+                 * @example
+                 *      function throwOnGLError(err, funcName, args) {
+                 *        throw WebGLDebugUtils.glEnumToString(err) +
+                 *              " was caused by call to " + funcName;
+                 *      };
+                 *      ctx = WebGLDebugUtils.makeDebugContext(
+                 *          canvas.getContext("webgl"), throwOnGLError);
                  *
                  * @method makeDebugContext
                  * @param {!WebGLRenderingContext} ctx The webgl context to wrap.

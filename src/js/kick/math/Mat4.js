@@ -6,7 +6,7 @@ define(["./Vec4"], function (vec4) {
         },
         /**
          * mat4 - 4x4 Matrix<br>
-         * @class mat4
+         * @class Mat4
          * @namespace kick.math
          */
         mat4 = {

@@ -5,34 +5,35 @@ define(["./Util"], function (Util) {
      * Key Input manager.<br>
      * This class encapsulates keyboard input and makes it easy to
      * test for key input.<br>
+     *
      * Example code:
-     * <pre class="brush: js">
-     * function KeyTestComponent(){
-     * &nbsp;var keyInput, thisObj = this;
-     * &nbsp;// registers listener (invoked when component is registered)
-     * &nbsp;this.activated = function (){
-     * &nbsp;&nbsp;var engine = thisObj.gameObject.engine;
-     * &nbsp;&nbsp;keyInput = engine.keyInput;
-     * &nbsp;};
-     * &nbsp;this.update = function(){
-     * &nbsp;&nbsp;var keyCodeForA = "A".charCodeAt(0);
-     * &nbsp;&nbsp;if (keyInput.isKeyDown(keyCodeForA)){
-     * &nbsp;&nbsp;&nbsp;console.log("A key is down");
-     * &nbsp;&nbsp;}
-     * &nbsp;&nbsp;if (keyInput.isKey(keyCodeForA)){
-     * &nbsp;&nbsp;&nbsp;console.log("A key is being held down");
-     * &nbsp;&nbsp;}
-     * &nbsp;&nbsp;if (keyInput.isKeyUp(keyCodeForA)){
-     * &nbsp;&nbsp;&nbsp;console.log("A key is up");
-     * &nbsp;&nbsp;}
-     * &nbsp;};
-     * }
-     * </pre>
-     * <br>
+     * @example
+     *     function KeyTestComponent(){
+     *         var keyInput, thisObj = this;
+     *         // registers listener (invoked when component is registered)
+     *         this.activated = function (){
+     *             var engine = thisObj.gameObject.engine;
+     *             keyInput = engine.keyInput;
+     *         };
+     *         this.update = function(){
+     *             var keyCodeForA = "A".charCodeAt(0);
+     *             if (keyInput.isKeyDown(keyCodeForA)){
+     *                 console.log("A key is down");
+     *             }
+     *             if (keyInput.isKey(keyCodeForA)){
+     *                 console.log("A key is being held down");
+     *             }
+     *             if (keyInput.isKeyUp(keyCodeForA)){
+     *                 console.log("A key is up");
+     *             }
+     *         };
+     *     }
+     *
      * Pressing the 'a' key should result in one frame with 'A key is down',
      * multiple frames with 'A key is being held down' and finally one frame
      * with 'A key is up'
      * @class KeyInput
+     * @constructor
      * @namespace kick.core
      */
     return function () {

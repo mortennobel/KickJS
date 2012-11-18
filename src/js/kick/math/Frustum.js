@@ -10,7 +10,7 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
      * The implementation is based on
      * "Fast Extraction of Viewing Frustum Planes from the WorldView-Projection Matrix" by Gil Grib and Klaus Hartmann
      * http://www.cs.otago.ac.nz/postgrads/alexis/planeExtraction.pdf
-     * @class frustum
+     * @class Frustum
      * @namespace kick.math
      */
     return {

@@ -22,16 +22,16 @@ define(["kick/core/Constants"], function (constants) {
          * Create a continuous array in memory mapped to vec4.
          *
          * Example
-         * <pre class="brush: js">
-         * var ref = {};
-         * var v = kick.math.Vec4.array(2,ref);
-         * v[1][1] = 1;
-         * ref.mem[5] == v[1][1];
-         * </pre>
+         * @example
+         *     var ref = {};
+         *     var v = kick.math.Vec4.array(2,ref);
+         *     v[1][1] = 1;
+         *     ref.mem[5] == v[1][1];
+         *
          * Will be layout like this:
-         * <pre class="brush: js">
-         * [vec4][vec4] = [0][1][2][3][4][5][6][7]
-         * </pre>
+         * @example
+         *     [vec4][vec4] = [0][1][2][3][4][5][6][7]
+         *
          * @method array
          * @param {Number} count Number of vec 3 to be layout in memory
          * @param {Object} ref Optional, if set a memory reference is set to ref.mem
@@ -115,17 +115,16 @@ define(["kick/core/Constants"], function (constants) {
          * Float32Array, wrapArray will give you access to the same data.
          * <br>
          * Example:<br>
-         * <pre class="brush: js">
-         * function avarageColor(float32arrayColor){
-         *     var sum = vec4.create(),
-         *         wrappedArray = vec4.wrapArray(float32arrayColor),
-         *         weigth = 1.0/wrappedArray;
-         *     for (var i=0;i  &lt; wrappedArray.length;i++){
-         *         vec4.add(sum,wrappedArray[i]);
+         * @example
+         *     function averageColor(float32arrayColor){
+         *         var sum = vec4.create(),
+         *             wrappedArray = vec4.wrapArray(float32arrayColor),
+         *             weigth = 1.0/wrappedArray;
+         *         for (var i=0;i  &lt; wrappedArray.length;i++){
+         *             vec4.add(sum,wrappedArray[i]);
+         *         }
+         *         return vec4.multiply(sum, [weight, weight, weight, weight]);
          *     }
-         *     return vec4.multiply(sum, [weight, weight, weight, weight]);
-         * }
-         * </pre>
          * @method wrapArray
          * @param {Float32Array} array
          * @return {Array_kick.math.Vec4}

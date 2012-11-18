@@ -32,17 +32,17 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Create a continuous array in memory mapped to vec3. <br>
          * <br>
          * Example<br>
-         * <pre class="brush: js">
-         * var ref = {};
-         * var v = kick.math.Vec3.array(2,ref);
-         * v[1][1] = 1;
-         * ref.mem[4] == v[1][1];
-         * </pre>
+         * @example
+         *     var ref = {};
+         *     var v = kick.math.Vec3.array(2,ref);
+         *     v[1][1] = 1;
+         *     ref.mem[4] == v[1][1];
+         *
          * Will be layed out like this: <br>
          * <br>
-         * <pre class="brush: js">
-         * [vec3][vec3) = [0][1][2][3][4][5]
-         * </pre>
+         * @example
+         *     [vec3][vec3) = [0][1][2][3][4][5]
+         *
          *
          * @method array
          * @param {Number} count Number of vec 3 to be layed out in memory
