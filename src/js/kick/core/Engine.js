@@ -13,7 +13,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
          * @class Engine
          * @namespace kick.core
          * @constructor
-         * @param {String} idOrElement elementid of canvas tag or the canvas element
+         * @param {String|canvas} idOrElement elementid of canvas tag or the canvas element
          * @param {kick.core.Config} config Optional, configuration object
          */
         return function (idOrElement, config) {

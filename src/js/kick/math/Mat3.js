@@ -12,7 +12,7 @@ define([], function () {
          * Any javascript array containing at least 9 numeric elements can serve as a mat3
          * @method create
          * @param {Array_Number} mat Optional, mat3 containing values to initialize with
-         * @return {kick.math.mat3} New mat3
+         * @return {kick.math.Mat3} New mat3
          * @static
          */
         create: function (mat) {
@@ -36,9 +36,9 @@ define([], function () {
         /**
          * Copies the values of one mat3 to another
          * @method set
-         * @param {kick.math.mat3} mat mat3 containing values to copy
-         * @param {kick.math.mat3} dest mat3 receiving copied values
-         * @return {kick.math.mat3} dest
+         * @param {kick.math.Mat3} mat mat3 containing values to copy
+         * @param {kick.math.Mat3} dest mat3 receiving copied values
+         * @return {kick.math.Mat3} dest
          * @static
          */
         set: function (mat, dest) {
@@ -57,8 +57,8 @@ define([], function () {
         /**
          * Sets a mat3 to an identity matrix
          * @method identity
-         * @param {kick.math.mat3} dest mat3 to set
-         * @return {kick.math.mat3} dest
+         * @param {kick.math.Mat3} dest mat3 to set
+         * @return {kick.math.Mat3} dest
          * @static
          */
         identity: function (dest) {
@@ -78,9 +78,9 @@ define([], function () {
         /**
          * Transposes a mat3 (flips the values over the diagonal)
          * @method transpose
-         * @param {kick.math.mat3} mat mat3 to transpose
-         * @param {kick.math.mat3} dest Optional, mat3 receiving transposed values. If not specified result is written to mat
-         * @return {kick.math.mat3} dest is specified, mat otherwise
+         * @param {kick.math.Mat3} mat mat3 to transpose
+         * @param {kick.math.Mat3} dest Optional, mat3 receiving transposed values. If not specified result is written to mat
+         * @return {kick.math.Mat3} dest is specified, mat otherwise
          * @static
          */
         transpose: function (mat, dest) {
@@ -113,9 +113,9 @@ define([], function () {
         /**
          * Copies the elements of a mat3 into the upper 3x3 elements of a mat4
          * @method toMat4
-         * @param {kick.math.mat3} mat mat3 containing values to copy
-         * @param {kick.math.mat4} dest Optional, mat4 receiving copied values
-         * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
+         * @param {kick.math.Mat3} mat mat3 containing values to copy
+         * @param {kick.math.Mat4} dest Optional, mat4 receiving copied values
+         * @return {kick.math.Mat4} dest if specified, a new mat4 otherwise
          * @static
          */
         toMat4: function (mat, dest) {
@@ -146,9 +146,9 @@ define([], function () {
 
         /**
          * Transform a mat3 into a rotation (quaternion).
-         * @param {kick.math.mat3} mat
-         * @param {kick.math.quat4} dest
-         * @return {kick.math.quat4}
+         * @param {kick.math.Mat3} mat
+         * @param {kick.math.Quat4} dest
+         * @return {kick.math.Quat4}
          * @static
          */
         toQuat: function (mat, dest) {
@@ -195,7 +195,7 @@ define([], function () {
         /**
          * Returns a string representation of a mat3
          * @method str
-         * @param {kick.math.mat3} mat mat3 to represent as a string
+         * @param {kick.math.Mat3} mat mat3 to represent as a string
          * @return {String} string representation of mat
          * @static
          */
@@ -208,7 +208,7 @@ define([], function () {
         /**
          * Returns a string representation of a mat3 printed as a 4x4 matrix (on 3 lines)
          * @method strPretty
-         * @param {kick.math.mat3} mat mat3 to represent as a string
+         * @param {kick.math.Mat3} mat mat3 to represent as a string
          * @return {String} string representation of mat
          * @static
          */

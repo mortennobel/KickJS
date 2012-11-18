@@ -17,9 +17,9 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
         /**
          * Default value is min=MAX, max=MIN (meaning that it has a negative size)
          * @method create
-         * @param {Array_Number | kick.math.aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
+         * @param {Array_Number | kick.math.Aabb} vec3Min Optional, vec3Min containing values to initialize minimum values with Default. Or an aabb.
          * @param {Array_Number} vec3Max Optional, vec3Max containing values to initialize maximum values with
-         * @return {kick.math.aabb} New aabb
+         * @return {kick.math.Aabb} New aabb
          * @static
          */
         create: function (vec3Min, vec3Max) {
@@ -56,9 +56,9 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
         /**
          * Copies the values of one aabb to another
          * @method set
-         * @param {kick.math.aabb} aabb containing values to copy
-         * @param {kick.math.aabb} dest receiving copied values
-         * @return {kick.math.aabb} dest
+         * @param {kick.math.Aabb} aabb containing values to copy
+         * @param {kick.math.Aabb} dest receiving copied values
+         * @return {kick.math.Aabb} dest
          * @static
          */
         set: function (aabb, dest) {
@@ -74,10 +74,10 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
         /**
          * Transforms the eight points of the Axis-Aligned Bounding Box into a new AABB
          * @method transform
-         * @param {kick.math.aabb} aabbIn
-         * @param {kick.math.mat4} mat
-         * @param {kick.math.aabb} dest Optional new aabb create if not specified
-         * @return {kick.math.aabb}
+         * @param {kick.math.Aabb} aabbIn
+         * @param {kick.math.Mat4} mat
+         * @param {kick.math.Aabb} dest Optional new aabb create if not specified
+         * @return {kick.math.Aabb}
          * @static
          */
         transform: (function () {
@@ -111,10 +111,10 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
 
         /**
          * @method merge
-         * @param {kick.math.aabb} aabb
-         * @param {kick.math.aabb} aabb2
-         * @param {kick.math.aabb} dest Optional, receiving copied values - otherwise using aabb
-         * @return {kick.math.aabb} dest if specified - otherwise a new value is returned
+         * @param {kick.math.Aabb} aabb
+         * @param {kick.math.Aabb} aabb2
+         * @param {kick.math.Aabb} dest Optional, receiving copied values - otherwise using aabb
+         * @return {kick.math.Aabb} dest if specified - otherwise a new value is returned
          * @static
          */
         merge: function (aabb, aabb2, dest) {
@@ -132,9 +132,9 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
 
         /**
          * @method addPoint
-         * @param {kick.math.aabb} aabb
-         * @param {kick.math.vec3} vec3Point
-         * @return {kick.math.aabb} aabb (same object as input)
+         * @param {kick.math.Aabb} aabb
+         * @param {kick.math.Vec3} vec3Point
+         * @return {kick.math.Aabb} aabb (same object as input)
          * @static
          */
         addPoint: function (aabb, vec3Point) {
@@ -152,9 +152,9 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
 
         /**
          * @method center
-         * @param {kick.math.aabb} aabb
-         * @param {kick.math.vec3} centerVec3 Optional
-         * @return {kick.math.vec3} Center of aabb, (centerVec3 if specified)
+         * @param {kick.math.Aabb} aabb
+         * @param {kick.math.Vec3} centerVec3 Optional
+         * @return {kick.math.Vec3} Center of aabb, (centerVec3 if specified)
          * @static
          */
         center: function (aabb, centerVec3) {
@@ -170,9 +170,9 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
 
         /**
          * @method halfVector
-         * @param {kick.math.aabb} aabb
-         * @param {kick.math.vec3} halfVec3 Optional
-         * @return {kick.math.vec3} Halfvector of aabb, (halfVec3 if specified)
+         * @param {kick.math.Aabb} aabb
+         * @param {kick.math.Vec3} halfVec3 Optional
+         * @return {kick.math.Vec3} Halfvector of aabb, (halfVec3 if specified)
          * @static
          */
         halfVec3: function (aabb, halfVec3) {
@@ -189,9 +189,9 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
         /**
          * Diagonal from min to max
          * @method diagonal
-         * @param {kick.math.aabb} aabb
-         * @param {kick.math.vec3} diagonalVec3 optional
-         * @return {kick.math.vec3}
+         * @param {kick.math.Aabb} aabb
+         * @param {kick.math.Vec3} diagonalVec3 optional
+         * @return {kick.math.Vec3}
          * @static
          */
         diagonal: function (aabb, diagonalVec3) {
@@ -206,7 +206,7 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
 
         /**
          * @method str
-         * @param {kick.math.aabb} aabb
+         * @param {kick.math.Aabb} aabb
          * @static
          */
         str: function (aabb) {

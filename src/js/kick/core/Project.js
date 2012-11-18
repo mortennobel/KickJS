@@ -554,7 +554,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
 
                 /**
                  * @method addResourceDescriptor
-                 * @param {kick.core.ResourceDescriptor_or_Object} resourceDescriptor
+                 * @param {kick.core.ResourceDescriptor|Object} resourceDescriptor
                  * @return {kick.core.ResourceDescriptor}
                  */
                 this.addResourceDescriptor = function (resourceDescriptor) {

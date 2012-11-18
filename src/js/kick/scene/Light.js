@@ -140,7 +140,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 /**
                  * Color intensity of the light (RGB). Default [1,1,1]
                  * @property color
-                 * @type kick.math.vec3
+                 * @type kick.math.Vec3
                  */
                 color: {
                     get: function () {
@@ -206,7 +206,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * attenuation[2] is quadratic attenuation.<br>
                  * Default value is (1,0,0)
                  * @property attenuation
-                 * @type kick.math.vec3
+                 * @type kick.math.Vec3
                  */
                 attenuation: {
                     get: function () {
@@ -222,7 +222,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * This property exposes a internal value. This value should not be modified.
                  * Instead use the intensity and color property.
                  * @property colorIntensity
-                 * @type kick.math.vec3
+                 * @type kick.math.Vec3
                  * @final
                  */
                 colorIntensity: {

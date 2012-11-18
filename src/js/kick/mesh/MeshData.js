@@ -224,7 +224,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                  * Note that this property is not cached. Use kick.mesh.Mesh.aabb for a cached version.
                  * Readonly
                  * @property aabb
-                 * @type kick.math.aabb
+                 * @type kick.math.Aabb
                  */
                 aabb: {
                     get: function () {
@@ -534,7 +534,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
             /**
              * Creates a copy of the mesh and transform the vertex positions of the MeshData with a mat4.
              * Note that normals are not modified - so they may need to renormalized.
-             * @param {kick.math.mat4} transformMatrix
+             * @param {kick.math.Mat4} transformMatrix
              * @return {kick.mesh.MeshData} transformed mesh
              */
             this.transform = function (transformMatrix) {
@@ -553,7 +553,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
              * Triangle fans cannot be combined
              * @method combine
              * @param {kick.mesh.MeshData} secondMesh
-             * @param {kick.math.mat4} transform Optional transformation matrix
+             * @param {kick.math.Mat4} transform Optional transformation matrix
              * @return {kick.mesh.MeshData} mesh object or null if incompatible objects
              */
             this.combine = function (secondMesh, transform) {

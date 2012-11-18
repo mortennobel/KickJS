@@ -704,7 +704,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 /**
                  * Only used when orthogonal camera type (!cameraTypePerspective). Default [0,0,0,1]
                  * @property clearColor
-                 * @type kick.math.vec4
+                 * @type kick.math.Vec4
                  */
                 clearColor: {
                     get: function () {

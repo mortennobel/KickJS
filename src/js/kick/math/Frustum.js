@@ -16,7 +16,7 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
     return {
         /**
          * @method extractPlanes
-         * @param {kick.math.mat4} modelViewMatrix
+         * @param {kick.math.Mat4} modelViewMatrix
          * @param {Boolean} normalize normalize plane normal
          * @param {Array_24} dest
          * @return {Array_24} 6 plane equations
@@ -109,8 +109,8 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
         /**
          * Based on [Akenine-Moller's Real-Time Rendering 3rd Ed] chapter 16.14.3
          * @method intersectAabb
-         * @param {kick.math.frustum} frustumPlanes
-         * @param {kick.math.aabb} aabbIn
+         * @param {kick.math.Frustum} frustumPlanes
+         * @param {kick.math.Aabb} aabbIn
          * @return {Number} frustum.OUTSIDE = outside(0), frustum.INSIDE = inside(1), frustum.INTERSECTING = intersecting(2)
          * @static
          */

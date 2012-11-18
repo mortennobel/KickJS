@@ -85,7 +85,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                  * Matrix of directional light data. Column 1 contains the light-direction in eye space,
                  * column 2 color intensity and column 3 half vector
                  * @property directionalLightData
-                 * @type kick.math.mat3
+                 * @type kick.math.Mat3
                  */
                 directionalLightData: {
                     get: function () {
@@ -95,7 +95,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 /**
                  * Return the directional light in world space
                  * @property directionalLightWorld
-                 * @type kick.math.vec3
+                 * @type kick.math.Vec3
                  */
                 directionalLightWorld: {
                     get: function () {
@@ -152,7 +152,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
              * Recompute the light based on the view-matrix. This method is called from the camera when the scene is
              * rendered, to transform the light into eye coordinates and compute the half vector for directional light
              * @method recomputeLight
-             * @param {kick.math.mat4} viewMatrix
+             * @param {kick.math.Mat4} viewMatrix
              */
             this.recomputeLight = function (viewMatrix) {
                 if (directionalLight !== null) {

@@ -17,7 +17,7 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * The current clear color
          * @property currentClearColor
-         * @type kick.math.vec4
+         * @type kick.math.Vec4
          */
         this.currentClearColor = null;
         /**
@@ -91,7 +91,7 @@ define(["kick/core/Constants"], function (constants) {
         /**
          * The size of the current viewport
          * @property viewportSize
-         * @type kick.math.vec2
+         * @type kick.math.Vec2
          */
         this.viewportSize = null;
 

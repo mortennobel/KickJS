@@ -45,7 +45,7 @@ define([], function () {
      * Defines the axis aligned bounding box used for view frustum culling
      * May be undefined or null.
      * @property aabb
-     * @type kick.math.aabb
+     * @type kick.math.Aabb
      */
 
     /**

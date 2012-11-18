@@ -45,7 +45,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                  * Add location and type information to each uniform.
                  * Besides it checks that the uniforms exists in the shader
                  * (if not the default uniforms are added).
-                 * @method
+                 * @method decorateUniforms
                  * @private
                  */
                 decorateUniforms = function () {

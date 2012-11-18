@@ -10,22 +10,22 @@ define([], function () {
     return function (object) {
         /**
          * @property viewMatrix
-         * @type kick.math.mat4
+         * @type kick.math.Mat4
          */
         this.viewMatrix = object.viewMatrix;
         /**
          * @property projectionMatrix
-         * @type kick.math.mat4
+         * @type kick.math.Mat4
          */
         this.projectionMatrix = object.projectionMatrix;
         /**
          * @property viewProjectionMatrix
-         * @type kick.math.mat4
+         * @type kick.math.Mat4
          */
         this.viewProjectionMatrix = object.viewProjectionMatrix;
         /**
          * @property lightMatrix
-         * @type kick.math.mat4
+         * @type kick.math.Mat4
          */
         this.lightMatrix = object.lightMatrix;
         /**
@@ -35,7 +35,7 @@ define([], function () {
         this.currentCamera = object.currentCamera;
         /**
          * @property currentCameraTransform
-         * @type kick.math.mat4
+         * @type kick.math.Mat4
          */
         this.currentCameraTransform = object.currentCameraTransform;
         /**

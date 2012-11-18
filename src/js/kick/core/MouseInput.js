@@ -126,7 +126,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
             /**
              * Returns the mouse position of the canvas element, where 0,0 is in the upper left corner.
              * @property mousePosition
-             * @type kick.math.vec2
+             * @type kick.math.Vec2
              */
             mousePosition: {
                 get: function () {
@@ -136,7 +136,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
             /**
              * Returns the delta movement (relative mouse movement since last frame)
              * @property deltaMovement
-             * @type kick.math.vec2
+             * @type kick.math.Vec2
              */
             deltaMovement: {
                 get: function () {
@@ -146,7 +146,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
             /**
              * Mouse scroll wheel input in two dimensions (horizontal and vertical)
              * @property deltaWheel
-             * @type kick.math.vec2
+             * @type kick.math.Vec2
              */
             deltaWheel: {
                 get: function () {

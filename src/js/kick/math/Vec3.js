@@ -34,7 +34,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Example<br>
          * <pre class="brush: js">
          * var ref = {};
-         * var v = kick.math.vec3.array(2,ref);
+         * var v = kick.math.Vec3.array(2,ref);
          * v[1][1] = 1;
          * ref.mem[4] == v[1][1];
          * </pre>
@@ -47,7 +47,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * @method array
          * @param {Number} count Number of vec 3 to be layed out in memory
          * @param {Object} ref Optional, if set a memory reference is set to ref.mem
-         * @return {kick.math.vec3} New vec3
+         * @return {kick.math.Vec3} New vec3
          * @static
          */
         array: function (count, ref) {
@@ -62,7 +62,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Any javascript array containing at least 3 numeric elements can serve as a vec3
          * @method create
          * @param {Array_Number} vec Optional, vec3 containing values to initialize with
-         * @return {kick.math.vec3} New vec3
+         * @return {kick.math.Vec3} New vec3
          * @static
          */
         create: function (vec) {
@@ -80,9 +80,9 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Copies the values of one vec3 to another
          * @method set
-         * @param {kick.math.vec3} vec vec3 containing values to copy
-         * @param {kick.math.vec3} dest vec3 receiving copied values
-         * @return {kick.math.vec3} dest
+         * @param {kick.math.Vec3} vec vec3 containing values to copy
+         * @param {kick.math.Vec3} dest vec3 receiving copied values
+         * @return {kick.math.Vec3} dest
          * @static
          */
         set: function (vec, dest) {
@@ -96,10 +96,10 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Performs a vector addition
          * @method add
-         * @param {kick.math.vec3} vec  first operand
-         * @param {kick.math.vec3} vec2  second operand
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec  first operand
+         * @param {kick.math.Vec3} vec2  second operand
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         add: function (vec, vec2, dest) {
@@ -119,10 +119,10 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Performs a vector subtraction
          * @method subtract
-         * @param {kick.math.vec3} vec first operand
-         * @param {kick.math.vec3} vec2 second operand
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec first operand
+         * @param {kick.math.Vec3} vec2 second operand
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         subtract: function (vec, vec2, dest) {
@@ -142,8 +142,8 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Test to see if vectors are equal (difference is less than epsilon)
          * @method equal
-         * @param {kick.math.vec3} vec first operand
-         * @param {kick.math.vec3} vec2 second operand
+         * @param {kick.math.Vec3} vec first operand
+         * @param {kick.math.Vec3} vec2 second operand
          * @param {Number} epsilon Optional - default value is
          * @return {Boolean} true if two vectors are equals
          * @static
@@ -165,10 +165,10 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Performs a vector multiplication
          * @method multiply
-         * @param {kick.math.vec3} vec first operand
-         * @param {kick.math.vec3} vec2 second operand
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec first operand
+         * @param {kick.math.Vec3} vec2 second operand
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         multiply: function (vec, vec2, dest) {
@@ -188,9 +188,9 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Negates the components of a vec3
          * @method negate
-         * @param {kick.math.vec3} vec vec3 to negate
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec vec3 to negate
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         negate: function (vec, dest) {
@@ -205,10 +205,10 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Multiplies the components of a vec3 by a scalar value
          * @method scale
-         * @param {kick.math.vec3} vec vec3 to scale
+         * @param {kick.math.Vec3} vec vec3 to scale
          * @param {Number} val Numeric value to scale by
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         scale: function (vec, val, dest) {
@@ -229,9 +229,9 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Generates a unit vector of the same direction as the provided vec3
          * If vector length is 0, returns [0, 0, 0]
          * @method normalize
-         * @param {kick.math.vec3} vec vec3 to normalize
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec vec3 to normalize
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         normalize: function (vec, dest) {
@@ -262,10 +262,10 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Generates the cross product of two vec3s
          * @method cross
-         * @param {kick.math.vec3} vec first operand
-         * @param {kick.math.vec3} vec2 second operand
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec first operand
+         * @param {kick.math.Vec3} vec2 second operand
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         cross: function (vec, vec2, dest) {
@@ -283,7 +283,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Calculates the length of a vec3
          * @method length
-         * @param {kick.math.vec3} vec vec3 to calculate length of
+         * @param {kick.math.Vec3} vec vec3 to calculate length of
          * @return {Number} Length of vec
          * @static
          */
@@ -295,7 +295,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Calculates the squared length of a vec3
          * @method lengthSqr
-         * @param {kick.math.vec3} vec vec3 to calculate squared length of
+         * @param {kick.math.Vec3} vec vec3 to calculate squared length of
          * @return {Number} Squared length of vec
          * @static
          */
@@ -307,8 +307,8 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Calculates the dot product of two vec3s
          * @method dot
-         * @param {kick.math.vec3} vec first operand
-         * @param {kick.math.vec3} vec2 second operand
+         * @param {kick.math.Vec3} vec first operand
+         * @param {kick.math.Vec3} vec2 second operand
          * @return {Number} Dot product of vec and vec2
          * @static
          */
@@ -319,10 +319,10 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Generates a unit vector pointing from one vector to another
          * @method direction
-         * @param {kick.math.vec3} vec origin vec3
-         * @param {kick.math.vec3} vec2 vec3 to point to
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec origin vec3
+         * @param {kick.math.Vec3} vec2 vec3 to point to
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         direction: function (vec, vec2, dest) {
@@ -350,11 +350,11 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Performs a linear interpolation between two vec3
          * @method lerp
-         * @param {kick.math.vec3} vec first vector
-         * @param {kick.math.vec3} vec2 second vector
+         * @param {kick.math.Vec3} vec first vector
+         * @param {kick.math.Vec3} vec2 second vector
          * @param {Number} lerp interpolation amount between the two inputs
-         * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         lerp: function (vec, vec2, lerp, dest) {
@@ -371,8 +371,8 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Calculates the euclidean distance between two vec3
          *
          * @method dist
-         * @param {kick.math.vec3} vec first vector
-         * @param {kick.math.vec3} vec2 second vector
+         * @param {kick.math.Vec3} vec first vector
+         * @param {kick.math.Vec3} vec2 second vector
          * @return {Number} distance between vec and vec2
          * @static
          */
@@ -390,12 +390,12 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * http://webcvs.freedesktop.org/mesa/Mesa/src/glu/mesa/project.c?revision=1.4&view=markup
          *
          * @method unproject
-         * @param {kick.math.vec3} vec screen-space vector to project
-         * @param {kick.math.mat4} modelView Model-View matrix
-         * @param {kick.math.mat4} proj Projection matrix
-         * @param {kick.math.vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
-         * @param {kick.math.vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
-         * @return {kick.math.vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} vec screen-space vector to project
+         * @param {kick.math.Mat4} modelView Model-View matrix
+         * @param {kick.math.Mat4} proj Projection matrix
+         * @param {kick.math.Vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
+         * @param {kick.math.Vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
+         * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         unproject: (function () {
@@ -427,9 +427,9 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Converts the spherical coordinates (in radians) to carterian coordinates.<br>
          * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
          * @method sphericalToCarterian
-         * @param {kick.math.vec3} spherical spherical coordinates
-         * @param {kick.math.vec3} dest optionally if not specified a new vec3 is returned
-         * @return {kick.math.vec3} position in cartesian angles
+         * @param {kick.math.Vec3} spherical spherical coordinates
+         * @param {kick.math.Vec3} dest optionally if not specified a new vec3 is returned
+         * @return {kick.math.Vec3} position in cartesian angles
          * @static
          */
         sphericalToCarterian: function (spherical, dest) {
@@ -450,9 +450,9 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Converts from cartesian coordinates to spherical coordinates (in radians)<br>
          * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
          * @method cartesianToSpherical
-         * @param {kick.math.vec3} cartesian
-         * @param {kick.math.vec3} dest Optional
-         * @return {kick.math.vec3}
+         * @param {kick.math.Vec3} cartesian
+         * @param {kick.math.Vec3} dest Optional
+         * @return {kick.math.Vec3}
          * @static
          */
         cartesianToSpherical: function (cartesian, dest) {
@@ -479,7 +479,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Returns a string representation of a vector
          * @method str
-         * @param {kick.math.vec3} vec vec3 to represent as a string
+         * @param {kick.math.Vec3} vec vec3 to represent as a string
          * @return {String} string representation of vec
          * @static
          */

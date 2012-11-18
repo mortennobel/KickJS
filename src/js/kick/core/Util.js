@@ -458,12 +458,12 @@ define(["require", "./Constants"], function (require, Constants) {
             return false;
         },
         /**
-         * Packs a Uint32 into a kick.math.vec4
+         * Packs a Uint32 into a kick.math.Vec4
          * @static
          * @method uint32ToVec4
          * @param {Number} uint32
-         * @param {kick.math.vec4} dest
-         * @return {kick.math.vec4}
+         * @param {kick.math.Vec4} dest
+         * @return {kick.math.Vec4}
          */
         uint32ToVec4 : function(uint32, dest) {
             var i;
@@ -477,10 +477,10 @@ define(["require", "./Constants"], function (require, Constants) {
             return dest;
         },
         /**
-         * Unpacks a kick.math.vec4 into a Uint32
+         * Unpacks a kick.math.Vec4 into a Uint32
          * @static
          * @method vec4ToUint32
-         * @param {kick.math.vec4} vec4
+         * @param {kick.math.Vec4} vec4
          */
         vec4ToUint32 : function(vec4) {
             var i;

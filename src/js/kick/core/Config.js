@@ -15,6 +15,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Enabling this will create the canvas in high resolution - and wraps the mouse input as well.
          * @property highDPISupport
          * @type {Boolean}
+         * @default true
          */
         this.highDPISupport = config.highDPISupport || true;
         /**
@@ -22,6 +23,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Default value is false.
          * @property shadows
          * @type Boolean
+         * @default false
          */
         this.shadows = config.shadows || false;
         /**
@@ -29,12 +31,14 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Default value is 20
          * @property shadowDistance
          * @type Number
+         * @default 20
          */
         this.shadowDistance = config.shadowDistance || 20;
         /**
          * A multiplier that moves the near plane of the shadow map. Default is 2.0
          * @property shadowNearMultiplier
          * @type Number
+         * @default 2.0
          */
         this.shadowNearMultiplier = config.shadowNearMultiplier || 2.0;
         /**
@@ -42,6 +46,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Allowed values are 1/2, 1/4, 1/8, etc.
          * @property shadowMapQuality
          * @type Number
+         * @default 1.0
          */
         this.shadowMapQuality = config.shadowMapQuality || 1.0;
 
@@ -49,6 +54,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Maximum number of lights in scene. Default value is 1
          * @property maxNumerOfLights
          * @type Number
+         * @default 1
          */
         this.maxNumerOfLights = typeof (config.maxNumerOfLights) === 'number' ? config.maxNumerOfLights : 1;
 
@@ -58,6 +64,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Default value is false.
          * @property enableDebugContext
          * @type Boolean
+         * @default false
          */
         this.enableDebugContext = typeof (config.enableDebugContext) === 'boolean' ? config.enableDebugContext  : false;
 
@@ -72,31 +79,35 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * values until cleared or overwritten by the author.
          * @property preserveDrawingBuffer
          * @type Boolean
+         * @default false
          */
         this.preserveDrawingBuffer = config.preserveDrawingBuffer || false;
 
         /**
-         * WebGL spec:  Default: true. If the value is true, the drawing buffer has an alpha channel for the purposes
+         * WebGL spec:  If the value is true, the drawing buffer has an alpha channel for the purposes
          * of performing OpenGL destination alpha operations and compositing with the page. If the value is false, no
          * alpha buffer is available.
          * @property alpha
          * @type Boolean
+         * @default true
          */
         this.alpha = typeof (config.alpha) === 'boolean' ? config.alpha : true;
 
         /**
-         * WebGL spec: Default: true. If the value is true, the drawing buffer has a depth buffer of at least 16 bits.
+         * WebGL spec: If the value is true, the drawing buffer has a depth buffer of at least 16 bits.
          * If the value is false, no depth buffer is available.
          * @property alpha
          * @type Boolean
+         * @default true
          */
         this.depth = typeof (config.depth) === 'boolean' ? config.depth : true;
 
         /**
-         * WebGL spec: Default: false. If the value is true, the drawing buffer has a stencil buffer of at least 8 bits.
+         * WebGL spec: If the value is true, the drawing buffer has a stencil buffer of at least 8 bits.
          * If the value is false, no stencil buffer is available.
          * @property stencil
          * @type Boolean
+         * @default false
          */
         this.stencil = typeof (config.stencil) === 'boolean' ? config.stencil : false;
 
@@ -106,6 +117,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * If the value is false or the implementation does not support antialiasing, no antialiasing is performed.
          * @property antialias
          * @type Boolean
+         * @default true
          */
         this.antialias = typeof (config.antialias) === 'boolean' ? config.antialias : true;
 
@@ -116,6 +128,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * See Premultiplied Alpha for more information on the effects of the premultipliedAlpha flag.
          * @property premultipliedAlpha
          * @type Boolean
+         * @default true
          */
         this.premultipliedAlpha = typeof (config.premultipliedAlpha) === 'boolean' ? config.premultipliedAlpha : true;
 
@@ -123,6 +136,7 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Polling of canvas resize. Default is 0 (meaning not polling)
          * @property checkCanvasResizeInterval
          * @type Number
+         * @default 0
          */
         this.checkCanvasResizeInterval = config.checkCanvasResizeInterval || 0;
 
@@ -130,8 +144,9 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * function (or function name) with the signature function(domElement) called when WebGL cannot be initialized.
          * Default function replaces the canvas element with an error description with a link to
          * http://get.webgl.org/troubleshooting/
+         * @todo Check this method
          * @property webglNotFoundFn
-         * @type Function_or_String
+         * @type Function | String
          */
         this.webglNotFoundFn = (function () {
             if (config.webglNotFoundFn) {

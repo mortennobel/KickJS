@@ -21,7 +21,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
 
         /**
          * @method import
-         * @param {XMLDom_or_String} colladaDOM
+         * @param {XMLDom|String} colladaDOM
          * @param {kick.core.Engine} engine
          * @param {kick.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis

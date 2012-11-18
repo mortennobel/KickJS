@@ -17,7 +17,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
                  * @private
                  * @method renderObjectWithShader
                  * @param {kick.material.Shader} shader
-                 * @return kick.math.vec4
+                 * @return kick.math.Vec4
                  */
                 renderObjectWithShader = function (shader) {
                     var array = new Uint8Array(4),
@@ -77,7 +77,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
                 /**
                  * The normal (in object coordinates) at the pick point
                  * @property normal
-                 * @type kick.math.vec3
+                 * @type kick.math.Vec3
                  */
                 normal: {
                     get: function () {
@@ -90,7 +90,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
                 /**
                  * The uv of the pick point
                  * @property uv
-                 * @type kick.math.vec2
+                 * @type kick.math.Vec2
                  */
                 uv: {
                     get: function () {

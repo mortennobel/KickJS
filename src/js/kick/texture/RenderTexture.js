@@ -85,7 +85,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
             Object.defineProperties(this, {
                 /**
                  * @property dimension
-                 * @type kick.math.vec2
+                 * @type kick.math.Vec2
                  */
                 dimension: {
                     get: function () {

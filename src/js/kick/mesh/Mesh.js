@@ -110,7 +110,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
              * Axis aligned bounding box.
              * Readonly.
              * @property aabb
-             * @type kick.math.aabb
+             * @type kick.math.Aabb
              */
             aabb: {
                 get: function () {

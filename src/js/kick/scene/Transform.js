@@ -58,7 +58,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global position.
              * @property position
-             * @type kick.math.vec3
+             * @type kick.math.Vec3
              */
             position: {
                 get: function () {
@@ -91,7 +91,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Local position.
              * @property localPosition
-             * @type kick.math.vec3
+             * @type kick.math.Vec3
              */
             localPosition: {
                 get: function () {
@@ -105,7 +105,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Local rotation in euler angles.
              * @property localRotationEuler
-             * @type kick.math.vec3
+             * @type kick.math.Vec3
              */
             localRotationEuler: {
                 get: function () {
@@ -121,7 +121,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global rotation in euler angles.
              * @property rotationEuler
-             * @type kick.math.vec3
+             * @type kick.math.Vec3
              */
             rotationEuler: {
                 get: function () {
@@ -139,7 +139,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global rotation in quaternion.
              * @property rotation
-             * @type kick.math.quat4
+             * @type kick.math.Quat4
              */
             rotation: {
                 get: function () {
@@ -171,7 +171,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Local rotation in quaternion.
              * @property localRotation
-             * @type kick.math.quat4
+             * @type kick.math.Quat4
              */
             localRotation: {
                 get: function () {
@@ -186,7 +186,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
              * Local scale.
              * Any zero value will be replaced with an epsilon value.
              * @property localScale
-             * @type kick.math.vec3
+             * @type kick.math.Vec3
              */
             localScale: {
                 get: function () {
@@ -250,7 +250,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
          * @method lookAt
          * @param {kick.scene.Transform} transform target object to look at
          * @param {Object} type the constructor of the wanted component
-         * @return {kick.math.mat4} local transformation
+         * @return {kick.math.Mat4} local transformation
          */
         this.lookAt = function (transform, up) {
             if (ASSERT) {
@@ -265,7 +265,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
         /**
          * Return the local transformation matrix
          * @method getLocalMatrix
-         * @return {kick.math.mat4} local transformation
+         * @return {kick.math.Mat4} local transformation
          */
         this.getLocalMatrix = function () {
             if (dirty[LOCAL]) {
@@ -278,7 +278,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
         /**
          * Return the local inverse of translate rotate scale
          * @method getLocalTRSInverse
-         * @return {kick.math.mat4} inverse of local transformation
+         * @return {kick.math.Mat4} inverse of local transformation
          */
         this.getLocalTRSInverse = function () {
             if (dirty[LOCAL_INV]) {
@@ -290,7 +290,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
 
         /**
          * @method getGlobalMatrix
-         * @return {kick.math.mat4} global transform
+         * @return {kick.math.Mat4} global transform
          */
         this.getGlobalMatrix = function () {
             if (dirty[GLOBAL]) {
@@ -309,7 +309,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
         /**
          * Return the inverse of global rotate translate transform
          * @method getGlobalTRSInverse
-         * @return {kick.math.mat4} inverse global transform
+         * @return {kick.math.Mat4} inverse global transform
          */
         this.getGlobalTRSInverse = function () {
             if (dirty[GLOBAL_INV]) {

@@ -15,7 +15,7 @@ define(["./Vec4"], function (vec4) {
              * Any javascript array containing at least 16 numeric elements can serve as a mat4
              * @method create
              * @param {Array_Number} mat Optional, mat4 containing values to initialize with
-             * @return {kick.math.mat4} New mat4
+             * @return {kick.math.Mat4} New mat4
              * @static
              */
             create: function (mat) {
@@ -46,9 +46,9 @@ define(["./Vec4"], function (vec4) {
             /**
              * Copies the values of one mat4 to another
              * @method set
-             * @param {kick.math.mat4} mat mat4 containing values to copy
-             * @param {kick.math.mat4} dest mat4 receiving copied values
-             * @return {kick.math.mat4} dest
+             * @param {kick.math.Mat4} mat mat4 containing values to copy
+             * @param {kick.math.Mat4} dest mat4 receiving copied values
+             * @return {kick.math.Mat4} dest
              * @static
              */
             set: function (mat, dest) {
@@ -75,11 +75,11 @@ define(["./Vec4"], function (vec4) {
             /**
              * Set translate, rotate, scale
              * @method setTRS
-             * @param {kick.math.vec3} translate
-             * @param {kick.math.quat4} rotateQuat
-             * @param {kick.math.vec3} scale
-             * @param {kick.math.mat4} dest Optional
-             * @return {kick.math.mat4} dest if specified mat4 otherwise
+             * @param {kick.math.Vec3} translate
+             * @param {kick.math.Quat4} rotateQuat
+             * @param {kick.math.Vec3} scale
+             * @param {kick.math.Mat4} dest Optional
+             * @return {kick.math.Mat4} dest if specified mat4 otherwise
              * @static
              */
             setTRS: function (translate, rotateQuat, scale, dest) {
@@ -125,11 +125,11 @@ define(["./Vec4"], function (vec4) {
             /**
              * Set the inverse of translate, rotate, scale
              * @method setTRSInverse
-             * @param {kick.math.vec3} translate
-             * @param {kick.math.quat4} rotateQuat must be normalized
-             * @param {kick.math.vec3} scale
-             * @param {kick.math.mat4} dest Optional
-             * @return {kick.math.mat4} dest if specified mat4 otherwise
+             * @param {kick.math.Vec3} translate
+             * @param {kick.math.Quat4} rotateQuat must be normalized
+             * @param {kick.math.Vec3} scale
+             * @param {kick.math.Mat4} dest Optional
+             * @return {kick.math.Mat4} dest if specified mat4 otherwise
              * @static
              */
             setTRSInverse: function (translate, rotateQuat, scale, dest) {
@@ -207,8 +207,8 @@ define(["./Vec4"], function (vec4) {
             /**
              * Sets a mat4 to an identity matrix
              * @method identity
-             * @param {kick.math.mat4} dest mat4 to set
-             * @return {kick.math.mat4} dest
+             * @param {kick.math.Mat4} dest mat4 to set
+             * @return {kick.math.Mat4} dest
              * @static
              */
             identity: function (dest) {
@@ -234,9 +234,9 @@ define(["./Vec4"], function (vec4) {
             /**
              * Transposes a mat4 (flips the values over the diagonal)
              * @method transpose
-             * @param {kick.math.mat4} mat mat4 to transpose
-             * @param {kick.math.mat4} dest Optional, mat4 receiving transposed values. If not specified result is written to mat
-             * @return {kick.math.mat4} dest is specified, mat otherwise
+             * @param {kick.math.Mat4} mat mat4 to transpose
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving transposed values. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest is specified, mat otherwise
              * @static
              */
             transpose: function (mat, dest) {
@@ -283,7 +283,7 @@ define(["./Vec4"], function (vec4) {
             /**
              * Calculates the determinant of a mat4
              * @method determinant
-             * @param {kick.math.mat4} mat mat4 to calculate determinant of
+             * @param {kick.math.Mat4} mat mat4 to calculate determinant of
              * @return {Number} determinant of mat
              * @static
              */
@@ -305,9 +305,9 @@ define(["./Vec4"], function (vec4) {
             /**
              * Calculates the inverse matrix of a mat4
              * @method inverse
-             * @param {kick.math.mat4} mat mat4 to calculate inverse of
-             * @param {kick.math.mat4} dest Optional, mat4 receiving inverse matrix. If not specified result is written to mat
-             * @return {kick.math.mat4} dest is specified, mat otherwise
+             * @param {kick.math.Mat4} mat mat4 to calculate inverse of
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving inverse matrix. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest is specified, mat otherwise
              * @static
              */
             inverse: function (mat, dest) {
@@ -362,9 +362,9 @@ define(["./Vec4"], function (vec4) {
             /**
              * Copies the upper 3x3 elements of a mat4 into another mat4
              * @method toRotationMat
-             * @param {kick.math.mat4} mat mat4 containing values to copy
-             * @param {kick.math.mat4} dest Optional, mat4 receiving copied values
-             * @return {kick.math.mat4} dest is specified, a new mat4 otherwise
+             * @param {kick.math.Mat4} mat mat4 containing values to copy
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving copied values
+             * @return {kick.math.Mat4} dest is specified, a new mat4 otherwise
              * @static
              */
             toRotationMat: function (mat, dest) {
@@ -393,9 +393,9 @@ define(["./Vec4"], function (vec4) {
             /**
              * Copies the upper 3x3 elements of a mat4 into a mat3
              * @method toMat3
-             * @param {kick.math.mat4} mat mat4 containing values to copy
-             * @param {kick.math.mat3} dest Optional, mat3 receiving copied values
-             * @return {kick.math.mat3} dest is specified, a new mat3 otherwise
+             * @param {kick.math.Mat4} mat mat4 containing values to copy
+             * @param {kick.math.Mat3} dest Optional, mat3 receiving copied values
+             * @return {kick.math.Mat3} dest is specified, a new mat3 otherwise
              * @static
              */
             toMat3: function (mat, dest) {
@@ -418,9 +418,9 @@ define(["./Vec4"], function (vec4) {
              * Calculates the normal matrix (that is the transpose of the inverse of the upper 3x3 elements of a mat4) and
              * copies the result into a mat3<br>
              * @method toNormalMat3
-             * @param {kick.math.mat4} mat mat4 containing values to transpose, invert and copy
-             * @param {kick.math.mat3} dest Optional, mat3 receiving values
-             * @return {kick.math.mat3} dest is specified, a new mat3 otherwise
+             * @param {kick.math.Mat4} mat mat4 containing values to transpose, invert and copy
+             * @param {kick.math.Mat3} dest Optional, mat3 receiving values
+             * @return {kick.math.Mat3} dest is specified, a new mat3 otherwise
              * @static
              */
             toNormalMat3: function (mat, dest) {
@@ -457,9 +457,9 @@ define(["./Vec4"], function (vec4) {
              * Calculates the inverse of the upper 3x3 elements of a mat4 and copies the result into a mat3<br>
              * The resulting matrix is useful for calculating transformed normals
              * @method toInverseMat3
-             * @param {kick.math.mat4} mat mat4 containing values to invert and copy
-             * @param {kick.math.mat3} dest Optional, mat3 receiving values
-             * @return {kick.math.mat3} dest is specified, a new mat3 otherwise
+             * @param {kick.math.Mat4} mat mat4 containing values to invert and copy
+             * @param {kick.math.Mat3} dest Optional, mat3 receiving values
+             * @return {kick.math.Mat3} dest is specified, a new mat3 otherwise
              * @static
              */
             toInverseMat3: function (mat, dest) {
@@ -496,10 +496,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Performs a matrix multiplication
              * @method multiply
-             * @param {kick.math.mat4} mat first operand
-             * @param {kick.math.mat4} mat2 second operand
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Mat4} mat first operand
+             * @param {kick.math.Mat4} mat2 second operand
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             multiply: function (mat, mat2, dest) {
@@ -540,10 +540,10 @@ define(["./Vec4"], function (vec4) {
              * Transforms a vec3 with the given matrix<br>
              * 4th vector component is implicitly '1'
              * @method multiplyVec3
-             * @param {kick.math.mat4} mat mat4 to transform the vector with
-             * @param {kick.math.vec3} vec vec3 to transform
-             * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-             * @return {kick.math.vec3} dest if specified, vec otherwise
+             * @param {kick.math.Mat4} mat mat4 to transform the vector with
+             * @param {kick.math.Vec3} vec vec3 to transform
+             * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+             * @return {kick.math.Vec3} dest if specified, vec otherwise
              * @static
              */
             multiplyVec3: function (mat, vec, dest) {
@@ -562,10 +562,10 @@ define(["./Vec4"], function (vec4) {
              * Transforms a vec3 with the given matrix<br>
              * 4th vector component is implicitly '0'
              * @method multiplyVec3Vector
-             * @param {kick.math.mat4} mat mat4 to transform the vector with
-             * @param {kick.math.vec3} vec vec3 to transform
-             * @param {kick.math.vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-             * @return {kick.math.vec3} dest if specified, vec otherwise
+             * @param {kick.math.Mat4} mat mat4 to transform the vector with
+             * @param {kick.math.Vec3} vec vec3 to transform
+             * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
+             * @return {kick.math.Vec3} dest if specified, vec otherwise
              * @static
              */
             multiplyVec3Vector: function (mat, vec, dest) {
@@ -584,10 +584,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Transforms a vec4 with the given matrix
              * @method multiplyVec4
-             * @param {kick.math.mat4} mat mat4 to transform the vector with
-             * @param {kick.math.vec4} vec vec4 to transform
-             * @param {kick.math.vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
-             * @return {kick.math.vec4} dest if specified, vec otherwise
+             * @param {kick.math.Mat4} mat mat4 to transform the vector with
+             * @param {kick.math.Vec4} vec vec4 to transform
+             * @param {kick.math.Vec4} dest Optional, vec4 receiving operation result. If not specified result is written to vec
+             * @return {kick.math.Vec4} dest if specified, vec otherwise
              * @static
              */
             multiplyVec4: function (mat, vec, dest) {
@@ -606,10 +606,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Translates a matrix by the given vector
              * @method translate
-             * @param {kick.math.mat4} mat mat4 to translate
-             * @param {kick.math.vec3} vec vec3 specifying the translation
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Mat4} mat mat4 to translate
+             * @param {kick.math.Vec3} vec vec3 specifying the translation
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             translate: function (mat, vec, dest) {
@@ -644,10 +644,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Scales a matrix by the given vector
              * @method scale
-             * @param {kick.math.mat4} mat mat4 to scale
-             * @param {kick.math.vec3} vec vec3 specifying the scale for each axis
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Mat4} mat mat4 to scale
+             * @param {kick.math.Vec3} vec vec3 specifying the scale for each axis
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             scale: function (mat, vec, dest) {
@@ -693,11 +693,11 @@ define(["./Vec4"], function (vec4) {
              * If rotating around a primary axis (X,Y,Z) one of the specialized rotation functions should be used instead for
              * performance
              * @method rotate
-             * @param {kick.math.mat4} mat mat4 to rotate
+             * @param {kick.math.Mat4} mat mat4 to rotate
              * @param {Number} angle angle (in radians) to rotate
-             * @param {kick.math.vec3} axis vec3 representing the axis to rotate around
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Vec3} axis vec3 representing the axis to rotate around
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             rotate: function (mat, angle, axis, dest) {
@@ -762,10 +762,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Rotates a matrix by the given angle around the X axis
              * @method rotateX
-             * @param {kick.math.mat4} mat mat4 to rotate
+             * @param {kick.math.Mat4} mat mat4 to rotate
              * @param {Number} angle angle (in radians) to rotate
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             rotateX: function (mat, angle, dest) {
@@ -804,10 +804,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Rotates a matrix by the given angle around the Y axis
              * @method rotateY
-             * @param {kick.math.mat4} mat mat4 to rotate
+             * @param {kick.math.Mat4} mat mat4 to rotate
              * @param {Number} angle angle (in radians) to rotate
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             rotateY: function (mat, angle, dest) {
@@ -846,10 +846,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Rotates a matrix by the given angle around the Z axis
              * @method rotateZ
-             * @param {kick.math.mat4} mat mat4 to rotate
+             * @param {kick.math.Mat4} mat mat4 to rotate
              * @param {Number} angle angle (in radians) to rotate
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {kick.math.mat4} dest if specified, mat otherwise
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
+             * @return {kick.math.Mat4} dest if specified, mat otherwise
              * @static
              */
             rotateZ: function (mat, angle, dest) {
@@ -895,8 +895,8 @@ define(["./Vec4"], function (vec4) {
              * @param {Number} top top bounds of the frustum
              * @param {Number} near near bounds of the frustum
              * @param {Number} far far bounds of the frustum
-             * @param {kick.math.mat4} dest Optional, mat4 frustum matrix will be written into
-             * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
+             * @param {kick.math.Mat4} dest Optional, mat4 frustum matrix will be written into
+             * @return {kick.math.Mat4} dest if specified, a new mat4 otherwise
              * @static
              */
             frustum: function (left, right, bottom, top, near, far, dest) {
@@ -930,8 +930,8 @@ define(["./Vec4"], function (vec4) {
              * @param {Number} aspect aspect ratio. typically viewport width/height
              * @param {Number} near near bounds of the frustum
              * @param {Number} far far bounds of the frustum
-             * @param {kick.math.mat4} dest Optional, mat4 frustum matrix will be written into
-             * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
+             * @param {kick.math.Mat4} dest Optional, mat4 frustum matrix will be written into
+             * @return {kick.math.Mat4} dest if specified, a new mat4 otherwise
              * @static
              */
             perspective: function (fovy, aspect, near, far, dest) {
@@ -949,8 +949,8 @@ define(["./Vec4"], function (vec4) {
              * @param {Number} top top bounds of the frustum
              * @param {Number} near near bounds of the frustum
              * @param {Number} far far bounds of the frustum
-             * @param {kick.math.mat4} dest Optional, mat4 frustum matrix will be written into
-             * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
+             * @param {kick.math.Mat4} dest Optional, mat4 frustum matrix will be written into
+             * @return {kick.math.Mat4} dest if specified, a new mat4 otherwise
              * @static
              */
             ortho: function (left, right, bottom, top, near, far, dest) {
@@ -980,11 +980,11 @@ define(["./Vec4"], function (vec4) {
             /**
              * Generates a look-at matrix with the given eye position, focal point, and up axis
              * @method lookAt
-             * @param {kick.math.vec3} eye position of the viewer
-             * @param {kick.math.vec3} center point the viewer is looking at
-             * @param {kick.math.vec3} up vec3 pointing "up"
-             * @param {kick.math.mat4} dest Optional, mat4 frustum matrix will be written into
-             * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
+             * @param {kick.math.Vec3} eye position of the viewer
+             * @param {kick.math.Vec3} center point the viewer is looking at
+             * @param {kick.math.Vec3} up vec3 pointing "up"
+             * @param {kick.math.Mat4} dest Optional, mat4 frustum matrix will be written into
+             * @return {kick.math.Mat4} dest if specified, a new mat4 otherwise
              * @static
              */
             lookAt: function (eye, center, up, dest) {
@@ -1066,10 +1066,10 @@ define(["./Vec4"], function (vec4) {
             /**
              * Returns array with translate, rotate scale
              * @method decompose
-             * @param {kick.math.mat4} mat mat4 to decompose
-             * @param {kick.math.vec3} translate Optional
-             * @param {kick.math.quat4} rotate Optional
-             * @param {kick.math.vec3} scale Optional
+             * @param {kick.math.Mat4} mat mat4 to decompose
+             * @param {kick.math.Vec3} translate Optional
+             * @param {kick.math.Quat4} rotate Optional
+             * @param {kick.math.Vec3} scale Optional
              * @return Array_tranlate_rotate_scale
              * @static
              */
@@ -1135,10 +1135,10 @@ define(["./Vec4"], function (vec4) {
              *
              *
              * @method fromRotationTranslation
-             * @param {kick.math.quat4} quat specifying the rotation by
-             * @param {kick.math.vec3} vec specifying the translation
-             * @param {kick.math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to a new mat4
-             * @return {kick.math.mat4} dest if specified, a new mat4 otherwise
+             * @param {kick.math.Quat4} quat specifying the rotation by
+             * @param {kick.math.Vec3} vec specifying the translation
+             * @param {kick.math.Mat4} dest Optional, mat4 receiving operation result. If not specified result is written to a new mat4
+             * @return {kick.math.Mat4} dest if specified, a new mat4 otherwise
              * @static
              */
             fromRotationTranslation: function (quat, vec, dest) {
@@ -1183,7 +1183,7 @@ define(["./Vec4"], function (vec4) {
             /**
              * Returns a string representation of a mat4
              * @method str
-             * @param {kick.math.mat4} mat mat4 to represent as a string
+             * @param {kick.math.Mat4} mat mat4 to represent as a string
              * @return {String} string representation of mat
              * @static
              */
@@ -1197,7 +1197,7 @@ define(["./Vec4"], function (vec4) {
             /**
              * Returns a string representation of a mat4 printed as a 4x4 matrix (on 4 lines)
              * @method strPretty
-             * @param {kick.math.mat4} mat mat4 to represent as a string
+             * @param {kick.math.Mat4} mat mat4 to represent as a string
              * @return {String} string representation of mat
              * @static
              */
