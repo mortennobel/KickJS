@@ -1,4 +1,4 @@
-define(["./core", "./importer", "./material", "./math", "./mesh", "./scene", "./texture"],
+define(["kick/core", "kick/importer", "kick/material", "kick/math", "kick/mesh", "kick/scene", "kick/texture"],
     function (core, importer, material, math, mesh, scene, texture) {
         "use strict";
         return {
