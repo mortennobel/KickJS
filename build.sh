@@ -11,6 +11,9 @@ googleClojure=$3
 #Location of Node.js
 nodejs=$4
 
+#Location of Rhino (js.jar) (http://www.mozilla.org/rhino/)
+rhino=$5
+
 version=0_5_0
 
 # The location of the files to parse.  Parses subdirectories, but will fail if
@@ -87,22 +90,22 @@ mv API_$version generator
 
 ##############################################################################
 echo "Running Precompiler release"
-mkdir $project/build
-rm -rf $project/build/pre
-mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/js/math.js $project/build/pre/math.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/build/pre/core.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/chunk.js $project/build/pre/chunk.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/mesh.js $project/build/pre/mesh.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/build/pre/material.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/collada.js $project/build/pre/collada.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/obj.js $project/build/pre/obj.js $version false false
-$nodejs $project/preprocessor/preprocessor $project/src/js/resource.js $project/build/pre/resource.js $version false false
-cp $project/src/js/constants.js $project/build/pre/constants.js
-cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
+# mkdir $project/build
+# rm -rf $project/build/pre
+# mkdir $project/build/pre
+# $nodejs $project/preprocessor/preprocessor $project/src/js/math.js $project/build/pre/math.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/core.js $project/build/pre/core.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/chunk.js $project/build/pre/chunk.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/scene.js $project/build/pre/scene.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/mesh.js $project/build/pre/mesh.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/material.js $project/build/pre/material.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/meshfactory.js $project/build/pre/meshfactory.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/texture.js $project/build/pre/texture.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/collada.js $project/build/pre/collada.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/obj.js $project/build/pre/obj.js $version false false
+# $nodejs $project/preprocessor/preprocessor $project/src/js/resource.js $project/build/pre/resource.js $version false false
+# cp $project/src/js/constants.js $project/build/pre/constants.js
+# cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 
 ## For debugging purpose only - skip preprocessor
 ## cp $project/src/js/math.js $project/build/pre/math.js
@@ -117,24 +120,29 @@ cp $project/src/js/glslconstants.js $project/build/pre/glslconstants.js
 ## cp $project/src/js/obj.js $project/build/pre/obj.js
 ## cp $project/src/js/resource.js $project/build/pre/resource.js
 
+echo "Package AMD"
+#r.js -o name=kick/all out=$project/build/kick.js baseUrl=$project/src/js
+#java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/kick-built.js --language_in ECMASCRIPT5_STRICT
+
+java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/preprocessor/r.js -o name=kick out=$project/build/kick-debug.js baseUrl=$project/src/js optimize=none
+
 ##############################################################################
 ## http://code.google.com/closure/compiler/
 ##############################################################################
 
-echo "Running Google Clojure compiler"
-java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/pre/constants.js --js $project/build/pre/glslconstants.js --js $project/build/pre/math.js --js $project/build/pre/core.js --js $project/build/pre/chunk.js --js $project/build/pre/texture.js --js $project/build/pre/scene.js --js $project/build/pre/mesh.js --js $project/build/pre/material.js --js $project/build/pre/meshfactory.js --js $project/build/pre/collada.js --js $project/build/pre/obj.js --js $project/build/pre/resource.js --language_in ECMASCRIPT5_STRICT
+# echo "Running Google Clojure compiler"
+# java -jar $googleClojure --js_output_file "$project/build/kick-min.js.tmp" --js $project/build/kick.js --language_in ECMASCRIPT5_STRICT
 
 ##############################################################################
 echo "Adding license info compiler"
-cat "$project/license.txt" "$project/build/kick-min.js.tmp" > "$project/build/kick-min-$version.js"
-rm "$project/build/kick-min.js.tmp"
+# cat "$project/build/kick-min.js.tmp" > "$project/build/kick-built.js"
+# rm "$project/build/kick-min.js.tmp"
 
 ##############################################################################
 echo "Copy kickjs to examples"
 mkdir "$project/example/js/"
-cp "$project/build/kick-min-$version.js" "$project/example/js/kick-min-$version.js"
-cp "$project/build/kick-debug-$version.js" "$project/example/js/kick-debug-$version.js"
-cp "$project/src/js-dependencies/webgl-debug.js" "$project/example/js/webgl-debug.js"
+cp "$project/build/kick-built.js" "$project/example/js/kick-built.js"
+cp "$project/build/kick-debug.js" "$project/example/js/kick-debug.js"
 
 echo "Build finished"
 date
