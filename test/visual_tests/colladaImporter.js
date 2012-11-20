@@ -5,7 +5,7 @@ requirejs.config({
     }
 });
 
-requirejs(['kick/all'],
+requirejs(['kick'],
     function (KICK) {
         "use strict";
 
