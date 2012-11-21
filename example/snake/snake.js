@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../js/kick-debug'
+        kick: '../js/kick-built'
     }
 });
 
@@ -10,8 +10,8 @@ requirejs(['kick'],
         "use strict";
         var initSnake = function () {
 
-            var vec3 = KICK.math.vec3,
-                mat4 = KICK.math.mat4,
+            var vec3 = KICK.math.Vec3,
+                mat4 = KICK.math.Mat4,
                 constants = KICK.core.Constants,
                 gameController;
 
@@ -595,5 +595,5 @@ requirejs(['kick'],
             document.addEventListener('keyup',keyListener,true);
         };
 
-        window.addEventListener("load", initSnake, false);
+        initSnake();
     });
