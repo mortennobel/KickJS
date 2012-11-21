@@ -1,0 +1,7 @@
+/*!
+ * KickJS 0.5.0 - New BSD License
+ * https://raw.github.com/mortennobel/KickJS/master/license.txt
+ * KickJS Uses
+ * - glMatrix.js
+ * - WebGL DebugContext (debug mode only)
+ */
