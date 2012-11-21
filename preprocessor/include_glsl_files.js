@@ -39,9 +39,9 @@ function modifyString(srcString, index, jsonObj){
         jsonObj[name] = trimStrings(jsonObj[name]);
     }
 
-    str += JSON.stringify(jsonObj);
+    str += "return "+JSON.stringify(jsonObj);
     str += ";\n";
-    str += "})();";
+    str += "});";
     return str;
 }
 

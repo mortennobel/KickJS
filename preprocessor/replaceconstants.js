@@ -6,9 +6,10 @@
  * @return sourcecode with constants replaced
  */
 function replaceConstants(obj, sourcecode){
+
     var replaceAll = function(input,re,replaceWith){
             var oldString;
-            do{
+            do {
                 oldString = input;
                 input = input.replace(re, replaceWith);
             } while (oldString !== input);
@@ -24,7 +25,7 @@ function replaceConstants(obj, sourcecode){
     });
     for (var i=0;i<names.length;i++){
         var name = names[i];
-        var re = new RegExp("[\\w.\\._]*"+name);
+        var re = new RegExp("[a-zA-Z_][\\w.\\._]*"+name);
         var value = obj[name];
         if (typeof value === "string"){
             value = '"'+value+'"';
