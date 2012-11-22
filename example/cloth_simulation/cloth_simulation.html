@@ -15,16 +15,7 @@
 Based on <a href="http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-coding-tutorial/">Mosegaards Cloth Simulation Coding Tutorial</a><br>
 (And yes it should be optimized to run on fully on the GPU)<br>
 <canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
-<script type="text/javascript">
-    if (location.search === "?debug"){
-        document.write('<script type="text/javascript" src="../js/webgl-debug.js"></s'+'cript>');
-        document.write('<script type="text/javascript" src="../js/kick-debug-0.4.2.js"></s'+'cript>');
-    } else {
-        document.write('<script type="text/javascript" src="../js/kick-min-0.4.2.js"></s'+'cript>');
-    }
-    document.write('<script src="cloth_simulation.js"></s'+'cript>');
-</script>
-
+<script data-main="cloth_simulation.js" type="text/javascript" src="../common/require.js"></script>
 <script type="text/javascript" src="/header.js"></script>
 </body>
 </html>

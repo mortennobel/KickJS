@@ -8,15 +8,7 @@
     <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
     <link href='/style.css' rel='stylesheet' type='text/css'>
 
-    <script type="text/javascript">
-        if (location.search === "?debug"){
-            document.write('<script type="text/javascript" src="../js/webgl-debug.js"></s'+'cript>');
-            document.write('<script type="text/javascript" src="../js/kick-debug-0.4.2.js"></s'+'cript>');
-        } else {
-            document.write('<script type="text/javascript" src="../js/kick-min-0.4.2.js"></s'+'cript>');
-        }
-    </script>
-    <script src="model_viewer.js"></script>
+
     <script type="text/javascript" src="downloadtify/downloadify.min.js"></script>
     <script type="text/javascript" src="downloadtify/swfobject.js"></script>
     <script type="text/javascript" src="../common/common.js"></script>
@@ -38,6 +30,7 @@
 <canvas id="canvas" style="border: none;" width="800" height="800" title="Left mouse to rotate. Mouse scroll wheel to zoom. Right mouse to rotate light source."></canvas>
 <script type="text/javascript" src="/header.js"></script>
 
+<script data-main="model_viewer.js" type="text/javascript" src="../common/require.js"></script>
 <div id="exportContent">
     <div class="yui3-widget-bd">
         <b>Export data:</b><br>

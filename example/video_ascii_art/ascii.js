@@ -1,4 +1,12 @@
-window.onload = function(){
+requirejs.config({
+    baseUrl: '.',
+    paths: {
+        kick: '../js/kick-built'
+    }
+});
+
+requirejs(['kick'],
+    function (KICK) {
     "use strict";
 
     function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer, materialUniforms){
@@ -168,4 +176,4 @@ window.onload = function(){
     documentResized();
 
     window.onresize = documentResized;
-};
+});

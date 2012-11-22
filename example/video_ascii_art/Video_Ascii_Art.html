@@ -61,9 +61,6 @@
     <script src="http://yui.yahooapis.com/3.5.0/build/yui/yui-min.js"></script>
 
     <link rel="stylesheet" href="reset-min.css">
-    <!--<script type="text/javascript" src="../js/webgl-debug.js"></script>-->
-    <script type="text/javascript" src="../js/kick-min-0.4.2.js"></script>
-    <!--<script type="text/javascript" src="../js/kick-debug-0.4.2.js"></script>-->
     <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
     <link href='/style.css' rel='stylesheet' type='text/css'>
     <!-- Google analytics-->
@@ -81,6 +78,7 @@
 </header>
 <article>
     <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+    <script data-main="ascii.js" type="text/javascript" src="../common/require.js"></script>
     <div id="panelContent"></div>
     <div style="display: none">
     <textarea style="width:500px;height:150px;" id="vertexShaderTex">
@@ -149,6 +147,6 @@ void main(void)
         </div>
 </article>
 <script type="text/javascript" src="/header.js"></script>
-<script type="text/javascript" src="ascii.js"></script>
+<script data-main="ascii.js" type="text/javascript" src="../common/require.js"></script>
 </body>
 </html>
