@@ -1,4 +1,4 @@
-define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants"], function (MeshData, Vec2, Vec3, Constants) {
+define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants", "kick/core/Util"], function (MeshData, Vec2, Vec3, Constants, Util) {
     "use strict";
 
     /**

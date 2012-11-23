@@ -510,7 +510,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 for (j = 0; j < _indices.length; j++) {
                     for (i = _indices[j].length - 1; i >= 0; i--) {
                         if (_indices[j][i] >= vertexCount) {
-                            debugger;
+                            Util.warn("_indices[" + j + "][" + i + "] >= vertexCount");
                             return false;
                         }
                     }
@@ -737,14 +737,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          * @return {Boolean} false if meshtype is not GL_TRIANGLES
          */
         MeshData.prototype.recalculateTangents = function () {
-            if (this.meshType !== Constants.GL_TRIANGLES) {
+            if (this.meshType !== Constants.GL_TRIANGLES && this.meshType !== Constants.GL_TRIANGLE_STRIP) {
                 return false;
             }
             var vertex = Vec3.wrapArray(this.vertex),
                 vertexCount = vertex.length,
                 normal = Vec3.wrapArray(this.normal),
                 texcoord = Vec2.wrapArray(this.uv1),
-                triangle = this.indices,
+                isTriangleStrip = this.meshType === Constants.GL_TRIANGLE_STRIP,
+                triangle = isTriangleStrip ? Util.convertTriangleStripToTriangles(this.indices, true) : this.indices,
                 triangleCount = triangle.length / 3,
                 tangentBuffer = new Float32Array(vertexCount * 4),
                 tangent = Vec4.wrapArray(tangentBuffer),

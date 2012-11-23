@@ -609,6 +609,37 @@ define(["require", "./Constants"], function (require, Constants) {
         },
 
         /**
+         * @method convertTriangleStripToTriangles
+         * @param [Array] triangleStripIndices index array
+         * @param {Bool} removeDegenerate remove degenerate triangles
+         */
+        convertTriangleStripToTriangles: function (triangleStripIndices, removeDegenerate) {
+            var i,
+                even = 1,
+                trianleIndices = [triangleStripIndices[0], triangleStripIndices[1], triangleStripIndices[2]];
+
+            for (i=3;i<triangleStripIndices.length;i++){
+                if (removeDegenerate){
+                    if (triangleStripIndices[i-1] === triangleStripIndices[i] ||
+                        triangleStripIndices[i-2] === triangleStripIndices[i] ||
+                        triangleStripIndices[i-1] === triangleStripIndices[i-2]){
+                        continue;
+                    }
+                }
+                if (i%2 === even) {
+                    trianleIndices.push(triangleStripIndices[i-1]);
+                    trianleIndices.push(triangleStripIndices[i-2]);
+                    trianleIndices.push(triangleStripIndices[i]);
+                } else {
+                    trianleIndices.push(triangleStripIndices[i-2]);
+                    trianleIndices.push(triangleStripIndices[i-1]);
+                    trianleIndices.push(triangleStripIndices[i]);
+                }
+            }
+            return trianleIndices;
+        },
+
+        /**
          * @method namespace
          * @param {String} ns_string
          * @return {Object}
