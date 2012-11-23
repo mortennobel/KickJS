@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/math/Aabb", "kick/math/Vec3", "kick/math/Vec4", "kick/math/Mat4"],
-    function (Constants, Util, ChunkData, Aabb, Vec3, Vec4, Mat4) {
+define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/math/Aabb", "kick/math/Vec2", "kick/math/Vec3", "kick/math/Vec4", "kick/math/Mat4"],
+    function (Constants, Util, ChunkData, Aabb, Vec2, Vec3, Vec4, Mat4) {
         "use strict";
 
         var ASSERT = Constants._ASSERT,
@@ -743,15 +743,16 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
             var vertex = Vec3.wrapArray(this.vertex),
                 vertexCount = vertex.length,
                 normal = Vec3.wrapArray(this.normal),
-                texcoord = this.uv1,
+                texcoord = Vec2.wrapArray(this.uv1),
                 triangle = this.indices,
                 triangleCount = triangle.length / 3,
-                tangent = this.tangent,
+                tangentBuffer = new Float32Array(vertexCount * 4),
+                tangent = Vec4.wrapArray(tangentBuffer),
                 tan1 = Vec3.array(vertexCount),
                 tan2 = Vec3.array(vertexCount),
                 a,
-                tmp = Vec3.create(),
-                tmp2 = Vec3.create(),
+                tmpFloat = 0,
+                tmpVec3 = Vec3.create(),
                 i1,
                 i2,
                 i3,
@@ -818,26 +819,23 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 Vec3.add(tan2[i2], tdir);
                 Vec3.add(tan2[i3], tdir);
             }
-            if (!tangent) {
-                tangent = new Float32Array(vertexCount * 4);
-                this.tangent = tangent;
-            }
-            tangent = Vec4.wrapArray(tangent);
-
             for (a = 0; a < vertexCount; a++) {
                 n = normal[a];
                 t = tan1[a];
 
                 // Gram-Schmidt orthogonalize
                 // tangent[a] = (t - n * Dot(n, t)).Normalize();
-                Vec3.subtract(t, n, tmp);
-                Vec3.dot(n, t, tmp2);
-                Vec3.set(Vec3.normalize(Vec3.multiply(tmp, tmp2)), tangent[a]);
+                tmpFloat = Vec3.dot(n, t);
+                Vec3.scale(n, tmpFloat, tmpVec3);
+                Vec3.subtract(t, tmpVec3, tmpVec3);
+                Vec3.normalize(tmpVec3);
+                Vec3.set(tmpVec3, tangent[a]);
 
                 // Calculate handedness
                 // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
                 tangent[a][3] = (Vec3.dot(Vec3.cross(n, t, Vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
             }
+            this.tangent = tangentBuffer;
             return true;
         };
 
