@@ -213,6 +213,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             /**
              * Set a image using a raw bytearray in a specified format.
              * GL_FLOAT should only be used if floating point textures is supported (See Texture.isFPTexturesSupported() ).
+             * If used on cubemap-texture then all 6 sides of the cube is assigned
              * @method setImageData
              * @param {Number} width image width in pixels
              * @param {Number} height image height in pixels
@@ -225,7 +226,16 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 createImageFunction = thisObj.setImageData;
                 createImageFunctionParameters = arguments;
                 var format,
-                    res;
+                    res,
+                    i,
+                    textureSides = _textureType === Constants.GL_TEXTURE_2D ?
+                            [Constants.GL_TEXTURE_2D] :
+                            [Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                                Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                                Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                                Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                                Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                                Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
                 recreateTextureIfDifferentType();
                 if (type === Constants.GL_FLOAT && !gl.isTexFloatEnabled) {
                     res = thisObj.isFPTexturesSupported(); // enable extension
@@ -243,8 +253,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                         Util.fail("Texture.setImageData (type) should be either GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5");
                     }
                 }
-                if (_textureType !== Constants.GL_TEXTURE_2D) {
-                    Util.fail("Texture.setImageData only supported by TEXTURE_2D");
+                if (!_textureType) {
+                    Util.fail("Texture.textureType not set");
                     return;
                 }
                 format = _intFormat;
@@ -253,12 +263,14 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 _dataURI = dataURI;
 
                 thisObj.bind(0); // bind to texture slot 0
-                gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
-                gl.texImage2D(Constants.GL_TEXTURE_2D, 0, _intFormat, width, height, border, format, type, pixels);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_S, _wrapS);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_T, _wrapT);
+                for (i = 0; i < textureSides.length; i++) {
+                    gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
+                    gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, format, type, pixels);
+                }
+                gl.texParameteri(_textureType, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+                gl.texParameteri(_textureType, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+                gl.texParameteri(_textureType, Constants.GL_TEXTURE_WRAP_S, _wrapS);
+                gl.texParameteri(_textureType, Constants.GL_TEXTURE_WRAP_T, _wrapT);
                 if (_generateMipmaps) {
                     createMipmaps();
                 }
@@ -267,17 +279,17 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             };
 
             /**
-             * Creates a 2x2 temporary image (checkerboard)
+             * Creates a 2x2 temporary image (white)
              * @method setTemporaryTexture
              */
             this.setTemporaryTexture = function () {
                 var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,
-                        0,   0,   0,
-                        0,   0,   0,
+                        255, 255, 255,
+                        255, 255, 255,
                         255, 255, 255]),
                     oldIntFormat = _intFormat;
                 _intFormat = Constants.GL_RGB;
-                this.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "kickjs://texture/checkerboard/");
+                this.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "kickjs://texture/white/");
                 _intFormat = oldIntFormat;
             };
 
