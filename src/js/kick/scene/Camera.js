@@ -369,6 +369,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
             /**
              * Schedules a camera picking session. During next repaint a picking session is done. If the pick hits some
              * game objects, then a callback is added to the event queue (and will run in next frame).
+             * Note since the WebGL window coordinate has the origin in the lower left corner and browsers coordinate
+             * system has the origin in the upper left corner, you may need to compute y as canvas.height - mouseCoordinate.y
              * @method pick
              * @param {function} gameObjectPickedFn callback function with the signature function(gameObject, hitCount)
              * @param {Number} x coordinate in screen coordinates (between 0 and canvas width - 1)
@@ -383,7 +385,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 pickingObject.add({
                     gameObjectPickedFn: gameObjectPickedFn,
                     x: x,
-                    y: glState.viewportSize[1] - y,
+                    y: y,
                     width: width,
                     height: height
                 });
