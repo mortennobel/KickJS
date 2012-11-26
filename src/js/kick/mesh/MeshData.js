@@ -674,11 +674,16 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
         /**
          * Recalculate the angle weighted vertex normals based on the triangle mesh
          * @method recalculateNormals
+         * @return {Boolean} false if meshtype is not GL_TRIANGLES or GL_TRIANGLE_STRIP
          */
         MeshData.prototype.recalculateNormals = function () {
+            if (this.meshType !== Constants.GL_TRIANGLES && this.meshType !== Constants.GL_TRIANGLE_STRIP) {
+                return false;
+            }
             var vertexCount = this.vertex.length / 3,
-                triangleCount = this.indices.length / 3,
-                triangles = this.indices,
+                isTriangleStrip = this.meshType === Constants.GL_TRIANGLE_STRIP,
+                triangles = isTriangleStrip ? Util.convertTriangleStripToTriangles(this.indices, true) : this.indices,
+                triangleCount = triangles.length / 3,
                 vertex = Vec3.wrapArray(this.vertex),
                 a,
                 normalArrayRef = {},
@@ -734,7 +739,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          *   Terathon Software 3D Graphics Library, 2001.<br>
          *   http://www.terathon.com/code/tangent.html
          * @method recalculateTangents
-         * @return {Boolean} false if meshtype is not GL_TRIANGLES
+         * @return {Boolean} false if meshtype is not GL_TRIANGLES or GL_TRIANGLE_STRIP
          */
         MeshData.prototype.recalculateTangents = function () {
             if (this.meshType !== Constants.GL_TRIANGLES && this.meshType !== Constants.GL_TRIANGLE_STRIP) {
