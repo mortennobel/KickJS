@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+
+</head>
+<body onload="">
+    <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
+
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example shows how a cube is rotated.
+    <script src="../../src/js-dependencies/require.js"></script>
+    <script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../src/js/kick'
+            }
+        });
+
+        req(['kick'],
+                function (KICK) {
+        var engine;
+        var meshRenderer;
+
+        var log = function (output) {
+            var element = document.getElementById("output");
+            element.innerHTML = element.innerHTML+output+"<br>";
+        };
+
+        var clearLog = function(){
+            var element = document.getElementById("output");
+            element.innerHTML = "";
+        };
+
+        function setMaterial(vertexShaderId, fragmentShaderId){
+            clearLog();
+            var vs = document.getElementById(vertexShaderId).value;
+            var fs = document.getElementById(fragmentShaderId).value;
+            var shader = new KICK.material.Shader(engine);
+            shader.vertexShaderSrc = vs;
+            shader.fragmentShaderSrc = fs;
+            shader.errorLog = log;
+            shader.apply();
+            var missingAttributes = meshRenderer.mesh.verify(shader);
+            if (missingAttributes){
+                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+                return;
+            }
+
+            meshRenderer.material = new KICK.material.Material(engine,{
+                name:"Some material",
+                shader:shader
+            });
+        }
+
+        function recalculateNormals(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateNormals();
+            mesh.updateData();
+        }
+
+        function recalculateTangents(){
+            clearLog();
+            var mesh = meshRenderer.mesh;
+            mesh.recalculateTangents();
+            mesh.updateData();
+        }
+
+        function addRotatorComponent(gameObject){
+            var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = -0.05,
+                    rotation = transform.localRotationEuler;
+            gameObject.addComponent({
+                update: function(){
+                    rotation[1] += time.deltaTime*rotationSpeed;
+                    transform.localRotationEuler = rotation;
+                }
+            });
+        }
+
+        function initKick() {
+            engine = new KICK.core.Engine('canvas',{
+                enableDebugContext: true
+            });
+            var cameraObject = engine.activeScene.createGameObject();
+            var camera = new KICK.scene.Camera({
+                clearColor: [0,0,0,1],
+                perspective: false,
+                near:-1,
+                far:1
+            });
+            cameraObject.addComponent(camera);
+
+            var gameObject = engine.activeScene.createGameObject();
+            meshRenderer = new KICK.scene.MeshRenderer();
+
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/"});
+            setMaterial('vertexShaderColor','fragmentShader');
+            gameObject.addComponent(meshRenderer);
+            addRotatorComponent(gameObject);
+        }
+                    initKick();
+                });
+    </script>
+  <br>
+
+  <h2>Output</h2>
+  <div id="output" style="color: red;">
+  </div>
+  <h2>Show data</h2>
+  [<a href="#" onclick="refreshData();">Refresh</a>]
+  <div id="example" class="yui3-skin-sam"></div>
+
+  <div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec3 normal;
+
+uniform mat4 _mvProj;
+
+varying vec3 vNormal;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vNormal = (normal+vec3(1.0,1.0,1.0))/2.0;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+
+varying vec3 vNormal;
+
+void main(void)
+{
+    gl_FragColor = vec4(vNormal.x, vNormal.y, vNormal.z, 1.0);
+}
+  </textarea>
+</div>
+  <br/>
+</body>
+</html>

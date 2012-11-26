@@ -109,14 +109,11 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                 sinLong, cosLong,
                 x1, x2, y1, y2, z1, z2,
                 meshDataConf;
-
-            for (j = 0; j < stacks; j++) {
+            // create vertices
+            for (j = 0; j <= stacks; j++) {
                 latitude1 = piDivStacks * j - PIDiv2;
-                latitude2 = piDivStacks * (j + 1) - PIDiv2;
                 sinLat1 = Math.sin(latitude1);
                 cosLat1 = Math.cos(latitude1);
-                sinLat2 = Math.sin(latitude2);
-                cosLat2 = Math.cos(latitude2);
                 for (i = 0; i <= slices; i++) {
                     longitude = (PI2 / slices) * i;
                     sinLong = Math.sin(longitude);
@@ -124,26 +121,24 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                     x1 = cosLong * cosLat1;
                     y1 = sinLat1;
                     z1 = sinLong * cosLat1;
-                    x2 = cosLong * cosLat2;
-                    y2 = sinLat2;
-                    z2 = sinLong * cosLat2;
                     Vec3.set([x1, y1, z1], normals[index]);
                     Vec2.set([1 - i / slices, j / stacks], uvs[index]);
                     Vec3.set([radius * x1, radius * y1, radius * z1], vertices[index]);
-                    indices.push(index);
-                    if (j > 0 && i === 0) {
-                        indices.push(index); // make degenerate
-                    }
                     index++;
-
-                    Vec3.set([x2, y2, z2], normals[index]);
-                    Vec2.set([1 - i / slices, (j + 1) / stacks], uvs[index]);
-                    Vec3.set([radius * x2, radius * y2, radius * z2], vertices[index]);
+                }
+            }
+            // create indices
+            for (j = 0; j <= stacks; j++) {
+                if (j > 0) {
+                    indices.push(j * (slices + 1)); // make degenerate
+                }
+                for (i = 0; i <= slices; i++) {
+                    index = j * (slices + 1) + i;
                     indices.push(index);
-                    if (i === slices && j < stacks - 1) {
-                        indices.push(index); // make degenerate
-                    }
-                    index++;
+                    indices.push(index + slices);
+                }
+                if (j < stacks) {
+                    indices.push(j * (slices + 1) + slices); // make degenerate
                 }
             }
             meshDataConf = {
