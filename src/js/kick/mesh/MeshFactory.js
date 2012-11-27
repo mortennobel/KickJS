@@ -102,12 +102,12 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                 PIDiv2 = Math.PI / 2,
                 PI2 = Math.PI * 2,
                 index = 0,
-                latitude1, latitude2,
-                sinLat1, sinLat2,
-                cosLat1, cosLat2,
+                latitude1,
+                sinLat1,
+                cosLat1,
                 longitude,
                 sinLong, cosLong,
-                x1, x2, y1, y2, z1, z2,
+                x1, y1, z1,
                 meshDataConf;
             // create vertices
             for (j = 0; j <= stacks; j++) {
@@ -128,17 +128,17 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                 }
             }
             // create indices
-            for (j = 0; j <= stacks; j++) {
+            for (j = 0; j < stacks; j++) {
                 if (j > 0) {
                     indices.push(j * (slices + 1)); // make degenerate
                 }
                 for (i = 0; i <= slices; i++) {
                     index = j * (slices + 1) + i;
                     indices.push(index);
-                    indices.push(index + slices);
+                    indices.push(index + slices + 1);
                 }
-                if (j < stacks) {
-                    indices.push(j * (slices + 1) + slices); // make degenerate
+                if (j + 1 < stacks) {
+                    indices.push(index + slices + 1); // make degenerate
                 }
             }
             meshDataConf = {
