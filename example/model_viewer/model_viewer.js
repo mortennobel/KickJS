@@ -286,7 +286,6 @@ requirejs(['kick'],
                     rotationEuler[1] += mouseDelta[0]*rotationSensitivity;
                     rotationEuler[0] += mouseDelta[1]*rotationSensitivity;
                     transform.localRotationEuler = rotationEuler;
-                    console.log(rotationEuler[0]+","+rotationEuler[1]);
                 }
             };
         }
