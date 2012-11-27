@@ -677,12 +677,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          * @return {Boolean} false if meshtype is not GL_TRIANGLES or GL_TRIANGLE_STRIP
          */
         MeshData.prototype.recalculateNormals = function () {
-            if (this.meshType !== Constants.GL_TRIANGLES && this.meshType !== Constants.GL_TRIANGLE_STRIP) {
-                return false;
-            }
             var vertexCount = this.vertex.length / 3,
-                isTriangleStrip = this.meshType === Constants.GL_TRIANGLE_STRIP,
-                triangles = isTriangleStrip ? Util.convertTriangleStripToTriangles(this.indices, true) : this.indices,
+                triangles = Util.convertToTriangleIndices(this.indices, this.meshType, true),
                 triangleCount = triangles.length / 3,
                 vertex = Vec3.wrapArray(this.vertex),
                 a,
@@ -701,6 +697,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 v1,
                 v2,
                 v3;
+            if (!triangles) {
+                return false;
+            }
 
             for (a = 0; a < triangleCount; a++) {
                 i1 = triangles[a * 3];
@@ -739,19 +738,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          *   Terathon Software 3D Graphics Library, 2001.<br>
          *   http://www.terathon.com/code/tangent.html
          * @method recalculateTangents
-         * @return {Boolean} false if meshtype is not GL_TRIANGLES or GL_TRIANGLE_STRIP
+         * @return {Boolean} false if meshtype is not supported
          */
         MeshData.prototype.recalculateTangents = function () {
-            if (this.meshType !== Constants.GL_TRIANGLES && this.meshType !== Constants.GL_TRIANGLE_STRIP) {
-                return false;
-            }
             var vertex = Vec3.wrapArray(this.vertex),
                 vertexCount = vertex.length,
                 normal = Vec3.wrapArray(this.normal),
                 texcoord = Vec2.wrapArray(this.uv1),
-                isTriangleStrip = this.meshType === Constants.GL_TRIANGLE_STRIP,
-                triangle = isTriangleStrip ? Util.convertTriangleStripToTriangles(this.indices, true) : this.indices,
-                triangleCount = triangle.length / 3,
+                triangles = Util.convertToTriangleIndices(this.indices, this.meshType, true),
+                triangleCount = triangles.length / 3,
                 tangentBuffer = new Float32Array(vertexCount * 4),
                 tangent = Vec4.wrapArray(tangentBuffer),
                 tan1 = Vec3.array(vertexCount),
@@ -783,11 +778,14 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 n,
                 sdir,
                 tdir;
+            if (!triangles) {
+                return false;
+            }
 
             for (a = 0; a < triangleCount; a++) {
-                i1 = triangle[a * 3];
-                i2 = triangle[a * 3 + 1];
-                i3 = triangle[a * 3 + 2];
+                i1 = triangles[a * 3];
+                i2 = triangles[a * 3 + 1];
+                i3 = triangles[a * 3 + 2];
 
                 v1 = vertex[i1];
                 v2 = vertex[i2];

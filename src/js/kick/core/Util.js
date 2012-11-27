@@ -332,24 +332,6 @@ define(["require", "./Constants"], function (require, Constants) {
             return canvas;
         },
         /**
-         * Invokes debugger and logs a warning
-         * @method warn
-         * @static
-         */
-        warn:function (message) {
-            debugger;
-            console.log(message);
-        },
-        /**
-         * Invokes debugger and logs an error
-         * @method fail
-         * @static
-         */
-        fail:function (message) {
-            debugger;
-            console.error(message);
-        },
-        /**
          * Converts a typed array to a number array
          * @method typedArrayToArray
          * @static
@@ -505,6 +487,7 @@ define(["require", "./Constants"], function (require, Constants) {
         },
         /**
          * Supports up to 3 byte UTF-8 encoding (including Basic Multilingual Plane)
+         * @static
          * @method utf8Encode
          * @param {String} str
          * @return Uint8Array
@@ -534,6 +517,7 @@ define(["require", "./Constants"], function (require, Constants) {
         },
         /**
          * Removes all properties (methods and attributes) of an object
+         * @static
          * @method removeAllProperties
          * @param {Object} obj
          */
@@ -546,6 +530,7 @@ define(["require", "./Constants"], function (require, Constants) {
         },
         /**
          * Supports up to 3 byte UTF-8 encoding (including Basic Multilingual Plane)
+         * @static
          * @method utf8Decode
          * @param {Uint8Array} bytes
          * @return String
@@ -587,6 +572,7 @@ define(["require", "./Constants"], function (require, Constants) {
             return str;
         },
         /**
+         * @static
          * @method isPowerOfTwo
          * @param {Number} x value
          * @return {Number}
@@ -595,6 +581,7 @@ define(["require", "./Constants"], function (require, Constants) {
             return (x & (x - 1)) === 0;
         },
         /**
+         * @static
          * @method nextHighestPowerOfTwo
          * @param {Number} x value
          * @return {Number}
@@ -609,11 +596,19 @@ define(["require", "./Constants"], function (require, Constants) {
         },
 
         /**
-         * @method convertTriangleStripToTriangles
-         * @param [Array] triangleStripIndices index array
+         * @static
+         * @method convertToTriangleIndices
+         * @param {Array} triangleStripIndices index array
+         * @param {Number} meshType such as Constants.GL_TRIANGLES or Constants.GL_TRIANGLE_STRIP
          * @param {Bool} removeDegenerate remove degenerate triangles
+         * @return {Array|null} triangleIndices or null if not possible to convert
          */
-        convertTriangleStripToTriangles: function (triangleStripIndices, removeDegenerate) {
+        convertToTriangleIndices: function (triangleStripIndices, primitiveType, removeDegenerate) {
+            if (primitiveType === Constants.GL_TRIANGLES){
+                return triangleStripIndices;
+            } else if (primitiveType !== Constants.GL_TRIANGLE_STRIP){
+                return null;
+            }
             var i,
                 even = 1,
                 trianleIndices = [triangleStripIndices[0], triangleStripIndices[1], triangleStripIndices[2]];
@@ -626,7 +621,7 @@ define(["require", "./Constants"], function (require, Constants) {
                         continue;
                     }
                 }
-                if (i%2 === even) {
+                if (i % 2 === even) {
                     trianleIndices.push(triangleStripIndices[i-1]);
                     trianleIndices.push(triangleStripIndices[i-2]);
                     trianleIndices.push(triangleStripIndices[i]);
@@ -642,6 +637,8 @@ define(["require", "./Constants"], function (require, Constants) {
         /**
          * @method namespace
          * @param {String} ns_string
+         * @static
+         * @deprecated
          * @return {Object}
          */
         namespace: function (ns_string) {
@@ -657,8 +654,25 @@ define(["require", "./Constants"], function (require, Constants) {
                 parent = parent[parts[i]];
             }
             return parent;
+        },
+        /**
+         * Invokes debugger and logs a warning
+         * @method warn
+         * @static
+         */
+        warn:function (message) {
+            debugger;
+            console.log(message);
+        },
+        /**
+         * Invokes debugger and logs an error
+         * @method fail
+         * @static
+         */
+        fail:function (message) {
+            debugger;
+            console.error(message);
         }
-
     };
 
     return Util;
