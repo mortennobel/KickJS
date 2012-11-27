@@ -7,6 +7,7 @@
 
 </head>
 <body onload="">
+<h1>Rotating sphere</h1>
     <button onclick="if (engine.isFullScreenSupported()){engine.setFullscreen(true); } else {alert('Fullscreen not supported');}">Set fullscreen</button><br>
 
   <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
@@ -99,7 +100,8 @@
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/"});
+            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?slices=70&stacks=40"});
+
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);
@@ -119,15 +121,15 @@
   <div style="display:none;">
   <textarea style="width:500px;height:150px;" id="vertexShaderColor">
 attribute vec3 vertex;
-attribute vec3 normal;
+attribute vec2 uv1;
 
 uniform mat4 _mvProj;
 
-varying vec3 vNormal;
+varying vec3 vColor;
 
 void main(void) {
     gl_Position = _mvProj * vec4(vertex, 1.0);
-    vNormal = (normal+vec3(1.0,1.0,1.0))/2.0;
+    vColor = vec3(uv1,0.0);
 }
   </textarea>
   <textarea style="width:500px;height:150px;" id="fragmentShader">
@@ -135,11 +137,11 @@ void main(void) {
 precision highp float;
 #endif
 
-varying vec3 vNormal;
+varying vec3 vColor;
 
 void main(void)
 {
-    gl_FragColor = vec4(vNormal.x, vNormal.y, vNormal.z, 1.0);
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
 }
   </textarea>
 </div>
