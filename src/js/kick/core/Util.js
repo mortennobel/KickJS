@@ -642,6 +642,7 @@ define(["require", "./Constants"], function (require, Constants) {
          * @return {Object}
          */
         namespace: function (ns_string) {
+            console.log("Util.namespace is deprecated and will be removed in future version of KickJS");
             var parts = ns_string.split("."),
                 parent = window,
                 i;
