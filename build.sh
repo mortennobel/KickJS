@@ -86,20 +86,23 @@ $nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre $v
 
 echo "Package AMD and compress (release)"
 
-java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/preprocessor/r.js -o name=kick out=$project/build/kick-built.js.tmp baseUrl=$project/src/js
+java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/preprocessor/r.js -o name=kick out=$project/build/kick.js.tmp baseUrl=$project/build/pre
 
 ##############################################################################
 echo "Adding license info compiler"
 cat "$project/license_min.txt" "$project/build/kick-debug.js.tmp" > "$project/build/kick-debug.js"
-cat "$project/license_min.txt" "$project/build/kick-built.js.tmp" > "$project/build/kick-built.js"
+cat "$project/license_min.txt" "$project/build/kick.js.tmp" > "$project/build/kick.js"
 rm "$project/build/kick-debug.js.tmp"
-rm "$project/build/kick-built.js.tmp"
+rm "$project/build/kick.js.tmp"
 
 ##############################################################################
 echo "Copy kickjs to examples"
 mkdir "$project/example/js/"
-cp "$project/build/kick-built.js" "$project/example/js/kick-built.js"
+cp "$project/build/kick.js" "$project/example/js/kick.js"
 cp "$project/build/kick-debug.js" "$project/example/js/kick-debug.js"
+mkdir "$project/tools/js/"
+cp "$project/build/kick.js" "$project/tools/js/kick.js"
+cp "$project/build/kick-debug.js" "$project/tools/js/kick-debug.js"
 
 echo "Build finished"
 date
