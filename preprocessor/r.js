@@ -1,5 +1,5 @@
 /**
- * @license r.js 2.1.1+ Tue, 20 Nov 2012 20:29:53 GMT Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license r.js 2.1.2 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -21,7 +21,7 @@ var requirejs, require, define;
 
     var fileName, env, fs, vm, path, exec, rhinoContext, dir, nodeRequire,
         nodeDefine, exists, reqMain, loadedOptimizedLib, existsForNode,
-        version = '2.1.1+ Tue, 20 Nov 2012 20:29:53 GMT',
+        version = '2.1.2',
         jsSuffixRegExp = /\.js$/,
         commandOption = '',
         useLibLoaded = {},
@@ -123,7 +123,7 @@ var requirejs, require, define;
     }
 
     /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 2.1.1+ Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS 2.1.2 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -136,7 +136,7 @@ var requirejs, require, define;
 (function (global) {
     var req, s, head, baseElement, dataMain, src,
         interactiveScript, currentlyAddingScript, mainScript, subPath,
-        version = '2.1.1+',
+        version = '2.1.2',
         commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
         jsSuffixRegExp = /\.js$/,
@@ -1133,6 +1133,11 @@ var requirejs, require, define;
                         //it.
                         getModule(moduleMap);
 
+                        //Transfer any config to this other module.
+                        if (hasProp(config.config, id)) {
+                            config.config[moduleName] = config.config[id];
+                        }
+
                         try {
                             req.exec(text);
                         } catch (e) {
@@ -1254,7 +1259,10 @@ var requirejs, require, define;
         };
 
         function callGetModule(args) {
-            getModule(makeModuleMap(args[0], null, true)).init(args[1], args[2]);
+            //Skip modules already defined.
+            if (!hasProp(defined, args[0])) {
+                getModule(makeModuleMap(args[0], null, true)).init(args[1], args[2]);
+            }
         }
 
         function removeListener(node, func, name, ieName) {
@@ -8634,7 +8642,7 @@ define('uglifyjs/parse-js', ["exports"], function(exports) {
           disclaimer in the documentation and/or other materials
           provided with the distribution.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER â€œAS ISâ€ AND ANY
     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
     PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
@@ -10085,7 +10093,7 @@ define('uglifyjs/process', ["require", "exports", "module", "./parse-js", "./squ
           disclaimer in the documentation and/or other materials
           provided with the distribution.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER â€œAS ISâ€ AND ANY
     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
     PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
@@ -13835,10 +13843,10 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
         $documentation: "A function definition"
     }, AST_Lambda);
     var AST_Jump = DEFNODE("Jump", null, {
-        $documentation: "Base class for “jumps” (for now that's `return`, `throw`, `break` and `continue`)"
+        $documentation: "Base class for â€œjumpsâ€ (for now that's `return`, `throw`, `break` and `continue`)"
     }, AST_Statement);
     var AST_Exit = DEFNODE("Exit", "value", {
-        $documentation: "Base class for “exits” (`return` and `throw`)",
+        $documentation: "Base class for â€œexitsâ€ (`return` and `throw`)",
         $propdoc: {
             value: "[AST_Node?] the value returned or thrown by this statement; could be null for AST_Return"
         },
@@ -13888,7 +13896,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
     var AST_Switch = DEFNODE("Switch", "expression", {
         $documentation: "A `switch` statement",
         $propdoc: {
-            expression: "[AST_Node] the `switch` “discriminant”"
+            expression: "[AST_Node] the `switch` â€œdiscriminantâ€"
         },
         _walk: function(visitor) {
             return visitor._visit(this, function() {
@@ -14055,7 +14063,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
     var AST_PropAccess = DEFNODE("PropAccess", "expression property", {
         $documentation: 'Base class for property access expressions, i.e. `a.foo` or `a["foo"]`',
         $propdoc: {
-            expression: "[AST_Node] the “container” expression",
+            expression: "[AST_Node] the â€œcontainerâ€ expression",
             property: "[AST_Node|string] the property to access.  For AST_Dot this is always a plain string, while for AST_Sub it's an arbitrary AST_Node"
         }
     });
@@ -14124,7 +14132,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
         }
     });
     var AST_Assign = DEFNODE("Assign", null, {
-        $documentation: "An assignment expression — `a = b + 5`"
+        $documentation: "An assignment expression â€” `a = b + 5`"
     }, AST_Binary);
     var AST_Array = DEFNODE("Array", "elements", {
         $documentation: "An array literal",
@@ -14355,7 +14363,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
     var RE_OCT_NUMBER = /^0[0-7]+$/;
     var RE_DEC_NUMBER = /^\d*\.?\d*(?:e[+-]?\d*(?:\d\.?|\.?\d)\d*)?$/i;
     var OPERATORS = makePredicate([ "in", "instanceof", "typeof", "new", "void", "delete", "++", "--", "+", "-", "!", "~", "&", "|", "^", "*", "/", "%", ">>", "<<", ">>>", "<", ">", "<=", ">=", "==", "===", "!=", "!==", "?", "=", "+=", "-=", "/=", "*=", "%=", ">>=", "<<=", ">>>=", "|=", "^=", "&=", "&&", "||" ]);
-    var WHITESPACE_CHARS = makePredicate(characters("  \n\r	\f​᠎             　"));
+    var WHITESPACE_CHARS = makePredicate(characters(" Â \n\r	\fâ€‹á Žâ€€â€â€‚â€ƒâ€„â€…â€†â€‡â€ˆâ€‰â€Šâ€¯âŸã€€"));
     var PUNC_BEFORE_EXPRESSION = makePredicate(characters("[{(,.;:"));
     var PUNC_CHARS = makePredicate(characters("[]{}(),;:"));
     var REGEXP_MODIFIERS = makePredicate(characters("gmsiy"));
@@ -14799,7 +14807,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
             if (is(type, val)) {
                 return next();
             }
-            token_error(S.token, "Unexpected token " + S.token.type + " «" + S.token.value + "»" + ", expected " + type + " «" + val + "»");
+            token_error(S.token, "Unexpected token " + S.token.type + " Â«" + S.token.value + "Â»" + ", expected " + type + " Â«" + val + "Â»");
         }
         function expect(punc) {
             return expect_token("punc", punc);
@@ -16274,7 +16282,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
             try {
                 if (token) options.source_map.add(token.file || "?", current_line, current_col, token.line, token.col, !name && token.type == "name" ? token.value : name);
             } catch (ex) {
-                AST_Node.warn("Couldn't figure out mapping for {file}:{line},{col} → {cline},{ccol} [{name}]", {
+                AST_Node.warn("Couldn't figure out mapping for {file}:{line},{col} â†’ {cline},{ccol} [{name}]", {
                     file: token.file,
                     line: token.line,
                     col: token.col,
@@ -20569,7 +20577,8 @@ define('rhino/optimize', ['logger', 'env!env/file'], function (logger, file) {
         };
     }
 
-    var JSSourceFilefromCode, optimize;
+    var JSSourceFilefromCode, optimize,
+        mapRegExp = /"file":"[^"]+"/;
 
     //Bind to Closure compiler, but if it is not available, do not sweat it.
     try {
@@ -20605,6 +20614,7 @@ define('rhino/optimize', ['logger', 'env!env/file'], function (logger, file) {
         closure: function (fileName, fileContents, outFileName, keepLines, config) {
             config = config || {};
             var result, mappings, optimized, compressed, baseName, writer,
+                outBaseName, outFileNameMap, outFileNameMapContent,
                 jscomp = Packages.com.google.javascript.jscomp,
                 flags = Packages.com.google.common.flags,
                 //Fake extern
@@ -20649,15 +20659,22 @@ define('rhino/optimize', ['logger', 'env!env/file'], function (logger, file) {
                 optimized = String(compiler.toSource());
 
                 if (config.generateSourceMaps && result.sourceMap && outFileName) {
-                    baseName = (new java.io.File(outFileName)).getName();
+                    outBaseName = (new java.io.File(outFileName)).getName();
 
                     file.saveUtf8File(outFileName + ".src", fileContents);
 
-                    writer = getFileWriter(outFileName + ".map", "utf-8");
+                    outFileNameMap = outFileName + ".map";
+                    writer = getFileWriter(outFileNameMap, "utf-8");
                     result.sourceMap.appendTo(writer, outFileName);
                     writer.close();
 
-                    fileContents = optimized + "\n//@ sourceMappingURL=" + baseName + ".map";
+                    //Not sure how better to do this, but right now the .map file
+                    //leaks the full OS path in the "file" property. Manually
+                    //modify it to not do that.
+                    file.saveFile(outFileNameMap,
+                        file.readFile(outFileNameMap).replace(mapRegExp, '"file":"' + baseName + '"'));
+
+                    fileContents = optimized + "\n//@ sourceMappingURL=" + outBaseName + ".map";
                 } else {
                     fileContents = optimized;
                 }
