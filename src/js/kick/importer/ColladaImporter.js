@@ -269,7 +269,6 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                             var subMeshes = destMeshData.subMeshes;
                             subMeshes.push(triangleIndices);
                             destMeshData.subMeshes = subMeshes;
-                            console.log("pushing new sub mesh with " + triangleIndices.length + " as # " + destMeshData.subMeshes.length);
                         }
                         polylistChild = polylistChild.nextSibling;
                     }
@@ -423,7 +422,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                         } else if (tagName === "node") {
                             addNode(childNode, transform);
                         } else {
-                            console.log("Unknown tagName '" + tagName + "'");
+                            console.log("ignore collada tagName '" + tagName + "'");
                         }
                         childNode = childNode.nextElementSibling;
                     }
