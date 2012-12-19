@@ -1,5 +1,5 @@
-define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./Shim"],
-    function (GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils) {
+define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./Shim"],
+    function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils) {
         "use strict";
 
         var ASSERT = Constants._ASSERT;
@@ -16,7 +16,7 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
          * @param {String|canvas} idOrElement elementid of canvas tag or the canvas element
          * @param {kick.core.Config} config Optional, configuration object
          */
-        return function (idOrElement, config) {
+        var engine = function (idOrElement, config) {
             var glState = new GLState(),
                 gl = null,
                 canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
@@ -397,6 +397,14 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                         gl.enable(c.GL_SCISSOR_TEST);
                         return true;
                     };
+                /**
+                 * Static reference to the current engine.
+                 * @property engine
+                 * @static
+                 * @type kick.core.Engine
+                 */
+                engine.engine = thisObj;
+
                 success = initGL();
                 if (!success) {
                     thisObj.config.webglNotFoundFn(canvas);
@@ -466,6 +474,6 @@ define(["./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInp
                 thisObj._gameLoop(lastTime);
             }());
         };
-
+        return engine;
     }
     );
