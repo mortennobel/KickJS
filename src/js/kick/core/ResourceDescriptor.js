@@ -32,32 +32,7 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
             _config = config || {},
             type = _config.type,
             uid = _config.uid,
-            resourceConfig = _config.config,
-            hasProperty = Util.hasProperty,
-            createConfigInitialized = function (config) {
-                var res = {},
-                    name,
-                    value,
-                    reftype,
-                    ref;
-                for (name in config) {
-                    if (hasProperty(config, name)) {
-                        value = config[name];
-                        reftype = value ? value.reftype : null;
-                        ref = value ? value.ref : null;
-                        if (value && ref && reftype) {
-                            if (reftype === "resource") {
-                                value = engine.resourceLoader[value.refMethod](ref);
-                            } else if (reftype === "project") {
-                                value = engine.project.load(ref);
-                            }
-                        }
-                        res[name] = value;
-                    }
-                }
-                res.uid = uid;
-                return res;
-            };
+            resourceConfig = _config.config;
         Object.defineProperties(this, {
             /**
              * The name may contain '/' as folder separator. The name property is a shorthand for config.name
@@ -111,8 +86,8 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
 
         /**
          * Create a instance of the resource by calling the constructor function with
-         * (config) parameters.<br>
-         * If the resource object has a init function, this is also invoked.
+         * uid (but otherwise uninitialized).<br>
+         * This method is used during project load.
          * @method instantiate
          * @param {function} onSuccess callback function that returns the resource
          * @param {function} onError=null callback function when error occurs
@@ -126,13 +101,9 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
                     console.log("ResourceDescriptor.onSuccess is not ");
                 }
             }
-
             var typePath = type.replace(/\./g,"/");
             require([typePath], function(ResourceClass){
-                var resource = new ResourceClass(createConfigInitialized(resourceConfig));
-                if (typeof resource.init === 'function') {
-                    resource.init();
-                }
+                var resource = new ResourceClass({uid:resourceConfig.uid});
                 onSuccess(resource);
             }, onError);
         };

@@ -17,7 +17,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
      */
     return function (config) {
         // extend ProjectAsset
-        ProjectAsset(this);
+        ProjectAsset(this, config, "kick.mesh.Mesh");
         if (ASSERT){
             if (config === EngineSingleton.engine){
                 Util.fail("Mesh constructor changed - engine parameter is removed");
@@ -187,8 +187,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             }
         };
 
-        Util.applyConfig(this, config);
-        engine.project.registerObject(this, "kick.mesh.Mesh");
+        Util.applyConfig(this, config, ["uid"]);
 
 
         /**

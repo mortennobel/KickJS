@@ -57,7 +57,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          */
         Shader = function (config) {
             // extend ProjectAsset
-            ProjectAsset(this);
+            ProjectAsset(this, config, "kick.material.Shader");
             if (ASSERT){
                 if (config === EngineSingleton.engine){
                     Util.fail("Shader constructor changed - engine parameter is removed");
@@ -885,9 +885,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 };
             };
 
-            (function init() {
-                Util.applyConfig(thisObj, config);
-                engine.project.registerObject(thisObj, "kick.material.Shader");
+            this.init = function(config){
+                Util.applyConfig(thisObj, config, ["uid"]);
                 if (_dataURI && _dataURI.indexOf("memory://") !== 0) {
                     engine.resourceLoader.getShaderData(_dataURI, thisObj);
                 } else {
@@ -898,7 +897,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     _name = "Shader_" + shaderUniqueNameCounter;
                     shaderUniqueNameCounter++;
                 }
-            }());
+            };
+            this.init(config);
         };
 
 

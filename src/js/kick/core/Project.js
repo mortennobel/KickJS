@@ -1,5 +1,5 @@
-define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/material/Shader", "./Util", "kick/texture/Texture", "kick/mesh/Mesh", "kick/material/Material"],
-    function (constants, ResourceDescriptor, ResourceTracker, Shader, util, Texture, Mesh, Material) {
+define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util", "kick/texture/Texture", "kick/mesh/Mesh", "kick/material/Material"],
+    function (constants, ResourceDescriptor, Shader, Util, Texture, Mesh, Material) {
         "use strict";
 
         var ASSERT = constants._ASSERT,
@@ -22,14 +22,6 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                     resourceCache = {},
                     thisObj = this,
                     _maxUID = 0,
-                    resourceTrackers = [],
-                    resourceTrackerListeners = [],
-                    notifyTrackedResourcesChanged = function () {
-                        var i;
-                        for (i = 0; i < resourceTrackerListeners.length; i++) {
-                            resourceTrackerListeners[i].resourceTrackerChanged();
-                        }
-                    },
                     refreshResourceDescriptor = function (uid, filter) {
                         if (resourceDescriptorsByUID[uid] instanceof ResourceDescriptor) {
                             var liveObject = resourceCache[uid];
@@ -98,7 +90,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 break;
                             default:
                                 if (ASSERT) {
-                                    util.fail("uid not mapped " + uid);
+                                    Util.fail("uid not mapped " + uid);
                                 }
                                 return null;
                             }
@@ -127,7 +119,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 break;
                             default:
                                 if (ASSERT) {
-                                    util.fail("uid not mapped " + uid);
+                                    Util.fail("uid not mapped " + uid);
                                 }
                                 return null;
                             }
@@ -181,7 +173,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 break;
                             default:
                                 if (ASSERT) {
-                                    util.fail("uid not mapped " + uid);
+                                    Util.fail("uid not mapped " + uid);
                                 }
                                 return null;
                             }
@@ -203,7 +195,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                         return res;
                     };
 
-                util.copyStaticPropertiesToObject(thisObj, Project);
+                Util.copyStaticPropertiesToObject(thisObj, Project);
 
 
                 Object.defineProperties(this, {
@@ -285,28 +277,6 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 };
 
                 /**
-                 * @method createResourceTracker
-                 * @return {kick.core.ResourceTracker}
-                 */
-                this.createResourceTracker = function () {
-                    var newResourceTracker = new ResourceTracker(thisObj);
-                    resourceTrackers.push(newResourceTracker);
-                    notifyTrackedResourcesChanged();
-                    return newResourceTracker;
-                };
-
-                /**
-                 * @method removeResourceTracker
-                 * @param {kick.core.ResourceTracker} resourceTracker
-                 */
-                this.removeResourceTracker = function (resourceTracker) {
-                    var removed = util.removeElementFromArray(resourceTrackers, resourceTracker);
-                    if (removed) {
-                        notifyTrackedResourcesChanged();
-                    }
-                };
-
-                /**
                  * Load a project of the form {maxUID:number,resourceDescriptors:[kick.core.ResourceDescriptor],activeScene:number}
                  * @method loadProject
                  * @param {object} config
@@ -324,45 +294,72 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                     var resourceDescriptors = config.resourceDescriptors || [],
                         i,
                         uid,
-                        onComplete,
-                        resourceLoadedListener;
+                        createConfigInitialized = function (config) {
+                            var res = {},
+                                name,
+                                value,
+                                reftype,
+                                ref;
+                            for (name in config) {
+                                if (Util.hasProperty(config, name)) {
+                                    value = config[name];
+                                    reftype = value ? value.reftype : null;
+                                    ref = value ? value.ref : null;
+                                    if (value && ref && reftype) {
+                                        if (reftype === "resource") {
+                                            value = engine.resourceLoader[value.refMethod](ref);
+                                        } else if (reftype === "project") {
+                                            value = engine.project.load(ref);
+                                        }
+                                    }
+                                    res[name] = value;
+                                }
+                            }
+                            return res;
+                        },
+                        onComplete = function () {
+                            // instantiate config
+                            for (uid in resourceDescriptorsByUID) {
+                                if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
+                                    resourceCache[uid].init(createConfigInitialized(resourceDescriptorsByUID[uid].config));
+                                }
+                            }
+
+                            _maxUID = config.maxUID || 0; // reset maxUID
+                            if (config.activeScene) {
+                                engine.activeScene = thisObj.load(config.activeScene);
+                            } else {
+                                engine.activeScene = null;
+                            }
+                            if (onSuccess) {
+                                onSuccess(thisObj);
+                            }
+                        },
+                        resourceCount = resourceDescriptors.length,
+                        instantiateCount = 0,
+                        instantiateSuccess = function(object){
+                            if (resourceCache[object.uid] !== object){
+                                onError("Did not restore uid correct for "+object.uid+".");
+                                return;
+                            }
+
+                            instantiateCount++;
+                            if (instantiateCount === resourceCount){
+                                onComplete();
+                            }
+                        };
                     _maxUID = config.maxUID || 0;
-                    for (i = 0; i < resourceDescriptors.length; i++) {
+                    for (i = 0; i < resourceCount; i++) {
                         thisObj.addResourceDescriptor(resourceDescriptors[i]);
                     }
 
                     // preload all resources
+
                     for (uid in resourceDescriptorsByUID) {
                         if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
-                            try {
-                                thisObj.load(uid);
-                            } catch (e) {
-                                onError ? onError(e) : util.warn(e);
-                            }
+                            resourceDescriptorsByUID[uid].instantiate(instantiateSuccess, onError);
                         }
                     }
-
-                    onComplete = function () {
-                        _maxUID = config.maxUID || 0; // reset maxUID
-                        if (config.activeScene) {
-                            engine.activeScene = thisObj.load(config.activeScene);
-                        } else {
-                            engine.activeScene = null;
-                        }
-                        if (onSuccess) {
-                            onSuccess();
-                        }
-                    };
-                    resourceLoadedListener = {
-                        resourceTrackerChanged : function () {
-                            if (resourceTrackers.length === 0) {
-                                util.removeElementFromArray(resourceTrackerListeners, resourceLoadedListener);
-                                onComplete();
-                            }
-                        }
-                    };
-                    resourceTrackerListeners.push(resourceLoadedListener);
-                    notifyTrackedResourcesChanged();
                 };
 
                 /**
@@ -441,7 +438,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                     var uid = engine.getUID(object);
                     if (resourceCache[uid]) {
                         if (constants._ASSERT) {
-                            util.warn("Object already registered ", uid, object);
+                            Util.warn("Object already registered ", uid, object);
                         }
                         return;
                     }
@@ -492,7 +489,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                         for (name in Project) {
                             if (typeof Project[name] === "number" && Project.hasOwnProperty(name) && name.indexOf(searchFor) === 0) {
                                 uid = Project[name];
-                                name = util.toCamelCase(name.substr(searchFor.length), " ");
+                                name = Util.toCamelCase(name.substr(searchFor.length), " ");
                                 res.push(new ResourceDescriptor({
                                     type: type,
                                     config: {

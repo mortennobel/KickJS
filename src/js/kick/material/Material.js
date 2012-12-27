@@ -18,7 +18,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
          */
         return function (config) {
             // extend ProjectAsset
-            ProjectAsset(this);
+            ProjectAsset(this, config, "kick.material.Material");
             if (ASSERT){
                 if (config === EngineSingleton.engine){
                     Util.fail("Material constructor changed - engine parameter is removed");
@@ -283,7 +283,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 };
             };
 
-            (function init() {
+            this.init = function(config) {
                 var uniformData = config.uniformData,
                     name,
                     value,
@@ -293,15 +293,12 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         shader: config.shader
                     };
                 engine.addContextListener(contextListener);
-                if (config.uniforms) {
-                    Util.warn("Warn - Material.uniforms is deprecated"); // Todo delete in 0.5.x
-                }
-                Util.applyConfig(thisObj, configCopy);
+                Util.applyConfig(thisObj, configCopy, ["uid"]);
                 if (!_shader || !_shader.isValid()) {
                     if (config.shader) {
                         Util.warn("Problem using shader in material. ", config.shader);
                     }
-                    thisObj._shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
+                    thisObj.shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
                 }
                 if (uniformData) {
                     for (name in uniformData) {
@@ -317,8 +314,8 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                     }
                 }
                 decorateUniforms();
-                engine.project.registerObject(thisObj, "kick.material.Material");
-            }());
+            };
+            this.init(config);
         };
 
     });

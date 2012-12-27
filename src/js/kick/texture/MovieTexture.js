@@ -16,7 +16,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
          */
         return function (config) {
             // extend ProjectAsset
-            ProjectAsset(this);
+            ProjectAsset(this, config, "kick.texture.MovieTexture");
             if (Constants._ASSERT){
                 if (config === EngineSingleton.engine){
                     Util.fail("MovieTexture constructor changed - engine parameter is removed");
@@ -285,11 +285,6 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 };
             };
 
-            (function init() {
-                // apply
-                Util.applyConfig(thisObj, config);
-
-                engine.project.registerObject(thisObj, "kick.texture.MovieTexture");
-            }());
+            this.init(config);
         };
     });

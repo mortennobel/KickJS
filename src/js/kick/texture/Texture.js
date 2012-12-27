@@ -18,7 +18,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
          */
         return function (config) {
             // extend ProjectAsset
-            ProjectAsset(this);
+            ProjectAsset(this, config, "kick.texture.Texture");
             if (Constants._ASSERT){
                 if (config === EngineSingleton.engine){
                     Util.fail("Texture constructor changed - engine parameter is removed");
@@ -566,17 +566,16 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 };
             };
 
-            (function init() {
-                engine.addContextListener(contextListener);
+            this.init = function(config){
                 // apply
-                Util.applyConfig(thisObj, config, ["dataURI"]);
+                Util.applyConfig(thisObj, config, ["uid","dataURI"]);
                 if (config && config.dataURI) {
                     // set dataURI last to make sure that object is configured before initialization
                     thisObj.dataURI = config.dataURI;
                 }
-
-                engine.project.registerObject(thisObj, "kick.texture.Texture");
-            }());
+            };
+            this.init(config);
+            engine.addContextListener(contextListener);
         };
 
     });

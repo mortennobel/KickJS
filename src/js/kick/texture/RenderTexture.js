@@ -12,7 +12,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
          */
         return function (config) {
             // extend ProjectAsset
-            ProjectAsset(this);
+            ProjectAsset(this, config, "kick.texture.RenderTexture");
             if (Constants._ASSERT){
                 if (config === EngineSingleton.engine){
                     Util.fail("RenderTexture constructor changed - engine parameter is removed");
@@ -149,11 +149,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                 };
             };
 
-            (function init() {
-                // apply
-                Util.applyConfig(thisObj, config);
-                engine.project.registerObject(thisObj, "kick.texture.RenderTexture");
-            }());
+            this.init(config);
         };
 
     });

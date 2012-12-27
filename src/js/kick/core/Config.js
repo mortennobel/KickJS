@@ -144,7 +144,6 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * function (or function name) with the signature function(domElement) called when WebGL cannot be initialized.
          * Default function replaces the canvas element with an error description with a link to
          * http://get.webgl.org/troubleshooting/
-         * @todo Check this method
          * @property webglNotFoundFn
          * @type Function | String
          */

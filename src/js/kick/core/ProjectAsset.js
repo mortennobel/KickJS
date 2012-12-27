@@ -1,4 +1,4 @@
-define(["kick/core/Constants", "./Util"], function (Constants, Util) {
+define(["kick/core/Constants", "./Util", "./EngineSingleton"], function (Constants, Util, EngineSingleton) {
     "use strict";
 
     var ASSERT = Constants._ASSERT;
@@ -14,13 +14,14 @@ define(["kick/core/Constants", "./Util"], function (Constants, Util) {
      * @class ProjectAsset
      * @namespace kick.core
      */
-    return function (subClass) {
-        var uid = 0;
+    return function (object, config, name) {
+        var uid = (config && config.uid)?config.uid:0;
+
         /**
          * @property uid
          * @type Number
          */
-        Object.defineProperty(subClass, "uid", {
+        Object.defineProperty(object, "uid", {
             get: function () {
                 return uid;
             },
@@ -36,6 +37,28 @@ define(["kick/core/Constants", "./Util"], function (Constants, Util) {
                 uid = newValue;
             }
         });
+
+        /**
+         * Configures the object using the configuration data.
+         * @method init
+         * @param config {Object} configuration data in JSON format
+         */
+        object.init = function(config){
+            Util.applyConfig(this, config, ["uid"]);
+        };
+
+        /**
+         * @method toJSON
+         * @return {Object} configuration in JSON
+         * @abstract
+         */
+        object.toJSON = function(){
+            Util.fail("toJSON does not exist for the Asset");
+        };
+
+        (function init(){
+            EngineSingleton.engine.project.registerObject(object, name);
+        }());
     };
 
 });

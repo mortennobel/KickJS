@@ -16,7 +16,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
          */
         Scene = function (config) {
             // extend ProjectAsset
-            ProjectAsset(this);
+            ProjectAsset(this, config, "kick.scene.Scene");
             if (ASSERT){
                 if (config === EngineSingleton.engine){
                     Util.fail("Scene constructor changed - engine parameter is removed");
@@ -183,7 +183,10 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     return gameObject;
                 };
 
-
+            /**
+             * @method notifyComponentUpdated
+             * @param component {kick.scene.Component}
+             */
             this.notifyComponentUpdated = function (component) {
                 for (i = componentListenes.length - 1; i >= 0; i--) {
                     componentListenes[i].componentUpdated(component);
@@ -419,7 +422,12 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 };
             };
 
-            (function init() {
+            /**
+             * Configures the object using the configuration data.
+             * @method init
+             * @param config {Object} configuration data in JSON format
+             */
+            this.init = function(config){
                 var gameObject,
                     hasProperty = Util.hasProperty,
                     applyConfig = Util.applyConfig,
@@ -477,7 +485,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                                     // register transform object to objectsById
                                     objectsById[componentObj.uid] = componentObj;
                                 } else {
-                                    Type = require(component.type);
+                                    Type = require(component.type.replace(/\./g,"/"));
                                     if (typeof Type === 'function') {
                                         componentObj = new Type({uid: component.uid});
                                         componentObj.uid = component.uid;
@@ -505,8 +513,8 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                         }
                     }());
                 }
-                engine.project.registerObject(thisObj, "kick.scene.Scene");
-            }());
+            };
+            this.init(config);
         };
 
         /**

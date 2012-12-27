@@ -25,8 +25,7 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
         });
 
         this.getMeshData = function (url, meshDestination) {
-            var oReq = new XMLHttpRequest(),
-                resourceTracker = engine.project.createResourceTracker();
+            var oReq = new XMLHttpRequest();
             function handler() {
                 if (oReq.readyState === 4) { // oReq.readyState  === complete
                     if (oReq.status === 200) { // oReq.status === ok
@@ -34,14 +33,11 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
                             meshData = new MeshData();
                         if (meshData.deserialize(arrayBuffer)) {
                             meshDestination.meshData = meshData;
-                            resourceTracker.resourceReady();
                         } else {
                             Util.fail("Cannot deserialize meshdata " + url);
-                            resourceTracker.resourceFailed();
                         }
                     } else {
                         Util.fail("Cannot load meshdata " + url + ". Server responded " + oReq.status);
-                        resourceTracker.resourceFailed();
                     }
                 }
             }
@@ -53,21 +49,17 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
         };
 
         this.getImageData = function (uri, textureDestination) {
-            var img = new Image(),
-                resourceTracker = engine.project.createResourceTracker();
+            var img = new Image();
             img.onload = function () {
                 try {
                     textureDestination.setImage(img, uri);
-                    resourceTracker.resourceReady();
                 } catch (e) {
                     Util.fail("Exception when loading image " + uri);
-                    resourceTracker.resourceFailed();
                 }
             };
             img.onerror = function (e) {
                 Util.fail(e);
                 Util.fail("Exception when loading image " + uri);
-                resourceTracker.resourceFailed();
             };
             if (uri.indexOf('data:') !== 0) {
                 img.crossOrigin = "anonymous"; // Ask for a CORS image except when using data

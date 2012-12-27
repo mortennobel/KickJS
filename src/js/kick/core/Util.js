@@ -159,14 +159,14 @@ define(["require", "./Constants"], function (require, Constants) {
             if (object === null){
                 return null;
             }
-            Util.warn("Fix wrong usage of require!!!!");
+
             if (DEBUG) {
-                if (!engine instanceof require("kick/core/Engine")) { // todo: fix this
+                if (!engine instanceof require("kick/core/Engine")) {
                     Util.fail("getJSONReference - engine not defined");
                 }
             }
-            var isGameObject = object instanceof require("kick/scene/GameObject"); // todo: fix this
-            var isComponent = !isGameObject && object.gameObject instanceof require("kick/scene/GameObject"); // todo: fix this
+            var isGameObject = object instanceof require("kick/scene/GameObject");
+            var isComponent = !isGameObject && object.gameObject instanceof require("kick/scene/GameObject");
             if (isComponent || isGameObject) {
                 return {
                     ref: engine.getUID(object),
@@ -239,7 +239,7 @@ define(["require", "./Constants"], function (require, Constants) {
             return res;
         },
         /**
-         * For each non function attribute in config, set the attribute on object
+         * For each non function attribute in config, set the attribute on object.
          * @method applyConfig
          * @param {Object} object
          * @param {Object} config
@@ -252,7 +252,7 @@ define(["require", "./Constants"], function (require, Constants) {
             config = config || {};
             excludeFilter = excludeFilter || [];
             for (var name in config) {
-                if (typeof config[name] !== 'function' && !contains(excludeFilter,name) && hasProperty(object,name)) {
+                if (typeof config[name] !== 'function' && !contains(excludeFilter, name) && hasProperty(object,name)) {
                     object[name] = config[name];
                 }
             }
@@ -633,29 +633,6 @@ define(["require", "./Constants"], function (require, Constants) {
                 }
             }
             return trianleIndices;
-        },
-
-        /**
-         * @method namespace
-         * @param {String} ns_string
-         * @static
-         * @deprecated
-         * @return {Object}
-         */
-        namespace: function (ns_string) {
-            console.log("Util.namespace is deprecated and will be removed in future version of KickJS");
-            var parts = ns_string.split("."),
-                parent = window,
-                i;
-
-            for (i = 0; i < parts.length; i += 1) {
-                // create property if it doesn't exist
-                if (typeof parent[parts[i]] === "undefined") {
-                    parent[parts[i]] = {};
-                }
-                parent = parent[parts[i]];
-            }
-            return parent;
         },
         /**
          * Invokes debugger and logs a warning
