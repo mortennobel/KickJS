@@ -40,7 +40,7 @@ This test shows tests how a deep scene hiearchy works.
                     clearLog();
                     var vs = document.getElementById(vertexShaderId).value;
                     var fs = document.getElementById(fragmentShaderId).value;
-                    var shader = new KICK.material.Shader(engine);
+                    var shader = new KICK.material.Shader();
                     shader.vertexShaderSrc = vs;
                     shader.fragmentShaderSrc = fs;
                     shader.errorLog = log;
@@ -51,7 +51,7 @@ This test shows tests how a deep scene hiearchy works.
                         return;
                     }
 
-                    meshRenderer.material = new KICK.material.Material(engine,{
+                    meshRenderer.material = new KICK.material.Material({
                         name:"Some material",
                         shader:shader
                     });
@@ -103,7 +103,7 @@ This test shows tests how a deep scene hiearchy works.
                         var gameObject = engine.activeScene.createGameObject();
                         meshRenderer = new KICK.scene.MeshRenderer();
                         gameObject.addComponent(meshRenderer);
-                        meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                        meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
                         gameObject.transform.localPosition = [0,0.2	,0.4];
                         gameObject.transform.localRotationEuler = [0,-8,-15];
                         gameObject.transform.localScale = [0.7,1.3,1.3];

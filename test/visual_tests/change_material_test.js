@@ -27,7 +27,7 @@ requirejs(['kick'],
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
@@ -38,7 +38,7 @@ requirejs(['kick'],
                 return;
             }
 
-            return new KICK.material.Material(engine,{
+            return new KICK.material.Material({
                 name:"Some material",
                 shader:shader
             });
@@ -87,9 +87,9 @@ requirejs(['kick'],
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             materials[0] = setMaterial('vertexShaderColor','fragmentShader');
-            materials[1] = new KICK.material.Material(engine,{
+            materials[1] = new KICK.material.Material({
                     shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
                     uniformData:{
                         mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
@@ -103,7 +103,7 @@ requirejs(['kick'],
 
             var gameObject2 = engine.activeScene.createGameObject();
             var meshRenderer2 = new KICK.scene.MeshRenderer();
-            meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer2.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             meshRenderer2.material = materials[0];
             gameObject2.transform.localPosition = [0,0,-1];
             gameObject2.transform.localScale = [1,2,1];

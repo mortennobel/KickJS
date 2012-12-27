@@ -25,7 +25,7 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new Shader(engine);
+            var shader = new Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
@@ -36,7 +36,7 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
                 return;
             }
 
-            meshRenderer.material = new Material(engine,{
+            meshRenderer.material = new Material({
                 name:"Some material",
                 shader:shader,
                 uniformData: materialUniforms
@@ -94,9 +94,9 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
 
             cameraObject2.transform.position = [0,0,3];
 
-            var texture = new Texture(engine);
+            var texture = new Texture();
             texture.setImageData(512,512,0,Constants.GL_UNSIGNED_BYTE,null,"");
-            var renderTexture = new RenderTexture(engine,{colorTexture:texture});
+            var renderTexture = new RenderTexture({colorTexture:texture});
 
             var camera = new Camera({
                 clearColor: [0,0,0,1],
@@ -114,14 +114,14 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
             cameraObject2.addComponent(camera2);
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new MeshRenderer();
-            meshRenderer.mesh = new Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer.mesh = new Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
             gameObject.addComponent(meshRenderer);
 
             var gameObject2 = engine.activeScene.createGameObject();
             gameObject2.layer = 2;
             var meshRenderer2 = new MeshRenderer();
-            meshRenderer2.mesh = new Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer2.mesh = new Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderTex','fragmentShaderTex',meshRenderer2, {
                     tex:  texture
                 });
@@ -134,7 +134,7 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
 
         function UVSphere(){
             // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
-            meshRenderer.mesh =  new Mesh(engine,{dataURI:"kickjs://mesh/uvsphere/"});
+            meshRenderer.mesh =  new Mesh({dataURI:"kickjs://mesh/uvsphere/"});
         }
     }
 );

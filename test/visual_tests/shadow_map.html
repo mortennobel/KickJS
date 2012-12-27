@@ -76,7 +76,7 @@
 
     function setMaterial(meshRenderer, color){
         // create material
-        var material = new KICK.material.Material(engine,{
+        var material = new KICK.material.Material({
             name:"Some material",
             shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
             uniformData:{

@@ -38,7 +38,7 @@ Click on the objects to enlarge them.
                                 }
                                 transform.localScale = scale;
                             }
-                            camera.pick(callback,mouseInput.mousePosition[0],mouseInput.mousePosition[1],3,3);
+                            camera.pick(callback,mouseInput.mousePosition[0],engine.canvas.height-mouseInput.mousePosition[1],3,3);
                         }
                     }
                 };
@@ -70,7 +70,7 @@ Click on the objects to enlarge them.
                     var x = -2.0+4*(i%2);
                     var y = -2.0+4*Math.floor(i/2);
                     // create material
-                    var material = new KICK.material.Material(engine,{
+                    var material = new KICK.material.Material({
                         shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
                         uniformData:{
                             mainColor: colors[i],

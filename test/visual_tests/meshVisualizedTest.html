@@ -22,27 +22,19 @@ req(['kick'],
             var engine;
             var meshRenderer;
 
-            var log = function (output) {
-                var element = document.getElementById("output");
-                element.innerHTML = element.innerHTML+output+"<br>";
-            };
-
-            var clearLog = function(){
-                var element = document.getElementById("output");
-                element.innerHTML = "";
-            };
-
             function setMesh(url){
-                clearLog();
-                meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: url});
+                meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: url});
+                var meshData = meshRenderer.mesh.meshData;
+                meshData.recalculateTangents();
+                meshData.recalculateNormals();
+                meshRenderer.mesh.meshData = meshData;
             }
 
             function setMaterial(vertexShaderId, fragmentShaderId){
-                clearLog();
                 var vs = document.getElementById(vertexShaderId).value;
                 var fs = document.getElementById(fragmentShaderId).value;
-                var shader = new KICK.material.Shader(engine);
-                shader.errorLog = log;
+                var shader = new KICK.material.Shader();
+                shader.errorLog = function(e){console.log(e);};
                 shader.vertexShaderSrc = vs;
                 shader.fragmentShaderSrc = fs;
                 shader.apply();
@@ -52,7 +44,7 @@ req(['kick'],
                     return;
                 }
 
-                meshRenderer.material = new KICK.material.Material(engine,{
+                meshRenderer.material = new KICK.material.Material({
                     name:"Some material",
                     shader:shader
                 });
@@ -77,6 +69,7 @@ req(['kick'],
                     enableDebugContext: true
                 });
                 var cameraObject = engine.activeScene.createGameObject();
+                cameraObject.transform.position = [0,0,1];
                 var camera = new KICK.scene.Camera({
                     clearColor: [0.5,1,1,1]
                 });
@@ -89,138 +82,11 @@ req(['kick'],
                 gameObject.addComponent(meshRenderer);
             }
 
-            function refreshData(){
-                example.innerHTML = "";
-                YUI().use("datatable-base", function(Y) {
-                    var mesh = meshRenderer.mesh,
-                            vertex = mesh.vertex,
-                            indices = mesh.indices,
-                            vertexRowLength = 1;
-                    function showVertexAttributes(){
-                        function addData(dColumns,dColumnSize){
-                            var cols = ["Vertexid"],
-                                    data = [],
-                                    dt,
-                                    i,
-                                    j;
-                            for (j=0;j<dColumns.length;j++){
-                                for (i=0;i<dColumnSize[j];i++){
-                                    var s = i==3?"W":String.fromCharCode("X".charCodeAt(0)+i);
-                                    cols.push(dColumns[j]+" "+s);
-                                }
-                            }
-                            for (i=0;i<vertex.length/3;i++){
-                                var row = {
-                                    "Vertexid":i
-                                };
-                                var columnIndex = 1;
-                                for (var c=1;c<=dColumnSize.length;c++){
-                                    var length = dColumnSize[c-1];
-                                    var bufferdata = mesh[dColumns[c-1]];
-                                    for ( j=0;j<length;j++){
-                                        row[cols[columnIndex]] = bufferdata[i*length+j];
-                                        columnIndex++;
-                                    }
-                                }
-                                data.push(row);
-                            }
-                            dt = new Y.DataTable.Base({
-                                columnset: cols,
-                                recordset: data,
-                                summary: "",
-                                caption: "Mesh data"
-                            }).render("#example");
-                        }
-
-                        var dataColumns = [];
-                        var dataColumnSize = [];
-                        function addDataRow(name,size){
-                            dataColumns.push(name);
-                            dataColumnSize.push(size);
-                            vertexRowLength += size;
-                        }
-                        if (mesh.vertex){
-                            addDataRow("vertex",3);
-                        }
-                        if (mesh.normal){
-                            addDataRow("normal",3);
-                        }
-                        if (mesh.uv1){
-                            addDataRow("uv1",2);
-                        }
-                        if (mesh.uv2){
-                            addDataRow("uv2",2);
-                        }
-                        if (mesh.tangent){
-                            addDataRow("tangent",4);
-                        }
-                        if (mesh.color){
-                            addDataRow("color",4);
-                        }
-                        addData(dataColumns,dataColumnSize);
-                    }
-                    function showInterleavedData(){
-
-                        var cols = ["Index"],
-                                data = [],
-                                i,j,
-                                iBean = mesh.createInterleavedData(),
-                                description = iBean.description,
-                                interleavedData = iBean.data;
-                        for (j=0;j<vertexRowLength-1;j++){
-                            cols.push("Data"+(j+1));
-                        }
-                        for (j=0;j<vertex.length/3;j++){
-                            var obj = {
-                                "Index":j
-                            };
-                            for (i=0;i<vertexRowLength-1;i++){
-                                obj["Data"+(i+1)] = interleavedData[j*(vertexRowLength-1)+i];
-                            }
-                            data.push(obj);
-                        }
-                        var dt = new Y.DataTable.Base({
-                            columnset: cols,
-                            recordset: data,
-                            summary: "",
-                            caption: "Mesh data "+JSON.stringify(description)
-                        }).render("#example");
-
-                    }
-                    function showVertexIndices(){
-
-                        var cols = ["Index","TriangleV1","TriangleV2","TriangleV3"],
-                                data = [],
-                                i,j;
-                        for (j=0;j<indices.length/3;j++){
-                            data.push({
-                                "Index":j,
-                                "TriangleV1" : indices[j*3+0],
-                                "TriangleV2" : indices[j*3+1],
-                                "TriangleV3" : indices[j*3+2]
-                            });
-                        }
-                        var dt = new Y.DataTable.Base({
-                            columnset: cols,
-                            recordset: data,
-                            summary: "",
-                            caption: "Mesh data"
-                        }).render("#example");
-
-                    }
-
-                    showVertexAttributes();
-                    showInterleavedData();
-                    showVertexIndices();
-
-                });
-            }
             initKick();
             window.setMesh = setMesh;
             window.setMaterial = setMaterial;
             window.recalculateNormals = recalculateNormals;
             window.recalculateTangents = recalculateTangents;
-            window.refreshData = refreshData;
         });
 </script>
 This example shows how vertex attributes can be visualized.
@@ -231,22 +97,14 @@ This example shows how vertex attributes can be visualized.
 [<a href="#" onclick="setMesh('kickjs://mesh/cube/?length=0.5');">Cube</a>]
 [<a href="#" onclick="setMesh('kickjs://mesh/uvsphere/');">UVsphere</a>]
 <br>
-<h2>Shaders</h2>
+<h2>Shaders:</h2>
 [<a href="#" onclick="setMaterial('vertexShaderUV','fragmentShader');">UV1</a>]
 [<a href="#" onclick="setMaterial('vertexShaderUV2','fragmentShader');">UV2</a>]
 [<a href="#" onclick="setMaterial('vertexShaderNormal','fragmentShader');">Normal</a>]
 [<a href="#" onclick="setMaterial('vertexShaderTangent','fragmentShader');">Tangent</a>]
 [<a href="#" onclick="setMaterial('vertexShaderColor','fragmentShader');">Color</a>]
 [<a href="#" onclick="setMaterial('vertexShaderBlack','fragmentShader');">Black</a>]
-<br>
-<h2>Recalculate</h2>
-[<a href="#" onclick="recalculateNormals();">Normals</a>]
-[<a href="#" onclick="recalculateTangents();">Tangents</a>]<br>
-<h2>Output</h2>
-<div id="output" style="color: red;">
-</div>
-<h2>Show data</h2>
-[<a href="#" onclick="refreshData();">Refresh</a>]
+
 <div id="example" class="yui3-skin-sam"></div>
 
 <div style="display:none;">

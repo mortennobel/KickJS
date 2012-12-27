@@ -37,7 +37,7 @@ This test ensured that components can be reused after removed from a game object
 
     // create material
     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-    var material = new KICK.material.Material(engine,{
+    var material = new KICK.material.Material({
         shader: shader,
         uniformData:{
             mainColor: [1,1,1,1]

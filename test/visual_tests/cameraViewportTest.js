@@ -25,7 +25,7 @@ requirejs(['kick'],
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
@@ -36,7 +36,7 @@ requirejs(['kick'],
                 return;
             }
 
-            meshRenderer.material = new KICK.material.Material(engine,{
+            meshRenderer.material = new KICK.material.Material({
                 name:"Some material",
                 shader:shader
             });
@@ -84,7 +84,7 @@ requirejs(['kick'],
 
         function UVSphere(){
             // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/"});
+            meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/"});
         }
 
         engine = new KICK.core.Engine('canvas',{
@@ -121,14 +121,14 @@ requirejs(['kick'],
 
         var gameObject = engine.activeScene.createGameObject();
         meshRenderer = new KICK.scene.MeshRenderer();
-        meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+        meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
         setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
         gameObject.addComponent(meshRenderer);
 
         var gameObject2 = engine.activeScene.createGameObject();
         gameObject2.layer = 2;
         var meshRenderer2 = new KICK.scene.MeshRenderer();
-        meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
+        meshRenderer2.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
         setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
         gameObject2.addComponent(meshRenderer2);
 

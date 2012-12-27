@@ -42,13 +42,13 @@
                     // create material
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
                     var materials = [
-                        new KICK.material.Material(engine,{
+                        new KICK.material.Material({
                             shader: shader,
                             uniformData:{
                                 mainColor: [1,0,0,1]
                             }
                         }),
-                        new KICK.material.Material(engine,{
+                        new KICK.material.Material({
                             shader: shader,
                             uniformData:{
                                 mainColor: [0,0,1,1]
@@ -65,7 +65,7 @@
                         meshRenderer.material = materials[i];
                         gameObject.addComponent(meshRenderer);
                     }
-                    var material = new KICK.material.Material(engine,
+                    var material = new KICK.material.Material(
                             {
                                 shader: engine.project.load(engine.project.ENGINE_SHADER___ERROR),
                                 name: "Replacement material"

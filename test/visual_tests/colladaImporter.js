@@ -26,20 +26,20 @@ requirejs(['kick'],
         var createMaterials = function(){
             var vs = document.getElementById("vertexShaderColor").value;
             var fs = document.getElementById("fragmentShader").value;
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
             shader.apply();
 
-            materials[0] = new KICK.material.Material(engine,{
+            materials[0] = new KICK.material.Material({
                 name:"Material.002",
                 shader:shader,
                 uniformData:{
                     color:  [1,0,0]
                 }
             });
-            materials[1] = new KICK.material.Material(engine,{
+            materials[1] = new KICK.material.Material({
                 name:"Material.003",
                 shader:shader,
                 uniformData:{
@@ -95,7 +95,7 @@ requirejs(['kick'],
 
             createMaterials();
 
-            var res = KICK.importer.ColladaImporter.import( document.getElementById("colladaFileContent").value , engine , engine.activeScene);
+            var res = KICK.importer.ColladaImporter.import( document.getElementById("colladaFileContent").value , engine.activeScene);
             var gameObjects = res.gameObjects;
             console.log("Imported "+gameObjects.length+"gameObjectss");
             for (var i=0;i<gameObjects.length;i++){

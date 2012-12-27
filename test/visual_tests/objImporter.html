@@ -38,20 +38,20 @@
         var createMaterials = function(){
             var vs = document.getElementById("vertexShaderColor").value;
             var fs = document.getElementById("fragmentShader").value;
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
             shader.apply();
 
-            new KICK.material.Material(engine,{
+            new KICK.material.Material({
                 name:"Material.002",
                 shader:shader,
                 uniformData:{
                      color:  [1,0,0]
                 }
             });
-            new KICK.material.Material(engine,{
+            new KICK.material.Material({
                 name:"Material.003",
                 shader:shader,
                 uniformData:{
@@ -107,7 +107,7 @@
 
             createMaterials();
 
-            var gameObjects = KICK.importer.ObjImporter.import( document.getElementById("objFileContent").value , engine , engine.activeScene).gameObjects;
+            var gameObjects = KICK.importer.ObjImporter.import( document.getElementById("objFileContent").value , engine.activeScene).gameObjects;
             console.log("Imported "+gameObjects.length+" gameObjects");
             for (var i=0;i<gameObjects.length;i++){
                 var gameObject = gameObjects[i];

@@ -26,7 +26,7 @@
       function setMaterial(vertexShaderId, fragmentShaderId,renderOrder){
           var vs = document.getElementById(vertexShaderId).value;
           var fs = document.getElementById(fragmentShaderId).value;
-          var shader = new KICK.material.Shader(engine);
+          var shader = new KICK.material.Shader();
           shader.vertexShaderSrc = vs;
           shader.fragmentShaderSrc = fs;
           shader.errorLog = console.log;
@@ -38,7 +38,7 @@
               return;
           }
 
-          meshRenderer.material = new KICK.material.Material(engine,{
+          meshRenderer.material = new KICK.material.Material({
               name:"Some material",
               shader:shader
           });
@@ -84,7 +84,7 @@
               gameObjectSphere.transform.position = position;
               var meshRendererSphere = new KICK.scene.MeshRenderer();
               meshRendererSphere.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
-              meshRendererSphere.material = new KICK.material.Material(engine,{
+              meshRendererSphere.material = new KICK.material.Material({
                   shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
                   uniformData:{
                       mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
@@ -100,7 +100,7 @@
               var gameObject = engine.activeScene.createGameObject();
               gameObject.transform.position = position;
               meshRenderer = new KICK.scene.MeshRenderer();
-              meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});;
+              meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});;
               setMaterial('vertexShaderColor','fragmentShader',renderOrder);
               gameObject.addComponent(meshRenderer);
           }

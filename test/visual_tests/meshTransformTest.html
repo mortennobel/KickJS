@@ -24,26 +24,15 @@
                 var mesh;
                 var material;
 
-                var log = function (output) {
-                    var element = document.getElementById("output");
-                    element.innerHTML = element.innerHTML+output+"<br>";
-                };
-
-                var clearLog = function(){
-                    var element = document.getElementById("output");
-                    element.innerHTML = "";
-                };
-
                 function createMaterial(vertexShaderId, fragmentShaderId){
-                    clearLog();
                     var vs = document.getElementById(vertexShaderId).value;
                     var fs = document.getElementById(fragmentShaderId).value;
-                    var shader = new KICK.material.Shader(engine);
+                    var shader = new KICK.material.Shader();
                     shader.vertexShaderSrc = vs;
                     shader.fragmentShaderSrc = fs;
-                    shader.errorLog = log;
+                    shader.errorLog = function(e){console.log(e);};
                     shader.apply();
-                    return new KICK.material.Material(engine,{
+                    return new KICK.material.Material({
                         name:"Some material",
                         shader:shader
                     });
@@ -96,7 +85,7 @@
                     });
                     cameraObject.addComponent(camera);
 
-                    mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                    mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
                     material = createMaterial('vertexShaderColor','fragmentShader');
 
                     var transform = null;
@@ -111,11 +100,6 @@
 This example shows how a cube is rotated.
 <br>
 
-<h2>Output</h2>
-<div id="output" style="color: red;">
-</div>
-<h2>Show data</h2>
-[<a href="#" onclick="refreshData();">Refresh</a>]
 <div id="example" class="yui3-skin-sam"></div>
 
 <div style="display:none;">

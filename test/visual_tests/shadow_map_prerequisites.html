@@ -161,7 +161,7 @@ void main(void) {
 
     function setMaterial(meshRenderer, color){
         // create material
-        var material = new KICK.material.Material(engine,{
+        var material = new KICK.material.Material({
             name:"Some material",
             shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
             uniformData:{
@@ -213,7 +213,7 @@ void main(void) {
     }
 
     function addShadowMapVisualizedCamera(cameraObject){
-        var shader = new KICK.material.Shader(engine);
+        var shader = new KICK.material.Shader();
         shader.vertexShaderSrc = document.getElementById('vertexLightUVShader').innerHTML;
         shader.fragmentShaderSrc = document.getElementById('fragmentLightUVShader').innerHTML;
         shader.errorLog = function(msg){console.log(msg);};
@@ -224,7 +224,7 @@ void main(void) {
             perspective: true,
             normalizedViewportRect:[0,0,1/3,0.5],
             layerMask:LAYER_VISIBLE_OBJECTS,
-            replacementMaterial: new KICK.material.Material(engine, {shader:shader}),
+            replacementMaterial: new KICK.material.Material({shader:shader}),
             renderShadow:true // even though shadows are not used here, we still need to set the light transform
         });
         cameraObject.addComponent(camera);
@@ -342,7 +342,7 @@ void main(void) {
         plane3.transform.localPosition = [0,-.5,0];
         var planeMeshRenderer2 = new KICK.scene.MeshRenderer();
         planeMeshRenderer2.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
-        planeMeshRenderer2.material = new KICK.material.Material(engine,{
+        planeMeshRenderer2.material = new KICK.material.Material({
             name:"Some material",
             shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
             uniformData:{
@@ -470,9 +470,9 @@ void main(void) {
         -0.42758414149284363,0.7999318242073059,0.4210473895072937,-0.3468207120895386,0.8372704982757568,0.4227215349674225,-0.26331058144569397,0.8679782152175903,0.4210478961467743,
         -0.17681121826171875,0.8888441324234009,0.4227219820022583,-0.08891143649816513,0.90267014503479,0.42104795575141907];
         meshData.uv1 = new Float32Array(meshData.vertex.length/3*2);
-        meshRenderer.mesh = new KICK.mesh.Mesh(engine, {meshData:meshData});
+        meshRenderer.mesh = new KICK.mesh.Mesh({meshData:meshData});
         console.log(meshRenderer.mesh.aabb);
-        meshRenderer.material = new KICK.material.Material(engine,{
+        meshRenderer.material = new KICK.material.Material({
             name:"Some material",
             shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
             uniformData:{
@@ -483,13 +483,13 @@ void main(void) {
     }
 
     function addLightViewVolume(){
-        var mesh = new KICK.mesh.Mesh(engine);
+        var mesh = new KICK.mesh.Mesh();
         engine.resourceLoader.getMeshData("kickjs://mesh/cube/",mesh);
         var meshData = mesh.meshData;
         var mat4 = KICK.math.Mat4;
         var transformation = mat4.scale(mat4.identity(mat4.create()),[5,5,20]);
         mesh.meshData = meshData.transform(transformation);
-        var material = new KICK.material.Material(engine,{
+        var material = new KICK.material.Material({
                                 shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
                                 uniformData:{
                                     mainColor:[0,1,1,.3]
@@ -529,7 +529,7 @@ void main(void) {
         cameraObject.addComponent(camera);
         var meshRenderer = new KICK.scene.MeshRenderer({
             mesh: engine.project.load(engine.project.ENGINE_MESH_PLANE),
-            material: new KICK.material.Material(engine,{
+            material: new KICK.material.Material({
                 shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT)
             })
         });
@@ -542,7 +542,7 @@ void main(void) {
     }
 
     function addVisualizeDepthMap(){
-        var shader = new KICK.material.Shader(engine);
+        var shader = new KICK.material.Shader();
         shader.vertexShaderSrc = document.getElementById('vertexDepthShader').innerHTML;
         shader.fragmentShaderSrc = document.getElementById('fragmentDepthShader').innerHTML;
         shader.errorLog = function(msg){console.log(msg);};
@@ -555,7 +555,7 @@ void main(void) {
             layerMask:LAYER_SHADOWMAP_DEPTH,
             far:1,
             near:-1,
-            replacementMaterial:new KICK.material.Material(engine, {shader:shader})
+            replacementMaterial:new KICK.material.Material({shader:shader})
         });
         camera.debug= true;
         var cameraObject = engine.activeScene.createGameObject(camera);

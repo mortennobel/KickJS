@@ -39,7 +39,7 @@
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
@@ -50,7 +50,7 @@
                 return;
             }
 
-            meshRenderer.material = new KICK.material.Material(engine,{
+            meshRenderer.material = new KICK.material.Material({
                 name:"Some material",
                 shader:shader
             });
@@ -99,7 +99,7 @@
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
             addRotatorComponent(gameObject);

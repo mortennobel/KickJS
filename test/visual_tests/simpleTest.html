@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+
+</head>
+<body onload="">
+
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  Simple test (should work as a template for other tests)
+    <script src="../../src/js-dependencies/require.js"></script>
+    <script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../src/js/kick'
+            }
+        });
+
+        req(['kick/core/ResourceDescriptor','kick/core/Engine'],
+            function (ResourceDescriptor, Engine) {
+                console.log("ResourceDescriptor loaded");
+                new Engine('canvas');
+                new ResourceDescriptor({});
+            });
+    </script>
+  <br>
+</body>
+</html>

@@ -69,10 +69,10 @@ This example shows how textures can be used
                         return;
                     }
 
-                    texture = new KICK.texture.Texture(engine);
+                    texture = new KICK.texture.Texture();
                     texture.setTemporaryTexture();
 
-                    material = new KICK.material.Material(engine,{
+                    material = new KICK.material.Material({
                         name:"Some material ",
                         shader:shader,
                         uniformData: {
@@ -101,10 +101,11 @@ This example shows how textures can be used
                     engine = new KICK.core.Engine('canvas',{
                         enableDebugContext: true
                     });
+                    window.engine = engine;
                     var project = engine.project;
                     project.loadProject(projectData,
                             function onSuccess(){
-                                engine.activeScene = new KICK.scene.Scene(engine);
+                                engine.activeScene = new KICK.scene.Scene();
                                 var cameraObject = engine.activeScene.createGameObject();
                                 var camera = new KICK.scene.Camera({
                                     clearColor: [0.5,1,1,1],
@@ -154,7 +155,7 @@ This example shows how textures can be used
                 }
 
                 function setTextureConfig(url){
-                    texture = new KICK.texture.Texture(engine, {
+                    texture = new KICK.texture.Texture({
                         dataURI: url,
                         name: "Some texture"
                     });

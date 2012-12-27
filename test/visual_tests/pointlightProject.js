@@ -1,10 +1,10 @@
 var pointProject = {
-   "engineVersion": "0.3.0",
+   "engineVersion": "0.5.0",
    "maxUID": 80,
    "activeScene": 1,
    "resourceDescriptors": [
       {
-         "type": "KICK.scene.Scene",
+         "type": "kick.scene.Scene",
          "uid": 1,
          "config": {
             "uid": 1,
@@ -15,7 +15,7 @@ var pointProject = {
                   "uid": 14,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 20,
                         "config": {
                            "localPosition": [
@@ -38,12 +38,12 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.Camera",
+                        "type": "kick.scene.Camera",
                         "uid": 15,
                         "config": {
                            "enabled": true,
                            "renderShadow": false,
-                           "renderer": "KICK.renderer.ForwardRenderer",
+                           "renderer": "kick.renderer.ForwardRenderer",
                            "layerMask": 4294967295,
                            "renderTarget": null,
                            "fieldOfView": 60,
@@ -79,7 +79,7 @@ var pointProject = {
                   "uid": 24,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 30,
                         "config": {
                            "localPosition": [
@@ -102,7 +102,7 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.MeshRenderer",
+                        "type": "kick.scene.MeshRenderer",
                         "uid": 60,
                         "config": {
                            "materials": [
@@ -129,7 +129,7 @@ var pointProject = {
                   "uid": 26,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 31,
                         "config": {
                            "localPosition": [
@@ -152,7 +152,7 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.Light",
+                        "type": "kick.scene.Light",
                         "uid": 27,
                         "config": {
                            "shadow": false,
@@ -180,7 +180,7 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.MeshRenderer",
+                        "type": "kick.scene.MeshRenderer",
                         "uid": 61,
                         "config": {
                            "materials": [
@@ -207,7 +207,7 @@ var pointProject = {
                   "uid": 32,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 38,
                         "config": {
                            "localPosition": [
@@ -230,7 +230,7 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.MeshRenderer",
+                        "type": "kick.scene.MeshRenderer",
                         "uid": 62,
                         "config": {
                            "materials": [
@@ -257,7 +257,7 @@ var pointProject = {
                   "uid": 36,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 39,
                         "config": {
                            "localPosition": [
@@ -280,7 +280,7 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.MeshRenderer",
+                        "type": "kick.scene.MeshRenderer",
                         "uid": 63,
                         "config": {
                            "materials": [
@@ -306,7 +306,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.material.Material",
+         "type": "kick.material.Material",
          "uid": 8,
          "config": {
             "uid": 8,
@@ -345,7 +345,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.material.Material",
+         "type": "kick.material.Material",
          "uid": 29,
          "config": {
             "uid": 29,
@@ -373,7 +373,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.material.Material",
+         "type": "kick.material.Material",
          "uid": 34,
          "config": {
             "uid": 34,
@@ -412,7 +412,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.material.Material",
+         "type": "kick.material.Material",
          "uid": 35,
          "config": {
             "uid": 35,
@@ -440,7 +440,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.scene.Scene",
+         "type": "kick.scene.Scene",
          "uid": 43,
          "config": {
             "uid": 43,
@@ -450,7 +450,7 @@ var pointProject = {
                   "uid": 44,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 47,
                         "config": {
                            "localPosition": [
@@ -473,12 +473,12 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.Camera",
+                        "type": "kick.scene.Camera",
                         "uid": 45,
                         "config": {
                            "enabled": true,
                            "renderShadow": false,
-                           "renderer": "KICK.renderer.ForwardRenderer",
+                           "renderer": "kick.renderer.ForwardRenderer",
                            "layerMask": 4294967295,
                            "renderTarget": null,
                            "fieldOfView": 60,
@@ -513,7 +513,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.scene.Scene",
+         "type": "kick.scene.Scene",
          "uid": 55,
          "config": {
             "uid": 55,
@@ -523,7 +523,7 @@ var pointProject = {
                   "uid": 56,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 59,
                         "config": {
                            "localPosition": [
@@ -546,12 +546,12 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.Camera",
+                        "type": "kick.scene.Camera",
                         "uid": 57,
                         "config": {
                            "enabled": true,
                            "renderShadow": false,
-                           "renderer": "KICK.renderer.ForwardRenderer",
+                           "renderer": "kick.renderer.ForwardRenderer",
                            "layerMask": 4294967295,
                            "renderTarget": null,
                            "fieldOfView": 60,
@@ -586,7 +586,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.scene.Scene",
+         "type": "kick.scene.Scene",
          "uid": 67,
          "config": {
             "uid": 67,
@@ -596,7 +596,7 @@ var pointProject = {
                   "uid": 68,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 71,
                         "config": {
                            "localPosition": [
@@ -619,12 +619,12 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.Camera",
+                        "type": "kick.scene.Camera",
                         "uid": 69,
                         "config": {
                            "enabled": true,
                            "renderShadow": false,
-                           "renderer": "KICK.renderer.ForwardRenderer",
+                           "renderer": "kick.renderer.ForwardRenderer",
                            "layerMask": 4294967295,
                            "renderTarget": null,
                            "fieldOfView": 60,
@@ -659,7 +659,7 @@ var pointProject = {
          }
       },
       {
-         "type": "KICK.scene.Scene",
+         "type": "kick.scene.Scene",
          "uid": 76,
          "config": {
             "uid": 76,
@@ -669,7 +669,7 @@ var pointProject = {
                   "uid": 77,
                   "components": [
                      {
-                        "type": "KICK.scene.Transform",
+                        "type": "kick.scene.Transform",
                         "uid": 80,
                         "config": {
                            "localPosition": [
@@ -692,12 +692,12 @@ var pointProject = {
                         }
                      },
                      {
-                        "type": "KICK.scene.Camera",
+                        "type": "kick.scene.Camera",
                         "uid": 78,
                         "config": {
                            "enabled": true,
                            "renderShadow": false,
-                           "renderer": "KICK.renderer.ForwardRenderer",
+                           "renderer": "kick.renderer.ForwardRenderer",
                            "layerMask": 4294967295,
                            "renderTarget": null,
                            "fieldOfView": 60,

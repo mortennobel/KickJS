@@ -24,7 +24,7 @@ requirejs(['kick'],
         };
 
         function createMaterial(color){
-            return new KICK.material.Material(engine,{
+            return new KICK.material.Material({
                 name:"Some material",
                 shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
                 uniformData:{
@@ -83,7 +83,7 @@ requirejs(['kick'],
             var gameObject = engine.activeScene.createGameObject();
             meshRenderer = new KICK.scene.MeshRenderer();
 
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             materials[0] = createMaterial([0,1,0,1]);
             materials[1] = createMaterial([1,0,0,1]);
             updateMaterial();
@@ -92,7 +92,7 @@ requirejs(['kick'],
 
             var gameObject2 = engine.activeScene.createGameObject();
             var meshRenderer2 = new KICK.scene.MeshRenderer();
-            meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer2.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             meshRenderer2.material = materials[0];
             gameObject2.transform.localPosition = [0,0,-1];
             gameObject2.transform.localScale = [1,2,1];
@@ -100,7 +100,7 @@ requirejs(['kick'],
 
             var gameObject3 = engine.activeScene.createGameObject();
             var meshRenderer3 = new KICK.scene.MeshRenderer();
-            meshRenderer3.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+            meshRenderer3.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
             meshRenderer3.material = materials[0];
             gameObject3.transform.localPosition = [0,0,-1];
             gameObject3.transform.localScale = [1.5,1.5,1];

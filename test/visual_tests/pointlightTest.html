@@ -73,9 +73,13 @@
                         enableDebugContext: true
                     });
 
-                    engine.project.loadProject(pointProject);
-                    var camera = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
-                    camera.gameObject.addComponent(new RotatorComponent());
+                    engine.project.loadProject(pointProject, function(){
+                        var camera = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
+                        camera.gameObject.addComponent(new RotatorComponent());
+                    }, function(){
+
+                    });
+
                 }
                 initKick() ;
             });

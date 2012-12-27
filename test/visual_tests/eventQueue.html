@@ -7,7 +7,7 @@
 <body>
 <h1>Event queue test</h1>
 This test will schedule future events using a simple event queue approach.<br>
-Press '1' or '2' to start rotating. The same will schedule a 5 second flicker scheduled on second in the future.
+Press '1' or '2' to start rotating. The same will schedule a 5second flicker scheduled 1 second in the future.
 Releasing the '1' or '2' will aboard the flicker.
 
 <br>
@@ -110,7 +110,7 @@ Releasing the '1' or '2' will aboard the flicker.
                 cameraObject.addComponent(camera);
 
                 function createMaterial(){
-                    return new KICK.material.Material(engine,{
+                    return new KICK.material.Material({
                         shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),//engine.resourceManager.getShader("kickjs://shader/unlit/"),
                         uniformData:{
                             mainColor: [1,1,1,1],

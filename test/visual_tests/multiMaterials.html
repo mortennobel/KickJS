@@ -146,7 +146,7 @@
 
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
                     for (var i = 0;i<5;i++){
-                        var material = new KICK.material.Material(engine, {
+                        var material = new KICK.material.Material({
                             shader:shader,
                             uniformData:{
                                 mainColor:[1.0,0.0,0.9,0.5],
@@ -160,7 +160,7 @@
                     }
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
                     for (var i = 0;i<5;i++){
-                        var material = new KICK.material.Material(engine, {
+                        var material = new KICK.material.Material({
                             shader:shader,
                             uniformData:{
                                 mainColor:[i/5,0.0,0.9,0.5],
@@ -172,7 +172,7 @@
                     }
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
                     for (var i = 0;i<5;i++){
-                        var material = new KICK.material.Material(engine, {
+                        var material = new KICK.material.Material({
                             shader:shader,
                             uniformData:{
                                 mainColor:[i/5,0.0,0.9,0.5],
@@ -184,7 +184,7 @@
                     }
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
                     for (var i = 0;i<5;i++){
-                        var material = new KICK.material.Material(engine, {
+                        var material = new KICK.material.Material({
                             shader:shader,
                             uniformData:{
                                 mainColor:[i/5,0.0,0.9,0.5],

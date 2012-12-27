@@ -39,7 +39,7 @@
               clearLog();
               var vs = document.getElementById(vertexShaderId).value;
               var fs = document.getElementById(fragmentShaderId).value;
-              var shader = new KICK.material.Shader(engine);
+              var shader = new KICK.material.Shader();
               shader.vertexShaderSrc = vs;
               shader.fragmentShaderSrc = fs;
               shader.errorLog = log;
@@ -50,7 +50,7 @@
                   return;
               }
 
-              meshRenderer.material = new KICK.material.Material(engine,{
+              meshRenderer.material = new KICK.material.Material({
                   name:"Some material",
                   shader:shader
               });
@@ -93,13 +93,13 @@
                       transform.localRotationEuler = rotVec;
                       if (useMat3ToQuat){
                           var rotationQuat = transform.localRotation;
-                          var rotationMat3 = KICK.math.quat4.toMat3(rotationQuat);
-                          transform.localRotation = KICK.math.mat3.toQuat(rotationMat3);
+                          var rotationMat3 = KICK.math.Quat4.toMat3(rotationQuat);
+                          transform.localRotation = KICK.math.Mat3.toQuat(rotationMat3);
                       }
                       if (useQuatLookAt){
-                          transform.localRotation = KICK.math.quat4.lookAt(translation,[0,0,0],[0,1,0]);
+                          transform.localRotation = KICK.math.Quat4.lookAt(translation,[0,0,0],[0,1,0]);
                       }
-                      res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
+                      res.innerHTML = KICK.math.Mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.Vec3.str(rotVec);
                   }
               });
           }
@@ -121,7 +121,7 @@
               var gameObject = engine.activeScene.createGameObject();
               meshRenderer = new KICK.scene.MeshRenderer();
 
-              meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+              meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
               setMaterial('vertexShaderColor','fragmentShader',meshRenderer);
               gameObject.addComponent(meshRenderer);
 
@@ -129,7 +129,7 @@
               gameObject2.transform.position = [0,0.5,0];
               var meshRenderer2 = new KICK.scene.MeshRenderer();
 
-              meshRenderer2.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
+              meshRenderer2.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?radius=0.6"});
               setMaterial('vertexShaderColor','fragmentShader',meshRenderer2);
               gameObject2.addComponent(meshRenderer2);
 

@@ -27,7 +27,7 @@
                 var texture2;
 
                 function initMaterials(vertexShaderId, fragmentShaderId){
-                    var shader = new KICK.material.Shader(engine);
+                    var shader = new KICK.material.Shader();
                     shader.vertexShaderSrc = document.getElementById('vs').innerHTML;
                     shader.fragmentShaderSrc = document.getElementById('fs').innerHTML;
                     shader.errorLog = console.log;
@@ -38,10 +38,10 @@
                         return;
                     }
 
-                    texture = new KICK.texture.Texture(engine);
-                    texture2 = new KICK.texture.Texture(engine);
+                    texture = new KICK.texture.Texture();
+                    texture2 = new KICK.texture.Texture();
 
-                    material = new KICK.material.Material(engine,{
+                    material = new KICK.material.Material({
                         name:"Some material ",
                         shader:shader,
                         uniformData: {

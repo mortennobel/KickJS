@@ -39,7 +39,7 @@ This test shows tests how a deep scene hiearchy works.
                     clearLog();
                     var vs = document.getElementById(vertexShaderId).value;
                     var fs = document.getElementById(fragmentShaderId).value;
-                    var shader = new KICK.material.Shader(engine);
+                    var shader = new KICK.material.Shader();
                     shader.vertexShaderSrc = vs;
                     shader.fragmentShaderSrc = fs;
                     shader.errorLog = log;
@@ -50,7 +50,7 @@ This test shows tests how a deep scene hiearchy works.
                         return;
                     }
 
-                    meshRenderer.material = new KICK.material.Material(engine,{
+                    meshRenderer.material = new KICK.material.Material({
                         name:"Some material",
                         shader:shader
                     });
@@ -91,7 +91,7 @@ This test shows tests how a deep scene hiearchy works.
 
                             //new Date().getMilliseconds();
                             transform.localRotationEuler = rotVec;
-                            res.innerHTML = KICK.math.mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.vec3.str(rotVec);
+                            res.innerHTML = KICK.math.Mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.Vec3.str(rotVec);
                         }
                     });
                 }
@@ -99,14 +99,14 @@ This test shows tests how a deep scene hiearchy works.
                 function buildScene(){
                     var gameObject = engine.activeScene.createGameObject();
                     meshRenderer = new KICK.scene.MeshRenderer();
-                    meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                    meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
                     setMaterial('vertexShaderColor','fragmentShader');
                     gameObject.transform.localScale = [2,1,1];
                     gameObject.addComponent(meshRenderer);
 
                     var gameObjectSphere = engine.activeScene.createGameObject();
                     meshRenderer = new KICK.scene.MeshRenderer();
-                    meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/uvsphere/?radius=0.5"});
+                    meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?radius=0.5"});
                     setMaterial('vertexShaderColor','fragmentShader');
                     gameObjectSphere.transform.localRotation = [0.7071,0,0,0.7071];
                     gameObjectSphere.transform.localPosition = [0,1,0];
@@ -115,7 +115,7 @@ This test shows tests how a deep scene hiearchy works.
 
                     var gameObjectCube = engine.activeScene.createGameObject();
                     meshRenderer = new KICK.scene.MeshRenderer();
-                    meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                    meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
                     setMaterial('vertexShaderColor','fragmentShader');
                     gameObjectCube.transform.localPosition = [0,-1,0];
                     gameObjectCube.transform.localScale = [2,0.5,1];
@@ -124,7 +124,7 @@ This test shows tests how a deep scene hiearchy works.
 
                     var gameObjectCube2 = engine.activeScene.createGameObject();
                     meshRenderer = new KICK.scene.MeshRenderer();
-                    meshRenderer.mesh = new KICK.mesh.Mesh(engine,{dataURI: "kickjs://mesh/cube/?length=0.5"});
+                    meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
                     setMaterial('vertexShaderColor','fragmentShader');
                     gameObjectCube2.transform.localPosition = [0,0,1];
                     gameObjectCube2.transform.localScale = [0.5,0.5,0.5];

@@ -28,7 +28,7 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
         cameraObject.addComponent(camera);
         // create material
         var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-        var material = new Material(engine, {
+        var material = new Material({
             shader: shader,
             uniformData: {
                 mainColor: [1, 1, 1, 1]
