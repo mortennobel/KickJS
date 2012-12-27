@@ -1,12 +1,13 @@
-define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRenderer", "kick/material/Material"],
-    function (math, Constants, Util, MeshData, Mesh, MeshRenderer, Material) {
+define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRenderer", "kick/material/Material", "kick/core/EngineSingleton"],
+    function (math, Constants, Util, MeshData, Mesh, MeshRenderer, Material, EngineSingleton) {
         "use strict";
 
         /**
          * @module kick.importer
          */
 
-        var quat4 = math.Quat4,
+        var ASSERT = Constants._ASSERT,
+            quat4 = math.Quat4,
             mat4 = math.Mat4,
             getXMLElementById = function (doc, id) {
                 return doc.querySelector("[id=" + id + "]");
@@ -22,19 +23,23 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
         /**
          * @method import
          * @param {XMLDom|String} colladaDOM
-         * @param {kick.core.Engine} engine
-         * @param {kick.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+         * @param {kick.scene.Scene} scene=engine.activeScene Optional. If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties(mesh:[], gameObjects:[], materials:[])
          * @static
          */
-        ColladaImporter.import = function (colladaDOM, engine, scene, rotate90x) {
-
+        ColladaImporter.import = function (colladaDOM, scene, rotate90x) {
+            if (ASSERT){
+                if (scene === EngineSingleton.engine){
+                    Util.fail("ColladaImporter function changed - engine parameter is removed");
+                }
+            }
             if (typeof colladaDOM === 'string') {
                 var parser = new window.DOMParser();
                 colladaDOM = parser.parseFromString(colladaDOM, "text/xml");
             }
-            var dataCache = {},
+            var engine = EngineSingleton.engine,
+                dataCache = {},
                 allMeshes = [],
                 allMaterials = [],
                 constants = Constants,
@@ -42,7 +47,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                  * Converts a string to an array
                  * @method stringToArray
                  * @param {String} numberString
-                 * @param {Object} type Optional - valid types are Array (default), and typed arrays classes
+                 * @param {Object} type=Array Optional - valid types are Array (default), and typed arrays classes
                  * @private
                  */
                     stringToArray = function (numberString, type) {
@@ -328,7 +333,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                         if (geometry.getAttribute("id") === meshid) {
                             var meshData = buildMeshData(colladaDOM, engine, geometry);
                             if (meshData) {
-                                var newMesh = new Mesh(engine, {meshData: meshData, name: meshData.name + " mesh"});
+                                var newMesh = new Mesh({meshData: meshData, name: meshData.name + " mesh"});
                                 allMeshes.push(newMesh);
                                 meshArray.push(newMesh);
                             }
@@ -387,7 +392,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                     for (i = 0; i < meshes.length; i++) {
                         meshRenderer = new MeshRenderer();
                         meshRenderer.mesh = meshes[i];
-                        newMaterial = new Material(engine, {
+                        newMaterial = new Material({
                             name: "Some material",
                             shader: engine.project.load(engine.project.ENGINE_SHADER_DEFAULT)
                         });

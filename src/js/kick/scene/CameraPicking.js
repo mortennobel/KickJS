@@ -1,19 +1,24 @@
-define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/Constants", "kick/core/Util", "./PickResult"],
-    function (Vec4, Material, RenderTexture, Constants, Util, PickResult) {
+define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/Constants", "kick/core/Util", "./PickResult", "kick/core/EngineSingleton"],
+    function (Vec4, Material, RenderTexture, Constants, Util, PickResult, EngineSingleton) {
         "use strict";
 
         /**
          * Camera picking object used by Camera objects to manage picking
          * @private
          * @class CameraPicking
-         * @param {kick.core.Engine} engine
          * @param {Function} setupClearColor
          * @param {Function} renderSceneObjects
          * @param {Scene} sceneObj
          * @constructor
          */
-        return function (engine, setupClearColor, renderSceneObjects, sceneObj, setupCamera) {
-            var pickingQueue = null,
+        return function (setupClearColor, renderSceneObjects, sceneObj, setupCamera) {
+            if (Constants._ASSERT){
+                if (setupClearColor === EngineSingleton.engine){
+                    Util.fail("CameraPicking constructor changed - engine parameter is removed");
+                }
+            }
+            var engine = EngineSingleton.engine,
+                pickingQueue = null,
                 pickingMaterial = null,
                 pickingRenderTarget = null,
                 pickingClearColor = Vec4.create(),
@@ -21,12 +26,12 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                 i,
                 init = function () {
                     pickingQueue = [];
-                    pickingMaterial = new Material(engine,
+                    pickingMaterial = new Material(
                         {
                             shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
                             name: "Picking material"
                         });
-                    pickingRenderTarget = new RenderTexture(engine, {
+                    pickingRenderTarget = new RenderTexture({
                         dimension: glState.viewportSize
 
                     });

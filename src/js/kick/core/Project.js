@@ -6,13 +6,18 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
             DEBUG = constants._DEBUG,
             /**
              * A project is a container of all resources and assets used in a game.
+             *
+             * When a project is loaded then all it's assets are initialized (except for built-in assets with uid less
+             * than 0, which are lazy-loaded).
+             *
+             * All assets initialized should be registered in the project. This is done by calling Project.registerObject()
+             * (Note for built-in kickjs assets, this happens automatically when the objects are constructed).
              * @class Project
              * @namespace kick.core
              * @constructor
              * @param {kick.core.Engine} engine
-             * @param {JSON} json project data
              */
-            Project =  function (engine) {
+            Project = function (engine) {
                 var resourceDescriptorsByUID = {},
                     resourceCache = {},
                     thisObj = this,
@@ -44,52 +49,51 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                         return name;
                     },
                     loadEngineAsset = function (uid) {
-                        var p = Project,
-                            res,
+                        var res,
                             url,
                             isCubemap,
                             canvas,
                             shader,
                             ctx;
-                        if (uid <= p.ENGINE_SHADER_DEFAULT && uid >= p.ENGINE_SHADER___PICK_NORMAL) {
+                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER___PICK_NORMAL) {
                             switch (uid) {
-                            case p.ENGINE_SHADER_DEFAULT:
+                            case Project.ENGINE_SHADER_DEFAULT:
                                 url = "kickjs://shader/default/";
                                 break;
-                            case p.ENGINE_SHADER_SPECULAR:
+                            case Project.ENGINE_SHADER_SPECULAR:
                                 url = "kickjs://shader/specular/";
                                 break;
-                            case p.ENGINE_SHADER_DIFFUSE:
+                            case Project.ENGINE_SHADER_DIFFUSE:
                                 url = "kickjs://shader/diffuse/";
                                 break;
-                            case p.ENGINE_SHADER_UNLIT:
+                            case Project.ENGINE_SHADER_UNLIT:
                                 url = "kickjs://shader/unlit/";
                                 break;
-                            case p.ENGINE_SHADER_UNLIT_VERTEX_COLOR:
+                            case Project.ENGINE_SHADER_UNLIT_VERTEX_COLOR:
                                 url = "kickjs://shader/unlit_vertex_color/";
                                 break;
-                            case p.ENGINE_SHADER_TRANSPARENT_SPECULAR:
+                            case Project.ENGINE_SHADER_TRANSPARENT_SPECULAR:
                                 url = "kickjs://shader/transparent_specular/";
                                 break;
-                            case p.ENGINE_SHADER_TRANSPARENT_DIFFUSE:
+                            case Project.ENGINE_SHADER_TRANSPARENT_DIFFUSE:
                                 url = "kickjs://shader/transparent_diffuse/";
                                 break;
-                            case p.ENGINE_SHADER_TRANSPARENT_UNLIT:
+                            case Project.ENGINE_SHADER_TRANSPARENT_UNLIT:
                                 url = "kickjs://shader/transparent_unlit/";
                                 break;
-                            case p.ENGINE_SHADER___SHADOWMAP:
+                            case Project.ENGINE_SHADER___SHADOWMAP:
                                 url = "kickjs://shader/__shadowmap/";
                                 break;
-                            case p.ENGINE_SHADER___PICK_UV:
+                            case Project.ENGINE_SHADER___PICK_UV:
                                 url = "kickjs://shader/__pick_uv/";
                                 break;
-                            case p.ENGINE_SHADER___PICK_NORMAL:
+                            case Project.ENGINE_SHADER___PICK_NORMAL:
                                 url = "kickjs://shader/__pick_normal/";
                                 break;
-                            case p.ENGINE_SHADER___PICK:
+                            case Project.ENGINE_SHADER___PICK:
                                 url = "kickjs://shader/__pick/";
                                 break;
-                            case p.ENGINE_SHADER___ERROR:
+                            case Project.ENGINE_SHADER___ERROR:
                                 url = "kickjs://shader/__error/";
                                 break;
                             default:
@@ -98,27 +102,27 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 }
                                 return null;
                             }
-                            res = new Shader(engine, {
+                            res = new Shader({
                                 dataURI: url,
                                 name: getUrlAsResourceName(url),
                                 uid: uid
                             });
-                        } else if (uid <= p.ENGINE_TEXTURE_BLACK && uid >= p.ENGINE_TEXTURE_CUBEMAP_WHITE) {
-                            isCubemap = uid === p.ENGINE_TEXTURE_CUBEMAP_WHITE;
+                        } else if (uid <= Project.ENGINE_TEXTURE_BLACK && uid >= Project.ENGINE_TEXTURE_CUBEMAP_WHITE) {
+                            isCubemap = uid === Project.ENGINE_TEXTURE_CUBEMAP_WHITE;
                             switch (uid) {
-                            case p.ENGINE_TEXTURE_BLACK:
+                            case Project.ENGINE_TEXTURE_BLACK:
                                 url = "kickjs://texture/black/";
                                 break;
-                            case p.ENGINE_TEXTURE_WHITE:
+                            case Project.ENGINE_TEXTURE_WHITE:
                                 url = "kickjs://texture/white/";
                                 break;
-                            case p.ENGINE_TEXTURE_GRAY:
+                            case Project.ENGINE_TEXTURE_GRAY:
                                 url = "kickjs://texture/gray/";
                                 break;
-                            case p.ENGINE_TEXTURE_LOGO:
+                            case Project.ENGINE_TEXTURE_LOGO:
                                 url = "kickjs://texture/logo/";
                                 break;
-                            case p.ENGINE_TEXTURE_CUBEMAP_WHITE:
+                            case Project.ENGINE_TEXTURE_CUBEMAP_WHITE:
                                 // do nothing
                                 break;
                             default:
@@ -128,7 +132,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 return null;
                             }
                             if (isCubemap) {
-                                res = new Texture(engine,
+                                res = new Texture(
                                     {
                                         name: "cubemap_white",
                                         minFilter: constants.GL_NEAREST,
@@ -149,7 +153,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 res.setImage(canvas, "memory://cubemap_white/");
 
                             } else {
-                                res = new Texture(engine,
+                                res = new Texture(
                                     {
                                         name: getUrlAsResourceName(url),
                                         minFilter: constants.GL_NEAREST,
@@ -161,18 +165,18 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                     });
                             }
 
-                        } else if (uid <= p.ENGINE_MESH_TRIANGLE && uid >= p.ENGINE_MESH_CUBE) {
+                        } else if (uid <= Project.ENGINE_MESH_TRIANGLE && uid >= Project.ENGINE_MESH_CUBE) {
                             switch (uid) {
-                            case p.ENGINE_MESH_TRIANGLE:
+                            case Project.ENGINE_MESH_TRIANGLE:
                                 url = "kickjs://mesh/triangle/";
                                 break;
-                            case p.ENGINE_MESH_PLANE:
+                            case Project.ENGINE_MESH_PLANE:
                                 url = "kickjs://mesh/plane/";
                                 break;
-                            case p.ENGINE_MESH_UVSPHERE:
+                            case Project.ENGINE_MESH_UVSPHERE:
                                 url = "kickjs://mesh/uvsphere/";
                                 break;
-                            case p.ENGINE_MESH_CUBE:
+                            case Project.ENGINE_MESH_CUBE:
                                 url = "kickjs://mesh/cube/";
                                 break;
                             default:
@@ -181,15 +185,15 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                                 }
                                 return null;
                             }
-                            res = new Mesh(engine,
+                            res = new Mesh(
                                 {
                                     dataURI: url,
                                     name: getUrlAsResourceName(url),
                                     uid: uid
                                 });
-                        } else if (uid <= p.ENGINE_MATERIAL_DEFAULT) {
-                            shader = loadEngineAsset(p.ENGINE_SHADER_UNLIT);
-                            res = new Material(engine, {
+                        } else if (uid <= Project.ENGINE_MATERIAL_DEFAULT) {
+                            shader = loadEngineAsset(Project.ENGINE_SHADER_UNLIT);
+                            res = new Material({
                                 shader: shader,
                                 name: "Default material"
                             });
@@ -307,11 +311,14 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                  * @method loadProject
                  * @param {object} config
                  * @param {Function} onSuccess
-                 * @param {Function} onFail
+                 * @param {Function} onFail=null Optional
                  */
                 this.loadProject = function (config, onSuccess, onError) {
                     if (_maxUID > 0) {
                         thisObj.closeProject();
+                    }
+                    if (typeof onSuccess !== "function" && ASSERT){
+                        Util.fail("Project.loadProject - onSuccess parameter not a function");
                     }
                     config = config || {};
                     var resourceDescriptors = config.resourceDescriptors || [],
@@ -374,22 +381,13 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 };
 
                 /**
-                 * Load a resource from the configuration (or cache).
-                 * Also increases the resource reference counter.
+                 * Load a resource from the project.
                  * @method load
                  * @param {String} uid
-                 * @return {kick.core.ProjectAsset} resource or null if resource is not found
                  */
-                this.load = function (uid) {
-                    var resourceObject = resourceCache[uid],
-                        resourceConfig;
+                this.load = function (uid, callback, onError) {
+                    var resourceObject = resourceCache[uid];
                     if (resourceObject) {
-                        return resourceObject;
-                    }
-                    resourceConfig = resourceDescriptorsByUID[uid];
-                    if (resourceConfig) {
-                        resourceObject = resourceConfig.instantiate(engine);
-                        resourceCache[uid] = resourceObject;
                         return resourceObject;
                     }
 
@@ -414,7 +412,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                  * If more objects exist with the same name, the first object is returned
                  * @method loadByName
                  * @param {String} name
-                 * @param {String} type Optional: limit the search to a specific type
+                 * @param {String} type=null limit the search to a specific type
                  * @return {kick.core.ProjectAsset} resource or null if resource is not found
                  */
                 this.loadByName = function (name, type) {
@@ -460,7 +458,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
                 /**
                  * Updates the resourceDescriptors with data from the initialized objects
                  * @method refreshResourceDescriptors
-                 * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
+                 * @param {Function} filter=null Filter with function(object): return boolean, where true means include in export.
                  */
                 this.refreshResourceDescriptors = function (filter) {
                     var uid;
@@ -588,7 +586,7 @@ define(["./Constants", "./ResourceDescriptor", "./ResourceTracker", "kick/materi
 
                 /**
                  * @method toJSON
-                 * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
+                 * @param {Function} filter=null Filter with function(object): return boolean, where true means include in export.
                  * @return Object
                  */
                 this.toJSON = function (filter) {

@@ -1,8 +1,9 @@
-define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRenderer", "kick/material/Material", "kick/core/Constants"],
-    function (math, MeshData, Mesh, MeshRenderer, Material, Constants) {
+define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton"],
+    function (math, MeshData, Mesh, MeshRenderer, Material, Constants, EngineSingleton) {
         "use strict";
 
-        var quat4 = math.Quat4,
+        var ASSERT = Constants._ASSERT,
+            quat4 = math.Quat4,
             mat4 = math.Mat4,
             /**
              * Imports a Wavefront .obj mesh into a scene. The importer loading both normals and texture coordinates from the
@@ -16,14 +17,19 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
         /**
          * @method import
          * @param {String} objFileContent
-         * @param {kick.core.Engine} engine
-         * @param {kick.scene.Scene} scene Optional. If not specified the active scene (from the engine) is used
+         * @param {kick.scene.Scene} scene=engine.activeScene Optional. If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties (mesh:[], gameObjects:[], materials:[])
          * @static
          */
-        ObjImporter.import = function (objFileContent, engine, scene, rotate90x) {
-            var lines = objFileContent.split("\n"),
+        ObjImporter.import = function (objFileContent, scene, rotate90x) {
+            if (ASSERT){
+                if (scene === EngineSingleton.engine){
+                    Util.fail("ObjImporter function changed - engine parameter is removed");
+                }
+            }
+            var engine = EngineSingleton.engine,
+                lines = objFileContent.split("\n"),
                 linesLength = lines.length,
                 vertices = [],
                 normals = [],
@@ -82,7 +88,7 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
                     }
                     var gameObject = scene.createGameObject(),
                         meshData = new MeshData(),
-                        mesh = new Mesh(engine),
+                        mesh = new Mesh(),
                         meshDataVertices = [],
                         meshDataNormals = [],
                         meshDataTextureCoordinates = [],
@@ -140,7 +146,7 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
                     var materials = [];
 
                     var addDefaultMaterial = function (name) {
-                        var newMaterial = new Material(engine,{
+                        var newMaterial = new Material({
                             name: name,
                             shader: engine.project.load(engine.project.ENGINE_SHADER_DEFAULT)
                         });

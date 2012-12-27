@@ -1,5 +1,5 @@
-define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick/math/Vec2"],
-    function (ProjectAsset, Constants, Util, Vec2) {
+define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick/math/Vec2", "kick/core/EngineSingleton"],
+    function (ProjectAsset, Constants, Util, Vec2, EngineSingleton) {
         "use strict";
 
         var DEBUG = Constants._DEBUG;
@@ -13,14 +13,19 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
          * @class Texture
          * @namespace kick.texture
          * @constructor
-         * @param {kick.core.Engine} engine
          * @param {Object} config Optional
          * @extends kick.core.ProjectAsset
          */
-        return function (engine, config) {
+        return function (config) {
             // extend ProjectAsset
             ProjectAsset(this);
-            var gl = engine.gl,
+            if (Constants._ASSERT){
+                if (config === EngineSingleton.engine){
+                    Util.fail("Texture constructor changed - engine parameter is removed");
+                }
+            }
+            var engine = EngineSingleton.engine,
+                gl = engine.gl,
                 glState = engine.glState,
                 texture0 = Constants.GL_TEXTURE0,
                 createImageFunction,

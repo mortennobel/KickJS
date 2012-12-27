@@ -21,7 +21,7 @@ define(["./Util"], function (util) {
          * @method add
          * @param {function} task
          * @param {Number} timeStart Number of milliseconds from current time
-         * @param {Number} timeEnd Optional (defaults to timeStart). Number of milliseconds from current time
+         * @param {Number} timeEnd=timeStart Number of milliseconds from current time
          * @return {Object} event object (used for 'cancel' event)
          */
         this.add = function (task, timeStart, timeEnd) {

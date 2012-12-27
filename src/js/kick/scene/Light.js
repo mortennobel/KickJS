@@ -37,7 +37,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 updateShadowTexture = function () {
                     if (_shadow) {
                         if (!_shadowTexture) {
-                            _shadowTexture = new Texture(engine, {
+                            _shadowTexture = new Texture({
                                 minFilter: Constants.GL_NEAREST,
                                 magFilter: Constants.GL_NEAREST,
                                 wrapS: Constants.GL_CLAMP_TO_EDGE,
@@ -49,7 +49,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                                 engine.gl.getParameter(Constants.GL_MAX_TEXTURE_SIZE));
                             maxTextureSize = Math.min(maxTextureSize, 4096) * engine.config.shadowMapQuality;
                             _shadowTexture.setImageData(maxTextureSize, maxTextureSize, 0, Constants.GL_UNSIGNED_BYTE, null, "");
-                            _shadowRenderTexture = new RenderTexture(engine, {
+                            _shadowRenderTexture = new RenderTexture({
                                 colorTexture: _shadowTexture
                             });
                         }

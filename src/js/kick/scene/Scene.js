@@ -1,5 +1,5 @@
-define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constants", "kick/core/Util", "./Camera", "./Light", "./GameObject", "./ComponentChangedListener"],
-    function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, ComponentChangedListener) {
+define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constants", "kick/core/Util", "./Camera", "./Light", "./GameObject", "./ComponentChangedListener", "kick/core/EngineSingleton"],
+    function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, ComponentChangedListener, EngineSingleton) {
         "use strict";
 
         var DEBUG = Constants._DEBUG,
@@ -11,14 +11,19 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
          * @class Scene
          * @namespace kick.scene
          * @constructor
-         * @param {kick.core.Engine} engine
          * @param {Object} config
          * @extends kick.core.ProjectAsset
          */
-        Scene = function (engine, config) {
+        Scene = function (config) {
             // extend ProjectAsset
             ProjectAsset(this);
-            var objectsById = {},
+            if (ASSERT){
+                if (config === EngineSingleton.engine){
+                    Util.fail("Scene constructor changed - engine parameter is removed");
+                }
+            }
+            var engine = EngineSingleton.engine,
+                objectsById = {},
                 gameObjects = [],
                 activeGameObjects = [],
                 gameObjectsNew = [],

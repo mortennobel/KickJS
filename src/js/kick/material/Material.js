@@ -1,5 +1,5 @@
-define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Shader", "./MaterialUniform"],
-    function (ProjectAsset, Util, Constants, Shader, MaterialUniform) {
+define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Shader", "./MaterialUniform", "kick/core/EngineSingleton"],
+    function (ProjectAsset, Util, Constants, Shader, MaterialUniform, EngineSingleton) {
         "use strict";
 
         /**
@@ -13,14 +13,19 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
          * @class Material
          * @namespace kick.material
          * @constructor
-         * @param {kick.core.Engine} engine
          * @param {Object} config
          * @extends kick.core.ProjectAsset
          */
-        return function (engine, config) {
+        return function (config) {
             // extend ProjectAsset
             ProjectAsset(this);
-            var _name = "Material",
+            if (ASSERT){
+                if (config === EngineSingleton.engine){
+                    Util.fail("Material constructor changed - engine parameter is removed");
+                }
+            }
+            var engine = EngineSingleton.engine,
+                _name = "Material",
                 _shader = null,
                 _uniforms = [],
                 thisObj = this,

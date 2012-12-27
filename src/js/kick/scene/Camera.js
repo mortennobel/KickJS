@@ -380,7 +380,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 width = width || 1;
                 height = height || 1;
                 if (!pickingObject) {
-                    pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects, _scene);
+                    pickingObject = new CameraPicking(setupClearColor, renderSceneObjects, _scene);
                 }
                 pickingObject.add({
                     gameObjectPickedFn: gameObjectPickedFn,
@@ -420,7 +420,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                         name: "Shadow map material",
                         shader: _shadowmapShader
                     };
-                    _shadowmapMaterial = new Material(engine, materialConfig);
+                    _shadowmapMaterial = new Material(materialConfig);
 
                     // calculate the shadow projection based on engine.config parameters
                     shadowLightOffsetFromCamera = engine.config.shadowDistance * 0.5; // first find radius
@@ -785,7 +785,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
              */
             this.toJSON = function () {
                 return {
-                    type: "kick.scene.Camera",
+                    type: "kick/scene/Camera",
                     uid: thisObj.uid || (engine ? engine.getUID(thisObj) : 0),
                     config: {
                         enabled: _enabled,

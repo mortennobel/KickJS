@@ -1,5 +1,5 @@
-define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kick/core/Util", "./UniformDescriptor", "kick/math/Vec3", "kick/math/Vec4", "kick/math/Mat4", "kick/math/Mat3"],
-    function (ProjectAsset, Constants, GLSLConstants, Util, UniformDescriptor, Vec3, Vec4, Mat4, Mat3) {
+define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kick/core/Util", "./UniformDescriptor", "kick/math/Vec3", "kick/math/Vec4", "kick/math/Mat4", "kick/math/Mat3", "kick/core/EngineSingleton"],
+    function (ProjectAsset, Constants, GLSLConstants, Util, UniformDescriptor, Vec3, Vec4, Mat4, Mat3, EngineSingleton) {
         "use strict";
 
         var Shader,
@@ -52,14 +52,19 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          * @class Shader
          * @namespace kick.material
          * @constructor
-         * @param {kick.core.Engine} engine
          * @param {Object} config
          * @extends kick.core.ProjectAsset
          */
-        Shader = function (engine, config) {
+        Shader = function (config) {
             // extend ProjectAsset
             ProjectAsset(this);
-            var gl = engine.gl,
+            if (ASSERT){
+                if (config === EngineSingleton.engine){
+                    Util.fail("Shader constructor changed - engine parameter is removed");
+                }
+            }
+            var engine = EngineSingleton.engine,
+                gl = engine.gl,
                 glState = engine.glState,
                 thisObj = this,
                 listeners = [],

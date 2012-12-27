@@ -1,4 +1,4 @@
-define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./MeshData"], function (ProjectAsset, Constants, Util, MeshData) {
+define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./MeshData", "kick/core/EngineSingleton"], function (ProjectAsset, Constants, Util, MeshData, EngineSingleton) {
     "use strict";
 
 
@@ -12,14 +12,19 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
      * @class Mesh
      * @namespace kick.mesh
      * @constructor
-     * @param {kick.core.Engine} engine
      * @param {Object} config
      * @extends kick.core.ProjectAsset
      */
-    return function (engine, config) {
+    return function (config) {
         // extend ProjectAsset
         ProjectAsset(this);
-        var gl = engine.gl,
+        if (ASSERT){
+            if (config === EngineSingleton.engine){
+                Util.fail("Mesh constructor changed - engine parameter is removed");
+            }
+        }
+        var engine = EngineSingleton.engine,
+            gl = engine.gl,
             glState = engine.glState,
             meshVertexAttBuffer,
             interleavedArrayFormat,

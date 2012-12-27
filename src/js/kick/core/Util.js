@@ -48,7 +48,7 @@ define(["require", "./Constants"], function (require, Constants) {
         /**
          * @method deepCopy
          * @param {Object} src
-         * @param {Array_Classes} passthroughClasses Optional. Don't attempt to clone object of these classes (uses instanceof operator)
+         * @param {Array_Classes} passthroughClasses=null Don't attempt to clone object of these classes (uses instanceof operator)
          * @return Object
          */
         deepCopy : function (object, passthroughClasses) {
@@ -118,7 +118,7 @@ define(["require", "./Constants"], function (require, Constants) {
          *
          * @method toCamelCase
          * @param {String} str
-         * @param {String} wordSeparator Optional - default value is empty string
+         * @param {String} wordSeparator="" Optional - default value is empty string
          */
         toCamelCase: function (str, wordSeparator) {
             if (!wordSeparator) {
@@ -159,13 +159,14 @@ define(["require", "./Constants"], function (require, Constants) {
             if (object === null){
                 return null;
             }
+            Util.warn("Fix wrong usage of require!!!!");
             if (DEBUG) {
-                if (!engine instanceof require("kick/core/Engine")) {
+                if (!engine instanceof require("kick/core/Engine")) { // todo: fix this
                     Util.fail("getJSONReference - engine not defined");
                 }
             }
-            var isGameObject = object instanceof require("kick/scene/GameObject");
-            var isComponent = !isGameObject && object.gameObject instanceof require("kick/scene/GameObject");
+            var isGameObject = object instanceof require("kick/scene/GameObject"); // todo: fix this
+            var isComponent = !isGameObject && object.gameObject instanceof require("kick/scene/GameObject"); // todo: fix this
             if (isComponent || isGameObject) {
                 return {
                     ref: engine.getUID(object),
@@ -185,7 +186,7 @@ define(["require", "./Constants"], function (require, Constants) {
          * @method componentToJSON
          * @param {kick.core.Engine} engine
          * @param {kick.scene.Component} component
-         * @param {String} componentType Optional defaults to component.constructor.name
+         * @param {String} componentType=component.constructor.name
          * @return {JSON}
          */
         componentToJSON: function(engine, component, componentType) {
@@ -395,7 +396,7 @@ define(["require", "./Constants"], function (require, Constants) {
          * @method insertSorted
          * @param {Object} element
          * @param {Array} sortedArray
-         * @param {Function} sortFunc has the signature foo(obj1,obj2) returns Number. Optional (uses numberSort as default)
+         * @param {Function} sortFunc=kick.core.Util.numberSortFunction has the signature foo(obj1,obj2) returns Number. Optional (uses numberSort as default)
          */
         insertSorted : function (element,sortedArray,sortFunc) {
             var i;

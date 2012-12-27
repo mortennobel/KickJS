@@ -1,5 +1,5 @@
-define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
-    function (MeshRenderer, Material, Constants) {
+define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton"],
+    function (MeshRenderer, Material, Constants, EngineSingleton) {
         "use strict";
 
         /**
@@ -8,12 +8,20 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants"],
          * @class PickResult
          * @namespace kick.scene
          * @constructor
+         * @param pickingRenderTarget
          * @param {kick.scene.GameObject} gameObject
          * @param {Integer} x
          * @param {Integer} y
+         * @param setupCamera
+         * @param engineUniforms
          * @constructor
          */
-        return function (engine, pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
+        return function (pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
+            if (Constants._ASSERT){
+                if (pickingRenderTarget === EngineSingleton.engine){
+                    Util.fail("PickResult constructor changed - engine parameter is removed");
+                }
+            }
             var normal,
                 uv,
                 /**

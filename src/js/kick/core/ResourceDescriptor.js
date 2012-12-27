@@ -1,5 +1,7 @@
-define(["./Util"], function (Util) {
+define(["require","./Util", "./Constants", "./EngineSingleton"], function (require, Util, constants, EngineSingleton) {
     "use strict";
+
+    var ASSERT = constants._ASSERT;
 
     /**
      * A project is a container of all resources and assets used in a game.<br>
@@ -14,7 +16,7 @@ define(["./Util"], function (Util) {
      *              }
      *          };
      *          var resourceDescriptorConfig = {
-     *              type: "kick.material.Material",
+     *              type: "kick/material/Material",
      *              config: materialConfig,
      *              uid: 132
      *          };
@@ -26,12 +28,13 @@ define(["./Util"], function (Util) {
      * @param {Object} config an object which attributes matches the properties of ResourceDescriptor
      */
     return function (config) {
-        var _config = config || {},
+        var engine = EngineSingleton.engine,
+            _config = config || {},
             type = _config.type,
             uid = _config.uid,
             resourceConfig = _config.config,
             hasProperty = Util.hasProperty,
-            createConfigInitialized = function (engine, config) {
+            createConfigInitialized = function (config) {
                 var res = {},
                     name,
                     value,
@@ -100,7 +103,7 @@ define(["./Util"], function (Util) {
          * (if toJSON method exist - otherwise the object are used directly)
          * @method updateConfig
          * @param {Object} object
-         * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
+         * @param {Function} filter=null Filter with function(object): return boolean, where true means include in export.
          */
         this.updateConfig = function (object, filter) {
             resourceConfig = object.toJSON ? object.toJSON(filter) : object;
@@ -108,19 +111,30 @@ define(["./Util"], function (Util) {
 
         /**
          * Create a instance of the resource by calling the constructor function with
-         * (engine,config) parameters.<br>
+         * (config) parameters.<br>
          * If the resource object has a init function, this is also invoked.
          * @method instantiate
-         * @param {kick.core.Engine} engine
-         * @return {Object} instance of the resource
+         * @param {function} onSuccess callback function that returns the resource
+         * @param {function} onError=null callback function when error occurs
          */
-        this.instantiate = function (engine) {
-            var ResourceClass = Util.namespace(type),
-                resource = new ResourceClass(engine, createConfigInitialized(engine, resourceConfig));
-            if (typeof resource.init === 'function') {
-                resource.init();
+        this.instantiate = function (onSuccess, onError) {
+            if (ASSERT){
+                if (typeof(onSuccess) !== "function"){
+                    console.log("ResourceDescriptor.onSuccess is not a function");
+                }
+                if (engine === onSuccess){
+                    console.log("ResourceDescriptor.onSuccess is not ");
+                }
             }
-            return resource;
+
+            var typePath = type.replace(/\./g,"/");
+            require([typePath], function(ResourceClass){
+                var resource = new ResourceClass(createConfigInitialized(resourceConfig));
+                if (typeof resource.init === 'function') {
+                    resource.init();
+                }
+                onSuccess(resource);
+            }, onError);
         };
 
         /**

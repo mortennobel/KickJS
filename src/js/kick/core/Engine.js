@@ -1,5 +1,5 @@
-define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./Shim"],
-    function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils) {
+define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./EngineSingleton", "./Shim"],
+    function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils, EngineSingleton, Shim_NotUsed) {
         "use strict";
 
         var ASSERT = Constants._ASSERT;
@@ -14,7 +14,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
          * @namespace kick.core
          * @constructor
          * @param {String|canvas} idOrElement elementid of canvas tag or the canvas element
-         * @param {kick.core.Config} config Optional, configuration object
+         * @param {kick.core.Config} config={} Configuration object
          */
         var engine = function (idOrElement, config) {
             var glState = new GLState(),
@@ -397,13 +397,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                         gl.enable(c.GL_SCISSOR_TEST);
                         return true;
                     };
-                /**
-                 * Static reference to the current engine.
-                 * @property engine
-                 * @static
-                 * @type kick.core.Engine
-                 */
-                engine.engine = thisObj;
+                EngineSingleton.engine = thisObj;
 
                 success = initGL();
                 if (!success) {
@@ -465,7 +459,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 });
                 Object.freeze(timeObj);
 
-                activeScene = new Scene(thisObj);
+                activeScene = new Scene();
                 eventQueue = new EventQueue(thisObj);
 
                 timeSinceStart = 0;
