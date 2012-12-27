@@ -672,6 +672,25 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
         };
 
         /**
+         * Create an array of empty UV coordinates
+         * @method createUv1
+         */
+        MeshData.prototype.createUv1 = function () {
+            var vertexCount = this.vertex.length / 3;
+            this.uv1 = new Float32Array(vertexCount*2);
+        };
+
+        /**
+         * Create an array of empty UV coordinates
+         * @method createUv2
+         */
+        MeshData.prototype.createUv2 = function () {
+            var vertexCount = this.vertex.length / 3;
+            this.uv2 = new Float32Array(vertexCount*2);
+        };
+
+
+        /**
          * Recalculate the angle weighted vertex normals based on the triangle mesh
          * @method recalculateNormals
          * @return {Boolean} false if meshtype is not GL_TRIANGLES or GL_TRIANGLE_STRIP
