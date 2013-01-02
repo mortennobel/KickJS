@@ -47,6 +47,9 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
                 length,
                 getParameterInt = Util.getParameterInt,
                 getParameterFloat = Util.getParameterFloat;
+            if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                resourceTracker.resourceLoadingStarted(url, meshDestination);
+            }
             if (url.indexOf("kickjs://mesh/triangle/") === 0) {
                 meshDataObj = MeshFactory.createTriangleData();
             } else if (url.indexOf("kickjs://mesh/plane/") === 0) {
@@ -61,10 +64,16 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
                 meshDataObj = MeshFactory.createCubeData(length);
             } else {
                 Util.fail("No meshdata found for " + url);
+                if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                    resourceTracker.resourceLoadingFailed(url, meshDestination);
+                }
                 return;
             }
 
             meshDestination.meshData = meshDataObj;
+            if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                resourceTracker.resourceLoadingFinished(url, meshDestination);
+            }
         };
 
         /**

@@ -318,22 +318,36 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                             return res;
                         },
                         onComplete = function () {
+                            var initCount = 1,
+                                decrementInitCount = function(url){
+                                    initCount--;
+                                    if (initCount == 0){
+                                        _maxUID = config.maxUID || 0; // reset maxUID
+                                        if (config.activeScene) {
+                                            engine.activeScene = thisObj.load(config.activeScene);
+                                        } else {
+                                            engine.activeScene = null;
+                                        }
+                                        if (onSuccess) {
+                                            onSuccess(thisObj);
+                                        }
+                                    }
+                                },
+                                resourceTracker = {
+                                    resourceLoadingStarted: function(){
+                                        initCount++;
+                                    },
+                                    resourceLoadingFinished: decrementInitCount,
+                                    resourceLoadingFailed: onError
+                                };
                             // instantiate config
                             for (uid in resourceDescriptorsByUID) {
                                 if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
-                                    resourceCache[uid].init(createConfigInitialized(resourceDescriptorsByUID[uid].config));
+                                    resourceCache[uid].init(createConfigInitialized(resourceDescriptorsByUID[uid].config), resourceTracker);
                                 }
                             }
+                            decrementInitCount();
 
-                            _maxUID = config.maxUID || 0; // reset maxUID
-                            if (config.activeScene) {
-                                engine.activeScene = thisObj.load(config.activeScene);
-                            } else {
-                                engine.activeScene = null;
-                            }
-                            if (onSuccess) {
-                                onSuccess(thisObj);
-                            }
                         },
                         resourceCount = resourceDescriptors.length,
                         instantiateCount = 0,

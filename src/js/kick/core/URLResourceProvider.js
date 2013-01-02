@@ -37,7 +37,7 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
                         if (meshData.deserialize(arrayBuffer)) {
                             meshDestination.meshData = meshData;
                             if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                                resourceTracker.resourceLoadingStarted(url, meshDestination);
+                                resourceTracker.resourceLoadingFinished(url, meshDestination);
                             }
                         } else {
                             Util.fail("Cannot deserialize meshdata " + url);
@@ -69,7 +69,7 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
                 try {
                     textureDestination.setImage(img, uri);
                     if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                        resourceTracker.resourceLoadingStarted(url, textureDestination);
+                        resourceTracker.resourceLoadingFinished(url, textureDestination);
                     }
                 } catch (e) {
                     Util.fail("Exception when loading image " + uri);
