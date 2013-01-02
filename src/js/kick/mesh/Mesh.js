@@ -177,12 +177,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
          * @method setDataURI
          * @param {String} newValue
          * @param {Boolean} automaticGetMeshData optional. if true the mesh data is attempted to be loaded by resourceLoader.getMeshData
+         * @param resourceTracker {ResourceTracker} Optional
          */
-        this.setDataURI = function (newValue, automaticGetMeshData) {
+        this.setDataURI = function (newValue, automaticGetMeshData, resourceTracker) {
             if (newValue !== _dataURI) {
                 _dataURI = newValue;
                 if (automaticGetMeshData) {
-                    engine.resourceLoader.getMeshData(newValue, thisObj);
+                    engine.resourceLoader.getMeshData(newValue, thisObj, resourceTracker);
                 }
             }
         };
@@ -314,6 +315,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 name: _name,
                 dataURI: _dataURI
             };
+        };
+
+        this.init = function(config, resourceTracker){
+            Util.applyConfig(this, config, ["uid", "dataURI"]);
+            if (config.dataURI){
+                thisObj.setDataURI(config.dataURI, true, resourceTracker);
+            }
         };
     };
 });

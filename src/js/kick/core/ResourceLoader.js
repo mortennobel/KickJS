@@ -19,7 +19,7 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
              * @private
              */
             buildCallbackFunc = function (methodName) {
-                return function (url, destination) {
+                return function (url, destination, resourceTracker) {
                     var i,
                         resourceProvider,
                         protocol;
@@ -27,7 +27,7 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
                         resourceProvider = resourceProviders[i];
                         protocol = resourceProvider.protocol;
                         if (url.indexOf(protocol) === 0) {
-                            resourceProvider[methodName](url, destination);
+                            resourceProvider[methodName](url, destination, resourceTracker);
                             return;
                         }
                     }
@@ -37,6 +37,7 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
          * @method getMeshData
          * @param {String} uri
          * @param {kick.mesh.Mesh} meshDestination
+         * @param resourceTracker {ResourceTracker} Optional
          */
         this.getMeshData = buildCallbackFunc("getMeshData");
         /**

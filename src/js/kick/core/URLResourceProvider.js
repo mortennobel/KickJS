@@ -24,8 +24,11 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
             }
         });
 
-        this.getMeshData = function (url, meshDestination) {
+        this.getMeshData = function (url, meshDestination, resourceTracker) {
             var oReq = new XMLHttpRequest();
+            if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                resourceTracker.resourceLoadingStarted(url, meshDestination);
+            }
             function handler() {
                 if (oReq.readyState === 4) { // oReq.readyState  === complete
                     if (oReq.status === 200) { // oReq.status === ok
@@ -33,11 +36,20 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
                             meshData = new MeshData();
                         if (meshData.deserialize(arrayBuffer)) {
                             meshDestination.meshData = meshData;
+                            if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                                resourceTracker.resourceLoadingStarted(url, meshDestination);
+                            }
                         } else {
                             Util.fail("Cannot deserialize meshdata " + url);
+                            if (resourceTracker && resourceTracker.resourceLoadingFailed){
+                                resourceTracker.resourceLoadingFailed(url, meshDestination);
+                            }
                         }
                     } else {
                         Util.fail("Cannot load meshdata " + url + ". Server responded " + oReq.status);
+                        if (resourceTracker && resourceTracker.resourceLoadingFailed){
+                            resourceTracker.resourceLoadingFailed(url, meshDestination);
+                        }
                     }
                 }
             }
@@ -48,18 +60,30 @@ define(["kick/mesh/MeshData", "./Util"], function (MeshData, Util) {
             oReq.send();
         };
 
-        this.getImageData = function (uri, textureDestination) {
+        this.getImageData = function (uri, textureDestination, resourceTracker) {
             var img = new Image();
+            if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                resourceTracker.resourceLoadingStarted(url, textureDestination);
+            }
             img.onload = function () {
                 try {
                     textureDestination.setImage(img, uri);
+                    if (resourceTracker && resourceTracker.resourceLoadingStarted){
+                        resourceTracker.resourceLoadingStarted(url, textureDestination);
+                    }
                 } catch (e) {
                     Util.fail("Exception when loading image " + uri);
+                    if (resourceTracker && resourceTracker.resourceLoadingFailed){
+                        resourceTracker.resourceLoadingFailed(url, textureDestination);
+                    }
                 }
             };
             img.onerror = function (e) {
                 Util.fail(e);
                 Util.fail("Exception when loading image " + uri);
+                if (resourceTracker && resourceTracker.resourceLoadingFailed){
+                    resourceTracker.resourceLoadingFailed(url, textureDestination);
+                }
             };
             if (uri.indexOf('data:') !== 0) {
                 img.crossOrigin = "anonymous"; // Ask for a CORS image except when using data

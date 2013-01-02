@@ -42,8 +42,9 @@ define(["kick/core/Constants", "./Util", "./EngineSingleton"], function (Constan
          * Configures the object using the configuration data.
          * @method init
          * @param config {Object} configuration data in JSON format
+         * @param resourceTracker {ResourceTracker} Optional
          */
-        object.init = function(config){
+        object.init = function(config, resourceTracker){
             Util.applyConfig(this, config, ["uid"]);
         };
 
