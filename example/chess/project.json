@@ -1,6 +1,6 @@
-{"engineVersion":"0.4.0", "maxUID":347, "activeScene":1, "resourceDescriptors":[
+{"engineVersion":"0.5.0", "maxUID":347, "activeScene":1, "resourceDescriptors":[
     {
-        "type":"KICK.scene.Scene",
+        "type":"kick.scene.Scene",
         "uid":1,
         "config":{
             "uid":1,
@@ -11,7 +11,7 @@
                     "uid":93,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":94,
                             "config":{
                                 "localPosition":[0, 0, 0],
@@ -22,7 +22,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.MeshRenderer",
+                            "type":"kick.scene.MeshRenderer",
                             "uid":95,
                             "config":{
                                 "materials":[
@@ -49,7 +49,7 @@
                     "uid":96,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":97,
                             "config":{
                                 "localPosition":[0, 0, 0],
@@ -60,7 +60,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.Light",
+                            "type":"kick.scene.Light",
                             "uid":98,
                             "config":{
                                 "shadow":false,
@@ -76,7 +76,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.Light",
+                            "type":"kick.scene.Light",
                             "uid":99,
                             "config":{
                                 "shadow":false,
@@ -99,7 +99,7 @@
                     "uid":126,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":127,
                             "config":{
                                 "localPosition":[0, 0, 0],
@@ -110,7 +110,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.MeshRenderer",
+                            "type":"kick.scene.MeshRenderer",
                             "uid":128,
                             "config":{
                                 "materials":[
@@ -137,7 +137,7 @@
                     "uid":130,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":131,
                             "config":{
                                 "localPosition":[0, 11, 0],
@@ -147,7 +147,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.Light",
+                            "type":"kick.scene.Light",
                             "uid":132,
                             "config":{
                                 "shadow":false,
@@ -170,7 +170,7 @@
                     "uid":134,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":135,
                             "config":{
                                 "localPosition":[0, 0, 0],
@@ -181,7 +181,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.MeshRenderer",
+                            "type":"kick.scene.MeshRenderer",
                             "uid":136,
                             "config":{
                                 "materials":[
@@ -208,7 +208,7 @@
                     "uid":137,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":138,
                             "config":{
                                 "localPosition":[0, 0, 0],
@@ -219,7 +219,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.MeshRenderer",
+                            "type":"kick.scene.MeshRenderer",
                             "uid":139,
                             "config":{
                                 "materials":[
@@ -246,7 +246,7 @@
                     "uid":267,
                     "components":[
                         {
-                            "type":"KICK.scene.Transform",
+                            "type":"kick.scene.Transform",
                             "uid":268,
                             "config":{
                                 "localPosition":[0, 0, 0],
@@ -257,7 +257,7 @@
                             }
                         },
                         {
-                            "type":"KICK.scene.MeshRenderer",
+                            "type":"kick.scene.MeshRenderer",
                             "uid":269,
                             "config":{
                                 "materials":[
@@ -283,7 +283,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":54,
         "config":{
             "uid":54,
@@ -292,7 +292,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":59,
         "config":{
             "uid":59,
@@ -301,7 +301,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":64,
         "config":{
             "uid":64,
@@ -310,7 +310,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":74,
         "config":{
             "uid":74,
@@ -319,7 +319,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":79,
         "config":{
             "uid":79,
@@ -328,7 +328,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":84,
         "config":{
             "uid":84,
@@ -337,7 +337,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":89,
         "config":{
             "uid":89,
@@ -346,7 +346,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":92,
         "config":{
             "uid":92,
@@ -369,7 +369,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":129,
         "config":{
             "uid":129,
@@ -390,7 +390,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":143,
         "config":{
             "uid":143,
@@ -413,7 +413,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":144,
         "config":{
             "uid":144,
@@ -436,7 +436,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":178,
         "config":{
             "uid":178,
@@ -445,7 +445,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":215,
         "config":{
             "uid":215,
@@ -466,7 +466,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":217,
         "config":{
             "uid":217,
@@ -487,7 +487,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":218,
         "config":{
             "uid":218,
@@ -508,7 +508,7 @@
         }
     },
     {
-        "type":"KICK.material.Material",
+        "type":"kick.material.Material",
         "uid":224,
         "config":{
             "uid":224,
@@ -529,7 +529,7 @@
         }
     },
     {
-        "type":"KICK.mesh.Mesh",
+        "type":"kick.mesh.Mesh",
         "uid":273,
         "config":{
             "uid":273,
@@ -538,7 +538,7 @@
         }
     },
     {
-        "type":"KICK.texture.Texture",
+        "type":"kick.texture.Texture",
         "uid":310,
         "config":{
             "uid":310,
