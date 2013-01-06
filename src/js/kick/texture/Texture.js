@@ -19,8 +19,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
         return function (config) {
             // extend ProjectAsset
             ProjectAsset(this, config, "kick.texture.Texture");
-            if (Constants._ASSERT){
-                if (config === EngineSingleton.engine){
+            if (Constants._ASSERT) {
+                if (config === EngineSingleton.engine) {
                     Util.fail("Texture constructor changed - engine parameter is removed");
                 }
             }
@@ -165,7 +165,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
                     gl.texImage2D(Constants.GL_TEXTURE_2D, 0, _intFormat, _intFormat, Constants.GL_UNSIGNED_BYTE, imageObj);
 
-                    Vec2.set([imageObj.width, imageObj.height], _dimension);
+                    Vec2.copy(_dimension, [imageObj.width, imageObj.height]);
                 } else {
                     cubemapOrder = [
                         Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -191,7 +191,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                         gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
                         gl.texImage2D(cubemapOrder[i], 0, _intFormat, _intFormat, Constants.GL_UNSIGNED_BYTE, canvas);
                     }
-                    Vec2.set([width, height], _dimension);
+                    Vec2.copy(_dimension, [width, height]);
                 }
                 thisObj.apply();
                 if (_generateMipmaps) {
@@ -264,7 +264,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 }
                 format = _intFormat;
 
-                Vec2.set([width, height], _dimension);
+                Vec2.copy(_dimension, [width, height]);
                 _dataURI = dataURI;
 
                 thisObj.bind(0); // bind to texture slot 0
@@ -566,9 +566,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 };
             };
 
-            this.init = function(config){
+            this.init = function (config) {
                 // apply
-                Util.applyConfig(thisObj, config, ["uid","dataURI"]);
+                Util.applyConfig(thisObj, config, ["uid", "dataURI"]);
                 if (config && config.dataURI) {
                     // set dataURI last to make sure that object is configured before initialization
                     thisObj.dataURI = config.dataURI;
@@ -578,4 +578,5 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             engine.addContextListener(contextListener);
         };
 
-    });
+    }
+);

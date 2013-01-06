@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture"],
-    function (Constants, Util, Quat4, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture) {
+define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture"],
+    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture) {
         "use strict";
 
         /**
@@ -28,7 +28,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 c = Constants,
                 _renderShadow = false,
                 _renderTarget = null,
-                _fieldOfView = 60,
+                _fieldOfView = 60 * Constants._DEGREE_TO_RADIAN,
                 _near = 0.1,
                 _far = 1000,
                 _left = -1,
@@ -71,8 +71,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                 renderableComponentsTransparent = [],
                 renderableComponentsOverlay = [],
                 renderableComponentsArray = [renderableComponentsBackGroundAndGeometry, renderableComponentsTransparent, renderableComponentsOverlay],
-                _normalizedViewportRect = Vec4.create([0, 0, 1, 1]),
-                offsetMatrix = Mat4.create([
+                _normalizedViewportRect = Vec4.clone([0, 0, 1, 1]),
+                offsetMatrix = Mat4.clone([
                     0.5, 0, 0, 0,
                     0, 0.5, 0, 0,
                     0, 0, 0.5, 0,
@@ -134,17 +134,17 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                     gl.clear(_currentClearFlags);
 
                     if (_perspective) {
-                        Mat4.perspective(_fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
-                            _near, _far, projectionMatrix);
+                        Mat4.perspective(projectionMatrix, _fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
+                            _near, _far);
                     } else {
-                        Mat4.ortho(_left, _right, _bottom, _top,
-                            _near, _far, projectionMatrix);
+                        Mat4.ortho(projectionMatrix, _left, _right, _bottom, _top,
+                            _near, _far);
                     }
 
                     globalMatrixInv = transform.getGlobalTRSInverse();
-                    Mat4.set(globalMatrixInv, viewMatrix);
+                    Mat4.copy(viewMatrix, globalMatrixInv);
 
-                    Mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
+                    Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
                 },
                 /**
@@ -197,7 +197,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                     for (i = renderableComponentsTransparent.length - 1; i >= 0; i--) {
                         object = renderableComponentsTransparent[i];
                         objectPosition = object.gameObject.transform.position;
-                        object.distanceToCamera = Vec3.lengthSqr(Vec3.subtract(objectPosition, cameraPosition, temp));
+                        object.distanceToCamera = Vec3.squaredLength(Vec3.subtract(objectPosition, cameraPosition, temp));
                     }
                     function compareDistanceToCamera(a, b) {
                         return b.distanceToCamera - a.distanceToCamera;
@@ -218,7 +218,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                                 var componentAabb = component.aabb,
                                     gameObject = component.gameObject;
                                 if (componentAabb && gameObject) {
-                                    Aabb.transform(componentAabb, gameObject.transform.getGlobalMatrix(), aabbWorldSpace);
+                                    Aabb.transform(aabbWorldSpace, componentAabb, gameObject.transform.getGlobalMatrix());
                                     return Frustum.intersectAabb(frustumPlanes, aabbWorldSpace) === Frustum.OUTSIDE;
                                 }
                                 return false;
@@ -235,7 +235,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                                 }
                             };
                         // update frustum planes
-                        Frustum.extractPlanes(engineUniforms.viewProjectionMatrix, false, frustumPlanes);
+                        Frustum.extractPlanes(frustumPlanes, engineUniforms.viewProjectionMatrix, false);
                         engineUniforms.sceneLights = sceneLightObj;
                         render(renderableComponentsBackGroundAndGeometry);
                         render(renderableComponentsTransparent);
@@ -262,11 +262,11 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                     // The actual light volume is a bit larger than the sphere (to include the corners).
                     // The near plane of the light volume is extended by the engine.config.shadowNearMultiplier
                     // Note that this is a very basic fitting algorithm with rooms for improvement
-                    Mat4.set(shadowLightProjection, projectionMatrix);
+                    Mat4.copy(projectionMatrix, shadowLightProjection);
 
                     // find the position of the light 'center' in world space
-                    transformedOffsetFromCamera = Quat4.multiplyVec3(transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
-                    cameraPosition = Vec3.add(transformedOffsetFromCamera, transform.position);
+                    transformedOffsetFromCamera = Quat.multiplyVec3(Vec3.create(), transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
+                    cameraPosition = Vec3.add(Vec3.create(), transformedOffsetFromCamera, transform.position);
                     // adjust to reduce flicker when rotating camera
                     cameraPosition[0] = Math.round(cameraPosition[0]);
                     cameraPosition[1] = Math.round(cameraPosition[1]);
@@ -274,11 +274,11 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
 
                     Mat4.setTRSInverse(cameraPosition, directionalLightTransform.localRotation, [1, 1, 1], viewMatrix);
 
-                    Mat4.multiply(projectionMatrix, viewMatrix, viewProjectionMatrix);
+                    Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
                     // update light matrix (will be used when scene is rendering with shadow map shader)
-                    Mat4.multiply(Mat4.multiply(offsetMatrix, projectionMatrix, lightMatrix),
-                        viewMatrix, lightMatrix);
+                    Mat4.multiply(lightMatrix, Mat4.multiply(lightMatrix, offsetMatrix, projectionMatrix),
+                        viewMatrix);
 
                     renderSceneObjects(sceneLightObj, _shadowmapMaterial);
 
@@ -559,12 +559,12 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                  * @type Number
                  */
                 fieldOfView: {
-                    get: function () { return _fieldOfView; },
+                    get: function () { return _fieldOfView * Constants._RADIAN_TO_DEGREE; },
                     set: function (newValue) {
                         if (c._ASSERT) {
                             assertNumber(newValue, "fieldOfView");
                         }
-                        _fieldOfView = Math.min(179, Math.max(newValue, 1));
+                        _fieldOfView = Math.min(179, Math.max(newValue, 1)) * Constants._DEGREE_TO_RADIAN;
                     }
                 },
                 /**
@@ -710,10 +710,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                  */
                 clearColor: {
                     get: function () {
-                        return Vec4.create(_clearColor);
+                        return Vec4.clone(_clearColor);
                     },
                     set: function (newValue) {
-                        _clearColor = Vec4.create(newValue);
+                        _clearColor = Vec4.clone(newValue);
                     }
                 },
                 /**
@@ -762,7 +762,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat4", "kick/math/M
                                 Util.fail("Camera.normalizedViewportRect must be Float32Array of length 4");
                             }
                         }
-                        Vec4.set(newValue, _normalizedViewportRect);
+                        Vec4.copy(_normalizedViewportRect, newValue);
                     }
                 }
             });

@@ -1,4 +1,4 @@
-define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Constants", "kick/core/Util"], function (Mat4, Vec3, Quat4, Constants, Util) {
+define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constants", "kick/core/Util"], function (Mat4, Vec3, Quat, Constants, Util) {
     "use strict";
 
     var ASSERT = Constants._ASSERT,
@@ -14,15 +14,15 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
      * @extends kick.scene.Component
      */
     Transform = function (gameObject) {
-        var localMatrix = Mat4.identity(Mat4.create()),
-            globalMatrix = Mat4.identity(Mat4.create()),
-            localMatrixInverse = Mat4.identity(Mat4.create()),
-            globalMatrixInverse = Mat4.identity(Mat4.create()),
-            globalPosition = Vec3.create([0, 0, 0]),
-            localPosition = Vec3.create([0, 0, 0]),
-            globalRotationQuat = Quat4.create([0, 0, 0, 1]),
-            localRotationQuat = Quat4.create([0, 0, 0, 1]),
-            localScale = Vec3.create([1, 1, 1]),
+        var localMatrix = Mat4.create(),
+            globalMatrix = Mat4.create(),
+            localMatrixInverse = Mat4.create(),
+            globalMatrixInverse = Mat4.create(),
+            globalPosition = Vec3.create(),
+            localPosition = Vec3.create(),
+            globalRotationQuat = Quat.create(),
+            localRotationQuat = Quat.create(),
+            localScale = Vec3.clone([1, 1, 1]),
             // the dirty parameter let the
             LOCAL = 0,
             LOCAL_INV = 1,
@@ -64,13 +64,13 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
                 get: function () {
                     // if no parent - use local position
                     if (parentTransform === null) {
-                        return Vec3.create(localPosition);
+                        return Vec3.clone(localPosition);
                     }
                     if (dirty[GLOBAL_POSITION]) {
-                        Mat4.multiplyVec3(thisObj.getGlobalMatrix(), [0, 0, 0], globalPosition);
+                        Mat4.multiplyVec3(globalPosition, thisObj.getGlobalMatrix(), [0, 0, 0]);
                         dirty[GLOBAL_POSITION] = 0;
                     }
-                    return Vec3.create(globalPosition);
+                    return Vec3.clone(globalPosition);
                 },
                 set: function (newValue) {
                     var currentPosition;
@@ -79,7 +79,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
                         return;
                     }
                     currentPosition = thisObj.position;
-                    Vec3.set(newValue, localPosition);
+                    Vec3.copy(localPosition, newValue);
                     thisObj.localPosition = [
                         localPosition[0] + currentPosition[0] - newValue[0],
                         localPosition[1] + currentPosition[1] - newValue[1],
@@ -95,10 +95,10 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
              */
             localPosition: {
                 get: function () {
-                    return Vec3.create(localPosition);
+                    return Vec3.clone(localPosition);
                 },
                 set: function (newValue) {
-                    Vec3.set(newValue, localPosition);
+                    Vec3.copy(localPosition, newValue);
                     markLocalDirty();
                 }
             },
@@ -110,11 +110,11 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             localRotationEuler: {
                 get: function () {
                     var vec = Vec3.create();
-                    Quat4.toEuler(localRotationQuat, vec);
+                    Quat.toEuler(vec, localRotationQuat);
                     return vec;
                 },
                 set: function (newValue) {
-                    Quat4.setEuler(newValue, localRotationQuat);
+                    Quat.setEuler(localRotationQuat, newValue);
                     markLocalDirty();
                 }
             },
@@ -126,12 +126,12 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             rotationEuler: {
                 get: function () {
                     var vec = Vec3.create();
-                    Quat4.toEuler(thisObj.rotation, vec);
+                    Quat.toEuler(vec, thisObj.rotation);
                     return vec;
                 },
                 set: function (newValue) {
-                    var tmp = Quat4.create();
-                    Quat4.setEuler(newValue, tmp);
+                    var tmp = Quat.create();
+                    Quat.setEuler(tmp, newValue);
                     this.rotation = tmp;
                 }
             },
@@ -139,19 +139,19 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
             /**
              * Global rotation in quaternion.
              * @property rotation
-             * @type kick.math.Quat4
+             * @type kick.math.Quat
              */
             rotation: {
                 get: function () {
                     var parentIterator = null;
                     if (parentTransform === null) {
-                        return Quat4.create(localRotationQuat);
+                        return Quat.clone(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]) {
-                        Quat4.set(localRotationQuat, globalRotationQuat);
+                        Quat.copy(globalRotationQuat, localRotationQuat);
                         parentIterator = thisObj.parent;
                         while (parentIterator !== null) {
-                            Quat4.multiply(parentIterator.localRotation, globalRotationQuat, globalRotationQuat);
+                            Quat.multiply(globalRotationQuat, parentIterator.localRotation, globalRotationQuat);
                             parentIterator = parentIterator.parent;
                         }
                         dirty[GLOBAL_ROTATION] = false;
@@ -163,22 +163,22 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
                         this.localRotation = newValue;
                         return;
                     }
-                    var rotationDifference = Quat4.create();
-                    Quat4.difference(newValue, thisObj.rotation, rotationDifference);
-                    this.localRotation = Quat4.multiply(localRotationQuat, rotationDifference);
+                    var rotationDifference = Quat.create();
+                    Quat.difference(rotationDifference, newValue, thisObj.rotation);
+                    this.localRotation = Quat.multiply(localRotationQuat, localRotationQuat, rotationDifference);
                 }
             },
             /**
              * Local rotation in quaternion.
              * @property localRotation
-             * @type kick.math.Quat4
+             * @type kick.math.Quat
              */
             localRotation: {
                 get: function () {
                     return localRotationQuat;
                 },
                 set: function (newValue) {
-                    Quat4.set(newValue, localRotationQuat);
+                    Quat.copy(localRotationQuat, newValue);
                     markLocalDirty();
                 }
             },
@@ -190,11 +190,11 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
              */
             localScale: {
                 get: function () {
-                    return Vec3.create(localScale);
+                    return Vec3.clone(localScale);
                 },
                 set: function (newValue) {
                     var i;
-                    Vec3.set(newValue, localScale);
+                    Vec3.copy(localScale, newValue);
                     // replace 0 value with epsilon to prevent a singular matrix
                     for (i = 0; i < localScale.length; i++) {
                         if (localScale[i] === 0) {
@@ -258,7 +258,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
                     Util.fail("transform must be a kick.scene.Transform");
                 }
             }
-            Quat4.lookAt(thisObj.position, transform.position, up, localRotationQuat);
+            Quat.lookAt(thisObj.position, transform.position, up, localRotationQuat);
             markLocalDirty();
         };
 
@@ -269,7 +269,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
          */
         this.getLocalMatrix = function () {
             if (dirty[LOCAL]) {
-                Mat4.setTRS(localPosition, localRotationQuat, localScale, localMatrix);
+                Mat4.setTRS(localMatrix, localPosition, localRotationQuat, localScale);
                 dirty[LOCAL] = 0;
             }
             return localMatrix;
@@ -282,7 +282,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
          */
         this.getLocalTRSInverse = function () {
             if (dirty[LOCAL_INV]) {
-                Mat4.setTRSInverse(localPosition, localRotationQuat, localScale, localMatrixInverse);
+                Mat4.setTRSInverse(localMatrixInverse, localPosition, localRotationQuat, localScale);
                 dirty[LOCAL_INV] = 0;
             }
             return localMatrixInverse;
@@ -294,11 +294,11 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
          */
         this.getGlobalMatrix = function () {
             if (dirty[GLOBAL]) {
-                Mat4.set(thisObj.getLocalMatrix(), globalMatrix);
+                Mat4.copy(globalMatrix, thisObj.getLocalMatrix());
 
                 var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
-                    Mat4.multiply(transformIterator.getLocalMatrix(), globalMatrix, globalMatrix);
+                    Mat4.multiply(globalMatrix, transformIterator.getLocalMatrix(), globalMatrix);
                     transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL] = 0;
@@ -313,10 +313,10 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4", "kick/core/Consta
          */
         this.getGlobalTRSInverse = function () {
             if (dirty[GLOBAL_INV]) {
-                Mat4.set(thisObj.getLocalTRSInverse(), globalMatrixInverse);
+                Mat4.copy(globalMatrixInverse, thisObj.getLocalTRSInverse());
                 var transformIterator = thisObj.parent;
                 while (transformIterator !== null) {
-                    Mat4.multiply(globalMatrixInverse, transformIterator.getLocalTRSInverse(), globalMatrixInverse);
+                    Mat4.multiply(globalMatrixInverse, globalMatrixInverse, transformIterator.getLocalTRSInverse());
                     transformIterator  = transformIterator.parent;
                 }
                 dirty[GLOBAL_INV] = 0;

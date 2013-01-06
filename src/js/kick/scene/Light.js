@@ -17,7 +17,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
          */
         Light = function (config) {
             var thisObj = this,
-                color = Vec3.create([1.0, 1.0, 1.0]),
+                color = Vec3.clone([1.0, 1.0, 1.0]),
                 engine,
                 type = Constants._LIGHT_TYPE_POINT,
                 _shadow = false,
@@ -25,12 +25,12 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 _shadowBias = 0.05,
                 _shadowTexture = null,
                 _shadowRenderTexture = null,
-                attenuation = Vec3.create([1, 0, 0]),
+                attenuation = Vec3.clone([1, 0, 0]),
                 intensity = 1,
                 transform,
-                colorIntensity = Vec3.create([1.0, 1.0, 1.0]),
+                colorIntensity = Vec3.clone([1.0, 1.0, 1.0]),
                 updateIntensity = function () {
-                    Vec3.set([color[0] * intensity, color[1] * intensity, color[2] * intensity], colorIntensity);
+                    Vec3.copy(colorIntensity, [color[0] * intensity, color[1] * intensity, color[2] * intensity]);
                 },
                 gameObject,
                 scriptPriority,
@@ -144,7 +144,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  */
                 color: {
                     get: function () {
-                        return Vec3.create(color);
+                        return Vec3.clone(color);
                     },
                     set: function (value) {
                         if (ASSERT) {
@@ -152,7 +152,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                                 Util.fail("Light color must be vec3");
                             }
                         }
-                        Vec3.set(value, color);
+                        Vec3.copy(color, value);
                         updateIntensity();
                     },
                     enumerable: true
@@ -213,7 +213,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                         return attenuation;
                     },
                     set: function (newValue) {
-                        Vec3.set(newValue, attenuation);
+                        Vec3.copy(attenuation, newValue);
                     },
                     enumerable: true
                 },

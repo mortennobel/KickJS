@@ -22,8 +22,10 @@
 
         req(['kick'],
                 function (KICK) {
+                    "use strict";
         var engine;
         var meshRenderer;
+                    var materials;
 
         var log = function (output) {
             var element = document.getElementById("output");
@@ -43,15 +45,15 @@
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
             shader.apply();
-
-            new KICK.material.Material({
+            materials = [];
+            materials[0] = new KICK.material.Material({
                 name:"Material.002",
                 shader:shader,
                 uniformData:{
                      color:  [1,0,0]
                 }
             });
-            new KICK.material.Material({
+            materials[1] = new KICK.material.Material({
                 name:"Material.003",
                 shader:shader,
                 uniformData:{
@@ -115,8 +117,10 @@
                 console.log("Number of mesh renderers "+meshRenderers.length);
                 for (var j=0;j<meshRenderers.length;j++){
                     meshRenderer = meshRenderers[j];
+                    materials.materials = materials;
                     var meshData = meshRenderer.mesh.meshData;
                     meshData.recalculateNormals();
+                    meshData.createUv1();
                     meshRenderer.mesh.meshData = meshData;
                     console.log("Number of subMeshes"+meshData.subMeshes.length);
                     for (var k=0;k<meshData.subMeshes.length;k++){

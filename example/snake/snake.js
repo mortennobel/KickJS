@@ -65,7 +65,7 @@ requirejs(['kick'],
             function SnakeTail(tailPosition){
                 var _tail,
                     transform,
-                    position = vec3.create(tailPosition);
+                    position = vec3.clone(tailPosition);
 
                 this.activated = function (){
                     transform = this.gameObject.transform;
@@ -76,7 +76,7 @@ requirejs(['kick'],
                     if (_tail){
                         _tail.move(position);
                     }
-                    vec3.set(newPosition,position);
+                    vec3.copy(position, newPosition);
                     if (transform){
                         transform.localPosition = position;
                     }
@@ -107,8 +107,8 @@ requirejs(['kick'],
                     input,
                     snakeTail,
                     _score = 0,
-                    moveDirection = vec3.create(initialMoveDirection || [1,0,0]),
-                    position = vec3.create(initialMovePosition || [0,0,0]),
+                    moveDirection = vec3.clone(initialMoveDirection || [1,0,0]),
+                    position = vec3.clone(initialMovePosition || [0,0,0]),
                     scene = engine.activeScene,
                     currentMovement = 0, // limits movement to not go backwards
                     shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
@@ -169,7 +169,7 @@ requirejs(['kick'],
                     if (snakeTail){
                         snakeTail.move(position);
                     }
-                    vec3.add(position,moveDirection);
+                    vec3.add(position,position,moveDirection);
                     transform.position = position;
                     currentMovement = 0;
                     return position;
@@ -259,8 +259,8 @@ requirejs(['kick'],
                     } while (tailChild);
                     snakeTail = null;
 
-                    vec3.set(initialMoveDirection || [1,0,0], moveDirection);
-                    vec3.set(initialMovePosition || [0,0,0], position);
+                    vec3.copy(moveDirection, initialMoveDirection || [1,0,0]);
+                    vec3.copy(position, initialMovePosition || [0,0,0]);
 
                     transform.position = position;
                     init();
@@ -271,10 +271,10 @@ requirejs(['kick'],
                 };
 
                 var init = function(){
-                    var childPosition = vec3.create(position),
-                        tailDirection = vec3.multiply([-1,-1,-1],moveDirection,vec3.create());
+                    var childPosition = vec3.clone(position),
+                        tailDirection = vec3.multiply(vec3.create(),[-1,-1,-1],moveDirection);
                     for (var i=0;i<initialLength;i++){
-                        vec3.add(childPosition,tailDirection);
+                        vec3.add(childPosition,childPosition,tailDirection);
                         addTail(childPosition);
                     }
                 };
@@ -312,8 +312,8 @@ requirejs(['kick'],
 
                     meshRenderer.material = material;
 
-                    var scaleWidthMatrix = mat4.scale(mat4.identity(mat4.create()),[size+1,1,1]);
-                    var scaleHeightMatrix = mat4.scale(mat4.identity(mat4.create()),[1,1,size]);
+                    var scaleWidthMatrix = mat4.scale(mat4.create(), mat4.create(),[size+1,1,1]);
+                    var scaleHeightMatrix = mat4.scale(mat4.create(), mat4.create(),[1,1,size]);
                     var wideCube = KICK.mesh.MeshFactory.createCubeData(0.5).transform(scaleWidthMatrix);
                     var tallCube = KICK.mesh.MeshFactory.createCubeData(0.5).transform(scaleHeightMatrix);
                     var meshData = new KICK.mesh.MeshData({
@@ -323,12 +323,12 @@ requirejs(['kick'],
                         indices:[],
                         uv1:[]
                     });
-                    var translateUpMatrix         = mat4.translate(mat4.identity(mat4.create()),[0,0,-size/2]);
-                    var translateDownHeightMatrix = mat4.translate(mat4.identity(mat4.create()),[0,0,size/2]);
+                    var translateUpMatrix         = mat4.translate(mat4.create(),mat4.create(),[0,0,-size/2]);
+                    var translateDownHeightMatrix = mat4.translate(mat4.create(),mat4.create(),[0,0,size/2]);
                     meshData = meshData.combine(wideCube.transform(translateUpMatrix));
                     meshData = meshData.combine(wideCube.transform(translateDownHeightMatrix));
-                    var translateLeftMatrix        = mat4.translate(mat4.identity(mat4.create()),[-size/2,0,0]);
-                    var translateRightHeightMatrix = mat4.translate(mat4.identity(mat4.create()),[size/2,0,0]);
+                    var translateLeftMatrix        = mat4.translate(mat4.create(),mat4.create(),[-size/2,0,0]);
+                    var translateRightHeightMatrix = mat4.translate(mat4.create(),mat4.create(),[size/2,0,0]);
                     meshData = meshData.combine(tallCube.transform(translateLeftMatrix));
                     meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 

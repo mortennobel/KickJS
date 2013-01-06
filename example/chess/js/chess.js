@@ -12,7 +12,7 @@ requirejs(['kick', 'ChessGame', 'ChessCameraMovementListener', 'ChessField', 'Ch
         var engine,
             vec2 = KICK.math.Vec2,
             vec3 = KICK.math.Vec3,
-            quat4 = KICK.math.Quat4;
+            quat = KICK.math.Quat;
 
 
         function initKick(){

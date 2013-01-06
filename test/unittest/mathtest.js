@@ -84,8 +84,8 @@ requirejs(['kick/math',  'kick/core/Constants'],
 
                     var v1 = [1,2,3];
                     var v2 = [-1,-2,-3];
-                    var lenSqr1 = math.Vec3.lengthSqr(v1);
-                    var lenSqr2 = math.Vec3.lengthSqr(v2);
+                    var lenSqr1 = math.Vec3.squaredLength(v1);
+                    var lenSqr2 = math.Vec3.squaredLength(v2);
 
                     Assert.areEqual(14,lenSqr1);
                     Assert.areEqual(14,lenSqr2);
@@ -95,8 +95,8 @@ requirejs(['kick/math',  'kick/core/Constants'],
 
                     var v1 = [1,2,3];
                     var v2 = [-1,-2,3];
-                    var res = math.Vec3.multiply(v1,v2,math.Vec3.create());
-                    var expected = math.Vec3.create([-1,-4,9]);
+                    var res = math.Vec3.multiply(math.Vec3.create(),v1,v2);
+                    var expected = math.Vec3.clone([-1,-4,9]);
                     for (var i=0;i<3;i++){
                         Assert.areEqual(expected[i],res[i]);
                     }
@@ -132,9 +132,9 @@ requirejs(['kick/math',  'kick/core/Constants'],
                     Assert.areEqual(4,v[1].length,"Content");
                     Assert.areEqual(0,v[1][3],"Zero'ed");
                 },
-                testQuad4SetEuler: function(){
+                testQuatSetEuler: function(){
                     var Assert = Y.Assert;
-                    var quat4 = math.Quat4.create();
+                    var quat = math.Quat.create();
                     for (var i=0;i<1000;i++){
                         var euler = math.Vec3.create();
                         if (i<3){
@@ -142,24 +142,23 @@ requirejs(['kick/math',  'kick/core/Constants'],
                         } else {
                             euler = [Math.random()*720-360,Math.random()*720-360,Math.random()*720-360];
                         }
-                        math.Quat4.setEuler(euler,quat4);
+                        math.Quat.setEuler(quat, euler);
                         var mat = math.Mat4.create();
-                        math.Mat4.identity(mat);
-                        math.Mat4.rotateEuler(mat,euler);
+                        math.Mat4.rotateEuler(mat,mat,euler);
                         var point = [Math.random()*720-360,Math.random()*720-360,Math.random()*720-360];
 
                         var matrixPoint = math.Vec3.create();
                         var quatPoint = math.Vec3.create();
                         math.Mat4.multiplyVec3(mat,point,matrixPoint);
-                        math.Quat4.multiplyVec3(quat4,point,quatPoint);
+                        math.Quat.multiplyVec3(quat,point,quatPoint);
                         var msg = "matrixPoint:\n"+math.Vec3.str(matrixPoint)+
                                 "\nquatPoint:\n"+math.Vec3.str(quatPoint);
                         Assert.compareVec(matrixPoint,quatPoint,msg);
                     }
                 },
-                testQuad4SetEulerToMatrix: function(){
+                testQuatSetEulerToMatrix: function(){
                     var Assert = Y.Assert;
-                    var quat4 = math.Quat4.create();
+                    var quat = math.Quat.create();
                     for (var i=0;i<1000;i++){
                         var euler = math.Vec3.create();
                         if (i<3){
@@ -167,11 +166,10 @@ requirejs(['kick/math',  'kick/core/Constants'],
                         } else {
                             euler = [Math.random()*720-360,Math.random()*720-360,Math.random()*720-360];
                         }
-                        math.Quat4.setEuler(euler,quat4);
-                        var quatMat = math.Quat4.toMat4(quat4);
+                        math.Quat.setEuler(quat, euler);
+                        var quatMat = math.Quat.toMat4(math.Mat4.create(), quat);
                         var mat = math.Mat4.create();
-                        math.Mat4.identity(mat);
-                        math.Mat4.rotateEuler(mat,euler);
+                        math.Mat4.rotateEuler(mat,mat,euler);
 
                         var msg = "quat euler to matrix:\n"+math.Mat4.strPretty(quatMat)+
                                 "\nmat euler:\n"+math.Mat4.strPretty(mat);
@@ -179,25 +177,25 @@ requirejs(['kick/math',  'kick/core/Constants'],
                     }
                 },
 
-                testQuad4AngleAxis: function(){
+                testQuatAngleAxis: function(){
                     var Assert = Y.Assert;
-                    var quat4 = math.Quat4.create();
+                    var quat = math.Quat.create();
 
                     var rotationAxis = [[1,0,0],[0,1,0],[0,0,1]];
                     var rotationAxisMatFunc = [math.Mat4.rotateX,math.Mat4.rotateY,math.Mat4.rotateZ];
                     for (var i=0;i<3;i++){
                         var angle = 12.145;
-                        math.Quat4.angleAxis(angle,rotationAxis[i],quat4);
+                        math.Quat.setAxisAngle(quat,rotationAxis[i],angle*constants._DEGREE_TO_RADIAN);
                         var mat = math.Mat4.create();
                         math.Mat4.identity(mat);
                         rotationAxisMatFunc[i](mat,angle*constants._DEGREE_TO_RADIAN);
 
-                        var point = math.Vec3.create([12.451,123.5,.9]);
+                        var point = math.Vec3.clone([12.451,123.5,0.9]);
 
                         var matrixPoint = math.Vec3.create();
                         var quatPoint = math.Vec3.create();
                         math.Mat4.multiplyVec3(mat,point,matrixPoint);
-                        math.Quat4.multiplyVec3(quat4,point,quatPoint);
+                        math.Quat.multiplyVec3(quat,point,quatPoint);
 
                         var msg = "matrixPoint:\n"+math.Vec3.str(matrixPoint)+
                                 "\nquatPoint:\n"+math.Vec3.str(quatPoint)+
@@ -205,39 +203,39 @@ requirejs(['kick/math',  'kick/core/Constants'],
                         Assert.compareVec(matrixPoint,quatPoint,msg);
                     }
                 },
-                testQuad4Euler: function(){
+                testQuatEuler: function(){
                     var Assert = Y.Assert;
-                    var quat = math.Quat4.create([0,0,0,1]);
-                    var vec = math.Vec3.create([0,0,0]);
+                    var quat = math.Quat.clone([0,0,0,1]);
+                    var vec = math.Vec3.clone([0,0,0]);
 
-                    math.Quat4.toEuler(quat,vec);
+                    math.Quat.toEuler(vec, quat);
                     Assert.compareVec([0,0,0],vec);
                 },
-                testQuad4EulerRotation: function(){
+                testQuatEulerRotation: function(){
                     var Assert = Y.Assert;
-                    var quat = math.Quat4.create([0,0,0,1]);
-                    math.Quat4.setEuler([0,180,0],quat);
-                    var left = math.Vec3.create([1,0,0]);
-                    var right = math.Vec3.create([-1,0,0]);
-                    var res = math.Vec3.create([0,0,0]);
-                    var testRotation = math.Quat4.create();
-                    math.Quat4.angleAxis(180,[0,1,0],testRotation);
-                    math.Quat4.multiplyVec3(testRotation,left,res);
+                    var quat = math.Quat.clone([0,0,0,1]);
+                    math.Quat.setEuler(quat, [0,180,0]);
+                    var left = math.Vec3.clone([1,0,0]);
+                    var right = math.Vec3.clone([-1,0,0]);
+                    var res = math.Vec3.clone([0,0,0]);
+                    var testRotation = math.Quat.create();
+                    math.Quat.setAxisAngle(testRotation,[0,1,0],180 * constants._DEGREE_TO_RADIAN);
+                    math.Quat.multiplyVec3(res, testRotation,left);
                     Assert.compareVec(res,right);
-                    math.Quat4.multiplyVec3(quat,left,res);
+                    math.Quat.multiplyVec3(res,quat,left);
                     Assert.compareVec(res,right);
-                    math.Quat4.multiplyVec3(quat,right,res);
+                    math.Quat.multiplyVec3(res, quat,right);
                     Assert.compareVec(res,left);
                 },
-                testQuad4Difference: function(){
+                testQuatDifference: function(){
                     var Assert = Y.Assert;
-                    var quat1 = math.Quat4.create([0,0,0,1]);
-                    var quat2 = math.Quat4.create([0,0,0,1]);
+                    var quat1 = math.Quat.create();
+                    var quat2 = math.Quat.create();
 
-                    math.Quat4.setEuler([15,0,0],quat1);
-                    math.Quat4.setEuler([-25,0,0],quat2);
-                    var res = math.Quat4.difference(quat1,quat2);
-                    var resEuler = math.Quat4.toEuler(res);
+                    math.Quat.setEuler(quat1, [15,0,0]);
+                    math.Quat.setEuler(quat2, [-25,0,0]);
+                    var res = math.Quat.difference(math.Quat.create(),quat1,quat2);
+                    var resEuler = math.Quat.toEuler(math.Vec3.create(), res);
                     Assert.compareVec([-40,0,0],resEuler);
                 },
                 testCartesialToSpherical:function(){
@@ -263,37 +261,37 @@ requirejs(['kick/math',  'kick/core/Constants'],
                 },
                 testSetTRS:function(){
                     var mat4 = math.Mat4;
-                    var quat4 = math.Quat4;
-                    mat4.setTRSOld = function(translate, rotateQuat, scale, dest){
-                        dest = mat4.fromRotationTranslation(rotateQuat,translate,dest);
+                    var quat = math.Quat;
+                    mat4.setTRSOld = function(dest, translate, rotateQuat, scale){
+                        dest = mat4.fromRotationTranslation(dest,rotateQuat,translate);
                         if (scale[0] !== 0 || scale[1] !== 0 || scale[1] !== 0){
-                            mat4.scale(dest, scale);
+                            mat4.scale(dest, dest, scale);
                         }
                         return dest;
                     };
 
                     for (var i=0;i<1000;i++){
                         var translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
-                        var rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
+                        var rotate = quat.setEuler(math.Quat.create(), [Math.random()*360,Math.random()*360,Math.random()*360]);
                         var scale = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
-                        var oldTRSRes = mat4.setTRSOld(translate,rotate,scale);
-                        var newTRSRes = mat4.setTRS(translate,rotate,scale);
+                        var oldTRSRes = mat4.setTRSOld(mat4.create(), translate,rotate,scale);
+                        var newTRSRes = mat4.setTRS(mat4.create(), translate,rotate,scale);
                         Y.Assert.compareVec(oldTRSRes,newTRSRes);
                     }
                 },
                 testSetTRSInverse:function(){
                     var mat4 = math.Mat4;
-                    var quat4 = math.Quat4;
+                    var quat = math.Quat;
 
                     mat4.setTRSInverseOld = (function(){
                             var conjugateRotation = new Float32Array(4);
                             return function(translate, rotateQuat, scale, dest){
                                 if(!dest) { dest = mat4.create(); }
                                 mat4.identity(dest);
-                                mat4.scale(dest, [1/scale[0],1/scale[1],1/scale[2]]);
-                                quat4.conjugate(rotateQuat,conjugateRotation);
-                                mat4.multiply(dest,quat4.toMat4(conjugateRotation));
-                                mat4.translate(dest, [-translate[0],-translate[1],-translate[2]]);
+                                mat4.scale(dest, dest, [1/scale[0],1/scale[1],1/scale[2]]);
+                                quat.conjugate(conjugateRotation, rotateQuat);
+                                mat4.multiply(dest,dest,quat.toMat4(math.Mat4.create(), conjugateRotation));
+                                mat4.translate(dest, dest, [-translate[0],-translate[1],-translate[2]]);
                                 return dest;
                             };
                         })();
@@ -301,10 +299,10 @@ requirejs(['kick/math',  'kick/core/Constants'],
 
                     for (var i=0;i<1000;i++){
                         var translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
-                        var rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
+                        var rotate = quat.setEuler(quat.create(), [Math.random()*360,Math.random()*360,Math.random()*360]);
                         var scale = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
                         var oldTRSRes = mat4.setTRSInverseOld(translate,rotate,scale);
-                        var newTRSRes = mat4.setTRSInverse(translate,rotate,scale);
+                        var newTRSRes = mat4.setTRSInverse(mat4.create(), translate,rotate,scale);
                         Y.Assert.compareVec(oldTRSRes,newTRSRes);
                     }
                 },
@@ -370,65 +368,65 @@ requirejs(['kick/math',  'kick/core/Constants'],
                 },*/
                 testDecomposeMat4:function(){
                     var Assert = Y.Assert;
-                    var quat4 = math.Quat4;
+                    var quat = math.Quat;
                     var translate = [10,20,30];
                     var rotate = [0,0,0,1];
                     var scale = [1,2,3];
                     for (var i=0;i<10000;i++){
                         translate = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
-                        rotate = quat4.setEuler([Math.random()*360,Math.random()*360,Math.random()*360],rotate);
-                        quat4.normalize(rotate);
+                        rotate = quat.setEuler(rotate, [Math.random()*360,Math.random()*360,Math.random()*360]);
+                        quat.normalize(rotate, rotate);
                         scale = [Math.random()*100,Math.random()*100,Math.random()*100];
-                        var matrix = math.Mat4.setTRS (translate , rotate , scale);
-                        var decomposedMatrix = math.Mat4.decompose(matrix);
+                        var matrix = math.Mat4.setTRS (math.Mat4.create(), translate , rotate , scale);
+                        var decomposedMatrix = math.Mat4.decompose(matrix, math.Vec3.create(), math.Quat.create(), math.Vec3.create());
                         var decomposedTranslate = decomposedMatrix[0];
                         var decomposedRotate = decomposedMatrix[1];
                         var decomposedScale = decomposedMatrix[2];
 
                         Y.Assert.compareVec(translate,decomposedTranslate);
-                        Y.Assert.compareQuat4(rotate,decomposedRotate);
+                        Y.Assert.compareQuat(rotate,decomposedRotate);
                         Y.Assert.compareVec(scale,decomposedScale);
                     }
                 },
                 testAABBTransformTranslate:function(){
                     var Assert = Y.Assert,
-                            quat4 = math.Quat4,
+                            quat = math.Quat,
                             mat4 = math.Mat4,
                             aabb = math.Aabb;
                     var ab = aabb.create([-1,-1,-1],[1,1,1]);
-                    var translateMat = mat4.setTRS([3,0,0],[0,0,0,1],[1,1,1]);
-                    var transformedAABB = aabb.transform(ab,translateMat);
+                    var translateMat = mat4.setTRS(mat4.create(),[3,0,0],[0,0,0,1],[1,1,1]);
+                    var transformedAABB = aabb.transform(ab,ab,translateMat);
                     var expectedRes = aabb.create([2,-1,-1],[4,1,1]);
                     Y.Assert.compareVec(expectedRes,transformedAABB);
 
                     ab = aabb.create([-1,-1,-1],[1,1,1]);
-                    translateMat = mat4.setTRS([-5,0,0],[0,0,0,1],[1,1,1]);
-                    transformedAABB = aabb.transform(ab,translateMat);
+                    translateMat = mat4.setTRS(mat4.create(),[-5,0,0],[0,0,0,1],[1,1,1]);
+                    transformedAABB = aabb.transform(ab,ab,translateMat);
                     expectedRes = aabb.create([-6,-1,-1],[-4,1,1]);
                     Y.Assert.compareVec(expectedRes,transformedAABB);
                 },
                 testAABBTransformTranslateScale:function(){
                     var Assert = Y.Assert,
-                            quat4 = math.Quat4,
+                            quat = math.Quat,
                             mat4 = math.Mat4,
                             aabb = math.Aabb;
                     var ab = aabb.create([-1,-1,-1],[1,1,1]);
-                    var translateMat = mat4.setTRS([3,0,0],[0,0,0,1],[2,2,2]);
-                    var transformedAABB = aabb.transform(ab,translateMat);
+                    var translateMat = mat4.setTRS(mat4.create(),[3,0,0],[0,0,0,1],[2,2,2]);
+                    var transformedAABB = aabb.transform(ab,ab,translateMat);
                     var expectedRes = aabb.create([1,-2,-2],[5,2,2]);
                     Y.Assert.compareVec(expectedRes,transformedAABB, "Was "+aabb.str(transformedAABB)+" expected "+aabb.str(expectedRes));
                 },
                 testAABBCenter:function(){
                     var Assert = Y.Assert,
-                            quat4 = math.Quat4,
+                            quat = math.Quat,
                             mat4 = math.Mat4,
                             aabb = math.Aabb;
                     var ab = aabb.create([-1,-1,-1],[1,1,1]);
-                    var center = aabb.center(ab);
+                    var center = aabb.center(math.Vec3.create() ,ab);
                     var expectedRes = [0,0,0];
                     Y.Assert.compareVec(center,expectedRes);
                     var ab = aabb.create([1,2,3],[4,6,8]);
-                    var center = aabb.center(ab);
+                    var center = aabb.center(math.Vec3.create() ,ab);
                     var expectedRes = [2.5,4,5.5];
                     Y.Assert.compareVec(center,expectedRes);
                 },
@@ -439,9 +437,9 @@ requirejs(['kick/math',  'kick/core/Constants'],
                             frustum = math.Frustum;
                     for (var i=0;i<2;i++){
                         // Test a simple case where the view projection has a near plane of 1 and far plane of 5
-                        var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                        var projectionMat = mat4.perspective( mat4.create(), 60 , 1, 1, 5);
                         var normalize = i;
-                        var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+                        var frustumPlanes = frustum.extractPlanes(frustum.create(), projectionMat,normalize);
                         Y.Assert.areEqual(frustumPlanes.length,4*6);
                         var near = frustumPlanes.subarray(4*4,5*4);
                         var far = frustumPlanes.subarray(5*4,6*4);
@@ -456,11 +454,11 @@ requirejs(['kick/math',  'kick/core/Constants'],
                         }
 
                         // Test modelView where translated with z=+2
-                        var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
-                        var cameraTransform = mat4.translate(mat4.identity(mat4.create()),[0,0,2]);
-                        var viewMatrix = mat4.inverse(cameraTransform);
-                        var modelView = mat4.multiply(projectionMat,viewMatrix);
-                        var frustumPlanes = frustum.extractPlanes(modelView,normalize);
+                        var projectionMat = mat4.perspective ( mat4.create(), 60 , 1, 1, 5);
+                        var cameraTransform = mat4.translate(mat4.create(),mat4.create(),[0,0,2]);
+                        var viewMatrix = mat4.invert(cameraTransform, cameraTransform);
+                        var modelView = mat4.multiply(mat4.create(),projectionMat,viewMatrix);
+                        var frustumPlanes = frustum.extractPlanes(frustum.create(),modelView,normalize);
                         Y.Assert.areEqual(frustumPlanes.length,4*6);
                         var near = frustumPlanes.subarray(4*4,5*4);
                         var far = frustumPlanes.subarray(5*4,6*4);
@@ -472,11 +470,11 @@ requirejs(['kick/math',  'kick/core/Constants'],
                         }
 
                         // Test modelView where rotated -90 degree around y
-                        var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
-                        var cameraTransform = mat4.rotateEuler(mat4.identity(mat4.create()),[0,-90,0]);
-                        var viewMatrix = mat4.inverse(cameraTransform);
-                        var modelView = mat4.multiply(projectionMat,viewMatrix);
-                        var frustumPlanes = frustum.extractPlanes(modelView,normalize);
+                        var projectionMat = mat4.perspective ( mat4.create(), 60 , 1, 1, 5);
+                        var cameraTransform = mat4.rotateEuler(mat4.create(),mat4.create(),[0,-90,0]);
+                        var viewMatrix = mat4.invert(mat4.create(),cameraTransform);
+                        var modelView = mat4.multiply(mat4.create(),projectionMat,viewMatrix);
+                        var frustumPlanes = frustum.extractPlanes(frustum.create(), modelView,normalize);
                         Y.Assert.areEqual(frustumPlanes.length,4*6);
                         var near = frustumPlanes.subarray(4*4,5*4);
                         var far = frustumPlanes.subarray(5*4,6*4);
@@ -496,9 +494,9 @@ requirejs(['kick/math',  'kick/core/Constants'],
                             frustum = math.Frustum;
                     for (var i=1;i<2;i++){
                         // Test a simple case where the view projection has a near plane of 1 and far plane of 5
-                        var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                        var projectionMat = mat4.perspective ( mat4.create(), 60 , 1, 1, 5);
                         var normalize = i;
-                        var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+                        var frustumPlanes = frustum.extractPlanes(frustum.create(), projectionMat,normalize);
 
                         var aabb05 = aabb.create([0,0,0],[.5,.5,.5]);
                         var res = frustum.intersectAabb(frustumPlanes, aabb05);
@@ -518,9 +516,9 @@ requirejs(['kick/math',  'kick/core/Constants'],
                             frustum = math.Frustum;
                     for (var i=1;i<2;i++){
                         // Test a simple case where the view projection has a near plane of 1 and far plane of 5
-                        var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                        var projectionMat = mat4.perspective (mat4.create(),  60 , 1, 1, 5);
                         var normalize = i;
-                        var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+                        var frustumPlanes = frustum.extractPlanes(frustum.create(), projectionMat,normalize);
 
                         var length = 1.5;
                         var aabb15 = aabb.create([-length,-length,-length],[length,length,length]);
@@ -536,9 +534,9 @@ requirejs(['kick/math',  'kick/core/Constants'],
                             frustum = math.Frustum;
                     for (var i=1;i<2;i++){
                         // Test a simple case where the view projection has a near plane of 1 and far plane of 5
-                        var projectionMat = mat4.perspective ( 60 , 1, 1, 5);
+                        var projectionMat = mat4.perspective (mat4.create(), 60 , 1, 1, 5);
                         var normalize = i;
-                        var frustumPlanes = frustum.extractPlanes(projectionMat,normalize);
+                        var frustumPlanes = frustum.extractPlanes(frustum.create(), projectionMat, normalize);
 
                         var aabb45 = aabb.create([0,0,-4.5],[.1,.1,-4.0]);
                         var res = frustum.intersectAabb(frustumPlanes, aabb45);
@@ -553,13 +551,13 @@ requirejs(['kick/math',  'kick/core/Constants'],
              * @param actual
              * @param message
              */
-            Y.Assert.compareQuat4 = function(expected,actual, message){
-                var quat4 = math.Quat4;
+            Y.Assert.compareQuat = function(expected,actual, message){
+                var quat = math.Quat;
                 var epsilon = 0.001;
                 var message = "Expected \n"+math.Vec4.str(expected)+" \nActual \n"+math.Vec4.str(actual);
                 var isEqual = function(quat){
                     for (var i=0;i<4;i++){
-                        if (Math.abs(expected[i]-quat[i])>epsilon){
+                        if (Math.abs(expected[i])-Math.abs(quat[i])>epsilon){
                             return false;
                         }
                     }
@@ -568,7 +566,7 @@ requirejs(['kick/math',  'kick/core/Constants'],
                 if (isEqual(actual)){
                     return;
                 }
-                var actualAlternative = quat4.create([actual[0]*-1,actual[1]*-1,actual[2]*-1,actual[3]*-1]);
+                var actualAlternative = quat.create([actual[0]*-1,actual[1]*-1,actual[2]*-1,actual[3]*-1]);
                 if (isEqual(actualAlternative)){
                     return;
                 }
@@ -617,25 +615,24 @@ requirejs(['kick/math',  'kick/core/Constants'],
              * @method rotateEuler
              * @param {math.mat4} mat mat4 to rotate
              * @param {math.vec3} eulerAngle angle (in degrees) to rotate
-             * @param {math.mat4} dest Optional, mat4 receiving operation result. If not specified result is written to mat
-             * @return {math.mat4} dest if specified, mat otherwise
+             * @param {math.mat4} out
+             * @return {math.mat4} out
              */
-            math.Mat4.rotateEuler = function(mat, eulerAngle, dest) {
+            math.Mat4.rotateEuler = function(out, mat, eulerAngle) {
                 var degreeToRadian = constants._DEGREE_TO_RADIAN;
-                if (dest) {
-                    mat4.set(mat,dest);
-                    mat = dest;
-                }
+
+                math.Mat4.copy(out, mat);
+
 
                 // Note unoptimized code
                 if (eulerAngle[2] !== 0){
-                    math.Mat4.rotateZ(mat, eulerAngle[2]*degreeToRadian);
+                    math.Mat4.rotateZ(mat, mat, eulerAngle[2]*degreeToRadian);
                 }
                 if (eulerAngle[1] !== 0){
-                    math.Mat4.rotateY(mat, eulerAngle[1]*degreeToRadian);
+                    math.Mat4.rotateY(mat, mat, eulerAngle[1]*degreeToRadian);
                 }
                 if (eulerAngle[0] !== 0){
-                    math.Mat4.rotateX(mat, eulerAngle[0]*degreeToRadian);
+                    math.Mat4.rotateX(mat, mat, eulerAngle[0]*degreeToRadian);
                 }
                 return mat;
             };

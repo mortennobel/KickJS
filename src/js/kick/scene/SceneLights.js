@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat4"],
-    function (Constants, Util, Mat3, Mat4, Vec3, Quat4) {
+define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat"],
+    function (Constants, Util, Mat3, Mat4, Vec3, Quat) {
         "use strict";
 
         var ASSERT = Constants._ASSERT;
@@ -18,7 +18,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 directionalLightDirection = directionalLightData.subarray(0, 3),
                 directionalLightColorIntensity = directionalLightData.subarray(3, 6),
                 directionalHalfVector = directionalLightData.subarray(6, 9),
-                directionalLightDirectionWorld = Vec3.create([1, 0, 0]),
+                directionalLightDirectionWorld = Vec3.clone([1, 0, 0]),
                 directionalLightTransform = null,
                 pointLightData = new Float32Array(9 * maxNumerOfLights), // mat3*maxNumerOfLights
                 pointLightDataVec3 = Vec3.wrapArray(pointLightData),
@@ -35,7 +35,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 resetPointLight = function (index) {
                     var i;
                     for (i = 0; i < 3; i++) {
-                        Vec3.set([0, 0, 0], pointLightDataVec3[index * 3 + i]);
+                        Vec3.copy(pointLightDataVec3[index * 3 + i], [0, 0, 0]);
                     }
                 };
             Object.defineProperties(this, {
@@ -77,7 +77,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                             directionalLightTransform = directionalLight.gameObject.transform;
                         } else {
                             directionalLightTransform = null;
-                            Mat3.set([0, 0, 0, 0, 0, 0, 0, 0, 0], directionalLightData);
+                            Mat3.copy(directionalLightData, [0, 0, 0, 0, 0, 0, 0, 0, 0]);
                         }
                     }
                 },
@@ -159,17 +159,17 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
             this.recomputeLight = function (viewMatrix) {
                 if (directionalLight !== null) {
                     // compute light direction
-                    Quat4.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirectionWorld);
+                    Quat.multiplyVec3(directionalLightDirectionWorld, directionalLightTransform.rotation, lightDirection);
 
                     // transform to eye space
-                    Mat4.multiplyVec3Vector(viewMatrix, directionalLightDirectionWorld, directionalLightDirection);
-                    Vec3.normalize(directionalLightDirection);
+                    Mat4.multiplyVec3Vector(directionalLightDirection, viewMatrix, directionalLightDirectionWorld);
+                    Vec3.normalize(directionalLightDirection, directionalLightDirection);
 
                     // compute half vector
-                    Vec3.add(lightDirection, directionalLightDirection, directionalHalfVector);
-                    Vec3.normalize(directionalHalfVector);
+                    Vec3.add(directionalHalfVector, lightDirection, directionalLightDirection);
+                    Vec3.normalize(directionalHalfVector, directionalHalfVector);
 
-                    Vec3.set(directionalLight.colorIntensity, directionalLightColorIntensity);
+                    Vec3.copy(directionalLightColorIntensity, directionalLight.colorIntensity);
                 }
                 if (maxNumerOfLights) { // only run if max number of lights are 1 or above (otherwise JIT compiler will skip it)
                     var index = 0,
@@ -180,9 +180,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                         pointLight = pointLights[i];
                         pointLightPosition = pointLight.transform.position;
 
-                        Mat4.multiplyVec3(viewMatrix, pointLightPosition, pointLightDataVec3[index]);
-                        Vec3.set(pointLight.colorIntensity, pointLightDataVec3[index + 1]);
-                        Vec3.set(pointLight.attenuation, pointLightDataVec3[index + 2]);
+                        Mat4.multiplyVec3(pointLightDataVec3[index], viewMatrix, pointLightPosition);
+                        Vec3.copy(pointLightDataVec3[index + 1], pointLight.colorIntensity);
+                        Vec3.copy(pointLightDataVec3[index + 2], pointLight.attenuation);
                         index += 3;
                     }
                 }

@@ -59,8 +59,8 @@
             if (keyInput.isKey("D".charCodeAt(0))){
                 deltaPosition[0] += time.deltaTime*movementSpeed;
             }
-            KICK.math.Quat4.multiplyVec3(transform.localRotation, deltaPosition);
-            KICK.math.Vec3.add(position,deltaPosition);
+            KICK.math.Quat.multiplyVec3(deltaPosition, transform.localRotation, deltaPosition);
+            KICK.math.Vec3.add(deltaPosition,position,deltaPosition);
             transform.localPosition = position;
             if (keyInput.isKey("Q".charCodeAt(0))){
                 rotation[1] += time.deltaTime*rotationSpeed;

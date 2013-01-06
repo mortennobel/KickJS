@@ -15,17 +15,23 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
      */
     return {
         /**
-         * @method extractPlanes
-         * @param {kick.math.Mat4} modelViewMatrix
-         * @param {Boolean} normalize normalize plane normal
-         * @param {Array_24} dest
-         * @return {Array_24} 6 plane equations
+         * Create a array of 24. 6 line equations (a*x+b*y+c*z+d=0 , where [a,b,c] is the normal of the plane).
+         * @method create
          * @static
          */
-        extractPlanes: function (modelViewMatrix, normalize, dest) {
-            if (!dest) {
-                dest = new Float32Array(6 * 4);
-            }
+        create : function () {
+            return new Float32Array(24);
+        },
+
+        /**
+         * @method extractPlanes
+         * @param {Array_24} out
+         * @param {kick.math.Mat4} modelViewMatrix
+         * @param {Boolean} normalize normalize plane normal
+         * @return {Array_24} out
+         * @static
+         */
+        extractPlanes: function (out, modelViewMatrix, normalize) {
             var _11 = modelViewMatrix[0], _21 = modelViewMatrix[1], _31 = modelViewMatrix[2], _41 = modelViewMatrix[3],
                 _12 = modelViewMatrix[4], _22 = modelViewMatrix[5], _32 = modelViewMatrix[6], _42 = modelViewMatrix[7],
                 _13 = modelViewMatrix[8], _23 = modelViewMatrix[9], _33 = modelViewMatrix[10], _43 = modelViewMatrix[11],
@@ -37,49 +43,49 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
                 length,
                 lengthRecip;
             // Left clipping plane
-            dest[0] = _41 + _11;
-            dest[1] = _42 + _12;
-            dest[2] = _43 + _13;
-            dest[3] = _44 + _14;
+            out[0] = _41 + _11;
+            out[1] = _42 + _12;
+            out[2] = _43 + _13;
+            out[3] = _44 + _14;
             // Right clipping plane
-            dest[4] = _41 - _11;
-            dest[4 + 1] = _42 - _12;
-            dest[4 + 2] = _43 - _13;
-            dest[4 + 3] = _44 - _14;
+            out[4] = _41 - _11;
+            out[4 + 1] = _42 - _12;
+            out[4 + 2] = _43 - _13;
+            out[4 + 3] = _44 - _14;
             // Top clipping plane
-            dest[2 * 4] = _41 - _21;
-            dest[2 * 4 + 1] = _42 - _22;
-            dest[2 * 4 + 2] = _43 - _23;
-            dest[2 * 4 + 3] = _44 - _24;
+            out[2 * 4] = _41 - _21;
+            out[2 * 4 + 1] = _42 - _22;
+            out[2 * 4 + 2] = _43 - _23;
+            out[2 * 4 + 3] = _44 - _24;
             // Bottom clipping plane
-            dest[3 * 4] = _41 + _21;
-            dest[3 * 4 + 1] = _42 + _22;
-            dest[3 * 4 + 2] = _43 + _23;
-            dest[3 * 4 + 3] = _44 + _24;
+            out[3 * 4] = _41 + _21;
+            out[3 * 4 + 1] = _42 + _22;
+            out[3 * 4 + 2] = _43 + _23;
+            out[3 * 4 + 3] = _44 + _24;
             // Near clipping plane
-            dest[4 * 4] = _41 + _31;
-            dest[4 * 4 + 1] = _42 + _32;
-            dest[4 * 4 + 2] = _43 + _33;
-            dest[4 * 4 + 3] = _44 + _34;
+            out[4 * 4] = _41 + _31;
+            out[4 * 4 + 1] = _42 + _32;
+            out[4 * 4 + 2] = _43 + _33;
+            out[4 * 4 + 3] = _44 + _34;
             // Far clipping plane
-            dest[5 * 4] = _41 - _31;
-            dest[5 * 4 + 1] = _42 - _32;
-            dest[5 * 4 + 2] = _43 - _33;
-            dest[5 * 4 + 3] = _44 - _34;
+            out[5 * 4] = _41 - _31;
+            out[5 * 4 + 1] = _42 - _32;
+            out[5 * 4 + 2] = _43 - _33;
+            out[5 * 4 + 3] = _44 - _34;
             if (normalize) {
                 for (i = 0; i < 6; i++) {
-                    x = dest[i * 4];
-                    y = dest[i * 4 + 1];
-                    z = dest[i * 4 + 2];
+                    x = out[i * 4];
+                    y = out[i * 4 + 1];
+                    z = out[i * 4 + 2];
                     length = Math.sqrt(x * x + y * y + z * z);
                     lengthRecip = 1 / length;
-                    dest[i * 4] *= lengthRecip;
-                    dest[i * 4 + 1] *= lengthRecip;
-                    dest[i * 4 + 2] *= lengthRecip;
-                    dest[i * 4 + 3] *= lengthRecip;
+                    out[i * 4] *= lengthRecip;
+                    out[i * 4 + 1] *= lengthRecip;
+                    out[i * 4 + 2] *= lengthRecip;
+                    out[i * 4 + 3] *= lengthRecip;
                 }
             }
-            return dest;
+            return out;
         },
 
         /**
@@ -137,8 +143,8 @@ define(["kick/core/Constants", "./Vec3", "./Aabb"], function (constants, vec3, a
                         if (s + e < 0) { return OUTSIDE; }
                         return INTERSECTING;
                     };
-                aabb.center(aabbIn, center);
-                aabb.halfVec3(aabbIn, halfVector);
+                aabb.center(center, aabbIn);
+                aabb.halfVec3(halfVector, aabbIn);
                 centerX = center[0];
                 centerY = center[1];
                 centerZ = center[2];

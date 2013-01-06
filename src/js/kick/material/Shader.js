@@ -1057,7 +1057,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 if (modelMatrix) {
                     gl.uniformMatrix4fv(modelMatrix.location, false, globalTransform);
                 }
-                modelView = Mat4.multiply(engineUniforms.viewMatrix, globalTransform, tempMat4);
+                modelView = Mat4.multiply(tempMat4, engineUniforms.viewMatrix, globalTransform);
                 if (mv) {
                     gl.uniformMatrix4fv(mv.location, false, modelView);
                 }
@@ -1066,7 +1066,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     // var normalMatrix = math.mat4.toMat3(finalModelView);
                     // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                     //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                    normalMatrix = Mat4.toNormalMat3(modelView, tempMat3);
+                    normalMatrix = Mat4.toNormalMat3(tempMat3, modelView);
                     if (ASSERT) {
                         if (!normalMatrix) {
                             Util.fail("Singular matrix");
@@ -1083,7 +1083,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
             }
             if (mvProj) {
                 globalTransform = globalTransform || transform.getGlobalMatrix();
-                gl.uniformMatrix4fv(mvProj.location, false, Mat4.multiply(engineUniforms.viewProjectionMatrix, globalTransform, tempMat4));
+                gl.uniformMatrix4fv(mvProj.location, false, Mat4.multiply(tempMat4, engineUniforms.viewProjectionMatrix, globalTransform));
             }
             if (gameObjectUID) {
                 uidAsVec4 = Util.uint32ToVec4(transform.gameObject.uid, tmpVec4);
@@ -1099,7 +1099,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
             }
             if (_lightMat) {
                 globalTransform = transform.getGlobalMatrix();
-                gl.uniformMatrix4fv(_lightMat.location, false, Mat4.multiply(engineUniforms.lightMatrix, globalTransform, tempMat4));
+                gl.uniformMatrix4fv(_lightMat.location, false, Mat4.multiply(tempMat4, engineUniforms.lightMatrix, globalTransform));
             }
         };
 

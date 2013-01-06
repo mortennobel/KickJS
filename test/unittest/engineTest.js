@@ -52,7 +52,55 @@ YUI().use('node', 'console', 'test', function (Y) {
         //---------------------------------------------------------------------
         // Test methods - names must begin with "test"
         //---------------------------------------------------------------------
+        testResourceDescriptor : function () {
+            var Assert = Y.Assert;
 
+            var resourceDescriptorConfig = {
+                "type": "kick.scene.Scene",
+                "uid": 1,
+                "config": {
+                    "uid": 1,
+                    "gameObjects": [
+                        {
+                            "name": "Triangle",
+                            "layer": 1,
+                            "uid": 10,
+                            "components": [
+                                {
+                                    "type": "kick.scene.Transform",
+                                    "uid": 18,
+                                    "config": {
+                                        "localPosition": [
+                                            -2,
+                                            0,
+                                            0
+                                        ],
+                                        "localRotation": [
+                                            0,
+                                            0,
+                                            0,
+                                            1
+                                        ],
+                                        "localScale": [
+                                            1,
+                                            1,
+                                            1
+                                        ],
+                                        "parent": null
+                                    }
+                                }]
+                        }]
+                }
+            };
+            var materialDescriptor = new KICK.core.ResourceDescriptor(resourceDescriptorConfig);
+            materialDescriptor.instantiate(function(object){
+                console.log("Loaded successfully");
+            }, function(){
+                console.log("Failed loading resource");
+                Assert.fail("testResourceDescriptor failed");
+            })
+
+        },
         testLoadMesh : function () {
             var Assert = Y.Assert;
 
@@ -103,7 +151,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                    "activeScene": 1,
                    "resourceDescriptors": [
                       {
-                         "type": "KICK.scene.Scene",
+                         "type": "kick.scene.Scene",
                          "uid": 1,
                          "config": {
                             "uid": 1,
@@ -114,7 +162,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                                   "uid": 10,
                                   "components": [
                                      {
-                                        "type": "KICK.scene.Transform",
+                                        "type": "kick.scene.Transform",
                                         "uid": 18,
                                         "config": {
                                            "localPosition": [
@@ -137,7 +185,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                                         }
                                      },
                                      {
-                                        "type": "KICK.scene.MeshRenderer",
+                                        "type": "kick.scene.MeshRenderer",
                                         "uid": 11,
                                         "config": {
                                            "materials": [
@@ -164,7 +212,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                                   "uid": 12,
                                   "components": [
                                      {
-                                        "type": "KICK.scene.Transform",
+                                        "type": "kick.scene.Transform",
                                         "uid": 19,
                                         "config": {
                                            "localPosition": [
@@ -187,7 +235,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                                         }
                                      },
                                      {
-                                        "type": "KICK.scene.MeshRenderer",
+                                        "type": "kick.scene.MeshRenderer",
                                         "uid": 13,
                                         "config": {
                                            "materials": [
@@ -214,7 +262,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                                   "uid": 14,
                                   "components": [
                                      {
-                                        "type": "KICK.scene.Transform",
+                                        "type": "kick.scene.Transform",
                                         "uid": 20,
                                         "config": {
                                            "localPosition": [
@@ -237,12 +285,12 @@ YUI().use('node', 'console', 'test', function (Y) {
                                         }
                                      },
                                      {
-                                        "type": "KICK.scene.Camera",
+                                        "type": "kick.scene.Camera",
                                         "uid": 15,
                                         "config": {
                                            "enabled": true,
                                            "renderShadow": false,
-                                           "renderer": "KICK.renderer.ForwardRenderer",
+                                           "renderer": "kick.renderer.ForwardRenderer",
                                            "layerMask": 4294967295,
                                            "renderTarget": null,
                                            "fieldOfView": 60,
@@ -309,7 +357,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                          }
                       },
                       {
-                         "type": "KICK.material.Material",
+                         "type": "kick.material.Material",
                          "uid": 9,
                          "config": {
                             "uid": 9,
@@ -344,7 +392,7 @@ YUI().use('node', 'console', 'test', function (Y) {
                 };
             engine.project.loadProject(projectConfig);
             var expectedValue = 1; // since the project only contains a single scene, no other scene should be added
-            Assert.areEqual(expectedValue,engine.project.getResourceDescriptorsByType("KICK.scene.Scene").length);
+            Assert.areEqual(expectedValue,engine.project.getResourceDescriptorsByType("kick.scene.Scene").length);
             var expectedUid = 1;
             Assert.areEqual(expectedUid,engine.activeScene.uid);
         },
@@ -357,21 +405,21 @@ YUI().use('node', 'console', 'test', function (Y) {
                     Assert.isTrue(array[i].name.charAt(1).toLowerCase() == array[i].name.charAt(1));
                 }
             };
-            var meshes = engine.project.getResourceDescriptorsByType("KICK.mesh.Mesh")
+            var meshes = engine.project.getResourceDescriptorsByType("kick.mesh.Mesh")
             Assert.areEqual(0,meshes.length);
-            meshes = engine.project.getEngineResourceDescriptorsByType("KICK.mesh.Mesh");
+            meshes = engine.project.getEngineResourceDescriptorsByType("kick.mesh.Mesh");
             Assert.areNotEqual(0,meshes.length);
             isAllNegativeUIDSAndHaveName(meshes);
 
-            var textures = engine.project.getResourceDescriptorsByType("KICK.texture.Texture")
+            var textures = engine.project.getResourceDescriptorsByType("kick.texture.Texture")
             Assert.areEqual(0,textures.length);
-            textures = engine.project.getEngineResourceDescriptorsByType("KICK.texture.Texture");
+            textures = engine.project.getEngineResourceDescriptorsByType("kick.texture.Texture");
             Assert.areNotEqual(0,textures.length);
             isAllNegativeUIDSAndHaveName(textures);
 
-            var shaders = engine.project.getResourceDescriptorsByType("KICK.material.Shader")
+            var shaders = engine.project.getResourceDescriptorsByType("kick.material.Shader")
             Assert.areEqual(0,shaders.length);
-            shaders = engine.project.getEngineResourceDescriptorsByType("KICK.material.Shader");
+            shaders = engine.project.getEngineResourceDescriptorsByType("kick.material.Shader");
             Assert.areNotEqual(0,shaders.length);
             isAllNegativeUIDSAndHaveName(shaders);
         },
@@ -418,7 +466,7 @@ YUI().use('node', 'console', 'test', function (Y) {
         testDefaultShaderValue:function(){
             var Assert = Y.Assert;
 
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
 
             shader.vertexShaderSrc = "attribute vec3 vertex;\n"+
                 "uniform mat4 _mvProj;\n"+
@@ -442,7 +490,7 @@ YUI().use('node', 'console', 'test', function (Y) {
         testUniformShaderValue:function(){
             var Assert = Y.Assert;
 
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
 
             shader.vertexShaderSrc = "attribute vec3 vertex;\n"+
                     "uniform mat4 _mvProj;\n"+
@@ -473,8 +521,8 @@ YUI().use('node', 'console', 'test', function (Y) {
      * @param actual
      * @param message
      */
-    Y.Assert.compareQuat4 = function(expected,actual, message){
-        var quat4 = KICK.math.quat4;
+    Y.Assert.compareQuat = function(expected,actual, message){
+        var quat = KICK.math.Quat;
         var epsilon = 0.001;
         var message = "Expected \n"+KICK.math.vec4.str(expected)+" \nActual \n"+KICK.math.vec4.str(actual);
         var isEqual = function(quat){
@@ -488,7 +536,7 @@ YUI().use('node', 'console', 'test', function (Y) {
         if (isEqual(actual)){
             return;
         }
-        var actualAlternative = quat4.create([actual[0]*-1,actual[1]*-1,actual[2]*-1,actual[3]*-1]);
+        var actualAlternative = quat.clone([actual[0]*-1,actual[1]*-1,actual[2]*-1,actual[3]*-1]);
         if (isEqual(actualAlternative)){
             return;
         }

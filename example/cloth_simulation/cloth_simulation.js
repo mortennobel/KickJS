@@ -19,8 +19,8 @@ requirejs(['kick'],
             CONSTRAINT_ITERATIONS = 4,
             ball_radius = 2, // the radius of our one ball
             vec3Zero = [0, 0, 0], // how many iterations of constraint satisfaction each frame (more is rigid, less is soft);
-            gravityForce = vec3.create([0, -0.2 * TIME_STEPSIZE2, 0]),
-            windForce = vec3.create([0.2 * TIME_STEPSIZE2, 0, 0.05 * TIME_STEPSIZE2]);
+            gravityForce = vec3.clone([0, -0.2 * TIME_STEPSIZE2, 0]),
+            windForce = vec3.clone([0.2 * TIME_STEPSIZE2, 0, 0.05 * TIME_STEPSIZE2]);
         function initKick() {
             engine = new KICK.core.Engine('canvas', {
                 enableDebugContext: location.search === "?debug" // debug enabled if query == debug
@@ -116,10 +116,10 @@ requirejs(['kick'],
             var color = new Float32Array((meshData.vertex.length/3)*4);
             var color1 = [146/255,194/255,136/255,1];
             var color2 = [79/255,0,1,1];
-            vec4.set(color1,color.subarray(0,4));
-            vec4.set(color2,color.subarray(4,8));
-            vec4.set(color1,color.subarray(8,12));
-            vec4.set(color2,color.subarray(12,16));
+            vec4.copy(color.subarray(0,4), color1);
+            vec4.copy(color.subarray(4,8), color2);
+            vec4.copy(color.subarray(8,12), color1);
+            vec4.copy(color.subarray(12,16), color2);
             meshData.color = color;
             backgroundMeshRenderer.mesh.meshData = meshData;
             var shaderUnlit = engine.project.load(engine.project.ENGINE_SHADER_UNLIT_VERTEX_COLOR);
@@ -187,7 +187,7 @@ requirejs(['kick'],
                         return pos;
                     },
                     set: function (newValue) {
-                        vec3.set(newValue, pos);
+                        vec3.copy(pos, newValue);
                     }
                 },
                 old_pos: {
@@ -195,7 +195,7 @@ requirejs(['kick'],
                         return old_pos;
                     },
                     set: function (newValue) {
-                        vec3.set(newValue, old_pos);
+                        vec3.copy(old_pos, newValue);
                     }
                 },
                 acceleration: {
@@ -203,7 +203,7 @@ requirejs(['kick'],
                         return acceleration;
                     },
                     set: function (newValue) {
-                        vec3.set(newValue, acceleration);
+                        vec3.copy(acceleration, newValue);
                     }
                 },
                 accumulated_normal: {
@@ -211,7 +211,7 @@ requirejs(['kick'],
                         return accumulated_normal;
                     },
                     set: function (newValue) {
-                        vec3.set(newValue, accumulated_normal);
+                        vec3.copy(accumulated_normal, newValue);
                     }
                 }
             });
@@ -222,8 +222,8 @@ requirejs(['kick'],
              */
             this.addForce = function (f) {
                 var invMass = 1 / thisObj.mass;
-                vec3.scale(f, invMass, temp);
-                vec3.add(acceleration, temp, acceleration);
+                vec3.scale(temp, f, invMass);
+                vec3.add(acceleration, acceleration, temp);
             };
 
             /* This is one of the important methods, where the time is progressed a single step size (TIME_STEPSIZE)
@@ -237,16 +237,16 @@ requirejs(['kick'],
                      old_pos = temp;
                      acceleration = Vec3(0,0,0); // acceleration is reset since it HAS been translated into a change in position (and implicitely into velocity)
                      * */
-                    vec3.set(pos,temp2);
+                    vec3.copy(temp2, pos);
 
-                    vec3.subtract(pos,old_pos,temp);
-                    vec3.scale(temp,1-DAMPING);
-                    vec3.add(pos,temp); // first part: + (pos-old_pos)*(1.0-DAMPING)
-                    vec3.scale(acceleration,TIME_STEPSIZE2,temp);
-                    vec3.add(pos,temp); // second part: + acceleration*TIME_STEPSIZE2
+                    vec3.subtract(pos, old_pos, temp);
+                    vec3.scale(temp, temp, 1-DAMPING);
+                    vec3.add(pos, pos, temp); // first part: + (pos-old_pos)*(1.0-DAMPING)
+                    vec3.scale(temp, acceleration,TIME_STEPSIZE2);
+                    vec3.add(pos,pos,temp); // second part: + acceleration*TIME_STEPSIZE2
 
-                    vec3.set(temp2,old_pos);
-                    vec3.set(vec3Zero,acceleration);
+                    vec3.copy(old_pos, temp2);
+                    vec3.copy(acceleration, vec3Zero);
                 }
             };
 
@@ -256,7 +256,7 @@ requirejs(['kick'],
             this.offsetPos = function(v) {
                 if(thisObj.movable) {
                     // if(movable) pos += v;
-                    vec3.add(pos,v);
+                    vec3.add(pos,pos,v);
                 }
             };
 
@@ -269,16 +269,16 @@ requirejs(['kick'],
              */
             this.addToNormal = function(normal){
                 // accumulated_normal += normal.normalized();
-                vec3.normalize(normal,temp);
-                vec3.add(accumulated_normal,temp,accumulated_normal);
+                vec3.normalize(normal, temp);
+                vec3.add(accumulated_normal, accumulated_normal, temp);
             };
 
             this.normalize = function(){
-                vec3.normalize(accumulated_normal);
+                vec3.normalize(accumulated_normal,accumulated_normal);
             };
 
             this.resetNormal = function(){
-                vec3.set(vec3Zero,accumulated_normal);
+                vec3.copy(accumulated_normal, vec3Zero);
             };
 
             (function constructor(){
@@ -306,7 +306,7 @@ requirejs(['kick'],
                 tempVec3 = vec3.create();  // the length between particle p1 and p2 in rest configuration
 
             (function constructor(){
-                var difference = vec3.subtract(p1.pos,p2.pos,vec3.create());
+                var difference = vec3.subtract(vec3.create(), p1.pos,p2.pos);
                 rest_distance = vec3.length(difference);
             })();
 
@@ -325,10 +325,10 @@ requirejs(['kick'],
                  */
                 vec3.subtract(p2.pos,p1.pos,tempVec3); // vector from p1 to p2
                 var current_distance = vec3.length(tempVec3); // current distance between p1 and p2
-                vec3.scale(tempVec3,1-rest_distance/current_distance);// The offset vector that could moves p1 into a distance of rest_distance to p2
-                vec3.scale(tempVec3,0.5); // Lets make it half that length, so that we can move BOTH p1 and p2.
+                vec3.scale(tempVec3, tempVec3,1-rest_distance/current_distance);// The offset vector that could moves p1 into a distance of rest_distance to p2
+                vec3.scale(tempVec3, tempVec3,0.5); // Lets make it half that length, so that we can move BOTH p1 and p2.
                 p1.offsetPos(tempVec3);
-                vec3.scale(tempVec3,-1.0);
+                vec3.scale(tempVec3, tempVec3,-1.0);
                 p2.offsetPos(tempVec3);
             };
             Object.freeze(this);
@@ -405,8 +405,8 @@ requirejs(['kick'],
                          p3->addForce(force);
                          */
                         calcTriangleNormal(p1, p2, p3, normal);
-                        vec3.normalize(normal, d);
-                        var force = vec3.scale(normal, vec3.dot(d, direction));
+                        vec3.normalize(d, normal);
+                        var force = vec3.scale(normal, normal, vec3.dot(d, direction));
                         p1.addForce(force);
                         p2.addForce(force);
                         p3.addForce(force);
@@ -470,7 +470,7 @@ requirejs(['kick'],
                 {
                     for(var y=0; y<num_particles_height; y++)
                     {
-                        var pos = vec3.create([width * (x/num_particles_width),
+                        var pos = vec3.clone([width * (x/num_particles_width),
                             -height * (y/num_particles_height),
                             0]);
                         particles[y*num_particles_width+x]= new Particle(pos); // insert particle in column x at y'th row
@@ -528,10 +528,10 @@ requirejs(['kick'],
                 // making the upper left most three and right most three particles unmovable
                 for(var i=0;i<3; i++)
                 {
-                    getParticle(0+i ,0).offsetPos(vec3.create([0.5,0.0,0.0])); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
+                    getParticle(0+i ,0).offsetPos(vec3.clone([0.5,0.0,0.0])); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
                     getParticle(0+i ,0).makeUnmovable();
 
-                    getParticle(0+i ,0).offsetPos(vec3.create([-0.5,0.0,0.0])); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
+                    getParticle(0+i ,0).offsetPos(vec3.clone([-0.5,0.0,0.0])); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
                     getParticle(num_particles_width-1-i ,0).makeUnmovable();
                 }
             })();
@@ -680,9 +680,9 @@ requirejs(['kick'],
                 {
                     vec3.subtract(particles[i].pos,center,v);
                     var l = vec3.length(v);
-                    if ( vec3.lengthSqr(v) < radiusSqr) // if the particle is inside the ball
+                    if ( vec3.squaredLength(v) < radiusSqr) // if the particle is inside the ball
                     {
-                        particles[i].offsetPos(vec3.scale(vec3.normalize(v),(radius-l))); // project the particle to the surface of the ball
+                        particles[i].offsetPos(vec3.scale(v, vec3.normalize(v,v),(radius-l))); // project the particle to the surface of the ball
                     }
                 }
             };

@@ -158,7 +158,7 @@ requirejs(['kick'],
                         var mat = KICK.math.Mat4.create();
                         KICK.math.Mat4.identity(mat);
                         var translateVector = [1,2,3];
-                        KICK.math.Mat4.translate(mat, translateVector);
+                        KICK.math.Mat4.translate(mat, mat, translateVector);
                         var meshData2 = meshData1.transform(mat);
 
                         for (var i=0;i<3;i++){

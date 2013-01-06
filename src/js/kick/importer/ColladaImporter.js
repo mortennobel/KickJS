@@ -7,7 +7,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
          */
 
         var ASSERT = Constants._ASSERT,
-            quat4 = math.Quat4,
+            quat = math.Quat,
             mat4 = math.Mat4,
             getXMLElementById = function (doc, id) {
                 return doc.querySelector("[id=" + id + "]");
@@ -354,26 +354,26 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                         localMatrix = transform.getLocalMatrix(),
                         newMatrix = mat4.identity(mat4.create());
                     if (tagName === "translate") {
-                        mat4.translate(newMatrix, stringToArray(node.textContent), newMatrix);
+                        mat4.translate(newMatrix, newMatrix, stringToArray(node.textContent));
                     } else if (tagName === "rotate") {
                         angleAxis = stringToArray(node.textContent);
                         angle = angleAxis[3];
                         if (angle) {
-                            rotationQuat = quat4.angleAxis(angle, angleAxis);
-                            quat4.toMat4(rotationQuat, newMatrix);
+                            rotationQuat = quat.setAxisAngle(math.Quat.create(), angleAxis, angle * constants._DEGREE_TO_RADIAN);
+                            quat.toMat4(newMatrix, rotationQuat);
                         } else {
                             return;
                         }
                     } else if (tagName === "scale") {
-                        mat4.scale(newMatrix, stringToArray(node.textContent), newMatrix);
+                        mat4.scale(newMatrix, newMatrix, stringToArray(node.textContent));
                     } else if (tagName === "matrix") {
                         mat4.transpose(stringToArray(node.textContent), newMatrix);
                     } else {
                         console.log(tagName + " - unsupported");
                         return;
                     }
-                    mat4.multiply(localMatrix, newMatrix, newMatrix);
-                    decomposedMatrix = mat4.decompose(newMatrix);
+                    mat4.multiply(newMatrix, localMatrix, newMatrix);
+                    decomposedMatrix = mat4.decompose(newMatrix, math.Vec3.create(), math.Quat.create(), math.Vec3.create());
                     transform.localPosition = decomposedMatrix[0];
                     transform.localRotation = decomposedMatrix[1];
                     transform.localScale = decomposedMatrix[2];
@@ -419,11 +419,6 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                             updateTransform(transform, childNode);
                         } else if (tagName === "instance_geometry") {
                             createMeshRenderer(gameObject, childNode);
-                            /*if (rotate90x){
-                             var currentRotation = transform.localRotation;
-                             var rotationAroundX = quat4.angleAxis(-90,[1,0,0]);
-                             transform.localRotation = quat4.multiply(rotationAroundX,currentRotation);
-                             }*/
                         } else if (tagName === "node") {
                             addNode(childNode, transform);
                         } else {

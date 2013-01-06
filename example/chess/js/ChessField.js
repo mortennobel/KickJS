@@ -29,7 +29,7 @@ define(["kick"], function (KICK) {
             },
             location:{
                 get:function(){
-                    return vec2.create(location2d);
+                    return vec2.clone(location2d);
                 }
             }
         });

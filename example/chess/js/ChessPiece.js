@@ -6,7 +6,7 @@ define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
         var engine = KICK.core.EngineSingleton.engine,
             vec2 = KICK.math.Vec2,
             vec3 = KICK.math.Vec3,
-            location = vec2.create(initialLocation),
+            location = vec2.clone(initialLocation),
             transform,
             getMeshName = function(type){
                 for (var name in ChessPieceType){
@@ -34,10 +34,10 @@ define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
             },
             location:{
                 get:function(){
-                    return vec2.create(location);
+                    return vec2.clone(location);
                 },
                 set:function(newvalue){
-                    vec2.set(newvalue,location);
+                    vec2.copy(location,newvalue);
                     var newPos = getPosition3D(location,0);
                     transform.localPosition = newPos;
                 }

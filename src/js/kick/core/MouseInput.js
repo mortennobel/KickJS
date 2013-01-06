@@ -54,7 +54,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
                 } else {
                     deltaMovement = vec2.create();
                 }
-                vec2.set(mousePosition, lastMousePosition);
+                vec2.copy(lastMousePosition, mousePosition);
             },
             mouseWheelHandler = function (e) {
                 if (isChrome) {

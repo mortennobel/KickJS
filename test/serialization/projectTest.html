@@ -325,7 +325,7 @@ void main(void)
                 translation[2] = Math.cos(rot)*radius;
                 transform.localPosition = translation;
 
-                transform.localRotation = KICK.math.quat4.lookAt(translation,[0,0,0],[0,1,0]);
+                transform.localRotation = KICK.math.Quat.lookAt(translation,[0,0,0],[0,1,0]);
             }
         }
 
@@ -346,7 +346,7 @@ void main(void)
             sceneCopy.name ="SerializedScene";
             var uid = engine.createUID();
             engine.project.addResourceDescriptor(new KICK.core.ResourceDescriptor({
-                type: "KICK.scene.Scene",
+                type: "kick/scene/Scene",
                 uid: uid,
                 config:sceneCopy
             }));

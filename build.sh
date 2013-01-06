@@ -21,7 +21,7 @@ version=0_5_0
 # source trees:
 parser_in=$project/src/js
 
-# The location to output the parser data.  This output is a file containing a 
+# The location to output the parser data.  This output is a file containing a
 # json string, and copies of the parsed files.
 parser_out=$project/API/parser
 
@@ -98,11 +98,13 @@ rm "$project/build/kick.js.tmp"
 ##############################################################################
 echo "Copy kickjs to examples"
 mkdir "$project/example/js/"
+echo "$project/build/kick.js"
+echo "$project/example/js/kick.js"
 cp "$project/build/kick.js" "$project/example/js/kick.js"
 cp "$project/build/kick-debug.js" "$project/example/js/kick-debug.js"
-mkdir "$project/tools/js/"
-cp "$project/build/kick.js" "$project/tools/js/kick.js"
-cp "$project/build/kick-debug.js" "$project/tools/js/kick-debug.js"
+mkdir "$project/tool/js/"
+cp "$project/build/kick.js" "$project/tool/js/kick.js"
+cp "$project/build/kick-debug.js" "$project/tool/js/kick-debug.js"
 
 echo "Build finished"
 date

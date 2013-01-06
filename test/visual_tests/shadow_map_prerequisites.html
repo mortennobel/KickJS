@@ -144,8 +144,8 @@ void main(void) {
             if (keyInput.isKey("D".charCodeAt(0))){
                 deltaPosition[0] += time.deltaTime*movementSpeed;
             }
-            KICK.math.Quat4.multiplyVec3(transform.localRotation, deltaPosition);
-            KICK.math.Vec3.add(position,deltaPosition);
+            KICK.math.Quat.multiplyVec3(deltaPosition, transform.localRotation, deltaPosition);
+            KICK.math.Vec3.add(position,position,deltaPosition);
             transform.localPosition = position;
             if (keyInput.isKey("Q".charCodeAt(0))){
                 rotation[1] += time.deltaTime*rotationSpeed;
@@ -487,7 +487,7 @@ void main(void) {
         engine.resourceLoader.getMeshData("kickjs://mesh/cube/",mesh);
         var meshData = mesh.meshData;
         var mat4 = KICK.math.Mat4;
-        var transformation = mat4.scale(mat4.identity(mat4.create()),[5,5,20]);
+        var transformation = mat4.scale(mat4.create(),mat4.create(),[5,5,20]);
         mesh.meshData = meshData.transform(transformation);
         var material = new KICK.material.Material({
                                 shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),

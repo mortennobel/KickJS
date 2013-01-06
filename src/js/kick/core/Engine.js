@@ -337,7 +337,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
              * @method canvasResized
              */
             this.canvasResized = function () {
-                glState.viewportSize = math.Vec2.create([canvas.width, canvas.height]);
+                glState.viewportSize = math.Vec2.clone([canvas.width, canvas.height]);
                 if (mouseInput) {
                     mouseInput.updateCanvasElementPosition();
                 }

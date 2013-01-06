@@ -58,263 +58,439 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
             return wrapArray(memory, 3);
         },
         /**
-         * Creates a new instance of a vec3 using the default array type
-         * Any javascript array containing at least 3 numeric elements can serve as a vec3
+         * Creates a new, empty vec3
+         *
          * @method create
-         * @param {Array_Number} vec Optional, vec3 containing values to initialize with
          * @return {kick.math.Vec3} New vec3
          * @static
          */
-        create: function (vec) {
-            var dest = new Float32Array(3);
-
-            if (vec) {
-                dest[0] = vec[0];
-                dest[1] = vec[1];
-                dest[2] = vec[2];
-            }
-
-            return dest;
+        create: function () {
+            return new Float32Array(3);
         },
 
         /**
-         * Copies the values of one vec3 to another
+         * @method clone
+         * @param {kick.math.Vec3} a vector to clone
+         * @return {kick.math.Vec3} a new 3D vector
+         * @static
+         */
+        clone: function (a) {
+            var out = new Float32Array(3);
+            out[0] = a[0];
+            out[1] = a[1];
+            out[2] = a[2];
+            return out;
+        },
+
+        /**
+         * Creates a new vec3 initialized with the given values
+         * @method fromValues
+         * @param {Number} x X component
+         * @param {Number} y Y component
+         * @param {Number} z Z component
+         * @return {kick.math.Vec3} a new 3D vector
+         * @static
+         */
+        fromValues: function (x, y, z) {
+            var out = new Float32Array(3);
+            out[0] = x;
+            out[1] = y;
+            out[2] = z;
+            return out;
+        },
+
+        /**
+         * Copy the values from one vec3 to another
+         *
+         * @method copy
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the source vector
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        copy: function (out, a) {
+            out[0] = a[0];
+            out[1] = a[1];
+            out[2] = a[2];
+            return out;
+        },
+
+        /**
+         * Set the components of a vec3 to the given values
+         *
          * @method set
-         * @param {kick.math.Vec3} vec vec3 containing values to copy
-         * @param {kick.math.Vec3} dest vec3 receiving copied values
-         * @return {kick.math.Vec3} dest
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {Number} x X component
+         * @param {Number} y Y component
+         * @param {Number} z Z component
+         * @return {kick.math.Vec3} out
          * @static
          */
-        set: function (vec, dest) {
-            dest[0] = vec[0];
-            dest[1] = vec[1];
-            dest[2] = vec[2];
-
-            return dest;
+        set: function (out, x, y, z) {
+            out[0] = x;
+            out[1] = y;
+            out[2] = z;
+            return out;
         },
 
         /**
-         * Performs a vector addition
+         * Adds two vec3's
          * @method add
-         * @param {kick.math.Vec3} vec  first operand
-         * @param {kick.math.Vec3} vec2  second operand
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
          * @static
          */
-        add: function (vec, vec2, dest) {
-            if (!dest || vec === dest) {
-                vec[0] += vec2[0];
-                vec[1] += vec2[1];
-                vec[2] += vec2[2];
-                return vec;
-            }
-
-            dest[0] = vec[0] + vec2[0];
-            dest[1] = vec[1] + vec2[1];
-            dest[2] = vec[2] + vec2[2];
-            return dest;
+        add: function (out, a, b) {
+            out[0] = a[0] + b[0];
+            out[1] = a[1] + b[1];
+            out[2] = a[2] + b[2];
+            return out;
         },
 
         /**
-         * Performs a vector subtraction
+         * Subtracts two vec3's
+         *
          * @method subtract
-         * @param {kick.math.Vec3} vec first operand
-         * @param {kick.math.Vec3} vec2 second operand
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
          * @static
          */
-        subtract: function (vec, vec2, dest) {
-            if (!dest || vec === dest) {
-                vec[0] -= vec2[0];
-                vec[1] -= vec2[1];
-                vec[2] -= vec2[2];
-                return vec;
-            }
-
-            dest[0] = vec[0] - vec2[0];
-            dest[1] = vec[1] - vec2[1];
-            dest[2] = vec[2] - vec2[2];
-            return dest;
-        },
-
-        /**
-         * Test to see if vectors are equal (difference is less than epsilon)
-         * @method equal
-         * @param {kick.math.Vec3} vec first operand
-         * @param {kick.math.Vec3} vec2 second operand
-         * @param {Number} epsilon Optional - default value is
-         * @return {Boolean} true if two vectors are equals
-         * @static
-         */
-        equal: function (vec, vec2, epsilon) {
-            var i;
-            if (!epsilon) {
-                epsilon = constants._EPSILON;
-            }
-            for (i = 0; i < 3; i++) {
-                if (Math.abs(vec[i] - vec2[i]) > epsilon) {
-                    return false;
-                }
-            }
-            return true;
+        subtract: function (out, a, b) {
+            out[0] = a[0] - b[0];
+            out[1] = a[1] - b[1];
+            out[2] = a[2] - b[2];
+            return out;
         },
 
 
         /**
-         * Performs a vector multiplication
+         * Multiplies two vec3's
          * @method multiply
-         * @param {kick.math.Vec3} vec first operand
-         * @param {kick.math.Vec3} vec2 second operand
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
          * @static
          */
-        multiply: function (vec, vec2, dest) {
-            if (!dest || vec === dest) {
-                vec[0] *= vec2[0];
-                vec[1] *= vec2[1];
-                vec[2] *= vec2[2];
-                return vec;
-            }
-
-            dest[0] = vec[0] * vec2[0];
-            dest[1] = vec[1] * vec2[1];
-            dest[2] = vec[2] * vec2[2];
-            return dest;
+        multiply: function (out, a, b) {
+            out[0] = a[0] * b[0];
+            out[1] = a[1] * b[1];
+            out[2] = a[2] * b[2];
+            return out;
         },
 
         /**
-         * Negates the components of a vec3
-         * @method negate
-         * @param {kick.math.Vec3} vec vec3 to negate
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * Divides two vec3's
+         *
+         * @method divide
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
          * @static
          */
-        negate: function (vec, dest) {
-            if (!dest) { dest = vec; }
-
-            dest[0] = -vec[0];
-            dest[1] = -vec[1];
-            dest[2] = -vec[2];
-            return dest;
+        divide: function (out, a, b) {
+            out[0] = a[0] / b[0];
+            out[1] = a[1] / b[1];
+            out[2] = a[2] / b[2];
+            return out;
         },
 
         /**
-         * Multiplies the components of a vec3 by a scalar value
+         * Returns the minimum of two vec3's
+         *
+         * @method min
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        min: function (out, a, b) {
+            out[0] = Math.min(a[0], b[0]);
+            out[1] = Math.min(a[1], b[1]);
+            out[2] = Math.min(a[2], b[2]);
+            return out;
+        },
+
+        /**
+         * Returns the maximum of two vec3's
+         *
+         * @method max
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        max: function (out, a, b) {
+            out[0] = Math.max(a[0], b[0]);
+            out[1] = Math.max(a[1], b[1]);
+            out[2] = Math.max(a[2], b[2]);
+            return out;
+        },
+
+        /**
+         * Scales a vec3 by a scalar number
          * @method scale
-         * @param {kick.math.Vec3} vec vec3 to scale
-         * @param {Number} val Numeric value to scale by
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the vector to scale
+         * @param {Number} b amount to scale the vector by
+         * @return {kick.math.Vec3} out
          * @static
          */
-        scale: function (vec, val, dest) {
-            if (!dest || vec === dest) {
-                vec[0] *= val;
-                vec[1] *= val;
-                vec[2] *= val;
-                return vec;
-            }
-
-            dest[0] = vec[0] * val;
-            dest[1] = vec[1] * val;
-            dest[2] = vec[2] * val;
-            return dest;
+        scale: function (out, a, b) {
+            out[0] = a[0] * b;
+            out[1] = a[1] * b;
+            out[2] = a[2] * b;
+            return out;
         },
 
         /**
-         * Generates a unit vector of the same direction as the provided vec3
-         * If vector length is 0, returns [0, 0, 0]
-         * @method normalize
-         * @param {kick.math.Vec3} vec vec3 to normalize
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * Calculates the euclidian distance between two vec3's
+         *
+         * @method distance
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {Number} distance between a and b
          * @static
          */
-        normalize: function (vec, dest) {
-            if (!dest) { dest = vec; }
-
-            var x = vec[0], y = vec[1], z = vec[2],
-                len = Math.sqrt(x * x + y * y + z * z);
-
-            if (!len) {
-                dest[0] = 0;
-                dest[1] = 0;
-                dest[2] = 0;
-                return dest;
-            } else if (len === 1) {
-                dest[0] = x;
-                dest[1] = y;
-                dest[2] = z;
-                return dest;
-            }
-
-            len = 1 / len;
-            dest[0] = x * len;
-            dest[1] = y * len;
-            dest[2] = z * len;
-            return dest;
+        distance: function (a, b) {
+            var x = b[0] - a[0],
+                y = b[1] - a[1],
+                z = b[2] - a[2];
+            return Math.sqrt(x * x + y * y + z * z);
         },
 
         /**
-         * Generates the cross product of two vec3s
-         * @method cross
-         * @param {kick.math.Vec3} vec first operand
-         * @param {kick.math.Vec3} vec2 second operand
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
+         * Calculates the squared euclidian distance between two vec3's
+         *
+         * @method squaredDistance
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {Number} squared distance between a and b
          * @static
          */
-        cross: function (vec, vec2, dest) {
-            if (!dest) { dest = vec; }
-
-            var x = vec[0], y = vec[1], z = vec[2],
-                x2 = vec2[0], y2 = vec2[1], z2 = vec2[2];
-
-            dest[0] = y * z2 - z * y2;
-            dest[1] = z * x2 - x * z2;
-            dest[2] = x * y2 - y * x2;
-            return dest;
+        squaredDistance: function (a, b) {
+            var x = b[0] - a[0],
+                y = b[1] - a[1],
+                z = b[2] - a[2];
+            return x * x + y * y + z * z;
         },
 
         /**
          * Calculates the length of a vec3
+         *
          * @method length
-         * @param {kick.math.Vec3} vec vec3 to calculate length of
+         * @param {kick.math.Vec3} a vector to calculate length of
          * @return {Number} Length of vec
          * @static
          */
-        length: function (vec) {
-            var x = vec[0], y = vec[1], z = vec[2];
+        length: function (a) {
+            var x = a[0],
+                y = a[1],
+                z = a[2];
             return Math.sqrt(x * x + y * y + z * z);
         },
 
         /**
          * Calculates the squared length of a vec3
-         * @method lengthSqr
-         * @param {kick.math.Vec3} vec vec3 to calculate squared length of
+         * @method squaredLength
+         * @param {kick.math.Vec3} a vector to calculate squared length of
          * @return {Number} Squared length of vec
          * @static
          */
-        lengthSqr: function (vec) {
-            var x = vec[0], y = vec[1], z = vec[2];
+        squaredLength: function (a) {
+            var x = a[0],
+                y = a[1],
+                z = a[2];
             return x * x + y * y + z * z;
+        },
+
+        /**
+         * Negates the components of a vec3
+         * @method negate
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a vector to negate
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        negate: function (out, a) {
+            out[0] = -a[0];
+            out[1] = -a[1];
+            out[2] = -a[2];
+            return out;
+        },
+
+
+
+        /**
+         * Normalize a vec3
+         *
+         * @method normalize
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a vector to normalize
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        normalize: function (out, a) {
+            var x = a[0],
+                y = a[1],
+                z = a[2],
+                len = x * x + y * y + z * z;
+            if (len > 0) {
+                //TODO: evaluate use of glm_invsqrt here?
+                len = 1 / Math.sqrt(len);
+                out[0] = a[0] * len;
+                out[1] = a[1] * len;
+                out[2] = a[2] * len;
+            }
+            return out;
         },
 
         /**
          * Calculates the dot product of two vec3s
          * @method dot
-         * @param {kick.math.Vec3} vec first operand
-         * @param {kick.math.Vec3} vec2 second operand
-         * @return {Number} Dot product of vec and vec2
+         * @param {vec3} a the first operand
+         * @param {vec3} b the second operand
+         * @return {Number} dot product of a and b
          * @static
          */
-        dot: function (vec, vec2) {
-            return vec[0] * vec2[0] + vec[1] * vec2[1] + vec[2] * vec2[2];
+        dot: function (a, b) {
+            return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
         },
+
+        /**
+         * Generates the cross product of two vec3s
+         * @method cross
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        cross: function (out, a, b) {
+            var ax = a[0], ay = a[1], az = a[2],
+                bx = b[0], by = b[1], bz = b[2];
+
+            out[0] = ay * bz - az * by;
+            out[1] = az * bx - ax * bz;
+            out[2] = ax * by - ay * bx;
+            return out;
+        },
+
+        /**
+         * Performs a linear interpolation between two vec3
+         *
+         * @method lerp
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
+         * @param {Number} t interpolation amount between the two inputs
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        lerp: function (out, a, b, t) {
+            var ax = a[0],
+                ay = a[1],
+                az = a[2];
+            out[0] = ax + t * (b[0] - ax);
+            out[1] = ay + t * (b[1] - ay);
+            out[2] = az + t * (b[2] - az);
+            return out;
+        },
+
+        /**
+         * Transforms the vec3 with a mat4.
+         * 4th vector component is implicitly '1'
+         *
+         * @method transformMat4
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the vector to transform
+         * @param {kick.math.Mat4} m matrix to transform with
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        transformMat4: function (out, a, m) {
+            var x = a[0], y = a[1], z = a[2];
+            out[0] = m[0] * x + m[4] * y + m[8] * z + m[12];
+            out[1] = m[1] * x + m[5] * y + m[9] * z + m[13];
+            out[2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+            return out;
+        },
+
+        /**
+         * Transforms the vec3 with a quat
+         *
+         * @method transformQuat
+         * @param {kick.math.Vec3} out the receiving vector
+         * @param {kick.math.Vec3} a the vector to transform
+         * @param {kick.math.Quat} q quaternion to transform with
+         * @return {kick.math.Vec3} out
+         * @static
+         */
+        transformQuat: function (out, a, q) {
+            var x = a[0], y = a[1], z = a[2],
+                qx = q[0], qy = q[1], qz = q[2], qw = q[3],
+
+            // calculate quat * vec
+                ix = qw * x + qy * z - qz * y,
+                iy = qw * y + qz * x - qx * z,
+                iz = qw * z + qx * y - qy * x,
+                iw = -qx * x - qy * y - qz * z;
+
+            // calculate result * inverse quat
+            out[0] = ix * qw + iw * -qx + iy * -qz - iz * -qy;
+            out[1] = iy * qw + iw * -qy + iz * -qx - ix * -qz;
+            out[2] = iz * qw + iw * -qz + ix * -qy - iy * -qx;
+            return out;
+        },
+
+        /**
+         * Perform some operation over an array of vec3s.
+         *
+         * @method forEach
+         * @param {Array} a the array of vectors to iterate over
+         * @param {Number} stride Number of elements between the start of each vec3. If 0 assumes tightly packed
+         * @param {Number} offset Number of elements to skip at the beginning of the array
+         * @param {Number} count Number of vec3s to iterate over. If 0 iterates over entire array
+         * @param {Function} fn Function to call for each vector in the array
+         * @param {Object} [arg] additional argument to pass to fn
+         * @return {Array} a
+         * @static
+         */
+        forEach: (function () {
+            var vec = new Float32Array(3);
+
+            return function (a, stride, offset, count, fn, arg) {
+                var i, l;
+                if (!stride) {
+                    stride = 3;
+                }
+
+                if (!offset) {
+                    offset = 0;
+                }
+
+                if (count) {
+                    l = Math.min((count * stride) + offset, a.length);
+                } else {
+                    l = a.length;
+                }
+
+                for (i = offset; i < l; i += stride) {
+                    vec[0] = a[i]; vec[1] = a[i+1]; vec[2] = a[i+2];
+                    fn(vec, vec, arg);
+                    a[i] = vec[0]; a[i+1] = vec[1]; a[i+2] = vec[2];
+                }
+
+                return a;
+            };
+        }()),
 
         /**
          * Generates a unit vector pointing from one vector to another
@@ -347,27 +523,9 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
             return dest;
         },
 
+
+
         /**
-         * Performs a linear interpolation between two vec3
-         * @method lerp
-         * @param {kick.math.Vec3} vec first vector
-         * @param {kick.math.Vec3} vec2 second vector
-         * @param {Number} lerp interpolation amount between the two inputs
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
-         * @return {kick.math.Vec3} dest if specified, vec otherwise
-         * @static
-         */
-        lerp: function (vec, vec2, lerp, dest) {
-            if (!dest) { dest = vec; }
-
-            dest[0] = vec[0] + lerp * (vec2[0] - vec[0]);
-            dest[1] = vec[1] + lerp * (vec2[1] - vec[1]);
-            dest[2] = vec[2] + lerp * (vec2[2] - vec[2]);
-
-            return dest;
-        },
-
-        /*
          * Calculates the euclidean distance between two vec3
          *
          * @method dist
@@ -384,7 +542,7 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
             return Math.sqrt(x * x + y * y + z * z);
         },
 
-        /*
+        /**
          * Projects the specified vec3 from screen space into object space
          * Based on Mesa gluUnProject implementation at:
          * http://webcvs.freedesktop.org/mesa/Mesa/src/glu/mesa/project.c?revision=1.4&view=markup
@@ -409,8 +567,8 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
                 v[2] = 2.0 * vec[2] - 1.0;
                 v[3] = 1.0;
 
-                mat4.multiply(proj, modelView, m);
-                if (!mat4.inverse(m)) { return null; }
+                mat4.multiply(m, proj, modelView);
+                if (!mat4.invert(m, m)) { return null; }
 
                 mat4.multiplyVec4(m, v);
                 if (v[3] === 0.0) { return null; }
@@ -445,6 +603,30 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
             dest[2] = a * Math.sin(polar);
             return dest;
         },
+
+        /**
+         * Test to see if vectors are equal (difference is less than epsilon)
+         * @method equal
+         * @param {kick.math.Vec3} vec first operand
+         * @param {kick.math.Vec3} vec2 second operand
+         * @param {Number} epsilon Optional - default value is
+         * @return {Boolean} true if two vectors are equals
+         * @static
+         */
+        equal: function (vec, vec2, epsilon) {
+            var i;
+            if (!epsilon) {
+                epsilon = constants._EPSILON;
+            }
+            for (i = 0; i < 3; i++) {
+                if (Math.abs(vec[i] - vec2[i]) > epsilon) {
+                    return false;
+                }
+            }
+            return true;
+        },
+
+
 
         /**
          * Converts from cartesian coordinates to spherical coordinates (in radians)<br>

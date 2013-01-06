@@ -22,7 +22,7 @@
             function (KICK) {
                 var engine,
                         vec3 = KICK.math.Vec3,
-                        quat4 = KICK.math.Quat4,
+                        quat = KICK.math.Quat,
                         cameraObject,
                         lightGameObject,
                         lightComponents = [];
@@ -52,7 +52,7 @@
                     cameraObject.addComponent(camera);
                     var transform = cameraObject.transform;
                     transform.localPosition = [0,0,-3];
-                    transform.localRotation = quat4.lookAt([0,0,-3],[0,0,0],[0,1,0]);
+                    transform.localRotation = quat.lookAt([0,0,-3],[0,0,0],[0,1,0]);
 
                     addLightComponent();
                 }
@@ -106,7 +106,7 @@
                             wheelSpeed = 0.0001,
                             mouseRotationSpeed = 0.01,
                             mouseInput,
-                            sphericalCoordinates = vec3.create([2.2,0,0]); // radius, polar, elevation
+                            sphericalCoordinates = vec3.clone([2.2,0,0]); // radius, polar, elevation
                     cartesianCoordinates = vec3.create();
 
                     this.activated = function(){
@@ -118,7 +118,7 @@
                         mouseInput.mouseWheelPreventDefaultAction = true;
                     };
 
-                    var localRotate = quat4.create();
+                    var localRotate = quat.create();
                     this.update = function(){
                         if (mouseInput.isButton(0)){
                             var mouseDelta = mouseInput.deltaMovement;
@@ -137,7 +137,7 @@
                         }
                         vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
                         transform.position = cartesianCoordinates;
-                        transform.localRotation = quat4.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
+                        transform.localRotation = quat.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
                     };
                 }
 

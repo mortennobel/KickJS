@@ -3,7 +3,7 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
         "use strict";
 
         var ASSERT = Constants._ASSERT,
-            quat4 = math.Quat4,
+            quat = math.Quat,
             mat4 = math.Mat4,
             /**
              * Imports a Wavefront .obj mesh into a scene. The importer loading both normals and texture coordinates from the
@@ -201,11 +201,11 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
                     }
                 } else if (token === "v") {
                     var vertex = strAsArray(value);
-                    mat4.multiplyVec3(transformMatrix, vertex);
+                    mat4.multiplyVec3(vertex, transformMatrix, vertex);
                     vertices.push(vertex);
                 } else if (token === "vn") {
                     var normal = strAsArray(value);
-                    mat4.multiplyVec3(transformMatrix, normal);
+                    mat4.multiplyVec3(normal, transformMatrix, normal);
                     normals.push(normal);
                 } else if (token === "vt") {
                     textureCoordinates.push(strAsArray(value));

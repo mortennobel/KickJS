@@ -39,8 +39,8 @@ requirejs(['kick'],
             function reflect(L, N){
             	var lDotN = vec3.dot(L,N); // Allocate primitive (stack)
             	var lDotN2 = - 2 * lDotN; // Allocate primitive (stack)
-            	var scaledNormal = vec3.scale(N,lDotN2,vec3.create()); // allocate temporary (heap)
-            	return vec3.subtract(L,scaledNormal,vec3.create()); // allocate result
+            	var scaledNormal = vec3.scale(vec3.create(),N,lDotN2); // allocate temporary (heap)
+            	return vec3.subtract(vec3.create(), L,scaledNormal); // allocate result
             }
 
             function reflectOptimized(L, N, res){ // res is optional
@@ -100,8 +100,8 @@ requirejs(['kick'],
                 testReflectSimple: function () {
                     var sum = 0;
                     var result = vec3.create();
-                    var L = vec3.create([1,2,3]);
-                    var N = vec3.create([0,1,0]);
+                    var L = vec3.clone([1,2,3]);
+                    var N = vec3.clone([0,1,0]);
                     for (var i=0;i<length;i++){
                         result = reflect(L,N);
                         sum += result[0];
@@ -111,8 +111,8 @@ requirejs(['kick'],
                 testReflectAdvanced: function () {
                     var sum = 0;
                     var result = vec3.create();
-                    var L = vec3.create([1,2,3]);
-                    var N = vec3.create([0,1,0]);
+                    var L = vec3.clone([1,2,3]);
+                    var N = vec3.clone([0,1,0]);
                     for (var i=0;i<length;i++){
                         result = reflectOptimized(L,N,result);
                         sum += result[0];

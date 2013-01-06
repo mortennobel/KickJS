@@ -55,153 +55,142 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
 
         /**
          * Copies the values of one aabb to another
-         * @method set
+         * @method copy
+         * @param {kick.math.Aabb} out receiving copied values
          * @param {kick.math.Aabb} aabb containing values to copy
-         * @param {kick.math.Aabb} dest receiving copied values
          * @return {kick.math.Aabb} dest
          * @static
          */
-        set: function (aabb, dest) {
-            dest[0] = aabb[0];
-            dest[1] = aabb[1];
-            dest[2] = aabb[2];
-            dest[3] = aabb[3];
-            dest[4] = aabb[4];
-            dest[5] = aabb[5];
-            return dest;
+        copy: function (out, aabb) {
+            out[0] = aabb[0];
+            out[1] = aabb[1];
+            out[2] = aabb[2];
+            out[3] = aabb[3];
+            out[4] = aabb[4];
+            out[5] = aabb[5];
+            return out;
         },
 
         /**
          * Transforms the eight points of the Axis-Aligned Bounding Box into a new AABB
          * @method transform
+         * @param {kick.math.Aabb} out
          * @param {kick.math.Aabb} aabbIn
          * @param {kick.math.Mat4} mat
-         * @param {kick.math.Aabb} dest Optional new aabb create if not specified
          * @return {kick.math.Aabb}
          * @static
          */
         transform: (function () {
-            var point = vec3.create();
-            return function (aabbIn, mat, dest) {
+            var point = vec3.create(),
+                temp = new Float32Array(6);
+            return function (out, aabbIn, mat) {
                 var max = Number.MAX_VALUE,
                     min = -Number.MAX_VALUE,
                     i,
                     j,
                     k,
                     transformedPoint;
-                if (!dest) {
-                    dest = this.create();
-                } else {
-                    this.set([max, max, max, min, min, min], dest);
-                }
+
+                this.copy(temp, [max, max, max, min, min, min]);
+
                 for (i = 0; i < 2; i++) {
                     for (j = 0; j < 2; j++) {
                         for (k = 0; k < 2; k++) {
                             point[0] = aabbIn[i * 3];
                             point[1] = aabbIn[j * 3 + 1];
                             point[2] = aabbIn[k * 3 + 2];
-                            transformedPoint = mat4.multiplyVec3(mat, point);
-                            this.addPoint(dest, transformedPoint);
+                            transformedPoint = mat4.multiplyVec3(point, mat, point);
+                            this.addPoint(temp, temp, transformedPoint);
                         }
                     }
                 }
-                return dest;
+                this.copy(out, temp);
+                return out;
             };
         }()),
 
         /**
          * @method merge
+         * @param {kick.math.Aabb} out
          * @param {kick.math.Aabb} aabb
          * @param {kick.math.Aabb} aabb2
-         * @param {kick.math.Aabb} dest Optional, receiving copied values - otherwise using aabb
-         * @return {kick.math.Aabb} dest if specified - otherwise a new value is returned
+         * @return {kick.math.Aabb} out
          * @static
          */
-        merge: function (aabb, aabb2, dest) {
-            if (!dest) {
-                dest = aabb;
-            }
-            dest[0] = Math.min(aabb[0], aabb2[0]);
-            dest[1] = Math.min(aabb[1], aabb2[1]);
-            dest[2] = Math.min(aabb[2], aabb2[2]);
-            dest[3] = Math.max(aabb[3], aabb2[3]);
-            dest[4] = Math.max(aabb[4], aabb2[4]);
-            dest[5] = Math.max(aabb[5], aabb2[5]);
-            return dest;
+        merge: function (aabb, aabb2, out) {
+            out[0] = Math.min(aabb[0], aabb2[0]);
+            out[1] = Math.min(aabb[1], aabb2[1]);
+            out[2] = Math.min(aabb[2], aabb2[2]);
+            out[3] = Math.max(aabb[3], aabb2[3]);
+            out[4] = Math.max(aabb[4], aabb2[4]);
+            out[5] = Math.max(aabb[5], aabb2[5]);
+            return out;
         },
 
         /**
          * @method addPoint
+         * @param {kick.math.Aabb} out
          * @param {kick.math.Aabb} aabb
-         * @param {kick.math.Vec3} vec3Point
+         * @param {kick.math.Vec3} a point
          * @return {kick.math.Aabb} aabb (same object as input)
          * @static
          */
-        addPoint: function (aabb, vec3Point) {
-            var vpX = vec3Point[0],
-                vpY = vec3Point[1],
-                vpZ = vec3Point[2];
-            aabb[0] = Math.min(aabb[0], vpX);
-            aabb[1] = Math.min(aabb[1], vpY);
-            aabb[2] = Math.min(aabb[2], vpZ);
-            aabb[3] = Math.max(aabb[3], vpX);
-            aabb[4] = Math.max(aabb[4], vpY);
-            aabb[5] = Math.max(aabb[5], vpZ);
+        addPoint: function (out, aabb, a) {
+            var vpX = a[0],
+                vpY = a[1],
+                vpZ = a[2];
+            out[0] = Math.min(aabb[0], vpX);
+            out[1] = Math.min(aabb[1], vpY);
+            out[2] = Math.min(aabb[2], vpZ);
+            out[3] = Math.max(aabb[3], vpX);
+            out[4] = Math.max(aabb[4], vpY);
+            out[5] = Math.max(aabb[5], vpZ);
             return aabb;
         },
 
         /**
          * @method center
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Aabb} aabb
-         * @param {kick.math.Vec3} centerVec3 Optional
-         * @return {kick.math.Vec3} Center of aabb, (centerVec3 if specified)
+         * @return {kick.math.Vec3} out
          * @static
          */
-        center: function (aabb, centerVec3) {
-            if (!centerVec3) {
-                centerVec3 = vec3.create();
-            }
-            centerVec3[0] = (aabb[0] + aabb[3]) * 0.5;
-            centerVec3[1] = (aabb[1] + aabb[4]) * 0.5;
-            centerVec3[2] = (aabb[2] + aabb[5]) * 0.5;
+        center: function (out, aabb) {
+            out[0] = (aabb[0] + aabb[3]) * 0.5;
+            out[1] = (aabb[1] + aabb[4]) * 0.5;
+            out[2] = (aabb[2] + aabb[5]) * 0.5;
 
-            return centerVec3;
+            return out;
         },
 
         /**
          * @method halfVector
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Aabb} aabb
-         * @param {kick.math.Vec3} halfVec3 Optional
-         * @return {kick.math.Vec3} Halfvector of aabb, (halfVec3 if specified)
+         * @return {kick.math.Vec3} out
          * @static
          */
-        halfVec3: function (aabb, halfVec3) {
-            if (!halfVec3) {
-                halfVec3 = vec3.create();
-            }
-            halfVec3[0] = (aabb[3] - aabb[0]) * 0.5;
-            halfVec3[1] = (aabb[4] - aabb[1]) * 0.5;
-            halfVec3[2] = (aabb[5] - aabb[2]) * 0.5;
+        halfVec3: function (out, aabb) {
+            out[0] = (aabb[3] - aabb[0]) * 0.5;
+            out[1] = (aabb[4] - aabb[1]) * 0.5;
+            out[2] = (aabb[5] - aabb[2]) * 0.5;
 
-            return halfVec3;
+            return out;
         },
 
         /**
          * Diagonal from min to max
          * @method diagonal
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Aabb} aabb
-         * @param {kick.math.Vec3} diagonalVec3 optional
-         * @return {kick.math.Vec3}
+         * @return {kick.math.Vec3} out
          * @static
          */
-        diagonal: function (aabb, diagonalVec3) {
-            if (!diagonalVec3) {
-                diagonalVec3 = vec3.create();
-            }
-            diagonalVec3[0] = aabb[3] - aabb[0];
-            diagonalVec3[1] = aabb[4] - aabb[1];
-            diagonalVec3[2] = aabb[5] - aabb[2];
-            return diagonalVec3;
+        diagonal: function (out, aabb) {
+            out[0] = aabb[3] - aabb[0];
+            out[1] = aabb[4] - aabb[1];
+            out[2] = aabb[5] - aabb[2];
+            return out;
         },
 
         /**

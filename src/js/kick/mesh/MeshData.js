@@ -240,7 +240,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                         aabb = Aabb.create();
                         for (i = 0; i < vertexLength; i += 3) {
                             point = vertex.subarray(i, i + 3);
-                            Aabb.addPoint(aabb, point);
+                            Aabb.addPoint(aabb, aabb, point);
                         }
                         return aabb;
                     }
@@ -542,7 +542,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     wrappedVec3Array = Vec3.wrapArray(copy.vertex),
                     j;
                 for (j = wrappedVec3Array.length - 1; j >= 0; j--) {
-                    Mat4.multiplyVec3(transformMatrix, wrappedVec3Array[j]);
+                    Mat4.multiplyVec3(wrappedVec3Array[j], transformMatrix, wrappedVec3Array[j]);
                 }
                 return copy;
             };
@@ -731,21 +731,21 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
 
                 Vec3.subtract(v2, v1, v1v2);
                 Vec3.subtract(v3, v1, v1v3);
-                Vec3.normalize(v1v2);
-                Vec3.normalize(v1v3);
+                Vec3.normalize(v1v2, v1v2);
+                Vec3.normalize(v1v3, v1v3);
                 Vec3.cross(v1v2, v1v3, normal);
-                Vec3.normalize(normal);
+                Vec3.normalize(normal, normal);
 
                 weight1 = Math.acos(Math.max(-1, Math.min(1, Vec3.dot(v1v2, v1v3))));
                 Vec3.subtract(v3, v2, v2v3Alias);
-                Vec3.normalize(v2v3Alias);
+                Vec3.normalize(v2v3Alias, v2v3Alias);
                 weight2 = Math.PI - Math.max(-1, Math.min(1, Math.acos(Vec3.dot(v1v2, v2v3Alias))));
-                Vec3.add(normalArray[i1], Vec3.scale(normal, weight1, temp));
-                Vec3.add(normalArray[i2], Vec3.scale(normal, weight2, temp));
-                Vec3.add(normalArray[i3], Vec3.scale(normal, Math.PI - weight1 - weight2, temp));
+                Vec3.add(normalArray[i1], normalArray[i1], Vec3.scale(temp, normal, weight1));
+                Vec3.add(normalArray[i2], normalArray[i2], Vec3.scale(temp, normal, weight2));
+                Vec3.add(normalArray[i3], normalArray[i3], Vec3.scale(temp, normal, Math.PI - weight1 - weight2));
             }
             for (a = 0; a < vertexCount; a++) {
-                Vec3.normalize(normalArray[a]);
+                Vec3.normalize(normalArray[a], normalArray[a]);
             }
             this.normal =  normalArrayRef.mem;
         };
@@ -827,20 +827,20 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 t2 = w3[1] - w1[1];
 
                 r = 1.0 / (s1 * t2 - s2 * t1);
-                sdir = Vec3.create([(t2 * x1 - t1 * x2) * r,
+                sdir = Vec3.clone([(t2 * x1 - t1 * x2) * r,
                     (t2 * y1 - t1 * y2) * r,
                     (t2 * z1 - t1 * z2) * r]);
-                tdir = Vec3.create([(s1 * x2 - s2 * x1) * r,
+                tdir = Vec3.clone([(s1 * x2 - s2 * x1) * r,
                     (s1 * y2 - s2 * y1) * r,
                     (s1 * z2 - s2 * z1) * r]);
 
-                Vec3.add(tan1[i1], sdir);
-                Vec3.add(tan1[i2], sdir);
-                Vec3.add(tan1[i3], sdir);
+                Vec3.add(tan1[i1], tan1[i1], sdir);
+                Vec3.add(tan1[i2], tan1[i2], sdir);
+                Vec3.add(tan1[i3], tan1[i3], sdir);
 
-                Vec3.add(tan2[i1], tdir);
-                Vec3.add(tan2[i2], tdir);
-                Vec3.add(tan2[i3], tdir);
+                Vec3.add(tan2[i1], tan2[i1], tdir);
+                Vec3.add(tan2[i2], tan2[i2], tdir);
+                Vec3.add(tan2[i3], tan2[i3], tdir);
             }
             for (a = 0; a < vertexCount; a++) {
                 n = normal[a];
@@ -849,10 +849,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 // Gram-Schmidt orthogonalize
                 // tangent[a] = (t - n * Dot(n, t)).Normalize();
                 tmpFloat = Vec3.dot(n, t);
-                Vec3.scale(n, tmpFloat, tmpVec3);
-                Vec3.subtract(t, tmpVec3, tmpVec3);
-                Vec3.normalize(tmpVec3);
-                Vec3.set(tmpVec3, tangent[a]);
+                Vec3.scale(tmpVec3, n, tmpFloat);
+                Vec3.subtract(tmpVec3, t, tmpVec3);
+                Vec3.normalize(tmpVec3, tmpVec3);
+                Vec3.copy(tangent[a], tmpVec3);
 
                 // Calculate handedness
                 // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;

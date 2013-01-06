@@ -121,9 +121,9 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                     x1 = cosLong * cosLat1;
                     y1 = sinLat1;
                     z1 = sinLong * cosLat1;
-                    Vec3.set([x1, y1, z1], normals[index]);
-                    Vec2.set([1 - i / slices, j / stacks], uvs[index]);
-                    Vec3.set([radius * x1, radius * y1, radius * z1], vertices[index]);
+                    Vec3.copy(normals[index], [x1, y1, z1]);
+                    Vec2.copy(uvs[index], [1 - i / slices, j / stacks]);
+                    Vec3.copy(vertices[index], [radius * x1, radius * y1, radius * z1]);
                     index++;
                 }
             }

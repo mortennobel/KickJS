@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../js/kick-built'
+        kick: '../js/kick-debug'
     }
 });
 
@@ -11,10 +11,10 @@ requirejs(['kick'],
 
 
         var vec3 = KICK.math.Vec3,
-            quat4 = KICK.math.Quat4,
+            quat = KICK.math.Quat,
             aabb = KICK.math.Aabb,
             objectCenter = vec3.create(),
-            sphericalCoordinates = vec3.create([10, 0, 0]); // radius, polar, elevation
+            sphericalCoordinates = vec3.clone([10, 0, 0]); // radius, polar, elevation
 
         if (location.href.indexOf('file') === 0) {
             alert("Model viewer example must be run from a web-server due to security constrains");
@@ -37,7 +37,7 @@ requirejs(['kick'],
             var meshData = new KICK.mesh.MeshData();
             meshData.deserialize(fileContent);
             var gameObject = engine.activeScene.createGameObject({name: meshData.name});
-            var mesh = new KICK.mesh.Mesh(engine, {
+            var mesh = new KICK.mesh.Mesh({
                 meshData: meshData
             });
             var materials = [];
@@ -61,7 +61,7 @@ requirejs(['kick'],
         function load(content,url,func,rotateAroundX){
             destroyAllMeshRenderersInScene();
 
-            var createdObject = func(content,engine,engine.activeScene,rotateAroundX);
+            var createdObject = func(content,engine.activeScene,rotateAroundX);
             var gameObjectsCreated = createdObject.gameObjects;
 
             var boundingBox = aabb.create();
@@ -70,7 +70,7 @@ requirejs(['kick'],
                 var meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
                 if (meshRendererNew){
                     var meshAabb = meshRendererNew.mesh.aabb;
-                    var aabbTransformed = aabb.transform(meshAabb,gameObject.transform.getGlobalMatrix ( ));
+                    var aabbTransformed = aabb.transform(meshAabb,meshAabb,gameObject.transform.getGlobalMatrix ( ));
                     aabb.merge(boundingBox,aabbTransformed);
                     var materials = [];
                     for (var j = meshRendererNew.mesh.meshData.subMeshes.length-1;j>=0;j--){
@@ -238,7 +238,7 @@ requirejs(['kick'],
                 console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
                 return null;
             }
-            return new KICK.material.Material(engine, {
+            return new KICK.material.Material({
                 name:"Some material",
                 shader:shader
             });
@@ -329,12 +329,12 @@ requirejs(['kick'],
                 vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
                 cartesianCoordinates = vec3.add(cartesianCoordinates,objectCenter,cartesianCoordinates);
                 transform.position = cartesianCoordinates;
-                transform.localRotation = quat4.lookAt(cartesianCoordinates,objectCenter,[0,1,0]);
+                transform.localRotation = quat.lookAt(cartesianCoordinates,objectCenter,[0,1,0]);
             };
         }
 
         function initDuckTexture(){
-            texture = new KICK.texture.Texture(engine);
+            texture = new KICK.texture.Texture();
             texture.setTemporaryTexture();
             texture.dataURI = "duckCM.jpg";
             material.setUniform("mainTexture", texture);
@@ -379,7 +379,7 @@ requirejs(['kick'],
             var gameObject = engine.activeScene.createGameObject();
             gameObject.name = "InitialMesh";
             meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(engine,
+            meshRenderer.mesh = new KICK.mesh.Mesh(
                 {
                     dataURI:"kickjs://mesh/uvsphere/?slices=48&stacks=24&radius=0.5",
                     name:"Default object"
