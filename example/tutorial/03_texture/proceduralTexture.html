@@ -8,11 +8,18 @@
 <h1>KickJS | Tutorial | 03 - Texture procedural</h1>
 This example shows how to create a texture from JavaScript.<br>
 <!-- Tutorial start -->
-<script type="text/javascript" src="../../js/webgl-debug.js"></script>
-<script type="text/javascript" src="../../js/kick-debug-0.4.2.js"></script>
-<!--<script type="text/javascript" src="../../js/kick-min-0.4.2.js"></script>-->
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
-<script type="text/javascript">
+
+    <script src="../../common/require.js"></script>
+    <script type="text/javascript">
+        var reqOne = require.config({
+            paths: {
+                kick: '../../js/kick-debug'
+            }
+        });
+
+        reqOne(['kick'],
+            function (KICK) {
     // init engine (create 3d context)
     var engine = new KICK.core.Engine('canvas');
 
@@ -30,7 +37,7 @@ This example shows how to create a texture from JavaScript.<br>
     cameraObject.addComponent(camera);
 
     // create texture
-    var texture = new KICK.texture.Texture(engine);
+    var texture = new KICK.texture.Texture();
     var checkerboardWidth = 128;
     var checkerboardHeight = 128;
     var checkerboard = new Uint8Array(checkerboardWidth*checkerboardWidth*3); // width * height * 3 color channels (RGB)
@@ -59,7 +66,7 @@ This example shows how to create a texture from JavaScript.<br>
 
     // create material
     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-    var material = new KICK.material.Material(engine,{
+    var material = new KICK.material.Material({
         shader: shader,
         uniformData:{
             mainTexture: texture
@@ -76,6 +83,7 @@ This example shows how to create a texture from JavaScript.<br>
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);
     }
+            });
 </script>
 <!-- Tutorial end -->
 </body>

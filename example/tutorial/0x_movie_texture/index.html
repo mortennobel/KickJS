@@ -1,171 +1,179 @@
 <html>
 <head>
-<script type="text/javascript" src="../../common/common.js"></script>
+    <script type="text/javascript" src="../../common/common.js"></script>
+    <script src="../../common/require.js"></script>
 
-<script type="text/javascript" src="../../js/kick-min-0.4.2.js"></script>
-<script type="text/javascript">
-// KickJS code
-    var engine;
-    var camera;
+    <script type="text/javascript">
+        // Canvas 2D example from from https://developer.mozilla.org/en/Canvas_tutorial%3ABasic_animations#An_animation_example_2
+        function init(){
+            clock();
+            setInterval(clock,1000);
+        }
+        function clock(){
+            var now = new Date();
+            var ctx = document.getElementById('2dcanvas').getContext('2d');
+            ctx.save();
+            ctx.clearRect(0,0,150,150);
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, 150, 150);
+            ctx.translate(75,75);
+            ctx.scale(0.4,0.4);
+            ctx.rotate(-Math.PI/2);
+            ctx.strokeStyle = "black";
+            ctx.fillStyle = "white";
+            ctx.lineWidth = 8;
+            ctx.lineCap = "round";
 
-    var RotatorComponent = function(rotationSpeed){
-        var transform,
-                time,
-                rotationEuler = [0,0,0];
-        this.activated = function(){
-            transform = this.gameObject.transform;
-            time = this.gameObject.engine.time;
-        };
+            // Hour marks
+            ctx.save();
+            for (var i=0;i<12;i++){
+                ctx.beginPath();
+                ctx.rotate(Math.PI/6);
+                ctx.moveTo(100,0);
+                ctx.lineTo(120,0);
+                ctx.stroke();
+            }
+            ctx.restore();
 
-        this.update = function(){
-            rotationEuler[1]+=time.deltaTime*rotationSpeed;
-            transform.localRotationEuler = rotationEuler;
-        };
-    };
+            // Minute marks
+            ctx.save();
+            ctx.lineWidth = 5;
+            for (i=0;i<60;i++){
+                if (i%5!=0) {
+                    ctx.beginPath();
+                    ctx.moveTo(117,0);
+                    ctx.lineTo(120,0);
+                    ctx.stroke();
+                }
+                ctx.rotate(Math.PI/30);
+            }
+            ctx.restore();
 
-    function initKick(canvas2d) {
+            var sec = now.getSeconds();
+            var min = now.getMinutes();
+            var hr  = now.getHours();
+            hr = hr>=12 ? hr-12 : hr;
 
-        engine = new KICK.core.Engine('glcanvas',{});
-        var activeScene = engine.activeScene;
-        var cameraObject = activeScene.createGameObject();
-        var camera = new KICK.scene.Camera({
-            clearColor: [124/255,163/255,137/255,1]
-        });
-        cameraObject.transform.position = [0,0,5];
-        cameraObject.addComponent(camera);
+            ctx.fillStyle = "black";
 
-        var gameObject = activeScene.createGameObject();
-        var meshRenderer = new KICK.scene.MeshRenderer();
+            // write Hours
+            ctx.save();
+            ctx.rotate( hr*(Math.PI/6) + (Math.PI/360)*min + (Math.PI/21600)*sec )
+            ctx.lineWidth = 14;
+            ctx.beginPath();
+            ctx.moveTo(-20,0);
+            ctx.lineTo(80,0);
+            ctx.stroke();
+            ctx.restore();
 
-        var texture = new KICK.texture.MovieTexture(engine,{
-            videoElement:canvas2d,
-            generateMipmaps:true,
-            minFilter:KICK.core.Constants.GL_LINEAR_MIPMAP_LINEAR
+            // write Minutes
+            ctx.save();
+            ctx.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec )
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.moveTo(-28,0);
+            ctx.lineTo(112,0);
+            ctx.stroke();
+            ctx.restore();
 
-        });
-        texture.setTemporaryTexture();
-        meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
-         // create material
-        meshRenderer.material = new KICK.material.Material(engine,{
-            shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
-            uniformData:{
-                mainColor: [1,.8,1,1], // change the color slightly (to give a very simple effect)
-                mainTexture: texture
+            // Write seconds
+            ctx.save();
+            ctx.rotate(sec * Math.PI/30);
+            ctx.strokeStyle = "#D40000";
+            ctx.fillStyle = "#D40000";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(-30,0);
+            ctx.lineTo(83,0);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(0,0,10,0,Math.PI*2,true);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(95,0,10,0,Math.PI*2,true);
+            ctx.stroke();
+            ctx.fillStyle = "#555";
+            ctx.arc(0,0,3,0,Math.PI*2,true);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.beginPath();
+            ctx.lineWidth = 14;
+            ctx.strokeStyle = '#325FA2';
+            ctx.arc(0,0,142,0,Math.PI*2,true);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+    </script>
+
+    <script type="text/javascript">
+        var reqOne = require.config({
+            paths: {
+                kick: '../../js/kick-debug'
             }
         });
-        gameObject.addComponent(meshRenderer);
-        gameObject.addComponent(new RotatorComponent(0.01));
-    }
 
-    var canvas2d;
-    function kickstart(){
-        canvas2d = document.getElementById("2dcanvas");
-        initKick(canvas2d);
-    }
+        reqOne(['kick'],
+                function (KICK) {
+                    // KickJS code
+                    var engine;
+                    var camera;
 
-    </script>
-    <script type="text/javascript">
-// Canvas 2D example from from https://developer.mozilla.org/en/Canvas_tutorial%3ABasic_animations#An_animation_example_2
-function init(){
-  clock();
-  setInterval(clock,1000);
-}
-function clock(){
-  var now = new Date();
-  var ctx = document.getElementById('2dcanvas').getContext('2d');
-  ctx.save();
-  ctx.clearRect(0,0,150,150);
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, 150, 150);
-  ctx.translate(75,75);
-  ctx.scale(0.4,0.4);
-  ctx.rotate(-Math.PI/2);
-  ctx.strokeStyle = "black";
-  ctx.fillStyle = "white";
-  ctx.lineWidth = 8;
-  ctx.lineCap = "round";
+                    var RotatorComponent = function(rotationSpeed){
+                        var transform,
+                                time,
+                                rotationEuler = [0,0,0];
+                        this.activated = function(){
+                            transform = this.gameObject.transform;
+                            time = this.gameObject.engine.time;
+                        };
 
-  // Hour marks
-  ctx.save();
-  for (var i=0;i<12;i++){
-    ctx.beginPath();
-    ctx.rotate(Math.PI/6);
-    ctx.moveTo(100,0);
-    ctx.lineTo(120,0);
-    ctx.stroke();
-  }
-  ctx.restore();
+                        this.update = function(){
+                            rotationEuler[1]+=time.deltaTime*rotationSpeed;
+                            transform.localRotationEuler = rotationEuler;
+                        };
+                    };
 
-  // Minute marks
-  ctx.save();
-  ctx.lineWidth = 5;
-  for (i=0;i<60;i++){
-    if (i%5!=0) {
-      ctx.beginPath();
-      ctx.moveTo(117,0);
-      ctx.lineTo(120,0);
-      ctx.stroke();
-    }
-    ctx.rotate(Math.PI/30);
-  }
-  ctx.restore();
+                    function initKick(canvas2d) {
+                        engine = new KICK.core.Engine('glcanvas',{});
+                        var activeScene = engine.activeScene;
+                        var cameraObject = activeScene.createGameObject();
+                        var camera = new KICK.scene.Camera({
+                            clearColor: [124/255,163/255,137/255,1]
+                        });
+                        cameraObject.transform.position = [0,0,5];
+                        cameraObject.addComponent(camera);
 
-  var sec = now.getSeconds();
-  var min = now.getMinutes();
-  var hr  = now.getHours();
-  hr = hr>=12 ? hr-12 : hr;
+                        var gameObject = activeScene.createGameObject();
+                        var meshRenderer = new KICK.scene.MeshRenderer();
 
-  ctx.fillStyle = "black";
+                        var texture = new KICK.texture.MovieTexture({
+                            videoElement:canvas2d,
+                            generateMipmaps:true,
+                            minFilter:KICK.core.Constants.GL_LINEAR_MIPMAP_LINEAR
 
-  // write Hours
-  ctx.save();
-  ctx.rotate( hr*(Math.PI/6) + (Math.PI/360)*min + (Math.PI/21600)*sec )
-  ctx.lineWidth = 14;
-  ctx.beginPath();
-  ctx.moveTo(-20,0);
-  ctx.lineTo(80,0);
-  ctx.stroke();
-  ctx.restore();
+                        });
+                        texture.setTemporaryTexture();
+                        meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
+                        // create material
+                        meshRenderer.material = new KICK.material.Material({
+                            shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
+                            uniformData:{
+                                mainColor: [1,.8,1,1], // change the color slightly (to give a very simple effect)
+                                mainTexture: texture
+                            }
+                        });
+                        gameObject.addComponent(meshRenderer);
+                        gameObject.addComponent(new RotatorComponent(0.01));
+                    }
 
-  // write Minutes
-  ctx.save();
-  ctx.rotate( (Math.PI/30)*min + (Math.PI/1800)*sec )
-  ctx.lineWidth = 10;
-  ctx.beginPath();
-  ctx.moveTo(-28,0);
-  ctx.lineTo(112,0);
-  ctx.stroke();
-  ctx.restore();
-
-  // Write seconds
-  ctx.save();
-  ctx.rotate(sec * Math.PI/30);
-  ctx.strokeStyle = "#D40000";
-  ctx.fillStyle = "#D40000";
-  ctx.lineWidth = 6;
-  ctx.beginPath();
-  ctx.moveTo(-30,0);
-  ctx.lineTo(83,0);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(0,0,10,0,Math.PI*2,true);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(95,0,10,0,Math.PI*2,true);
-  ctx.stroke();
-  ctx.fillStyle = "#555";
-  ctx.arc(0,0,3,0,Math.PI*2,true);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.beginPath();
-  ctx.lineWidth = 14;
-  ctx.strokeStyle = '#325FA2';
-  ctx.arc(0,0,142,0,Math.PI*2,true);
-  ctx.stroke();
-
-  ctx.restore();
-}
+                    var canvas2d;
+                    window.kickstart = function(){
+                        canvas2d = document.getElementById("2dcanvas");
+                        initKick(canvas2d);
+                    }
+                });
     </script>
 </head>
 <body onload="init();kickstart();">

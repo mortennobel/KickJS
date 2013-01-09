@@ -8,111 +8,117 @@
 <h1>KickJS | Tutorial | 06 - Mouse input and picking</h1>
 
 <!-- Tutorial start -->
-<script type="text/javascript" src="../../js/webgl-debug.js"></script>
-<script type="text/javascript" src="../../js/kick-debug-0.4.2.js"></script>
-<!--<script type="text/javascript" src="../../js/kick-min-0.4.2.js"></script>-->
 Accelerate the triangle by pressing left mouse button on the items.<br><br>
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
-
+<script src="../../common/require.js"></script>
 <script type="text/javascript">
-    var RotatorComponent = function(config){
-        var rotationEuler = [0,0,0],
-                thisObj = this,
-                mouseInput,
-                transform,
-                gameObject,
-                time,
-                currentSpeed = 0,
-                isMouseButtonDown,
-                camera;
-
-        this.rotationSpeed = config.rotationSpeed;
-
-        this.activated = function(){
-            gameObject = thisObj.gameObject;
-            var engine = gameObject.engine;
-            time = engine.time;
-            transform = gameObject.transform;
-            mouseInput = engine.mouseInput;
-            camera = gameObject.scene.findComponentsOfType(KICK.scene.Camera)[0];
-        };
-
-        this.update = function(){
-            var deltaTime = time.deltaTime;
-            if (mouseInput.isButtonDown(0) && !mouseInput.isButtonUp(0)){
-                var mousePosition = mouseInput.mousePosition;
-                camera.pick(function(gameObjectPicked){
-                    if (gameObjectPicked === gameObject){
-                        isMouseButtonDown = true;
-                    }
-                },mousePosition[0],mousePosition[1]);
-            }
-            if (mouseInput.isButtonUp(0)){
-                isMouseButtonDown = false;
-            }
-            if (isMouseButtonDown) {
-                // accelerate
-                currentSpeed += config.rotationSpeed*deltaTime;
-            } else {
-                // de-accelerate
-                currentSpeed = Math.max(0,currentSpeed-config.rotationSpeed*deltaTime);
-            }
-            // apply current rotation
-            rotationEuler[2] += deltaTime*currentSpeed;
-            transform.localRotationEuler = rotationEuler;
-        };
-    };
-
-    (function(){
-        // init engine (create 3d context)
-        var engine = new KICK.core.Engine('canvas');
-
-        // create a game object in [0,0,0] facing down the -z axis
-        var cameraObject = engine.activeScene.createGameObject();
-        cameraObject.transform.position = [0,0,5];
-        // create a orthographic camera
-        var camera = new KICK.scene.Camera({
-            perspective: false,
-            left:-5,
-            right:5,
-            top:5,
-            bottom:-5
-        });
-        cameraObject.addComponent(camera);
-
-        // create material
-        var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-        var material = new KICK.material.Material(engine,{
-            shader: shader,
-            uniforms:{
-                mainColor: {
-                    value: [1,1,1,1],
-                    type: KICK.core.Constants.GL_FLOAT_VEC4
-                },
-                mainTexture: {
-                    value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                    type: KICK.core.Constants.GL_SAMPLER_2D
-                }
-            }
-        });
-
-        // create meshes
-        var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
-        var rotationAcceleration = [0.0002,0.00032];
-
-        for (var i=0;i<meshes.length;i++){
-            var gameObject = engine.activeScene.createGameObject();
-            gameObject.transform.position = [-2.0+4*i,0,0];
-            var meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = engine.project.load(meshes[i]);
-            meshRenderer.material = material;
-            gameObject.addComponent(meshRenderer);
-            gameObject.addComponent(new RotatorComponent(
-                    {
-                        rotationSpeed:rotationAcceleration[i]
-                    }));
+    var reqOne = require.config({
+        paths: {
+            kick: '../../js/kick-debug'
         }
-    })();
+    });
+
+    reqOne(['kick'],
+            function (KICK) {
+                var RotatorComponent = function(config){
+                    var rotationEuler = [0,0,0],
+                            thisObj = this,
+                            mouseInput,
+                            transform,
+                            gameObject,
+                            time,
+                            currentSpeed = 0,
+                            isMouseButtonDown,
+                            camera;
+
+                    this.rotationSpeed = config.rotationSpeed;
+
+                    this.activated = function(){
+                        gameObject = thisObj.gameObject;
+                        var engine = gameObject.engine;
+                        time = engine.time;
+                        transform = gameObject.transform;
+                        mouseInput = engine.mouseInput;
+                        camera = gameObject.scene.findComponentsOfType(KICK.scene.Camera)[0];
+                    };
+
+                    this.update = function(){
+                        var deltaTime = time.deltaTime;
+                        if (mouseInput.isButtonDown(0) && !mouseInput.isButtonUp(0)){
+                            var mousePosition = mouseInput.mousePosition;
+                            camera.pick(function(gameObjectPicked){
+                                if (gameObjectPicked === gameObject){
+                                    isMouseButtonDown = true;
+                                }
+                            },mousePosition[0],mousePosition[1]);
+                        }
+                        if (mouseInput.isButtonUp(0)){
+                            isMouseButtonDown = false;
+                        }
+                        if (isMouseButtonDown) {
+                            // accelerate
+                            currentSpeed += config.rotationSpeed*deltaTime;
+                        } else {
+                            // de-accelerate
+                            currentSpeed = Math.max(0,currentSpeed-config.rotationSpeed*deltaTime);
+                        }
+                        // apply current rotation
+                        rotationEuler[2] += deltaTime*currentSpeed;
+                        transform.localRotationEuler = rotationEuler;
+                    };
+                };
+
+                (function(){
+                    // init engine (create 3d context)
+                    var engine = new KICK.core.Engine('canvas');
+
+                    // create a game object in [0,0,0] facing down the -z axis
+                    var cameraObject = engine.activeScene.createGameObject();
+                    cameraObject.transform.position = [0,0,5];
+                    // create a orthographic camera
+                    var camera = new KICK.scene.Camera({
+                        perspective: false,
+                        left:-5,
+                        right:5,
+                        top:5,
+                        bottom:-5
+                    });
+                    cameraObject.addComponent(camera);
+
+                    // create material
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+                    var material = new KICK.material.Material({
+                        shader: shader,
+                        uniforms:{
+                            mainColor: {
+                                value: [1,1,1,1],
+                                type: KICK.core.Constants.GL_FLOAT_VEC4
+                            },
+                            mainTexture: {
+                                value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                                type: KICK.core.Constants.GL_SAMPLER_2D
+                            }
+                        }
+                    });
+
+                    // create meshes
+                    var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
+                    var rotationAcceleration = [0.0002,0.00032];
+
+                    for (var i=0;i<meshes.length;i++){
+                        var gameObject = engine.activeScene.createGameObject();
+                        gameObject.transform.position = [-2.0+4*i,0,0];
+                        var meshRenderer = new KICK.scene.MeshRenderer();
+                        meshRenderer.mesh = engine.project.load(meshes[i]);
+                        meshRenderer.material = material;
+                        gameObject.addComponent(meshRenderer);
+                        gameObject.addComponent(new RotatorComponent(
+                                {
+                                    rotationSpeed:rotationAcceleration[i]
+                                }));
+                    }
+                })();
+            });
 </script>
 <!-- Tutorial end -->
 </body>

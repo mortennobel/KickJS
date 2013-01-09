@@ -8,12 +8,17 @@
 <h1>KickJS | Tutorial | 02 - Scripting triangle world - Optimized code</h1>
 This example demonstrate how to script update that runs in every frame (slightly optimized code).<br>
 <!-- Tutorial start -->
-<script type="text/javascript" src="../../js/webgl-debug.js"></script>
-<script type="text/javascript" src="../../js/kick-debug-0.4.2.js"></script>
-<!--<script type="text/javascript" src="../../js/kick-min-0.4.2.js"></script>-->
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+<script src="../../common/require.js"></script>
 <script type="text/javascript">
+    var reqOne = require.config({
+        paths: {
+            kick: '../../js/kick-debug'
+        }
+    });
 
+    reqOne(['kick'],
+        function (KICK) {
     var RotatorComponent = function(config){
         var transform,
                 time,
@@ -52,7 +57,7 @@ This example demonstrate how to script update that runs in every frame (slightly
 
     // create material
         var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-        var material = new KICK.material.Material(engine,{
+        var material = new KICK.material.Material({
             shader: shader,
             uniformData:{
                 mainColor: [1,1,1,1]
@@ -71,6 +76,7 @@ This example demonstrate how to script update that runs in every frame (slightly
             var rotationSpeed = i-0.4;
             gameObject.addComponent(new RotatorComponent({rotationSpeed:rotationSpeed}));
         }
+        });
 </script>
 <!-- Tutorial end -->
 </body>
