@@ -274,7 +274,7 @@ void main(void) {
         // add light components
         lightObj = engine.activeScene.createGameObject();
         directionalLight = new KICK.scene.Light({
-            type : KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+            type : KICK.scene.Light.TYPE_DIRECTIONAL,
             shadow: true,
             color: [1.0,1.0,1.0],
             intensity: 1
@@ -284,7 +284,7 @@ void main(void) {
         lightObj.transform.rotationEuler = [-70,0,10];
         lightObj.transform.position = [1,10,1];
         lightObj.addComponent(new KICK.scene.Light({
-            type : KICK.core.Constants._LIGHT_TYPE_AMBIENT,
+            type : KICK.scene.Light.TYPE_AMBIENT,
             color: [1.0,1.0,1.0],
             intensity: 0.4
         }));

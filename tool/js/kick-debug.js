@@ -3524,7 +3524,7 @@ define('kick/math/Vec4',["kick/core/Constants"], function (constants) {
          *         for (var i=0;i  &lt; wrappedArray.length;i++){
          *             vec4.add(sum,wrappedArray[i]);
          *         }
-         *         return vec4.multiply(sum, [weight, weight, weight, weight]);
+         *         return vec4.multiply(sum, sum, [weight, weight, weight, weight]);
          *     }
          * @method wrapArray
          * @param {Float32Array} array
@@ -5870,7 +5870,7 @@ define('kick/math/Vec3',["kick/core/Constants", "./Mat4"], function (constants, 
                 v[2] = 2.0 * vec[2] - 1.0;
                 v[3] = 1.0;
 
-                mat4.multiply(proj, modelView, m);
+                mat4.multiply(m, proj, modelView);
                 if (!mat4.invert(m, m)) { return null; }
 
                 mat4.multiplyVec4(m, v);
@@ -6292,6 +6292,7 @@ define('kick/math/Vec2',["kick/core/Constants"], function (constants) {
 
         /**
          * Set the components of a vec2 to the given values
+         * @method set
          * @param {kick.math.Vec2} out the receiving vector
          * @param {Number} x X component
          * @param {Number} y Y component
@@ -7190,7 +7191,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                     wrappedVec3Array = Vec3.wrapArray(copy.vertex),
                     j;
                 for (j = wrappedVec3Array.length - 1; j >= 0; j--) {
-                    Mat4.multiplyVec3(transformMatrix, wrappedVec3Array[j]);
+                    Mat4.multiplyVec3(wrappedVec3Array[j], transformMatrix, wrappedVec3Array[j]);
                 }
                 return copy;
             };
@@ -7388,9 +7389,9 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                 Vec3.subtract(v3, v2, v2v3Alias);
                 Vec3.normalize(v2v3Alias, v2v3Alias);
                 weight2 = Math.PI - Math.max(-1, Math.min(1, Math.acos(Vec3.dot(v1v2, v2v3Alias))));
-                Vec3.add(normalArray[i1], Vec3.scale(temp, normal, weight1));
-                Vec3.add(normalArray[i2], Vec3.scale(temp, normal, weight2));
-                Vec3.add(normalArray[i3], Vec3.scale(temp, normal, Math.PI - weight1 - weight2));
+                Vec3.add(normalArray[i1], normalArray[i1], Vec3.scale(temp, normal, weight1));
+                Vec3.add(normalArray[i2], normalArray[i2], Vec3.scale(temp, normal, weight2));
+                Vec3.add(normalArray[i3], normalArray[i3], Vec3.scale(temp, normal, Math.PI - weight1 - weight2));
             }
             for (a = 0; a < vertexCount; a++) {
                 Vec3.normalize(normalArray[a], normalArray[a]);
@@ -7475,20 +7476,20 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                 t2 = w3[1] - w1[1];
 
                 r = 1.0 / (s1 * t2 - s2 * t1);
-                sdir = Vec3.create([(t2 * x1 - t1 * x2) * r,
+                sdir = Vec3.clone([(t2 * x1 - t1 * x2) * r,
                     (t2 * y1 - t1 * y2) * r,
                     (t2 * z1 - t1 * z2) * r]);
-                tdir = Vec3.create([(s1 * x2 - s2 * x1) * r,
+                tdir = Vec3.clone([(s1 * x2 - s2 * x1) * r,
                     (s1 * y2 - s2 * y1) * r,
                     (s1 * z2 - s2 * z1) * r]);
 
-                Vec3.add(tan1[i1], sdir);
-                Vec3.add(tan1[i2], sdir);
-                Vec3.add(tan1[i3], sdir);
+                Vec3.add(tan1[i1], tan1[i1], sdir);
+                Vec3.add(tan1[i2], tan1[i2], sdir);
+                Vec3.add(tan1[i3], tan1[i3], sdir);
 
-                Vec3.add(tan2[i1], tdir);
-                Vec3.add(tan2[i2], tdir);
-                Vec3.add(tan2[i3], tdir);
+                Vec3.add(tan2[i1], tan2[i1], tdir);
+                Vec3.add(tan2[i2], tan2[i2], tdir);
+                Vec3.add(tan2[i3], tan2[i3], tdir);
             }
             for (a = 0; a < vertexCount; a++) {
                 n = normal[a];
@@ -10193,7 +10194,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     // var normalMatrix = math.mat4.toMat3(finalModelView);
                     // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                     //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
-                    normalMatrix = Mat4.toNormalMat3(modelView, tempMat3);
+                    normalMatrix = Mat4.toNormalMat3(tempMat3, modelView);
                     if (ASSERT) {
                         if (!normalMatrix) {
                             Util.fail("Singular matrix");
@@ -10284,8 +10285,8 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
         return function (config) {
             // extend ProjectAsset
             ProjectAsset(this, config, "kick.texture.Texture");
-            if (true){
-                if (config === EngineSingleton.engine){
+            if (true) {
+                if (config === EngineSingleton.engine) {
                     Util.fail("Texture constructor changed - engine parameter is removed");
                 }
             }
@@ -10831,9 +10832,9 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                 };
             };
 
-            this.init = function(config){
+            this.init = function (config) {
                 // apply
-                Util.applyConfig(thisObj, config, ["uid","dataURI"]);
+                Util.applyConfig(thisObj, config, ["uid", "dataURI"]);
                 if (config && config.dataURI) {
                     // set dataURI last to make sure that object is configured before initialization
                     thisObj.dataURI = config.dataURI;
@@ -10843,7 +10844,8 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
             engine.addContextListener(contextListener);
         };
 
-    });
+    }
+);
 
 define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./MeshData", "kick/core/EngineSingleton"], function (ProjectAsset, Constants, Util, MeshData, EngineSingleton) {
     
@@ -13611,7 +13613,7 @@ define('kick/math/Quat',["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", ".
 
         /**
          * Return rotation that goes from quat to quat2.<br>
-         * It is the same as: quat.multiply(quat.invert(quat,quat),quat2,dest);
+         * It is the same as: quat.multiply(dest, quat.invert(quat,quat),quat2);
          * @method difference
          * @param {kick.math.Quat} out
          * @param {kick.math.Quat} quat from rotation
@@ -13664,7 +13666,7 @@ define('kick/scene/SceneLights',["kick/core/Constants", "kick/core/Util", "kick/
                 directionalLightDirection = directionalLightData.subarray(0, 3),
                 directionalLightColorIntensity = directionalLightData.subarray(3, 6),
                 directionalHalfVector = directionalLightData.subarray(6, 9),
-                directionalLightDirectionWorld = Vec3.create([1, 0, 0]),
+                directionalLightDirectionWorld = Vec3.clone([1, 0, 0]),
                 directionalLightTransform = null,
                 pointLightData = new Float32Array(9 * maxNumerOfLights), // mat3*maxNumerOfLights
                 pointLightDataVec3 = Vec3.wrapArray(pointLightData),
@@ -13805,14 +13807,14 @@ define('kick/scene/SceneLights',["kick/core/Constants", "kick/core/Util", "kick/
             this.recomputeLight = function (viewMatrix) {
                 if (directionalLight !== null) {
                     // compute light direction
-                    Quat.multiplyVec3(directionalLightTransform.rotation, lightDirection, directionalLightDirectionWorld);
+                    Quat.multiplyVec3(directionalLightDirectionWorld, directionalLightTransform.rotation, lightDirection);
 
                     // transform to eye space
-                    Mat4.multiplyVec3Vector(viewMatrix, directionalLightDirectionWorld, directionalLightDirection);
+                    Mat4.multiplyVec3Vector(directionalLightDirection, viewMatrix, directionalLightDirectionWorld);
                     Vec3.normalize(directionalLightDirection, directionalLightDirection);
 
                     // compute half vector
-                    Vec3.add(lightDirection, directionalLightDirection, directionalHalfVector);
+                    Vec3.add(directionalHalfVector, lightDirection, directionalLightDirection);
                     Vec3.normalize(directionalHalfVector, directionalHalfVector);
 
                     Vec3.copy(directionalLightColorIntensity, directionalLight.colorIntensity);
@@ -13826,7 +13828,7 @@ define('kick/scene/SceneLights',["kick/core/Constants", "kick/core/Util", "kick/
                         pointLight = pointLights[i];
                         pointLightPosition = pointLight.transform.position;
 
-                        Mat4.multiplyVec3(viewMatrix, pointLightPosition, pointLightDataVec3[index]);
+                        Mat4.multiplyVec3(pointLightDataVec3[index], viewMatrix, pointLightPosition);
                         Vec3.copy(pointLightDataVec3[index + 1], pointLight.colorIntensity);
                         Vec3.copy(pointLightDataVec3[index + 2], pointLight.attenuation);
                         index += 3;
@@ -14654,7 +14656,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                 c = Constants,
                 _renderShadow = false,
                 _renderTarget = null,
-                _fieldOfView = 60,
+                _fieldOfView = 60 * 0.01745329251994,
                 _near = 0.1,
                 _far = 1000,
                 _left = -1,
@@ -14697,8 +14699,8 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                 renderableComponentsTransparent = [],
                 renderableComponentsOverlay = [],
                 renderableComponentsArray = [renderableComponentsBackGroundAndGeometry, renderableComponentsTransparent, renderableComponentsOverlay],
-                _normalizedViewportRect = Vec4.create([0, 0, 1, 1]),
-                offsetMatrix = Mat4.create([
+                _normalizedViewportRect = Vec4.clone([0, 0, 1, 1]),
+                offsetMatrix = Mat4.clone([
                     0.5, 0, 0, 0,
                     0, 0.5, 0, 0,
                     0, 0, 0.5, 0,
@@ -14891,8 +14893,8 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                     Mat4.copy(projectionMatrix, shadowLightProjection);
 
                     // find the position of the light 'center' in world space
-                    transformedOffsetFromCamera = Quat.multiplyVec3(transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
-                    cameraPosition = Vec3.add(transformedOffsetFromCamera, transform.position);
+                    transformedOffsetFromCamera = Quat.multiplyVec3(Vec3.create(), transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
+                    cameraPosition = Vec3.add(Vec3.create(), transformedOffsetFromCamera, transform.position);
                     // adjust to reduce flicker when rotating camera
                     cameraPosition[0] = Math.round(cameraPosition[0]);
                     cameraPosition[1] = Math.round(cameraPosition[1]);
@@ -15185,12 +15187,12 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                  * @type Number
                  */
                 fieldOfView: {
-                    get: function () { return _fieldOfView; },
+                    get: function () { return _fieldOfView * 57.2957795130824; },
                     set: function (newValue) {
                         if (true) {
                             assertNumber(newValue, "fieldOfView");
                         }
-                        _fieldOfView = Math.min(179, Math.max(newValue, 1));
+                        _fieldOfView = Math.min(179, Math.max(newValue, 1)) * 0.01745329251994;
                     }
                 },
                 /**
@@ -15336,10 +15338,10 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                  */
                 clearColor: {
                     get: function () {
-                        return Vec4.create(_clearColor);
+                        return Vec4.clone(_clearColor);
                     },
                     set: function (newValue) {
-                        _clearColor = Vec4.create(newValue);
+                        _clearColor = Vec4.clone(newValue);
                     }
                 },
                 /**
@@ -15473,7 +15475,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
          */
         Light = function (config) {
             var thisObj = this,
-                color = Vec3.create([1.0, 1.0, 1.0]),
+                color = Vec3.clone([1.0, 1.0, 1.0]),
                 engine,
                 type = 3,
                 _shadow = false,
@@ -15481,10 +15483,10 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                 _shadowBias = 0.05,
                 _shadowTexture = null,
                 _shadowRenderTexture = null,
-                attenuation = Vec3.create([1, 0, 0]),
+                attenuation = Vec3.clone([1, 0, 0]),
                 intensity = 1,
                 transform,
-                colorIntensity = Vec3.create([1.0, 1.0, 1.0]),
+                colorIntensity = Vec3.clone([1.0, 1.0, 1.0]),
                 updateIntensity = function () {
                     Vec3.copy(colorIntensity, [color[0] * intensity, color[1] * intensity, color[2] * intensity]);
                 },
@@ -15600,7 +15602,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                  */
                 color: {
                     get: function () {
-                        return Vec3.create(color);
+                        return Vec3.clone(color);
                     },
                     set: function (value) {
                         if (ASSERT) {
@@ -15770,15 +15772,15 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
      * @extends kick.scene.Component
      */
     Transform = function (gameObject) {
-        var localMatrix = Mat4.identity(Mat4.create()),
-            globalMatrix = Mat4.identity(Mat4.create()),
-            localMatrixInverse = Mat4.identity(Mat4.create()),
-            globalMatrixInverse = Mat4.identity(Mat4.create()),
-            globalPosition = Vec3.create([0, 0, 0]),
-            localPosition = Vec3.create([0, 0, 0]),
-            globalRotationQuat = Quat.create([0, 0, 0, 1]),
-            localRotationQuat = Quat.create([0, 0, 0, 1]),
-            localScale = Vec3.create([1, 1, 1]),
+        var localMatrix = Mat4.create(),
+            globalMatrix = Mat4.create(),
+            localMatrixInverse = Mat4.create(),
+            globalMatrixInverse = Mat4.create(),
+            globalPosition = Vec3.create(),
+            localPosition = Vec3.create(),
+            globalRotationQuat = Quat.create(),
+            localRotationQuat = Quat.create(),
+            localScale = Vec3.clone([1, 1, 1]),
             // the dirty parameter let the
             LOCAL = 0,
             LOCAL_INV = 1,
@@ -15820,13 +15822,13 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
                 get: function () {
                     // if no parent - use local position
                     if (parentTransform === null) {
-                        return Vec3.create(localPosition);
+                        return Vec3.clone(localPosition);
                     }
                     if (dirty[GLOBAL_POSITION]) {
-                        Mat4.multiplyVec3(thisObj.getGlobalMatrix(), [0, 0, 0], globalPosition);
+                        Mat4.multiplyVec3(globalPosition, thisObj.getGlobalMatrix(), [0, 0, 0]);
                         dirty[GLOBAL_POSITION] = 0;
                     }
-                    return Vec3.create(globalPosition);
+                    return Vec3.clone(globalPosition);
                 },
                 set: function (newValue) {
                     var currentPosition;
@@ -15851,7 +15853,7 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
              */
             localPosition: {
                 get: function () {
-                    return Vec3.create(localPosition);
+                    return Vec3.clone(localPosition);
                 },
                 set: function (newValue) {
                     Vec3.copy(localPosition, newValue);
@@ -15901,7 +15903,7 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
                 get: function () {
                     var parentIterator = null;
                     if (parentTransform === null) {
-                        return Quat.create(localRotationQuat);
+                        return Quat.clone(localRotationQuat);
                     }
                     if (dirty[GLOBAL_ROTATION]) {
                         Quat.copy(globalRotationQuat, localRotationQuat);
@@ -15946,7 +15948,7 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
              */
             localScale: {
                 get: function () {
-                    return Vec3.create(localScale);
+                    return Vec3.clone(localScale);
                 },
                 set: function (newValue) {
                     var i;
@@ -18506,7 +18508,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
              * @method canvasResized
              */
             this.canvasResized = function () {
-                glState.viewportSize = math.Vec2.create([canvas.width, canvas.height]);
+                glState.viewportSize = math.Vec2.clone([canvas.width, canvas.height]);
                 if (mouseInput) {
                     mouseInput.updateCanvasElementPosition();
                 }
@@ -19064,7 +19066,7 @@ define('kick/importer/ColladaImporter',["kick/math", "kick/core/Constants", "kic
                         angleAxis = stringToArray(node.textContent);
                         angle = angleAxis[3];
                         if (angle) {
-                            rotationQuat = quat.setAxisAngle(math.Quat.create(), angleAxis, angle);
+                            rotationQuat = quat.setAxisAngle(math.Quat.create(), angleAxis, angle * 0.01745329251994);
                             quat.toMat4(newMatrix, rotationQuat);
                         } else {
                             return;
@@ -19078,7 +19080,7 @@ define('kick/importer/ColladaImporter',["kick/math", "kick/core/Constants", "kic
                         return;
                     }
                     mat4.multiply(newMatrix, localMatrix, newMatrix);
-                    decomposedMatrix = mat4.decompose(newMatrix);
+                    decomposedMatrix = mat4.decompose(newMatrix, math.Vec3.create(), math.Quat.create(), math.Vec3.create());
                     transform.localPosition = decomposedMatrix[0];
                     transform.localRotation = decomposedMatrix[1];
                     transform.localScale = decomposedMatrix[2];
@@ -19381,11 +19383,11 @@ define('kick/importer/ObjImporter',["kick/math", "kick/mesh/MeshData", "kick/mes
                     }
                 } else if (token === "v") {
                     var vertex = strAsArray(value);
-                    mat4.multiplyVec3(transformMatrix, vertex);
+                    mat4.multiplyVec3(vertex, transformMatrix, vertex);
                     vertices.push(vertex);
                 } else if (token === "vn") {
                     var normal = strAsArray(value);
-                    mat4.multiplyVec3(transformMatrix, normal);
+                    mat4.multiplyVec3(normal, transformMatrix, normal);
                     normals.push(normal);
                 } else if (token === "vt") {
                     textureCoordinates.push(strAsArray(value));

@@ -285,12 +285,12 @@ var ShaderEditor = function () {
                 addRotatorComponent(gameObject);
 
                 ambientlightGameObject = _engine.activeScene.createGameObject();
-                _ambientLight = new KICK.scene.Light({type: KICK.core.Constants._LIGHT_TYPE_AMBIENT});
+                _ambientLight = new KICK.scene.Light({type: KICK.scene.Light.TYPE_AMBIENT});
                 _ambientLight.color = [0.1, 0.1, 0.1];
                 ambientlightGameObject.addComponent(_ambientLight);
 
                 lightGameObject = _engine.activeScene.createGameObject();
-                _light = new KICK.scene.Light({type: KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL});
+                _light = new KICK.scene.Light({type: KICK.scene.Light.TYPE_DIRECTIONAL});
                 lightGameObject.addComponent(_light);
                 _lightTransform = lightGameObject.transform;
                 onComplete();

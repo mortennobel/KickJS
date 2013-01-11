@@ -445,7 +445,7 @@ requirejs(['kick'],
             function initLights(){
                 var ambientlightGameObject = engine.activeScene.createGameObject();
                 ambientlightGameObject.name = "ambient light";
-                var ambientLight = new KICK.scene.Light({type :KICK.core.Constants._LIGHT_TYPE_AMBIENT});
+                var ambientLight = new KICK.scene.Light({type :KICK.scene.Light.TYPE_AMBIENT});
                 ambientLight.color = [0.5,0.5,0.5];
                 ambientlightGameObject.addComponent(ambientLight);
 
@@ -453,7 +453,7 @@ requirejs(['kick'],
                 lightGameObject.name = "directional light";
                 var light = new KICK.scene.Light(
                     {
-                        type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+                        type:KICK.scene.Light.TYPE_DIRECTIONAL,
                         color:[1,1,1],
                         intensity:1.5
                     }

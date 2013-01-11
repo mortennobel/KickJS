@@ -41,18 +41,18 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 i,
                 thisObj = this,
                 addLight = function (light) {
-                    if (light.type === Constants._LIGHT_TYPE_AMBIENT) {
+                    if (light.type === Light.TYPE_AMBIENT) {
                         sceneLightObj.ambientLight = light;
-                    } else if (light.type === Constants._LIGHT_TYPE_DIRECTIONAL) {
+                    } else if (light.type === Light.TYPE_DIRECTIONAL) {
                         sceneLightObj.directionalLight = light;
                     } else {
                         sceneLightObj.addPointLight(light);
                     }
                 },
                 removeLight = function (light) {
-                    if (light.type === Constants._LIGHT_TYPE_AMBIENT) {
+                    if (light.type === Light.TYPE_AMBIENT) {
                         sceneLightObj.ambientLight = null;
-                    } else if (light.type === Constants._LIGHT_TYPE_DIRECTIONAL) {
+                    } else if (light.type === Light.TYPE_DIRECTIONAL) {
                         sceneLightObj.directionalLight = null;
                     } else {
                         sceneLightObj.removePointLight(light);

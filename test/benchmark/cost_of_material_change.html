@@ -5,13 +5,23 @@
     <title>Cost of material change</title>
 </head>
 <body>
-    <script type="text/javascript" src="../../build/kick-min-0.4.0.js"></script>
     <!--<script type="text/javascript" src="../../build/kick-debug-0.4.0.js"></script>-->
     <h1>Cost of material change (Elements: <span id="elements"></span>)</h1>
        Performance test cost of material change.
        <br>
    <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
-   <script type="text/javascript">
+    <script src="../../src/js-dependencies/require.js"></script>
+    <script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../build/kick'
+            }
+        });
+
+        req(['kick'],
+                function (KICK) {
+                    "use strict";
        function initLight(){
            var lightGameObject = engine.activeScene.createGameObject();
            lightGameObject.transform.localRotationEuler = [10,0,0];
@@ -40,8 +50,8 @@
            return min + Math.random()*(max-min);
        };
        
-       function startTest(primitives, sameMaterial){
-           engine.activeScene = new KICK.scene.Scene(engine);
+       window.startTest = function(primitives, sameMaterial){
+           engine.activeScene = new KICK.scene.Scene();
            var numberOfPrimitives = primitives;
            document.getElementById('elements').innerHTML = numberOfPrimitives;
            
@@ -61,7 +71,7 @@
            cameraObject.addComponent(camera);
            var material;
            if (sameMaterial){
-               material = new KICK.material.Material(engine,{
+               material = new KICK.material.Material({
                    shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
                    uniformData:{
                        mainColor: [Math.random(),Math.random(),Math.random(),Math.random()],
@@ -79,7 +89,7 @@
                gameObject.transform.localScale = [1,1,1];
                var meshRenderer = new KICK.scene.MeshRenderer();
                meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
-               meshRenderer.material = material || new KICK.material.Material(engine,{
+               meshRenderer.material = material || new KICK.material.Material({
                    shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
                    uniformData:{
                        mainColor: [Math.random(),Math.random(),Math.random(),Math.random()],
@@ -96,6 +106,7 @@
        window.onload = function(){
            startTest(5);
        };
+                });
    </script>
     <br>
     Different materials<br>

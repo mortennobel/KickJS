@@ -91,11 +91,11 @@ requirejs(['kick'],
                 bottom:-2
             });
             cameraObject.addComponent(camera);
-            cameraObject.addComponent(new KICK.scene.Light({type:KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL}));
+            cameraObject.addComponent(new KICK.scene.Light({type:KICK.scene.Light.TYPE_DIRECTIONAL}));
 
             createMaterials();
 
-            var res = KICK.importer.ColladaImporter.import( document.getElementById("colladaFileContent").value , engine.activeScene);
+            var res = KICK.importer.ColladaImporter.import( document.getElementById("colladaFileContent").value, engine.activeScene);
             var gameObjects = res.gameObjects;
             console.log("Imported "+gameObjects.length+"gameObjectss");
             for (var i=0;i<gameObjects.length;i++){

@@ -89,14 +89,14 @@ requirejs(['kick'],
         function buildLight(scene){
             var lightGO = scene.createGameObject({name:"Light"}),
                 light = new KICK.scene.Light({
-                    type: KICK.core.Constants._LIGHT_TYPE_DIRECTIONAL,
+                    type: KICK.scene.Light.TYPE_DIRECTIONAL,
                     color: [1.0, 1.0, 1.0]
                 });
             lightGO.addComponent(light);
             lightGO.transform.localRotationEuler = [0,0,0];
 
             var lightAmbient = new KICK.scene.Light({
-                type:KICK.core.Constants._LIGHT_TYPE_AMBIENT,
+                type: KICK.scene.Light.TYPE_AMBIENT,
                 color: [0.1,0.1,0.1]
             });
             lightGO.addComponent(lightAmbient);

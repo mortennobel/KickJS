@@ -19,7 +19,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
             var thisObj = this,
                 color = Vec3.clone([1.0, 1.0, 1.0]),
                 engine,
-                type = Constants._LIGHT_TYPE_POINT,
+                type = 3, // point light
                 _shadow = false,
                 _shadowStrength = 1.0,
                 _shadowBias = 0.05,
@@ -275,23 +275,26 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
         };
 
         /**
+         * Used to define ambient color in the scene (indirect lightening)
          * @property TYPE_AMBIENT
          * @type Number
          * @static
          */
-        Light.TYPE_AMBIENT = Constants._LIGHT_TYPE_AMBIENT;
+        Light.TYPE_AMBIENT = 1;
         /**
+         * Used to define directional light in the scene (such as sunlight)
          * @property TYPE_DIRECTIONAL
          * @type Number
          * @static
          */
-        Light.TYPE_DIRECTIONAL = Constants._LIGHT_TYPE_DIRECTIONAL;
+        Light.TYPE_DIRECTIONAL = 2;
         /**
+         * Used to define point light in the scene
          * @property TYPE_POINT
          * @type Number
          * @static
          */
-        Light.TYPE_POINT = Constants._LIGHT_TYPE_POINT;
+        Light.TYPE_POINT = 3;
 
         Object.freeze(Light);
 

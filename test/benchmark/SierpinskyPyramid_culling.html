@@ -5,13 +5,24 @@
     <title>Sierpinsky Pyramid</title>
 </head>
 <body>
-    <script type="text/javascript" src="../../build/kick-min-0.4.0.js"></script>
+
     <h1>Sierpinsky Pyramid (Elements: <span id="elements"></span>)</h1>
        Performance test of rendering much data. Currently view volume culling is not suported by KickJS, so the
        performance may not be impresive.
        <br>
    <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
-   <script type="text/javascript">
+    <script src="../../src/js-dependencies/require.js"></script>
+    <script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../../build/kick'
+            }
+        });
+
+        req(['kick'],
+                function (KICK) {
+                    "use strict";
        function initLight(){
            var lightGameObject = engine.activeScene.createGameObject();
            lightGameObject.transform.localRotationEuler = [10,145,0];
@@ -36,7 +47,7 @@
        });
 
        
-       var material = new KICK.material.Material(engine,{
+       var material = new KICK.material.Material({
            shader: engine.project.load(engine.project.ENGINE_SHADER_SPECULAR),
            uniforms:{
                mainColor: {
@@ -56,8 +67,8 @@
            return min + Math.random()*(max-min);
        };
        
-       function startTest(stacks, slices){
-           engine.activeScene = new KICK.scene.Scene(engine);
+       window.startTest = function(stacks, slices){
+           engine.activeScene = new KICK.scene.Scene();
            var numberOfPrimitives = 0;
 
 
@@ -171,11 +182,11 @@
                meshData = window.meshData;
            }
 
-           var mesh = new KICK.mesh.Mesh(engine);
+           var mesh = new KICK.mesh.Mesh();
            mesh.meshData = meshData;
            return mesh;
        }
-       
+                });
    </script>
     <button onclick="startTest(6,3);">6x3</button>
     <button onclick="startTest(6,4);">6x4</button>

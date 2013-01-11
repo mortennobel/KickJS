@@ -5,99 +5,106 @@
     <title>Sphere materials</title>
 </head>
 <body>
-    <script type="text/javascript" src="../../build/kick-min-0.4.0.js"></script>
-    <h1>Sphere materials (Elements: <span id="elements"></span>)</h1>
-       Performance test of rendering many different materials.
-       <br>
-   <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
-   <script type="text/javascript">
-       function initLight(){
-           var lightGameObject = engine.activeScene.createGameObject();
-           lightGameObject.transform.localRotationEuler = [10,0,0];
-           var lightComponent = new KICK.scene.Light({
-               type:KICK.scene.Light.TYPE_AMBIENT,
-               color: [0.1,0.1,0.1]
-           });
-           lightGameObject.addComponent(lightComponent);
-           window.ambLight = lightComponent;
+<h1>Sphere materials (Elements: <span id="elements"></span>)</h1>
+Performance test of rendering many different materials.
+<br>
+<canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+<script src="../../src/js-dependencies/require.js"></script>
+<script type="text/javascript">
+    var req = require.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../build/kick'
+        }
+    });
 
-           lightComponent = new KICK.scene.Light({
-               type:KICK.scene.Light.TYPE_DIRECTIONAL,
-               color: [1.0,1.0,1.0]
-           });
-           lightGameObject.addComponent(lightComponent);
-           window.dirLight = lightComponent;
-       }
+    req(['kick'],
+            function (KICK) {
+                "use strict";
+                function initLight(){
+                    var lightGameObject = engine.activeScene.createGameObject();
+                    lightGameObject.transform.localRotationEuler = [10,0,0];
+                    var lightComponent = new KICK.scene.Light({
+                        type:KICK.scene.Light.TYPE_AMBIENT,
+                        color: [0.1,0.1,0.1]
+                    });
+                    lightGameObject.addComponent(lightComponent);
+                    window.ambLight = lightComponent;
 
-       // init engine (create 3d context)
-       var engine = new KICK.core.Engine('canvas',{
-           enableDebugContext: false
-       });
+                    lightComponent = new KICK.scene.Light({
+                        type:KICK.scene.Light.TYPE_DIRECTIONAL,
+                        color: [1.0,1.0,1.0]
+                    });
+                    lightGameObject.addComponent(lightComponent);
+                    window.dirLight = lightComponent;
+                }
 
-       
+                // init engine (create 3d context)
+                var engine = new KICK.core.Engine('canvas',{
+                    enableDebugContext: false
+                });
 
+                // create meshes
+                var randomRange = function(min,max){
+                    return min + Math.random()*(max-min);
+                };
 
-       
-       // create meshes
-       var randomRange = function(min,max){
-           return min + Math.random()*(max-min);
-       };
-       
-       function startTest(primitives){
-           engine.activeScene = new KICK.scene.Scene(engine);
-           var numberOfPrimitives = primitives;
-           document.getElementById('elements').innerHTML = numberOfPrimitives;
-           
-           // create a game object in [0,0,0] facing down the -z axis
-           var cameraObject = engine.activeScene.createGameObject();
-           cameraObject.transform.position = [0,0,0];
-           // create a perspective camera
-           var camera = new KICK.scene.Camera({
-               perspective: false,
-               left:-100,
-               right:100,
-               top:100,
-               bottom:-100,
-               near:-100,
-               far:100
-           });
-           cameraObject.addComponent(camera);
-           
-           for (var i=0;i<numberOfPrimitives ;i++){
-               var gameObject = engine.activeScene.createGameObject();
-               gameObject.name = "Object "+(i+1);
+                window.startTest = function(primitives){
+                    engine.activeScene = new KICK.scene.Scene();
+                    var numberOfPrimitives = primitives;
+                    document.getElementById('elements').innerHTML = numberOfPrimitives;
 
-               gameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
-               gameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
-               gameObject.transform.localScale = [1,1,1];
-               var meshRenderer = new KICK.scene.MeshRenderer();
-               meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
-               meshRenderer.material = new KICK.material.Material(engine,{
-                   shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                   uniformData:{
-                       mainColor: [Math.random(),Math.random(),Math.random(),Math.random()],
-                       mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-                   }
-               });
-               gameObject.addComponent(meshRenderer);
-           }
+                    // create a game object in [0,0,0] facing down the -z axis
+                    var cameraObject = engine.activeScene.createGameObject();
+                    cameraObject.transform.position = [0,0,0];
+                    // create a perspective camera
+                    var camera = new KICK.scene.Camera({
+                        perspective: false,
+                        left:-100,
+                        right:100,
+                        top:100,
+                        bottom:-100,
+                        near:-100,
+                        far:100
+                    });
+                    cameraObject.addComponent(camera);
 
-           // init light
-           initLight();
+                    for (var i=0;i<numberOfPrimitives ;i++){
+                        var gameObject = engine.activeScene.createGameObject();
+                        gameObject.name = "Object "+(i+1);
 
-       }
-       startTest(5);
-   </script>
-    <button onclick="startTest(5);">5</button>
-    <button onclick="startTest(500);">500</button>
-    <button onclick="startTest(1000);">1000</button>
-    <button onclick="startTest(1500);">1500</button>
-    <button onclick="startTest(2000);">2000</button>
-    <button onclick="startTest(2500);">2500</button>
-    <button onclick="startTest(3000);">3000</button>
-    <button onclick="startTest(3500);">3500</button>
-    <button onclick="startTest(4000);">4000</button>
-    <button onclick="startTest(4500);">4500</button>
-    <button onclick="startTest(5000);">5000</button>
+                        gameObject.transform.position = [randomRange(-50,50),randomRange(-50,50),randomRange(-50,50)];
+                        gameObject.transform.rotationEuler = [randomRange(0,180),randomRange(0,180),0];
+                        gameObject.transform.localScale = [1,1,1];
+                        var meshRenderer = new KICK.scene.MeshRenderer();
+                        meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
+                        meshRenderer.material = new KICK.material.Material({
+                            shader: engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
+                            uniformData:{
+                                mainColor: [Math.random(),Math.random(),Math.random(),Math.random()],
+                                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
+                            }
+                        });
+                        gameObject.addComponent(meshRenderer);
+                    }
+
+                    // init light
+                    initLight();
+
+                }
+                window.startTest(5);
+            });
+</script>
+<button onclick="startTest(5);">5</button>
+<button onclick="startTest(500);">500</button>
+<button onclick="startTest(1000);">1000</button>
+<button onclick="startTest(1500);">1500</button>
+<button onclick="startTest(2000);">2000</button>
+<button onclick="startTest(2500);">2500</button>
+<button onclick="startTest(3000);">3000</button>
+<button onclick="startTest(3500);">3500</button>
+<button onclick="startTest(4000);">4000</button>
+<button onclick="startTest(4500);">4500</button>
+<button onclick="startTest(5000);">5000</button>
 </body>
 </html>
