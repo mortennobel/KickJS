@@ -75,6 +75,10 @@ requirejs(['kick'],
             });
         }
 
+        function debugMesh(meshData){
+
+        }
+
         function initKick() {
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true
@@ -108,11 +112,11 @@ requirejs(['kick'],
                     var meshData = meshRenderer.mesh.meshData;
                     meshData.recalculateNormals();
                     console.log("Is valid: "+meshData.isValid());
+                    console.log(KICK.math.Vec3.wrapArray( meshData.vertex));
                     meshRenderer.mesh.meshData = meshData;
+                    debugMesh(meshData);
                     console.log("Number of subMeshes"+meshData.subMeshes.length);
-                    for (var k=0;k<meshData.subMeshes.length;k++){
-                        console.log("Number of subMeshes length "+meshData.subMeshes[k].length);
-                    }
+
                 }
                 addRotatorComponent(gameObject);
             }

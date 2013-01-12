@@ -595,41 +595,61 @@ define(["require", "./Constants"], function (require, Constants) {
             }
             return x + 1;
         },
-
+        /**
+         * @static
+         * @method convertSubMeshesToTriangleIndices
+         * @param {Array} subMeshes array of array of indices
+         * @param {Number} primitiveType such as Constants.GL_TRIANGLES or Constants.GL_TRIANGLE_STRIP
+         * @param {Boolean} removeDegenerate remove degenerate triangles
+         * @return {Array|null} triangleIndices or null if not possible to convert
+         */
+        convertSubMeshesToTriangleIndices: function (subMeshes, primitiveType, removeDegenerate){
+            var result = [],
+                i,
+                subResult;
+            for (i=0;i<subMeshes.length;i++){
+                subResult = Util.convertToTriangleIndices(subMeshes[i], primitiveType, removeDegenerate);
+                if (!subResult) {
+                    return null;
+                }
+                result = result.concat(subResult);
+            }
+            return result;
+        },
         /**
          * @static
          * @method convertToTriangleIndices
-         * @param {Array} triangleStripIndices index array
-         * @param {Number} meshType such as Constants.GL_TRIANGLES or Constants.GL_TRIANGLE_STRIP
-         * @param {Bool} removeDegenerate remove degenerate triangles
+         * @param {Array} indices index array
+         * @param {Number} primitiveType such as Constants.GL_TRIANGLES or Constants.GL_TRIANGLE_STRIP
+         * @param {Boolean} removeDegenerate remove degenerate triangles
          * @return {Array|null} triangleIndices or null if not possible to convert
          */
-        convertToTriangleIndices: function (triangleStripIndices, primitiveType, removeDegenerate) {
+        convertToTriangleIndices: function (indices, primitiveType, removeDegenerate) {
             if (primitiveType === Constants.GL_TRIANGLES){
-                return triangleStripIndices;
+                return indices;
             } else if (primitiveType !== Constants.GL_TRIANGLE_STRIP){
                 return null;
             }
             var i,
                 even = 1,
-                trianleIndices = [triangleStripIndices[0], triangleStripIndices[1], triangleStripIndices[2]];
+                trianleIndices = [indices[0], indices[1], indices[2]];
 
-            for (i=3;i<triangleStripIndices.length;i++){
+            for (i=3;i<indices.length;i++){
                 if (removeDegenerate){
-                    if (triangleStripIndices[i-1] === triangleStripIndices[i] ||
-                        triangleStripIndices[i-2] === triangleStripIndices[i] ||
-                        triangleStripIndices[i-1] === triangleStripIndices[i-2]){
+                    if (indices[i-1] === indices[i] ||
+                        indices[i-2] === indices[i] ||
+                        indices[i-1] === indices[i-2]){
                         continue;
                     }
                 }
                 if (i % 2 === even) {
-                    trianleIndices.push(triangleStripIndices[i-1]);
-                    trianleIndices.push(triangleStripIndices[i-2]);
-                    trianleIndices.push(triangleStripIndices[i]);
+                    trianleIndices.push(indices[i-1]);
+                    trianleIndices.push(indices[i-2]);
+                    trianleIndices.push(indices[i]);
                 } else {
-                    trianleIndices.push(triangleStripIndices[i-2]);
-                    trianleIndices.push(triangleStripIndices[i-1]);
-                    trianleIndices.push(triangleStripIndices[i]);
+                    trianleIndices.push(indices[i-2]);
+                    trianleIndices.push(indices[i-1]);
+                    trianleIndices.push(indices[i]);
                 }
             }
             return trianleIndices;

@@ -299,20 +299,20 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                     while (meshChild !== null) {
                         tagName = meshChild.tagName;
                         if (tagName === "lines") {
-                            console.log("lines - unsupported");
+                            Util.warn("Collada importer: lines - unsupported");
                         } else if (tagName === "linestrips - unsupported") {
-                            console.log("linestrips");
+                            Util.warn("Collada importer:linestrips - unsupported");
                         } else if (tagName === "polygons") {
-                            console.log("polygons  - unsupported");
+                            Util.warn("Collada importer:polygons  - unsupported");
                         } else if (tagName === "polylist" || tagName === "triangles") {
                             if (!destMeshData) {
                                 destMeshData = new MeshData({name: name});
                             }
                             buildFromPolyList(meshChild, destMeshData, vertexAttributeCache);
                         } else if (tagName === "trifans") {
-                            console.log("trifans unsupported");
+                            Util.warn("Collada importer: Trifans unsupported");
                         } else if (tagName === "tristrips") {
-                            console.log("tristrips - unsupported");
+                            Util.warn("Collada importer: Tristrips - unsupported");
                         }
                         meshChild = meshChild.nextSibling;
                     }
@@ -350,7 +350,9 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                         angle,
                         rotationQuat,
                         matrix,
-                        decomposedMatrix,
+                        decomposedTranslation = math.Vec3.create(),
+                        decomposedRotation = math.Quat.create(),
+                        decomposedScale = math.Vec3.create(),
                         localMatrix = transform.getLocalMatrix(),
                         newMatrix = mat4.identity(mat4.create());
                     if (tagName === "translate") {
@@ -369,14 +371,14 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                     } else if (tagName === "matrix") {
                         mat4.transpose(stringToArray(node.textContent), newMatrix);
                     } else {
-                        console.log(tagName + " - unsupported");
+                        Util.warn("Collada importer:" + tagName + " - unsupported");
                         return;
                     }
                     mat4.multiply(newMatrix, localMatrix, newMatrix);
-                    decomposedMatrix = mat4.decompose(newMatrix, math.Vec3.create(), math.Quat.create(), math.Vec3.create());
-                    transform.localPosition = decomposedMatrix[0];
-                    transform.localRotation = decomposedMatrix[1];
-                    transform.localScale = decomposedMatrix[2];
+                    mat4.decompose(newMatrix, decomposedTranslation, decomposedRotation, decomposedScale);
+                    transform.localPosition = decomposedTranslation;
+                    transform.localRotation = decomposedRotation;
+                    transform.localScale = decomposedScale;
                 },
                 createMeshRenderer = function (gameObject, node) {
                     var url = node.getAttribute("url"),
@@ -422,7 +424,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                         } else if (tagName === "node") {
                             addNode(childNode, transform);
                         } else {
-                            console.log("ignore collada tagName '" + tagName + "'");
+                            Util.warn("Collada importer: ignore collada tagName '" + tagName + "'");
                         }
                         childNode = childNode.nextElementSibling;
                     }
