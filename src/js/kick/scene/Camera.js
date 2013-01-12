@@ -197,7 +197,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     for (i = renderableComponentsTransparent.length - 1; i >= 0; i--) {
                         object = renderableComponentsTransparent[i];
                         objectPosition = object.gameObject.transform.position;
-                        object.distanceToCamera = Vec3.squaredLength(Vec3.subtract(objectPosition, cameraPosition, temp));
+                        object.distanceToCamera = Vec3.squaredLength(Vec3.subtract(temp, objectPosition, cameraPosition));
                     }
                     function compareDistanceToCamera(a, b) {
                         return b.distanceToCamera - a.distanceToCamera;
