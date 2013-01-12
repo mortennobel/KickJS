@@ -764,7 +764,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 vertexCount = vertex.length,
                 normal = Vec3.wrapArray(this.normal),
                 texcoord = Vec2.wrapArray(this.uv1),
-                triangles = Util.convertSubMeshesToTriangleIndices(this.indices, this.meshType, true),
+                triangles = Util.convertSubMeshesToTriangleIndices(this.subMeshes, this.meshType, true),
                 triangleCount = triangles.length / 3,
                 tangentBuffer = new Float32Array(vertexCount * 4),
                 tangent = Vec4.wrapArray(tangentBuffer),
