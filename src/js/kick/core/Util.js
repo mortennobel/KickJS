@@ -612,7 +612,7 @@ define(["require", "./Constants"], function (require, Constants) {
                 if (!subResult) {
                     return null;
                 }
-                result = result.concat(subResult);
+                result = result.concat(Util.typedArrayToArray(subResult));
             }
             return result;
         },
