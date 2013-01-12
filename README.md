@@ -49,9 +49,9 @@ https://github.com/mortennobel/KickJS/downloads
 
 Take a look at the <a href="http://www.kickjs.org/tutorial/index.html">tutorial</a>, which gives a gentle introduction to the concepts used in the game engine.
 
-## Bugs
+## Bugs, missing features and performance improvements
 
-Checkout the bug section at GitHub
+Checkout the issues section at GitHub
 https://github.com/mortennobel/KickJS/issues
 
 ## License
