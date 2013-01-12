@@ -446,11 +446,11 @@ define(["kick/core/Constants", "./Vec3", "./Vec4", "./Mat3", "./Mat4"], function
                 destMatrix = mat3.create();
             return function (out, position, target, up) {
                 // idea create mat3 rotation and transform into quaternion
-                vec3.subtract(position, target, forwardVector);
+                vec3.subtract(forwardVector, position, target);
                 vec3.normalize(forwardVector, forwardVector);
-                vec3.cross(up, forwardVector, rightVector);
+                vec3.cross(rightVector, up, forwardVector);
                 vec3.normalize(rightVector, rightVector); // needed?
-                vec3.cross(forwardVector, rightVector, upVector);
+                vec3.cross(upVector, forwardVector, rightVector);
                 vec3.normalize(upVector, upVector); // needed?
                 destMatrix[0] = rightVector[0];
                 destMatrix[1] = rightVector[1];
