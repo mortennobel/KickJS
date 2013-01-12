@@ -50,7 +50,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
                 mousePosition[0] = (e.clientX - objectPosition[0] + body.scrollLeft) * devicePixelRatio;
                 mousePosition[1] = (e.clientY - objectPosition[1] + body.scrollTop) * devicePixelRatio;
                 if (deltaMovement) {
-                    vec2.subtract(mousePosition, lastMousePosition, deltaMovement);
+                    vec2.subtract(deltaMovement, mousePosition, lastMousePosition);
                 } else {
                     deltaMovement = vec2.create();
                 }
