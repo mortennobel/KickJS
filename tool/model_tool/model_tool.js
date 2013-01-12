@@ -329,7 +329,7 @@ requirejs(['kick'],
                 vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
                 cartesianCoordinates = vec3.add(cartesianCoordinates,objectCenter,cartesianCoordinates);
                 transform.position = cartesianCoordinates;
-                transform.localRotation = quat.lookAt(cartesianCoordinates,objectCenter,[0,1,0]);
+                transform.localRotation = quat.lookAt(quat.create(), cartesianCoordinates, objectCenter, [0,1,0]);
             };
         }
 

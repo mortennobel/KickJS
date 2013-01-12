@@ -314,8 +314,8 @@ requirejs(['kick'],
 
                     var scaleWidthMatrix = mat4.scale(mat4.create(), mat4.create(),[size+1,1,1]);
                     var scaleHeightMatrix = mat4.scale(mat4.create(), mat4.create(),[1,1,size]);
-                    var wideCube = KICK.mesh.MeshFactory.createCubeData(0.5).transform(scaleWidthMatrix);
-                    var tallCube = KICK.mesh.MeshFactory.createCubeData(0.5).transform(scaleHeightMatrix);
+                    var wideCube = KICK.mesh.MeshDataFactory.createCubeData(0.5).transform(scaleWidthMatrix);
+                    var tallCube = KICK.mesh.MeshDataFactory.createCubeData(0.5).transform(scaleHeightMatrix);
                     var meshData = new KICK.mesh.MeshData({
                         meshType:wideCube.meshType,
                         vertex:[],

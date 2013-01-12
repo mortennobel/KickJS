@@ -1,4 +1,4 @@
-define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Constants"], function (Util, MeshFactory, GLSLConstants, Constants) {
+define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", "./Constants"], function (Util, MeshDataFactory, GLSLConstants, Constants) {
     "use strict";
 
     var ASSERT = Constants._ASSERT;
@@ -51,17 +51,17 @@ define(["./Util", "kick/mesh/MeshFactory", "kick/material/GLSLConstants", "./Con
                 resourceTracker.resourceLoadingStarted(url, meshDestination);
             }
             if (url.indexOf("kickjs://mesh/triangle/") === 0) {
-                meshDataObj = MeshFactory.createTriangleData();
+                meshDataObj = MeshDataFactory.createTriangleData();
             } else if (url.indexOf("kickjs://mesh/plane/") === 0) {
-                meshDataObj = MeshFactory.createPlaneData();
+                meshDataObj = MeshDataFactory.createPlaneData();
             } else if (url.indexOf("kickjs://mesh/uvsphere/") === 0) {
                 slices = getParameterInt(url, "slices");
                 stacks = getParameterInt(url, "stacks");
                 radius = getParameterFloat(url, "radius");
-                meshDataObj = MeshFactory.createUVSphereData(slices, stacks, radius);
+                meshDataObj = MeshDataFactory.createUVSphereData(slices, stacks, radius);
             } else if (url.indexOf("kickjs://mesh/cube/") === 0) {
                 length = getParameterFloat(url, "length");
-                meshDataObj = MeshFactory.createCubeData(length);
+                meshDataObj = MeshDataFactory.createCubeData(length);
             } else {
                 Util.fail("No meshdata found for " + url);
                 if (resourceTracker && resourceTracker.resourceLoadingStarted){

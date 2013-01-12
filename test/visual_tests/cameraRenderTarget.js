@@ -133,7 +133,6 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
         initKick();
 
         function UVSphere(){
-            // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
             meshRenderer.mesh =  new Mesh({dataURI:"kickjs://mesh/uvsphere/"});
         }
     }

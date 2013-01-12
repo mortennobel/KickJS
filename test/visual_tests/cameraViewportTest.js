@@ -83,7 +83,6 @@ requirejs(['kick'],
         }
 
         function UVSphere(){
-            // setMesh(KICK.mesh.MeshFactory.createUVSphere, 2);
             meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/"});
         }
 

@@ -2,8 +2,8 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
     "use strict";
 
     /**
-     * Class responsible for creating Mesh objects
-     * @class MeshFactory
+     * Class responsible for creating MeshData objects
+     * @class MeshDataFactory
      * @namespace kick.mesh
      * @static
      */

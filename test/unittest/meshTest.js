@@ -203,8 +203,8 @@ requirejs(['kick'],
                     testCubeCombine: function () {
                         var Assert = Y.Assert;
 
-                        var meshData1 = KICK.mesh.MeshFactory.createCubeData(0.5);
-                        var meshData2 = KICK.mesh.MeshFactory.createCubeData(0.5);
+                        var meshData1 = KICK.mesh.MeshDataFactory.createCubeData(0.5);
+                        var meshData2 = KICK.mesh.MeshDataFactory.createCubeData(0.5);
 
                         var matrix = KICK.math.Mat4.create();
                         KICK.math.Mat4.identity(matrix);
@@ -221,7 +221,7 @@ requirejs(['kick'],
                     testSerialize: function () {
                         var Assert = Y.Assert;
 
-                        var meshData1 = KICK.mesh.MeshFactory.createCubeData(0.5);
+                        var meshData1 = KICK.mesh.MeshDataFactory.createCubeData(0.5);
                         var meshData1Serialized = meshData1.serialize();
                         var meshData2 = new KICK.mesh.MeshData();
                         meshData2.deserialize(meshData1Serialized);
