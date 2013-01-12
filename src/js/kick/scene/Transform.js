@@ -245,8 +245,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
         });
 
         /**
-         *
-         * Todo: known issue does not work when thisObj has parent object
+         * Changes the rotation of the object to look at input (Transform) object.
          * @method lookAt
          * @param {kick.scene.Transform} transform target object to look at
          * @param {Object} type the constructor of the wanted component
@@ -258,7 +257,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     Util.fail("transform must be a kick.scene.Transform");
                 }
             }
-            Quat.lookAt(thisObj.position, transform.position, up, localRotationQuat);
+            Quat.lookAt(localRotationQuat, thisObj.position, transform.position, up);
             markLocalDirty();
         };
 
