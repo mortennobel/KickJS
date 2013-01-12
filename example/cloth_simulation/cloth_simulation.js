@@ -239,7 +239,7 @@ requirejs(['kick'],
                      * */
                     vec3.copy(temp2, pos);
 
-                    vec3.subtract(pos, old_pos, temp);
+                    vec3.subtract(temp, pos, old_pos);
                     vec3.scale(temp, temp, 1-DAMPING);
                     vec3.add(pos, pos, temp); // first part: + (pos-old_pos)*(1.0-DAMPING)
                     vec3.scale(temp, acceleration,TIME_STEPSIZE2);
@@ -306,7 +306,7 @@ requirejs(['kick'],
                 tempVec3 = vec3.create();  // the length between particle p1 and p2 in rest configuration
 
             (function constructor(){
-                var difference = vec3.subtract(vec3.create(), p1.pos,p2.pos);
+                var difference = vec3.subtract(vec3.create(), p1.pos, p2.pos);
                 rest_distance = vec3.length(difference);
             })();
 
@@ -323,7 +323,7 @@ requirejs(['kick'],
                  p1->offsetPos(correctionVectorHalf); // correctionVectorHalf is pointing from p1 to p2, so the length should move p1 half the length needed to satisfy the constraint.
                  p2->offsetPos(-correctionVectorHalf); // we must move p2 the negative direction of correctionVectorHalf since it points from p2 to p1, and not p1 to p2.
                  */
-                vec3.subtract(p2.pos,p1.pos,tempVec3); // vector from p1 to p2
+                vec3.subtract(tempVec3, p2.pos,p1.pos); // vector from p1 to p2
                 var current_distance = vec3.length(tempVec3); // current distance between p1 and p2
                 vec3.scale(tempVec3, tempVec3,1-rest_distance/current_distance);// The offset vector that could moves p1 into a distance of rest_distance to p2
                 vec3.scale(tempVec3, tempVec3,0.5); // Lets make it half that length, so that we can move BOTH p1 and p2.
@@ -383,8 +383,8 @@ requirejs(['kick'],
                         var pos1 = p1.pos,
                             pos2 = p2.pos,
                             pos3 = p3.pos;
-                        v1 = vec3.subtract(pos2,pos1,v1);
-                        v2 = vec3.subtract(pos3,pos1,v2);
+                        v1 = vec3.subtract(v1, pos2, pos1);
+                        v2 = vec3.subtract(v2, pos3, pos1);
                         return vec3.cross(v1,v2,dest);
                     }})(),
                 /**
@@ -678,7 +678,7 @@ requirejs(['kick'],
                     radiusSqr = radius*radius;
                 for(var i = particles.length-1;i>=0;i--)
                 {
-                    vec3.subtract(particles[i].pos,center,v);
+                    vec3.subtract(v, particles[i].pos,center);
                     var l = vec3.length(v);
                     if ( vec3.squaredLength(v) < radiusSqr) // if the particle is inside the ball
                     {
