@@ -686,7 +686,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          */
         MeshData.prototype.createUv2 = function () {
             var vertexCount = this.vertex.length / 3;
-            this.uv2 = new Float32Array(vertexCount*2);
+            this.uv2 = new Float32Array(vertexCount * 2);
         };
 
 
@@ -697,7 +697,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          */
         MeshData.prototype.recalculateNormals = function () {
             var vertexCount = this.vertex.length / 3,
-                triangles = Util.convertSubMeshesToTriangleIndices(this.indices, this.meshType, true),
+                triangles = Util.convertSubMeshesToTriangleIndices(this.subMeshes, this.meshType, true),
                 triangleCount = triangles.length / 3,
                 vertex = Vec3.wrapArray(this.vertex),
                 a,
@@ -729,15 +729,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 v2 = vertex[i2];
                 v3 = vertex[i3];
 
-                Vec3.subtract(v2, v1, v1v2);
-                Vec3.subtract(v3, v1, v1v3);
+                Vec3.subtract(v1v2, v2, v1);
+                Vec3.subtract(v1v3, v3, v1);
                 Vec3.normalize(v1v2, v1v2);
                 Vec3.normalize(v1v3, v1v3);
-                Vec3.cross(v1v2, v1v3, normal);
+                Vec3.cross(normal, v1v2, v1v3);
                 Vec3.normalize(normal, normal);
 
                 weight1 = Math.acos(Math.max(-1, Math.min(1, Vec3.dot(v1v2, v1v3))));
-                Vec3.subtract(v3, v2, v2v3Alias);
+                Vec3.subtract(v2v3Alias, v3, v2);
                 Vec3.normalize(v2v3Alias, v2v3Alias);
                 weight2 = Math.PI - Math.max(-1, Math.min(1, Math.acos(Vec3.dot(v1v2, v2v3Alias))));
                 Vec3.add(normalArray[i1], normalArray[i1], Vec3.scale(temp, normal, weight1));
