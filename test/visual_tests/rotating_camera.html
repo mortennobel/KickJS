@@ -93,11 +93,11 @@
                       transform.localRotationEuler = rotVec;
                       if (useMat3ToQuat){
                           var rotationQuat = transform.localRotation;
-                          var rotationMat3 = KICK.math.Quat.toMat3(rotationQuat);
-                          transform.localRotation = KICK.math.Mat3.toQuat(rotationMat3);
+                          var rotationMat3 = KICK.math.Quat.toMat3(KICK.math.Mat4.create(), rotationQuat);
+                          transform.localRotation = KICK.math.Mat3.toQuat(KICK.math.Quat.create(), rotationMat3);
                       }
                       if (useQuatLookAt){
-                          transform.localRotation = KICK.math.Quat.lookAt(translation,[0,0,0],[0,1,0]);
+                          transform.localRotation = KICK.math.Quat.lookAt(KICK.math.Quat.create(),translation,[0,0,0],[0,1,0]);
                       }
                       res.innerHTML = KICK.math.Mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.Vec3.str(rotVec);
                   }

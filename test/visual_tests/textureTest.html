@@ -120,6 +120,7 @@ This example shows how textures can be used
                                 meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
                                 initMaterials('vertexShader','fragmentShader');
                                 gameObject.addComponent(meshRenderer);
+                                setGIF();
                             }, function onError(err){
                                 alert(err);
                                 console.log(err);

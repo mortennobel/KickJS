@@ -22,7 +22,7 @@ req(['kick'],
             var engine;
             var meshRenderer;
 
-            function setMesh(url){
+            window.setMesh = function(url){
                 meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: url});
                 var meshData = meshRenderer.mesh.meshData;
                 meshData.recalculateTangents();
@@ -30,7 +30,7 @@ req(['kick'],
                 meshRenderer.mesh.meshData = meshData;
             }
 
-            function setMaterial(vertexShaderId, fragmentShaderId){
+            window.setMaterial = function(vertexShaderId, fragmentShaderId){
                 var vs = document.getElementById(vertexShaderId).value;
                 var fs = document.getElementById(fragmentShaderId).value;
                 var shader = new KICK.material.Shader();
@@ -48,21 +48,25 @@ req(['kick'],
                     name:"Some material",
                     shader:shader
                 });
-            }
+            };
 
-            function recalculateNormals(){
+            window.recalculateNormals = function(){
                 clearLog();
-                var mesh = meshRenderer.mesh;
-                mesh.recalculateNormals();
+                var mesh = meshRenderer.mesh,
+                        meshData = mesh.meshData;
+                meshData.recalculateNormals();
+                mesh.meshData = mesh;
                 mesh.updateData();
-            }
+            };
 
-            function recalculateTangents(){
+            window.recalculateTangents = function(){
                 clearLog();
-                var mesh = meshRenderer.mesh;
-                mesh.recalculateTangents();
+                var mesh = meshRenderer.mesh,
+                        meshData = mesh.meshData;
+                meshData.recalculateTangents();
+                mesh.meshData = mesh;
                 mesh.updateData();
-            }
+            };
 
             function initKick() {
                 engine = new KICK.core.Engine('canvas',{

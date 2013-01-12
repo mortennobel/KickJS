@@ -136,7 +136,7 @@
                         }
                         vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
                         transform.position = cartesianCoordinates;
-                        transform.localRotation = quat.lookAt(cartesianCoordinates,[0,0,0],[0,1,0],localRotate);
+                        transform.localRotation = quat.lookAt(localRotate, cartesianCoordinates,[0,0,0],[0,1,0]);
                     };
                 }
 
