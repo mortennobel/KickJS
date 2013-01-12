@@ -1063,7 +1063,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 }
                 if (norm) {
                     // note this can be simplified to
-                    // var normalMatrix = math.mat4.toMat3(finalModelView);
+                    // var normalMatrix = math.Mat4.toMat3(math.Mat3.create(), finalModelView);
                     // if the modelViewMatrix is orthogonal (non-uniform scale is not applied)
                     //var normalMatrix = mat3.transpose(mat4.toInverseMat3(finalModelView));
                     normalMatrix = Mat4.toNormalMat3(tempMat3, modelView);
