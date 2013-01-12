@@ -93,7 +93,7 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
          * @param {function} onError=null callback function when error occurs
          */
         this.instantiate = function (onSuccess, onError) {
-            if (ASSERT){
+            if (ASSERT) {
                 if (typeof(onSuccess) !== "function"){
                     console.log("ResourceDescriptor.onSuccess is not a function");
                 }
@@ -102,8 +102,8 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
                 }
             }
             var typePath = type.replace(/\./g,"/");
-            require([typePath], function(ResourceClass){
-                var resource = new ResourceClass({uid:resourceConfig.uid});
+            require([typePath], function(ResourceClass) {
+                var resource = new ResourceClass({uid: uid});
                 onSuccess(resource);
             }, onError);
         };
