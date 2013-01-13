@@ -52,7 +52,7 @@
                         }
                     }
 
-                    oReq.open("GET", "/example/shader_editor/GetShader?ts=" + new Date().getTime(), true);
+                    oReq.open("GET", "/tool/shader_editor/GetShader?ts=" + new Date().getTime(), true);
                     oReq.onreadystatechange = handler;
                     oReq.send();
                 },
@@ -107,7 +107,7 @@
                     objStr = JSON.stringify(obj);
                     oReq = new XMLHttpRequest();
 
-                    oReq.open("POST", "/example/shader_editor/UpdateShader", true);
+                    oReq.open("POST", "/tool/shader_editor/UpdateShader", true);
                     oReq.setRequestHeader("Content-type", "application/json; charset=UTF-8");
                     oReq.onreadystatechange = handler;
                     oReq.send(objStr);
@@ -835,7 +835,7 @@
                     }
                 }
 
-                oReq.open("GET", "/example/shader_editor/GetShader?id=" + id + "&ts=" + new Date().getTime(), true);
+                oReq.open("GET", "/tool/shader_editor/GetShader?id=" + id + "&ts=" + new Date().getTime(), true);
                 oReq.onreadystatechange = handler;
                 oReq.send();
             };
@@ -915,7 +915,7 @@
                 }
             }
 
-            oReq.open("GET", "/example/shader_editor/GetShader?id=" + id + "&ts=" + new Date().getTime(), false);
+            oReq.open("GET", "/tool/shader_editor/GetShader?id=" + id + "&ts=" + new Date().getTime(), false);
             oReq.onreadystatechange = handler;
             oReq.send();
             return result;
