@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../js/kick-built'
+        kick: '../js/kick'
     }
 });
 
@@ -10,57 +10,63 @@ requirejs(['kick'],
         "use strict";
 
         function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer, materialUniforms){
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
+            var vs = document.getElementById(vertexShaderId).value,
+                fs = document.getElementById(fragmentShaderId).value,
+                shader = new KICK.material.Shader(),
+                missingAttributes;
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = console.log;
             shader.apply();
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+            missingAttributes = meshRenderer.mesh.verify(shader);
+            if (missingAttributes) {
+                log("Missing attributes in mesh " + JSON.stringify(missingAttributes));
                 return;
             }
 
-            meshRenderer.material = new KICK.material.Material(engine,{
-                name:"Some material",
-                shader:shader,
+            meshRenderer.material = new KICK.material.Material({
+                name: "Some material",
+                shader: shader,
                 uniformData: materialUniforms
             });
         }
 
-        var engine;
-        var camera;
+        var engine,
+            camera;
         function initKick(videoElement) {
-            engine = new KICK.core.Engine('canvas',{
+            engine = new KICK.core.Engine('canvas', {
                 enableDebugContext: true
             });
-            var activeScene = engine.activeScene;
-            var cameraObject = activeScene.createGameObject();
+            var activeScene = engine.activeScene,
+                cameraObject = activeScene.createGameObject(),
+                gameObject,
+                meshRenderer,
+                texture,
+                asciiTexture,
+                image;
             camera = new KICK.scene.Camera({
-                clearColor: [124/255,163/255,137/255,1],
+                clearColor: [124 / 255, 163 / 255, 137 / 255, 1],
                 perspective: false,
                 near: -1,
-                far:1
+                far: 1
             });
             cameraObject.addComponent(camera);
 
-            var gameObject = activeScene.createGameObject();
-            var meshRenderer = new KICK.scene.MeshRenderer();
+            gameObject = activeScene.createGameObject();
+            meshRenderer = new KICK.scene.MeshRenderer();
 
-            var texture = new KICK.texture.MovieTexture(engine,{
-                videoElement:videoElement
+            texture = new KICK.texture.MovieTexture({
+                videoElement: videoElement
             });
-            var asciiTexture = new KICK.texture.Texture(engine,{
+            asciiTexture = new KICK.texture.Texture({
                 generateMipmaps: false,
                 magFilter: KICK.core.Constants.GL_NEAREST,
                 minFilter:  KICK.core.Constants.GL_NEAREST,
                 wrapS: KICK.core.Constants.GL_CLAMP_TO_EDGE,
                 wrapT: KICK.core.Constants.GL_CLAMP_TO_EDGE
             });
-            var image = new Image();
-            image.onload = function() {
+            image = new Image();
+            image.onload = function () {
                 asciiTexture.setImage(image, "ascii_art");
             };
             // base 64 encoded of custom made 8x16 ascii font (mixing both normal and inverted). Contains 256 chars.
@@ -83,84 +89,84 @@ requirejs(['kick'],
             setMaterial('vertexShaderTex', 'fragmentShaderTex', meshRenderer, {
                 tex: texture
             });
-            gameObject.transform.position = [.9,.9,0.1];
-            gameObject.transform.localScale = [0.1,0.1,0.1];
+            gameObject.transform.position = [0.9, 0.9, 0.1];
+            gameObject.transform.localScale = [0.1, 0.1, 0.1];
         }
 
         // initKick();
-        window.YUI().use("panel",function(Y) {
-            var YUIConfirm = function (headerTxt,bodyTxt, buttons){
-                var nestedPanel = new Y.Panel({
-                    headerContent: headerTxt,
-                    bodyContent:bodyTxt,
-                    zIndex: 5, //We set a z-index higher than the parent's z-index
-                    centered:true,
-                    width:300,
-                    modal:true,
-                    buttons: buttons
-                });
+        window.YUI().use("panel", function (Y) {
+            var YUIConfirm = function (headerTxt, bodyTxt, buttons) {
+                    var nestedPanel = new Y.Panel({
+                        headerContent: headerTxt,
+                        bodyContent: bodyTxt,
+                        zIndex: 5, //We set a z-index higher than the parent's z-index
+                        centered: true,
+                        width: 300,
+                        modal: true,
+                        buttons: buttons
+                    });
 
-                nestedPanel.render('#nestedPanel');
-                return nestedPanel;
-            };
+                    nestedPanel.render('#nestedPanel');
+                    return nestedPanel;
+                },
+                onEnd = function () {
+                    YUIConfirm("End of video", "Reload page to see another video", []);
+                },
+                buildLoadVideoDialog = function () {
+                    var div = document.createElement("div"),
+                        button,
+                        img;
+                    div.innerHTML = "WebCam ascii art is a real time post processing effect that will transform a WebCam feed into ASCII art. The effect is created in a shader and uses the KickJS engine.<br><br>"+
+                        "Currently only Google Chrome is support for WebRTC (used for capturing video). (Firefox will have support for WEBRTC from version 18)<br><br>";
 
-            var onEnd = function () {
-                YUIConfirm("End of video", "Reload page to see another video",[]);
-            };
+                    button = document.createElement("button");
+                    button.innerHTML = "Start WebCam";
+                    button.style.width = "100%";
+                    button.onclick = function () {
+                        var video = document.createElement("video"),
+                            hasUserMedia;
+                        video.style.display = "none";
+                        video.width = 320;
+                        video.height = 240;
+                        navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+                        hasUserMedia = navigator.getUserMedia ? true : false;
+                        if (hasUserMedia) {
+                            video.autoplay = true;
+                            document.body.appendChild(video);
 
-            var buildLoadVideoDialog = function () {
-                var div = document.createElement("div");
-                div.innerHTML = "WebCam ascii art is a real time post processing effect that will transform a WebCam feed into ASCII art. The effect is created in a shader and uses the KickJS engine.<br><br>"+
-                    "Currently only Google Chrome is support for WebRTC (used for capturing video). (Firefox will have support for WEBRTC from version 18)<br><br>";
+                            navigator.getUserMedia({audio: false, video: true}, function (stream) {
+                                video.src = window.webkitURL.createObjectURL(stream);
+                            }, function (error) {
+                                console.log("Failed to get a stream due to", error);
+                                alert("Failed to get a stream due to" + error);
+                            });
+                            video.play();
+                            initKick(video);
+                            window.currentDialog.hide();
+                        } else {
+                            alert("Failed - your browser does not support webcam using WebRTC");
+                        }
+                    };
+                    div.appendChild(button);
+                    div.appendChild(document.createElement("br"));
+                    div.appendChild(document.createElement("br"));
+                    img = document.createElement("img");
+                    img.src = "/images/example_webcam_ascii_art.jpg";
+                    img.style.padding = "20px";
+                    img.title = "Preview - press 'Start WebCam' to show realtime effect";
+                    div.appendChild(img);
 
-                var button = document.createElement("button");
-                button.innerHTML = "Start WebCam";
-                button.style.width = "100%";
-                button.onclick = function () {
-                    var video = document.createElement("video");
-                    video.style.display = "none";
-                    video.width = 320;
-                    video.height = 240;
-                    navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-                    var hasUserMedia = navigator.getUserMedia ? true : false;
-                    if (hasUserMedia) {
-                        video.autoplay = true;
-                        document.body.appendChild(video);
-
-                        navigator.getUserMedia({audio:false, video:true}, function(stream){
-                            video.src = window.webkitURL.createObjectURL(stream);
-                        }, function(error){
-                            console.log("Failed to get a stream due to", error);
-                            alert("Failed to get a stream due to"+ error);
-                        });
-                        video.play();
-                        initKick(video);
-                        window.currentDialog.hide();
-                    } else {
-                        alert("Failed - your browser does not support webcam using WebRTC");
-                    }
-
+                    window.currentDialog = YUIConfirm("Start webcam", div, []);
                 };
-                div.appendChild(button);
-                div.appendChild(document.createElement("br"));
-                div.appendChild(document.createElement("br"));
-                var img = document.createElement("img");
-                img.src = "/images/example_webcam_ascii_art.jpg";
-                img.style.padding = "20px";
-                img.title = "Preview - press 'Start WebCam' to show realtime effect";
-                div.appendChild(img);
-
-                window.currentDialog = YUIConfirm("Start webcam", div,[]);
-            };
             buildLoadVideoDialog();
         });
 
-        function documentResized(){
+        function documentResized() {
             var canvas = document.getElementById('canvas');
             canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight-canvas.offsetTop;
+            canvas.height = window.innerHeight - canvas.offsetTop;
 
-            if (engine){
+            if (engine) {
                 engine.canvasResized();
             }
         }

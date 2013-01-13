@@ -14,7 +14,12 @@ requirejs(['kick'],
             quat = KICK.math.Quat,
             aabb = KICK.math.Aabb,
             objectCenter = vec3.create(),
-            sphericalCoordinates = vec3.clone([10, 0, 0]); // radius, polar, elevation
+            sphericalCoordinates = vec3.clone([10, 0, 0]), // radius, polar, elevation
+            material,
+            engine,
+            camera,
+            meshRenderer,
+            texture;
 
         if (location.href.indexOf('file') === 0) {
             alert("Model viewer example must be run from a web-server due to security constrains");
@@ -34,46 +39,62 @@ requirejs(['kick'],
 
         function loadKickJSModel(fileContent) {
             destroyAllMeshRenderersInScene();
-            var meshData = new KICK.mesh.MeshData();
+            var meshData = new KICK.mesh.MeshData(),
+                gameObject,
+                mesh,
+                materials,
+                j,
+                meshRenderer,
+                boundingBox,
+                length,
+                lengthPlusOffset;
             meshData.deserialize(fileContent);
-            var gameObject = engine.activeScene.createGameObject({name: meshData.name});
-            var mesh = new KICK.mesh.Mesh({
+            gameObject = engine.activeScene.createGameObject({name: meshData.name});
+            mesh = new KICK.mesh.Mesh({
                 meshData: meshData
             });
-            var materials = [];
-            for (var j = meshData.subMeshes.length-1;j>=0;j--){
+            materials = [];
+            for (j = meshData.subMeshes.length - 1; j >= 0; j--) {
                 materials[j] = material;
             }
 
-            var meshRenderer = new KICK.scene.MeshRenderer({
+            meshRenderer = new KICK.scene.MeshRenderer({
                 mesh: mesh,
                 materials: materials
             });
             gameObject.addComponent(meshRenderer);
-            var boundingBox = mesh.aabb;
-            aabb.center(boundingBox,objectCenter);
-            var length = vec3.length(aabb.diagonal(boundingBox))*0.5;
-            var lengthPlusOffset = length*2.5;
+            boundingBox = mesh.aabb;
+            aabb.center(objectCenter, boundingBox);
+            length = vec3.length(aabb.diagonal(vec3.create(), boundingBox)) * 0.5;
+            lengthPlusOffset = length * 2.5;
 
             sphericalCoordinates[0] = lengthPlusOffset;
         }
 
-        function load(content,url,func,rotateAroundX){
+        function load(content, url, func, rotateAroundX) {
             destroyAllMeshRenderersInScene();
 
-            var createdObject = func(content,engine.activeScene,rotateAroundX);
-            var gameObjectsCreated = createdObject.gameObjects;
-
-            var boundingBox = aabb.create();
-            for (var i=0;i<gameObjectsCreated.length;i++){
-                var gameObject = gameObjectsCreated[i];
-                var meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
-                if (meshRendererNew){
-                    var meshAabb = meshRendererNew.mesh.aabb;
-                    var aabbTransformed = aabb.transform(meshAabb,meshAabb,gameObject.transform.getGlobalMatrix ( ));
-                    aabb.merge(boundingBox,aabbTransformed);
-                    var materials = [];
-                    for (var j = meshRendererNew.mesh.meshData.subMeshes.length-1;j>=0;j--){
+            var createdObject = func(content, engine.activeScene, rotateAroundX),
+                gameObjectsCreated = createdObject.gameObjects,
+                boundingBox = aabb.create(),
+                i,
+                gameObject,
+                meshRendererNew,
+                meshAabb,
+                aabbTransformed,
+                materials,
+                j,
+                length,
+                lengthPlusOffset;
+            for (i = 0; i < gameObjectsCreated.length; i++) {
+                gameObject = gameObjectsCreated[i];
+                meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+                if (meshRendererNew) {
+                    meshAabb = meshRendererNew.mesh.aabb;
+                    aabbTransformed = aabb.transform(meshAabb, meshAabb, gameObject.transform.getGlobalMatrix());
+                    aabb.merge(boundingBox, boundingBox, aabbTransformed);
+                    materials = [];
+                    for (j = meshRendererNew.mesh.meshData.subMeshes.length - 1; j >= 0; j--) {
                         materials[j] = material;
                     }
                     meshRendererNew.materials = materials;
@@ -82,21 +103,20 @@ requirejs(['kick'],
                     createDummyUVsIfNotExist();
                 }
             }
-            aabb.center(boundingBox,objectCenter);
-            var length = vec3.length(aabb.diagonal(boundingBox))*0.5;
-            var lengthPlusOffset = length*2.5;
+            aabb.center(boundingBox, objectCenter);
+            length = vec3.length(aabb.diagonal(vec3.create(), boundingBox)) * 0.5;
+            lengthPlusOffset = length * 2.5;
 
             sphericalCoordinates[0] = lengthPlusOffset;
         }
 
-        function loadObj(url){
+        function loadObj(url) {
             var oReq = new XMLHttpRequest();
-            function handler()
-            {
-                if (oReq.readyState == 4 /* complete */) {
-                    if (oReq.status == 200) {
+            function handler() {
+                if (oReq.readyState === 4) { //  complete
+                    if (oReq.status === 200) {
                         var txt = oReq.responseText;
-                        load(txt,url,KICK.importer.ObjImporter.import);
+                        load(txt, url, KICK.importer.ObjImporter.import);
                     }
                 }
             }
@@ -105,14 +125,13 @@ requirejs(['kick'],
             oReq.send();
         }
 
-        function loadCollada(url){
+        function loadCollada(url) {
             var oReq = new XMLHttpRequest();
-            function handler()
-            {
-                if (oReq.readyState === 4 /* complete */) {
+            function handler() {
+                if (oReq.readyState === 4) { // complete
                     if (oReq.status === 200) {
                         var xmlDom = oReq.responseXML;
-                        load(xmlDom,url,KICK.importer.ColladaImporter.import);
+                        load(xmlDom, url, KICK.importer.ColladaImporter.import);
                     }
                 }
             }
@@ -121,11 +140,10 @@ requirejs(['kick'],
             oReq.send();
         }
 
-        function loadKickJSModelFromURL(url){
+        function loadKickJSModelFromURL(url) {
             var oReq = new XMLHttpRequest();
-            function handler()
-            {
-                if (oReq.readyState === 4 /* complete */) {
+            function handler() {
+                if (oReq.readyState === 4) { // complete
                     if (oReq.status === 200) {
                         var content = oReq.response;
                         loadKickJSModel(content);
@@ -139,83 +157,86 @@ requirejs(['kick'],
         }
 
 
-        var material;
-
-        function duckClicked(){
+        function duckClicked() {
             loadCollada("duck.dae");
         }
 
-        function cubeClicked(){
+        function cubeClicked() {
             loadCollada("cube.dae");
         }
 
-        function teapotClicked(){
+        function teapotClicked() {
             loadKickJSModelFromURL("teapot.kickjs");
         }
 
-        function loadModelFile(file,rotateAroundX){
+        function loadModelFile(file, rotateAroundX) {
             var reader = new FileReader(),
                 fileName = file.fileName || file.name,
-                fileNameLowercase = fileName.toLowerCase();
-            var endsWith = function(str,search) {
-                return (str.match(search+"$")==search)
-            };
+                fileNameLowercase = fileName.toLowerCase(),
+                endsWith = function (str, search) {
+                    return (str.match(search + "$") === search);
+                },
+                parser;
 
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 var fileContent = event.target.result;
 
-                if (endsWith(fileNameLowercase,".obj")){
-                    load(fileContent,fileName,KICK.importer.ObjImporter.import,rotateAroundX);
-                } else if (endsWith(fileNameLowercase,".dae")){
-                    var parser=new DOMParser();
-                    load(parser.parseFromString(fileContent,"text/xml"),fileName,KICK.importer.ColladaImporter.import,rotateAroundX);
-                } else if (endsWith(fileNameLowercase, ".kickjs")){
+                if (endsWith(fileNameLowercase, ".obj")) {
+                    load(fileContent, fileName, KICK.importer.ObjImporter.import,rotateAroundX);
+                } else if (endsWith(fileNameLowercase, ".dae")) {
+                    parser = new DOMParser();
+                    load(parser.parseFromString(fileContent, "text/xml"), fileName, KICK.importer.ColladaImporter.import,rotateAroundX);
+                } else if (endsWith(fileNameLowercase, ".kickjs")) {
                     loadKickJSModel(fileContent);
                 }
             };
 
-            reader.onerror = function() {
+            reader.onerror = function () {
                 alert("Error reading file");
             };
-            if (endsWith(fileNameLowercase,".kickjs")){
+            if (endsWith(fileNameLowercase, ".kickjs")) {
                 reader.readAsArrayBuffer(file);
             } else {
                 reader.readAsText(file);
             }
         }
 
-        function loadClicked(files,rotateAroundX,model){
-            var URL = window.webkitURL || window.URL;
-            var isPNG = function(arrayBuffer){
-                var uInt8 = new Uint8Array(arrayBuffer);
-                return uInt8.length>10 &&
-                    uInt8[0] === 137 &&
-                    uInt8[1] === 80 &&
-                    uInt8[2] === 78 &&
-                    uInt8[3] === 71 &&
-                    uInt8[4] === 13 &&
-                    uInt8[5] === 10 &&
-                    uInt8[6] === 26 &&
-                    uInt8[7] === 10;
-            };
+        function loadClicked(files, rotateAroundX, model) {
+            var URL = window.webkitURL || window.URL,
+                isPNG = function (arrayBuffer) {
+                    var uInt8 = new Uint8Array(arrayBuffer);
+                    return uInt8.length>10 &&
+                        uInt8[0] === 137 &&
+                        uInt8[1] === 80 &&
+                        uInt8[2] === 78 &&
+                        uInt8[3] === 71 &&
+                        uInt8[4] === 13 &&
+                        uInt8[5] === 10 &&
+                        uInt8[6] === 26 &&
+                        uInt8[7] === 10;
+                },
+                endsWith = function (str, search) {
+                    return (str.match(search + "$") === search);
+                },
+                i,
+                file,
+                filename,
+                fileLowerCase,
+                img;
+            for (i = 0; i < files.length; i++) {
+                file = files[i];
+                filename = file.fileName || file.name;
+                fileLowerCase = filename.toLowerCase();
+                if (model && (endsWith(fileLowerCase, ".dae") ||
+                    endsWith(fileLowerCase, ".obj") ||
+                    endsWith(fileLowerCase, ".kickjs"))) {
+                    loadModelFile(file, rotateAroundX);
+                } else if (!model && (endsWith(fileLowerCase, ".jpg") ||
+                    endsWith(fileLowerCase, ".jpeg") ||
+                    endsWith(fileLowerCase, ".png"))) {
 
-            var endsWith = function(str,search) {
-                return (str.match(search+"$")==search)
-            };
-            for (var i=0;i<files.length;i++){
-                var file = files[i];
-                var filename = file.fileName || file.name;
-                var fileLowerCase = filename.toLowerCase();
-                if (model && (endsWith(fileLowerCase,".dae") ||
-                    endsWith(fileLowerCase,".obj") ||
-                    endsWith(fileLowerCase,".kickjs"))){
-                    loadModelFile(file,rotateAroundX);
-                } else if (!model && (endsWith(fileLowerCase,".jpg") ||
-                    endsWith(fileLowerCase,".jpeg") ||
-                    endsWith(fileLowerCase,".png"))){
-
-                    var img = document.createElement("img");
-                    img.onload = function(e) {
+                    img = document.createElement("img");
+                    img.onload = function (e) {
                         texture.setImage(img, "");
                         URL.revokeObjectURL(this.src);
                     };
@@ -226,27 +247,22 @@ requirejs(['kick'],
             }
         }
 
-        var engine;
-        var camera;
-        var meshRenderer;
-        var texture;
-
-        function createMaterial(){
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                console.log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+        function createMaterial() {
+            var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR),
+                missingAttributes = meshRenderer.mesh.verify(shader);
+            if (missingAttributes) {
+                console.log("Missing attributes in mesh " + JSON.stringify(missingAttributes));
                 return null;
             }
             return new KICK.material.Material({
-                name:"Some material",
-                shader:shader
+                name: "Some material",
+                shader: shader
             });
         }
 
-        function recalculateNormals(){
-            var mesh = meshRenderer.mesh;
-            var meshData = mesh.meshData;
+        function recalculateNormals() {
+            var mesh = meshRenderer.mesh,
+                meshData = mesh.meshData;
             if (!meshData.interleavedArrayFormat.normal){
                 console.log("Recalculate normals");
                 meshData.recalculateNormals();
@@ -254,24 +270,21 @@ requirejs(['kick'],
             }
         }
 
-        function createDummyUVsIfNotExist(){
-            var mesh = meshRenderer.mesh;
-            var meshData = mesh.meshData;
-            if (!meshData.interleavedArrayFormat.uv1){
-                console.log("Create dummy uv1");
-                meshData.uv1 = new Float32Array(meshData.vertex.length/3*2);
-                mesh.meshData = meshData;
-                meshRenderer.mesh = mesh;
-            }
+        function createDummyUVsIfNotExist() {
+            var mesh = meshRenderer.mesh,
+                meshData = mesh.meshData;
+            meshData.createUv1();
+            mesh.meshData = meshData;
+            meshRenderer.mesh = mesh;
         }
 
-        function LightRotatorComponent(){
+        function LightRotatorComponent() {
             var thisObj = this,
                 transform,
                 rotationSensitivity = 1,
                 rotationEuler,
                 mouseInput;
-            this.activated = function(){
+            this.activated = function () {
                 var gameObject = thisObj.gameObject,
                     engine = gameObject.engine;
                 transform = gameObject.transform;
@@ -279,18 +292,18 @@ requirejs(['kick'],
                 mouseInput = engine.mouseInput;
             };
 
-            this.update = function(){
+            this.update = function () {
                 transform.localRotationEuler = rotationEuler;
-                if (mouseInput.isButton(2)){
+                if (mouseInput.isButton(2)) {
                     var mouseDelta = mouseInput.deltaMovement;
-                    rotationEuler[1] += mouseDelta[0]*rotationSensitivity;
-                    rotationEuler[0] += mouseDelta[1]*rotationSensitivity;
+                    rotationEuler[1] += mouseDelta[0] * rotationSensitivity;
+                    rotationEuler[0] += mouseDelta[1] * rotationSensitivity;
                     transform.localRotationEuler = rotationEuler;
                 }
             };
         }
 
-        function RotatorComponent(){
+        function RotatorComponent () {
             var thisObj = this,
                 time,
                 transform,
@@ -301,7 +314,7 @@ requirejs(['kick'],
                 mouseInput,
                 cartesianCoordinates = vec3.create();
 
-            this.activated = function(){
+            this.activated = function () {
                 var gameObject = thisObj.gameObject,
                     engine = gameObject.engine;
                 transform = gameObject.transform;
@@ -310,41 +323,44 @@ requirejs(['kick'],
                 mouseInput.mouseWheelPreventDefaultAction = true;
             };
 
-            this.update = function(){
-                if (mouseInput.isButton(0)){
-                    var mouseDelta = mouseInput.deltaMovement;
-                    sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
-                    sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
-                    sphericalCoordinates[2] = Math.max(-Math.PI*0.499,sphericalCoordinates[2]);
-                    sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
+            this.update = function () {
+                var mouseDelta,
+                    wheelY,
+                    delta;
+                if (mouseInput.isButton(0)) {
+                    mouseDelta = mouseInput.deltaMovement;
+                    sphericalCoordinates[1] -= mouseDelta[0] * mouseRotationSpeed;
+                    sphericalCoordinates[2] += mouseDelta[1] * mouseRotationSpeed;
+                    sphericalCoordinates[2] = Math.max(-Math.PI * 0.499, sphericalCoordinates[2]);
+                    sphericalCoordinates[2] = Math.min(Math.PI * 0.499, sphericalCoordinates[2]);
                 } else {
-                    sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
-                    sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
+                    sphericalCoordinates[1] += time.deltaTime * rotationSpeed;
+                    sphericalCoordinates[2] = Math.sin(time.time * upDownSpeed) * Math.PI * 0.25;
                 }
-                var wheelY = mouseInput.deltaWheel[1];
-                if (wheelY){
-                    var delta = wheelY*wheelSpeed;
-                    sphericalCoordinates[0] *= 1+delta;
+                wheelY = mouseInput.deltaWheel[1];
+                if (wheelY) {
+                    delta = wheelY * wheelSpeed;
+                    sphericalCoordinates[0] *= 1 + delta;
                 }
-                vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
-                cartesianCoordinates = vec3.add(cartesianCoordinates,objectCenter,cartesianCoordinates);
+                vec3.sphericalToCarterian(sphericalCoordinates, cartesianCoordinates);
+                cartesianCoordinates = vec3.add(cartesianCoordinates, objectCenter, cartesianCoordinates);
                 transform.position = cartesianCoordinates;
-                transform.localRotation = quat.lookAt(quat.create(), cartesianCoordinates, objectCenter, [0,1,0]);
+                transform.localRotation = quat.lookAt(quat.create(), cartesianCoordinates, objectCenter, [0, 1, 0]);
             };
         }
 
-        function initDuckTexture(){
+        function initDuckTexture() {
             texture = new KICK.texture.Texture();
             texture.setTemporaryTexture();
             texture.dataURI = "duckCM.jpg";
             material.setUniform("mainTexture", texture);
         }
 
-        function initLights(){
+        function initLights() {
             var ambientlightGameObject = engine.activeScene.createGameObject();
             ambientlightGameObject.name = "ambient light";
-            var ambientLight = new KICK.scene.Light({type :KICK.scene.Light.TYPE_AMBIENT});
-            ambientLight.color = [0.1,0.1,0.1];
+            var ambientLight = new KICK.scene.Light({type: KICK.scene.Light.TYPE_AMBIENT});
+            ambientLight.color = [0.1, 0.1, 0.1];
             ambientlightGameObject.addComponent(ambientLight);
 
             var lightGameObject = engine.activeScene.createGameObject();

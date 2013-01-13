@@ -22,7 +22,7 @@ define(["kick"], function (KICK) {
         };
 
         this.update = function(){
-            if (mouseInput.isButton(2)){
+            if (mouseInput.isButton(2)) {
                 var mouseDelta = mouseInput.deltaMovement;
                 sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
                 sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
@@ -31,7 +31,7 @@ define(["kick"], function (KICK) {
             }
             vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
             transform.position = cartesianCoordinates;
-            transform.localRotation = quat.lookAt(cartesianCoordinates,[0,0,0],[0,1,0]);
+            transform.localRotation = quat.lookAt(quat.create(), cartesianCoordinates, [0,0,0],[0,1,0]);
         };
     };
 });

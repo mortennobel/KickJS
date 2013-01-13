@@ -509,6 +509,27 @@
     },
     {
         "type":"kick.material.Material",
+        "uid":1218,
+        "config":{
+            "uid":1218,
+            "name":"BoardHighlight",
+            "shader":{
+                "ref":-108,
+                "name":"Diffuse",
+                "reftype":"project"
+            },
+            "uniformData":{
+                "mainColor":[0.00000000074505806, 1, 0.44999998807907104, 1],
+                "mainTexture":{
+                        "ref":-201,
+                        "name":"White",
+                        "reftype":"project"
+                }
+            }
+        }
+    },
+    {
+        "type":"kick.material.Material",
         "uid":224,
         "config":{
             "uid":224,

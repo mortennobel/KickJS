@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../js/kick-built'
+        kick: '../js/kick-debug'
     }
 });
 
@@ -12,7 +12,7 @@ requirejs(['kick'],
     function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer, materialUniforms){
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader(engine);
+            var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = console.log;
@@ -23,7 +23,7 @@ requirejs(['kick'],
                 return;
             }
 
-            meshRenderer.material = new KICK.material.Material(engine,{
+            meshRenderer.material = new KICK.material.Material({
                 name:"Some material",
                 shader:shader,
                 uniformData: materialUniforms
@@ -49,10 +49,10 @@ requirejs(['kick'],
         var gameObject = activeScene.createGameObject();
         var meshRenderer = new KICK.scene.MeshRenderer();
 
-        var texture = new KICK.texture.MovieTexture(engine,{
+        var texture = new KICK.texture.MovieTexture({
             videoElement:videoElement
         });
-        var asciiTexture = new KICK.texture.Texture(engine,{
+        var asciiTexture = new KICK.texture.Texture({
             generateMipmaps: false,
             magFilter: KICK.core.Constants.GL_NEAREST,
             minFilter:  KICK.core.Constants.GL_NEAREST,

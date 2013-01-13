@@ -2,7 +2,7 @@ define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
     "use strict";
 
     // Chess piece class
-    return function(type, color, initialLocation){
+    return function (type, color, initialLocation){
         var engine = KICK.core.EngineSingleton.engine,
             vec2 = KICK.math.Vec2,
             vec3 = KICK.math.Vec3,

@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../js/kick-built'
+        kick: '../js/kick-debug'
     }
 });
 
@@ -22,7 +22,7 @@ requirejs(['kick'],
                 this.activated = function (){
                     var engine = this.gameObject.engine,
                         shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                        material = new KICK.material.Material(engine,{
+                        material = new KICK.material.Material({
                             shader:shader,
                             name:"SnakeFood material",
                             uniformData:{
@@ -112,14 +112,14 @@ requirejs(['kick'],
                     scene = engine.activeScene,
                     currentMovement = 0, // limits movement to not go backwards
                     shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                    material = new KICK.material.Material(engine,{
+                    material = new KICK.material.Material({
                         shader:shader,
                         name:"Snake material",
                         uniformData:{
                             mainColor: color
                         }
                     }),
-                    mesh = new KICK.mesh.Mesh(engine,
+                    mesh = new KICK.mesh.Mesh(
                         {
                             dataURI:"kickjs://mesh/cube/?length=0.45",
                             name:"Snake body"
@@ -302,7 +302,7 @@ requirejs(['kick'],
                     shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
                     console.log("Level uid "+thisObj.uid);
                     console.log("Mesh renderer "+meshRenderer.uid);
-                    material = new KICK.material.Material(engine,{
+                    material = new KICK.material.Material({
                         shader:shader,
                         name:"Snake level material",
                         uniformData:{
@@ -332,7 +332,7 @@ requirejs(['kick'],
                     meshData = meshData.combine(tallCube.transform(translateLeftMatrix));
                     meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 
-                    meshRenderer.mesh = new KICK.mesh.Mesh(engine,{name:"Level",meshData:meshData});
+                    meshRenderer.mesh = new KICK.mesh.Mesh({name:"Level",meshData:meshData});
                 };
 
                 this.isIntersecting = function(position){

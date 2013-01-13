@@ -12,6 +12,7 @@ define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovemen
             doPlayerMove = null,
             playerColor = 0, // white
             selectedPiece = null,
+            highligtedLocation = null,
             locationToChessStr = function(location){
                 return String.fromCharCode("a".charCodeAt(0)+location[0])+(location[1]+1);
             },
@@ -148,6 +149,13 @@ define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovemen
             } else {
                 console.log("Clicked "+locationToChessStr (location));
             }
+        };
+        this.locationHighlighted = function(location){
+            if (highligtedLocation){
+                gameBoard.getField(highligtedLocation).highlighted = false;
+            }
+            highligtedLocation = KICK.math.Vec2.clone(location);
+            gameBoard.getField(location).highlighted = true;
         };
 
         // init
