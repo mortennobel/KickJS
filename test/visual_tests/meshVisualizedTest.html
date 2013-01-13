@@ -103,7 +103,6 @@ This example shows how vertex attributes can be visualized.
 <br>
 <h2>Shaders:</h2>
 [<a href="#" onclick="setMaterial('vertexShaderUV','fragmentShader');">UV1</a>]
-[<a href="#" onclick="setMaterial('vertexShaderUV2','fragmentShader');">UV2</a>]
 [<a href="#" onclick="setMaterial('vertexShaderNormal','fragmentShader');">Normal</a>]
 [<a href="#" onclick="setMaterial('vertexShaderTangent','fragmentShader');">Tangent</a>]
 [<a href="#" onclick="setMaterial('vertexShaderColor','fragmentShader');">Color</a>]
@@ -123,18 +122,6 @@ This example shows how vertex attributes can be visualized.
         vColor = vec3(uv1.x,uv1.y,0);
         }
     </textarea>
-    <textarea style="width:500px;height:150px;" id="vertexShaderUV2">
-        attribute vec3 vertex;
-        attribute vec2 uv2;
-
-        varying vec3 vColor;
-
-        void main(void) {
-        gl_Position = vec4(vertex, 1.0);
-        vColor = vec3(uv2.x,uv2.y,0);
-        }
-    </textarea>
-
     <textarea style="width:500px;height:150px;" id="vertexShaderNormal">
         attribute vec3 vertex;
         attribute vec3 normal;
