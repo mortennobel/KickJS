@@ -38,6 +38,9 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 activeSceneNull = {updateAndRender: function () {}},
                 animationFrameObj = {},
                 wrapperFunctionToMethodOnObject = function (time_) {
+                    if (time_ < 1e12) {
+                        time_ = Date.now();
+                    }
                     thisObj._gameLoop(time_);
                 },
                 vec2 = math.Vec2;
