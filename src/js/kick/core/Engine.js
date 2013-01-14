@@ -181,11 +181,11 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                         var currentValue = thisObj.paused;
                         if (pause !== currentValue) {
                             if (pause) {
-                                cancelRequestAnimFrame(animationFrameObj);
+                                window.cancelAnimationFrame(animationFrameObj);
                                 animationFrameObj = null;
                             } else {
                                 lastTime = new Date().getTime() - 16; // ensures valid delta time in next frame
-                                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
+                                animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                             }
                         }
                     }
@@ -260,7 +260,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 }
 
                 if (animationFrameObj !== null) {
-                    animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
+                    animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                 }
             };
 

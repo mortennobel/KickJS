@@ -18,9 +18,11 @@ define([], function () {
                     return window.setTimeout(callback, fps60, new Date().getTime());
                 };
         })();
-
-        window.cancelRequestAnimFrame = ( function() {
+    }
+    if (typeof window.cancelAnimationFrame === "undefined") {
+        window.cancelAnimationFrame = (function () {
             return window.cancelAnimationFrame          ||
+                window.cancelRequestAnimFrame               ||
                 window.webkitCancelRequestAnimationFrame    ||
                 window.mozCancelRequestAnimationFrame       ||
                 window.oCancelRequestAnimationFrame     ||
