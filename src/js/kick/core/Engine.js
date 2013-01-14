@@ -38,7 +38,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 activeSceneNull = {updateAndRender: function () {}},
                 animationFrameObj = {},
                 wrapperFunctionToMethodOnObject = function (time_) {
-                    if (time_ < 1e12) {
+                    if (time_ < 1e12) { // if highres timer. see http://updates.html5rocks.com/2012/05/requestAnimationFrame-API-now-with-sub-millisecond-precision
                         time_ = Date.now();
                     }
                     thisObj._gameLoop(time_);
