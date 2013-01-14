@@ -35,7 +35,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 _right = 1,
                 _bottom = -1,
                 _top = 1,
-                _clearColor = [0, 0, 0, 1],
+                _clearColor = Vec4.clone([0, 0, 0, 1]),
+                _shadowmapClearColor = Vec4.clone([1, 1, 1, 1]),
                 _perspective = true,
                 _clearFlagColor = true,
                 _clearFlagDepth = true,
@@ -249,12 +250,12 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         renderTextureDimension = shadowRenderTexture.dimension,
                         renderTextureWidth = renderTextureDimension[0],
                         renderTextureHeight = renderTextureDimension[1],
-                        transformedOffsetFromCamera,
-                        cameraPosition;
+                        transformedOffsetFromCamera = Vec3.create(),
+                        cameraPosition = Vec3.create();
                     setupViewport(0, 0, renderTextureWidth, renderTextureHeight);
 
                     shadowRenderTexture.bind();
-                    setupClearColor([1, 1, 1, 1]);
+                    setupClearColor(_shadowmapClearColor);
                     gl.clear(c.GL_COLOR_BUFFER_BIT | c.GL_DEPTH_BUFFER_BIT);
 
                     // fitting:
@@ -265,23 +266,21 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     Mat4.copy(projectionMatrix, shadowLightProjection);
 
                     // find the position of the light 'center' in world space
-                    transformedOffsetFromCamera = Quat.multiplyVec3(Vec3.create(), transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
-                    cameraPosition = Vec3.add(Vec3.create(), transformedOffsetFromCamera, transform.position);
+                    transformedOffsetFromCamera = Quat.multiplyVec3(transformedOffsetFromCamera, transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
+                    cameraPosition = Vec3.add(cameraPosition, transformedOffsetFromCamera, transform.position);
                     // adjust to reduce flicker when rotating camera
                     cameraPosition[0] = Math.round(cameraPosition[0]);
                     cameraPosition[1] = Math.round(cameraPosition[1]);
                     cameraPosition[2] = Math.round(cameraPosition[2]);
 
-                    Mat4.setTRSInverse(cameraPosition, directionalLightTransform.localRotation, [1, 1, 1], viewMatrix);
+                    Mat4.setTRSInverse(viewMatrix, cameraPosition, directionalLightTransform.localRotation, [1, 1, 1]);
 
                     Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
                     // update light matrix (will be used when scene is rendering with shadow map shader)
-                    Mat4.multiply(lightMatrix, Mat4.multiply(lightMatrix, offsetMatrix, projectionMatrix),
-                        viewMatrix);
+                    Mat4.multiply(lightMatrix, Mat4.multiply(lightMatrix, offsetMatrix, projectionMatrix), viewMatrix);
 
                     renderSceneObjects(sceneLightObj, _shadowmapMaterial);
-
                 },
                 componentListener = {
                     /**
@@ -427,8 +426,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     shadowRadius = shadowLightOffsetFromCamera * 1.55377397403004; // sqrt(2+sqrt(2))
                     nearPlanePosition = -shadowRadius * engine.config.shadowNearMultiplier;
                     shadowLightProjection = Mat4.create();
-                    Mat4.ortho(-shadowRadius, shadowRadius, -shadowRadius, shadowRadius,
-                        nearPlanePosition, shadowRadius, shadowLightProjection);
+                    Mat4.ortho(shadowLightProjection, -shadowRadius, shadowRadius, -shadowRadius, shadowRadius,
+                        nearPlanePosition, shadowRadius);
 
                 } else if (_renderShadow) {
                     _renderShadow = false; // disable render shadow
