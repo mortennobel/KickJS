@@ -14663,7 +14663,8 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                 _right = 1,
                 _bottom = -1,
                 _top = 1,
-                _clearColor = [0, 0, 0, 1],
+                _clearColor = Vec4.clone([0, 0, 0, 1]),
+                _shadowmapClearColor = Vec4.clone([1, 1, 1, 1]),
                 _perspective = true,
                 _clearFlagColor = true,
                 _clearFlagDepth = true,
@@ -14877,12 +14878,12 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                         renderTextureDimension = shadowRenderTexture.dimension,
                         renderTextureWidth = renderTextureDimension[0],
                         renderTextureHeight = renderTextureDimension[1],
-                        transformedOffsetFromCamera,
-                        cameraPosition;
+                        transformedOffsetFromCamera = Vec3.create(),
+                        cameraPosition = Vec3.create();
                     setupViewport(0, 0, renderTextureWidth, renderTextureHeight);
 
                     shadowRenderTexture.bind();
-                    setupClearColor([1, 1, 1, 1]);
+                    setupClearColor(_shadowmapClearColor);
                     gl.clear(16384 | 256);
 
                     // fitting:
@@ -14893,23 +14894,21 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                     Mat4.copy(projectionMatrix, shadowLightProjection);
 
                     // find the position of the light 'center' in world space
-                    transformedOffsetFromCamera = Quat.multiplyVec3(Vec3.create(), transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
-                    cameraPosition = Vec3.add(Vec3.create(), transformedOffsetFromCamera, transform.position);
+                    transformedOffsetFromCamera = Quat.multiplyVec3(transformedOffsetFromCamera, transform.rotation, [0, 0, -shadowLightOffsetFromCamera]);
+                    cameraPosition = Vec3.add(cameraPosition, transformedOffsetFromCamera, transform.position);
                     // adjust to reduce flicker when rotating camera
                     cameraPosition[0] = Math.round(cameraPosition[0]);
                     cameraPosition[1] = Math.round(cameraPosition[1]);
                     cameraPosition[2] = Math.round(cameraPosition[2]);
 
-                    Mat4.setTRSInverse(cameraPosition, directionalLightTransform.localRotation, [1, 1, 1], viewMatrix);
+                    Mat4.setTRSInverse(viewMatrix, cameraPosition, directionalLightTransform.localRotation, [1, 1, 1]);
 
                     Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
 
                     // update light matrix (will be used when scene is rendering with shadow map shader)
-                    Mat4.multiply(lightMatrix, Mat4.multiply(lightMatrix, offsetMatrix, projectionMatrix),
-                        viewMatrix);
+                    Mat4.multiply(lightMatrix, Mat4.multiply(lightMatrix, offsetMatrix, projectionMatrix), viewMatrix);
 
                     renderSceneObjects(sceneLightObj, _shadowmapMaterial);
-
                 },
                 componentListener = {
                     /**
@@ -15055,8 +15054,8 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                     shadowRadius = shadowLightOffsetFromCamera * 1.55377397403004; // sqrt(2+sqrt(2))
                     nearPlanePosition = -shadowRadius * engine.config.shadowNearMultiplier;
                     shadowLightProjection = Mat4.create();
-                    Mat4.ortho(-shadowRadius, shadowRadius, -shadowRadius, shadowRadius,
-                        nearPlanePosition, shadowRadius, shadowLightProjection);
+                    Mat4.ortho(shadowLightProjection, -shadowRadius, shadowRadius, -shadowRadius, shadowRadius,
+                        nearPlanePosition, shadowRadius);
 
                 } else if (_renderShadow) {
                     _renderShadow = false; // disable render shadow
@@ -18148,9 +18147,11 @@ define('kick/core/Shim',[], function () {
                     return window.setTimeout(callback, fps60, new Date().getTime());
                 };
         })();
-
-        window.cancelRequestAnimFrame = ( function() {
+    }
+    if (typeof window.cancelAnimationFrame === "undefined") {
+        window.cancelAnimationFrame = (function () {
             return window.cancelAnimationFrame          ||
+                window.cancelRequestAnimFrame               ||
                 window.webkitCancelRequestAnimationFrame    ||
                 window.mozCancelRequestAnimationFrame       ||
                 window.oCancelRequestAnimationFrame     ||
@@ -18211,6 +18212,9 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                 activeSceneNull = {updateAndRender: function () {}},
                 animationFrameObj = {},
                 wrapperFunctionToMethodOnObject = function (time_) {
+                    if (time_ < 1e12) { // if highres timer. see http://updates.html5rocks.com/2012/05/requestAnimationFrame-API-now-with-sub-millisecond-precision
+                        time_ = Date.now();
+                    }
                     thisObj._gameLoop(time_);
                 },
                 vec2 = math.Vec2;
@@ -18351,11 +18355,11 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                         var currentValue = thisObj.paused;
                         if (pause !== currentValue) {
                             if (pause) {
-                                cancelRequestAnimFrame(animationFrameObj);
+                                window.cancelAnimationFrame(animationFrameObj);
                                 animationFrameObj = null;
                             } else {
                                 lastTime = new Date().getTime() - 16; // ensures valid delta time in next frame
-                                animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
+                                animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                             }
                         }
                     }
@@ -18430,7 +18434,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                 }
 
                 if (animationFrameObj !== null) {
-                    animationFrameObj = requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
+                    animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                 }
             };
 
