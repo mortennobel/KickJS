@@ -16,7 +16,8 @@ requirejs(['kick'],
             vec4 = KICK.math.Vec4,
             DAMPING = 0.01, // how much to damp the cloth simulation each frame
             TIME_STEPSIZE2  = 0.5 * 0.5, // how large time step each particle takes each frame
-            CONSTRAINT_ITERATIONS = 4,
+            CONSTRAINT_ITERATIONS = 3,
+            meshResolution = 16,
             ball_radius = 2, // the radius of our one ball
             vec3Zero = [0, 0, 0], // how many iterations of constraint satisfaction each frame (more is rigid, less is soft);
             gravityForce = vec3.clone([0, -0.2 * TIME_STEPSIZE2, 0]),
@@ -51,7 +52,7 @@ requirejs(['kick'],
 
         function buildCloth(scene) {
             var clothGO = scene.createGameObject({name: "Cloth"});
-            clothGO.addComponent(new ClothComponent(14, 10, 13, 13));
+            clothGO.addComponent(new ClothComponent(14, 10, meshResolution, meshResolution));
             var clothMeshRenderer = new KICK.scene.MeshRenderer();
             var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
             clothMeshRenderer.material = new KICK.material.Material({
@@ -267,17 +268,17 @@ requirejs(['kick'],
             /**
              * @param {vec3} normal
              */
-            this.addToNormal = function(normal){
+            this.addToNormal = function (normal) {
                 // accumulated_normal += normal.normalized();
-                vec3.normalize(normal, temp);
+                vec3.normalize(temp, normal);
                 vec3.add(accumulated_normal, accumulated_normal, temp);
             };
 
-            this.normalize = function(){
-                vec3.normalize(accumulated_normal,accumulated_normal);
+            this.normalize = function () {
+                vec3.normalize(accumulated_normal, accumulated_normal);
             };
 
-            this.resetNormal = function(){
+            this.resetNormal = function () {
                 vec3.copy(accumulated_normal, vec3Zero);
             };
 
@@ -285,10 +286,10 @@ requirejs(['kick'],
                 if (newPos){
                     thisObj.pos = newPos;
                     thisObj.old_pos = newPos;
-                    thisObj.acceleration = [0,0,0];
+                    thisObj.acceleration = [0, 0, 0];
                     thisObj.mass = 1;
                     thisObj.movable = 1;
-                    thisObj.accumulated_normal = [0,0,0];
+                    thisObj.accumulated_normal = [0, 0, 0];
                 }
             })();
             Object.freeze(this);
@@ -301,11 +302,11 @@ requirejs(['kick'],
          * @param {Particle} p1
          * @param {Particle} p2
          */
-        function Constraint(p1,p2){
+        function Constraint(p1, p2) {
             var rest_distance,
                 tempVec3 = vec3.create();  // the length between particle p1 and p2 in rest configuration
 
-            (function constructor(){
+            (function constructor() {
                 var difference = vec3.subtract(vec3.create(), p1.pos, p2.pos);
                 rest_distance = vec3.length(difference);
             })();
@@ -314,7 +315,7 @@ requirejs(['kick'],
              * This is one of the important methods, where a single constraint between two particles p1 and p2 is solved
              * the method is called by Cloth.time_step() many times per frame
              */
-            this.satisfyConstraint = function(){
+            this.satisfyConstraint = function () {
                 /*
                  Vec3 p1_to_p2 = p2->getPos()-p1->getPos(); // vector from p1 to p2
                  float current_distance = p1_to_p2.length(); // current distance between p1 and p2
@@ -323,12 +324,12 @@ requirejs(['kick'],
                  p1->offsetPos(correctionVectorHalf); // correctionVectorHalf is pointing from p1 to p2, so the length should move p1 half the length needed to satisfy the constraint.
                  p2->offsetPos(-correctionVectorHalf); // we must move p2 the negative direction of correctionVectorHalf since it points from p2 to p1, and not p1 to p2.
                  */
-                vec3.subtract(tempVec3, p2.pos,p1.pos); // vector from p1 to p2
+                vec3.subtract(tempVec3, p2.pos, p1.pos); // vector from p1 to p2
                 var current_distance = vec3.length(tempVec3); // current distance between p1 and p2
-                vec3.scale(tempVec3, tempVec3,1-rest_distance/current_distance);// The offset vector that could moves p1 into a distance of rest_distance to p2
-                vec3.scale(tempVec3, tempVec3,0.5); // Lets make it half that length, so that we can move BOTH p1 and p2.
+                vec3.scale(tempVec3, tempVec3, 1 - rest_distance / current_distance);  // The offset vector that could moves p1 into a distance of rest_distance to p2
+                vec3.scale(tempVec3, tempVec3, 0.5); // Lets make it half that length, so that we can move BOTH p1 and p2.
                 p1.offsetPos(tempVec3);
-                vec3.scale(tempVec3, tempVec3,-1.0);
+                vec3.scale(tempVec3, tempVec3, -1.0);
                 p2.offsetPos(tempVec3);
             };
             Object.freeze(this);
@@ -352,24 +353,24 @@ requirejs(['kick'],
                 meshRenderer,
                 vertices = [],
                 normals = [],
-                getParticle = function(x,y){
-                    return particles[y*num_particles_width + x];
+                getParticle = function (x, y) {
+                    return particles[y * num_particles_width + x];
                 },
                 /**
                  * @param {Particle} p1
                  * @param {Particle} p2
                  */
-                    makeConstraint = function(p1,p2){
-                    constraints.push(new Constraint(p1,p2));
+                makeConstraint = function (p1, p2) {
+                    constraints.push(new Constraint(p1, p2));
                 },
             /* A private method used by updateMeshData() and addWindForcesForTriangle() to retrieve the
              normal vector of the triangle defined by the position of the particles p1, p2, and p3.
              The magnitude of the normal vector is equal to the area of the parallelogram defined by p1, p2 and p3
              */
-                calcTriangleNormal = (function(){
-                    var v1 = vec3.create();
-                    var v2 = vec3.create();
-                    return function(p1, p2, p3,dest){
+                calcTriangleNormal = (function () {
+                    var v1 = vec3.create(),
+                        v2 = vec3.create();
+                    return function (p1, p2, p3,dest) {
                         /**
                          Vec3 pos1 = p1->getPos();
                          Vec3 pos2 = p2->getPos();
@@ -385,13 +386,16 @@ requirejs(['kick'],
                             pos3 = p3.pos;
                         v1 = vec3.subtract(v1, pos2, pos1);
                         v2 = vec3.subtract(v2, pos3, pos1);
-                        return vec3.cross(v1,v2,dest);
+                        if (!dest) {
+                            console.log("dest must be set");
+                        }
+                        return vec3.cross(dest, v1, v2);
                     }})(),
                 /**
                  *  A private method used by windForce() to calcualte the wind force for a single triangle
                  *	defined by p1,p2,p3
                  */
-                    addWindForcesForTriangle = (function(){
+                addWindForcesForTriangle = (function () {
                     // create clojure to have private variables
                     var normal = vec3.create(),
                         d = vec3.create();
@@ -418,8 +422,8 @@ requirejs(['kick'],
                  * @param {Particle} p3
                  * @param {Number} triangleIndex triangle index
                  */
-                    drawTriangle = function(p1, p2, p3,  triangleIndex){
-                    var set = function(destArray, newValue, idx){
+                    drawTriangle = function (p1, p2, p3,  triangleIndex) {
+                    var set = function (destArray, newValue, idx) {
                         for (var i = 0;i<newValue.length;i++){
                             destArray[idx+i] = newValue[i];
                         }
@@ -535,7 +539,7 @@ requirejs(['kick'],
                     getParticle(num_particles_width-1-i ,0).makeUnmovable();
                 }
             })();
-
+            var updateMeshDataNormal = vec3.create();
             /* drawing the cloth as a smooth shaded (and colored according to column) OpenGL triangular mesh
              Called from the display() method
              The cloth is seen as consisting of triangles for four particles in the grid as follows:
@@ -547,8 +551,9 @@ requirejs(['kick'],
 
              */
             this.updateMeshData = function(){
+                var i, x, y;
                 // reset normals (which where written to last frame)
-                for (var i = particles.length-1;i>=0;i--)
+                for (i = particles.length-1;i>=0;i--)
                 {
                     particles[i].resetNormal();
                 }
@@ -572,26 +577,26 @@ requirejs(['kick'],
                  }
                  */
                 //create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
-                for(var x = 0; x<num_particles_width-1; x++)
+                for(x = 0; x< num_particles_width - 1; x++)
                 {
-                    for(var y=0; y<num_particles_height-1; y++)
+                    for(y = 0; y < num_particles_height - 1; y++)
                     {
-                        var normal = calcTriangleNormal(getParticle(x+1,y),getParticle(x,y),getParticle(x,y+1));
+                        var normal = calcTriangleNormal(getParticle(x+1,y),getParticle(x,y),getParticle(x,y+1), updateMeshDataNormal);
                         getParticle(x+1,y).addToNormal(normal);
                         getParticle(x,y).addToNormal(normal);
                         getParticle(x,y+1).addToNormal(normal);
 
-                        normal = calcTriangleNormal(getParticle(x+1,y+1),getParticle(x+1,y),getParticle(x,y+1));
+                        normal = calcTriangleNormal(getParticle(x+1,y+1),getParticle(x+1,y),getParticle(x,y+1), updateMeshDataNormal);
                         getParticle(x+1,y+1).addToNormal(normal);
                         getParticle(x+1,y).addToNormal(normal);
                         getParticle(x,y+1).addToNormal(normal);
                     }
                 }
-                for(x = 0; x<num_particles_width; x++)
+                for(x = 0; x< num_particles_width; x++)
                 {
-                    for(y=0; y<num_particles_height; y++)
+                    for(y = 0; y < num_particles_height; y++)
                     {
-                        getParticle(x,y).normalize();
+                        getParticle(x, y).normalize();
                     }
                 }
 
@@ -668,21 +673,22 @@ requirejs(['kick'],
                 }
             };
 
+            var ballCollisionVec3 = vec3.create();
+
             /* used to detect and resolve the collision of the cloth with the ball.
              This is based on a very simples scheme where the position of each particle is simply compared to the sphere and corrected.
              This also means that the sphere can "slip through" if the ball is small enough compared to the distance in the grid bewteen particles
              */
             this.ballCollision = function(center,radius )
             {
-                var v = vec3.create(),
-                    radiusSqr = radius*radius;
+                var radiusSqr = radius*radius;
                 for(var i = particles.length-1;i>=0;i--)
                 {
-                    vec3.subtract(v, particles[i].pos,center);
-                    var l = vec3.length(v);
-                    if ( vec3.squaredLength(v) < radiusSqr) // if the particle is inside the ball
+                    vec3.subtract(ballCollisionVec3, particles[i].pos,center);
+                    var l = vec3.length(ballCollisionVec3);
+                    if ( vec3.squaredLength(ballCollisionVec3) < radiusSqr) // if the particle is inside the ball
                     {
-                        particles[i].offsetPos(vec3.scale(v, vec3.normalize(v,v),(radius-l))); // project the particle to the surface of the ball
+                        particles[i].offsetPos(vec3.scale(ballCollisionVec3, vec3.normalize(ballCollisionVec3,ballCollisionVec3),(radius-l))); // project the particle to the surface of the ball
                     }
                 }
             };
