@@ -1,0 +1,57 @@
+<html>
+<body>
+<canvas id="3dCanvas" width="500" height="500"></canvas>
+
+<script src="require.js"></script>
+<script type="text/javascript">
+    var req = require.config({});
+    req(['kick'],
+            function (kick) {
+                "use strict";
+                // init engine (create 3d context)
+                var engine = new kick.core.Engine('3dCanvas');
+                // create a game object in [0,0,0] facing down the -z axis
+                var cameraObject = engine.activeScene.createGameObject();
+                cameraObject.transform.position = [0,0,5];
+                // create a orthographics camera
+                var camera = new kick.scene.Camera({
+                    perspective: false,
+                    left:-5,
+                    right:5,
+                    top:5,
+                    bottom:-5
+                });
+                cameraObject.addComponent(camera);
+                // create shader - Note that it is bad practice to inline GLSL shader code in JavaScript
+                var vertexShaderStr = "attribute vec3 vertex;\n"+
+                    "uniform mat4 _mvProj;\n"+
+                    "void main(void) {\n"+
+                    "    gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+                    "}";
+                var fragmentShaderStr = "uniform highp float _time;\n"+
+                    "void main(void) {\n"+
+                    "  highp float fraction = mod(_time/1000.0,1.0);\n"+
+                    "  gl_FragColor = vec4(fraction,fraction,fraction, 1.0);\n"+
+                    "}";
+                var shader = new kick.material.Shader( {
+                    vertexShaderSrc: vertexShaderStr,
+                    fragmentShaderSrc: fragmentShaderStr
+                });
+                var material = new kick.material.Material({
+                    shader: shader,
+                    uniformData:{
+                    }
+                });
+                // create cube
+                var gameObject = engine.activeScene.createGameObject();
+                gameObject.transform.position = [0.0,0,0];
+                var meshRenderer = new kick.scene.MeshRenderer();
+                meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
+                meshRenderer.material = material;
+                gameObject.addComponent(meshRenderer);
+            }
+    );
+</script>
+
+</body>
+</html>
