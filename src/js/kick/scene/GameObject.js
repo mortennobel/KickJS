@@ -229,6 +229,52 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
         };
 
         /**
+         * Get the first component with a specific method.<br>
+         * Example usage:<br>
+         * @example
+         *     var renderer = someGameObject.getComponentsWithMethod("render");
+         * @method getComponentsWithMethod
+         * @param {String} methodName of the method
+         * @return {Object|null} component of with a method with a specific method name
+         */
+        this.getComponentsWithMethod = function (methodName) {
+            var component,
+                i;
+            for (i = _components.length - 1; i >= 0; i--) {
+                component = _components[i];
+                if (typeof (component[methodName]) === "function") {
+                    return component;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Get all components with a specific method. <br>
+         * Example usage:<br>
+         * @example
+         *     var renderers = someGameObject.getComponentsWithMethod("render");
+         *     for (var i = 0; i < renderers.length; i++){
+         *         renderers[i].render(obj);
+         *     }
+         * @method getComponentsWithMethod
+         * @param {Object} methodName the constructor of the wanted component
+         * @return {Array} arrays of components of specified type
+         */
+        this.getComponentsWithMethod = function (methodName) {
+            var component,
+                i,
+                res = [];
+            for (i = _components.length - 1; i >= 0; i--) {
+                component = _components[i];
+                if (typeof (component[methodName]) === "function") {
+                    res.push(component);
+                }
+            }
+            return res;
+        };
+
+        /**
          * @method toJSON
          * @return JSON object
          */
