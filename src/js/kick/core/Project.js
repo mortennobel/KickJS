@@ -319,9 +319,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                         },
                         onComplete = function () {
                             var initCount = 1,
-                                decrementInitCount = function(url){
+                                decrementInitCount = function (url) {
                                     initCount--;
-                                    if (initCount == 0){
+                                    if (initCount === 0) {
                                         _maxUID = config.maxUID || 0; // reset maxUID
                                         if (config.activeScene) {
                                             engine.activeScene = thisObj.load(config.activeScene);
@@ -334,7 +334,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                     }
                                 },
                                 resourceTracker = {
-                                    resourceLoadingStarted: function(){
+                                    resourceLoadingStarted: function () {
                                         initCount++;
                                     },
                                     resourceLoadingFinished: decrementInitCount,
@@ -351,9 +351,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                         },
                         resourceCount = resourceDescriptors.length,
                         instantiateCount = 0,
-                        instantiateSuccess = function(object){
-                            if (resourceCache[object.uid] !== object){
-                                onError("Did not restore uid correct for "+object.uid+".");
+                        instantiateSuccess = function (object) {
+                            if (resourceCache[object.uid] !== object) {
+                                onError("Did not restore uid correct for " + object.uid + ".");
                                 return;
                             }
 
@@ -701,12 +701,6 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          * @static
          */
         Project.ENGINE_SHADER___PICK_NORMAL = -112;
-        /**
-         * @property ENGINE_SHADER___PICK_POSITION
-         * @type Number
-         * @static
-         */
-        Project.ENGINE_SHADER___PICK_POSITION = -113;
         /**
          * @property ENGINE_TEXTURE_BLACK
          * @type Number
