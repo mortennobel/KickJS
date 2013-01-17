@@ -453,6 +453,17 @@ define(["kick/core/Constants"], function (constants) {
                 }
             }
             return true;
+        },
+
+        /**
+         * Returns a string representation of a vector
+         * @method str
+         * @param {kick.math.Vec2} vec vec2 to represent as a string
+         * @return {String} string representation of vec
+         * @static
+         */
+        str: function (vec) {
+            return '[' + vec[0] + ', ' + vec[1] + ']';
         }
 
     };
