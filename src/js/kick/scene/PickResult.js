@@ -1,5 +1,5 @@
-define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton"],
-    function (MeshRenderer, Material, Constants, EngineSingleton) {
+define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton", "kick/core/Util"],
+    function (MeshRenderer, Material, Constants, EngineSingleton, Util) {
         "use strict";
 
         /**
@@ -18,12 +18,13 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
          */
         return function (pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
             if (Constants._ASSERT){
-                if (pickingRenderTarget === EngineSingleton.engine){
+                if (pickingRenderTarget === EngineSingleton.engine) {
                     Util.fail("PickResult constructor changed - engine parameter is removed");
                 }
             }
             var normal,
                 uv,
+                engine = EngineSingleton.engine,
                 /**
                  * @private
                  * @method renderObjectWithShader
@@ -34,7 +35,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                     var array = new Uint8Array(4),
                         meshRenderers = gameObject.getComponentsOfType(MeshRenderer), // todo - create getComponentsWithMethod
                         i,
-                        material = new Material(engine, {
+                        material = new Material({
                             name: "PickResult",
                             shader: shader
                         });

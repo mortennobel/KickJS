@@ -91,7 +91,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                                         foundObj = sceneObj.getObjectByUID(uid);
                                         if (foundObj) {
                                             if (pick.point) {
-                                                foundObj = new PickResult(engine, pickingRenderTarget, foundObj, pick.x, pick.y, setupCamera, engineUniforms);
+                                                foundObj = new PickResult(pickingRenderTarget, foundObj, pick.x, pick.y, setupCamera, engineUniforms);
                                             }
                                             objects.push(foundObj);
                                             objectCount[uid] = 1;
