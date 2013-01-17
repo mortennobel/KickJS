@@ -9,11 +9,12 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
          * @param {Function} setupClearColor
          * @param {Function} renderSceneObjects
          * @param {Scene} sceneObj
+         * @param {kick.scene.Camera} camera
          * @constructor
          */
-        return function (setupClearColor, renderSceneObjects, sceneObj, setupCamera) {
-            if (Constants._ASSERT){
-                if (setupClearColor === EngineSingleton.engine){
+        return function (setupClearColor, renderSceneObjects, sceneObj, camera) {
+            if (Constants._ASSERT) {
+                if (setupClearColor === EngineSingleton.engine) {
                     Util.fail("CameraPicking constructor changed - engine parameter is removed");
                 }
             }
@@ -30,7 +31,8 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                         {
                             shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
                             name: "Picking material"
-                        });
+                        }
+                    );
                     pickingRenderTarget = new RenderTexture({
                         dimension: glState.viewportSize
 
@@ -91,7 +93,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                                         foundObj = sceneObj.getObjectByUID(uid);
                                         if (foundObj) {
                                             if (pick.point) {
-                                                foundObj = new PickResult(pickingRenderTarget, foundObj, pick.x, pick.y, setupCamera, engineUniforms);
+                                                foundObj = new PickResult(pickingRenderTarget, foundObj, pick.x, pick.y, engineUniforms, camera);
                                             }
                                             objects.push(foundObj);
                                             objectCount[uid] = 1;

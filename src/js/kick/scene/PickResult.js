@@ -1,5 +1,5 @@
-define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton", "kick/core/Util"],
-    function (MeshRenderer, Material, Constants, EngineSingleton, Util) {
+define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton", "kick/core/Util", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Vec2"],
+    function (MeshRenderer, Material, Constants, EngineSingleton, Util, vec4, vec3, vec2) {
         "use strict";
 
         /**
@@ -12,18 +12,19 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
          * @param {kick.scene.GameObject} gameObject
          * @param {Integer} x
          * @param {Integer} y
-         * @param setupCamera
-         * @param engineUniforms
+         * @param {EngineUniforms} engineUniforms
+         * @param {kick.scene.Camera}
          * @constructor
          */
-        return function (pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
-            if (Constants._ASSERT){
+        return function (pickingRenderTarget, gameObject, x, y, engineUniforms, camera) {
+            if (Constants._ASSERT) {
                 if (pickingRenderTarget === EngineSingleton.engine) {
                     Util.fail("PickResult constructor changed - engine parameter is removed");
                 }
             }
             var normal,
                 uv,
+                depth,
                 engine = EngineSingleton.engine,
                 /**
                  * @private
@@ -33,13 +34,13 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                  */
                 renderObjectWithShader = function (shader) {
                     var array = new Uint8Array(4),
-                        meshRenderers = gameObject.getComponentsOfType(MeshRenderer), // todo - create getComponentsWithMethod
+                        meshRenderers = gameObject.getComponentsWithMethod("render"),
                         i,
                         material = new Material({
                             name: "PickResult",
                             shader: shader
                         });
-                    setupCamera();
+                    camera.setupCamera();
                     pickingRenderTarget.bind();
                     engine.gl.clear(Constants.GL_COLOR_BUFFER_BIT | Constants.GL_DEPTH_BUFFER_BIT);
                     for (i = 0; i < meshRenderers.length; i++) {
@@ -52,12 +53,21 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                 readNormal = function () {
                     var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_NORMAL);
                     normal = renderObjectWithShader(shader);
-                    normal = [normal[0] / 255, normal[1] / 255, normal[2] / 255];
+                    // normal = (normal / 255 - 0.5) * 2
+                    normal = vec3.scale(vec3.create(), normal, 1 / 255);
+                    vec3.add(normal, normal, [-0.5, -0.5, -0.5]);
+                    vec3.scale(normal, normal, 2);
                 },
                 readUV = function () {
                     var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_UV);
                     uv = renderObjectWithShader(shader);
-                    uv = [uv[0] / 255, uv[1] / 255];
+                    uv = vec2.scale(vec2.create(), uv, 1 / 255);
+                },
+                readDepth = function () {
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP),
+                        depthPacked = renderObjectWithShader(shader),
+                        bit_shift = [1 / (16777216 * 255), 1 / (65536 * 255), 1 / (256 * 255), 1 / 255];
+                    depth = vec4.dot(depthPacked, bit_shift);
                 };
 
 
@@ -110,6 +120,14 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                             readUV();
                         }
                         return uv;
+                    }
+                },
+                depth : {
+                    get: function () {
+                        if (!depth) {
+                            readDepth();
+                        }
+                        return depth;
                     }
                 }
             });

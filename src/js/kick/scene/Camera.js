@@ -106,49 +106,6 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     gl.scissor(offsetX, offsetY, width, height);
                 },
                 /**
-                 * Clear the screen and set the projectionMatrix and modelViewMatrix on the glState object
-                 * @method setupCamera
-                 * @private
-                 */
-                setupCamera = function () {
-                    var viewportDimension = _renderTarget ? _renderTarget.dimension : glState.viewportSize,
-                        viewPortWidth = viewportDimension[0],
-                        viewPortHeight = viewportDimension[1],
-                        offsetX = viewPortWidth * _normalizedViewportRect[0],
-                        offsetY = viewPortHeight * _normalizedViewportRect[1],
-                        width = viewPortWidth * _normalizedViewportRect[2],
-                        height = viewPortHeight * _normalizedViewportRect[3],
-                        globalMatrixInv;
-                    setupViewport(offsetX, offsetY, width, height);
-                    glState.currentMaterial = null; // clear current material
-                    // setup render target
-                    if (glState.renderTarget !== _renderTarget) {
-                        if (_renderTarget) {
-                            _renderTarget.bind();
-                        } else {
-                            gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, null);
-                        }
-                        glState.renderTarget = _renderTarget;
-                    }
-
-                    setupClearColor(_clearColor);
-                    gl.clear(_currentClearFlags);
-
-                    if (_perspective) {
-                        Mat4.perspective(projectionMatrix, _fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
-                            _near, _far);
-                    } else {
-                        Mat4.ortho(projectionMatrix, _left, _right, _bottom, _top,
-                            _near, _far);
-                    }
-
-                    globalMatrixInv = transform.getGlobalTRSInverse();
-                    Mat4.copy(viewMatrix, globalMatrixInv);
-
-                    Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-
-                },
-                /**
                  * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
                  * and finally on mesh.
                  * @method compareRenderOrder
@@ -353,7 +310,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
              */
             this.pickPoint = function (gameObjectPickedFn, x, y) {
                 if (!pickingObject) {
-                    pickingObject = new CameraPicking(setupClearColor, renderSceneObjects, _scene, setupCamera);
+                    pickingObject = new CameraPicking(setupClearColor, renderSceneObjects, _scene, thisObj);
                 }
                 pickingObject.add({
                     gameObjectPickedFn: gameObjectPickedFn,
@@ -388,6 +345,50 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     width: width,
                     height: height
                 });
+            };
+
+            /**
+             * Clear the screen and set the projectionMatrix and modelViewMatrix on the glState object.
+             * Called during renderScene
+             * @method setupCamera
+             */
+            this.setupCamera = function () {
+                var viewportDimension = _renderTarget ? _renderTarget.dimension : glState.viewportSize,
+                    viewPortWidth = viewportDimension[0],
+                    viewPortHeight = viewportDimension[1],
+                    offsetX = viewPortWidth * _normalizedViewportRect[0],
+                    offsetY = viewPortHeight * _normalizedViewportRect[1],
+                    width = viewPortWidth * _normalizedViewportRect[2],
+                    height = viewPortHeight * _normalizedViewportRect[3],
+                    globalMatrixInv;
+                setupViewport(offsetX, offsetY, width, height);
+                glState.currentMaterial = null; // clear current material
+                // setup render target
+                if (glState.renderTarget !== _renderTarget) {
+                    if (_renderTarget) {
+                        _renderTarget.bind();
+                    } else {
+                        gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, null);
+                    }
+                    glState.renderTarget = _renderTarget;
+                }
+
+                setupClearColor(_clearColor);
+                gl.clear(_currentClearFlags);
+
+                if (_perspective) {
+                    Mat4.perspective(projectionMatrix, _fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
+                        _near, _far);
+                } else {
+                    Mat4.ortho(projectionMatrix, _left, _right, _bottom, _top,
+                        _near, _far);
+                }
+
+                globalMatrixInv = transform.getGlobalTRSInverse();
+                Mat4.copy(viewMatrix, globalMatrixInv);
+
+                Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+
             };
 
             /**
@@ -459,7 +460,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     glState.currentMaterial = null; // clear current material
                     renderShadowMap(sceneLightObj);
                 }
-                setupCamera();
+                thisObj.setupCamera();
 
                 sceneLightObj.recomputeLight(viewMatrix);
                 if (renderableComponentsTransparent.length > 0) {

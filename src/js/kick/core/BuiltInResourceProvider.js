@@ -146,7 +146,6 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                     "__shadowmap",
                     "__error",
                     "__pick",
-                    "__pick_position",
                     "__pick_normal",
                     "__pick_uv",
                     "transparent_specular",
