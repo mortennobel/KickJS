@@ -353,7 +353,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
              */
             this.pickPoint = function (gameObjectPickedFn, x, y) {
                 if (!pickingObject) {
-                    pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects, _scene, setupCamera);
+                    pickingObject = new CameraPicking(setupClearColor, renderSceneObjects, _scene, setupCamera);
                 }
                 pickingObject.add({
                     gameObjectPickedFn: gameObjectPickedFn,
