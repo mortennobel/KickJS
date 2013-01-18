@@ -495,32 +495,30 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Generates a unit vector pointing from one vector to another
          * @method direction
+         * @param {kick.math.Vec3} out vec3 receiving operation result.
          * @param {kick.math.Vec3} vec origin vec3
          * @param {kick.math.Vec3} vec2 vec3 to point to
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
          * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
-        direction: function (vec, vec2, dest) {
-            if (!dest) { dest = vec; }
-
+        direction: function (out, vec, vec2) {
             var x = vec[0] - vec2[0],
                 y = vec[1] - vec2[1],
                 z = vec[2] - vec2[2],
                 len = Math.sqrt(x * x + y * y + z * z);
 
             if (!len) {
-                dest[0] = 0;
-                dest[1] = 0;
-                dest[2] = 0;
-                return dest;
+                out[0] = 0;
+                out[1] = 0;
+                out[2] = 0;
+                return out;
             }
 
             len = 1 / len;
-            dest[0] = x * len;
-            dest[1] = y * len;
-            dest[2] = z * len;
-            return dest;
+            out[0] = x * len;
+            out[1] = y * len;
+            out[2] = z * len;
+            return out;
         },
 
 
@@ -548,20 +546,18 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * http://webcvs.freedesktop.org/mesa/Mesa/src/glu/mesa/project.c?revision=1.4&view=markup
          *
          * @method unproject
+         * @param {kick.math.Vec3} out vec3 receiving unprojected result.
          * @param {kick.math.Vec3} vec screen-space vector to project
          * @param {kick.math.Mat4} modelView Model-View matrix
          * @param {kick.math.Mat4} proj Projection matrix
          * @param {kick.math.Vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
          * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         unproject: (function () {
             var m = new Float32Array(16),
                 v = new Float32Array(4);
-            return function (vec, modelView, proj, viewport, dest) {
-                if (!dest) { dest = vec; }
-
+            return function (out, vec, modelView, proj, viewport) {
                 v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
                 v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
                 v[2] = 2.0 * vec[2] - 1.0;
@@ -573,11 +569,11 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
                 mat4.multiplyVec4(m, v);
                 if (v[3] === 0.0) { return null; }
 
-                dest[0] = v[0] / v[3];
-                dest[1] = v[1] / v[3];
-                dest[2] = v[2] / v[3];
+                out[0] = v[0] / v[3];
+                out[1] = v[1] / v[3];
+                out[2] = v[2] / v[3];
 
-                return dest;
+                return out;
             };
         }()),
 
@@ -585,23 +581,20 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Converts the spherical coordinates (in radians) to carterian coordinates.<br>
          * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
          * @method sphericalToCarterian
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Vec3} spherical spherical coordinates
-         * @param {kick.math.Vec3} dest optionally if not specified a new vec3 is returned
          * @return {kick.math.Vec3} position in cartesian angles
          * @static
          */
-        sphericalToCarterian: function (spherical, dest) {
+        sphericalToCarterian: function (out, spherical) {
             var radius = spherical[0],
                 polar = -spherical[1],
                 elevation = spherical[2],
                 a = radius * Math.cos(elevation);
-            if (!dest) {
-                dest =  new Float32Array(3);
-            }
-            dest[0] = a * Math.cos(polar);
-            dest[1] = radius * Math.sin(elevation);
-            dest[2] = a * Math.sin(polar);
-            return dest;
+            out[0] = a * Math.cos(polar);
+            out[1] = radius * Math.sin(elevation);
+            out[2] = a * Math.sin(polar);
+            return out;
         },
 
         /**
@@ -632,12 +625,12 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * Converts from cartesian coordinates to spherical coordinates (in radians)<br>
          * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
          * @method cartesianToSpherical
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Vec3} cartesian
-         * @param {kick.math.Vec3} dest Optional
          * @return {kick.math.Vec3}
          * @static
          */
-        cartesianToSpherical: function (cartesian, dest) {
+        cartesianToSpherical: function (out, cartesian) {
             var x = cartesian[0],
                 y = cartesian[1],
                 z = cartesian[2],
@@ -645,17 +638,14 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
             if (x === 0) {
                 x = constants._EPSILON;
             }
-            if (!dest) {
-                dest =  new Float32Array(3);
-            }
 
-            dest[0] = sphericalX = Math.sqrt(x * x + y * y + z * z);
-            dest[1] = -Math.atan(z / x);
+            out[0] = sphericalX = Math.sqrt(x * x + y * y + z * z);
+            out[1] = -Math.atan(z / x);
             if (x < 0) {
-                dest[1] += Math.PI;
+                out[1] += Math.PI;
             }
-            dest[2] = Math.asin(y / sphericalX);
-            return dest;
+            out[2] = Math.asin(y / sphericalX);
+            return out;
         },
 
         /**
