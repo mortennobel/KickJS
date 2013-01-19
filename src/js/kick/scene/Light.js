@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture/Texture", "kick/texture/RenderTexture"],
-    function (Constants, Util, Vec3, Texture, RenderTexture) {
+define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture/Texture", "kick/texture/RenderTexture", "kick/core/EngineSingleton"],
+    function (Constants, Util, Vec3, Texture, RenderTexture, EngineSingleton) {
         "use strict";
 
         var ASSERT = Constants._ASSERT,
@@ -18,7 +18,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
         Light = function (config) {
             var thisObj = this,
                 color = Vec3.clone([1.0, 1.0, 1.0]),
-                engine,
+                engine = EngineSingleton.engine,
                 type = 3, // point light
                 _shadow = false,
                 _shadowStrength = 1.0,
@@ -33,6 +33,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                     Vec3.copy(colorIntensity, [color[0] * intensity, color[1] * intensity, color[2] * intensity]);
                 },
                 gameObject,
+                initialized = false,
                 scriptPriority,
                 updateShadowTexture = function () {
                     if (_shadow) {
@@ -102,7 +103,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                     set: function (value) {
                         if (value !== _shadow) {
                             _shadow = value;
-                            if (engine) {
+                            if (initialized) {
                                 updateShadowTexture();
                             }
                         }
@@ -174,7 +175,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                         return type;
                     },
                     set: function (newValue) {
-                        if (!engine) {
+                        if (!initialized) {
                             type = newValue;
                         } else {
                             if (ASSERT) {
@@ -257,7 +258,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
 
             this.activated = function () {
                 var gameObject = thisObj.gameObject;
-                engine = gameObject.engine;
+                initialized = true;
                 transform = gameObject.transform;
                 updateShadowTexture();
             };
@@ -267,7 +268,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
              * @return {JSON}
              */
             this.toJSON = function () {
-                return Util.componentToJSON(thisObj.gameObject.engine, this, "kick.scene.Light");
+                return Util.componentToJSON(this, "kick.scene.Light");
             };
 
             Util.applyConfig(this, config);

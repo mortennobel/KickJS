@@ -1,4 +1,4 @@
-define(["require", "./Constants"], function (require, Constants) {
+define(["require", "./Constants", "./EngineSingleton"], function (require, Constants, EngineSingleton) {
     "use strict";
 
     var ASSERT = Constants._ASSERT,
@@ -184,13 +184,13 @@ define(["require", "./Constants"], function (require, Constants) {
         },
         /**
          * @method componentToJSON
-         * @param {kick.core.Engine} engine
          * @param {kick.scene.Component} component
          * @param {String} componentType=component.constructor.name
          * @return {JSON}
          */
-        componentToJSON: function(engine, component, componentType) {
+        componentToJSON: function(component, componentType) {
             var name,
+                engine = EngineSingleton.engine,
                 config = {},
                 functionReturnType = {},
                 res = {
@@ -200,6 +200,11 @@ define(["require", "./Constants"], function (require, Constants) {
                 },
                 o,
                 serializedObject;
+            if (DEBUG){
+                if (component === EngineSingleton.engine) {
+                    Util.fail("Util.componentToJSON parameters has changed to Util.componentToJSON(kick.scene.Component, String)");
+                }
+            }
             if (res.type === "") {
                 Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
             }

@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick/mesh/Mesh"],
-    function (Constants, Material, Util, Mesh) {
+define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick/mesh/Mesh", "kick/core/EngineSingleton"],
+    function (Constants, Material, Util, Mesh, EngineSingleton) {
         "use strict";
 
         var ASSERT = Constants._ASSERT;
@@ -20,7 +20,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 _materials = [],
                 _mesh,
                 _renderOrder,
-                engine,
+                engine = EngineSingleton.engine,
                 thisObj = this;
 
             /**
@@ -28,10 +28,9 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
              * @method activated
              */
             this.activated = function () {
-                engine = thisObj.gameObject.engine;
                 transform = thisObj.gameObject.transform;
                 if (_materials.length === 0) {
-                    var project = thisObj.gameObject.engine.project;
+                    var project = engine.project;
                     thisObj.material = project.load(project.ENGINE_MATERIAL_DEFAULT);
                 }
             };
@@ -156,7 +155,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 if (!thisObj.gameObject) {
                     return null; // component is destroyed
                 } else {
-                    return Util.componentToJSON(thisObj.gameObject.engine, this, "kick.scene.MeshRenderer");
+                    return Util.componentToJSON(this, "kick.scene.MeshRenderer");
                 }
             };
 

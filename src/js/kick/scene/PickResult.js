@@ -122,12 +122,41 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                         return uv;
                     }
                 },
-                depth : {
+                /**
+                 * The distance of the pick point to the camera
+                 * @property distance
+                 * @type Number
+                 */
+                distance : {
                     get: function () {
                         if (!depth) {
                             readDepth();
                         }
-                        return depth;
+                        var zFar = camera.far,
+                            zNear = camera.near;
+
+                        return 2 * zFar * zNear / (zFar + zNear - (zFar - zNear) * (2 * depth - 1));
+                    }
+                },
+                /**
+                 * The 3D point in world coordinates of the selected point
+                 * @property point
+                 * @type kick.math.Vec3
+                 */
+                point: {
+                    get: function () {
+                        if (!depth) {
+                            readDepth();
+                        }
+                        vec3.unproject(vec3.create(), [x, y], engineUniforms.viewMatrix, engineUniforms.projectionMatrix, []);
+                        /*
+                        * @method unproject
+                        * @param {kick.math.Vec3} out vec3 receiving unprojected result.
+                        * @param {kick.math.Vec3} vec screen-space vector to project
+                        * @param {kick.math.Mat4} modelView Model-View matrix
+                        * @param {kick.math.Mat4} proj Projection matrix
+                        * @param {kick.math.Vec4}
+                        * */
                     }
                 }
             });
