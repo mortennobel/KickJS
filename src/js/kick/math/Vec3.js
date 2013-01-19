@@ -550,23 +550,23 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
          * @param {kick.math.Vec3} vec screen-space vector to project
          * @param {kick.math.Mat4} modelView Model-View matrix
          * @param {kick.math.Mat4} proj Projection matrix
-         * @param {kick.math.Vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
+         * @param {kick.math.Vec4} viewportRect Viewport as given to gl.viewport [x, y, width, height]
          * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         unproject: (function () {
             var m = new Float32Array(16),
                 v = new Float32Array(4);
-            return function (out, vec, modelView, proj, viewport) {
-                v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
-                v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
+            return function (out, vec, modelView, proj, viewportRect) {
+                v[0] = (vec[0] - viewportRect[0]) * 2.0 / viewportRect[2] - 1.0;
+                v[1] = (vec[1] - viewportRect[1]) * 2.0 / viewportRect[3] - 1.0;
                 v[2] = 2.0 * vec[2] - 1.0;
                 v[3] = 1.0;
 
                 mat4.multiply(m, proj, modelView);
                 if (!mat4.invert(m, m)) { return null; }
 
-                mat4.multiplyVec4(m, v);
+                mat4.multiplyVec4(v, m, v);
                 if (v[3] === 0.0) { return null; }
 
                 out[0] = v[0] / v[3];
