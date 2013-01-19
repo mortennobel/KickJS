@@ -12,12 +12,10 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
          * Material configuration. Stores a material configuration and a shader.
          * @example
          *      var material = new KICK.material.Material({
-         *      shader:shader,
+         *      shader: project.load(project.ENGINE_SHADER_DIFFUSE),
          *          uniformData:{
          *              mainColor:[1.0,0.0,0.9,0.5],
-         *              mainTexture: project.load(project.ENGINE_TEXTURE_WHITE),
-         *              specularExponent:50,
-         *              specularColor:[1,1,1,1]
+         *              mainTexture: project.load(project.ENGINE_TEXTURE_WHITE)
          *          }
          *      });
          * @class Material
