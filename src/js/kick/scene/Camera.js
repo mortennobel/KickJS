@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture"],
-    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture) {
+define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/EngineSingleton"],
+    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture, EngineSingleton) {
         "use strict";
 
         /**
@@ -23,7 +23,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 glState,
                 thisObj = this,
                 transform,
-                engine,
+                engine = EngineSingleton.engine,
                 _enabled = true,
                 c = Constants,
                 _renderShadow = false,
@@ -403,7 +403,6 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     _shadowmapShader,
                     materialConfig;
                 engineUniforms.currentCameraTransform = gameObject.transform;
-                engine = gameObject.engine;
                 if (!isContextListenerRegistered) {
                     isContextListenerRegistered = true;
                     engine.addContextListener(contextListener);
@@ -763,6 +762,36 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                             }
                         }
                         Vec4.copy(_normalizedViewportRect, newValue);
+                    }
+                },
+                /**
+                 * Viewport rect [xOffset,yOffset,xWidth,yHeight]
+                 * @property viewportRect
+                 * @type Array_Number
+                 */
+                viewportRect: {
+                    get: function () {
+                        var res = Vec4.clone(_normalizedViewportRect),
+                            canvasDimension = engine.canvasDimension;
+                        res[0] *= canvasDimension[0];
+                        res[2] *= canvasDimension[0];
+                        res[1] *= canvasDimension[1];
+                        res[3] *= canvasDimension[1];
+                        return res;
+                    },
+                    set: function (value) {
+                        if (c._ASSERT) {
+                            if (value.length !== 4) {
+                                Util.fail("Camera.viewportRect must be Float32Array of length 4");
+                            }
+                        }
+                        var res = Vec4.clone(value),
+                            canvasDimension = engine.canvasDimension;
+                        res[0] /= canvasDimension[0];
+                        res[2] /= canvasDimension[0];
+                        res[1] /= canvasDimension[1];
+                        res[3] /= canvasDimension[1];
+                        Vec4.copy(_normalizedViewportRect, res);
                     }
                 }
             });
