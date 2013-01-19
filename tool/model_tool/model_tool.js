@@ -100,6 +100,7 @@ requirejs(['kick'],
                     meshAabb = meshRendererNew.mesh.aabb;
                     aabbTransformed = aabb.transform(meshAabb, meshAabb, gameObject.transform.getGlobalMatrix());
                     aabb.merge(boundingBox, boundingBox, aabbTransformed);
+                    console.log(boundingBox);
                     materials = [];
                     for (j = meshRendererNew.mesh.meshData.subMeshes.length - 1; j >= 0; j--) {
                         materials[j] = material;
@@ -110,7 +111,7 @@ requirejs(['kick'],
                     createDummyUVsIfNotExist();
                 }
             }
-            aabb.center(boundingBox, objectCenter);
+            aabb.center(objectCenter, boundingBox);
             length = vec3.length(aabb.diagonal(vec3.create(), boundingBox)) * 0.5;
             lengthPlusOffset = length * 2.5;
 
@@ -274,9 +275,11 @@ requirejs(['kick'],
         function createDummyUVsIfNotExist() {
             var mesh = meshRenderer.mesh,
                 meshData = mesh.meshData;
-            meshData.createUv1();
-            mesh.meshData = meshData;
-            meshRenderer.mesh = mesh;
+            if (!meshData.uv1){
+                meshData.createUv1();
+                mesh.meshData = meshData;
+                meshRenderer.mesh = mesh;
+            }
         }
 
         function LightRotatorComponent() {
