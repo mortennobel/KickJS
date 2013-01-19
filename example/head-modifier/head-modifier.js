@@ -79,8 +79,6 @@ requirejs(['kick'],
                 meshData: meshData
             });
 
-            // todo: debug
-            mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
             meshRenderer = new kick.scene.MeshRenderer({
                 mesh: mesh,
                 materials: [createMaterial()]
