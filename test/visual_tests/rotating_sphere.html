@@ -88,6 +88,7 @@
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true
             });
+            window.engine = engine;
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],

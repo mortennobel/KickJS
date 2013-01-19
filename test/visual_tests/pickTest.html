@@ -19,15 +19,15 @@ Click on the objects to enlarge them.
     });
 
     req(['kick'],
-            function (KICK) {
+            function (kick) {
                 // init engine (create 3d context)
-                var engine = new KICK.core.Engine('canvas',{
+                var engine = new kick.core.Engine('canvas',{
                     enableDebugContext: true
                 });
 
                 var ClickListener = function(){
                     this.update = function(){
-                        var mouseInput = this.gameObject.engine.mouseInput;
+                        var mouseInput = kick.core.EngineSingleton.engine.mouseInput;
                         if (mouseInput.isButtonDown(0)){
                             function callback(gameObject, count){
                                 console.log("gameObject "+gameObject.name+" count "+count);
@@ -47,7 +47,7 @@ Click on the objects to enlarge them.
                 var cameraObject = engine.activeScene.createGameObject();
                 cameraObject.transform.position = [0,0,5];
                 // create a perspective camera
-                var camera = new KICK.scene.Camera({
+                var camera = new kick.scene.Camera({
                     perspective: false,
                     left:-5,
                     right:5,
@@ -70,7 +70,7 @@ Click on the objects to enlarge them.
                     var x = -2.0+4*(i%2);
                     var y = -2.0+4*Math.floor(i/2);
                     // create material
-                    var material = new KICK.material.Material({
+                    var material = new kick.material.Material({
                         shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
                         uniformData:{
                             mainColor: colors[i],
@@ -78,7 +78,7 @@ Click on the objects to enlarge them.
                         }
                     });
                     gameObject.transform.position = [x,y,0];
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     meshRenderer.mesh = engine.project.load(meshes[i]);
                     meshRenderer.material = material;
                     gameObject.addComponent(meshRenderer);

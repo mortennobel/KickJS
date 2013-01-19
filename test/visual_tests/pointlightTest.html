@@ -20,15 +20,15 @@
     });
 
     req(['kick'],
-            function (KICK) {
+            function (kick) {
                 var engine;
 
                 function RotatorComponent(){
                     var thisObj = this,
                             time,
                             transform,
-                            vec3 = KICK.math.Vec3,
-                            quat= KICK.math.Quat,
+                            vec3 = kick.math.Vec3,
+                            quat= kick.math.Quat,
                             rotationSpeed = 0.001,
                             upDownSpeed = 0.0001,
                             wheelSpeed = 0.0001,
@@ -39,7 +39,7 @@
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = gameObject.engine;
+                                engine = kick.core.EngineSingleton.engine;
                         transform = gameObject.transform;
                         time = engine.time;
                         mouseInput = engine.mouseInput;
@@ -69,12 +69,12 @@
                     };
                 }
                 function initKick() {
-                    engine = new KICK.core.Engine('canvas',{
+                    engine = new kick.core.Engine('canvas',{
                         enableDebugContext: true
                     });
 
                     engine.project.loadProject(pointProject, function(){
-                        var camera = engine.activeScene.findComponentsOfType(KICK.scene.Camera)[0];
+                        var camera = engine.activeScene.findComponentsOfType(kick.scene.Camera)[0];
                         camera.gameObject.addComponent(new RotatorComponent());
                     }, function(err){
                         console.log(err);

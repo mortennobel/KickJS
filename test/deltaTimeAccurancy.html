@@ -41,7 +41,7 @@
                    deltaTimeSum = 0;// 10 sec
            this.activated = function(){
                startTime = new Date().getTime();
-               time = this.gameObject.engine.time;
+               time = kick.core.EngineSingleton.engine.time;
            };
            this.update = function(){
                deltaTimeSum += time.deltaTime;

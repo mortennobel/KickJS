@@ -20,20 +20,20 @@ var req = require.config({
 });
 
 req(['kick'],
-        function (KICK) {
+        function (kick) {
             "use strict";
             function initLight(){
                 var lightGameObject = engine.activeScene.createGameObject();
                 lightGameObject.transform.localRotationEuler = [10,145,0];
-                var lightComponent = new KICK.scene.Light({
-                    type:KICK.scene.Light.TYPE_AMBIENT,
+                var lightComponent = new kick.scene.Light({
+                    type:kick.scene.Light.TYPE_AMBIENT,
                     color: [1.0,0.1,0.1]
                 });
                 lightGameObject.addComponent(lightComponent);
                 window.ambLight = lightComponent;
 
-                lightComponent = new KICK.scene.Light({
-                    type:KICK.scene.Light.TYPE_DIRECTIONAL,
+                lightComponent = new kick.scene.Light({
+                    type:kick.scene.Light.TYPE_DIRECTIONAL,
                     color: [1.0,1.0,1.0]
                 });
                 lightGameObject.addComponent(lightComponent);
@@ -41,20 +41,20 @@ req(['kick'],
             }
 
             // init engine (create 3d context)
-            var engine = new KICK.core.Engine('canvas',{
+            var engine = new kick.core.Engine('canvas',{
                 enableDebugContext: false
             });
 
-            var material = new KICK.material.Material({
+            var material = new kick.material.Material({
                 shader: engine.project.load(engine.project.ENGINE_SHADER_SPECULAR),
                 uniforms:{
                     mainColor: {
                         value: [.8,.7,.6,1],
-                        type: KICK.core.Constants.GL_FLOAT_VEC4
+                        type: kick.core.Constants.GL_FLOAT_VEC4
                     },
                     mainTexture: {
                         value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                        type: KICK.core.Constants.GL_SAMPLER_2D
+                        type: kick.core.Constants.GL_SAMPLER_2D
                     }
                 }
             });
@@ -64,7 +64,7 @@ req(['kick'],
                         keyInput;
                 this.activated = function(){
                     transform = this.gameObject.transform;
-                    keyInput = this.gameObject.engine.keyInput;
+                    keyInput = kick.core.EngineSingleton.engine.keyInput;
                 };
 
                 this.update = function(){
@@ -92,7 +92,7 @@ req(['kick'],
             };
 
             window.startTest = function (stacks, slices){
-                engine.activeScene = new KICK.scene.Scene();
+                engine.activeScene = new kick.scene.Scene();
                 var numberOfPrimitives = 0;
 
 
@@ -104,7 +104,7 @@ req(['kick'],
                 var cameraObject = engine.activeScene.createGameObject();
                 cameraObject.transform.position = [0,0,0];
                 // create a perspective camera
-                var camera = new KICK.scene.Camera({
+                var camera = new kick.scene.Camera({
                     perspective: true,
                     fieldOfView:60
                 });
@@ -127,7 +127,7 @@ req(['kick'],
 
                         gameObject.transform.position = [x,y,z];
                         gameObject.transform.localScale = [10,10,10];
-                        var meshRenderer = new KICK.scene.MeshRenderer();
+                        var meshRenderer = new kick.scene.MeshRenderer();
                         meshRenderer.mesh = createSierpinskyTriangleMesh();
                         meshRenderer.material = material;
                         gameObject.addComponent(meshRenderer);
@@ -196,7 +196,7 @@ req(['kick'],
                 var meshData;
                 if (!window.meshData){
                     generateSierpinskyPyramid(p1, p2, p3, p4, depth);
-                    meshData = new KICK.mesh.MeshData();
+                    meshData = new kick.mesh.MeshData();
                     meshData.vertex = vertices;
                     console.log("Vertex count "+(meshData.vertex.length/3));
                     meshData.uv1 = new Float32Array(indices.length*2);
@@ -209,7 +209,7 @@ req(['kick'],
 
 
 
-                var mesh = new KICK.mesh.Mesh();
+                var mesh = new kick.mesh.Mesh();
                 mesh.meshData = meshData;
                 return mesh;
             }

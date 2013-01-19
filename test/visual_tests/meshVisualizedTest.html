@@ -18,12 +18,12 @@ var req = require.config({
 });
 
 req(['kick'],
-        function (KICK) {
+        function (kick) {
             var engine;
             var meshRenderer;
 
             window.setMesh = function(url){
-                meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: url});
+                meshRenderer.mesh = new kick.mesh.Mesh({dataURI: url});
                 var meshData = meshRenderer.mesh.meshData;
                 meshData.recalculateTangents();
                 meshData.recalculateNormals();
@@ -33,7 +33,7 @@ req(['kick'],
             window.setMaterial = function(vertexShaderId, fragmentShaderId){
                 var vs = document.getElementById(vertexShaderId).value;
                 var fs = document.getElementById(fragmentShaderId).value;
-                var shader = new KICK.material.Shader();
+                var shader = new kick.material.Shader();
                 shader.errorLog = function(e){console.log(e);};
                 shader.vertexShaderSrc = vs;
                 shader.fragmentShaderSrc = fs;
@@ -44,7 +44,7 @@ req(['kick'],
                     return;
                 }
 
-                meshRenderer.material = new KICK.material.Material({
+                meshRenderer.material = new kick.material.Material({
                     name:"Some material",
                     shader:shader
                 });
@@ -69,18 +69,18 @@ req(['kick'],
             };
 
             function initKick() {
-                engine = new KICK.core.Engine('canvas',{
+                engine = new kick.core.Engine('canvas',{
                     enableDebugContext: true
                 });
                 var cameraObject = engine.activeScene.createGameObject();
                 cameraObject.transform.position = [0,0,1];
-                var camera = new KICK.scene.Camera({
+                var camera = new kick.scene.Camera({
                     clearColor: [0.5,1,1,1]
                 });
                 cameraObject.addComponent(camera);
 
                 var gameObject = engine.activeScene.createGameObject();
-                meshRenderer = new KICK.scene.MeshRenderer();
+                meshRenderer = new kick.scene.MeshRenderer();
                 setMesh("kickjs://mesh/cube/?length=0.5");
                 setMaterial('vertexShaderUV','fragmentShader');
                 gameObject.addComponent(meshRenderer);

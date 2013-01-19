@@ -24,7 +24,7 @@
     });
 
     req(['kick'],
-            function (KICK) {
+            function (kick) {
     "use strict";
     var engine;
     var meshRenderer;
@@ -39,8 +39,8 @@
                 time;
         this.activated = function(){
             transform = this.gameObject.transform;
-            keyInput = this.gameObject.engine.keyInput;
-            time = this.gameObject.engine.time;
+            keyInput = kick.core.EngineSingleton.engine.keyInput;
+            time = kick.core.EngineSingleton.engine.time;
             position = transform.localPosition;
             rotation = transform.localRotationEuler;
         };
@@ -59,8 +59,8 @@
             if (keyInput.isKey("D".charCodeAt(0))){
                 deltaPosition[0] += time.deltaTime*movementSpeed;
             }
-            KICK.math.Quat.multiplyVec3(deltaPosition, transform.localRotation, deltaPosition);
-            KICK.math.Vec3.add(deltaPosition,position,deltaPosition);
+            kick.math.Quat.multiplyVec3(deltaPosition, transform.localRotation, deltaPosition);
+            kick.math.Vec3.add(deltaPosition,position,deltaPosition);
             transform.localPosition = position;
             if (keyInput.isKey("Q".charCodeAt(0))){
                 rotation[1] += time.deltaTime*rotationSpeed;
@@ -76,7 +76,7 @@
 
     function setMaterial(meshRenderer, color){
         // create material
-        var material = new KICK.material.Material({
+        var material = new kick.material.Material({
             name:"Some material",
             shader:engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
             uniformData:{
@@ -107,7 +107,7 @@
     var camera;
     function addMainCamera(){
         var cameraObject = engine.activeScene.createGameObject();
-        camera = new KICK.scene.Camera({
+        camera = new kick.scene.Camera({
             clearColor: [0,0,1,1],
             perspective: true
         //    renderShadow:true
@@ -117,7 +117,7 @@
         cameraObject.addComponent(new CameraMover());
 
         // visualize the camera
-        var meshRenderer = new KICK.scene.MeshRenderer();
+        var meshRenderer = new kick.scene.MeshRenderer();
 
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
         setMaterial(meshRenderer, [.7,.9,.5,1]);
@@ -129,7 +129,7 @@
     function addMovingBall(position){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.localPosition = position;
-        meshRenderer = new KICK.scene.MeshRenderer();
+        meshRenderer = new kick.scene.MeshRenderer();
 
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
         setMaterial(meshRenderer, [.7,.9,.5,1]);
@@ -144,7 +144,7 @@
         var plane = engine.activeScene.createGameObject();
         plane.transform.rotationEuler = [-90,0,0];
         plane.transform.localScale = [5,5,5];
-        var planeMeshRenderer = new KICK.scene.MeshRenderer();
+        var planeMeshRenderer = new kick.scene.MeshRenderer();
 
         planeMeshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
         setMaterial(planeMeshRenderer,[.9,.7,.4,1]);
@@ -155,7 +155,7 @@
         plane2.transform.rotationEuler = [-90,0,0];
         plane2.transform.localScale = [100,100,100];
         plane2.transform.localPosition = [0,-5,0];
-        var planeMeshRenderer2 = new KICK.scene.MeshRenderer();
+        var planeMeshRenderer2 = new kick.scene.MeshRenderer();
 
         planeMeshRenderer2.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
         setMaterial(planeMeshRenderer2,[.4,.9,.9,1]);
@@ -167,8 +167,8 @@
     function addLightComponents(){
         // add light components
         lightObj = engine.activeScene.createGameObject();
-        directionalLight = new KICK.scene.Light({
-            type : KICK.scene.Light.TYPE_DIRECTIONAL,
+        directionalLight = new kick.scene.Light({
+            type : kick.scene.Light.TYPE_DIRECTIONAL,
             color: [1.0,1.0,1.0],
             intensity: 1
         });
@@ -177,8 +177,8 @@
         lightObj.addComponent(directionalLight);
         lightObj.transform.rotationEuler = [-70,0,10];
         lightObj.transform.position = [1,10,1];
-        lightObj.addComponent(new KICK.scene.Light({
-            type : KICK.scene.Light.TYPE_AMBIENT,
+        lightObj.addComponent(new kick.scene.Light({
+            type : kick.scene.Light.TYPE_AMBIENT,
             color: [1.0,1.0,1.0],
             intensity: 0.4
         }));
@@ -192,7 +192,7 @@
                 rotationEuler;
         this.activated = function(){
             transform = this.gameObject.transform;
-            keyInput = this.gameObject.engine.keyInput;
+            keyInput = kick.core.EngineSingleton.engine.keyInput;
             rotationEuler = transform.localRotationEuler;
         };
 
@@ -214,7 +214,7 @@
     }
 
     function initKick() {
-        engine = new KICK.core.Engine('canvas',{
+        engine = new kick.core.Engine('canvas',{
             enableDebugContext: true,
             shadows:true
         });
