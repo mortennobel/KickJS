@@ -81,7 +81,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 var blackWhiteCheckerboard = new Uint8Array([255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255, 255]);
                 thisObj.bind(0); // bind to texture slot 0
                 gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
-                gl.texImage2D(Constants.GL_TEXTURE_2D, 0, _intFormat, 2, 2, 0, Constants.GL_RGB, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard);
+                gl.texImage2D(Constants.GL_TEXTURE_2D, 0, Constants.GL_RGB, 2, 2, 0, Constants.GL_RGB, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard);
                 gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
                 gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
                 gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_S, _wrapS);

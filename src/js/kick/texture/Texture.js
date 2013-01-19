@@ -230,8 +230,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             this.setImageData = function (width, height, border, type, pixels, dataURI) {
                 createImageFunction = thisObj.setImageData;
                 createImageFunctionParameters = arguments;
-                var format,
-                    res,
+                var res,
                     i,
                     textureSides = _textureType === Constants.GL_TEXTURE_2D ?
                             [Constants.GL_TEXTURE_2D] :
@@ -262,7 +261,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     Util.fail("Texture.textureType not set");
                     return;
                 }
-                format = _intFormat;
+
 
                 Vec2.copy(_dimension, [width, height]);
                 _dataURI = dataURI;
@@ -270,7 +269,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 thisObj.bind(0); // bind to texture slot 0
                 for (i = 0; i < textureSides.length; i++) {
                     gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
-                    gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, format, type, pixels);
+                    gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, _intFormat, type, pixels);
                 }
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
