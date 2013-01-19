@@ -51,7 +51,6 @@ define(["kick/core/Constants", "./Util", "./EngineSingleton"], function (Constan
         /**
          * @method toJSON
          * @return {Object} configuration in JSON
-         * @abstract
          */
         object.toJSON = function(){
             Util.fail("toJSON does not exist for the Asset");

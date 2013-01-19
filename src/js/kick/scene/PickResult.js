@@ -8,12 +8,12 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
          * @class PickResult
          * @namespace kick.scene
          * @constructor
-         * @param pickingRenderTarget
+         * @param {kick.texture.RenderTexture} pickingRenderTarget
          * @param {kick.scene.GameObject} gameObject
          * @param {Integer} x
          * @param {Integer} y
          * @param {EngineUniforms} engineUniforms
-         * @param {kick.scene.Camera}
+         * @param {kick.scene.Camera} camera
          * @constructor
          */
         return function (pickingRenderTarget, gameObject, x, y, engineUniforms, camera) {
