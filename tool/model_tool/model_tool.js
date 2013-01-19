@@ -706,6 +706,62 @@ requirejs(['kick'],
                 exportPanel.hide();
                 Y.one("#JSONExport").set("innerHTML","");
                 Y.one("#KickJSExport").set("innerHTML","");
+            };
+
+            function handleFileSelect(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+
+                var files = evt.dataTransfer.files; // FileList object.
+
+                // files is a FileList of File objects. List some properties.
+                var output = [];
+
+                var rotateAroundX = false;
+                for (var i = 0, f; f = files[i]; i++) {
+//                    output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+//                        f.size, ' bytes, last modified: ',
+//                        f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+//                        '</li>');
+                    var fileName = f.name;
+                    var fileNameLowercase = fileName.toLowerCase();
+                    if (endsWith(fileNameLowercase, ".obj") || endsWith(fileNameLowercase, ".dae") || endsWith(fileNameLowercase, ".kickjs")){
+                        var reader = new FileReader();
+                        reader.fname = f.name;
+                        reader.onload = function(e) {
+                            var fileContent = this.result;
+                            var fileName = this.fname;
+                            var fileNameLowercase = fileName.toLowerCase();
+                            if (endsWith(fileNameLowercase, ".obj")) {
+                                load(fileContent, fileName, kick.importer.ObjImporter.import,rotateAroundX);
+                            } else if (endsWith(fileNameLowercase, ".dae")) {
+                                var parser = new DOMParser();
+                                load(parser.parseFromString(fileContent, "text/xml"), fileName, kick.importer.ColladaImporter.import,rotateAroundX);
+                            } else if (endsWith(fileNameLowercase, ".kickjs")) {
+                                loadKickJSModel(fileContent);
+                            }
+                        };
+                        reader.readAsText(f);
+                    } else {
+                        var img = document.createElement("img");
+                        img.onload = function (e) {
+                            texture.setImage(img, "");
+                            URL.revokeObjectURL(this.src);
+                        };
+                        img.src = URL.createObjectURL(f);
+                    }
+                }
             }
+
+            function handleDragOver(evt) {
+                evt.stopPropagation();
+                evt.preventDefault();
+                evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+            }
+
+            // Setup the dnd listeners.
+            var dropZone = document.getElementById('canvas');
+            dropZone.addEventListener('dragover', handleDragOver, false);
+            dropZone.addEventListener('drop', handleFileSelect, false);
         });
     });
