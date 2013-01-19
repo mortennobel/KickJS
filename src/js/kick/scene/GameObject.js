@@ -33,9 +33,15 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
                  * Reference to the engine
                  * @property engine
                  * @type kick.core.Engine
+                 * @deprecated
                  */
                 engine: {
-                    value: scene.engine
+                    get: function () {
+                        if (ASSERT) {
+                            Util.fail("GameObject.engine is deprecated. Use EngineSingleton.engine instead.");
+                        }
+                        return scene.engine;
+                    }
                 },
                 /**
                  * Reference to the transform
@@ -286,7 +292,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
             for (i = 0; i < _components.length; i++) {
                 component = _components[i];
                 if (!component.toJSON) {
-                    componentsJSON.push(Util.componentToJSON(scene.engine, component));
+                    componentsJSON.push(Util.componentToJSON(component));
                 } else {
                     componentJSON = component.toJSON();
                     if (componentJSON) {
