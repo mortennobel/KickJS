@@ -105,6 +105,8 @@ cp "$project/build/kick-debug.js" "$project/example/js/kick-debug.js"
 mkdir "$project/tool/js/"
 cp "$project/build/kick.js" "$project/tool/js/kick.js"
 cp "$project/build/kick-debug.js" "$project/tool/js/kick-debug.js"
+cp "$project/build/kick.js" "$project/test/tutorial/kick.js"
+cp "$project/build/kick-debug.js" "$project/test/tutorial/kick-debug.js"
 
 echo "Build finished"
 date
