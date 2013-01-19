@@ -19,7 +19,14 @@ requirejs(['kick'],
             engine,
             camera,
             meshRenderer,
-            texture;
+            texture,
+            endsWith = function (str, search) {
+                var res = str.match(search + "$");
+                if (Array.isArray(res)){
+                    res = res[0];
+                }
+                return (res === search);
+            };
 
         if (location.href.indexOf('file') === 0) {
             alert("Model viewer example must be run from a web-server due to security constrains");
@@ -173,9 +180,6 @@ requirejs(['kick'],
             var reader = new FileReader(),
                 fileName = file.fileName || file.name,
                 fileNameLowercase = fileName.toLowerCase(),
-                endsWith = function (str, search) {
-                    return (str.match(search + "$") === search);
-                },
                 parser;
 
             reader.onload = function (event) {
@@ -214,9 +218,6 @@ requirejs(['kick'],
                         uInt8[5] === 10 &&
                         uInt8[6] === 26 &&
                         uInt8[7] === 10;
-                },
-                endsWith = function (str, search) {
-                    return (str.match(search + "$") === search);
                 },
                 i,
                 file,
