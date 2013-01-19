@@ -64,7 +64,7 @@ req(['kick'],
                         keyInput;
                 this.activated = function(){
                     transform = this.gameObject.transform;
-                    keyInput = kick.core.EngineSingleton.engine.keyInput;
+                    keyInput = kick.core.Engine.instance.keyInput;
                 };
 
                 this.update = function(){

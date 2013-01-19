@@ -30,7 +30,7 @@ This example demonstrate how to script update that runs in every frame (slightly
         // Get references to objects used in the update method performs better
         this.activated = function(){
             transform = thisObj.gameObject.transform;
-            time = kick.core.EngineSingleton.engine.time;
+            time = kick.core.Engine.instance.time;
         };
 
         this.update = function(){

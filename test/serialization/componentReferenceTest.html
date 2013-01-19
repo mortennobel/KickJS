@@ -236,7 +236,7 @@ void main(void)
             this.update = function(){
                 var gameObject = thisObj.gameObject,
                         transform = thisObj.rotationTransform || gameObject.transform,
-                        time = kick.core.EngineSingleton.engine.time,
+                        time = kick.core.Engine.instance.time,
                         deltaTime = time.deltaTime;
                 rotationEuler[2] += deltaTime*thisObj.rotationSpeed;
                 transform.localRotationEuler = rotationEuler;

@@ -2,7 +2,7 @@ define(["kick", "ChessPiece", "ChessField"], function (kick, ChessPiece, ChessFi
     "use strict";
 
     return function(chessGame){
-        var engine = kick.core.EngineSingleton.engine,
+        var engine = kick.core.Engine.instance,
             mouseInput,
             camera,
             canvas = engine.canvas,

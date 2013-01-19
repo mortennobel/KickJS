@@ -26,7 +26,7 @@ requirejs(['kick'],
                 };
             this.activated = function () {
                 var gameObject = thisObj.gameObject,
-                    engine = kick.core.EngineSingleton.engine;
+                    engine = kick.core.Engine.instance.engine;
                 transform = gameObject.transform;
                 rotationEuler = transform.localRotationEuler;
                 mouseInput = engine.mouseInput;

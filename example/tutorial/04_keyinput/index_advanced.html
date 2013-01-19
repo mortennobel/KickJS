@@ -36,7 +36,7 @@ The key down event and key up event will change the color of the objects.<br><br
 
                 this.activated = function(){
                     var gameObject = thisObj.gameObject,
-                            engine = kick.core.EngineSingleton.engine;
+                            engine = kick.core.Engine.instance;
                     time = engine.time;
                     transform = gameObject.transform;
                     keyInput = engine.keyInput;

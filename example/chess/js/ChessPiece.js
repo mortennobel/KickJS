@@ -3,7 +3,7 @@ define(["kick", "ChessPieceType"], function (kick, ChessPieceType) {
 
     // Chess piece class
     return function (type, color, initialLocation){
-        var engine = kick.core.EngineSingleton.engine,
+        var engine = kick.core.Engine.instance,
             vec2 = kick.math.Vec2,
             vec3 = kick.math.Vec3,
             location = vec2.clone(initialLocation),

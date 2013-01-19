@@ -21,7 +21,7 @@
             var mouseInput,
                 thisObj = this;
             this.activated = function(){
-                mouseInput = kick.core.EngineSingleton.engine.mouseInput;
+                mouseInput = kick.core.Engine.instance.mouseInput;
             };
             this.update = function(){
                 if (mouseInput.isButtonDown(0)){
@@ -40,8 +40,8 @@
                         return " ["+mousePosition[0]+","+mousePosition[1]+"]";
                     };
             this.activated = function(){
-                mouseInput = kick.core.EngineSingleton.engine.mouseInput;
-                time = kick.core.EngineSingleton.engine.time;
+                mouseInput = kick.core.Engine.instance.mouseInput;
+                time = kick.core.Engine.instance.time;
             };
 
 

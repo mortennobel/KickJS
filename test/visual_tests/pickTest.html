@@ -27,7 +27,7 @@ Click on the objects to enlarge them.
 
                 var ClickListener = function(){
                     this.update = function(){
-                        var mouseInput = kick.core.EngineSingleton.engine.mouseInput;
+                        var mouseInput = kick.core.Engine.instance.mouseInput;
                         if (mouseInput.isButtonDown(0)){
                             function callback(gameObject, count){
                                 console.log("gameObject "+gameObject.name+" count "+count);

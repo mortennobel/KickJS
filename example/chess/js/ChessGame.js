@@ -2,7 +2,7 @@ define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovemen
     "use strict";
 
     return function(){
-        var engine = kick.core.EngineSingleton.engine,
+        var engine = kick.core.Engine.instance,
             worker = new Worker("js/chess_web_worker.js"),
             cameraGameObject,
             thisObj = this,

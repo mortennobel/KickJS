@@ -5,7 +5,6 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
         /**
          * @module kick.material
          */
-
         var ASSERT = Constants._ASSERT;
 
         /**

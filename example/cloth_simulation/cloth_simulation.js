@@ -145,7 +145,7 @@ requirejs(['kick'],
                 ball_time = 0;
 
             this.activated = function () {
-                time = kick.core.EngineSingleton.engine.time;
+                time = kick.core.Engine.instance.time;
                 thisTransform = thisObj.gameObject.transform;
             };
 
@@ -694,7 +694,7 @@ requirejs(['kick'],
             };
 
             this.activated = function(){
-                time = kick.core.EngineSingleton.engine.time;
+                time = kick.core.Engine.instance.time;
                 ballTransform = thisObj.gameObject.scene.getGameObjectByName("Ball").transform;
                 meshRenderer = thisObj.gameObject.getComponentOfType(kick.scene.MeshRenderer);
                 meshRenderer.mesh = new kick.mesh.Mesh({name:"Cloth Mesh"});

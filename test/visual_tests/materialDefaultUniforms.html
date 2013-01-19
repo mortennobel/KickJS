@@ -18,17 +18,17 @@
     });
 
     req(['kick'],
-            function (KICK) {
+            function (kick) {
                 var engine,
-                        vec3 = KICK.math.Vec3,
-                        quat = KICK.math.Quat,
+                        vec3 = kick.math.Vec3,
+                        quat = kick.math.Quat,
                         cameraObject,
                         lightGameObject,
                         lightComponents = [];
 
                 function addSphere(material,position,scale){
                     var gameObject = engine.activeScene.createGameObject();
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
                     meshRenderer.material = material;
                     gameObject.addComponent(meshRenderer);
@@ -43,11 +43,11 @@
                 }
 
                 function initKick() {
-                    engine = new KICK.core.Engine('canvas',{
+                    engine = new kick.core.Engine('canvas',{
                         enableDebugContext: true
                     });
                     cameraObject = engine.activeScene.createGameObject();
-                    var camera = new KICK.scene.Camera({});
+                    var camera = new kick.scene.Camera({});
                     cameraObject.addComponent(camera);
                     var transform = cameraObject.transform;
                     transform.localPosition = [0,0,-3];
@@ -60,9 +60,9 @@
                     material.shader = engine.project.load(shader);
                     if (window.debugShader){
                         console.log("__________________vertexShaderSrc__________________");
-                        console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
+                        console.log(kick.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
                         console.log("_________________fragmentShaderSrc_________________");
-                        console.log(KICK.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
+                        console.log(kick.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
                     }
                 }
 
@@ -72,15 +72,15 @@
                         lightGameObject.removeComponent(lightComponents[i]);
                     }
                     lightComponents.length = 0;
-                    lightComponent = new KICK.scene.Light({
-                        type:KICK.scene.Light.TYPE_AMBIENT,
+                    lightComponent = new kick.scene.Light({
+                        type:kick.scene.Light.TYPE_AMBIENT,
                         color: [0.1,0.1,0.1]
                     });
                     lightGameObject.addComponent(lightComponent);
                     lightComponents.push(lightComponent);
 
-                    lightComponent = new KICK.scene.Light({
-                        type:KICK.scene.Light.TYPE_DIRECTIONAL,
+                    lightComponent = new kick.scene.Light({
+                        type:kick.scene.Light.TYPE_DIRECTIONAL,
                         color: [1.0,1.0,1.0]
                     });
                     lightGameObject.addComponent(lightComponent);
@@ -110,7 +110,7 @@
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = KICK.core.EngineSingleton.engine;
+                                engine = kick.core.Engine.instance;
                         transform = gameObject.transform;
                         time = engine.time;
                         mouseInput = engine.mouseInput;
@@ -145,7 +145,7 @@
 
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
 
-                    var material = new KICK.material.Material({
+                    var material = new kick.material.Material({
                         shader:shader,
                         uniformData:{
                             mainColor:[1.0,0.0,0.9,0.5]
@@ -155,7 +155,7 @@
                     addSphere(material, position,[0.25,0.25,0.25]);
 
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
-                    var material = new KICK.material.Material( {
+                    var material = new kick.material.Material( {
                         shader:shader,
                         uniformData:{
                             mainColor:[1,0.0,0.9,0.5]
@@ -166,7 +166,7 @@
 
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
 
-                    var material = new KICK.material.Material( {
+                    var material = new kick.material.Material( {
                         shader:shader,
                         uniformData:{
                             mainColor:[1,0.0,0.9,0.5]
@@ -176,7 +176,7 @@
                     addSphere(material, position,[0.25,0.25,0.25]);
 
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
-                    var material = new KICK.material.Material( {
+                    var material = new kick.material.Material( {
                         shader:shader,
                         uniformData:{
                             mainColor:[1,0.0,0.9,0.5]

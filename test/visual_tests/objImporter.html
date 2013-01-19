@@ -24,8 +24,8 @@
                 function (KICK) {
                     "use strict";
         var engine;
+        var project;
         var meshRenderer;
-                    var materials;
 
         var log = function (output) {
             var element = document.getElementById("output");
@@ -35,31 +35,6 @@
         var clearLog = function(){
             var element = document.getElementById("output");
             element.innerHTML = "";
-        };
-
-        var createMaterials = function(){
-            var vs = document.getElementById("vertexShaderColor").value;
-            var fs = document.getElementById("fragmentShader").value;
-            var shader = new KICK.material.Shader();
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
-            shader.apply();
-            materials = [];
-            materials[0] = new KICK.material.Material({
-                name:"Material.002",
-                shader:shader,
-                uniformData:{
-                     color:  [1,0,0]
-                }
-            });
-            materials[1] = new KICK.material.Material({
-                name:"Material.003",
-                shader:shader,
-                uniformData:{
-                     color: [0,1,0]
-                }
-            });
         };
 
         function recalculateNormals(){
@@ -93,6 +68,7 @@
             engine = new KICK.core.Engine('canvas',{
                 enableDebugContext: true
             });
+            project = engine.project;
             var cameraObject = engine.activeScene.createGameObject();
             var camera = new KICK.scene.Camera({
                 clearColor: [0,0,0,1],
@@ -107,7 +83,6 @@
             cameraObject.addComponent(camera);
             cameraObject.addComponent(new KICK.scene.Light({type: KICK.scene.Light.TYPE_DIRECTIONAL}));
 
-            createMaterials();
 
             var gameObjects = KICK.importer.ObjImporter.import( document.getElementById("objFileContent").value , engine.activeScene).gameObjects;
             console.log("Imported "+gameObjects.length+" gameObjects");
@@ -117,11 +92,20 @@
                 console.log("Number of mesh renderers "+meshRenderers.length);
                 for (var j=0;j<meshRenderers.length;j++){
                     meshRenderer = meshRenderers[j];
-                    materials.materials = materials;
                     var meshData = meshRenderer.mesh.meshData;
                     meshData.recalculateNormals();
                     meshData.createUv1();
                     meshRenderer.mesh.meshData = meshData;
+                    for (var m = 0; m < meshRenderer.materials.length; m++) {
+                        meshRenderer.materials[m] = new KICK.material.Material({
+                            shader:project.load(project.ENGINE_SHADER_DIFFUSE),
+                            uniformData:{
+                                mainColor: (m==0 ? [1.0,0.0,0.9,0.5] : [1.0,1.0,0.9,0.5]),
+                                mainTexture: project.load(engine.project.ENGINE_TEXTURE_WHITE)
+                            }
+                        });
+                    }
+
                     console.log("Number of subMeshes"+meshData.subMeshes.length);
                     for (var k=0;k<meshData.subMeshes.length;k++){
                         console.log("Number of subMeshes length "+meshData.subMeshes[k].length);
@@ -166,7 +150,7 @@ f 5 1 4 8
 attribute vec3 vertex;
 
 uniform mat4 _mvProj;
-uniform vec3 color;
+uniform vec4 color;
 
 varying vec3 vColor;
 

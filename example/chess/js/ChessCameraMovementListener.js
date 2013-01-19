@@ -14,7 +14,7 @@ define(["kick"], function (kick) {
 
         this.activated = function(){
             var gameObject = thisObj.gameObject,
-                engine = kick.core.EngineSingleton.engine;
+                engine = kick.core.Engine.instance;
             transform = gameObject.transform;
             time = engine.time;
             mouseInput = engine.mouseInput;

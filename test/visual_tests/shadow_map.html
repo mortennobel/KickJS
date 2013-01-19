@@ -39,8 +39,8 @@
                 time;
         this.activated = function(){
             transform = this.gameObject.transform;
-            keyInput = kick.core.EngineSingleton.engine.keyInput;
-            time = kick.core.EngineSingleton.engine.time;
+            keyInput = kick.core.Engine.instance.keyInput;
+            time = kick.core.Engine.instance.time;
             position = transform.localPosition;
             rotation = transform.localRotationEuler;
         };
@@ -192,7 +192,7 @@
                 rotationEuler;
         this.activated = function(){
             transform = this.gameObject.transform;
-            keyInput = kick.core.EngineSingleton.engine.keyInput;
+            keyInput = kick.core.Engine.instance.keyInput;
             rotationEuler = transform.localRotationEuler;
         };
 

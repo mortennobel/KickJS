@@ -35,7 +35,7 @@ Accelerate the triangle by pressing left mouse button on the items.<br><br>
 
                     this.activated = function(){
                         gameObject = thisObj.gameObject;
-                        var engine = kick.core.EngineSingleton.engine;
+                        var engine = kick.core.Engine.instance;
                         time = engine.time;
                         transform = gameObject.transform;
                         mouseInput = engine.mouseInput;

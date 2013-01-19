@@ -24,7 +24,7 @@ Releasing the '1' or '2' will aboard the flicker.
     });
 
     req(['kick'],
-            function (KICK) {
+            function (kick) {
                 "use strict";
                 var RotatorComponent = function(config){
                     var rotationEuler = [0,0,0],
@@ -44,13 +44,13 @@ Releasing the '1' or '2' will aboard the flicker.
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = KICK.core.EngineSingleton.engine;
+                                engine = kick.core.Engine.instance;
                         eventQueue = engine.eventQueue
                         console.log("eventQueue "+eventQueue);
                         time = engine.time;
                         transform = gameObject.transform;
                         keyInput = engine.keyInput;
-                        material = gameObject.getComponentOfType(KICK.scene.MeshRenderer).material;
+                        material = gameObject.getComponentOfType(kick.scene.MeshRenderer).material;
                     };
 
                     this.update = function(){
@@ -92,7 +92,7 @@ Releasing the '1' or '2' will aboard the flicker.
                 };
 
                 // init engine (create 3d context)
-                var engine = new KICK.core.Engine('canvas',{
+                var engine = new kick.core.Engine('canvas',{
                     enableDebugContext: true
                 });
 
@@ -100,7 +100,7 @@ Releasing the '1' or '2' will aboard the flicker.
                 var cameraObject = engine.activeScene.createGameObject();
                 cameraObject.transform.position = [0,0,5];
                 // create a perspective camera
-                var camera = new KICK.scene.Camera({
+                var camera = new kick.scene.Camera({
                     perspective: false,
                     left:-5,
                     right:5,
@@ -110,7 +110,7 @@ Releasing the '1' or '2' will aboard the flicker.
                 cameraObject.addComponent(camera);
 
                 function createMaterial(){
-                    return new KICK.material.Material({
+                    return new kick.material.Material({
                         shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),//engine.resourceManager.getShader("kickjs://shader/unlit/"),
                         uniformData:{
                             mainColor: [1,1,1,1],
@@ -128,7 +128,7 @@ Releasing the '1' or '2' will aboard the flicker.
                 for (var i=0;i<meshes.length;i++){
                     var gameObject = engine.activeScene.createGameObject();
                     gameObject.transform.position = [-2.0+4*i,0,0];
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     meshRenderer.mesh = engine.project.load(meshes[i]);
                     meshRenderer.material = createMaterial();
                     gameObject.addComponent(meshRenderer);

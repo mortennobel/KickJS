@@ -2,7 +2,8 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
     function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils, EngineSingleton, Shim_NotUsed) {
         "use strict";
 
-        var ASSERT = Constants._ASSERT;
+        var ASSERT = Constants._ASSERT,
+            engineInstance = null;
 
         /**
          * @module kick.core
@@ -42,8 +43,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                         time_ = Date.now();
                     }
                     thisObj._gameLoop(time_);
-                },
-                vec2 = math.Vec2;
+                };
 
             Object.defineProperties(this, {
                 /**
@@ -418,6 +418,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                         return true;
                     };
                 EngineSingleton.engine = thisObj;
+                engineInstance = thisObj;
 
                 success = initGL();
                 if (!success) {
@@ -488,6 +489,19 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 thisObj._gameLoop(lastTime);
             }());
         };
+        Object.defineProperties(engine, {
+            /**
+             * Returns the singleton engine object
+             * @property instance
+             * @type kick.core.Engine
+             * @static
+             */
+            instance: {
+                get: function () {
+                    return engineInstance;
+                }
+            }
+        })
         return engine;
     }
     );

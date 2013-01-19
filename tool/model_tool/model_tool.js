@@ -290,7 +290,7 @@ requirejs(['kick'],
                 mouseInput;
             this.activated = function () {
                 var gameObject = thisObj.gameObject,
-                    engine = kick.core.EngineSingleton.engine;
+                    engine = kick.core.Engine.instance;
                 transform = gameObject.transform;
                 rotationEuler = transform.localRotationEuler;
                 mouseInput = engine.mouseInput;
@@ -320,7 +320,7 @@ requirejs(['kick'],
 
             this.activated = function () {
                 var gameObject = thisObj.gameObject,
-                    engine = kick.core.EngineSingleton.engine;
+                    engine = kick.core.Engine.instance;
                 transform = gameObject.transform;
                 time = engine.time;
                 mouseInput = engine.mouseInput;

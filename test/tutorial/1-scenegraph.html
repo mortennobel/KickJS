@@ -4,10 +4,13 @@
 
 <script src="require.js"></script>
 <script type="text/javascript">
-    var req = require.config({});
+    var req = require.config({
+                paths: {
+                    kick: 'kick-debug'
+                }
+            });
     req(['kick'],
             function (kick) {
-                "use strict";
                 // init engine (create 3d context)
                 var engine = new kick.core.Engine('3dCanvas');
                 // create a game object in [0,0,0] facing down the -z axis
@@ -22,24 +25,12 @@
                     bottom:-5
                 });
                 cameraObject.addComponent(camera);
-                // create shader - Note that it is bad practice to inline GLSL shader code in JavaScript
-                var vertexShaderStr = "attribute vec3 vertex;\n"+
-                    "uniform mat4 _mvProj;\n"+
-                    "void main(void) {\n"+
-                    "    gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
-                    "}";
-                var fragmentShaderStr = "uniform highp float _time;\n"+
-                    "void main(void) {\n"+
-                    "  highp float fraction = mod(_time/1000.0,1.0);\n"+
-                    "  gl_FragColor = vec4(fraction,fraction,fraction, 1.0);\n"+
-                    "}";
-                var shader = new kick.material.Shader( {
-                    vertexShaderSrc: vertexShaderStr,
-                    fragmentShaderSrc: fragmentShaderStr
-                });
+                // create material
+                var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
                 var material = new kick.material.Material({
                     shader: shader,
                     uniformData:{
+                        mainColor: [1,1,1,1]
                     }
                 });
                 // create cube

@@ -20,7 +20,7 @@ requirejs(['kick'],
                     transform,
                     levelSize = snakeLevelComponent.size;
                 this.activated = function (){
-                    var engine = kick.core.EngineSingleton.engine,
+                    var engine = kick.core.Engine.instance,
                         shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
                         material = new kick.material.Material({
                             shader:shader,
@@ -296,7 +296,7 @@ requirejs(['kick'],
                 };
 
                 this.activated = function (){
-                    var engine = kick.core.EngineSingleton.engine;
+                    var engine = kick.core.Engine.instance;
                     meshRenderer = thisObj.gameObject.getComponentOfType(kick.scene.MeshRenderer);
 
                     shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);

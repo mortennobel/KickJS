@@ -4,41 +4,30 @@
 
 <script src="require.js"></script>
 <script type="text/javascript">
-    var req = require.config({});
+    var req = require.config({
+                paths: {
+                    kick: 'kick-debug'
+                }
+            });
     req(['kick'],
             function (kick) {
                 "use strict";
                 var RotatorComponent = function(config){
-                var rotationEuler = [0,0,0],
-                        thisObj = this,
-                        keyInput,
-                        transform,
+                var transform,
                         time,
-                        currentSpeed = 0;
+                        rotationEuler = [0,0,0],
+                        thisObj = this;
 
-                this.rotationSpeed = config.rotationSpeed;
-                this.keyCode = config.keyCode;
+                this.rotationSpeed = config.rotationSpeed || 0.1;
 
-
+                // Get references to objects used in the update method performs better
                 this.activated = function(){
-                    var gameObject = thisObj.gameObject,
-                            engine = gameObject.engine;
-                    time = engine.time;
-                    transform = gameObject.transform;
-                    keyInput = engine.keyInput;
+                    transform = thisObj.gameObject.transform;
+                    time = thisObj.gameObject.engine.time;
                 };
 
                 this.update = function(){
-                    var deltaTime = time.deltaTime;
-                    if (keyInput.isKey(thisObj.keyCode)){
-                        // accelerate
-                        currentSpeed += config.rotationSpeed*deltaTime;
-                    } else {
-                        // de-accelerate
-                        currentSpeed = Math.max(0,currentSpeed-config.rotationSpeed*deltaTime);
-                    }
-                    // apply current rotation
-                    rotationEuler[2] += deltaTime*currentSpeed;
+                    rotationEuler[2]+=time.deltaTime*thisObj.rotationSpeed;
                     transform.localRotationEuler = rotationEuler;
                 };
                 };
@@ -51,25 +40,25 @@
                 cameraObject.transform.position = [0,0,5];
                 // create a orthographic camera
                 var camera = new kick.scene.Camera({
-                    perspective: false,
-                    left:-5,
-                    right:5,
-                    top:5,
-                    bottom:-5
+                perspective: false,
+                left:-5,
+                right:5,
+                top:5,
+                bottom:-5
                 });
                 cameraObject.addComponent(camera);
 
                 // create material
                 var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
                 var material = new kick.material.Material({
-                    shader: shader
+                    shader: shader,
+                    uniformData:{
+                        mainColor: [1,1,1,1]
+                    }
                 });
 
                 // create meshes
                 var meshes = [engine.project.ENGINE_MESH_TRIANGLE, engine.project.ENGINE_MESH_CUBE];
-                var keyCodes = ["1","2"];
-                var rotationAcceleration = [0.0002,0.00032];
-
                 for (var i=0;i<meshes.length;i++){
                     var gameObject = engine.activeScene.createGameObject();
                     gameObject.transform.position = [-2.0+4*i,0,0];
@@ -77,11 +66,8 @@
                     meshRenderer.mesh = engine.project.load(meshes[i]);
                     meshRenderer.material = material;
                     gameObject.addComponent(meshRenderer);
-                    gameObject.addComponent(new RotatorComponent(
-                            {
-                                rotationSpeed:rotationAcceleration[i],
-                                keyCode:keyCodes[i].charCodeAt(0)
-                            }));
+                    var rotationSpeed = i-0.4;
+                    gameObject.addComponent(new RotatorComponent({rotationSpeed:rotationSpeed}));
                 }
             }
     );

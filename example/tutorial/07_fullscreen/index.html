@@ -29,7 +29,7 @@ This example demonstrate how to use fullscreen support (if available).<br><br>
                     this.update = function(){
                         var gameObject = thisObj.gameObject,
                                 transform = gameObject.transform,
-                                time = kick.core.EngineSingleton.engine.time,
+                                time = kick.core.Engine.instance.time,
                                 deltaTime = time.deltaTime;
                         rotationEuler[2] += deltaTime*thisObj.rotationSpeed;
                         transform.localRotationEuler = rotationEuler;

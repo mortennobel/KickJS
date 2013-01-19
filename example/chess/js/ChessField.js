@@ -2,7 +2,7 @@ define(["kick"], function (kick) {
     "use strict";
 
     return function (location2d) {
-        var engine = kick.core.EngineSingleton.engine,
+        var engine = kick.core.Engine.instance,
             vec2 = kick.math.Vec2,
             meshRenderer,
             material,
