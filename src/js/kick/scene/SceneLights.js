@@ -14,7 +14,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
         return function (maxNumerOfLights) {
             var ambientLight = null,
                 directionalLight = null,
-                directionalLightData = Mat3.create(), // column matrix with the columns lightDirection,colorIntensity,halfVector
+                directionalLightData = new Float32Array(9), // column matrix with the columns lightDirection,colorIntensity,halfVector
                 directionalLightDirection = directionalLightData.subarray(0, 3),
                 directionalLightColorIntensity = directionalLightData.subarray(3, 6),
                 directionalHalfVector = directionalLightData.subarray(6, 9),
