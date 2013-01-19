@@ -2455,7 +2455,48 @@ define('kick/core/Constants',[],function () {
     return constants;
 });
 
-define('kick/core/Util',["require", "./Constants"], function (require, Constants) {
+define('kick/core/EngineSingleton',["./Constants"], function (Constants) {
+    
+    /* //////// no documentation to hide class /////////
+     * Singleton - used to get a reference to the current engine.
+     * The static engine property is set when an engine-instance is created.
+     * The singleton object is needed to avoid cyclic-dependencies.
+     * When used outside the engine, you can use the kick.core.Engine.instance instead.
+     * @class EngineSingleton
+     * @namespace kick.core
+     * @private
+     */
+    var EngineSingleton = {},
+        currentEngine = null;
+    /* //////// no documentation to hide class /////////
+     * Returns
+     * @property engine
+     * @type {kick.core.Engine}
+     * @default null
+     * @static
+     */
+    Object.defineProperty(EngineSingleton, "engine",
+        {
+            set: function (newEngine) {
+                if (currentEngine !== null && true) {
+                    console.log("Engine is created twice in same context.");
+                }
+                currentEngine = newEngine;
+            },
+            get: function(){
+                if (currentEngine==null && true){
+                    console.log("Engine is not initialized yet.");
+                }
+                return currentEngine;
+            }
+
+        });
+    Object.freeze(EngineSingleton);
+
+    return EngineSingleton;
+});
+
+define('kick/core/Util',["require", "./Constants", "./EngineSingleton"], function (require, Constants, EngineSingleton) {
     
 
     var ASSERT = true,
@@ -2476,11 +2517,11 @@ define('kick/core/Util',["require", "./Constants"], function (require, Constants
          * Used for deserializing a configuration (replaces reference objects with actual references)
          * @method deserializeConfig
          * @param {Object} config
-         * @param {kick.engine.Engine} engine usef for looking up references to project assets
          * @param {kick.scene.Scene} scene used for looking up references to gameObjects and components
          */
-        deserializeConfig: function (config, engine, scene) {
+        deserializeConfig: function (config, scene) {
             var i,
+                engine = EngineSingleton.engine,
                 destArray;
             if (typeof config === 'number') {
                 return config;
@@ -2488,7 +2529,7 @@ define('kick/core/Util',["require", "./Constants"], function (require, Constants
             if (Array.isArray(config)) {
                 destArray = new Array(config.length);
                 for (i = 0; i < config.length; i++) {
-                    destArray[i] = Util.deserializeConfig(config[i], engine, scene);
+                    destArray[i] = Util.deserializeConfig(config[i], scene);
                 }
                 config = destArray;
             } else if (config) {
@@ -2608,19 +2649,13 @@ define('kick/core/Util',["require", "./Constants"], function (require, Constants
         },
         /**
          * @method getJSONReference
-         * @param {kick.core.Engine} engine
          * @param {Object} object
          * @return {JSON}
          */
-        getJSONReference: function (engine, object) {
+        getJSONReference: function (object) {
+            var engine = EngineSingleton.engine;
             if (object === null){
                 return null;
-            }
-
-            if (DEBUG) {
-                if (!engine instanceof require("kick/core/Engine")) {
-                    Util.fail("getJSONReference - engine not defined");
-                }
             }
             var isGameObject = object instanceof require("kick/scene/GameObject");
             var isComponent = !isGameObject && object.gameObject instanceof require("kick/scene/GameObject");
@@ -2641,13 +2676,13 @@ define('kick/core/Util',["require", "./Constants"], function (require, Constants
         },
         /**
          * @method componentToJSON
-         * @param {kick.core.Engine} engine
          * @param {kick.scene.Component} component
          * @param {String} componentType=component.constructor.name
          * @return {JSON}
          */
-        componentToJSON: function(engine, component, componentType) {
+        componentToJSON: function(component, componentType) {
             var name,
+                engine = EngineSingleton.engine,
                 config = {},
                 functionReturnType = {},
                 res = {
@@ -2657,6 +2692,11 @@ define('kick/core/Util',["require", "./Constants"], function (require, Constants
                 },
                 o,
                 serializedObject;
+            if (DEBUG){
+                if (component === EngineSingleton.engine) {
+                    Util.fail("Util.componentToJSON parameters has changed to Util.componentToJSON(kick.scene.Component, String)");
+                }
+            }
             if (res.type === "") {
                 Util.fail("Cannot serialize object type. Either provide toJSON function or use explicit function name 'function SomeObject(){}' ");
             }
@@ -2676,7 +2716,7 @@ define('kick/core/Util',["require", "./Constants"], function (require, Constants
                         // is typed array
                         return Util.typedArrayToArray(o);
                     } else if (typeofO === 'object') {
-                        return Util.getJSONReference(engine,o);
+                        return Util.getJSONReference(o);
                     } else {
                         return o;
                     }
@@ -5798,32 +5838,30 @@ define('kick/math/Vec3',["kick/core/Constants", "./Mat4"], function (constants, 
         /**
          * Generates a unit vector pointing from one vector to another
          * @method direction
+         * @param {kick.math.Vec3} out vec3 receiving operation result.
          * @param {kick.math.Vec3} vec origin vec3
          * @param {kick.math.Vec3} vec2 vec3 to point to
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving operation result. If not specified result is written to vec
          * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
-        direction: function (vec, vec2, dest) {
-            if (!dest) { dest = vec; }
-
+        direction: function (out, vec, vec2) {
             var x = vec[0] - vec2[0],
                 y = vec[1] - vec2[1],
                 z = vec[2] - vec2[2],
                 len = Math.sqrt(x * x + y * y + z * z);
 
             if (!len) {
-                dest[0] = 0;
-                dest[1] = 0;
-                dest[2] = 0;
-                return dest;
+                out[0] = 0;
+                out[1] = 0;
+                out[2] = 0;
+                return out;
             }
 
             len = 1 / len;
-            dest[0] = x * len;
-            dest[1] = y * len;
-            dest[2] = z * len;
-            return dest;
+            out[0] = x * len;
+            out[1] = y * len;
+            out[2] = z * len;
+            return out;
         },
 
 
@@ -5851,36 +5889,34 @@ define('kick/math/Vec3',["kick/core/Constants", "./Mat4"], function (constants, 
          * http://webcvs.freedesktop.org/mesa/Mesa/src/glu/mesa/project.c?revision=1.4&view=markup
          *
          * @method unproject
+         * @param {kick.math.Vec3} out vec3 receiving unprojected result.
          * @param {kick.math.Vec3} vec screen-space vector to project
          * @param {kick.math.Mat4} modelView Model-View matrix
          * @param {kick.math.Mat4} proj Projection matrix
-         * @param {kick.math.Vec4} viewport Viewport as given to gl.viewport [x, y, width, height]
-         * @param {kick.math.Vec3} dest Optional, vec3 receiving unprojected result. If not specified result is written to vec
+         * @param {kick.math.Vec4} viewportRect Viewport as given to gl.viewport [x, y, width, height]
          * @return {kick.math.Vec3} dest if specified, vec otherwise
          * @static
          */
         unproject: (function () {
             var m = new Float32Array(16),
                 v = new Float32Array(4);
-            return function (vec, modelView, proj, viewport, dest) {
-                if (!dest) { dest = vec; }
-
-                v[0] = (vec[0] - viewport[0]) * 2.0 / viewport[2] - 1.0;
-                v[1] = (vec[1] - viewport[1]) * 2.0 / viewport[3] - 1.0;
+            return function (out, vec, modelView, proj, viewportRect) {
+                v[0] = (vec[0] - viewportRect[0]) * 2.0 / viewportRect[2] - 1.0;
+                v[1] = (vec[1] - viewportRect[1]) * 2.0 / viewportRect[3] - 1.0;
                 v[2] = 2.0 * vec[2] - 1.0;
                 v[3] = 1.0;
 
                 mat4.multiply(m, proj, modelView);
                 if (!mat4.invert(m, m)) { return null; }
 
-                mat4.multiplyVec4(m, v);
+                mat4.multiplyVec4(v, m, v);
                 if (v[3] === 0.0) { return null; }
 
-                dest[0] = v[0] / v[3];
-                dest[1] = v[1] / v[3];
-                dest[2] = v[2] / v[3];
+                out[0] = v[0] / v[3];
+                out[1] = v[1] / v[3];
+                out[2] = v[2] / v[3];
 
-                return dest;
+                return out;
             };
         }()),
 
@@ -5888,23 +5924,20 @@ define('kick/math/Vec3',["kick/core/Constants", "./Mat4"], function (constants, 
          * Converts the spherical coordinates (in radians) to carterian coordinates.<br>
          * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
          * @method sphericalToCarterian
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Vec3} spherical spherical coordinates
-         * @param {kick.math.Vec3} dest optionally if not specified a new vec3 is returned
          * @return {kick.math.Vec3} position in cartesian angles
          * @static
          */
-        sphericalToCarterian: function (spherical, dest) {
+        sphericalToCarterian: function (out, spherical) {
             var radius = spherical[0],
                 polar = -spherical[1],
                 elevation = spherical[2],
                 a = radius * Math.cos(elevation);
-            if (!dest) {
-                dest =  new Float32Array(3);
-            }
-            dest[0] = a * Math.cos(polar);
-            dest[1] = radius * Math.sin(elevation);
-            dest[2] = a * Math.sin(polar);
-            return dest;
+            out[0] = a * Math.cos(polar);
+            out[1] = radius * Math.sin(elevation);
+            out[2] = a * Math.sin(polar);
+            return out;
         },
 
         /**
@@ -5935,12 +5968,12 @@ define('kick/math/Vec3',["kick/core/Constants", "./Mat4"], function (constants, 
          * Converts from cartesian coordinates to spherical coordinates (in radians)<br>
          * Spherical coordinates are mapped so vec[0] is radius, vec[1] is polar and vec[2] is elevation
          * @method cartesianToSpherical
+         * @param {kick.math.Vec3} out
          * @param {kick.math.Vec3} cartesian
-         * @param {kick.math.Vec3} dest Optional
          * @return {kick.math.Vec3}
          * @static
          */
-        cartesianToSpherical: function (cartesian, dest) {
+        cartesianToSpherical: function (out, cartesian) {
             var x = cartesian[0],
                 y = cartesian[1],
                 z = cartesian[2],
@@ -5948,17 +5981,14 @@ define('kick/math/Vec3',["kick/core/Constants", "./Mat4"], function (constants, 
             if (x === 0) {
                 x = 0.00001;
             }
-            if (!dest) {
-                dest =  new Float32Array(3);
-            }
 
-            dest[0] = sphericalX = Math.sqrt(x * x + y * y + z * z);
-            dest[1] = -Math.atan(z / x);
+            out[0] = sphericalX = Math.sqrt(x * x + y * y + z * z);
+            out[1] = -Math.atan(z / x);
             if (x < 0) {
-                dest[1] += Math.PI;
+                out[1] += Math.PI;
             }
-            dest[2] = Math.asin(y / sphericalX);
-            return dest;
+            out[2] = Math.asin(y / sphericalX);
+            return out;
         },
 
         /**
@@ -5990,7 +6020,6 @@ define('kick/math/Aabb',["kick/core/Constants", "./Vec3", "./Mat4"], function (c
      * @namespace kick.math
      */
     return {
-
         /**
          * Default value is min=MAX, max=MIN (meaning that it has a negative size)
          * @method create
@@ -6094,7 +6123,7 @@ define('kick/math/Aabb',["kick/core/Constants", "./Vec3", "./Mat4"], function (c
          * @return {kick.math.Aabb} out
          * @static
          */
-        merge: function (aabb, aabb2, out) {
+        merge: function (out, aabb, aabb2) {
             out[0] = Math.min(aabb[0], aabb2[0]);
             out[1] = Math.min(aabb[1], aabb2[1]);
             out[2] = Math.min(aabb[2], aabb2[2]);
@@ -6642,6 +6671,17 @@ define('kick/math/Vec2',["kick/core/Constants"], function (constants) {
                 }
             }
             return true;
+        },
+
+        /**
+         * Returns a string representation of a vector
+         * @method str
+         * @param {kick.math.Vec2} vec vec2 to represent as a string
+         * @return {String} string representation of vec
+         * @static
+         */
+        str: function (vec) {
+            return '[' + vec[0] + ', ' + vec[1] + ']';
         }
 
     };
@@ -7954,7 +7994,7 @@ define('kick/material/GLSLConstants',[], function () {
 * @property unlit_vs.glsl
 * @type String
 */
-return {"__error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\ngl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","__error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","__pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\nvoid main(void)\n{\ngl_FragColor = gameObjectUID;\n}","__pick_normal_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec3 vNormal;\nvoid main(void)\n{\ngl_FragColor = vec4(vNormal,0);\n}","__pick_normal_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nuniform mat4 _mvProj;\nvarying vec3 vNormal;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvNormal = normal;\n}","__pick_uv_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec2 vUV;\nvoid main(void)\n{\ngl_FragColor = vec4(vUV, 0, 0);\n}","__pick_uv_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec2 vUV;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUV = uv1;\n}","__pick_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\nvarying vec4 gameObjectUID;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\ngameObjectUID = _gameObjectUID;\n}","__shadowmap_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvec4 packDepth( const in float depth ) {\nconst vec4 bitShift = vec4( 16777216.0, 65536.0, 256.0, 1.0 );\nconst vec4 bitMask = vec4( 0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0 );\nvec4 res = fract( depth * bitShift );\nres -= res.xxyz * bitMask;\nreturn res;\n}\nvoid main() {\ngl_FragColor = packDepth( gl_FragCoord.z );\n}\n","__shadowmap_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 directionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 pointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((directionalLight+pointLight)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color, 1.0);\n}\n","diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec4 vShadowMapCoord;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\nvNormal = _norm * normal;\nvShadowMapCoord = _lightMat * v;\n} ","light.glsl":"vec3 getPointLightDiffuse(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS]){\nvec3 diffuse = vec3(0.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nfloat nDotVP = max(0.0, dot(normal, VP));\ndiffuse += colorIntensity*nDotVP * attenuation;\n}\nreturn diffuse;\n}\nvoid getPointLight(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS],float specularExponent, out vec3 diffuse, out float specular){\ndiffuse = vec3(0.0, 0.0, 0.0);\nspecular = 0.0;\nvec3 eye = vec3(0.0,0.0,1.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nvec3 halfVector = normalize(VP + eye);\nfloat nDotVP = max(0.0, dot(normal, VP));\nfloat nDotHV = max(0.0, dot(normal, halfVector));\nfloat pf;\nif (nDotVP == 0.0){\npf = 0.0;\n} else {\npf = pow(nDotHV, specularExponent);\n}\nbool isLightEnabled = (attenuationVector[0]+attenuationVector[1]+attenuationVector[2])>0.0;\nif (isLightEnabled){\ndiffuse += colorIntensity * nDotVP * attenuation;\nspecular += pf * attenuation;\n}\n}\n}\nvec3 getDirectionalLightDiffuse(vec3 normal, mat3 dLight){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\nreturn (colorIntensity * diffuseContribution);\n}\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nvec3 halfVector = dLight[2];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\n\tfloat specularContribution = max(dot(normal, halfVector), 0.0);\nspecular = pow(specularContribution, specularExponent);\n\tdiffuse = (colorIntensity * diffuseContribution);\n}\nuniform mat3 _dLight;\nuniform vec3 _ambient;\nuniform mat3 _pLights[LIGHTS];\n","shadowmap.glsl":"varying vec4 vShadowMapCoord;\nuniform sampler2D _shadowMapTexture;\nconst float shadowBias = 0.005;\nfloat unpackDepth( const in vec4 rgba_depth ) {\nconst vec4 bit_shift = vec4( 1.0 / ( 16777216.0 ), 1.0 / ( 65536.0 ), 1.0 / 256.0, 1.0 );\nreturn dot( rgba_depth, bit_shift );\n}\nfloat computeLightVisibility(){\nvec3 shadowCoord = vShadowMapCoord.xyz / vShadowMapCoord.w;\nif (shadowCoord.x >= 0.0 && shadowCoord.x <= 1.0 && shadowCoord.y >= 0.0 && shadowCoord.y <= 1.0){\nvec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);\nbool isMaxDepth = dot(packedShadowDepth, vec4(1.0,1.0,1.0,1.0))==4.0;\nif (!isMaxDepth){\nfloat shadowDepth = unpackDepth(packedShadowDepth);\nif (shadowDepth > shadowCoord.z - shadowBias){\nreturn 1.0;\n}\nreturn 0.0;\n}\n}\nreturn 1.0; // if outside shadow map, then not occcluded\n}","specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((diffuse+diffusePoint)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color.xyz, 1.0)+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvarying vec4 vShadowMapCoord;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvUv = uv1;\nvEcPosition = (_mv * v).xyz;\nvNormal= _norm * normal;\nvShadowMapCoord = _lightMat * v;\n} ","transparent_diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuseDirectionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 diffusePointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nvec4 color = vec4(max(diffuseDirectionalLight+diffusePointLight,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color;\n}\n","transparent_diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nuniform mat4 _mv;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= _norm * normal;\n} ","transparent_specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nvec4 color = vec4(max(diffuse+diffusePoint,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","transparent_specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= _norm * normal;\n} ","transparent_unlit_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz,1.0);\n}\n","unlit_vertex_color_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec4 vColor;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz*vColor.xyz,1.0);\n}\n","unlit_vertex_color_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nattribute vec4 color;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvarying vec4 vColor;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\nvColor = color;\n}","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}"};
+return {"__error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\ngl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","__error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","__pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\nvoid main(void)\n{\ngl_FragColor = gameObjectUID;\n}","__pick_normal_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec3 vNormal;\nvoid main(void)\n{\ngl_FragColor = vec4(vNormal,0);\n}","__pick_normal_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec3 vNormal;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvNormal = (_norm * normal) / 2.0 + vec3(0.5, 0.5, 0.5);\n}","__pick_uv_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec2 vUV;\nvoid main(void)\n{\ngl_FragColor = vec4(vUV, 0, 0);\n}","__pick_uv_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec2 vUV;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUV = uv1;\n}","__pick_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\nvarying vec4 gameObjectUID;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\ngameObjectUID = _gameObjectUID;\n}","__shadowmap_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvec4 packDepth( const in float depth ) {\nconst vec4 bitShift = vec4( 16777216.0, 65536.0, 256.0, 1.0 );\nconst vec4 bitMask = vec4( 0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0 );\nvec4 res = fract( depth * bitShift );\nres -= res.xxyz * bitMask;\nreturn res;\n}\nvoid main() {\ngl_FragColor = packDepth( gl_FragCoord.z );\n}\n","__shadowmap_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 directionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 pointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((directionalLight+pointLight)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color, 1.0);\n}\n","diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec4 vShadowMapCoord;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\nvNormal = _norm * normal;\nvShadowMapCoord = _lightMat * v;\n} ","light.glsl":"vec3 getPointLightDiffuse(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS]){\nvec3 diffuse = vec3(0.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nfloat nDotVP = max(0.0, dot(normal, VP));\ndiffuse += colorIntensity*nDotVP * attenuation;\n}\nreturn diffuse;\n}\nvoid getPointLight(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS],float specularExponent, out vec3 diffuse, out float specular){\ndiffuse = vec3(0.0, 0.0, 0.0);\nspecular = 0.0;\nvec3 eye = vec3(0.0,0.0,1.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nvec3 halfVector = normalize(VP + eye);\nfloat nDotVP = max(0.0, dot(normal, VP));\nfloat nDotHV = max(0.0, dot(normal, halfVector));\nfloat pf;\nif (nDotVP == 0.0){\npf = 0.0;\n} else {\npf = pow(nDotHV, specularExponent);\n}\nbool isLightEnabled = (attenuationVector[0]+attenuationVector[1]+attenuationVector[2])>0.0;\nif (isLightEnabled){\ndiffuse += colorIntensity * nDotVP * attenuation;\nspecular += pf * attenuation;\n}\n}\n}\nvec3 getDirectionalLightDiffuse(vec3 normal, mat3 dLight){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\nreturn (colorIntensity * diffuseContribution);\n}\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nvec3 halfVector = dLight[2];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\n\tfloat specularContribution = max(dot(normal, halfVector), 0.0);\nspecular = pow(specularContribution, specularExponent);\n\tdiffuse = (colorIntensity * diffuseContribution);\n}\nuniform mat3 _dLight;\nuniform vec3 _ambient;\nuniform mat3 _pLights[LIGHTS];\n","shadowmap.glsl":"varying vec4 vShadowMapCoord;\nuniform sampler2D _shadowMapTexture;\nconst float shadowBias = 0.005;\nfloat unpackDepth( const in vec4 rgba_depth ) {\nconst vec4 bit_shift = vec4( 1.0 / ( 16777216.0 ), 1.0 / ( 65536.0 ), 1.0 / 256.0, 1.0 );\nreturn dot( rgba_depth, bit_shift );\n}\nfloat computeLightVisibility(){\nvec3 shadowCoord = vShadowMapCoord.xyz / vShadowMapCoord.w;\nif (shadowCoord.x >= 0.0 && shadowCoord.x <= 1.0 && shadowCoord.y >= 0.0 && shadowCoord.y <= 1.0){\nvec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);\nbool isMaxDepth = dot(packedShadowDepth, vec4(1.0,1.0,1.0,1.0))==4.0;\nif (!isMaxDepth){\nfloat shadowDepth = unpackDepth(packedShadowDepth);\nif (shadowDepth > shadowCoord.z - shadowBias){\nreturn 1.0;\n}\nreturn 0.0;\n}\n}\nreturn 1.0; // if outside shadow map, then not occcluded\n}","specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((diffuse+diffusePoint)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color.xyz, 1.0)+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvarying vec4 vShadowMapCoord;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvUv = uv1;\nvEcPosition = (_mv * v).xyz;\nvNormal= _norm * normal;\nvShadowMapCoord = _lightMat * v;\n} ","transparent_diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuseDirectionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 diffusePointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nvec4 color = vec4(max(diffuseDirectionalLight+diffusePointLight,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color;\n}\n","transparent_diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nuniform mat4 _mv;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= _norm * normal;\n} ","transparent_specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nvec4 color = vec4(max(diffuse+diffusePoint,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","transparent_specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= _norm * normal;\n} ","transparent_unlit_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz,1.0);\n}\n","unlit_vertex_color_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec4 vColor;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz*vColor.xyz,1.0);\n}\n","unlit_vertex_color_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nattribute vec4 color;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvarying vec4 vColor;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\nvColor = color;\n}","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}"};
 });
 
 define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", "./Constants"], function (Util, MeshDataFactory, GLSLConstants, Constants) {
@@ -7980,6 +8020,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
              * Returns kickjs
              * @property protocol
              * @type String
+             * @final
              */
             protocol: {
                 value: "kickjs://"
@@ -8105,7 +8146,6 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                     "__shadowmap",
                     "__error",
                     "__pick",
-                    "__pick_position",
                     "__pick_normal",
                     "__pick_uv",
                     "transparent_specular",
@@ -8226,6 +8266,26 @@ define('kick/core/Config',["./Util", "./Constants"], function (Util, Constants) 
 
     /**
      * The global configuration of the engine. Cannot be changed during runtime.
+     * @example
+     *      <canvas id="3dCanvas" width="50" height="50"></canvas>
+     *      <script src="require.js"></script>
+     *      <script type="text/javascript">
+     *          var req = require.config({
+     *                  paths: {
+     *                      kick: 'kick-debug' // loads kick-debug.js (must be in same path)
+     *                  }
+     *              });
+     *          req(['kick'],
+     *                  function (kick) {
+     *                      var config = {
+                                enableDebugContext: true,
+                                shadows: true
+                            };
+     *                      var engine = new kick.core.Engine('3dCanvas', config);
+     *                      // [...]
+     *                  }
+     *          );
+     *      </script>
      * @class Config
      * @namespace kick.core
      * @constructor
@@ -8522,45 +8582,6 @@ define('kick/core/GLState',["kick/core/Constants"], function (constants) {
     };
 });
 
-define('kick/core/EngineSingleton',["./Util", "./Constants"], function (Util, Constants) {
-    
-    /**
-     * Singleton - used to get a reference to the current engine.
-     * The static engine property is set when an engine-instance is created.
-     * The singleton object is needed to avoid cyclic-dependencies.
-     * @class EngineSingleton
-     * @namespace kick.core
-     */
-    var EngineSingleton = {},
-        currentEngine = null;
-    /**
-     * Returns
-     * @property engine
-     * @type {kick.core.Engine}
-     * @default null
-     * @static
-     */
-    Object.defineProperty(EngineSingleton,"engine",
-        {
-            set: function(newEngine){
-                if (currentEngine != null && true){
-                    Util.warn("Engine is created twice in same context.");
-                }
-                currentEngine = newEngine;
-            },
-            get: function(){
-                if (currentEngine==null && true){
-                    Util.warn("Engine is not initialized yet.");
-                }
-                return currentEngine;
-            }
-
-        });
-    Object.freeze(EngineSingleton);
-
-    return EngineSingleton;
-});
-
 define('kick/core/ResourceDescriptor',["require","./Util", "./Constants", "./EngineSingleton"], function (require, Util, constants, EngineSingleton) {
     
 
@@ -8568,22 +8589,22 @@ define('kick/core/ResourceDescriptor',["require","./Util", "./Constants", "./Eng
 
     /**
      * A project is a container of all resources and assets used in a game.<br>
-     * Example usage:
+     *
      * @example
      *     var materialConfig = {
-     *              name:"Some material",
-     *              shader:"Undefined",
-     *              uniforms: {
-     *                  value:42,
-     *                  type: 5126
-     *              }
-     *          };
-     *          var resourceDescriptorConfig = {
-     *              type: "kick/material/Material",
-     *              config: materialConfig,
-     *              uid: 132
-     *          };
-     *          var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
+     *         name:"Some material",
+     *         shader:"Undefined",
+     *         uniforms: {
+     *             value:42,
+     *             type: 5126
+     *         }
+     *     };
+     *     var resourceDescriptorConfig = {
+     *         type: "kick/material/Material",
+     *         config: materialConfig,
+     *         uid: 132
+     *     };
+     *     var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
      *
      * @class ResourceDescriptor
      * @namespace kick.core
@@ -8739,7 +8760,6 @@ define('kick/core/ProjectAsset',["kick/core/Constants", "./Util", "./EngineSingl
         /**
          * @method toJSON
          * @return {Object} configuration in JSON
-         * @abstract
          */
         object.toJSON = function(){
             Util.fail("toJSON does not exist for the Asset");
@@ -9177,6 +9197,23 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
          *     </li>
          *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
          * </ul>
+         * @example
+         *      var diffuseShader = project.load(project.ENGINE_SHADER_DIFFUSE);
+         * @example
+         *      var vertexShaderStr = "attribute vec3 vertex;\n"+
+         *          "uniform mat4 _mvProj;\n"+
+         *          "void main(void) {\n"+
+         *          "    gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+         *          "}";
+         *      var fragmentShaderStr = "uniform highp float _time;\n"+
+         *          "void main(void) {\n"+
+         *          "  highp float fraction = mod(_time/1000.0,1.0);\n"+
+         *          "  gl_FragColor = vec4(fraction,fraction,fraction, 1.0);\n"+
+         *          "}";
+         *      var shader = new kick.material.Shader( {
+         *              vertexShaderSrc: vertexShaderStr,
+         *              fragmentShaderSrc: fragmentShaderStr
+         *          });
          * @class Shader
          * @namespace kick.material
          * @constructor
@@ -10496,8 +10533,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
             this.setImageData = function (width, height, border, type, pixels, dataURI) {
                 createImageFunction = thisObj.setImageData;
                 createImageFunctionParameters = arguments;
-                var format,
-                    res,
+                var res,
                     i,
                     textureSides = _textureType === 3553 ?
                             [3553] :
@@ -10528,7 +10564,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                     Util.fail("Texture.textureType not set");
                     return;
                 }
-                format = _intFormat;
+
 
                 Vec2.copy(_dimension, [width, height]);
                 _dataURI = dataURI;
@@ -10536,7 +10572,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                 thisObj.bind(0); // bind to texture slot 0
                 for (i = 0; i < textureSides.length; i++) {
                     gl.pixelStorei(3317, 1);
-                    gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, format, type, pixels);
+                    gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, _intFormat, type, pixels);
                 }
                 gl.texParameteri(_textureType, 10240, _magFilter);
                 gl.texParameteri(_textureType, 10241, _minFilter);
@@ -11246,7 +11282,7 @@ define('kick/material/MaterialUniform',["kick/core/Util", "kick/core/Constants",
                         Util.fail("Unknown uniform value type. Expected Texture");
                     }
                 }
-                value = Util.getJSONReference(value.engine, value);
+                value = Util.getJSONReference(value);
             }
             return {
                 name: thisObj.name,
@@ -11263,11 +11299,18 @@ define('kick/material/Material',["kick/core/ProjectAsset", "kick/core/Util", "ki
         /**
          * @module kick.material
          */
-
         var ASSERT = true;
 
         /**
-         * Material configuration
+         * Material configuration. Stores a material configuration and a shader.
+         * @example
+         *      var material = new KICK.material.Material({
+         *      shader: project.load(project.ENGINE_SHADER_DIFFUSE),
+         *          uniformData:{
+         *              mainColor:[1.0,0.0,0.9,0.5],
+         *              mainTexture: project.load(project.ENGINE_TEXTURE_WHITE)
+         *          }
+         *      });
          * @class Material
          * @namespace kick.material
          * @constructor
@@ -11536,7 +11579,7 @@ define('kick/material/Material',["kick/core/ProjectAsset", "kick/core/Util", "ki
                 return {
                     uid: thisObj.uid,
                     name: _name,
-                    shader: Util.getJSONReference(engine, _shader),
+                    shader: Util.getJSONReference(_shader),
                     uniformData: serializedUniforms // uniformData only used during serialization
                 };
             };
@@ -11899,9 +11942,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                         },
                         onComplete = function () {
                             var initCount = 1,
-                                decrementInitCount = function(url){
+                                decrementInitCount = function (url) {
                                     initCount--;
-                                    if (initCount == 0){
+                                    if (initCount === 0) {
                                         _maxUID = config.maxUID || 0; // reset maxUID
                                         if (config.activeScene) {
                                             engine.activeScene = thisObj.load(config.activeScene);
@@ -11914,7 +11957,7 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                                     }
                                 },
                                 resourceTracker = {
-                                    resourceLoadingStarted: function(){
+                                    resourceLoadingStarted: function () {
                                         initCount++;
                                     },
                                     resourceLoadingFinished: decrementInitCount,
@@ -11931,9 +11974,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                         },
                         resourceCount = resourceDescriptors.length,
                         instantiateCount = 0,
-                        instantiateSuccess = function(object){
-                            if (resourceCache[object.uid] !== object){
-                                onError("Did not restore uid correct for "+object.uid+".");
+                        instantiateSuccess = function (object) {
+                            if (resourceCache[object.uid] !== object) {
+                                onError("Did not restore uid correct for " + object.uid + ".");
                                 return;
                             }
 
@@ -12282,12 +12325,6 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
          */
         Project.ENGINE_SHADER___PICK_NORMAL = -112;
         /**
-         * @property ENGINE_SHADER___PICK_POSITION
-         * @type Number
-         * @static
-         */
-        Project.ENGINE_SHADER___PICK_POSITION = -113;
-        /**
          * @property ENGINE_TEXTURE_BLACK
          * @type Number
          * @static
@@ -12547,7 +12584,7 @@ define('kick/core/MouseInput',["kick/math/Vec2", "./Util"], function (Vec2, Util
      *         var mouseInput,
      *         thisObj = this;
      *         this.activated = function(){
-     *             mouseInput = thisObj.gameObject.engine.mouseInput;
+     *             mouseInput = kick.core.EngineSingleton.engine.mouseInput;
      *         };
      *         this.update = function(){
      *             if (mouseInput.isButtonDown(0)){
@@ -12836,7 +12873,7 @@ define('kick/core/KeyInput',["./Util"], function (Util) {
      *         var keyInput, thisObj = this;
      *         // registers listener (invoked when component is registered)
      *         this.activated = function (){
-     *             var engine = thisObj.gameObject.engine;
+     *             var engine = kick.core.EngineSingleton.engine;
      *             keyInput = engine.keyInput;
      *         };
      *         this.update = function(){
@@ -13662,7 +13699,7 @@ define('kick/scene/SceneLights',["kick/core/Constants", "kick/core/Util", "kick/
         return function (maxNumerOfLights) {
             var ambientLight = null,
                 directionalLight = null,
-                directionalLightData = Mat3.create(), // column matrix with the columns lightDirection,colorIntensity,halfVector
+                directionalLightData = new Float32Array(9), // column matrix with the columns lightDirection,colorIntensity,halfVector
                 directionalLightDirection = directionalLightData.subarray(0, 3),
                 directionalLightColorIntensity = directionalLightData.subarray(3, 6),
                 directionalHalfVector = directionalLightData.subarray(6, 9),
@@ -14209,7 +14246,7 @@ define('kick/texture/RenderTexture',["kick/core/ProjectAsset", "kick/math/Vec2",
                 return {
                     uid: thisObj.uid,
                     name: _name,
-                    colorTexture: Util.getJSONReference(engine, colorTexture)
+                    colorTexture: Util.getJSONReference(colorTexture)
                 };
             };
 
@@ -14218,8 +14255,8 @@ define('kick/texture/RenderTexture',["kick/core/ProjectAsset", "kick/math/Vec2",
 
     });
 
-define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick/mesh/Mesh"],
-    function (Constants, Material, Util, Mesh) {
+define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick/mesh/Mesh", "kick/core/EngineSingleton"],
+    function (Constants, Material, Util, Mesh, EngineSingleton) {
         
 
         var ASSERT = true;
@@ -14240,7 +14277,7 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
                 _materials = [],
                 _mesh,
                 _renderOrder,
-                engine,
+                engine = EngineSingleton.engine,
                 thisObj = this;
 
             /**
@@ -14248,10 +14285,9 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
              * @method activated
              */
             this.activated = function () {
-                engine = thisObj.gameObject.engine;
                 transform = thisObj.gameObject.transform;
                 if (_materials.length === 0) {
-                    var project = thisObj.gameObject.engine.project;
+                    var project = engine.project;
                     thisObj.material = project.load(project.ENGINE_MATERIAL_DEFAULT);
                 }
             };
@@ -14376,7 +14412,7 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
                 if (!thisObj.gameObject) {
                     return null; // component is destroyed
                 } else {
-                    return Util.componentToJSON(thisObj.gameObject.engine, this, "kick.scene.MeshRenderer");
+                    return Util.componentToJSON(this, "kick.scene.MeshRenderer");
                 }
             };
 
@@ -14385,8 +14421,8 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
 
     });
 
-define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton"],
-    function (MeshRenderer, Material, Constants, EngineSingleton) {
+define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick/core/EngineSingleton", "kick/core/Util", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Vec2"],
+    function (MeshRenderer, Material, Constants, EngineSingleton, Util, vec4, vec3, vec2) {
         
 
         /**
@@ -14395,22 +14431,24 @@ define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kic
          * @class PickResult
          * @namespace kick.scene
          * @constructor
-         * @param pickingRenderTarget
+         * @param {kick.texture.RenderTexture} pickingRenderTarget
          * @param {kick.scene.GameObject} gameObject
          * @param {Integer} x
          * @param {Integer} y
-         * @param setupCamera
-         * @param engineUniforms
+         * @param {EngineUniforms} engineUniforms
+         * @param {kick.scene.Camera} camera
          * @constructor
          */
-        return function (pickingRenderTarget, gameObject, x, y, setupCamera, engineUniforms) {
-            if (true){
-                if (pickingRenderTarget === EngineSingleton.engine){
+        return function (pickingRenderTarget, gameObject, x, y, engineUniforms, camera) {
+            if (true) {
+                if (pickingRenderTarget === EngineSingleton.engine) {
                     Util.fail("PickResult constructor changed - engine parameter is removed");
                 }
             }
             var normal,
                 uv,
+                depth,
+                engine = EngineSingleton.engine,
                 /**
                  * @private
                  * @method renderObjectWithShader
@@ -14419,13 +14457,13 @@ define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kic
                  */
                 renderObjectWithShader = function (shader) {
                     var array = new Uint8Array(4),
-                        meshRenderers = gameObject.getComponentsOfType(MeshRenderer), // todo - create getComponentsWithMethod
+                        meshRenderers = gameObject.getComponentsWithMethod("render"),
                         i,
-                        material = new Material(engine, {
+                        material = new Material({
                             name: "PickResult",
                             shader: shader
                         });
-                    setupCamera();
+                    camera.setupCamera();
                     pickingRenderTarget.bind();
                     engine.gl.clear(16384 | 256);
                     for (i = 0; i < meshRenderers.length; i++) {
@@ -14438,12 +14476,21 @@ define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kic
                 readNormal = function () {
                     var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_NORMAL);
                     normal = renderObjectWithShader(shader);
-                    normal = [normal[0] / 255, normal[1] / 255, normal[2] / 255];
+                    // normal = (normal / 255 - 0.5) * 2
+                    normal = vec3.scale(vec3.create(), normal, 1 / 255);
+                    vec3.add(normal, normal, [-0.5, -0.5, -0.5]);
+                    vec3.scale(normal, normal, 2);
                 },
                 readUV = function () {
                     var shader = engine.project.load(engine.project.ENGINE_SHADER___PICK_UV);
                     uv = renderObjectWithShader(shader);
-                    uv = [uv[0] / 255, uv[1] / 255];
+                    uv = vec2.scale(vec2.create(), uv, 1 / 255);
+                },
+                readDepth = function () {
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER___SHADOWMAP),
+                        depthPacked = renderObjectWithShader(shader),
+                        bit_shift = [1 / (16777216 * 255), 1 / (65536 * 255), 1 / (256 * 255), 1 / 255];
+                    depth = vec4.dot(depthPacked, bit_shift);
                 };
 
 
@@ -14497,13 +14544,38 @@ define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kic
                         }
                         return uv;
                     }
+                },
+                /**
+                 * The distance of the pick point to the camera
+                 * @property distance
+                 * @type Number
+                 */
+                distance : {
+                    get: function () {
+                        if (!depth) {
+                            readDepth();
+                        }
+                        var zFar = camera.far,
+                            zNear = camera.near;
+
+                        return 2 * zFar * zNear / (zFar + zNear - (zFar - zNear) * (2 * depth - 1));
+                    }
+                },
+                /**
+                 * The 3D point in world coordinates of the selected point
+                 * @property point
+                 * @type kick.math.Vec3
+                 */
+                point: {
+                    get: function () {
+                        if (!depth) {
+                            readDepth();
+                        }
+                        return vec3.unproject(vec3.create(), [x, y, depth], engineUniforms.viewMatrix, engineUniforms.projectionMatrix, camera.viewportRect);
+                    }
                 }
             });
         };
-
-
-
-
     });
 
 define('kick/scene/CameraPicking',["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/Constants", "kick/core/Util", "./PickResult", "kick/core/EngineSingleton"],
@@ -14517,11 +14589,12 @@ define('kick/scene/CameraPicking',["kick/math/Vec4", "kick/material/Material", "
          * @param {Function} setupClearColor
          * @param {Function} renderSceneObjects
          * @param {Scene} sceneObj
+         * @param {kick.scene.Camera} camera
          * @constructor
          */
-        return function (setupClearColor, renderSceneObjects, sceneObj, setupCamera) {
-            if (true){
-                if (setupClearColor === EngineSingleton.engine){
+        return function (setupClearColor, renderSceneObjects, sceneObj, camera) {
+            if (true) {
+                if (setupClearColor === EngineSingleton.engine) {
                     Util.fail("CameraPicking constructor changed - engine parameter is removed");
                 }
             }
@@ -14538,7 +14611,8 @@ define('kick/scene/CameraPicking',["kick/math/Vec4", "kick/material/Material", "
                         {
                             shader: engine.project.load(engine.project.ENGINE_SHADER___PICK),
                             name: "Picking material"
-                        });
+                        }
+                    );
                     pickingRenderTarget = new RenderTexture({
                         dimension: glState.viewportSize
 
@@ -14599,7 +14673,7 @@ define('kick/scene/CameraPicking',["kick/math/Vec4", "kick/material/Material", "
                                         foundObj = sceneObj.getObjectByUID(uid);
                                         if (foundObj) {
                                             if (pick.point) {
-                                                foundObj = new PickResult(engine, pickingRenderTarget, foundObj, pick.x, pick.y, setupCamera, engineUniforms);
+                                                foundObj = new PickResult(pickingRenderTarget, foundObj, pick.x, pick.y, engineUniforms, camera);
                                             }
                                             objects.push(foundObj);
                                             objectCount[uid] = 1;
@@ -14626,8 +14700,8 @@ define('kick/scene/CameraPicking',["kick/math/Vec4", "kick/material/Material", "
 
     });
 
-define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture"],
-    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture) {
+define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/EngineSingleton"],
+    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture, EngineSingleton) {
         
 
         /**
@@ -14651,7 +14725,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                 glState,
                 thisObj = this,
                 transform,
-                engine,
+                engine = EngineSingleton.engine,
                 _enabled = true,
                 c = Constants,
                 _renderShadow = false,
@@ -14732,49 +14806,6 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                 setupViewport = function (offsetX, offsetY, width, height) {
                     gl.viewport(offsetX, offsetY, width, height);
                     gl.scissor(offsetX, offsetY, width, height);
-                },
-                /**
-                 * Clear the screen and set the projectionMatrix and modelViewMatrix on the glState object
-                 * @method setupCamera
-                 * @private
-                 */
-                setupCamera = function () {
-                    var viewportDimension = _renderTarget ? _renderTarget.dimension : glState.viewportSize,
-                        viewPortWidth = viewportDimension[0],
-                        viewPortHeight = viewportDimension[1],
-                        offsetX = viewPortWidth * _normalizedViewportRect[0],
-                        offsetY = viewPortHeight * _normalizedViewportRect[1],
-                        width = viewPortWidth * _normalizedViewportRect[2],
-                        height = viewPortHeight * _normalizedViewportRect[3],
-                        globalMatrixInv;
-                    setupViewport(offsetX, offsetY, width, height);
-                    glState.currentMaterial = null; // clear current material
-                    // setup render target
-                    if (glState.renderTarget !== _renderTarget) {
-                        if (_renderTarget) {
-                            _renderTarget.bind();
-                        } else {
-                            gl.bindFramebuffer(36160, null);
-                        }
-                        glState.renderTarget = _renderTarget;
-                    }
-
-                    setupClearColor(_clearColor);
-                    gl.clear(_currentClearFlags);
-
-                    if (_perspective) {
-                        Mat4.perspective(projectionMatrix, _fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
-                            _near, _far);
-                    } else {
-                        Mat4.ortho(projectionMatrix, _left, _right, _bottom, _top,
-                            _near, _far);
-                    }
-
-                    globalMatrixInv = transform.getGlobalTRSInverse();
-                    Mat4.copy(viewMatrix, globalMatrixInv);
-
-                    Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
-
                 },
                 /**
                  * Compare two objects based on renderOrder value, then on material.shader.uid (if exist)
@@ -14981,7 +15012,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
              */
             this.pickPoint = function (gameObjectPickedFn, x, y) {
                 if (!pickingObject) {
-                    pickingObject = new CameraPicking(engine, setupClearColor, renderSceneObjects, _scene, setupCamera);
+                    pickingObject = new CameraPicking(setupClearColor, renderSceneObjects, _scene, thisObj);
                 }
                 pickingObject.add({
                     gameObjectPickedFn: gameObjectPickedFn,
@@ -15019,6 +15050,50 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
             };
 
             /**
+             * Clear the screen and set the projectionMatrix and modelViewMatrix on the glState object.
+             * Called during renderScene
+             * @method setupCamera
+             */
+            this.setupCamera = function () {
+                var viewportDimension = _renderTarget ? _renderTarget.dimension : glState.viewportSize,
+                    viewPortWidth = viewportDimension[0],
+                    viewPortHeight = viewportDimension[1],
+                    offsetX = viewPortWidth * _normalizedViewportRect[0],
+                    offsetY = viewPortHeight * _normalizedViewportRect[1],
+                    width = viewPortWidth * _normalizedViewportRect[2],
+                    height = viewPortHeight * _normalizedViewportRect[3],
+                    globalMatrixInv;
+                setupViewport(offsetX, offsetY, width, height);
+                glState.currentMaterial = null; // clear current material
+                // setup render target
+                if (glState.renderTarget !== _renderTarget) {
+                    if (_renderTarget) {
+                        _renderTarget.bind();
+                    } else {
+                        gl.bindFramebuffer(36160, null);
+                    }
+                    glState.renderTarget = _renderTarget;
+                }
+
+                setupClearColor(_clearColor);
+                gl.clear(_currentClearFlags);
+
+                if (_perspective) {
+                    Mat4.perspective(projectionMatrix, _fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
+                        _near, _far);
+                } else {
+                    Mat4.ortho(projectionMatrix, _left, _right, _bottom, _top,
+                        _near, _far);
+                }
+
+                globalMatrixInv = transform.getGlobalTRSInverse();
+                Mat4.copy(viewMatrix, globalMatrixInv);
+
+                Mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+
+            };
+
+            /**
              * Handles the camera setup (get fast reference to transform and glcontext).
              * Also register component listener on scene
              * @method activated
@@ -15030,7 +15105,6 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                     _shadowmapShader,
                     materialConfig;
                 engineUniforms.currentCameraTransform = gameObject.transform;
-                engine = gameObject.engine;
                 if (!isContextListenerRegistered) {
                     isContextListenerRegistered = true;
                     engine.addContextListener(contextListener);
@@ -15087,7 +15161,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                     glState.currentMaterial = null; // clear current material
                     renderShadowMap(sceneLightObj);
                 }
-                setupCamera();
+                thisObj.setupCamera();
 
                 sceneLightObj.recomputeLight(viewMatrix);
                 if (renderableComponentsTransparent.length > 0) {
@@ -15391,6 +15465,36 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                         }
                         Vec4.copy(_normalizedViewportRect, newValue);
                     }
+                },
+                /**
+                 * Viewport rect [xOffset,yOffset,xWidth,yHeight]
+                 * @property viewportRect
+                 * @type Array_Number
+                 */
+                viewportRect: {
+                    get: function () {
+                        var res = Vec4.clone(_normalizedViewportRect),
+                            canvasDimension = engine.canvasDimension;
+                        res[0] *= canvasDimension[0];
+                        res[2] *= canvasDimension[0];
+                        res[1] *= canvasDimension[1];
+                        res[3] *= canvasDimension[1];
+                        return res;
+                    },
+                    set: function (value) {
+                        if (true) {
+                            if (value.length !== 4) {
+                                Util.fail("Camera.viewportRect must be Float32Array of length 4");
+                            }
+                        }
+                        var res = Vec4.clone(value),
+                            canvasDimension = engine.canvasDimension;
+                        res[0] /= canvasDimension[0];
+                        res[2] /= canvasDimension[0];
+                        res[1] /= canvasDimension[1];
+                        res[3] /= canvasDimension[1];
+                        Vec4.copy(_normalizedViewportRect, res);
+                    }
                 }
             });
 
@@ -15418,7 +15522,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                         enabled: _enabled,
                         renderShadow: _renderShadow,
                         layerMask: _layerMask,
-                        renderTarget: Util.getJSONReference(engine, _renderTarget),
+                        renderTarget: Util.getJSONReference(_renderTarget),
                         fieldOfView: _fieldOfView,
                         near: _near,
                         far: _far,
@@ -15455,8 +15559,8 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
         return Camera;
     });
 
-define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture/Texture", "kick/texture/RenderTexture"],
-    function (Constants, Util, Vec3, Texture, RenderTexture) {
+define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture/Texture", "kick/texture/RenderTexture", "kick/core/EngineSingleton"],
+    function (Constants, Util, Vec3, Texture, RenderTexture, EngineSingleton) {
         
 
         var ASSERT = true,
@@ -15475,7 +15579,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
         Light = function (config) {
             var thisObj = this,
                 color = Vec3.clone([1.0, 1.0, 1.0]),
-                engine,
+                engine = EngineSingleton.engine,
                 type = 3, // point light
                 _shadow = false,
                 _shadowStrength = 1.0,
@@ -15490,6 +15594,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                     Vec3.copy(colorIntensity, [color[0] * intensity, color[1] * intensity, color[2] * intensity]);
                 },
                 gameObject,
+                initialized = false,
                 scriptPriority,
                 updateShadowTexture = function () {
                     if (_shadow) {
@@ -15559,7 +15664,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                     set: function (value) {
                         if (value !== _shadow) {
                             _shadow = value;
-                            if (engine) {
+                            if (initialized) {
                                 updateShadowTexture();
                             }
                         }
@@ -15631,7 +15736,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                         return type;
                     },
                     set: function (newValue) {
-                        if (!engine) {
+                        if (!initialized) {
                             type = newValue;
                         } else {
                             if (ASSERT) {
@@ -15714,7 +15819,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
 
             this.activated = function () {
                 var gameObject = thisObj.gameObject;
-                engine = gameObject.engine;
+                initialized = true;
                 transform = gameObject.transform;
                 updateShadowTexture();
             };
@@ -15724,7 +15829,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
              * @return {JSON}
              */
             this.toJSON = function () {
-                return Util.componentToJSON(thisObj.gameObject.engine, this, "kick.scene.Light");
+                return Util.componentToJSON(this, "kick.scene.Light");
             };
 
             Util.applyConfig(this, config);
@@ -15758,7 +15863,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
         return Light;
     });
 
-define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constants", "kick/core/Util"], function (Mat4, Vec3, Quat, Constants, Util) {
+define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constants", "kick/core/Util", "kick/core/EngineSingleton"], function (Mat4, Vec3, Quat, Constants, Util, EngineSingleton) {
     
 
     var ASSERT = true,
@@ -16099,18 +16204,18 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
         this.toJSON = function () {
             var typedArrayToArray = Util.typedArrayToArray;
             if (ASSERT) {
-                if (!thisObj.gameObject || !thisObj.gameObject.engine) {
-                    Util.fail("Cannot serialize a Transform object that has no reference to gameObject/engine");
+                if (!thisObj.gameObject) {
+                    Util.fail("Cannot serialize a Transform object that has no reference to gameObject");
                 }
             }
             return {
                 type: "kick.scene.Transform",
-                uid: gameObject.engine.getUID(thisObj),
+                uid: EngineSingleton.engine.getUID(thisObj),
                 config: {
                     localPosition: typedArrayToArray(localPosition),
                     localRotation: typedArrayToArray(localRotationQuat),
                     localScale: typedArrayToArray(localScale),
-                    parent: parentTransform ? Util.getJSONReference(thisObj.gameObject.engine, parentTransform) : null
+                    parent: parentTransform ? Util.getJSONReference(parentTransform) : null
                 }
             };
         };
@@ -16162,9 +16267,15 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
                  * Reference to the engine
                  * @property engine
                  * @type kick.core.Engine
+                 * @deprecated
                  */
                 engine: {
-                    value: scene.engine
+                    get: function () {
+                        if (ASSERT) {
+                            Util.fail("GameObject.engine is deprecated. Use EngineSingleton.engine instead.");
+                        }
+                        return scene.engine;
+                    }
                 },
                 /**
                  * Reference to the transform
@@ -16358,6 +16469,52 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
         };
 
         /**
+         * Get the first component with a specific method.<br>
+         * Example usage:<br>
+         * @example
+         *     var renderer = someGameObject.getComponentsWithMethod("render");
+         * @method getComponentsWithMethod
+         * @param {String} methodName of the method
+         * @return {Object|null} component of with a method with a specific method name
+         */
+        this.getComponentsWithMethod = function (methodName) {
+            var component,
+                i;
+            for (i = _components.length - 1; i >= 0; i--) {
+                component = _components[i];
+                if (typeof (component[methodName]) === "function") {
+                    return component;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Get all components with a specific method. <br>
+         * Example usage:<br>
+         * @example
+         *     var renderers = someGameObject.getComponentsWithMethod("render");
+         *     for (var i = 0; i < renderers.length; i++){
+         *         renderers[i].render(obj);
+         *     }
+         * @method getComponentsWithMethod
+         * @param {Object} methodName the constructor of the wanted component
+         * @return {Array} arrays of components of specified type
+         */
+        this.getComponentsWithMethod = function (methodName) {
+            var component,
+                i,
+                res = [];
+            for (i = _components.length - 1; i >= 0; i--) {
+                component = _components[i];
+                if (typeof (component[methodName]) === "function") {
+                    res.push(component);
+                }
+            }
+            return res;
+        };
+
+        /**
          * @method toJSON
          * @return JSON object
          */
@@ -16369,7 +16526,7 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
             for (i = 0; i < _components.length; i++) {
                 component = _components[i];
                 if (!component.toJSON) {
-                    componentsJSON.push(Util.componentToJSON(scene.engine, component));
+                    componentsJSON.push(Util.componentToJSON(component));
                 } else {
                     componentJSON = component.toJSON();
                     if (componentJSON) {
@@ -16865,7 +17022,7 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
                         for (name in config) {
                             if (config.hasOwnProperty(name) && hasProperty(config, name)) {
                                 value = config[name];
-                                value = Util.deserializeConfig(value, engine, thisObj);
+                                value = Util.deserializeConfig(value, thisObj);
                                 configCopy[name] = value;
                             }
                         }
@@ -17248,7 +17405,7 @@ define('kick/core/Time',[], function () {
 define('kick/core/WebGLDebugUtils',["./Constants"], function (Constants) {
     
 
-    /**
+    /* /// Removed from documentation ///
      * This class contains the webgl-debug.js. Note is is only defined in debug builds.
      * @class WebGLDebugUtils
      * @namespace kick.core
@@ -17362,7 +17519,7 @@ define('kick/core/WebGLDebugUtils',["./Constants"], function (Constants) {
                 // Culling
 
                 'cullFace': { 0:true },
-                'frontFace': { 0:true },
+                'frontFace': { 0:true }
             };
 
             /*
@@ -18130,7 +18287,7 @@ define('kick/core/WebGLDebugUtils',["./Constants"], function (Constants) {
 define('kick/core/Shim',[], function () {
     
 
-    /**
+    /* ////// Removed from documentation /////
      * Adds requestAnimationFrame as window.requestAnimationFrame
      * @class Shim
      * @namespace kick.core
@@ -18176,7 +18333,8 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
     function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils, EngineSingleton, Shim_NotUsed) {
         
 
-        var ASSERT = true;
+        var ASSERT = true,
+            engineInstance = null;
 
         /**
          * @module kick.core
@@ -18184,6 +18342,23 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
 
         /**
          * Game engine object
+         * @example
+         *      <canvas id="3dCanvas" width="50" height="50"></canvas>
+         *      <script src="require.js"></script>
+         *      <script type="text/javascript">
+         *          var req = require.config({
+         *                  paths: {
+         *                      kick: 'kick-debug' // loads kick-debug.js (must be in same path)
+         *                  }
+         *              });
+         *          req(['kick'],
+         *                  function (kick) {
+         *                      // init engine (create 3d context)
+         *                      var engine = new kick.core.Engine('3dCanvas');
+         *                      console.log("Engine loaded. KickJS "+engine.version);
+         *                  }
+         *          );
+         *      </script>
          * @class Engine
          * @namespace kick.core
          * @constructor
@@ -18216,14 +18391,14 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                         time_ = Date.now();
                     }
                     thisObj._gameLoop(time_);
-                },
-                vec2 = math.Vec2;
+                };
 
             Object.defineProperties(this, {
                 /**
                  * The current version of KickJS
                  * @property version
                  * @type String
+                 * @final
                  */
                 version: {
                     value: "0.5.0"
@@ -18232,14 +18407,16 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * Resource manager of the engine. Loads and cache resources.
                  * @property resourceLoader
                  * @type kick.core.ResourceLoader
+                 * @final
                  */
                 resourceLoader: {
-                    value: new ResourceLoader(this)
+                    value: new ResourceLoader(thisObj)
                 },
                 /**
                  * Project describes the resources available for a given projects (such as Scenes, Materials, Shader and Meshes)
                  * @property project
                  * @type kick.core.Project
+                 * @final
                  */
                 project: {
                     value: project
@@ -18249,6 +18426,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * @property glState
                  * @type kick.core.GLState
                  * @protected
+                 * @final
                  */
                 glState: {
                     get: function () { return glState; }
@@ -18257,6 +18435,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * The WebGL context (readonly)
                  * @property gl
                  * @type WebGLContext
+                 * @final
                  */
                 gl: {
                     get: function () { return gl; }
@@ -18265,6 +18444,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * The canvas element (readonly)
                  * @property canvas
                  * @type HTML-Element
+                 * @final
                  */
                 canvas: {
                     value: canvas
@@ -18298,7 +18478,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                     get: function () {
                         if (!mouseInput) {
                             mouseInput = new MouseInput(thisObj);
-                            this.addFrameListener(mouseInput);
+                            thisObj.addFrameListener(mouseInput);
                         }
                         return mouseInput;
                     }
@@ -18312,7 +18492,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                     get: function () {
                         if (!keyInput) {
                             keyInput = new KeyInput();
-                            this.addFrameListener(keyInput);
+                            thisObj.addFrameListener(keyInput);
                         }
                         return keyInput;
                     }
@@ -18320,10 +18500,21 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                 /**
                  * @property eventQueue
                  * @type kick.core.EventQueue
+                 * @final
                  */
                 eventQueue: {
                     get: function () {
                         return eventQueue;
+                    }
+                },
+                /**
+                 * The width and height of the canvas
+                 * @property canvasDimension
+                 * @type kick.math.Vec2
+                 */
+                canvasDimension: {
+                    get: function () {
+                        return new Float32Array([canvas.width, canvas.height]);
                     }
                 },
                 /**
@@ -18514,7 +18705,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
              * @method canvasResized
              */
             this.canvasResized = function () {
-                glState.viewportSize = math.Vec2.clone([canvas.width, canvas.height]);
+                glState.viewportSize = thisObj.canvasDimension;
                 if (mouseInput) {
                     mouseInput.updateCanvasElementPosition();
                 }
@@ -18575,6 +18766,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                         return true;
                     };
                 EngineSingleton.engine = thisObj;
+                engineInstance = thisObj;
 
                 success = initGL();
                 if (!success) {
@@ -18645,6 +18837,19 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                 thisObj._gameLoop(lastTime);
             }());
         };
+        Object.defineProperties(engine, {
+            /**
+             * Returns the singleton engine object
+             * @property instance
+             * @type kick.core.Engine
+             * @static
+             */
+            instance: {
+                get: function () {
+                    return engineInstance;
+                }
+            }
+        })
         return engine;
     }
     );
@@ -19622,7 +19827,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                 var blackWhiteCheckerboard = new Uint8Array([255, 255, 255, 0, 0, 0, 0, 0, 0, 255, 255, 255]);
                 thisObj.bind(0); // bind to texture slot 0
                 gl.pixelStorei(3317, 1);
-                gl.texImage2D(3553, 0, _intFormat, 2, 2, 0, 6407, 5121, blackWhiteCheckerboard);
+                gl.texImage2D(3553, 0, 6407, 2, 2, 0, 6407, 5121, blackWhiteCheckerboard);
                 gl.texParameteri(3553, 10240, _magFilter);
                 gl.texParameteri(3553, 10241, _minFilter);
                 gl.texParameteri(3553, 10242, _wrapS);
