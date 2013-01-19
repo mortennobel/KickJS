@@ -50,6 +50,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * The current version of KickJS
                  * @property version
                  * @type String
+                 * @final
                  */
                 version: {
                     value: Constants._VERSION
@@ -58,14 +59,16 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * Resource manager of the engine. Loads and cache resources.
                  * @property resourceLoader
                  * @type kick.core.ResourceLoader
+                 * @final
                  */
                 resourceLoader: {
-                    value: new ResourceLoader(this)
+                    value: new ResourceLoader(thisObj)
                 },
                 /**
                  * Project describes the resources available for a given projects (such as Scenes, Materials, Shader and Meshes)
                  * @property project
                  * @type kick.core.Project
+                 * @final
                  */
                 project: {
                     value: project
@@ -75,6 +78,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * @property glState
                  * @type kick.core.GLState
                  * @protected
+                 * @final
                  */
                 glState: {
                     get: function () { return glState; }
@@ -83,6 +87,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * The WebGL context (readonly)
                  * @property gl
                  * @type WebGLContext
+                 * @final
                  */
                 gl: {
                     get: function () { return gl; }
@@ -91,6 +96,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * The canvas element (readonly)
                  * @property canvas
                  * @type HTML-Element
+                 * @final
                  */
                 canvas: {
                     value: canvas
@@ -124,7 +130,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     get: function () {
                         if (!mouseInput) {
                             mouseInput = new MouseInput(thisObj);
-                            this.addFrameListener(mouseInput);
+                            thisObj.addFrameListener(mouseInput);
                         }
                         return mouseInput;
                     }
@@ -138,7 +144,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     get: function () {
                         if (!keyInput) {
                             keyInput = new KeyInput();
-                            this.addFrameListener(keyInput);
+                            thisObj.addFrameListener(keyInput);
                         }
                         return keyInput;
                     }
@@ -146,10 +152,21 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 /**
                  * @property eventQueue
                  * @type kick.core.EventQueue
+                 * @final
                  */
                 eventQueue: {
                     get: function () {
                         return eventQueue;
+                    }
+                },
+                /**
+                 * The width and height of the canvas
+                 * @property canvasDimension
+                 * @type kick.math.Vec2
+                 */
+                canvasDimension: {
+                    get: function () {
+                        return new Float32Array([canvas.width, canvas.height]);
                     }
                 },
                 /**
@@ -340,7 +357,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
              * @method canvasResized
              */
             this.canvasResized = function () {
-                glState.viewportSize = math.Vec2.clone([canvas.width, canvas.height]);
+                glState.viewportSize = thisObj.canvasDimension;
                 if (mouseInput) {
                     mouseInput.updateCanvasElementPosition();
                 }
