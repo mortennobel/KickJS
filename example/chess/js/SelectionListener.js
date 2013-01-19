@@ -1,8 +1,8 @@
-define(["kick", "ChessPiece", "ChessField"], function (KICK, ChessPiece, ChessField) {
+define(["kick", "ChessPiece", "ChessField"], function (kick, ChessPiece, ChessField) {
     "use strict";
 
     return function(chessGame){
-        var engine = KICK.core.EngineSingleton.engine,
+        var engine = kick.core.EngineSingleton.engine,
             mouseInput,
             camera,
             canvas = engine.canvas,
@@ -39,7 +39,7 @@ define(["kick", "ChessPiece", "ChessField"], function (KICK, ChessPiece, ChessFi
             };
         this.activated = function () {
             mouseInput = engine.mouseInput;
-            camera = this.gameObject.scene.findComponentsOfType(KICK.scene.Camera)[0];
+            camera = this.gameObject.scene.findComponentsOfType(kick.scene.Camera)[0];
         };
 
         this.update = function () {

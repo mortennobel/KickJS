@@ -35,7 +35,7 @@ Accelerate the triangle by pressing '1' and the square by pressing '2'.<br><br>
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = gameObject.engine;
+                                engine = kick.core.EngineSingleton.engine;
                         time = engine.time;
                         transform = gameObject.transform;
                         keyInput = engine.keyInput;

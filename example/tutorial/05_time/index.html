@@ -36,7 +36,7 @@ Pressing '3' will activate slow motion time (10% of actual time)<br><br>
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = gameObject.engine;
+                                engine = kick.core.EngineSingleton.engine;
                         time = engine.time;
                         transform = gameObject.transform;
                         keyInput = engine.keyInput;
@@ -63,7 +63,7 @@ Pressing '3' will activate slow motion time (10% of actual time)<br><br>
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = gameObject.engine;
+                                engine = kick.core.EngineSingleton.engine;
                         time = engine.time;
                         keyInput = engine.keyInput;
                     };

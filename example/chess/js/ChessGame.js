@@ -1,8 +1,8 @@
-define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovementListener", "ChessField", "SelectionListener"], function (KICK, GameBoard, ChessPieceType, ChessPiece, ChessCameraMovementListener, ChessField, SelectionListener) {
+define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovementListener", "ChessField", "SelectionListener"], function (kick, GameBoard, ChessPieceType, ChessPiece, ChessCameraMovementListener, ChessField, SelectionListener) {
     "use strict";
 
     return function(){
-        var engine = KICK.core.EngineSingleton.engine,
+        var engine = kick.core.EngineSingleton.engine,
             worker = new Worker("js/chess_web_worker.js"),
             cameraGameObject,
             thisObj = this,
@@ -81,14 +81,14 @@ define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovemen
                     gameBoard.addPiece(chessPieceComponent);
                 };
             cameraGameObject = scene.createGameObject({name:"Camera"});
-            cameraGameObject.addComponent(new KICK.scene.Camera());
+            cameraGameObject.addComponent(new kick.scene.Camera());
             cameraGameObject.addComponent(new ChessCameraMovementListener());
 
             // enable shadow on light
             var light = scene.getGameObjectByName("Light");
-            var lightComponents = light.getComponentsOfType(KICK.scene.Light);
+            var lightComponents = light.getComponentsOfType(kick.scene.Light);
             for (i=0;i<lightComponents.length;i++){
-                if (lightComponents[i].type ===  KICK.scene.Light.TYPE_DIRECTIONAL){
+                if (lightComponents[i].type ===  kick.scene.Light.TYPE_DIRECTIONAL){
                     lightComponents[i].shadow = false;
                 }
             }
@@ -154,7 +154,7 @@ define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovemen
             if (highligtedLocation){
                 gameBoard.getField(highligtedLocation).highlighted = false;
             }
-            highligtedLocation = KICK.math.Vec2.clone(location);
+            highligtedLocation = kick.math.Vec2.clone(location);
             gameBoard.getField(location).highlighted = true;
         };
 

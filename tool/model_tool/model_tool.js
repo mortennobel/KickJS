@@ -6,13 +6,13 @@ requirejs.config({
 });
 
 requirejs(['kick'],
-    function (KICK) {
+    function (kick) {
         "use strict";
 
 
-        var vec3 = KICK.math.Vec3,
-            quat = KICK.math.Quat,
-            aabb = KICK.math.Aabb,
+        var vec3 = kick.math.Vec3,
+            quat = kick.math.Quat,
+            aabb = kick.math.Aabb,
             objectCenter = vec3.create(),
             sphericalCoordinates = vec3.clone([10, 0, 0]), // radius, polar, elevation
             material,
@@ -31,7 +31,7 @@ requirejs(['kick'],
                 gameObject;
             for (i = scene.getNumberOfGameObjects() - 1; i >= 0; i--) {
                 gameObject = scene.getGameObject(i);
-                if (gameObject.getComponentOfType(KICK.scene.MeshRenderer)) {
+                if (gameObject.getComponentOfType(kick.scene.MeshRenderer)) {
                     gameObject.destroy();
                 }
             }
@@ -39,7 +39,7 @@ requirejs(['kick'],
 
         function loadKickJSModel(fileContent) {
             destroyAllMeshRenderersInScene();
-            var meshData = new KICK.mesh.MeshData(),
+            var meshData = new kick.mesh.MeshData(),
                 gameObject,
                 mesh,
                 materials,
@@ -50,7 +50,7 @@ requirejs(['kick'],
                 lengthPlusOffset;
             meshData.deserialize(fileContent);
             gameObject = engine.activeScene.createGameObject({name: meshData.name});
-            mesh = new KICK.mesh.Mesh({
+            mesh = new kick.mesh.Mesh({
                 meshData: meshData
             });
             materials = [];
@@ -58,7 +58,7 @@ requirejs(['kick'],
                 materials[j] = material;
             }
 
-            meshRenderer = new KICK.scene.MeshRenderer({
+            meshRenderer = new kick.scene.MeshRenderer({
                 mesh: mesh,
                 materials: materials
             });
@@ -88,7 +88,7 @@ requirejs(['kick'],
                 lengthPlusOffset;
             for (i = 0; i < gameObjectsCreated.length; i++) {
                 gameObject = gameObjectsCreated[i];
-                meshRendererNew = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+                meshRendererNew = gameObject.getComponentOfType(kick.scene.MeshRenderer);
                 if (meshRendererNew) {
                     meshAabb = meshRendererNew.mesh.aabb;
                     aabbTransformed = aabb.transform(meshAabb, meshAabb, gameObject.transform.getGlobalMatrix());
@@ -116,7 +116,7 @@ requirejs(['kick'],
                 if (oReq.readyState === 4) { //  complete
                     if (oReq.status === 200) {
                         var txt = oReq.responseText;
-                        load(txt, url, KICK.importer.ObjImporter.import);
+                        load(txt, url, kick.importer.ObjImporter.import);
                     }
                 }
             }
@@ -131,7 +131,7 @@ requirejs(['kick'],
                 if (oReq.readyState === 4) { // complete
                     if (oReq.status === 200) {
                         var xmlDom = oReq.responseXML;
-                        load(xmlDom, url, KICK.importer.ColladaImporter.import);
+                        load(xmlDom, url, kick.importer.ColladaImporter.import);
                     }
                 }
             }
@@ -182,10 +182,10 @@ requirejs(['kick'],
                 var fileContent = event.target.result;
 
                 if (endsWith(fileNameLowercase, ".obj")) {
-                    load(fileContent, fileName, KICK.importer.ObjImporter.import,rotateAroundX);
+                    load(fileContent, fileName, kick.importer.ObjImporter.import,rotateAroundX);
                 } else if (endsWith(fileNameLowercase, ".dae")) {
                     parser = new DOMParser();
-                    load(parser.parseFromString(fileContent, "text/xml"), fileName, KICK.importer.ColladaImporter.import,rotateAroundX);
+                    load(parser.parseFromString(fileContent, "text/xml"), fileName, kick.importer.ColladaImporter.import,rotateAroundX);
                 } else if (endsWith(fileNameLowercase, ".kickjs")) {
                     loadKickJSModel(fileContent);
                 }
@@ -254,7 +254,7 @@ requirejs(['kick'],
                 console.log("Missing attributes in mesh " + JSON.stringify(missingAttributes));
                 return null;
             }
-            return new KICK.material.Material({
+            return new kick.material.Material({
                 name: "Some material",
                 shader: shader
             });
@@ -286,7 +286,7 @@ requirejs(['kick'],
                 mouseInput;
             this.activated = function () {
                 var gameObject = thisObj.gameObject,
-                    engine = gameObject.engine;
+                    engine = kick.core.EngineSingleton.engine;
                 transform = gameObject.transform;
                 rotationEuler = transform.localRotationEuler;
                 mouseInput = engine.mouseInput;
@@ -316,7 +316,7 @@ requirejs(['kick'],
 
             this.activated = function () {
                 var gameObject = thisObj.gameObject,
-                    engine = gameObject.engine;
+                    engine = kick.core.EngineSingleton.engine;
                 transform = gameObject.transform;
                 time = engine.time;
                 mouseInput = engine.mouseInput;
@@ -350,7 +350,7 @@ requirejs(['kick'],
         }
 
         function initDuckTexture() {
-            texture = new KICK.texture.Texture();
+            texture = new kick.texture.Texture();
             texture.setTemporaryTexture();
             texture.dataURI = "duckCM.jpg";
             material.setUniform("mainTexture", texture);
@@ -359,15 +359,15 @@ requirejs(['kick'],
         function initLights() {
             var ambientlightGameObject = engine.activeScene.createGameObject();
             ambientlightGameObject.name = "ambient light";
-            var ambientLight = new KICK.scene.Light({type: KICK.scene.Light.TYPE_AMBIENT});
+            var ambientLight = new kick.scene.Light({type: kick.scene.Light.TYPE_AMBIENT});
             ambientLight.color = [0.1, 0.1, 0.1];
             ambientlightGameObject.addComponent(ambientLight);
 
             var lightGameObject = engine.activeScene.createGameObject();
             lightGameObject.name = "directional light";
-            var light = new KICK.scene.Light(
+            var light = new kick.scene.Light(
                 {
-                    type: KICK.scene.Light.TYPE_DIRECTIONAL,
+                    type: kick.scene.Light.TYPE_DIRECTIONAL,
                     color:[1,1,1],
                     intensity:1
                 }
@@ -378,12 +378,12 @@ requirejs(['kick'],
         }
 
         function initKick() {
-            engine = new KICK.core.Engine('canvas',{
+            engine = new kick.core.Engine('canvas',{
                 enableDebugContext: false
             });
             var cameraObject = engine.activeScene.createGameObject();
             cameraObject.name = "Camera";
-            camera = new KICK.scene.Camera({
+            camera = new kick.scene.Camera({
                 clearColor: [0,0,0,1],
                 fieldOfView:60,
                 far:100000
@@ -394,8 +394,8 @@ requirejs(['kick'],
 
             var gameObject = engine.activeScene.createGameObject();
             gameObject.name = "InitialMesh";
-            meshRenderer = new KICK.scene.MeshRenderer();
-            meshRenderer.mesh = new KICK.mesh.Mesh(
+            meshRenderer = new kick.scene.MeshRenderer();
+            meshRenderer.mesh = new kick.mesh.Mesh(
                 {
                     dataURI:"kickjs://mesh/uvsphere/?slices=48&stacks=24&radius=0.5",
                     name:"Default object"
@@ -446,11 +446,11 @@ requirejs(['kick'],
         function getCurrentModelAsJSON(){
             var res = [];
             var conf = getConfiguration();
-            var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+            var typedArrayToArray = kick.core.Util.typedArrayToArray;
             var scene = engine.activeScene;
             for (var i=scene.getNumberOfGameObjects()-1;i>=0;i--){
                 var gameObject = scene.getGameObject(i);
-                var meshRenderer = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+                var meshRenderer = gameObject.getComponentOfType(kick.scene.MeshRenderer);
                 if (meshRenderer){
                     var meshData = meshRenderer.mesh.meshData;
                     var obj = {
@@ -527,13 +527,13 @@ requirejs(['kick'],
         function getCurrentModelAsKickJSBinary(){
             var res = new ArrayBuffer(0);
             var conf = getConfiguration();
-            var typedArrayToArray = KICK.core.Util.typedArrayToArray;
+            var typedArrayToArray = kick.core.Util.typedArrayToArray;
             var scene = engine.activeScene;
             for (var i=scene.getNumberOfGameObjects()-1;i>=0;i--){
                 var gameObject = scene.getGameObject(i);
-                var meshRenderer = gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+                var meshRenderer = gameObject.getComponentOfType(kick.scene.MeshRenderer);
                 if (meshRenderer){
-                    var meshData = new KICK.mesh.MeshData(meshRenderer.mesh.meshData);
+                    var meshData = new kick.mesh.MeshData(meshRenderer.mesh.meshData);
                     if (conf.normals){
                         if (!meshData.normal){
                             meshData.recalculateNormals();

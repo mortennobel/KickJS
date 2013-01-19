@@ -6,17 +6,17 @@ requirejs.config({
 });
 
 requirejs(['kick', 'ChessGame', 'ChessCameraMovementListener', 'ChessField', 'ChessPiece', 'ChessPieceType', 'GameBoard', 'SelectionListener'],
-    function (KICK, ChessGame) {
+    function (kick, ChessGame) {
         "use strict";
 
         var engine,
-            vec2 = KICK.math.Vec2,
-            vec3 = KICK.math.Vec3,
-            quat = KICK.math.Quat;
+            vec2 = kick.math.Vec2,
+            vec3 = kick.math.Vec3,
+            quat = kick.math.Quat;
 
 
         function initKick(){
-            engine = new KICK.core.Engine('canvas',{
+            engine = new kick.core.Engine('canvas',{
                 shadows:false,
                 antialias:true,
                 enableDebugContext: location.search === "?debug" // debug enabled if query == debug

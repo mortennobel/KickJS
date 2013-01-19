@@ -1,11 +1,11 @@
-define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
+define(["kick", "ChessPieceType"], function (kick, ChessPieceType) {
     "use strict";
 
     // Chess piece class
     return function (type, color, initialLocation){
-        var engine = KICK.core.EngineSingleton.engine,
-            vec2 = KICK.math.Vec2,
-            vec3 = KICK.math.Vec3,
+        var engine = kick.core.EngineSingleton.engine,
+            vec2 = kick.math.Vec2,
+            vec3 = kick.math.Vec3,
             location = vec2.clone(initialLocation),
             transform,
             getMeshName = function(type){
@@ -14,7 +14,7 @@ define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
                         return name;
                     }
                 }
-                KICK.core.Util.fail("type "+type+" not found");
+                kick.core.Util.fail("type "+type+" not found");
             },
             getPosition3D = function(position2d, height, dest){
                 if (!dest){
@@ -56,7 +56,7 @@ define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
             transform.localRotationEuler= [-90,yRotation,0];
             transform.localPosition = getPosition3D(initialLocation,0);
 
-            var meshRenderer = new KICK.scene.MeshRenderer();
+            var meshRenderer = new kick.scene.MeshRenderer();
             meshRenderer.mesh = engine.project.loadByName(getMeshName(type));
             meshRenderer.material = engine.project.loadByName(color?"ChessBlack":"ChessWhite");
             gameObject.addComponent(meshRenderer);

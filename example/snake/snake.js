@@ -6,13 +6,13 @@ requirejs.config({
 });
 
 requirejs(['kick'],
-    function (KICK) {
+    function (kick) {
         "use strict";
         var initSnake = function () {
 
-            var vec3 = KICK.math.Vec3,
-                mat4 = KICK.math.Mat4,
-                constants = KICK.core.Constants,
+            var vec3 = kick.math.Vec3,
+                mat4 = kick.math.Mat4,
+                constants = kick.core.Constants,
                 gameController;
 
             function SnakeFood(snakeLevelComponent, snakes){
@@ -20,9 +20,9 @@ requirejs(['kick'],
                     transform,
                     levelSize = snakeLevelComponent.size;
                 this.activated = function (){
-                    var engine = this.gameObject.engine,
+                    var engine = kick.core.EngineSingleton.engine,
                         shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                        material = new KICK.material.Material({
+                        material = new kick.material.Material({
                             shader:shader,
                             name:"SnakeFood material",
                             uniformData:{
@@ -32,7 +32,7 @@ requirejs(['kick'],
                         mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE );
                     transform = this.gameObject.transform;
 
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     meshRenderer.mesh = mesh;
                     meshRenderer.material = material;
                     this.gameObject.addComponent(meshRenderer);
@@ -112,14 +112,14 @@ requirejs(['kick'],
                     scene = engine.activeScene,
                     currentMovement = 0, // limits movement to not go backwards
                     shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
-                    material = new KICK.material.Material({
+                    material = new kick.material.Material({
                         shader:shader,
                         name:"Snake material",
                         uniformData:{
                             mainColor: color
                         }
                     }),
-                    mesh = new KICK.mesh.Mesh(
+                    mesh = new kick.mesh.Mesh(
                         {
                             dataURI:"kickjs://mesh/cube/?length=0.45",
                             name:"Snake body"
@@ -204,7 +204,7 @@ requirejs(['kick'],
                     transform = this.gameObject.transform;
                     transform.position = position;
                     time = engine.time;
-                    meshRenderer = new KICK.scene.MeshRenderer();
+                    meshRenderer = new kick.scene.MeshRenderer();
                     this.gameObject.addComponent(meshRenderer);
                     meshRenderer.material = material;
                     meshRenderer.mesh = mesh;
@@ -214,7 +214,7 @@ requirejs(['kick'],
                     var gameObject = scene.createGameObject({
                         name:"SnakeComponent"
                     });
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     gameObject.addComponent(meshRenderer);
                     meshRenderer.mesh = mesh;
                     meshRenderer.material = material;
@@ -296,13 +296,13 @@ requirejs(['kick'],
                 };
 
                 this.activated = function (){
-                    var engine = thisObj.gameObject.engine;
-                    meshRenderer = thisObj.gameObject.getComponentOfType(KICK.scene.MeshRenderer);
+                    var engine = kick.core.EngineSingleton.engine;
+                    meshRenderer = thisObj.gameObject.getComponentOfType(kick.scene.MeshRenderer);
 
                     shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
                     console.log("Level uid "+thisObj.uid);
                     console.log("Mesh renderer "+meshRenderer.uid);
-                    material = new KICK.material.Material({
+                    material = new kick.material.Material({
                         shader:shader,
                         name:"Snake level material",
                         uniformData:{
@@ -314,9 +314,9 @@ requirejs(['kick'],
 
                     var scaleWidthMatrix = mat4.scale(mat4.create(), mat4.create(),[size+1,1,1]);
                     var scaleHeightMatrix = mat4.scale(mat4.create(), mat4.create(),[1,1,size]);
-                    var wideCube = KICK.mesh.MeshDataFactory.createCubeData(0.5).transform(scaleWidthMatrix);
-                    var tallCube = KICK.mesh.MeshDataFactory.createCubeData(0.5).transform(scaleHeightMatrix);
-                    var meshData = new KICK.mesh.MeshData({
+                    var wideCube = kick.mesh.MeshDataFactory.createCubeData(0.5).transform(scaleWidthMatrix);
+                    var tallCube = kick.mesh.MeshDataFactory.createCubeData(0.5).transform(scaleHeightMatrix);
+                    var meshData = new kick.mesh.MeshData({
                         meshType:wideCube.meshType,
                         vertex:[],
                         normal:[],
@@ -332,7 +332,7 @@ requirejs(['kick'],
                     meshData = meshData.combine(tallCube.transform(translateLeftMatrix));
                     meshData = meshData.combine(tallCube.transform(translateRightHeightMatrix));
 
-                    meshRenderer.mesh = new KICK.mesh.Mesh({name:"Level",meshData:meshData});
+                    meshRenderer.mesh = new kick.mesh.Mesh({name:"Level",meshData:meshData});
                 };
 
                 this.isIntersecting = function(position){
@@ -412,7 +412,7 @@ requirejs(['kick'],
                             for (j=0;j<snakeLength;j++){
                                 testForSelfIntersection = i===j;
                                 if (snakes[j].isIntersecting(snakePosition,!testForSelfIntersection)){
-                                    if (!KICK.core.Util.contains(deadSnakes,snake)){
+                                    if (!kick.core.Util.contains(deadSnakes,snake)){
                                         deadSnakes.push(snake);
                                     }
                                     break;
@@ -420,7 +420,7 @@ requirejs(['kick'],
                             }
                             // test for level intersection
                             if (level.isIntersecting(snakePosition)){
-                                if (!KICK.core.Util.contains(deadSnakes,snake)){
+                                if (!kick.core.Util.contains(deadSnakes,snake)){
                                     deadSnakes.push(snake);
                                 }
                             }
@@ -445,15 +445,15 @@ requirejs(['kick'],
             function initLights(){
                 var ambientlightGameObject = engine.activeScene.createGameObject();
                 ambientlightGameObject.name = "ambient light";
-                var ambientLight = new KICK.scene.Light({type :KICK.scene.Light.TYPE_AMBIENT});
+                var ambientLight = new kick.scene.Light({type :kick.scene.Light.TYPE_AMBIENT});
                 ambientLight.color = [0.5,0.5,0.5];
                 ambientlightGameObject.addComponent(ambientLight);
 
                 var lightGameObject = engine.activeScene.createGameObject();
                 lightGameObject.name = "directional light";
-                var light = new KICK.scene.Light(
+                var light = new kick.scene.Light(
                     {
-                        type:KICK.scene.Light.TYPE_DIRECTIONAL,
+                        type:kick.scene.Light.TYPE_DIRECTIONAL,
                         color:[1,1,1],
                         intensity:1.5
                     }
@@ -465,13 +465,13 @@ requirejs(['kick'],
             var engine;
             var camera;
             function initKick() {
-                engine = new KICK.core.Engine('canvas',{
+                engine = new kick.core.Engine('canvas',{
                     enableDebugContext: false
                 });
                 initLights();
                 var activeScene = engine.activeScene;
                 var cameraObject = activeScene.createGameObject({name:"Camera"});
-                camera = new KICK.scene.Camera({
+                camera = new kick.scene.Camera({
                     clearColor: [124/255,163/255,137/255,1],
                     fieldOfView: 90
                 });
@@ -483,7 +483,7 @@ requirejs(['kick'],
 
                 var levelGameObject = activeScene.createGameObject({name:"Level"});
                 var levelComponent = new SnakeLevelComponent();
-                var meshRenderer = new KICK.scene.MeshRenderer();
+                var meshRenderer = new kick.scene.MeshRenderer();
                 levelGameObject.addComponent(meshRenderer);
                 levelGameObject.addComponent(levelComponent);
 

@@ -126,7 +126,7 @@
                                 rotationEuler = [0,0,0];
                         this.activated = function(){
                             transform = this.gameObject.transform;
-                            time = this.gameObject.engine.time;
+                            time = kick.core.EngineSingleton.engine.time;
                         };
 
                         this.update = function(){

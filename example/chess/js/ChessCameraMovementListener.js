@@ -1,7 +1,7 @@
-define(["kick"], function (KICK) {
+define(["kick"], function (kick) {
     "use strict";
-    var vec3 = KICK.math.Vec3,
-        quat = KICK.math.Quat;
+    var vec3 = kick.math.Vec3,
+        quat = kick.math.Quat;
 
     return function(){
         var thisObj = this,
@@ -14,7 +14,7 @@ define(["kick"], function (KICK) {
 
         this.activated = function(){
             var gameObject = thisObj.gameObject,
-                engine = gameObject.engine;
+                engine = kick.core.EngineSingleton.engine;
             transform = gameObject.transform;
             time = engine.time;
             mouseInput = engine.mouseInput;
@@ -29,7 +29,7 @@ define(["kick"], function (KICK) {
                 sphericalCoordinates[2] = Math.max(0,sphericalCoordinates[2]);
                 sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
             }
-            vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+            vec3.sphericalToCarterian(cartesianCoordinates, sphericalCoordinates);
             transform.position = cartesianCoordinates;
             transform.localRotation = quat.lookAt(quat.create(), cartesianCoordinates, [0,0,0],[0,1,0]);
         };

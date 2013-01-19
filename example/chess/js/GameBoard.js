@@ -1,4 +1,4 @@
-define(["kick", "ChessPieceType"], function (KICK, ChessPieceType) {
+define(["kick", "ChessPieceType"], function (kick, ChessPieceType) {
     "use strict";
 
     return function(){

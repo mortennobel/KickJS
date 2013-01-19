@@ -6,14 +6,14 @@ requirejs.config({
 });
 
 requirejs(['kick'],
-    function (KICK) {
+    function (kick) {
         "use strict";
 // Cloth simulation based on Mosegaards Cloth Simulation Coding Tutorial
 // http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-coding-tutorial/
 
         var engine,
-            vec3 = KICK.math.Vec3,
-            vec4 = KICK.math.Vec4,
+            vec3 = kick.math.Vec3,
+            vec4 = kick.math.Vec4,
             DAMPING = 0.01, // how much to damp the cloth simulation each frame
             TIME_STEPSIZE2  = 0.5 * 0.5, // how large time step each particle takes each frame
             CONSTRAINT_ITERATIONS = 3,
@@ -23,7 +23,7 @@ requirejs(['kick'],
             gravityForce = vec3.clone([0, -0.2 * TIME_STEPSIZE2, 0]),
             windForce = vec3.clone([0.2 * TIME_STEPSIZE2, 0, 0.05 * TIME_STEPSIZE2]);
         function initKick() {
-            engine = new KICK.core.Engine('canvas', {
+            engine = new kick.core.Engine('canvas', {
                 enableDebugContext: location.search === "?debug" // debug enabled if query == debug
             });
             buildScene();
@@ -40,7 +40,7 @@ requirejs(['kick'],
 
         function buildCamera(scene) {
             var cameraGO = scene.createGameObject({name: "Camera"});
-            var camera = new KICK.scene.Camera({
+            var camera = new kick.scene.Camera({
                 fieldOfView: 60
             });
             camera.clearColor = [0.2, 0.2, 0.4, 1];
@@ -53,9 +53,9 @@ requirejs(['kick'],
         function buildCloth(scene) {
             var clothGO = scene.createGameObject({name: "Cloth"});
             clothGO.addComponent(new ClothComponent(14, 10, meshResolution, meshResolution));
-            var clothMeshRenderer = new KICK.scene.MeshRenderer();
+            var clothMeshRenderer = new kick.scene.MeshRenderer();
             var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
-            clothMeshRenderer.material = new KICK.material.Material({
+            clothMeshRenderer.material = new kick.material.Material({
                 shader:shader,
                 uniformData:{
                     mainColor: [1.0, 1.0, 1.0, 1.0],
@@ -67,14 +67,14 @@ requirejs(['kick'],
 
         function buildBall(scene){
             var ballGO = scene.createGameObject({name: "Ball"});
-            var ballMeshRenderer = new KICK.scene.MeshRenderer();
-            ballMeshRenderer.mesh = new KICK.mesh.Mesh(
+            var ballMeshRenderer = new kick.scene.MeshRenderer();
+            ballMeshRenderer.mesh = new kick.mesh.Mesh(
                 {
                     dataURI: "kickjs://mesh/uvsphere/?slices=25&stacks=50&radius=" + (ball_radius - 0.2),
                     name: "Default object"
                 });
             var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
-            ballMeshRenderer.material = new KICK.material.Material( {
+            ballMeshRenderer.material = new kick.material.Material( {
                 shader: shader,
                 uniformData: {
                     mainColor: [1.0, 0.0, 0.9, 0.5],
@@ -89,15 +89,15 @@ requirejs(['kick'],
 
         function buildLight(scene){
             var lightGO = scene.createGameObject({name:"Light"}),
-                light = new KICK.scene.Light({
-                    type: KICK.scene.Light.TYPE_DIRECTIONAL,
+                light = new kick.scene.Light({
+                    type: kick.scene.Light.TYPE_DIRECTIONAL,
                     color: [1.0, 1.0, 1.0]
                 });
             lightGO.addComponent(light);
             lightGO.transform.localRotationEuler = [0,0,0];
 
-            var lightAmbient = new KICK.scene.Light({
-                type: KICK.scene.Light.TYPE_AMBIENT,
+            var lightAmbient = new kick.scene.Light({
+                type: kick.scene.Light.TYPE_AMBIENT,
                 color: [0.1,0.1,0.1]
             });
             lightGO.addComponent(lightAmbient);
@@ -105,9 +105,9 @@ requirejs(['kick'],
 
         function buildBackground(scene){
             var backgroundGO = scene.createGameObject({name:"Background"}),
-                backgroundMeshRenderer = new KICK.scene.MeshRenderer();
+                backgroundMeshRenderer = new kick.scene.MeshRenderer();
 
-            backgroundMeshRenderer.mesh = new KICK.mesh.Mesh(
+            backgroundMeshRenderer.mesh = new kick.mesh.Mesh(
                 {
                     dataURI: "kickjs://mesh/plane/",
                     name: "Default object"
@@ -124,7 +124,7 @@ requirejs(['kick'],
             meshData.color = color;
             backgroundMeshRenderer.mesh.meshData = meshData;
             var shaderUnlit = engine.project.load(engine.project.ENGINE_SHADER_UNLIT_VERTEX_COLOR);
-            backgroundMeshRenderer.material = new KICK.material.Material( {
+            backgroundMeshRenderer.material = new kick.material.Material( {
                 shader: shaderUnlit,
                 uniformData: {
                     mainColor: [1.0, 1.0, 1.0, 1.0],
@@ -145,7 +145,7 @@ requirejs(['kick'],
                 ball_time = 0;
 
             this.activated = function () {
-                time = thisObj.gameObject.engine.time;
+                time = kick.core.EngineSingleton.engine.time;
                 thisTransform = thisObj.gameObject.transform;
             };
 
@@ -349,7 +349,7 @@ requirejs(['kick'],
             // total number of particles is num_particles_width*num_particles_height
                 particles = [],// all particles that are part of this cloth
                 constraints = [], // all constraints between particles as part of this cloth
-                meshData = new KICK.mesh.MeshData(),
+                meshData = new kick.mesh.MeshData(),
                 meshRenderer,
                 vertices = [],
                 normals = [],
@@ -694,10 +694,10 @@ requirejs(['kick'],
             };
 
             this.activated = function(){
-                time = thisObj.gameObject.engine.time;
+                time = kick.core.EngineSingleton.engine.time;
                 ballTransform = thisObj.gameObject.scene.getGameObjectByName("Ball").transform;
-                meshRenderer = thisObj.gameObject.getComponentOfType(KICK.scene.MeshRenderer);
-                meshRenderer.mesh = new KICK.mesh.Mesh({name:"Cloth Mesh"});
+                meshRenderer = thisObj.gameObject.getComponentOfType(kick.scene.MeshRenderer);
+                meshRenderer.mesh = new kick.mesh.Mesh({name:"Cloth Mesh"});
                 var indices = [];
                 var indexCount = (num_particles_width-1)*(num_particles_height-1)*3*2;
                 for (var i=0;i<indexCount;i++){
