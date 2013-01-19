@@ -1,4 +1,4 @@
-define(["./Util", "./Constants"], function (Util, Constants) {
+define(["./Constants"], function (Constants) {
     "use strict";
     /**
      * Singleton - used to get a reference to the current engine.
@@ -16,17 +16,17 @@ define(["./Util", "./Constants"], function (Util, Constants) {
      * @default null
      * @static
      */
-    Object.defineProperty(EngineSingleton,"engine",
+    Object.defineProperty(EngineSingleton, "engine",
         {
-            set: function(newEngine){
-                if (currentEngine != null && Constants._DEBUG){
-                    Util.warn("Engine is created twice in same context.");
+            set: function (newEngine) {
+                if (currentEngine !== null && Constants._DEBUG) {
+                    console.log("Engine is created twice in same context.");
                 }
                 currentEngine = newEngine;
             },
             get: function(){
                 if (currentEngine==null && Constants._DEBUG){
-                    Util.warn("Engine is not initialized yet.");
+                    console.log("Engine is not initialized yet.");
                 }
                 return currentEngine;
             }
