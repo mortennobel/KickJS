@@ -154,7 +154,7 @@
                                 cameraObject.removeComponent(rotator);
                             }
                             var transform = cameraObject.transform;
-                            transform.localPosition = vec3.sphericalToCarterian([2.2,-Math.PI*.25,0],[0,0,0]);
+                            transform.localPosition = vec3.sphericalToCarterian(vec3.create(),[2.2,-Math.PI*.25,0]);
                             transform.localRotationEuler = [0,45,0];
                         }
                     }
@@ -174,7 +174,7 @@
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = gameObject.engine;
+                                engine = KICK.core.EngineSingleton.engine;
                         transform = gameObject.transform;
                         time = engine.time;
                         mouseInput = engine.mouseInput;
@@ -198,7 +198,7 @@
                             var delta = wheelY*wheelSpeed;
                             sphericalCoordinates[0] *= 1+delta;
                         }
-                        vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+                        vec3.sphericalToCarterian(cartesianCoordinates, sphericalCoordinates);
                         transform.position = cartesianCoordinates;
                         transform.localRotation = quat.lookAt(localRotate, cartesianCoordinates,[0,0,0],[0,1,0]);
                     };

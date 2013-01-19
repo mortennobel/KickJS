@@ -63,7 +63,7 @@
                             var delta = wheelY*wheelSpeed;
                             sphericalCoordinates[0] *= 1+delta;
                         }
-                        vec3.sphericalToCarterian(sphericalCoordinates,cartesianCoordinates);
+                        vec3.sphericalToCarterian(cartesianCoordinates, sphericalCoordinates);
                         transform.position = cartesianCoordinates;
                         transform.localRotation = quat.lookAt(localRotate, cartesianCoordinates,[0,0,0],[0,1,0]);
                     };

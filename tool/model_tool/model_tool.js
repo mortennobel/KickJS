@@ -342,7 +342,7 @@ requirejs(['kick'],
                     delta = wheelY * wheelSpeed;
                     sphericalCoordinates[0] *= 1 + delta;
                 }
-                vec3.sphericalToCarterian(sphericalCoordinates, cartesianCoordinates);
+                vec3.sphericalToCarterian(cartesianCoordinates, sphericalCoordinates);
                 cartesianCoordinates = vec3.add(cartesianCoordinates, objectCenter, cartesianCoordinates);
                 transform.position = cartesianCoordinates;
                 transform.localRotation = quat.lookAt(quat.create(), cartesianCoordinates, objectCenter, [0, 1, 0]);

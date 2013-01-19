@@ -38,6 +38,7 @@
                     top:5,
                     bottom:-5
                 });
+                console.log("viewportRect: " + KICK.math.Vec4.str(camera.viewportRect));
                 cameraObject.addComponent(camera);
 
                 var material = engine.project.load(engine.project.ENGINE_MATERIAL_DEFAULT);

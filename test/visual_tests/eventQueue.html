@@ -44,7 +44,7 @@ Releasing the '1' or '2' will aboard the flicker.
 
                     this.activated = function(){
                         var gameObject = thisObj.gameObject,
-                                engine = gameObject.engine;
+                                engine = KICK.core.EngineSingleton.engine;
                         eventQueue = engine.eventQueue
                         console.log("eventQueue "+eventQueue);
                         time = engine.time;

@@ -60,7 +60,6 @@ requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'k
                     translation[2] = Math.cos(rot) * radius;
                     rotVec[1] = rot * radianToDegree;
                     transform.localPosition = translation;
-                    console.log(rotVec);
                     //new Date().getMilliseconds();
                     transform.localRotationEuler = rotVec;
                     res.innerHTML = math.Mat4.strPretty(transform.getGlobalMatrix()) + "\nRotation euler:" + math.Vec3.str(rotVec);
