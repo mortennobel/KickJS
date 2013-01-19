@@ -51,6 +51,21 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          * </ul>
          * @example
          *      var diffuseShader = project.load(project.ENGINE_SHADER_DIFFUSE);
+         * @example
+         *      var vertexShaderStr = "attribute vec3 vertex;\n"+
+         *          "uniform mat4 _mvProj;\n"+
+         *          "void main(void) {\n"+
+         *          "    gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+         *          "}";
+         *      var fragmentShaderStr = "uniform highp float _time;\n"+
+         *          "void main(void) {\n"+
+         *          "  highp float fraction = mod(_time/1000.0,1.0);\n"+
+         *          "  gl_FragColor = vec4(fraction,fraction,fraction, 1.0);\n"+
+         *          "}";
+         *      var shader = new kick.material.Shader( {
+         *              vertexShaderSrc: vertexShaderStr,
+         *              fragmentShaderSrc: fragmentShaderStr
+         *          });
          * @class Shader
          * @namespace kick.material
          * @constructor
