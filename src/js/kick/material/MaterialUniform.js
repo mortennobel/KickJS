@@ -69,7 +69,7 @@ define(["kick/core/Util", "kick/core/Constants", "kick/texture/Texture"], functi
                         Util.fail("Unknown uniform value type. Expected Texture");
                     }
                 }
-                value = Util.getJSONReference(value.engine, value);
+                value = Util.getJSONReference(value);
             }
             return {
                 name: thisObj.name,

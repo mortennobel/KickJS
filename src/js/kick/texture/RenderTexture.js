@@ -145,7 +145,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                 return {
                     uid: thisObj.uid,
                     name: _name,
-                    colorTexture: Util.getJSONReference(engine, colorTexture)
+                    colorTexture: Util.getJSONReference(colorTexture)
                 };
             };
 

@@ -820,7 +820,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         enabled: _enabled,
                         renderShadow: _renderShadow,
                         layerMask: _layerMask,
-                        renderTarget: Util.getJSONReference(engine, _renderTarget),
+                        renderTarget: Util.getJSONReference(_renderTarget),
                         fieldOfView: _fieldOfView,
                         near: _near,
                         far: _far,

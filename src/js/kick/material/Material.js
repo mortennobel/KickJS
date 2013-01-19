@@ -278,7 +278,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 return {
                     uid: thisObj.uid,
                     name: _name,
-                    shader: Util.getJSONReference(engine, _shader),
+                    shader: Util.getJSONReference(_shader),
                     uniformData: serializedUniforms // uniformData only used during serialization
                 };
             };

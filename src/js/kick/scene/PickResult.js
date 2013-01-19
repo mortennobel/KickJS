@@ -148,21 +148,9 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                         if (!depth) {
                             readDepth();
                         }
-                        vec3.unproject(vec3.create(), [x, y], engineUniforms.viewMatrix, engineUniforms.projectionMatrix, []);
-                        /*
-                        * @method unproject
-                        * @param {kick.math.Vec3} out vec3 receiving unprojected result.
-                        * @param {kick.math.Vec3} vec screen-space vector to project
-                        * @param {kick.math.Mat4} modelView Model-View matrix
-                        * @param {kick.math.Mat4} proj Projection matrix
-                        * @param {kick.math.Vec4}
-                        * */
+                        return vec3.unproject(vec3.create(), [x, y, depth], engineUniforms.viewMatrix, engineUniforms.projectionMatrix, camera.viewportRect);
                     }
                 }
             });
         };
-
-
-
-
     });

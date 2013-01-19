@@ -19,11 +19,11 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
          * Used for deserializing a configuration (replaces reference objects with actual references)
          * @method deserializeConfig
          * @param {Object} config
-         * @param {kick.engine.Engine} engine usef for looking up references to project assets
          * @param {kick.scene.Scene} scene used for looking up references to gameObjects and components
          */
-        deserializeConfig: function (config, engine, scene) {
+        deserializeConfig: function (config, scene) {
             var i,
+                engine = EngineSingleton.engine,
                 destArray;
             if (typeof config === 'number') {
                 return config;
@@ -31,7 +31,7 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
             if (Array.isArray(config)) {
                 destArray = new Array(config.length);
                 for (i = 0; i < config.length; i++) {
-                    destArray[i] = Util.deserializeConfig(config[i], engine, scene);
+                    destArray[i] = Util.deserializeConfig(config[i], scene);
                 }
                 config = destArray;
             } else if (config) {
@@ -151,19 +151,13 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
         },
         /**
          * @method getJSONReference
-         * @param {kick.core.Engine} engine
          * @param {Object} object
          * @return {JSON}
          */
-        getJSONReference: function (engine, object) {
+        getJSONReference: function (object) {
+            var engine = EngineSingleton.engine;
             if (object === null){
                 return null;
-            }
-
-            if (DEBUG) {
-                if (!engine instanceof require("kick/core/Engine")) {
-                    Util.fail("getJSONReference - engine not defined");
-                }
             }
             var isGameObject = object instanceof require("kick/scene/GameObject");
             var isComponent = !isGameObject && object.gameObject instanceof require("kick/scene/GameObject");
@@ -224,7 +218,7 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
                         // is typed array
                         return Util.typedArrayToArray(o);
                     } else if (typeofO === 'object') {
-                        return Util.getJSONReference(engine,o);
+                        return Util.getJSONReference(o);
                     } else {
                         return o;
                     }

@@ -1,4 +1,4 @@
-define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constants", "kick/core/Util"], function (Mat4, Vec3, Quat, Constants, Util) {
+define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constants", "kick/core/Util", "kick/core/EngineSingleton"], function (Mat4, Vec3, Quat, Constants, Util, EngineSingleton) {
     "use strict";
 
     var ASSERT = Constants._ASSERT,
@@ -339,18 +339,18 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
         this.toJSON = function () {
             var typedArrayToArray = Util.typedArrayToArray;
             if (ASSERT) {
-                if (!thisObj.gameObject || !thisObj.gameObject.engine) {
-                    Util.fail("Cannot serialize a Transform object that has no reference to gameObject/engine");
+                if (!thisObj.gameObject) {
+                    Util.fail("Cannot serialize a Transform object that has no reference to gameObject");
                 }
             }
             return {
                 type: "kick.scene.Transform",
-                uid: gameObject.engine.getUID(thisObj),
+                uid: EngineSingleton.engine.getUID(thisObj),
                 config: {
                     localPosition: typedArrayToArray(localPosition),
                     localRotation: typedArrayToArray(localRotationQuat),
                     localScale: typedArrayToArray(localScale),
-                    parent: parentTransform ? Util.getJSONReference(thisObj.gameObject.engine, parentTransform) : null
+                    parent: parentTransform ? Util.getJSONReference(parentTransform) : null
                 }
             };
         };

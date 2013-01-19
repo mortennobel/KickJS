@@ -439,7 +439,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                         for (name in config) {
                             if (config.hasOwnProperty(name) && hasProperty(config, name)) {
                                 value = config[name];
-                                value = Util.deserializeConfig(value, engine, thisObj);
+                                value = Util.deserializeConfig(value, thisObj);
                                 configCopy[name] = value;
                             }
                         }
