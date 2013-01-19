@@ -597,7 +597,7 @@ requirejs(['kick'],
                     alert('You must put something in the File Contents or there will be nothing to save!');
                 },
                 transparent: false,
-                swf: '/example/model_viewer/downloadtify/downloadify.swf',
+                swf: '/tool/model_tool/downloadtify/downloadify.swf',
                 downloadImage: 'json.png',
                 width: 61,
                 height: 26,
@@ -615,7 +615,7 @@ requirejs(['kick'],
                 onError: function(){
                     alert('You must put something in the File Contents or there will be nothing to save!');
                 },
-                swf: '/example/model_viewer/downloadtify/downloadify.swf',
+                swf: '/tool/model_tool/downloadtify/downloadify.swf',
                 downloadImage: 'KickJS.png',
                 width: 68,
                 height: 26,
@@ -638,7 +638,9 @@ requirejs(['kick'],
             document.getElementById("loadTextureButton").addEventListener("click", function(){
                 window.openFileDialog(false);
             },false);
-            document.getElementById("exportButton").addEventListener("click", window.exportDialog,false);
+            document.getElementById("exportButton").addEventListener("click", function(){
+                window.exportDialog();
+            },false);
         }
         loaded();
 
