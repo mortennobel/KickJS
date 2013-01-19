@@ -9,7 +9,17 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
         var ASSERT = Constants._ASSERT;
 
         /**
-         * Material configuration
+         * Material configuration. Stores a material configuration and a shader.
+         * @example
+         *      var material = new KICK.material.Material({
+         *      shader:shader,
+         *          uniformData:{
+         *              mainColor:[1.0,0.0,0.9,0.5],
+         *              mainTexture: project.load(project.ENGINE_TEXTURE_WHITE),
+         *              specularExponent:50,
+         *              specularColor:[1,1,1,1]
+         *          }
+         *      });
          * @class Material
          * @namespace kick.material
          * @constructor

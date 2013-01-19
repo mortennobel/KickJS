@@ -49,6 +49,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          *     </li>
          *     <li>Defines <code>SHADOW</code> (Boolean) and <code>LIGHTS</code> (Integer) based on the current configuration of the engine (cannot be modified runtime). </li>
          * </ul>
+         * @example
+         *      var diffuseShader = project.load(project.ENGINE_SHADER_DIFFUSE);
          * @class Shader
          * @namespace kick.material
          * @constructor
