@@ -11,6 +11,23 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
 
         /**
          * Game engine object
+         * @example
+         *      <canvas id="3dCanvas" width="50" height="50"></canvas>
+         *      <script src="require.js"></script>
+         *      <script type="text/javascript">
+         *          var req = require.config({
+         *                  paths: {
+         *                      kick: 'kick-debug' // loads kick-debug.js (must be in same path)
+         *                  }
+         *              });
+         *          req(['kick'],
+         *                  function (kick) {
+         *                      // init engine (create 3d context)
+         *                      var engine = new kick.core.Engine('3dCanvas');
+         *                      console.log("Engine loaded. KickJS "+engine.version);
+         *                  }
+         *          );
+         *      </script>
          * @class Engine
          * @namespace kick.core
          * @constructor

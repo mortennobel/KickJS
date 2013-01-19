@@ -4,6 +4,26 @@ define(["./Util", "./Constants"], function (Util, Constants) {
 
     /**
      * The global configuration of the engine. Cannot be changed during runtime.
+     * @example
+     *      <canvas id="3dCanvas" width="50" height="50"></canvas>
+     *      <script src="require.js"></script>
+     *      <script type="text/javascript">
+     *          var req = require.config({
+     *                  paths: {
+     *                      kick: 'kick-debug' // loads kick-debug.js (must be in same path)
+     *                  }
+     *              });
+     *          req(['kick'],
+     *                  function (kick) {
+     *                      var config = {
+                                enableDebugContext: true,
+                                shadows: true
+                            };
+     *                      var engine = new kick.core.Engine('3dCanvas', config);
+     *                      // [...]
+     *                  }
+     *          );
+     *      </script>
      * @class Config
      * @namespace kick.core
      * @constructor

@@ -1,7 +1,7 @@
 define(["./Constants"], function (Constants) {
     "use strict";
 
-    /**
+    /* /// Removed from documentation ///
      * This class contains the webgl-debug.js. Note is is only defined in debug builds.
      * @class WebGLDebugUtils
      * @namespace kick.core

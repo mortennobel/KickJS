@@ -1,7 +1,7 @@
 define([], function () {
     "use strict";
 
-    /**
+    /* ////// Removed from documentation /////
      * Adds requestAnimationFrame as window.requestAnimationFrame
      * @class Shim
      * @namespace kick.core

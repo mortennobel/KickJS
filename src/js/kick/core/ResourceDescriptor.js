@@ -5,22 +5,22 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
 
     /**
      * A project is a container of all resources and assets used in a game.<br>
-     * Example usage:
+     *
      * @example
      *     var materialConfig = {
-     *              name:"Some material",
-     *              shader:"Undefined",
-     *              uniforms: {
-     *                  value:42,
-     *                  type: kick.core.Constants.GL_FLOAT
-     *              }
-     *          };
-     *          var resourceDescriptorConfig = {
-     *              type: "kick/material/Material",
-     *              config: materialConfig,
-     *              uid: 132
-     *          };
-     *          var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
+     *         name:"Some material",
+     *         shader:"Undefined",
+     *         uniforms: {
+     *             value:42,
+     *             type: kick.core.Constants.GL_FLOAT
+     *         }
+     *     };
+     *     var resourceDescriptorConfig = {
+     *         type: "kick/material/Material",
+     *         config: materialConfig,
+     *         uid: 132
+     *     };
+     *     var materialDescriptor = new ResourceDescriptor(resourceDescriptorConfig);
      *
      * @class ResourceDescriptor
      * @namespace kick.core
