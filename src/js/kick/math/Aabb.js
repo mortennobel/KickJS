@@ -13,7 +13,6 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
      * @namespace kick.math
      */
     return {
-
         /**
          * Default value is min=MAX, max=MIN (meaning that it has a negative size)
          * @method create
@@ -117,7 +116,7 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
          * @return {kick.math.Aabb} out
          * @static
          */
-        merge: function (aabb, aabb2, out) {
+        merge: function (out, aabb, aabb2) {
             out[0] = Math.min(aabb[0], aabb2[0]);
             out[1] = Math.min(aabb[1], aabb2[1]);
             out[2] = Math.min(aabb[2], aabb2[2]);
