@@ -21,6 +21,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
              * Returns kickjs
              * @property protocol
              * @type String
+             * @final
              */
             protocol: {
                 value: "kickjs://"
