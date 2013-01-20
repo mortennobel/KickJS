@@ -140,7 +140,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     var shader,
                         infoLog,
                         c = Constants;
-                    str = Shader.getPrecompiledSource(engine, str);
+                    str = Shader.getPrecompiledSource(str);
                     if (isFragmentShader) {
                         shader = gl.createShader(c.GL_FRAGMENT_SHADER);
                     } else {
@@ -921,18 +921,22 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
 
         /**
          * @method getPrecompiledSource
-         * @param {kick.core.Engine} engine
          * @param {String} sourcecode
          * @return {String} sourcecode after precompiler
          * @static
          */
-        Shader.getPrecompiledSource = function (engine, sourcecode) {
-            var name,
+        Shader.getPrecompiledSource = function (sourcecode) {
+            var engine = EngineSingleton.engine,
+                name,
                 source,
                 version = "#version 100",
                 lineOffset = 1,
                 indexOfNewline;
             if (Constants._DEBUG) {
+                if (sourcecode === engine){
+                    Util.fail("Shader.getPrecompiledSource() - engine parameter removed");
+                    return null;
+                }
                 (function () {
                     // insert #line nn after each #pragma include to give meaning full lines in error console
                     var linebreakPosition = [],
