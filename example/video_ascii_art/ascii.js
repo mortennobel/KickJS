@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../js/kick-debug'
+        kick: '../js/kick'
     }
 });
 
