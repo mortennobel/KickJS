@@ -26,6 +26,7 @@ http://www.kickjs.org/
 API documentation:
 http://www.kickjs.org/api/
 
+(Offline usage can be found in KICK-doc.zip)
 
 ## Features:
  - Collada DAE and Wavefront OBJ models

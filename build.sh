@@ -73,8 +73,8 @@ $yuidoc_bin -c $project/yuidoc.json . -o $generator_out
 echo "Zipping Documentation (YUI Doc)"
 cd $project/API
 mv generator API_$version
-rm $project/API_$version.zip
-zip -r ../API_$version.zip API_$version
+rm $project/KickJS-doc.zip
+zip -r ../KickJS-doc.zip API_$version
 mv API_$version generator
 
 ##############################################################################
