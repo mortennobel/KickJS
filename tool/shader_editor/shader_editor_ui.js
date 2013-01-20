@@ -179,13 +179,13 @@
                 fragmentShaderSession;
             editor = window.ace.edit(id);
             editor.setTheme("ace/theme/twilight");
-            GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
-            EditSession = window.require('ace/edit_session').EditSession;
+            //GLSL_ES_Mode = window.require("ace/mode/glsl_es").Mode;
+            EditSession = ace.require('ace/edit_session').EditSession;
             vertexShaderSession = new EditSession("");
-            vertexShaderSession.setMode(new GLSL_ES_Mode());
+            //vertexShaderSession.setMode(new GLSL_ES_Mode());
             editor.setSession(vertexShaderSession);
             fragmentShaderSession = new EditSession("");
-            fragmentShaderSession.setMode(new GLSL_ES_Mode());
+            //fragmentShaderSession.setMode(new GLSL_ES_Mode());
 
             this.shaderChangeListener = function (force) {
                 var shader,
@@ -210,7 +210,7 @@
                 document.getElementById('glslEditorPanel').style.display = "block";
                 editor.setSession(vertexShaderSession);
                 // clear undo manager
-                var UndoManager = window.require("ace/undomanager").UndoManager;
+                var UndoManager = ace.require("ace/undomanager").UndoManager;
                 editor.getSession().setUndoManager(new UndoManager());
             };
 
@@ -218,7 +218,7 @@
                 document.getElementById('glslEditorPanel').style.display = "block";
                 editor.setSession(fragmentShaderSession);
                 // clear undo manager
-                var UndoManager = window.require("ace/undomanager").UndoManager;
+                var UndoManager = ace.require("ace/undomanager").UndoManager;
                 editor.getSession().setUndoManager(new UndoManager());
             };
 
