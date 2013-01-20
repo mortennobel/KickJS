@@ -61,9 +61,9 @@
                     material.shader = engine.project.load(shader);
                     if (window.debugShader){
                         console.log("__________________vertexShaderSrc__________________");
-                        console.log(kick.material.Shader.getPrecompiledSource(engine,material.shader.vertexShaderSrc));
+                        console.log(kick.material.Shader.getPrecompiledSource(material.shader.vertexShaderSrc));
                         console.log("_________________fragmentShaderSrc_________________");
-                        console.log(kick.material.Shader.getPrecompiledSource(engine,material.shader.fragmentShaderSrc));
+                        console.log(kick.material.Shader.getPrecompiledSource(material.shader.fragmentShaderSrc));
                     }
                 }
 

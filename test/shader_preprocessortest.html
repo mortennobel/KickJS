@@ -69,7 +69,7 @@ void main(void) {
         engine.config.shadows = {};
 
         var input = sourceinput.value;
-        var newValue = KICK.material.Shader.getPrecompiledSource(engine,input);
+        var newValue = KICK.material.Shader.getPrecompiledSource(input);
         if (newValue !== sourceoutput.value){
             sourceoutput.value = newValue;
         }
