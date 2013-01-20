@@ -29,7 +29,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             meshVertexAttBuffer,
             interleavedArrayFormat,
             interleavedArrayFormatArray = [],
-            meshVertexIndexBuffers = [],
+            meshVertexIndexBuffer = 0,
+            meshVertexBufferOffsetBytes = [],
             _name,
             _meshData,
             _dataURI = "memory://void",
@@ -41,15 +42,16 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             meshElements = [],
             deleteBuffers = function () {
                 var i;
-                for (i = 0; i < meshVertexIndexBuffers.length; i++) {
-                    gl.deleteBuffer(meshVertexIndexBuffers[i]);
+                if (meshVertexIndexBuffer){
+                    gl.deleteBuffer(meshVertexIndexBuffer);
+                    meshVertexIndexBuffer = 0;
                 }
+                meshVertexBufferOffsetBytes.length = 0;
                 if (typeof meshVertexAttBuffer === "number") {
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
                 meshElements.length = 0;
-                meshVertexIndexBuffers.length = 0;
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
@@ -73,8 +75,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             updateData = function () {
                 var subMeshes = _meshData.subMeshes,
                     i,
-                    indices,
-                    meshVertexIndexBuffer;
+                    indexLen,
+                    indicesSize = 0,
+                    meshVertexIndexBufferConcat;
                 // delete current buffers
                 deleteBuffers();
 
@@ -88,17 +91,22 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 gl.bufferData(c.GL_ARRAY_BUFFER, _meshData.interleavedArray, c.GL_STATIC_DRAW);
 
                 for (i = 0; i < subMeshes.length; i++) {
-                    indices = subMeshes[i];
-                    meshVertexIndexBuffer = gl.createBuffer();
-                    meshElements[i] = indices.length;
-                    meshVertexIndexBuffers.push(meshVertexIndexBuffer);
-                    gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
-                    gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, indices, c.GL_STATIC_DRAW);
+                    meshVertexBufferOffsetBytes.push(indicesSize * 2);
+                    indexLen = subMeshes[i].length;
+                    meshElements[i] = indexLen;
+                    indicesSize += indexLen
                 }
+                meshVertexIndexBufferConcat = new Uint16Array(indicesSize);
+                for (i = 0; i < subMeshes.length; i++) {
+                    meshVertexIndexBufferConcat.set(subMeshes[i], meshVertexBufferOffsetBytes[i] / 2);
+                }
+                meshVertexIndexBuffer = gl.createBuffer();
+                gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+                gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBufferConcat, c.GL_STATIC_DRAW);
             },
             contextListener = {
                 contextLost: function () {
-                    meshVertexIndexBuffers.length = 0;
+                    meshVertexIndexBuffer = 0;
                     meshVertexAttBuffer = null;
                     gl = null;
                 },
@@ -244,7 +252,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                             interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
                     }
                 }
-
+                gl.bindBuffer(Constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
                 if (ASSERT) {
                     for (i = shader.activeAttributes.length - 1; i >= 0; i--) {
                         activeAttribute = shader.activeAttributes[i];
@@ -283,8 +291,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
          * @param {Number} submeshIndex
          */
         this.render = function (submeshIndex) {
-            gl.bindBuffer(Constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffers[submeshIndex]);
-            gl.drawElements(meshType, meshElements[submeshIndex], c.GL_UNSIGNED_SHORT, 0);
+            gl.drawElements(meshType, meshElements[submeshIndex], c.GL_UNSIGNED_SHORT, meshVertexBufferOffsetBytes[submeshIndex]);
         };
 
         /**
