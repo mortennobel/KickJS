@@ -4,7 +4,25 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
 
         /**
          * Result of Camera.pickPoint.
+         * @example
+         *      function SomeComponent() {
+         *           var engine = kick.core.Engine.instance,
+         *              mouseInput = engine.mouseInput,
+         *              camera;
+         *           this.activated = function () {
+         *              camera = engine.activeScene.findComponentsOfType(kick.scene.Camera)[0];
+         *           };
          *
+         *           this.update = function () {
+         *              var objectPicked = function (pickResult) {
+         *                    console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance",
+         *                              pickResult.distance, "point", pickResult.point);
+         *                };
+         *                if (mouseInput.isButtonUp(0)) {
+         *                    camera.pickPoint(objectPicked, mouseInput.mousePosition[0], mouseInput.mousePosition[1]);
+         *                }
+         *           };
+         *       };
          * @class PickResult
          * @namespace kick.scene
          * @constructor
