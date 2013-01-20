@@ -24,7 +24,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
          *                  function (kick) {
          *                      // init engine (create 3d context)
          *                      var engine = new kick.core.Engine('3dCanvas');
-         *                      console.log("Engine loaded. KickJS "+engine.version);
          *                  }
          *          );
          *      </script>
@@ -442,7 +441,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     thisObj.config.webglNotFoundFn(canvas);
                     return;
                 }
-
+                console.log("KickJS "+thisObj.version);
                 canvas.addEventListener("webglcontextlost", function (event) {
                     wasPaused = thisObj.paused;
                     thisObj.paused = true;
@@ -518,7 +517,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     return engineInstance;
                 }
             }
-        })
+        });
         return engine;
     }
     );

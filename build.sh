@@ -14,8 +14,6 @@ nodejs=$4
 #Location of Rhino (js.jar) (http://www.mozilla.org/rhino/)
 rhino=$5
 
-version=0_5_0
-
 # The location of the files to parse.  Parses subdirectories, but will fail if
 # there are duplicate file names in these directories.  You can specify multiple
 # source trees:
@@ -29,7 +27,7 @@ parser_out=$project/API/parser
 generator_out=$project/API/generator
 
 # The version of your project to display within the documentation.
-version=0.5.0
+version=0.5.1
 
 # The version of YUI the project is using.  This effects the output for
 # YUI configuration attributes.  This should start with '2' or '3'.
@@ -52,7 +50,7 @@ echo "Running Precompiler dev"
 mkdir $project/build
 rm -rf $project/build/pre
 mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre $version true true
+$nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre true true
 
 echo "Package AMD and compress (debug)"
 
@@ -72,17 +70,17 @@ $yuidoc_bin -c $project/yuidoc.json . -o $generator_out
 ##############################################################################
 echo "Zipping Documentation (YUI Doc)"
 cd $project/API
-mv generator API_$version
+mv generator API_
 rm $project/KickJS-doc.zip
-zip -r ../KickJS-doc.zip API_$version
-mv API_$version generator
+zip -r ../KickJS-doc.zip API_
+mv API_ generator
 
 ##############################################################################
 echo "Running Precompiler release"
 mkdir $project/build
 rm -rf $project/build/pre
 mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre $version false false
+$nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre false false
 
 echo "Package AMD and compress (release)"
 

@@ -18,7 +18,8 @@ define(function () {
          * @static
          * @final
          */
-        _VERSION: { value: "0.0.0", configurable: true, enumerable: true },
+        _VERSION: { value: "0.5.1", configurable: true, enumerable: true },
+
         /**
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
