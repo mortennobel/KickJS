@@ -15,20 +15,18 @@ requirejs.config({
 requirejs(['kick/core/Constants'],
     function (constants) {
         "use strict";
-        if (process.argv.length !== 7) {
-            console.error("Usage node preprocessor [inputPath] [outputPath] [version] [debug] [assert]");
+        if (process.argv.length !== 6) {
+            console.error("Usage node preprocessor [inputPath] [outputPath] [debug] [assert]");
         }
 
         var inputPath = process.argv[2],
             outputPath = process.argv[3],
-            version = process.argv[4],
-            debug = process.argv[5] === "true",
-            assert = process.argv[6] === "true";
+            debug = process.argv[4] === "true",
+            assert = process.argv[5] === "true";
 
         Object.defineProperties(constants, {
             _ASSERT: { value: assert, enumerable:true, configurable:true},
-            _DEBUG: { value: debug, enumerable:true, configurable:true},
-            _VERSION: { value: version, enumerable:true, configurable:true}
+            _DEBUG: { value: debug, enumerable:true, configurable:true}
         });
         function processFile(path) {
             "use strict";
@@ -48,8 +46,7 @@ requirejs(['kick/core/Constants'],
                 var input = fs.readFileSync(inputPath + path, "UTF-8"),
                     output;
                 if (path.indexOf("/Constants.js") !==  -1) {
-                    output = input.replace('"0.0.0"', '"'+version+'"');
-                    output = output.replace("_ASSERT: { value: true", "_ASSERT: { value: "+assert);
+                    output = input.replace("_ASSERT: { value: true", "_ASSERT: { value: "+assert);
                     output = output.replace("_DEBUG: { value: true", "_DEBUG: { value: "+debug);
                 } else if (path.indexOf("/GLSLConstants.js") ===  -1){
                     output = replaceConstants.replaceConstants(constants, input);
@@ -59,11 +56,8 @@ requirejs(['kick/core/Constants'],
                 }
                 fs.writeFileSync(outputPath + path, output,  "UTF-8");
             }
-
         }
-
         processFile("");
-
     });
 
 
