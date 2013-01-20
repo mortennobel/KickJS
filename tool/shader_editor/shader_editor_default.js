@@ -1,6 +1,6 @@
-Object.defineProperty(window, "defaultMaterial", {
-    value: JSON.stringify(
-        {
+define([],
+    function () {
+        return {
             "shader": {
                 "faceCulling": 1029,
                 "zTest": 513,
@@ -44,6 +44,6 @@ Object.defineProperty(window, "defaultMaterial", {
             },
             "about": "",
             "name": "Default shader"
-        }
-    )
-});
+        };
+
+    });

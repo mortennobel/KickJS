@@ -4,7 +4,7 @@
    "activeScene": 1,
    "resourceDescriptors": [
       {
-         "type": "KICK.scene.Scene",
+         "type": "kick.scene.Scene",
          "uid": 1,
          "config": {
             "uid": 1,
@@ -13,7 +13,7 @@
          }
       },
       {
-         "type": "KICK.mesh.Mesh",
+         "type": "kick.mesh.Mesh",
          "uid": 2,
          "config": {
             "uid": 2,
@@ -22,7 +22,7 @@
          }
       },
       {
-         "type": "KICK.mesh.Mesh",
+         "type": "kick.mesh.Mesh",
          "uid": 3,
          "config": {
             "uid": 3,

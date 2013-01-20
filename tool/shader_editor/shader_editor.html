@@ -9,10 +9,6 @@
     <script src="http://yui.yahooapis.com/3.8.0/build/yui/yui-min.js"></script>
     <script src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 
-    <!--<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>-->
-    <!--<script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>-->
-    <!--<script src="ace/mode-glsl_es.js" type="text/javascript" charset="utf-8"></script>-->
-
     <style>
         #glslEditor {
             width: 65%;
@@ -52,21 +48,6 @@
             top:150px !important;
         }
     </style>
-
-    <!--<script type="text/javascript" src="../js/webgl-debug.js"></script>-->
-    <!--<script type="text/javascript" src="../js/kick-min-0.4.0.js"></script>-->
-    <script type="text/javascript">
-        if (location.search === "?debug"){
-            document.write('<script type="text/javascript" src="../js/webgl-debug.js"></s'+'cript>');
-            document.write('<script type="text/javascript" src="../js/kick-debug-0.4.2.js"></s'+'cript>');
-            document.write('<script type="text/javascript" src="exampleShaders.js"></s'+'cript>');
-        } else {
-            document.write('<script type="text/javascript" src="../js/kick-min-0.4.2.js"></s'+'cript>');
-        }
-    </script>
-    <script type="text/javascript" src="shader_editor_default.js"></script>
-    <script type="text/javascript" src="shader_editor.js"></script>
-    <script type="text/javascript" src="shader_editor_ui.js"></script>
     <link href='/style.css' rel='stylesheet' type='text/css'>
     <script type="text/javascript" src="../common/common.js"></script>
 </head>
@@ -290,6 +271,6 @@
             </div>
 </div>
 <script type="text/javascript" src="/header.js"></script>
-
+<script data-main="shader_editor.js" type="text/javascript" src="../common/require.js"></script>
 </body>
 </html>
