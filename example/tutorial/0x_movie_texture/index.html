@@ -110,12 +110,12 @@
     <script type="text/javascript">
         var reqOne = require.config({
             paths: {
-                kick: '../../js/kick-debug'
+                kick: '../../../build/kick-debug'
             }
         });
 
         reqOne(['kick'],
-                function (KICK) {
+                function (kick) {
                     // KickJS code
                     var engine;
                     var camera;
@@ -136,28 +136,28 @@
                     };
 
                     function initKick(canvas2d) {
-                        engine = new KICK.core.Engine('glcanvas',{});
+                        engine = new kick.core.Engine('glcanvas',{});
                         var activeScene = engine.activeScene;
                         var cameraObject = activeScene.createGameObject();
-                        var camera = new KICK.scene.Camera({
+                        var camera = new kick.scene.Camera({
                             clearColor: [124/255,163/255,137/255,1]
                         });
                         cameraObject.transform.position = [0,0,5];
                         cameraObject.addComponent(camera);
 
                         var gameObject = activeScene.createGameObject();
-                        var meshRenderer = new KICK.scene.MeshRenderer();
+                        var meshRenderer = new kick.scene.MeshRenderer();
 
-                        var texture = new KICK.texture.MovieTexture({
+                        var texture = new kick.texture.MovieTexture({
                             videoElement:canvas2d,
                             generateMipmaps:true,
-                            minFilter:KICK.core.Constants.GL_LINEAR_MIPMAP_LINEAR
+                            minFilter:kick.core.Constants.GL_LINEAR_MIPMAP_LINEAR
 
                         });
                         texture.setTemporaryTexture();
                         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_CUBE);
                         // create material
-                        meshRenderer.material = new KICK.material.Material({
+                        meshRenderer.material = new kick.material.Material({
                             shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
                             uniformData:{
                                 mainColor: [1,.8,1,1], // change the color slightly (to give a very simple effect)
