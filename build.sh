@@ -43,18 +43,19 @@ rm -rf $generator_out
 
 ##############################################################################
 echo "Include GLSL files as constants"
-$nodejs $project/preprocessor/include_glsl_files $project/src/glsl/ $project/src/js/kick/material/glslconstants.js
+$nodejs $project/dependencies/build/include_glsl_files $project/src/glsl/ $project/src/js/kick/material/glslconstants.js
 
 ##############################################################################
 echo "Running Precompiler dev"
 mkdir $project/build
 rm -rf $project/build/pre
 mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre true true
+echo $nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/pre true true
+$nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/pre true true
 
 echo "Package AMD and compress (debug)"
 
-java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/preprocessor/r.js -o name=kick out=$project/build/kick-debug.js.tmp baseUrl=$project/build/pre optimize=none
+java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/dependencies/build/r.js -o name=kick out=$project/build/kick-debug.js.tmp baseUrl=$project/build/pre optimize=none
 
 
 ##############################################################################
@@ -80,11 +81,11 @@ echo "Running Precompiler release"
 mkdir $project/build
 rm -rf $project/build/pre
 mkdir $project/build/pre
-$nodejs $project/preprocessor/preprocessor $project/src/js $project/build/pre false false
+$nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/pre false false
 
 echo "Package AMD and compress (release)"
 
-java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/preprocessor/r.js -o name=kick out=$project/build/kick.js.tmp baseUrl=$project/build/pre
+java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/dependencies/build/r.js -o name=kick out=$project/build/kick.js.tmp baseUrl=$project/build/pre
 
 ##############################################################################
 echo "Adding license info compiler"
@@ -92,19 +93,6 @@ cat "$project/license_min.txt" "$project/build/kick-debug.js.tmp" > "$project/bu
 cat "$project/license_min.txt" "$project/build/kick.js.tmp" > "$project/build/kick.js"
 rm "$project/build/kick-debug.js.tmp"
 rm "$project/build/kick.js.tmp"
-
-##############################################################################
-echo "Copy kickjs to examples"
-mkdir "$project/example/js/"
-echo "$project/build/kick.js"
-echo "$project/example/js/kick.js"
-cp "$project/build/kick.js" "$project/example/js/kick.js"
-cp "$project/build/kick-debug.js" "$project/example/js/kick-debug.js"
-mkdir "$project/tool/js/"
-cp "$project/build/kick.js" "$project/tool/js/kick.js"
-cp "$project/build/kick-debug.js" "$project/tool/js/kick-debug.js"
-cp "$project/build/kick.js" "$project/test/tutorial/kick.js"
-cp "$project/build/kick-debug.js" "$project/test/tutorial/kick-debug.js"
 
 echo "Build finished"
 date

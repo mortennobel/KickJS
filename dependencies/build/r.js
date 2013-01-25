@@ -1,5 +1,5 @@
 /**
- * @license r.js 2.1.2+ Thu, 17 Jan 2013 01:18:51 GMT Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license r.js 2.1.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
@@ -21,7 +21,7 @@ var requirejs, require, define;
 
     var fileName, env, fs, vm, path, exec, rhinoContext, dir, nodeRequire,
         nodeDefine, exists, reqMain, loadedOptimizedLib, existsForNode,
-        version = '2.1.2+ Thu, 17 Jan 2013 01:18:51 GMT',
+        version = '2.1.4',
         jsSuffixRegExp = /\.js$/,
         commandOption = '',
         useLibLoaded = {},
@@ -123,20 +123,20 @@ var requirejs, require, define;
     }
 
     /** vim: et:ts=4:sw=4:sts=4
- * @license RequireJS 2.1.2+ Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
+ * @license RequireJS 2.1.4 Copyright (c) 2010-2012, The Dojo Foundation All Rights Reserved.
  * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
 //Not using strict: uneven strict support in browsers, #392, and causes
 //problems with requirejs.exec()/transpiler plugins that may not be strict.
 /*jslint regexp: true, nomen: true, sloppy: true */
-/*global window, navigator, document, importScripts, jQuery, setTimeout, opera */
+/*global window, navigator, document, importScripts, setTimeout, opera */
 
 
 (function (global) {
     var req, s, head, baseElement, dataMain, src,
         interactiveScript, currentlyAddingScript, mainScript, subPath,
-        version = '2.1.2+',
+        version = '2.1.4',
         commentRegExp = /(\/\*([\s\S]*?)\*\/|([^:]|^)\/\/(.*)$)/mg,
         cjsRequireRegExp = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g,
         jsSuffixRegExp = /\.js$/,
@@ -145,7 +145,6 @@ var requirejs, require, define;
         ostring = op.toString,
         hasOwn = op.hasOwnProperty,
         ap = Array.prototype,
-        aps = ap.slice,
         apsp = ap.splice,
         isBrowser = !!(typeof window !== 'undefined' && navigator && document),
         isWebWorker = !isBrowser && typeof importScripts !== 'undefined',
@@ -1521,16 +1520,21 @@ var requirejs, require, define;
                      * plain URLs like nameToUrl.
                      */
                     toUrl: function (moduleNamePlusExt) {
-                        var index = moduleNamePlusExt.lastIndexOf('.'),
-                            ext = null;
+                        var ext, url,
+                            index = moduleNamePlusExt.lastIndexOf('.'),
+                            segment = moduleNamePlusExt.split('/')[0],
+                            isRelative = segment === '.' || segment === '..';
 
-                        if (index !== -1) {
+                        //Have a file extension alias, and it is not the
+                        //dots from a relative path.
+                        if (index !== -1 && (!isRelative || index > 1)) {
                             ext = moduleNamePlusExt.substring(index, moduleNamePlusExt.length);
                             moduleNamePlusExt = moduleNamePlusExt.substring(0, index);
                         }
 
-                        return context.nameToUrl(normalize(moduleNamePlusExt,
-                                                relMap && relMap.id, true), ext);
+                        url = context.nameToUrl(normalize(moduleNamePlusExt,
+                                                relMap && relMap.id, true), ext || '.fake');
+                        return ext ? url : url.substring(0, url.length - 5);
                     },
 
                     defined: function (id) {
@@ -1575,10 +1579,11 @@ var requirejs, require, define;
 
             /**
              * Called to enable a module if it is still in the registry
-             * awaiting enablement. parent module is passed in for context,
-             * used by the optimizer.
+             * awaiting enablement. A second arg, parent, the parent module,
+             * is passed in for context, when this method is overriden by
+             * the optimizer. Not shown here to keep code compact.
              */
-            enable: function (depMap, parent) {
+            enable: function (depMap) {
                 var mod = getOwn(registry, depMap.id);
                 if (mod) {
                     getModule(depMap).enable();
@@ -8669,7 +8674,7 @@ define('uglifyjs/parse-js', ["exports"], function(exports) {
           disclaimer in the documentation and/or other materials
           provided with the distribution.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER â€œAS ISâ€ AND ANY
     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
     PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
@@ -10120,7 +10125,7 @@ define('uglifyjs/process', ["require", "exports", "module", "./parse-js", "./squ
           disclaimer in the documentation and/or other materials
           provided with the distribution.
 
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER “AS IS” AND ANY
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER â€œAS ISâ€ AND ANY
     EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
     IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
     PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE
@@ -13918,10 +13923,10 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
         $documentation: "A function definition"
     }, AST_Lambda);
     var AST_Jump = DEFNODE("Jump", null, {
-        $documentation: "Base class for “jumps” (for now that's `return`, `throw`, `break` and `continue`)"
+        $documentation: "Base class for â€œjumpsâ€ (for now that's `return`, `throw`, `break` and `continue`)"
     }, AST_Statement);
     var AST_Exit = DEFNODE("Exit", "value", {
-        $documentation: "Base class for “exits” (`return` and `throw`)",
+        $documentation: "Base class for â€œexitsâ€ (`return` and `throw`)",
         $propdoc: {
             value: "[AST_Node?] the value returned or thrown by this statement; could be null for AST_Return"
         },
@@ -13971,7 +13976,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
     var AST_Switch = DEFNODE("Switch", "expression", {
         $documentation: "A `switch` statement",
         $propdoc: {
-            expression: "[AST_Node] the `switch` “discriminant”"
+            expression: "[AST_Node] the `switch` â€œdiscriminantâ€"
         },
         _walk: function(visitor) {
             return visitor._visit(this, function() {
@@ -14138,7 +14143,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
     var AST_PropAccess = DEFNODE("PropAccess", "expression property", {
         $documentation: 'Base class for property access expressions, i.e. `a.foo` or `a["foo"]`',
         $propdoc: {
-            expression: "[AST_Node] the “container” expression",
+            expression: "[AST_Node] the â€œcontainerâ€ expression",
             property: "[AST_Node|string] the property to access.  For AST_Dot this is always a plain string, while for AST_Sub it's an arbitrary AST_Node"
         }
     });
@@ -14207,7 +14212,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
         }
     });
     var AST_Assign = DEFNODE("Assign", null, {
-        $documentation: "An assignment expression — `a = b + 5`"
+        $documentation: "An assignment expression â€” `a = b + 5`"
     }, AST_Binary);
     var AST_Array = DEFNODE("Array", "elements", {
         $documentation: "An array literal",
@@ -14882,7 +14887,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
             if (is(type, val)) {
                 return next();
             }
-            token_error(S.token, "Unexpected token " + S.token.type + " «" + S.token.value + "»" + ", expected " + type + " «" + val + "»");
+            token_error(S.token, "Unexpected token " + S.token.type + " Â«" + S.token.value + "Â»" + ", expected " + type + " Â«" + val + "Â»");
         }
         function expect(punc) {
             return expect_token("punc", punc);
@@ -16368,7 +16373,7 @@ define('uglifyjs2', ['exports', 'source-map', 'logger'], function (exports, MOZ_
             try {
                 if (token) options.source_map.add(token.file || "?", current_line, current_col, token.line, token.col, !name && token.type == "name" ? token.value : name);
             } catch (ex) {
-                AST_Node.warn("Couldn't figure out mapping for {file}:{line},{col} → {cline},{ccol} [{name}]", {
+                AST_Node.warn("Couldn't figure out mapping for {file}:{line},{col} â†’ {cline},{ccol} [{name}]", {
                     file: token.file,
                     line: token.line,
                     col: token.col,
@@ -21202,9 +21207,10 @@ function (lang,   logger,   envOptimize,        file,           parse,
      * @param {String} fileName the file name
      * @param {String} fileContents the file contents
      * @param {String} cssImportIgnore comma delimited string of files to ignore
+     * @param {String} cssPrefix string to be prefixed before relative URLs
      * @param {Object} included an object used to track the files already imported
      */
-    function flattenCss(fileName, fileContents, cssImportIgnore, included) {
+    function flattenCss(fileName, fileContents, cssImportIgnore, cssPrefix, included) {
         //Find the last slash in the name.
         fileName = fileName.replace(lang.backSlashRegExp, "/");
         var endIndex = fileName.lastIndexOf("/"),
@@ -21255,7 +21261,7 @@ function (lang,   logger,   envOptimize,        file,           parse,
                 included[fullImportFileName] = true;
 
                 //Make sure to flatten any nested imports.
-                flat = flattenCss(fullImportFileName, importContents, cssImportIgnore, included);
+                flat = flattenCss(fullImportFileName, importContents, cssImportIgnore, cssPrefix, included);
                 importContents = flat.fileContents;
 
                 if (flat.importList.length) {
@@ -21284,8 +21290,9 @@ function (lang,   logger,   envOptimize,        file,           parse,
                     //a protocol.
                     colonIndex = fixedUrlMatch.indexOf(":");
                     if (fixedUrlMatch.charAt(0) !== "/" && (colonIndex === -1 || colonIndex > fixedUrlMatch.indexOf("/"))) {
-                        //It is a relative URL, tack on the path prefix
-                        urlMatch = importPath + fixedUrlMatch;
+                        //It is a relative URL, tack on the cssPrefix and path prefix
+                        urlMatch = cssPrefix + importPath + fixedUrlMatch;
+
                     } else {
                         logger.trace(importFileName + "\n  URL not a relative URL, skipping: " + urlMatch);
                     }
@@ -21423,7 +21430,7 @@ function (lang,   logger,   envOptimize,        file,           parse,
 
             //Read in the file. Make sure we have a JS string.
             var originalFileContents = file.readFile(fileName),
-                flat = flattenCss(fileName, originalFileContents, config.cssImportIgnore, {}),
+                flat = flattenCss(fileName, originalFileContents, config.cssImportIgnore, config.cssPrefix, {}),
                 //Do not use the flattened CSS if there was one that was skipped.
                 fileContents = flat.skippedList.length ? originalFileContents : flat.fileContents,
                 startIndex, endIndex, buildText, comment;
@@ -23265,6 +23272,14 @@ define('build', function (require) {
             }
         }
 
+        //Normalize cssPrefix
+        if (config.cssPrefix) {
+            //Make sure cssPrefix ends in a slash
+            config.cssPrefix = endsWithSlash(config.cssPrefix);
+        } else {
+            config.cssPrefix = '';
+        }
+
         //Cycle through modules and combine any local stubModules with
         //global values.
         if (config.modules && config.modules.length) {
@@ -23299,8 +23314,7 @@ define('build', function (require) {
                 }
             }
         } catch (wrapError) {
-            throw new Error('Malformed wrap config: need both start/end or ' +
-                            'startFile/endFile: ' + wrapError.toString());
+            throw new Error('Malformed wrap config: ' + wrapError.toString());
         }
 
         //Do final input verification
@@ -23430,7 +23444,7 @@ define('build', function (require) {
         rawTextByIds = require.s.contexts._.config.rawText;
         if (rawTextByIds) {
             lang.eachProp(rawTextByIds, function (contents, id) {
-                var url = require.toUrl(id);
+                var url = require.toUrl(id) + '.js';
                 require._cachedRawText[url] = contents;
             });
         }

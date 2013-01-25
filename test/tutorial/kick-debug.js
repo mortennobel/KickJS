@@ -28,7 +28,8 @@ define('kick/core/Constants',[],function () {
          * @static
          * @final
          */
-        _VERSION: { value: "0.5.0", configurable: true, enumerable: true },
+        _VERSION: { value: "0.5.1", configurable: true, enumerable: true },
+
         /**
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
@@ -9288,7 +9289,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     var shader,
                         infoLog,
                         c = Constants;
-                    str = Shader.getPrecompiledSource(engine, str);
+                    str = Shader.getPrecompiledSource(str);
                     if (isFragmentShader) {
                         shader = gl.createShader(35632);
                     } else {
@@ -10069,18 +10070,22 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
 
         /**
          * @method getPrecompiledSource
-         * @param {kick.core.Engine} engine
          * @param {String} sourcecode
          * @return {String} sourcecode after precompiler
          * @static
          */
-        Shader.getPrecompiledSource = function (engine, sourcecode) {
-            var name,
+        Shader.getPrecompiledSource = function (sourcecode) {
+            var engine = EngineSingleton.engine,
+                name,
                 source,
                 version = "#version 100",
                 lineOffset = 1,
                 indexOfNewline;
             if (true) {
+                if (sourcecode === engine){
+                    Util.fail("Shader.getPrecompiledSource() - engine parameter removed");
+                    return null;
+                }
                 (function () {
                     // insert #line nn after each #pragma include to give meaning full lines in error console
                     var linebreakPosition = [],
@@ -14427,7 +14432,25 @@ define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kic
 
         /**
          * Result of Camera.pickPoint.
+         * @example
+         *      function SomeComponent() {
+         *           var engine = kick.core.Engine.instance,
+         *              mouseInput = engine.mouseInput,
+         *              camera;
+         *           this.activated = function () {
+         *              camera = engine.activeScene.findComponentsOfType(kick.scene.Camera)[0];
+         *           };
          *
+         *           this.update = function () {
+         *              var objectPicked = function (pickResult) {
+         *                    console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance",
+         *                              pickResult.distance, "point", pickResult.point);
+         *                };
+         *                if (mouseInput.isButtonUp(0)) {
+         *                    camera.pickPoint(objectPicked, mouseInput.mousePosition[0], mouseInput.mousePosition[1]);
+         *                }
+         *           };
+         *       };
          * @class PickResult
          * @namespace kick.scene
          * @constructor
@@ -18355,7 +18378,6 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
          *                  function (kick) {
          *                      // init engine (create 3d context)
          *                      var engine = new kick.core.Engine('3dCanvas');
-         *                      console.log("Engine loaded. KickJS "+engine.version);
          *                  }
          *          );
          *      </script>
@@ -18401,7 +18423,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * @final
                  */
                 version: {
-                    value: "0.5.0"
+                    value: "0.5.1"
                 },
                 /**
                  * Resource manager of the engine. Loads and cache resources.
@@ -18773,7 +18795,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                     thisObj.config.webglNotFoundFn(canvas);
                     return;
                 }
-
+                console.log("KickJS "+thisObj.version);
                 canvas.addEventListener("webglcontextlost", function (event) {
                     wasPaused = thisObj.paused;
                     thisObj.paused = true;
@@ -18849,7 +18871,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                     return engineInstance;
                 }
             }
-        })
+        });
         return engine;
     }
     );

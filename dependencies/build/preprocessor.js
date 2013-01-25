@@ -1,5 +1,5 @@
 var requirejs = require('./r'),
-    replaceConstants = require("./replaceConstants"),
+    replaceConstants = require("./replaceconstants"),
     fs = require('fs');
 
 requirejs.config({
@@ -8,7 +8,7 @@ requirejs.config({
     //are loaded relative to the top-level JS file.
     nodeRequire: require,
     paths: {
-        kick: '../src/js/kick'
+        kick: '../../src/js/kick'
     }
 });
 
