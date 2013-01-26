@@ -28,7 +28,8 @@ define('kick/core/Constants',[],function () {
          * @static
          * @final
          */
-        _VERSION: { value: "0.5.0", configurable: true, enumerable: true },
+        _VERSION: { value: "0.5.1", configurable: true, enumerable: true },
+
         /**
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
          * will remove dead code in the minify-stage).<br>
@@ -9288,7 +9289,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     var shader,
                         infoLog,
                         c = Constants;
-                    str = Shader.getPrecompiledSource(engine, str);
+                    str = Shader.getPrecompiledSource(str);
                     if (isFragmentShader) {
                         shader = gl.createShader(35632);
                     } else {
@@ -10069,18 +10070,22 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
 
         /**
          * @method getPrecompiledSource
-         * @param {kick.core.Engine} engine
          * @param {String} sourcecode
          * @return {String} sourcecode after precompiler
          * @static
          */
-        Shader.getPrecompiledSource = function (engine, sourcecode) {
-            var name,
+        Shader.getPrecompiledSource = function (sourcecode) {
+            var engine = EngineSingleton.engine,
+                name,
                 source,
                 version = "#version 100",
                 lineOffset = 1,
                 indexOfNewline;
             if (true) {
+                if (sourcecode === engine){
+                    Util.fail("Shader.getPrecompiledSource() - engine parameter removed");
+                    return null;
+                }
                 (function () {
                     // insert #line nn after each #pragma include to give meaning full lines in error console
                     var linebreakPosition = [],
@@ -10914,7 +10919,8 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
             meshVertexAttBuffer,
             interleavedArrayFormat,
             interleavedArrayFormatArray = [],
-            meshVertexIndexBuffers = [],
+            meshVertexIndexBuffer = 0,
+            meshVertexBufferOffsetBytes = [],
             _name,
             _meshData,
             _dataURI = "memory://void",
@@ -10926,15 +10932,16 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
             meshElements = [],
             deleteBuffers = function () {
                 var i;
-                for (i = 0; i < meshVertexIndexBuffers.length; i++) {
-                    gl.deleteBuffer(meshVertexIndexBuffers[i]);
+                if (meshVertexIndexBuffer){
+                    gl.deleteBuffer(meshVertexIndexBuffer);
+                    meshVertexIndexBuffer = 0;
                 }
+                meshVertexBufferOffsetBytes.length = 0;
                 if (typeof meshVertexAttBuffer === "number") {
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
                 meshElements.length = 0;
-                meshVertexIndexBuffers.length = 0;
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
@@ -10958,8 +10965,9 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
             updateData = function () {
                 var subMeshes = _meshData.subMeshes,
                     i,
-                    indices,
-                    meshVertexIndexBuffer;
+                    indexLen,
+                    indicesSize = 0,
+                    meshVertexIndexBufferConcat;
                 // delete current buffers
                 deleteBuffers();
 
@@ -10973,17 +10981,22 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                 gl.bufferData(34962, _meshData.interleavedArray, 35044);
 
                 for (i = 0; i < subMeshes.length; i++) {
-                    indices = subMeshes[i];
-                    meshVertexIndexBuffer = gl.createBuffer();
-                    meshElements[i] = indices.length;
-                    meshVertexIndexBuffers.push(meshVertexIndexBuffer);
-                    gl.bindBuffer(34963, meshVertexIndexBuffer);
-                    gl.bufferData(34963, indices, 35044);
+                    meshVertexBufferOffsetBytes.push(indicesSize * 2);
+                    indexLen = subMeshes[i].length;
+                    meshElements[i] = indexLen;
+                    indicesSize += indexLen
                 }
+                meshVertexIndexBufferConcat = new Uint16Array(indicesSize);
+                for (i = 0; i < subMeshes.length; i++) {
+                    meshVertexIndexBufferConcat.set(subMeshes[i], meshVertexBufferOffsetBytes[i] / 2);
+                }
+                meshVertexIndexBuffer = gl.createBuffer();
+                gl.bindBuffer(34963, meshVertexIndexBuffer);
+                gl.bufferData(34963, meshVertexIndexBufferConcat, 35044);
             },
             contextListener = {
                 contextLost: function () {
-                    meshVertexIndexBuffers.length = 0;
+                    meshVertexIndexBuffer = 0;
                     meshVertexAttBuffer = null;
                     gl = null;
                 },
@@ -11129,7 +11142,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                             interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
                     }
                 }
-
+                gl.bindBuffer(34963, meshVertexIndexBuffer);
                 if (ASSERT) {
                     for (i = shader.activeAttributes.length - 1; i >= 0; i--) {
                         activeAttribute = shader.activeAttributes[i];
@@ -11168,8 +11181,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
          * @param {Number} submeshIndex
          */
         this.render = function (submeshIndex) {
-            gl.bindBuffer(34963, meshVertexIndexBuffers[submeshIndex]);
-            gl.drawElements(meshType, meshElements[submeshIndex], 5123, 0);
+            gl.drawElements(meshType, meshElements[submeshIndex], 5123, meshVertexBufferOffsetBytes[submeshIndex]);
         };
 
         /**
@@ -14427,7 +14439,25 @@ define('kick/scene/PickResult',["./MeshRenderer", "kick/material/Material", "kic
 
         /**
          * Result of Camera.pickPoint.
+         * @example
+         *      function SomeComponent() {
+         *           var engine = kick.core.Engine.instance,
+         *              mouseInput = engine.mouseInput,
+         *              camera;
+         *           this.activated = function () {
+         *              camera = engine.activeScene.findComponentsOfType(kick.scene.Camera)[0];
+         *           };
          *
+         *           this.update = function () {
+         *              var objectPicked = function (pickResult) {
+         *                    console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance",
+         *                              pickResult.distance, "point", pickResult.point);
+         *                };
+         *                if (mouseInput.isButtonUp(0)) {
+         *                    camera.pickPoint(objectPicked, mouseInput.mousePosition[0], mouseInput.mousePosition[1]);
+         *                }
+         *           };
+         *       };
          * @class PickResult
          * @namespace kick.scene
          * @constructor
@@ -18355,7 +18385,6 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
          *                  function (kick) {
          *                      // init engine (create 3d context)
          *                      var engine = new kick.core.Engine('3dCanvas');
-         *                      console.log("Engine loaded. KickJS "+engine.version);
          *                  }
          *          );
          *      </script>
@@ -18401,7 +18430,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * @final
                  */
                 version: {
-                    value: "0.5.0"
+                    value: "0.5.1"
                 },
                 /**
                  * Resource manager of the engine. Loads and cache resources.
@@ -18773,7 +18802,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                     thisObj.config.webglNotFoundFn(canvas);
                     return;
                 }
-
+                console.log("KickJS "+thisObj.version);
                 canvas.addEventListener("webglcontextlost", function (event) {
                     wasPaused = thisObj.paused;
                     thisObj.paused = true;
@@ -18849,7 +18878,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                     return engineInstance;
                 }
             }
-        })
+        });
         return engine;
     }
     );
