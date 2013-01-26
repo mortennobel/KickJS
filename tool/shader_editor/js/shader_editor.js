@@ -398,7 +398,7 @@ requirejs(['kick', 'shader_editor_ui'],
                         // restore material
                         delete lastValidMaterial.uid;
                         lastValidMaterial.shader = shader;
-                        _meshRenderer.material = new KICK.material.Material(_engine, lastValidMaterial);
+                        _meshRenderer.material = new KICK.material.Material(lastValidMaterial);
                     }
                 }
             };

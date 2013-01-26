@@ -314,7 +314,7 @@ define(["kick", "shader_editor_default"],
                             document.getElementById('texturePreview').style.display = 'block';
                         },
                         addTexture = function () {
-                            var t = new KICK.texture.Texture(shaderEditor.engine),
+                            var t = new KICK.texture.Texture(),
                                 currentTextures = document.getElementById('currentTextures'),
                                 newOption = document.createElement('option');
                             newOption.value = currentTextures.options.length;
