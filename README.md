@@ -15,8 +15,8 @@ programming in a browser easy.
 <a href="http://www.kickjs.org/example/snake/snake.html" title="Snake"><img src="http://www.kickjs.org/images/example_snake.jpg"></a>
 
 ## Tools
-<a href="http://www.kickjs.org/tool/shader_editor/shader_editor.html" title="GLSL Editor"><img src="http://www.kickjs.org/images/tool_glsl_editor.jpg"></a>
-<a href="http://www.kickjs.org/tool/model_viewer/model_tool.html" title="Model tool (Collada .dae and Wavefront .obj)"><img src="http://www.kickjs.org/images/tool_collada_import.jpg"></a>
+<a href="http://www.kickjs.org/tool/shader_editor/shader_editor.html" title="GLSL Editor"><img src="http://www.kickjs.org/images/example_glsl_editor.jpg"></a>
+<a href="http://www.kickjs.org/tool/model_tool/model_tool.html" title="Model tool (Collada .dae and Wavefront .obj)"><img src="http://www.kickjs.org/images/example_collada_import.jpg"></a>
 
 ## Website and Documentation
 
