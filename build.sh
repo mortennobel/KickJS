@@ -89,8 +89,8 @@ java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $p
 
 ##############################################################################
 echo "Adding license info compiler"
-cat "$project/license_min.txt" "$project/build/kick-debug.js.tmp" > "$project/build/kick-debug.js"
-cat "$project/license_min.txt" "$project/build/kick.js.tmp" > "$project/build/kick.js"
+cat "$project/dependencies/build/license_min.txt" "$project/build/kick-debug.js.tmp" > "$project/build/kick-debug.js"
+cat "$project/dependencies/build/license_min.txt" "$project/build/kick.js.tmp" > "$project/build/kick.js"
 rm "$project/build/kick-debug.js.tmp"
 rm "$project/build/kick.js.tmp"
 
