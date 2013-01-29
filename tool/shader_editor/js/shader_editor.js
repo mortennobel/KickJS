@@ -97,7 +97,6 @@ requirejs(['kick', 'shader_editor_ui'],
                         }
                     }
                     shaderData.material.shader = shader;
-                    console.log(shaderData.material);
                     if (_meshRenderer.material) {
                         _meshRenderer.material.destroy();
                     }
@@ -360,7 +359,6 @@ requirejs(['kick', 'shader_editor_ui'],
                     if (!lastValidMaterial.uniformData){
                         debugger;
                     }
-                    console.log("backup of shader ", lastValidMaterial);
                 }
                 shader.vertexShaderSrc = vs;
                 shader.fragmentShaderSrc = fs;
@@ -369,8 +367,6 @@ requirejs(['kick', 'shader_editor_ui'],
                     shaderCompiledSuccessfully = shader.apply(),
                     onError = function () {
                         previousShaderError = true;
-                        console.log(KICK.material.Shader.getPrecompiledSource(vs));
-                        console.log(KICK.material.Shader.getPrecompiledSource(fs));
                         document.body.style.backgroundColor = 'pink';
                     };
 
@@ -392,9 +388,6 @@ requirejs(['kick', 'shader_editor_ui'],
                     document.body.style.backgroundColor = 'white';
                     previousShaderError = false;
                     if (lastValidMaterial) {
-                        console.log(_engine.project.toJSON());
-                        console.log("Restore of ", lastValidMaterial);
-                        console.log("Restore of ", JSON.parse(JSON.stringify(lastValidMaterial)));
                         // restore material
                         delete lastValidMaterial.uid;
                         lastValidMaterial.shader = shader;
