@@ -24,7 +24,9 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
         deserializeConfig: function (config, scene) {
             var i,
                 engine = EngineSingleton.engine,
-                destArray;
+                destArray,
+                ref,
+                reftype;
             if (typeof config === 'number') {
                 return config;
             }
@@ -35,11 +37,18 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
                 }
                 config = destArray;
             } else if (config) {
-                if (config && config.ref && config.reftype) {
-                    if (config.reftype === "project") {
-                        config = engine.project.load(config.ref);
-                    } else if (config.reftype === "gameobject" || config.reftype === "component") {
-                        config = scene.getObjectByUID(config.ref);
+                ref = config.ref;
+                reftype = config.reftype;
+                if (reftype) {
+                    if (reftype === "project") {
+                        config = engine.project.load(ref);
+                    } else if (reftype === "gameobject" || reftype === "component") {
+                        config = scene.getObjectByUID(ref);
+                    } else if (DEBUG) {
+                        Util.warn("Unsupported ref type. Expected 'project', 'gameobject' or 'component'");
+                    }
+                    if (DEBUG && !config){
+                        Util.warn("Unable to find "+reftype+" ref "+ref);
                     }
                 }
             }
