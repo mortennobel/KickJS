@@ -639,7 +639,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 },
                 /**
                  * Only used for orthogonal camera type (!cameraTypePerspective). Default 1
-                 * @property left
+                 * @property right
                  * @type Number
                  */
                 right: {
