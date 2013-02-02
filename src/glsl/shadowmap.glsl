@@ -3,9 +3,19 @@ uniform sampler2D _shadowMapTexture;
 
 const float shadowBias = 0.005;
 
-float unpackDepth( const in vec4 rgba_depth ) {
-    const vec4 bit_shift = vec4( 1.0 / ( 16777216.0 ), 1.0 / ( 65536.0 ), 1.0 / 256.0, 1.0 );
-    return dot( rgba_depth, bit_shift );
+vec4 packDepth( const in float depth ) {
+    const vec4 bitShift = vec4( 16777216.0, 65536.0, 256.0, 1.0 );
+    const vec4 bitMask  = vec4( 0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0 );
+    vec4 res = fract( depth * bitShift );
+    res -= res.xxyz * bitMask;
+    return res;
+}
+
+float unpackDepth(const in vec4 rgba_depth)
+{
+    const vec4 bit_shift = vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0);
+    float depth = dot(rgba_depth, bit_shift);
+    return depth;
 }
 
 float computeLightVisibility(){
