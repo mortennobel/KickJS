@@ -512,6 +512,53 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.areEqual("_mvProj",shader.engineUniforms[0].name, "#3");
             Assert.areEqual("color",shader.materialUniforms[0].name, "#4");
 
+        },
+        testRenderOrder: function (){
+            var kick = KICK;
+            var vertexShaderStr = "attribute vec3 vertex;\n"+
+                "uniform mat4 _mvProj;\n"+
+                "void main(void) {\n"+
+                "    gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+                "}";
+            var fragmentShaderStr = "uniform highp float _time;\n"+
+                "void main(void) {\n"+
+                "  highp float fraction = mod(_time/1000.0,1.0);\n"+
+                "  gl_FragColor = vec4(fraction,fraction,fraction, 1.0);\n"+
+                "}";
+            var shader1 = new kick.material.Shader({
+                     vertexShaderSrc: vertexShaderStr,
+                     fragmentShaderSrc: fragmentShaderStr
+                 });
+            shader1.renderOrder = 1;
+            var shader2 = new kick.material.Shader({
+                     vertexShaderSrc: vertexShaderStr,
+                     fragmentShaderSrc: fragmentShaderStr
+                 });
+
+            shader2.renderOrder = 2;
+            var material = new kick.material.Material();
+            material.shader = shader1;
+            var material2 = new kick.material.Material();
+            material2.shader = shader1;
+
+            Y.Assert.areEqual(1, material.renderOrder);
+            material.shader = shader2;
+            Y.Assert.areEqual(2, material.renderOrder);
+
+            // check render order of meshRenderer
+            var meshRenderer = new kick.scene.MeshRenderer();
+            meshRenderer = new kick.scene.MeshRenderer();
+            meshRenderer.material = material;
+            Y.Assert.areEqual(2, meshRenderer.renderOrder);
+
+            meshRenderer.material = material2;
+            Y.Assert.areEqual(1, meshRenderer.renderOrder);
+            material2.shader = shader2;
+            Y.Assert.areEqual(2, material2.renderOrder);
+            Y.Assert.areEqual(2, meshRenderer.renderOrder);
+            shader2.renderOrder = 3;
+            Y.Assert.areEqual(3, material2.renderOrder, "material2 has renderorder 3");
+            Y.Assert.areEqual(3, meshRenderer.renderOrder, "meshrenderer has renderorder 3");
         }
     });
 

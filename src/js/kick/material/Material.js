@@ -35,6 +35,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 _name = "Material",
                 _shader = null,
                 _uniforms = [],
+                shaderChangeListeners = [],
                 thisObj = this,
                 gl = engine.gl,
                 _renderOrder = 0,
@@ -52,6 +53,12 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         }
                     }
                 },
+                notifyShaderChange = function(){
+                    var i;
+                    for (i = 0; i < shaderChangeListeners.length; i++) {
+                        shaderChangeListeners[i](thisObj);
+                    }
+                },
                 /**
                  * Called when a shader is set or changed.
                  * Add location and type information to each uniform.
@@ -61,6 +68,8 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                  * @private
                  */
                 decorateUniforms = function () {
+                    _renderOrder = _shader.renderOrder;
+                    notifyShaderChange();
                     var i, uniform,
                         foundUniformNames = {},
                         name,
@@ -148,6 +157,33 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                     }
                 }
             });
+
+            /**
+             * Listener is notified whenever shader is changed
+             * @method addShaderChangeListeners
+             * @param {Function} listenerFn
+             */
+            this.addShaderChangeListener = function (listenerFn) {
+                if (ASSERT) {
+                    if (typeof listenerFn !== "function") {
+                        Util.warn("Material.addShaderChangeListener: listenerFn not function");
+                    }
+                }
+                shaderChangeListeners.push(listenerFn);
+            };
+
+            /**
+             * @method removeShaderChangeListener
+             * @param {Function} listenerFn
+             */
+            this.removeShaderChangeListener = function (listenerFn) {
+                if (ASSERT) {
+                    if (typeof listenerFn !== "function") {
+                        Util.warn("Material.removeShaderChangeListener: listenerFn not function");
+                    }
+                }
+                Util.removeElementFromArray(shaderChangeListeners, listenerFn, true);
+            };
 
             /**
              * Bind material uniforms

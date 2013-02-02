@@ -9,7 +9,7 @@
 
 
 <canvas id="canvas" style="border: none;" width="500" height="500"></canvas> <br>
-<script src="pointlightProject.js"></script>
+<script src="pick_test2_project.js"></script>
 <script src="../../dependencies/require.js"></script>
 <script type="text/javascript">
     var req = require.config({
@@ -33,8 +33,9 @@
 
                     this.update = function () {
                         var objectPicked = function (pickResult) {
-                            console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance", pickResult.distance, "point", pickResult.point);
-                            console.log("Distance to origin: "+kick.math.Vec3.length(pickResult.point));
+//                            console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance", pickResult.distance, "point", pickResult.point);
+//                            console.log("Distance to origin: "+kick.math.Vec3.length(pickResult.point));
+                            console.log(pickResult.gameObject.name);
                         };
                         if (mouseInput.isButtonUp(0)) {
                             camera.pickPoint(objectPicked, mouseInput.mousePosition[0], mouseInput.mousePosition[1]);
@@ -48,10 +49,10 @@
                             transform,
                             vec3 = kick.math.Vec3,
                             quat= kick.math.Quat,
-                            rotationSpeed = 0.001,
+                            rotationSpeed = 0.0001,
                             upDownSpeed = 0.0001,
                             wheelSpeed = 0.0001,
-                            mouseRotationSpeed = 0.01,
+                            mouseRotationSpeed = 0.001,
                             mouseInput,
                             sphericalCoordinates = vec3.clone([20.2,0,0]); // radius, polar, elevation
                     cartesianCoordinates = vec3.create();
@@ -67,16 +68,10 @@
 
                     var localRotate = quat.create();
                     this.update = function(){
-                        if (mouseInput.isButton(0)){
-                            var mouseDelta = mouseInput.deltaMovement;
-                            sphericalCoordinates[1] -= mouseDelta[0]*mouseRotationSpeed;
-                            sphericalCoordinates[2] += mouseDelta[1]*mouseRotationSpeed;
-                            sphericalCoordinates[2] = Math.max(-Math.PI*0.499,sphericalCoordinates[2]);
-                            sphericalCoordinates[2] = Math.min(Math.PI*0.499,sphericalCoordinates[2]);
-                        } else {
-                            sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
-                            sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
-                        }
+
+                        sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
+                        sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
+
                         var wheelY = mouseInput.deltaWheel[1];
                         if (wheelY){
                             var delta = wheelY*wheelSpeed;
@@ -87,6 +82,9 @@
                         transform.localRotation = quat.lookAt(localRotate, cartesianCoordinates,[0,0,0],[0,1,0]);
                     };
                 }
+
+
+
                 function initKick() {
                     engine = new kick.core.Engine('canvas',{
                         enableDebugContext: true

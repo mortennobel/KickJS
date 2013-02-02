@@ -126,7 +126,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 notifyListeners = function () {
                     var i;
                     for (i = 0; i < listeners.length; i++) {
-                        listeners[i]();
+                        listeners[i](thisObj);
                     }
                 },
                 /**
@@ -473,6 +473,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                             Util.fail("Shader.renderOrder must be a number");
                         }
                         _renderOrder = value;
+                        notifyListeners();
                     }
                 },
                 /**

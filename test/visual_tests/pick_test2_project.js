@@ -124,6 +124,60 @@ var pointProject = {
                   ]
                },
                {
+                  "name": "RedTrans",
+                  "layer": 1,
+                  "uid": 16,
+                  "components": [
+                     {
+                        "type": "kick.scene.Transform",
+                        "uid": 17,
+                        "config": {
+                           "localPosition": [
+                              0,
+                              0,
+                              0
+                           ],
+                           "localRotation": [
+                              0,
+                              0,
+                              0,
+                              1
+                           ],
+                           "localScale": [
+                              1.5,
+                              1.5,
+                              1.5
+                           ],
+                            "parent": {
+                                "ref": 30,
+                                "name": "Red",
+                                "reftype": "component"
+                            }
+                        }
+                     },
+                     {
+                        "type": "kick.scene.MeshRenderer",
+                        "uid": 18,
+                        "config": {
+                           "materials": [
+                              {
+                                 "ref": 13,
+                                 "name": "Red",
+                                 "reftype": "project"
+                              }
+                           ],
+                           "mesh": {
+                              "ref": -302,
+                              "name": "Uvsphere",
+                              "reftype": "project"
+                           },
+                           "uid": 60,
+                           "scriptPriority": 0
+                        }
+                     }
+                  ]
+               },
+               {
                   "name": "PointLight",
                   "layer": 1,
                   "uid": 26,
@@ -322,6 +376,45 @@ var pointProject = {
                      0,
                      0,
                      1
+                  ]
+               ,
+               "mainTexture": {
+                     "ref": -201,
+                     "name": "White",
+                     "reftype": "project"
+                  }
+               ,
+               "specularColor": [
+                     1,
+                     1,
+                     1,
+                     1
+                  ]
+               ,
+               "specularExponent": [
+                     50
+                  ]
+
+            }
+         }
+      },
+      {
+         "type": "kick.material.Material",
+         "uid": 13,
+         "config": {
+            "uid": 13,
+            "name": "Transparent specular",
+            "shader": {
+               "ref": -103,
+               "name": "Specular",
+               "reftype": "project"
+            },
+            "uniformData": {
+               "mainColor":[
+                     1,
+                     0,
+                     0,
+                     0.5
                   ]
                ,
                "mainTexture": {

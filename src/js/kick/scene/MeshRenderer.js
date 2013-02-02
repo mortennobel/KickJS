@@ -8,6 +8,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
          * Renders a Mesh.
          * To create custom renderable objects you should not inherit from this class, but simple create a component with a
          * render() method.
+         * If a mesh with sub-meshes, which uses multiple materials, the renderOrder is taken from the first material
          * @class MeshRenderer
          * @constructor
          * @namespace kick.scene
@@ -21,7 +22,17 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 _mesh,
                 _renderOrder,
                 engine = EngineSingleton.engine,
-                thisObj = this;
+                thisObj = this,
+                updateRenderOrder = function() {
+                    if (_materials.length > 0 && _renderOrder != _materials[0].renderOrder){
+                        _renderOrder = _materials[0].renderOrder;
+                        if (thisObj.gameObject) {
+                            thisObj.gameObject.notifyComponentUpdated(thisObj);
+                            return true;
+                        }
+                    }
+                    return false;
+                };
 
             /**
              * If no materials are assigned, the ENGINE_MATERIAL_DEFAULT is assigned as material.
@@ -42,7 +53,11 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                         return _mesh.aabb;
                     }
                 },
-                // inherit documentation from component
+                /**
+                 * The renderOrder for materials[0]
+                 * @property renderOrder
+                 * @type {Number}
+                 */
                 renderOrder: {
                     get: function () {
                         return _renderOrder;
@@ -66,7 +81,11 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                                 Util.fail("MeshRenderer.material must be a kick.material.Material");
                             }
                         }
+                        if (_materials.length > 0){
+                            _materials[0].removeShaderChangeListener(updateRenderOrder);
+                        }
                         _materials[0] = newValue;
+                        _materials[0].addShaderChangeListener(updateRenderOrder);
                         _renderOrder = _materials[0].renderOrder;
                         if (thisObj.gameObject) {
                             thisObj.gameObject.notifyComponentUpdated(thisObj);
@@ -84,6 +103,9 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                     },
                     set: function (newValue) {
                         var i;
+                        for (i = 0;i < _materials.length; i++){
+                            _materials[i].removeShaderChangeListener(updateRenderOrder);
+                        }
                         _materials = [];
                         for (i = 0; i < newValue.length; i++) {
                             if (ASSERT) {
@@ -92,7 +114,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                                 }
                             }
                             _materials[i] = newValue[i];
-                            _renderOrder = _materials[i].renderOrder;
+                            _materials[i].addShaderChangeListener(updateRenderOrder);
                         }
                         if (thisObj.gameObject) {
                             thisObj.gameObject.notifyComponentUpdated(thisObj);
