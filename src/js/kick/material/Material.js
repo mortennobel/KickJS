@@ -291,19 +291,20 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             };
 
             this.init = function(config) {
-                var uniformData = config.uniformData,
+                var conf = config || {},
+                    uniformData = conf.uniformData,
                     name,
                     value,
                     configCopy = {
-                        uid: config.uid || 0,
-                        name: config.name,
-                        shader: config.shader
+                        uid: conf .uid || 0,
+                        name: conf.name,
+                        shader: conf.shader
                     };
                 engine.addContextListener(contextListener);
                 Util.applyConfig(thisObj, configCopy, ["uid"]);
                 if (!_shader || !_shader.isValid()) {
-                    if (config.shader) {
-                        Util.warn("Problem using shader in material. ", config.shader);
+                    if (conf.shader) {
+                        Util.warn("Problem using shader in material. ", conf.shader);
                     }
                     thisObj.shader = engine.project.load(engine.project.ENGINE_SHADER___ERROR);
                 }
