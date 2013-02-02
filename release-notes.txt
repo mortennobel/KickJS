@@ -1,5 +1,11 @@
 KickJS Release notes:
 
+0.5.1
+- Improved sub mesh rendering
+- Remove engine parameter from Shader.getPrecompiledSource()
+- Fix rare bug in MeshData.recomputeNormals()
+- Fix problem with renderOrder (which caused wrong render order)
+
 0.5.0
 - Now all classes must be loaded using require.js (this replaces the KICK.namespace method).
 - kick.math is now based on gl-matrix 2.0 (note that parameters has different ordering - and out parameter is required)
