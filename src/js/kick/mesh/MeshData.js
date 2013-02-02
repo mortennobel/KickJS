@@ -739,7 +739,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 weight1 = Math.acos(Math.max(-1, Math.min(1, Vec3.dot(v1v2, v1v3))));
                 Vec3.subtract(v2v3Alias, v3, v2);
                 Vec3.normalize(v2v3Alias, v2v3Alias);
-                weight2 = Math.PI - Math.max(-1, Math.min(1, Math.acos(Vec3.dot(v1v2, v2v3Alias))));
+                weight2 = Math.PI - Math.acos(Math.max(-1, Math.min(1, Vec3.dot(v1v2, v2v3Alias))));
                 Vec3.add(normalArray[i1], normalArray[i1], Vec3.scale(temp, normal, weight1));
                 Vec3.add(normalArray[i2], normalArray[i2], Vec3.scale(temp, normal, weight2));
                 Vec3.add(normalArray[i3], normalArray[i3], Vec3.scale(temp, normal, Math.PI - weight1 - weight2));
