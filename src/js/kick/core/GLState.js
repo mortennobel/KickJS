@@ -15,11 +15,26 @@ define(["kick/core/Constants"], function (constants) {
     return function (engine) {
         var thisObj = this,
             vertexArrayObjectExt = null,
+            standardDerivativesExt = null,
+            textureFloatExt = null,
+            textureFloatHalfExt = null,
+            depthTextureExt = null,
+            textureFilterAnisotropicExt = null,
             reloadExtensions = function(){
                 vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
+                standardDerivativesExt = engine.getGLExtension("OES_standard_derivatives");
+                textureFloatExt = engine.getGLExtension("OES_texture_float");
+                textureFloatHalfExt = engine.getGLExtension("OES_texture_half_float");
+                depthTextureExt = engine.getGLExtension("WEBGL_depth_texture");
+                textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic");
             },
             clearExtensions = function(){
                 vertexArrayObjectExt = null;
+                standardDerivativesExt = null;
+                textureFloatExt = null;
+                textureFloatHalfExt = null;
+                depthTextureExt = null;
+                textureFilterAnisotropicExt = null;
             };
         /**
          * The current clear color
@@ -113,6 +128,66 @@ define(["kick/core/Constants"], function (constants) {
             vertexArrayObjectExtension:{
                 get: function(){
                     return vertexArrayObjectExt;
+                }
+            },
+            /**
+             * The OES_standard_derivatives extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES_standard_derivatives/
+             * @property standardDerivativesExtension
+             * @type Object
+             * @final
+             */
+            standardDerivativesExtension:{
+                get: function(){
+                    return standardDerivativesExt;
+                }
+            },
+            /**
+             * The OES_texture_float extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES_texture_float/
+             * @property textureFloatExtension
+             * @type Object
+             * @final
+             */
+            textureFloatExtension:{
+                get: function(){
+                    return textureFloatExt;
+                }
+            },
+            /**
+             * The OES_texture_half_float extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES_texture_half_float/
+             * @property textureFloatHalfExtension
+             * @type Object
+             * @final
+             */
+            textureFloatHalfExtension:{
+                get: function(){
+                    return textureFloatHalfExt;
+                }
+            },
+            /**
+             * The WEBGL_depth_texture extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/
+             * @property depthTextureExtension
+             * @type Object
+             * @final
+             */
+            depthTextureExtension:{
+                get: function(){
+                    return depthTextureExt;
+                }
+            },
+            /**
+             * The EXT_texture_filter_anisotropic extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/
+             * @property textureFilterAnisotropicExtension
+             * @type Object
+             * @final
+             */
+            textureFilterAnisotropicExtension:{
+                get: function(){
+                    return textureFilterAnisotropicExt;
                 }
             }
         });
