@@ -34,7 +34,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
          * @param {kick.core.Config} config={} Configuration object
          */
         var engine = function (idOrElement, config) {
-            var glState = new GLState(),
+            var glState,
                 gl = null,
                 canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
                 webGlContextNames = ["experimental-webgl", "webgl"],
@@ -448,6 +448,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                                 console.log("webgl-debug.js not included - cannot find WebGLDebugUtils");
                             }
                         }
+                        glState = new GLState(thisObj);
                         Object.freeze(gl);
                         gl.enable(c.GL_DEPTH_TEST);
                         gl.enable(c.GL_SCISSOR_TEST);

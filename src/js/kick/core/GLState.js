@@ -12,8 +12,15 @@ define(["kick/core/Constants"], function (constants) {
      * @namespace kick.core
      * @param {kick.core.Engine} engine
      */
-    return function () {
-        var thisObj = this;
+    return function (engine) {
+        var thisObj = this,
+            vertexArrayObjectExt = null,
+            reloadExtensions = function(){
+                vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
+            },
+            clearExtensions = function(){
+                vertexArrayObjectExt = null;
+            };
         /**
          * The current clear color
          * @property currentClearColor
@@ -95,6 +102,21 @@ define(["kick/core/Constants"], function (constants) {
          */
         this.viewportSize = null;
 
+        Object.defineProperties(this, {
+            /**
+             * The OES_vertex_array_object extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES_vertex_array_object/
+             * @property vertexArrayObjectExtension
+             * @type Object
+             * @final
+             */
+            vertexArrayObjectExtension:{
+                get: function(){
+                    return vertexArrayObjectExt;
+                }
+            }
+        });
+
         /**
          * Sets all properties to null
          * @method clear
@@ -108,6 +130,11 @@ define(["kick/core/Constants"], function (constants) {
             }
         };
 
+        engine.addContextListener({
+            contextLost: clearExtensions,
+            contextRestored: reloadExtensions
+        });
+        reloadExtensions();
         if (ASSERT) {
             Object.preventExtensions(this);
         }
