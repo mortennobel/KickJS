@@ -234,6 +234,26 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
             };
 
             /**
+             * Query WebGL for a specific extension. If found, the extension object is returned.
+             * "WEBKIT_", "MOZ_" vendor prefixes are used.
+             * @method getGLExtension
+             * @param {String} extensionName
+             * @return Object|null
+             */
+            this.getGLExtension = function (extensionName) {
+                var vendorPrefixes = ["", "WEBKIT_", "MOZ_"],
+                    i,
+                    ext;
+                for(i = 0;i < vendorPrefixes.length; i++) {
+                    ext = gl.getExtension(vendorPrefixes[i] + extensionName);
+                    if (ext) {
+                        return ext;
+                    }
+                }
+                return null;
+            };
+
+            /**
              * Note that fullscreen needs to be invoked directly from a keyboard event or a mouse event from outside the
              * gameLoop. This means it is currently not possible to set fullscreen from a Component's update method.
              * @method setFullscreen
