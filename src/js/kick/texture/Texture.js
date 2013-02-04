@@ -233,8 +233,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             this.setImageData = function (width, height, border, type, pixels, dataURI) {
                 createImageFunction = thisObj.setImageData;
                 createImageFunctionParameters = arguments;
-                var res,
-                    i,
+                var i,
                     textureSides = _textureType === Constants.GL_TEXTURE_2D ?
                             [Constants.GL_TEXTURE_2D] :
                             [Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -308,7 +307,6 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                         255, 255, 255,
                         255, 255, 255]),
                     oldIntFormat = _intFormat;
-                _intFormat = Constants.GL_RGB;
                 this.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "kickjs://texture/white/");
                 _intFormat = oldIntFormat;
             };
