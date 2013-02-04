@@ -203,8 +203,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
 
             /**
              * Calling this function has the side effect of enabling floating point texture (in available on platform)
+             * Use GLState.depthTextureExtension instead
              * @method isFPTexturesSupported
              * @return {Boolean}
+             * @deprecated
              */
             this.isFPTexturesSupported = function () {
                 var res = gl.isTexFloatEnabled;
@@ -217,13 +219,14 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
 
             /**
              * Set a image using a raw bytearray in a specified format.
-             * GL_FLOAT should only be used if floating point textures is supported (See Texture.isFPTexturesSupported() ).
+             * GL_FLOAT/GL_HALF_FLOAT_OES should only be used if extension is supported (See GLState.textureFloatExtension / GLState.textureFloatHalfExtension).
+             * If only one of GL_FLOAT/GL_HALF_FLOAT_OES is supported, then the engine will silently use the supported type.
              * If used on cubemap-texture then all 6 sides of the cube is assigned
              * @method setImageData
              * @param {Number} width image width in pixels
              * @param {Number} height image height in pixels
              * @param {Number} border image border in pixels
-             * @param {Object} type GL_FLOAT, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5
+             * @param {Object} type GL_FLOAT, GL_HALF_FLOAT_OES, GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT_4_4_4_4, GL_UNSIGNED_SHORT_5_5_5_1 or GL_UNSIGNED_SHORT_5_6_5
              * @param {Array} pixels array of pixels (may be null)
              * @param {String} dataURI String representing the image
              */
@@ -241,11 +244,24 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                                 Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
                                 Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
                 recreateTextureIfDifferentType();
-                if (type === Constants.GL_FLOAT && !gl.isTexFloatEnabled) {
-                    res = thisObj.isFPTexturesSupported(); // enable extension
-                    if (!res) {
-                        Util.fail("OES_texture_float unsupported on the platform. Using GL_UNSIGNED_BYTE instead of GL_FLOAT.");
-                        type = Constants.GL_UNSIGNED_BYTE;
+                if (type === Constants.GL_FLOAT) {
+                    if (!glState.depthTextureExtension) {
+                        if (glState.textureFloatHalfExtension) {
+                            type = Constants.GL_HALF_FLOAT_OES;
+                        } else {
+                            Util.fail("OES_texture_float unsupported on the platform. Using GL_UNSIGNED_BYTE instead of GL_FLOAT.");
+                            type = Constants.GL_UNSIGNED_BYTE;
+                        }
+                    }
+                }
+                if (type === Constants.GL_HALF_FLOAT_OES){
+                    if (!glState.textureFloatHalfExtension) {
+                        if (glState.depthTextureExtension) {
+                            type = Constants.GL_FLOAT;
+                        } else {
+                            Util.fail("OES_texture_half_float unsupported on the platform. Using GL_UNSIGNED_BYTE instead of GL_HALF_FLOAT_OES.");
+                            type = Constants.GL_UNSIGNED_BYTE;
+                        }
                     }
                 }
                 if (Constants._ASSERT) {
