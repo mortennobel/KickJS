@@ -4,38 +4,56 @@
 <head>
     <title></title>
 
-    <script type="text/javascript" src="../src/js/constants.js"></script>
-    <script type="text/javascript" src="../src/js/core.js"></script>
-    <script type="text/javascript" src="../src/js/resource.js"></script>
-    <script type="text/javascript" src="../src/js/math.js"></script>
-    <script type="text/javascript" src="../src/js/mesh.js"></script>
-    <script type="text/javascript" src="../src/js/scene.js"></script>
-    <script type="text/javascript" src="../src/js/texture.js"></script>
-    <script type="text/javascript">
-        var engine;
+    <script src="../dependencies/require.js"></script>
 
-        function initKick() {
-            engine = new KICK.core.Engine('canvas',{
-                enableDebugContext: true
-            });
-            var gl = engine.gl;
-            for (var g in gl){
-                if (typeof gl[g] !== "function" && g.charCodeAt(0)<"a".charCodeAt(0)){
-                    document.write("/**<br>");
-                    document.write(" * Value "+gl[g]+"<br>");
-                    document.write(" * @property GL_"+g+"<br>");
-                    document.write(" * @type Number<br>");
-                    document.write(" * @static<br>");
-                    document.write(" * @final<br>");
-                    document.write(" */<br>");
-                    document.write("GL_"+g+": { value: "+gl[g]+", enumerable: true},<br>");
-                }
-            }
-        }
-    </script>
 </head>
-<body onload="initKick();">
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
- <br/>
+<body>
+<canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+<br/>
+<script type="text/javascript">
+        var req = require.config({
+            baseUrl: 'js/lib',
+            paths: {
+                kick: '../../../src/js/kick'
+            }
+        });
+
+        req(['kick'],
+                function (KICK) {
+                    var engine;
+
+                    function initKick() {
+                        engine = new KICK.core.Engine('canvas',{
+                            enableDebugContext: true
+                        });
+                        var gl = engine.gl,
+                                writeEnum = function(name, value){
+                                    document.write("/**<br>");
+                                    document.write(" * Value "+value+"<br>");
+                                    document.write(" * @property GL_"+name+"<br>");
+                                    document.write(" * @type Number<br>");
+                                    document.write(" * @static<br>");
+                                    document.write(" * @final<br>");
+                                    document.write(" */<br>");
+                                    document.write("GL_"+name+": { value: "+value+", enumerable: true},<br>");
+                                };
+                        for (var g in gl){
+                            if (typeof gl[g] !== "function" && g.charCodeAt(0)<"a".charCodeAt(0)){
+                                writeEnum(g, gl[g]);
+                            }
+                        }
+                        writeEnum("UNSIGNED_INT_24_8_WEBGL", 34042);
+                        writeEnum("TEXTURE_MAX_ANISOTROPY_EXT", 34046);
+                        writeEnum("MAX_TEXTURE_MAX_ANISOTROPY_EXT", 34047);
+                        writeEnum("VERTEX_ARRAY_BINDING_OES", 34229);
+                        writeEnum("FRAGMENT_SHADER_DERIVATIVE_HINT_OES", 35723);
+                        writeEnum("HALF_FLOAT_OES", 0x8D61);
+                    }
+
+                    initKick();
+                }, function(err){
+                    debugger;
+                });
+    </script>
 </body>
 </html>
