@@ -128,7 +128,8 @@ define(["kick/core/Constants"], function (constants) {
             vertexArrayObjectExtension:{
                 get: function(){
                     return vertexArrayObjectExt;
-                }
+                },
+                enumerable:true
             },
             /**
              * The OES_standard_derivatives extension (if available)
@@ -140,7 +141,8 @@ define(["kick/core/Constants"], function (constants) {
             standardDerivativesExtension:{
                 get: function(){
                     return standardDerivativesExt;
-                }
+                },
+                enumerable:true
             },
             /**
              * The OES_texture_float extension (if available)
@@ -152,7 +154,8 @@ define(["kick/core/Constants"], function (constants) {
             textureFloatExtension:{
                 get: function(){
                     return textureFloatExt;
-                }
+                },
+                enumerable:true
             },
             /**
              * The OES_texture_half_float extension (if available)
@@ -164,7 +167,8 @@ define(["kick/core/Constants"], function (constants) {
             textureFloatHalfExtension:{
                 get: function(){
                     return textureFloatHalfExt;
-                }
+                },
+                enumerable:true
             },
             /**
              * The WEBGL_depth_texture extension (if available)
@@ -176,7 +180,8 @@ define(["kick/core/Constants"], function (constants) {
             depthTextureExtension:{
                 get: function(){
                     return depthTextureExt;
-                }
+                },
+                enumerable:true
             },
             /**
              * The EXT_texture_filter_anisotropic extension (if available)
@@ -188,7 +193,8 @@ define(["kick/core/Constants"], function (constants) {
             textureFilterAnisotropicExtension:{
                 get: function(){
                     return textureFilterAnisotropicExt;
-                }
+                },
+                enumerable:true
             }
         });
 
