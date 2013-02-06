@@ -161,10 +161,10 @@ define(["kick/core/Constants"], function (constants) {
          * Adds two vec4's
          *
          * @method add
-         * @param {vec4} out the receiving vector
-         * @param {vec4} a the first operand
-         * @param {vec4} b the second operand
-         * @return {vec4} out
+         * @param {kick.math.Vec4} out the receiving vector
+         * @param {kick.math.Vec4} a the first operand
+         * @param {kick.math.Vec4} b the second operand
+         * @return {kick.math.Vec4} out
          * @static
          */
         add: function (out, a, b) {

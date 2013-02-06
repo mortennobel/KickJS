@@ -355,8 +355,8 @@ define(["kick/core/Constants", "./Mat4"], function (constants, mat4) {
         /**
          * Calculates the dot product of two vec3s
          * @method dot
-         * @param {vec3} a the first operand
-         * @param {vec3} b the second operand
+         * @param {kick.math.Vec3} a the first operand
+         * @param {kick.math.Vec3} b the second operand
          * @return {Number} dot product of a and b
          * @static
          */

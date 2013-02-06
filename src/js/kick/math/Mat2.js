@@ -193,8 +193,9 @@ define([], function () {
          * @method scale
          * @param {kick.math.Mat2} out the receiving matrix
          * @param {kick.math.Mat2} a the matrix to rotate
-         * @param {kick.math.Mat2} v the vec2 to scale the matrix by
+         * @param {kick.math.Vec2} v the vec2 to scale the matrix by
          * @return {kick.math.Mat2} out
+         * @static
          **/
         scale: function (out, a, v) {
             var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3],

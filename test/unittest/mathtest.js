@@ -241,21 +241,21 @@ requirejs(['kick/math',  'kick/core/Constants'],
                 testCartesialToSpherical:function(){
                     var Assert = Y.Assert;
                     var vecCartesial = [1,0,0];
-                    var spherical = math.Vec3.cartesianToSpherical(vecCartesial);
+                    var spherical = math.Vec3.cartesianToSpherical([0,0,0], vecCartesial);
                     Assert.compareVec (spherical,[1,0,0]);
 
                     vecCartesial = [0,0,1];
-                    spherical = math.Vec3.cartesianToSpherical(vecCartesial);
+                    spherical = math.Vec3.cartesianToSpherical([0,0,0], vecCartesial);
                     Assert.compareVec (spherical,[1,-1.5707963705062866,0]);
 
                     vecCartesial = [0,0,0];
-                    spherical = math.Vec3.cartesianToSpherical(vecCartesial);
+                    spherical = math.Vec3.cartesianToSpherical([0,0,0], vecCartesial);
                     Assert.compareVec (spherical,[0,0,0]);
 
                     for (var i=0;i<100;i++){
                         vecCartesial = [Math.random()*100-50,Math.random()*100-50,Math.random()*100-50];
-                        spherical = math.Vec3.cartesianToSpherical(vecCartesial);
-                        var vecCartesial2 = math.Vec3.sphericalToCarterian(spherical);
+                        spherical = math.Vec3.cartesianToSpherical([0,0,0], vecCartesial);
+                        var vecCartesial2 = math.Vec3.sphericalToCarterian([0,0,0], spherical);
                         Assert.compareVec(vecCartesial,vecCartesial2,"Error in "+i);
                     }
                 },
@@ -542,7 +542,22 @@ requirejs(['kick/math',  'kick/core/Constants'],
                         var res = frustum.intersectAabb(frustumPlanes, aabb45);
                         Y.Assert.areEqual(frustum.INSIDE,res, aabb.str(aabb45)+" normalize "+normalize);
                     }
+                },
+                testMat2d : function(){
+                    "use strict";
+                    var Assert = Y.Assert,
+                        mat2d = math.Mat2d,
+                        m = mat2d.create();
+                    Assert.areEqual(6, m.length);
+                },
+                testVec2: function(){
+                    "use strict";
+                    var Assert = Y.Assert,
+                        vec2 = math.Vec2,
+                        v = vec2.create();
+                    Assert.areEqual(2, v.length);
                 }
+
             });
 
             /**
