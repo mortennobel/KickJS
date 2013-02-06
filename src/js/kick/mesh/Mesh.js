@@ -115,6 +115,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 contextRestored: function (newGl) {
                     gl = newGl;
                     vertexArrayObject = {};
+                    vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
                     updateData();
                 }
             },
