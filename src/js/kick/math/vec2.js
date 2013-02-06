@@ -364,6 +364,7 @@ define(["kick/core/Constants"], function (constants) {
          * @param {kick.math.Vec2} b the second operand
          * @param {Number} t interpolation amount between the two inputs
          * @return {kick.math.Vec2} out
+         * @static
          */
         lerp: function (out, a, b, t) {
             var ax = a[0],
@@ -387,10 +388,66 @@ define(["kick/core/Constants"], function (constants) {
         transformMat2: function (out, a, m) {
             var x = a[0],
                 y = a[1];
-            out[0] = x * m[0] + y * m[1];
-            out[1] = x * m[2] + y * m[3];
+            out[0] = m[0] * x + m[2] * y;
+            out[1] = m[1] * x + m[3] * y;
             return out;
         },
+
+        /**
+         * Transforms the vec2 with a mat2d
+         * @method transformMat2d
+         * @param {kick.math.Vec2} out the receiving vector
+         * @param {kick.math.Vec2} a the vector to transform
+         * @param {kick.math.Mat2d} m matrix to transform with
+         * @return {kick.math.Vec2} out
+         * @static
+         */
+        transformMat2d: function(out, a, m) {
+            var x = a[0],
+                y = a[1];
+            out[0] = m[0] * x + m[2] * y + m[4];
+            out[1] = m[1] * x + m[3] * y + m[5];
+            return out;
+        },
+
+
+        /**
+         * Transforms the vec2 with a mat3
+         * 3rd vector component is implicitly '1'
+         * @method transformMat3
+         * @param {kick.math.Vec2} out the receiving vector
+         * @param {kick.math.Vec2} a the vector to transform
+         * @param {kick.math.Mat3} m matrix to transform with
+         * @return {kick.math.Vec2} out
+         * @static
+         */
+        transformMat3: function(out, a, m) {
+            var x = a[0],
+                y = a[1];
+            out[0] = m[0] * x + m[3] * y + m[6];
+            out[1] = m[1] * x + m[4] * y + m[7];
+            return out;
+        },
+
+        /**
+         * Transforms the vec2 with a mat4
+         * 3rd vector component is implicitly '0'
+         * 4th vector component is implicitly '1'
+         * @method transformMat4
+         * @param {kick.math.Vec2} out the receiving vector
+         * @param {kick.math.Vec2} a the vector to transform
+         * @param {kick.math.Mat4} m matrix to transform with
+         * @return {kick.math.Vec2} out
+         * @static
+         */
+        transformMat4: function(out, a, m) {
+            var x = a[0],
+                y = a[1];
+            out[0] = m[0] * x + m[4] * y + m[12];
+            out[1] = m[1] * x + m[5] * y + m[13];
+            return out;
+        },
+
 
         /**
          * Perform some operation over an array of vec2s.
