@@ -11352,6 +11352,8 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
         var engine = EngineSingleton.engine,
             gl = engine.gl,
             glState = engine.glState,
+            vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
+            vertexArrayObject = {},
             meshVertexAttBuffer,
             interleavedArrayFormat,
             interleavedArrayFormatArray = [],
@@ -11438,7 +11440,55 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                 },
                 contextRestored: function (newGl) {
                     gl = newGl;
+                    vertexArrayObject = {};
                     updateData();
+                }
+            },
+            bindBuffers = function(shader){
+                var i,
+                    interleavedDataDescriptor,
+                    name,
+                    shaderAttribute,
+                    activeAttribute,
+                    attributeIndex;
+                gl.bindBuffer(34962, meshVertexAttBuffer);
+                for (i = 0; i < interleavedArrayFormatArray.length; i++) {
+                    interleavedDataDescriptor = interleavedArrayFormatArray[i];
+                    name = interleavedDataDescriptor.name;
+                    shaderAttribute = shader.lookupAttribute[name];
+                    if (typeof (shaderAttribute) !== 'undefined') {
+                        gl.enableVertexAttribArray(shaderAttribute);
+                        gl.vertexAttribPointer(shaderAttribute, interleavedDataDescriptor.size,
+                            interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
+                    }
+                }
+                gl.bindBuffer(34963, meshVertexIndexBuffer);
+                if (ASSERT) {
+                    for (i = shader.activeAttributes.length - 1; i >= 0; i--) {
+                        activeAttribute = shader.activeAttributes[i];
+                        if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])) {
+                            Util.fail("Shader wants " + activeAttribute.name + " but mesh does not have it.");
+                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
+                            gl.disableVertexAttribArray(attributeIndex);
+                            switch (activeAttribute.type) {
+                            case 5126:
+                                gl.vertexAttrib1f(attributeIndex, 0.0);
+                                break;
+                            case 35664:
+                                gl.vertexAttrib2f(attributeIndex, 0.0, 0.0);
+                                break;
+                            case 35665:
+                                gl.vertexAttrib3f(attributeIndex, 0.0, 0.0, 0.0);
+                                break;
+                            case 35666:
+                                gl.vertexAttrib4f(attributeIndex, 0.0, 0.0, 0.0, 0.0);
+                                break;
+                            default:
+                                Util.fail("Shader wants " + activeAttribute.name + " no default value for type.");
+                                break;
+                            }
+                        }
+                    }
                 }
             };
 
@@ -11554,61 +11604,33 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
          * @method bind
          * @param {kick.material.Shader} shader
          */
-        this.bind = function (shader) {
-            var i,
-                interleavedDataDescriptor,
-                name,
-                shaderAttribute,
-                activeAttribute,
-                attributeIndex;
-            shader.bind();
+        this.bind = vertexArrayObjectExtension ?
+            function bindUsingVAO(shader) {
+                shader.bind();
 
-            if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader) {
-                glState.meshBuffer = meshVertexAttBuffer;
-                glState.meshShader = shader;
-                gl.bindBuffer(34962, meshVertexAttBuffer);
-
-                for (i = 0; i < interleavedArrayFormatArray.length; i++) {
-                    interleavedDataDescriptor = interleavedArrayFormatArray[i];
-                    name = interleavedDataDescriptor.name;
-                    shaderAttribute = shader.lookupAttribute[name];
-                    if (typeof (shaderAttribute) !== 'undefined') {
-                        gl.enableVertexAttribArray(shaderAttribute);
-                        gl.vertexAttribPointer(shaderAttribute, interleavedDataDescriptor.size,
-                            interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
+                if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader) {
+                    glState.meshBuffer = meshVertexAttBuffer;
+                    glState.meshShader = shader;
+                    var vao = vertexArrayObject[shader.uid];
+                    if (!vao){
+                        vao = vertexArrayObjectExtension.createVertexArrayOES();
+                        vertexArrayObjectExtension.bindVertexArrayOES(vao);
+                        vertexArrayObject[shader.uid] = vao;
+                        bindBuffers(shader);
+                    } else {
+                        vertexArrayObjectExtension.bindVertexArrayOES(vao);
                     }
                 }
-                gl.bindBuffer(34963, meshVertexIndexBuffer);
-                if (ASSERT) {
-                    for (i = shader.activeAttributes.length - 1; i >= 0; i--) {
-                        activeAttribute = shader.activeAttributes[i];
-                        if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])) {
-                            Util.fail("Shader wants " + activeAttribute.name + " but mesh does not have it.");
-                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
-                            gl.disableVertexAttribArray(attributeIndex);
-                            switch (activeAttribute.type) {
-                            case 5126:
-                                gl.vertexAttrib1f(attributeIndex, 0.0);
-                                break;
-                            case 35664:
-                                gl.vertexAttrib2f(attributeIndex, 0.0, 0.0);
-                                break;
-                            case 35665:
-                                gl.vertexAttrib3f(attributeIndex, 0.0, 0.0, 0.0);
-                                break;
-                            case 35666:
-                                gl.vertexAttrib4f(attributeIndex, 0.0, 0.0, 0.0, 0.0);
-                                break;
-                            default:
-                                Util.fail("Shader wants " + activeAttribute.name + " no default value for type.");
-                                break;
-                            }
-                        }
-                    }
-                }
+            }:
+            function bindDefault(shader) {
+                shader.bind();
 
-            }
-        };
+                if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader) {
+                    glState.meshBuffer = meshVertexAttBuffer;
+                    glState.meshShader = shader;
+                    bindBuffers(shader);
+                }
+            };
 
         /**
          * Renders the current mesh.
@@ -11630,6 +11652,9 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                 deleteBuffers();
                 engine.removeContextListener(contextListener);
                 engine.project.removeResourceDescriptor(thisObj.uid);
+            }
+            for (var name in vertexArrayObject){
+                vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
             }
         };
 
@@ -17886,6 +17911,7 @@ define('kick/math/Mat2',[], function () {
          * @param {kick.math.Mat2} a the matrix to rotate
          * @param {kick.math.Vec2} v the vec2 to scale the matrix by
          * @return {kick.math.Mat2} out
+         * @static
          **/
         scale: function (out, a, v) {
             var a0 = a[0], a1 = a[1], a2 = a[2], a3 = a[3],

@@ -26,6 +26,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
         var engine = EngineSingleton.engine,
             gl = engine.gl,
             glState = engine.glState,
+            vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
+            vertexArrayObject = {},
             meshVertexAttBuffer,
             interleavedArrayFormat,
             interleavedArrayFormatArray = [],
@@ -112,7 +114,55 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 },
                 contextRestored: function (newGl) {
                     gl = newGl;
+                    vertexArrayObject = {};
                     updateData();
+                }
+            },
+            bindBuffers = function(shader){
+                var i,
+                    interleavedDataDescriptor,
+                    name,
+                    shaderAttribute,
+                    activeAttribute,
+                    attributeIndex;
+                gl.bindBuffer(Constants.GL_ARRAY_BUFFER, meshVertexAttBuffer);
+                for (i = 0; i < interleavedArrayFormatArray.length; i++) {
+                    interleavedDataDescriptor = interleavedArrayFormatArray[i];
+                    name = interleavedDataDescriptor.name;
+                    shaderAttribute = shader.lookupAttribute[name];
+                    if (typeof (shaderAttribute) !== 'undefined') {
+                        gl.enableVertexAttribArray(shaderAttribute);
+                        gl.vertexAttribPointer(shaderAttribute, interleavedDataDescriptor.size,
+                            interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
+                    }
+                }
+                gl.bindBuffer(Constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+                if (ASSERT) {
+                    for (i = shader.activeAttributes.length - 1; i >= 0; i--) {
+                        activeAttribute = shader.activeAttributes[i];
+                        if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])) {
+                            Util.fail("Shader wants " + activeAttribute.name + " but mesh does not have it.");
+                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
+                            gl.disableVertexAttribArray(attributeIndex);
+                            switch (activeAttribute.type) {
+                            case c.GL_FLOAT:
+                                gl.vertexAttrib1f(attributeIndex, 0.0);
+                                break;
+                            case c.GL_FLOAT_VEC2:
+                                gl.vertexAttrib2f(attributeIndex, 0.0, 0.0);
+                                break;
+                            case c.GL_FLOAT_VEC3:
+                                gl.vertexAttrib3f(attributeIndex, 0.0, 0.0, 0.0);
+                                break;
+                            case c.GL_FLOAT_VEC4:
+                                gl.vertexAttrib4f(attributeIndex, 0.0, 0.0, 0.0, 0.0);
+                                break;
+                            default:
+                                Util.fail("Shader wants " + activeAttribute.name + " no default value for type.");
+                                break;
+                            }
+                        }
+                    }
                 }
             };
 
@@ -228,61 +278,33 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
          * @method bind
          * @param {kick.material.Shader} shader
          */
-        this.bind = function (shader) {
-            var i,
-                interleavedDataDescriptor,
-                name,
-                shaderAttribute,
-                activeAttribute,
-                attributeIndex;
-            shader.bind();
+        this.bind = vertexArrayObjectExtension ?
+            function bindUsingVAO(shader) {
+                shader.bind();
 
-            if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader) {
-                glState.meshBuffer = meshVertexAttBuffer;
-                glState.meshShader = shader;
-                gl.bindBuffer(Constants.GL_ARRAY_BUFFER, meshVertexAttBuffer);
-
-                for (i = 0; i < interleavedArrayFormatArray.length; i++) {
-                    interleavedDataDescriptor = interleavedArrayFormatArray[i];
-                    name = interleavedDataDescriptor.name;
-                    shaderAttribute = shader.lookupAttribute[name];
-                    if (typeof (shaderAttribute) !== 'undefined') {
-                        gl.enableVertexAttribArray(shaderAttribute);
-                        gl.vertexAttribPointer(shaderAttribute, interleavedDataDescriptor.size,
-                            interleavedDataDescriptor.type, false, vertexAttrLength, interleavedDataDescriptor.pointer);
+                if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader) {
+                    glState.meshBuffer = meshVertexAttBuffer;
+                    glState.meshShader = shader;
+                    var vao = vertexArrayObject[shader.uid];
+                    if (!vao){
+                        vao = vertexArrayObjectExtension.createVertexArrayOES();
+                        vertexArrayObjectExtension.bindVertexArrayOES(vao);
+                        vertexArrayObject[shader.uid] = vao;
+                        bindBuffers(shader);
+                    } else {
+                        vertexArrayObjectExtension.bindVertexArrayOES(vao);
                     }
                 }
-                gl.bindBuffer(Constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
-                if (ASSERT) {
-                    for (i = shader.activeAttributes.length - 1; i >= 0; i--) {
-                        activeAttribute = shader.activeAttributes[i];
-                        if (interleavedArrayFormat && !(interleavedArrayFormat[activeAttribute.name])) {
-                            Util.fail("Shader wants " + activeAttribute.name + " but mesh does not have it.");
-                            attributeIndex = shader.lookupAttribute[activeAttribute.name];
-                            gl.disableVertexAttribArray(attributeIndex);
-                            switch (activeAttribute.type) {
-                            case c.GL_FLOAT:
-                                gl.vertexAttrib1f(attributeIndex, 0.0);
-                                break;
-                            case c.GL_FLOAT_VEC2:
-                                gl.vertexAttrib2f(attributeIndex, 0.0, 0.0);
-                                break;
-                            case c.GL_FLOAT_VEC3:
-                                gl.vertexAttrib3f(attributeIndex, 0.0, 0.0, 0.0);
-                                break;
-                            case c.GL_FLOAT_VEC4:
-                                gl.vertexAttrib4f(attributeIndex, 0.0, 0.0, 0.0, 0.0);
-                                break;
-                            default:
-                                Util.fail("Shader wants " + activeAttribute.name + " no default value for type.");
-                                break;
-                            }
-                        }
-                    }
-                }
+            }:
+            function bindDefault(shader) {
+                shader.bind();
 
-            }
-        };
+                if (glState.meshBuffer !== meshVertexAttBuffer || glState.meshShader !== shader) {
+                    glState.meshBuffer = meshVertexAttBuffer;
+                    glState.meshShader = shader;
+                    bindBuffers(shader);
+                }
+            };
 
         /**
          * Renders the current mesh.
@@ -304,6 +326,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 deleteBuffers();
                 engine.removeContextListener(contextListener);
                 engine.project.removeResourceDescriptor(thisObj.uid);
+            }
+            for (var name in vertexArrayObject){
+                vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
             }
         };
 
