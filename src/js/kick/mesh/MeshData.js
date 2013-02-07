@@ -474,7 +474,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     }
                 },
                 /**
-                 * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, or GL_LINES
+                 * Must be GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, GL_POINTS, or GL_LINES
                  * @property meshType
                  * @type Number
                  */
@@ -487,8 +487,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                             if (newValue !== Constants.GL_LINES &&
                                     newValue !== Constants.GL_TRIANGLES &&
                                     newValue !== Constants.GL_TRIANGLE_FAN &&
-                                    newValue !== Constants.GL_TRIANGLE_STRIP) {
-                                Util.fail("MeshData.meshType must be GL_TRIANGLES, GL_TRIANGLE_FAN or GL_TRIANGLE_STRIP");
+                                    newValue !== Constants.GL_TRIANGLE_STRIP &&
+                                    newValue !== Constants.GL_POINTS
+                                ) {
+                                Util.fail("MeshData.meshType must be GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP or GL_POINTS");
                             }
                         }
                         _meshType = newValue;
