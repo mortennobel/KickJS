@@ -42,8 +42,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             vertexAttrLength = 0,
             meshType,
             meshElements = [],
-            deleteBuffers = function () {
-                var i;
+            deleteBuffersAndVertexArrayObjects = function () {
                 if (meshVertexIndexBuffer){
                     gl.deleteBuffer(meshVertexIndexBuffer);
                     meshVertexIndexBuffer = 0;
@@ -54,6 +53,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                     meshVertexAttBuffer = null;
                 }
                 meshElements.length = 0;
+                for (var name in vertexArrayObject){
+                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                }
+                vertexArrayObjectExtension = {};
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
@@ -80,8 +83,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                     indexLen,
                     indicesSize = 0,
                     meshVertexIndexBufferConcat;
-                // delete current buffers
-                deleteBuffers();
+                // delete current buffers and VAOs
+                deleteBuffersAndVertexArrayObjects();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 createInterleavedArrayFormatArray();
@@ -324,13 +327,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
          */
         this.destroy = function () {
             if (meshVertexAttBuffer !== null) {
-                deleteBuffers();
+                deleteBuffersAndVertexArrayObjects();
                 engine.removeContextListener(contextListener);
                 engine.project.removeResourceDescriptor(thisObj.uid);
             }
-            for (var name in vertexArrayObject){
-                vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
-            }
+
         };
 
         /**
