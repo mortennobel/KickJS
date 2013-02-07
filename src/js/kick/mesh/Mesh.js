@@ -56,7 +56,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 for (var name in vertexArrayObject){
                     vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
                 }
-                vertexArrayObjectExtension = {};
+                vertexArrayObject = {};
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
