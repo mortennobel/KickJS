@@ -455,7 +455,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     }
                 },
                 /**
-                 * indices (integer)
+                 * Indices (integer) - One index array for each submesh
                  * @property subMeshes
                  * @type Array_Array_Number
                  */
