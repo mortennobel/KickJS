@@ -505,7 +505,7 @@ define(["./Constants"], function (Constants) {
 
                 canvas.loseContextInNCalls = function(numCalls) {
                     if (contextLost_) {
-                        throw "You can not ask a lost contet to be lost";
+                        throw "You can not ask a lost context to be lost";
                     }
                     numCallsToLoseContext_ = numCalls_ + numCalls;
                 };
