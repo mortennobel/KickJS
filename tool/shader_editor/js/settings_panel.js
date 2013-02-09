@@ -6,7 +6,11 @@ define([],
                     srcNode: '#projection',
                     type: 'radio'
                 }),
-                meshsetting = document.getElementById('meshsetting'),
+
+                meshsetting = new Y.ButtonGroup({
+                    srcNode: '#meshsetting',
+                    type: 'radio'
+                }),
                 rotatemesh = document.getElementById('rotatemesh'),
                 thisObj = this,
                 addChildListeners = function (component, listener, listenerNames, tag) {
@@ -114,11 +118,12 @@ define([],
 
 
             projection.render();
+            meshsetting.render();
 
 
             this.getSettingsData = function () {
                 return {
-                    meshsetting: getRadioValue('meshsetting'),
+                    meshsetting: getButtonGroupValue(meshsetting),
                     projection: getButtonGroupValue(projection),
                     rotatemesh: getRadioValue('rotatemesh'),
                     lightrot: getChildrenValueVector('lightrot'),
@@ -129,7 +134,7 @@ define([],
             };
 
             this.setSettingsData = function (settingsData) {
-                setRadioValue('meshsetting', settingsData.meshsetting);
+                setButtonGroupValue(meshsetting,settingsData.meshsetting )
                 setButtonGroupValue(projection,settingsData.projection )
 //                setRadioValue('projection', );
                 setRadioValue('rotatemesh', settingsData.rotatemesh);
@@ -140,8 +145,7 @@ define([],
                 updateSettings();
             };
 
-
-            addChildListeners(meshsetting, updateSettings, 'click', "meshid");
+            meshsetting.on("click", updateSettings);
             projection.on("click", updateSettings);
             addChildListeners(rotatemesh, updateSettings, 'click', "isOn");
 
