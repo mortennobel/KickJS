@@ -25,10 +25,18 @@ requirejs(['kick', 'shader_editor_ui'],
                 isRotating = true,
                 meshsetting,
                 setMesh = function (url) {
-                    _meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: url});
+                    var mesh = new KICK.mesh.Mesh({dataURI: url}),
+                        meshData = mesh.meshData;
+                    meshData.recalculateTangents();
+                    mesh.meshData = meshData;
+                    _meshRenderer.mesh = mesh;
                 },
                 setMeshByName = function (name) {
-                    _meshRenderer.mesh = _engine.project.loadByName(name);
+                    var mesh = _engine.project.loadByName(name),
+                        meshData = mesh.meshData;
+                    meshData.recalculateTangents();
+                    mesh.meshData = meshData;
+                    _meshRenderer.mesh = mesh;
                 },
                 logFn = function (output, clear) {
                     if (window.log) {
@@ -126,14 +134,6 @@ requirejs(['kick', 'shader_editor_ui'],
                 {
                     engine: {
                         get: function () { return _engine; }
-                    },
-                    mesh: {
-                        get: function () {
-                            return _meshRenderer.mesh;
-                        },
-                        set: function (value) {
-                            _meshRenderer.mesh = value;
-                        }
                     },
                     material: {
                         get: function () {
