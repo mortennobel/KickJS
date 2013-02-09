@@ -5,14 +5,18 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Shader Editor</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.8.0/build/cssreset/reset-min.css&3.8.0/build/cssfonts/fonts-min.css&3.8.0/build/cssgrids/grids-min.css&3.8.0/build/cssbase/base-min.css&3.8.0/build/cssbutton/cssbutton.css">
-    <script src="http://yui.yahooapis.com/3.8.0/build/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.8.1/build/cssreset/reset-min.css&3.8.1/build/cssfonts/fonts-min.css&3.8.1/build/cssgrids/grids-min.css&3.8.1/build/cssbase/base-min.css&3.8.1/build/cssbutton/cssbutton.css">
+    <script src="http://yui.yahooapis.com/3.8.1/build/yui/yui-min.js"></script>
     <script src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 
     <style>
         #glslEditor {
             width: 65%;
             height: 80%;
+        }
+
+        .hiddenPanel {
+            display: none;
         }
 
         .yui3-panel {
@@ -193,17 +197,64 @@
                         <button class='radio' id="plane" value="plane" title="Plane" style="background-image: url('images/plane.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                         <button class='radio' id="teapot" value="teapot" title="Teapot" style="background-image: url('images/teapot.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                         <button class='radio' id="head" value="head" title="3D head (Lee Perry-Smith)" style="background-image: url('images/head.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="points" value="points" title="Random points (inside the unit cube)" style="background-image: url('images/points.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                     </div>
 
                     <h3>Camera</h3>
                     <div id="projection">
-                        <button class='radio' id="orthogonale" value="orthogonale" title="Perspective camera" style="background-image: url('images/perspective.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="perspective" value="perspective" title="Orthogonal camera" style="background-image: url('images/orthogonal.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="perspective" value="perspective" title="Perspective camera" style="background-image: url('images/perspective.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="orthogonale" value="orthogonale" title="Orthogonal camera" style="background-image: url('images/orthogonal.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                     </div>
-                    <h3>Rotate mesh</h3>
+                    <h3>Mesh movement</h3>
                     <div id="rotatemesh">
-                        <input type="radio" name="mesh-rotate-settings" id="rotateOff" value="off"><label for="rotateOff"> Off</label></option>
-                        <input type="radio" name="mesh-rotate-settings" id="rotateOn" value="on" checked><label for="rotateOn"> On</label></option>
+                        <button class='radio' id="rotateOn" value="on">Rotation</button>
+                        <button class='radio' id="rotateOff" value="off">Static</button>
+                    </div>
+                    <h3>Blending</h3>
+                    <div id="blending">
+                        <button class='radio' id="blendingOn" value="on">On</button>
+                        <button class='radio' id="blendingOff" value="off">Off</button>
+                    </div>
+                    <div id="blendingoptions" style="margin-left: 20px;">
+                        <b>Blend options</b><br>
+                        <div style="margin-left: 20px;">
+                        Source factor :<br>
+                        <select>
+                            <option>GL_ZERO</option>
+                            <option>GL_ONE</option>
+                            <option>GL_SRC_COLOR</option>
+                            <option>GL_ONE_MINUS_SRC_COLOR</option>
+                            <option>GL_DST_COLOR</option>
+                            <option>GL_ONE_MINUS_DST_COLOR</option>
+                            <option>GL_SRC_ALPHA</option>
+                            <option>GL_ONE_MINUS_SRC_ALPHA</option>
+                            <option>GL_DST_ALPHA</option>
+                            <option>GL_ONE_MINUS_DST_ALPHA</option>
+                            <option>GL_CONSTANT_COLOR</option>
+                            <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
+                            <option>GL_CONSTANT_ALPHA</option>
+                            <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
+                            <option>GL_SRC_ALPHA_SATURATE</option>
+                        </select><br>
+                        Destination factor :<br>
+                        <select>
+                            <option>GL_ZERO</option>
+                            <option>GL_ONE</option>
+                            <option>GL_SRC_COLOR</option>
+                            <option>GL_ONE_MINUS_SRC_COLOR</option>
+                            <option>GL_DST_COLOR</option>
+                            <option>GL_ONE_MINUS_DST_COLOR</option>
+                            <option>GL_SRC_ALPHA</option>
+                            <option>GL_ONE_MINUS_SRC_ALPHA</option>
+                            <option>GL_DST_ALPHA</option>
+                            <option>GL_ONE_MINUS_DST_ALPHA</option>
+                            <option>GL_CONSTANT_COLOR</option>
+                            <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
+                            <option>GL_CONSTANT_ALPHA</option>
+                            <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
+                        </select>
+                        </div>
+
                     </div>
                     <h3>Directional Light</h3>
                     Rotation (<b title="default pointing towards negative z">Euler</b>):<br>

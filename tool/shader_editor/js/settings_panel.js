@@ -11,7 +11,14 @@ define([],
                     srcNode: '#meshsetting',
                     type: 'radio'
                 }),
-                rotatemesh = document.getElementById('rotatemesh'),
+                rotatemesh = new Y.ButtonGroup({
+                    srcNode: '#rotatemesh',
+                    type: 'radio'
+                }),
+                blending = new Y.ButtonGroup({
+                    srcNode: '#blending',
+                    type: 'radio'
+                }),
                 thisObj = this,
                 addChildListeners = function (component, listener, listenerNames, tag) {
                     var i, j;
@@ -62,16 +69,21 @@ define([],
                 },
                 setButtonGroupValue = function(buttonGroup, value){
                     var buttons = buttonGroup.getButtons(),
-                        first = true;
+                        first = true,
+                        anyChecked = false;
                     buttons.each(function(button){
                         var selected = button.get("value") === value || (!value && first);
                         if (selected){
                             button.addClass(Y.ButtonGroup.CLASS_NAMES.SELECTED);
+                            anyChecked = true;
                         } else {
                             button.removeClass(Y.ButtonGroup.CLASS_NAMES.SELECTED);
                         }
                         first = false;
                     });
+                    if (!anyChecked){
+                        buttons.item(0).addClass(Y.ButtonGroup.CLASS_NAMES.SELECTED);
+                    }
                 },
                 getRadioValue = function (elementName) {
                     var elem = document.getElementById(elementName),
@@ -114,18 +126,27 @@ define([],
                 updateSettings = function () {
                     var data = thisObj.getSettingsData();
                     shaderEditor.updateSettings(data);
+
+                    var blendingoptions = document.getElementById("blendingoptions");
+                    if (getButtonGroupValue(blending) === "off"){
+                        blendingoptions.className = "hiddenPanel";
+                    } else {
+                        blendingoptions.className = "";
+                    }
                 };
 
 
             projection.render();
             meshsetting.render();
-
+            rotatemesh.render();
+            blending.render();
 
             this.getSettingsData = function () {
                 return {
                     meshsetting: getButtonGroupValue(meshsetting),
                     projection: getButtonGroupValue(projection),
-                    rotatemesh: getRadioValue('rotatemesh'),
+                    rotatemesh: getButtonGroupValue(rotatemesh),
+                    blending: getButtonGroupValue(blending),
                     lightrot: getChildrenValueVector('lightrot'),
                     lightcolor: getChildrenValueVector('lightcolor'),
                     lightAmbient: getChildrenValueVector('ambientLight'),
@@ -134,10 +155,10 @@ define([],
             };
 
             this.setSettingsData = function (settingsData) {
-                setButtonGroupValue(meshsetting,settingsData.meshsetting )
-                setButtonGroupValue(projection,settingsData.projection )
-//                setRadioValue('projection', );
-                setRadioValue('rotatemesh', settingsData.rotatemesh);
+                setButtonGroupValue(meshsetting,settingsData.meshsetting );
+                setButtonGroupValue(projection,settingsData.projection );
+                setButtonGroupValue(rotatemesh, settingsData.rotatemesh);
+                setButtonGroupValue(blending, settingsData.blending);
                 var lightintensity = document.getElementById('lightintensity');
                 setChildrenValueVector('lightrot', settingsData.lightrot);
                 setChildrenValueVector('lightcolor', settingsData.lightcolor);
@@ -147,7 +168,8 @@ define([],
 
             meshsetting.on("click", updateSettings);
             projection.on("click", updateSettings);
-            addChildListeners(rotatemesh, updateSettings, 'click', "isOn");
+            rotatemesh.on("click", updateSettings);
+            blending.on("click", updateSettings);
 
             (function addLightListeners() {
                 var lightpos = document.getElementById('lightpos'),

@@ -89,7 +89,7 @@ define([],
                     jsonData = controller.getData();
 
                     obj = {
-                        id: shaderid,
+                        id: glslEditorController.shaderid,
                         name: name,
                         about: about,
                         owner: editorUI.username,
@@ -148,8 +148,8 @@ define([],
                 onNewButton = function () {
                     window.YUIConfirm("New shader", "Create a new shader?", null, function () {
                         controller.setShader(defaultMaterial);
-                        shaderid = "";
-                        shortUrl = "";
+                        glslEditorController.shaderid = "";
+                        glslEditorController.shortUrl = "";
                     });
                 };
             Y.one("#resetShader").on("click", onNewButton);

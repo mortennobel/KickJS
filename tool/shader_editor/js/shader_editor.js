@@ -24,6 +24,29 @@ requirejs(['kick', 'shader_editor_ui'],
                 thisObj = this,
                 isRotating = true,
                 meshsetting,
+                pointMesh,
+                setPointMesh = function(){
+                    if (!pointMesh){
+                        var meshData = new KICK.mesh.MeshData(),
+                            numberOfParticles = 1000,
+                            positions = new Float32Array(numberOfParticles*3),
+                            wrappedArray = KICK.math.Vec3.wrapArray(positions),
+                            indices = new Uint16Array(numberOfParticles),
+                            i;
+                        for (i=0;i<numberOfParticles;i++){
+                            wrappedArray[i][0] = Math.random() * 2 - 1;
+                            wrappedArray[i][1] = Math.random() * 2 - 1;
+                            wrappedArray[i][2] = Math.random() * 2 - 1;
+                            indices[i] = i;
+                        }
+                        meshData.indices = indices;
+                        meshData.vertex = positions;
+                        meshData.meshType = KICK.core.Constants.GL_POINTS;
+                        pointMesh = new KICK.mesh.Mesh({meshData: meshData});
+
+                    }
+                    _meshRenderer.mesh = pointMesh;
+                },
                 setMesh = function (url) {
                     var mesh = new KICK.mesh.Mesh({dataURI: url}),
                         meshData = mesh.meshData;
@@ -175,6 +198,9 @@ requirejs(['kick', 'shader_editor_ui'],
                         break;
                     case "head":
                         setMeshByName('Head');
+                        break;
+                    case "points":
+                        setPointMesh();
                         break;
                     default:
                         setMesh('kickjs://mesh/plane/');
