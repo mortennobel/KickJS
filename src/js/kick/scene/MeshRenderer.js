@@ -24,7 +24,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 engine = EngineSingleton.engine,
                 thisObj = this,
                 updateRenderOrder = function() {
-                    if (_materials.length > 0 && _renderOrder != _materials[0].renderOrder){
+                    if (_materials.length > 0 && _renderOrder !== _materials[0].renderOrder){
                         _renderOrder = _materials[0].renderOrder;
                         if (thisObj.gameObject) {
                             thisObj.gameObject.notifyComponentUpdated(thisObj);
