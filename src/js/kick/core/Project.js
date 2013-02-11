@@ -22,6 +22,14 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                     resourceCache = {},
                     thisObj = this,
                     _maxUID = 0,
+                    verifyMaxUID = function(){
+                        var uid;
+                        for (uid in resourceDescriptorsByUID){
+                            if (_maxUID < uid){
+                                Util.fail("MaxUID invalid");
+                            }
+                        }
+                    },
                     refreshResourceDescriptor = function (uid, filter) {
                         if (resourceDescriptorsByUID[uid] instanceof ResourceDescriptor) {
                             var liveObject = resourceCache[uid];
@@ -210,6 +218,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                         },
                         set: function (newValue) {
                             _maxUID = newValue;
+                            if (ASSERT){
+                                verifyMaxUID();
+                            }
                         }
                     },
                     /**
@@ -281,7 +292,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                  * @method loadProject
                  * @param {object} config
                  * @param {Function} onSuccess
-                 * @param {Function} onFail=null Optional
+                 * @param {Function} [onFail=null]
                  */
                 this.loadProject = function (config, onSuccess, onError) {
                     if (_maxUID > 0) {
@@ -439,6 +450,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                             }
                         }
                     }
+                    if (ASSERT){
+                        verifyMaxUID();
+                    }
                     return null;
                 };
 
@@ -464,6 +478,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                             config: {name: object.name} // will be generated on serialization
                         });
                     }
+                    if (ASSERT){
+                        verifyMaxUID();
+                    }
                 };
 
                 /**
@@ -478,6 +495,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                         if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
                             refreshResourceDescriptor(uid, filter);
                         }
+                    }
+                    if (ASSERT){
+                        verifyMaxUID();
                     }
                 };
 
