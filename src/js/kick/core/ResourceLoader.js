@@ -37,7 +37,7 @@ define(["./URLResourceProvider", "./BuiltInResourceProvider"], function (URLReso
          * @method getMeshData
          * @param {String} uri
          * @param {kick.mesh.Mesh} meshDestination
-         * @param resourceTracker {ResourceTracker} Optional
+         * @param {ResourceTracker} [resourceTracker]
          */
         this.getMeshData = buildCallbackFunc("getMeshData");
         /**

@@ -146,7 +146,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
              * This method may not be called (the renderer could make the same calls)
              * @method render
              * @param {kick.scene.EngineUniforms} engineUniforms
-             * @param {kick.material.Material} overwriteMaterial Optional
+             * @param {kick.material.Material} [overwriteMaterial]
              */
             this.render = function (engineUniforms, overwriteMaterial) {
                 var length = _materials.length,

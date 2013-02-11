@@ -7,7 +7,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
          * @class RenderTexture
          * @namespace kick.texture
          * @constructor
-         * @param {Object} config Optional
+         * @param {Object} [config]
          * @extends kick.core.ProjectAsset
          */
         return function (config) {

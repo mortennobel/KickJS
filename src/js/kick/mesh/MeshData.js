@@ -11,7 +11,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
          * This is a pure data class with no WebGL dependency
          * @class MeshData
          * @namespace kick.mesh
-         * @param {Object} config
+         * @param {Object} [config]
          * @constructor
          */
         MeshData = function (config) {
@@ -490,7 +490,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                                     newValue !== Constants.GL_TRIANGLE_STRIP &&
                                     newValue !== Constants.GL_POINTS
                                 ) {
-                                Util.fail("MeshData.meshType must be GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP or GL_POINTS");
+                                Util.fail("MeshData.meshType must be `GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP` or `GL_POINTS`");
                             }
                         }
                         _meshType = newValue;

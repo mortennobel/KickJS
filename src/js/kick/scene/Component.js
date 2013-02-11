@@ -32,7 +32,7 @@ define([], function () {
      * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
      * @param {kick.scene.EngineUniforms} engineUniforms
-     * @param {kick.material.Material} overwriteMaterial Optional
+     * @param {kick.material.Material} [overwriteMaterial]
      */
 
     /**

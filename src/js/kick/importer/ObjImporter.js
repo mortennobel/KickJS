@@ -17,8 +17,8 @@ define(["kick/math", "kick/mesh/MeshData", "kick/mesh/Mesh", "kick/scene/MeshRen
         /**
          * @method import
          * @param {String} objFileContent
-         * @param {kick.scene.Scene} scene=engine.activeScene Optional. If not specified the active scene (from the engine) is used
-         * @param {boolean} rotate90x rotate -90 degrees around x axis
+         * @param {kick.scene.Scene} [scene=engine.activeScene] Optional. If not specified the active scene (from the engine) is used
+         * @param {boolean} [rotate90x] rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties (mesh:[], gameObjects:[], materials:[])
          * @static
          */

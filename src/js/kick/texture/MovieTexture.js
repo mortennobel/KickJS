@@ -11,7 +11,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
          * @class MovieTexture
          * @namespace kick.texture
          * @constructor
-         * @param {Object} config Optional
+         * @param {Object} [config]
          * @extends kick.core.ProjectAsset
          */
         return function (config) {

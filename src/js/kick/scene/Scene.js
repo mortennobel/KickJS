@@ -346,7 +346,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
 
             /**
              * @method createGameObject
-             * @param {Object} config Optionally configuration passed to the game objects
+             * @param {Object} [config] Optionally configuration passed to the game objects
              * @return {kick.scene.GameObject}
              */
             this.createGameObject = function (config) {
@@ -401,7 +401,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
 
             /**
              * @method toJSON
-             * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
+             * @param {Function} [filterFn] Optional. Filter with function(object): return boolean, where true means include in export.
              * @return {Object}
              */
             this.toJSON = function (filterFn) {

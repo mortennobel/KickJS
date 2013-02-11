@@ -13,7 +13,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
          * @class Texture
          * @namespace kick.texture
          * @constructor
-         * @param {Object} config Optional
+         * @param {Object} [config]
          * @extends kick.core.ProjectAsset
          */
         return function (config) {

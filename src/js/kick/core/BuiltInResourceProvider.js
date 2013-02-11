@@ -38,7 +38,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
          * @method getMeshData
          * @param {String} url
          * @param {kick.mesh.Mesh} meshDestination
-         * @param resourceTracker {ResourceTracker} Optional
+         * @param {ResourceTracker} [resourceTracker]
          */
         this.getMeshData = function (url, meshDestination, resourceTracker) {
             var meshDataObj,

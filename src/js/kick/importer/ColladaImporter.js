@@ -23,7 +23,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
         /**
          * @method import
          * @param {XMLDom|String} colladaDOM
-         * @param {kick.scene.Scene} scene=engine.activeScene Optional. If not specified the active scene (from the engine) is used
+         * @param {kick.scene.Scene} [scene=engine.activeScene] If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties(mesh:[], gameObjects:[], materials:[])
          * @static
@@ -47,7 +47,7 @@ define(["kick/math", "kick/core/Constants", "kick/core/Util", "kick/mesh/MeshDat
                  * Converts a string to an array
                  * @method stringToArray
                  * @param {String} numberString
-                 * @param {Object} type=Array Optional - valid types are Array (default), and typed arrays classes
+                 * @param {Object} [type=Array] valid types are Array (default), and typed arrays classes
                  * @private
                  */
                     stringToArray = function (numberString, type) {

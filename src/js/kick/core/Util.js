@@ -127,7 +127,7 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
          *
          * @method toCamelCase
          * @param {String} str
-         * @param {String} wordSeparator="" Optional - default value is empty string
+         * @param {String} [wordSeparator=""]
          */
         toCamelCase: function (str, wordSeparator) {
             if (!wordSeparator) {
@@ -404,7 +404,7 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
          * @method insertSorted
          * @param {Object} element
          * @param {Array} sortedArray
-         * @param {Function} sortFunc=kick.core.Util.numberSortFunction has the signature foo(obj1,obj2) returns Number. Optional (uses numberSort as default)
+         * @param {Function} [sortFunc=kick.core.Util.numberSortFunction] has the signature foo(obj1,obj2) returns Number.
          */
         insertSorted : function (element,sortedArray,sortFunc) {
             var i;
