@@ -131,6 +131,7 @@ requirejs(['kick', 'shader_editor_ui'],
                     if (_meshRenderer.material) {
                         _meshRenderer.material.destroy();
                     }
+                    shaderData.material.uid = 0; // remove uid (since that may be in use)
                     _meshRenderer.material = new KICK.material.Material(shaderData.material);
                     lastValidMaterial = _meshRenderer.material.toJSON();
                 },
