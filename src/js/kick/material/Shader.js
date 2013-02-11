@@ -90,8 +90,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 _faceCulling = Constants.GL_BACK,
                 _zTest = Constants.GL_LESS,
                 _blend = false,
-                _blendSFactor = Constants.GL_SRC_ALPHA,
-                _blendDFactor = Constants.GL_ONE_MINUS_SRC_ALPHA,
+                _blendSFactorRGB = Constants.GL_SRC_ALPHA,
+                _blendDFactorRGB = Constants.GL_ONE_MINUS_SRC_ALPHA,
+                _blendSFactorAlpha = Constants.GL_SRC_ALPHA,
+                _blendDFactorAlpha = Constants.GL_ONE_MINUS_SRC_ALPHA,
                 _polygonOffsetEnabled = false,
                 _polygonOffsetFactor = 2.5,
                 _polygonOffsetUnits = 10.0,
@@ -116,7 +118,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * @private
                  */
                 updateBlendKey = function () {
-                    blendKey = (_blendSFactor + _blendDFactor * 10000) * (_blend ? -1 : 1);
+                    blendKey = (_blendSFactorRGB + (_blendDFactorRGB << 10) + (_blendSFactorAlpha << 20) + (_blendDFactorAlpha << 30)) * (_blend ? -1 : 1);
                 },
                 /**
                  * Calls the listeners registered for this shader
@@ -192,7 +194,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                         } else {
                             gl.disable(Constants.GL_BLEND);
                         }
-                        gl.blendFunc(_blendSFactor, _blendDFactor);
+                        gl.blendFuncSeparate(_blendSFactorRGB, _blendDFactorRGB,_blendSFactorAlpha, _blendDFactorAlpha);
                     }
                 },
                 updatePolygonOffset = function () {
@@ -654,6 +656,95 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     }
                 },
                 /**
+                 * Specifies the blend source-factor for the RGB channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendSFactorRGB
+                 * @type Number
+                 */
+                blendSFactorRGB:{
+                    get: function(){
+                        return _blendSFactorRGB;
+                    },
+                    set: function(value){
+                        if (ASSERT) {
+                            var c = Constants;
+                            if (value !== c.GL_ZERO &&
+                                value !== c.GL_ONE &&
+                                value !== c.GL_SRC_COLOR &&
+                                value !== c.GL_ONE_MINUS_SRC_COLOR &&
+                                value !== c.GL_DST_COLOR &&
+                                value !== c.GL_ONE_MINUS_DST_COLOR &&
+                                value !== c.GL_SRC_ALPHA &&
+                                value !== c.GL_ONE_MINUS_SRC_ALPHA &&
+                                value !== c.GL_DST_ALPHA &&
+                                value !== c.GL_ONE_MINUS_DST_ALPHA &&
+                                value !== c.GL_CONSTANT_COLOR &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
+                                value !== c.GL_CONSTANT_ALPHA &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_ALPHA &&
+                                value !== c.GL_SRC_ALPHA_SATURATE) {
+                                Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
+                                    "GL_SRC_ALPHA_SATURATE.");
+                            }
+                        }
+                        _blendSFactorRGB = value;
+                        updateBlendKey();
+                    }
+                },
+                /**
+                 * Specifies the blend source-factor for the alpha channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendSFactorAlpha
+                 * @type Number
+                 */
+                blendSFactorAlpha:{
+                    get: function(){
+                        return _blendSFactorAlpha;
+                    },
+                    set: function(value){
+                        if (ASSERT) {
+                            var c = Constants;
+                            if (value !== c.GL_ZERO &&
+                                value !== c.GL_ONE &&
+                                value !== c.GL_SRC_COLOR &&
+                                value !== c.GL_ONE_MINUS_SRC_COLOR &&
+                                value !== c.GL_DST_COLOR &&
+                                value !== c.GL_ONE_MINUS_DST_COLOR &&
+                                value !== c.GL_SRC_ALPHA &&
+                                value !== c.GL_ONE_MINUS_SRC_ALPHA &&
+                                value !== c.GL_DST_ALPHA &&
+                                value !== c.GL_ONE_MINUS_DST_ALPHA &&
+                                value !== c.GL_CONSTANT_COLOR &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
+                                value !== c.GL_CONSTANT_ALPHA &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_ALPHA &&
+                                value !== c.GL_SRC_ALPHA_SATURATE) {
+                                Util.fail("Shader.blendSFactorAlpha must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
+                                    "GL_SRC_ALPHA_SATURATE.");
+                            }
+                        }
+                        _blendSFactorAlpha = value;
+                        updateBlendKey();
+                    }
+                },
+                /**
+                 * Short for blendSFactorAlpha and blendSFactorRGB
                  * Specifies the blend s-factor<br>
                  * Initial value GL_SRC_ALPHA
                  * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
@@ -665,38 +756,98 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * @type Number
                  */
                 blendSFactor: {
-                    get: function () { return _blendSFactor; },
+                    get: function () { return _blendSFactorRGB; },
                     set: function (value) {
+                        thisObj.blendSFactorAlpha = value;
+                        thisObj.blendSFactorRGB = value;
+                    }
+                },
+                /**
+                 * Specifies the blend d-factor for the RGB channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendDFactorRGB
+                 * @type Number
+                 */
+                blendDFactorRGB: {
+                    get: function(){
+                        return _blendDFactorRGB;
+                    },
+                    set: function(value){
                         if (ASSERT) {
                             var c = Constants;
                             if (value !== c.GL_ZERO &&
-                                    value !== c.GL_ONE &&
-                                    value !== c.GL_SRC_COLOR &&
-                                    value !== c.GL_ONE_MINUS_SRC_COLOR &&
-                                    value !== c.GL_DST_COLOR &&
-                                    value !== c.GL_ONE_MINUS_DST_COLOR &&
-                                    value !== c.GL_SRC_ALPHA &&
-                                    value !== c.GL_ONE_MINUS_SRC_ALPHA &&
-                                    value !== c.GL_DST_ALPHA &&
-                                    value !== c.GL_ONE_MINUS_DST_ALPHA &&
-                                    value !== c.GL_CONSTANT_COLOR &&
-                                    value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
-                                    value !== c.GL_CONSTANT_ALPHA &&
-                                    value !== c.GL_ONE_MINUS_CONSTANT_ALPHA &&
-                                    value !== c.GL_SRC_ALPHA_SATURATE) {
-                                Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                value !== c.GL_ONE &&
+                                value !== c.GL_SRC_COLOR &&
+                                value !== c.GL_ONE_MINUS_SRC_COLOR &&
+                                value !== c.GL_DST_COLOR &&
+                                value !== c.GL_ONE_MINUS_DST_COLOR &&
+                                value !== c.GL_SRC_ALPHA &&
+                                value !== c.GL_ONE_MINUS_SRC_ALPHA &&
+                                value !== c.GL_DST_ALPHA &&
+                                value !== c.GL_ONE_MINUS_DST_ALPHA &&
+                                value !== c.GL_CONSTANT_COLOR &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
+                                value !== c.GL_CONSTANT_ALPHA &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_ALPHA) {
+                                Util.fail("Shader.blendDFactorRGB must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
                                     "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
                                     "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
-                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
-                                    "GL_SRC_ALPHA_SATURATE.");
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
                             }
                         }
-                        _blendSFactor = value;
+                        _blendDFactorRGB = value;
                         updateBlendKey();
                     }
                 },
                 /**
-                 * Specifies the blend d-factor<br>
+                 * Specifies the blend d-factor for the alpha channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendDFactorAlpha
+                 * @type Number
+                 */
+                blendDFactorAlpha: {
+                    get: function(){
+                        return _blendDFactorAlpha;
+                    },
+                    set: function(value){
+                        if (ASSERT) {
+                            var c = Constants;
+                            if (value !== c.GL_ZERO &&
+                                value !== c.GL_ONE &&
+                                value !== c.GL_SRC_COLOR &&
+                                value !== c.GL_ONE_MINUS_SRC_COLOR &&
+                                value !== c.GL_DST_COLOR &&
+                                value !== c.GL_ONE_MINUS_DST_COLOR &&
+                                value !== c.GL_SRC_ALPHA &&
+                                value !== c.GL_ONE_MINUS_SRC_ALPHA &&
+                                value !== c.GL_DST_ALPHA &&
+                                value !== c.GL_ONE_MINUS_DST_ALPHA &&
+                                value !== c.GL_CONSTANT_COLOR &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
+                                value !== c.GL_CONSTANT_ALPHA &&
+                                value !== c.GL_ONE_MINUS_CONSTANT_ALPHA) {
+                                Util.fail("Shader.blendDFactorAlpha must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
+                            }
+                        }
+                        _blendDFactorAlpha = value;
+                        updateBlendKey();
+                    }
+                },
+                /**
+                 * Short for blendDFactorAlpha and blendDFactorRGB
                  * Initial value GL_SRC_ALPHA
                  * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
                  * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
@@ -707,32 +858,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * @type Number
                  */
                 blendDFactor: {
-                    get: function () { return _blendDFactor; },
+                    get: function () { return _blendDFactorRGB; },
                     set: function (value) {
-                        if (ASSERT) {
-                            var c = Constants;
-                            if (value !== c.GL_ZERO &&
-                                    value !== c.GL_ONE &&
-                                    value !== c.GL_SRC_COLOR &&
-                                    value !== c.GL_ONE_MINUS_SRC_COLOR &&
-                                    value !== c.GL_DST_COLOR &&
-                                    value !== c.GL_ONE_MINUS_DST_COLOR &&
-                                    value !== c.GL_SRC_ALPHA &&
-                                    value !== c.GL_ONE_MINUS_SRC_ALPHA &&
-                                    value !== c.GL_DST_ALPHA &&
-                                    value !== c.GL_ONE_MINUS_DST_ALPHA &&
-                                    value !== c.GL_CONSTANT_COLOR &&
-                                    value !== c.GL_ONE_MINUS_CONSTANT_COLOR &&
-                                    value !== c.GL_CONSTANT_ALPHA &&
-                                    value !== c.GL_ONE_MINUS_CONSTANT_ALPHA) {
-                                Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
-                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
-                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
-                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
-                            }
-                        }
-                        _blendDFactor = value;
-                        updateBlendKey();
+                        thisObj.blendDFactorAlpha = value;
+                        thisObj.blendDFactorRGB = value;
                     }
                 },
                 /**
