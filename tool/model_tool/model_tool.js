@@ -9,7 +9,6 @@ requirejs(['kick'],
     function (kick) {
         "use strict";
 
-
         var vec3 = kick.math.Vec3,
             quat = kick.math.Quat,
             aabb = kick.math.Aabb,

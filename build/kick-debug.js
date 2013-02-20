@@ -2673,7 +2673,7 @@ define('kick/core/Util',["require", "./Constants", "./EngineSingleton"], functio
          *
          * @method toCamelCase
          * @param {String} str
-         * @param {String} wordSeparator="" Optional - default value is empty string
+         * @param {String} [wordSeparator=""]
          */
         toCamelCase: function (str, wordSeparator) {
             if (!wordSeparator) {
@@ -2950,7 +2950,7 @@ define('kick/core/Util',["require", "./Constants", "./EngineSingleton"], functio
          * @method insertSorted
          * @param {Object} element
          * @param {Array} sortedArray
-         * @param {Function} sortFunc=kick.core.Util.numberSortFunction has the signature foo(obj1,obj2) returns Number. Optional (uses numberSort as default)
+         * @param {Function} [sortFunc=kick.core.Util.numberSortFunction] has the signature foo(obj1,obj2) returns Number.
          */
         insertSorted : function (element,sortedArray,sortFunc) {
             var i;
@@ -6863,7 +6863,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
          * This is a pure data class with no WebGL dependency
          * @class MeshData
          * @namespace kick.mesh
-         * @param {Object} config
+         * @param {Object} [config]
          * @constructor
          */
         MeshData = function (config) {
@@ -7307,7 +7307,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                     }
                 },
                 /**
-                 * indices (integer)
+                 * Indices (integer) - One index array for each submesh
                  * @property subMeshes
                  * @type Array_Array_Number
                  */
@@ -7326,7 +7326,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                     }
                 },
                 /**
-                 * Must be GL_TRIANGLES,GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, or GL_LINES
+                 * Must be GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, GL_POINTS, or GL_LINES
                  * @property meshType
                  * @type Number
                  */
@@ -7339,8 +7339,10 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                             if (newValue !== 1 &&
                                     newValue !== 4 &&
                                     newValue !== 6 &&
-                                    newValue !== 5) {
-                                Util.fail("MeshData.meshType must be GL_TRIANGLES, GL_TRIANGLE_FAN or GL_TRIANGLE_STRIP");
+                                    newValue !== 5 &&
+                                    newValue !== 0
+                                ) {
+                                Util.fail("MeshData.meshType must be `GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP` or `GL_POINTS`");
                             }
                         }
                         _meshType = newValue;
@@ -8200,7 +8202,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
          * @method getMeshData
          * @param {String} url
          * @param {kick.mesh.Mesh} meshDestination
-         * @param resourceTracker {ResourceTracker} Optional
+         * @param {ResourceTracker} [resourceTracker]
          */
         this.getMeshData = function (url, meshDestination, resourceTracker) {
             var meshDataObj,
@@ -9022,7 +9024,7 @@ define('kick/core/ProjectAsset',["kick/core/Constants", "./Util", "./EngineSingl
          * Configures the object using the configuration data.
          * @method init
          * @param config {Object} configuration data in JSON format
-         * @param resourceTracker {ResourceTracker} Optional
+         * @param {ResourceTracker} [resourceTracker]
          */
         object.init = function(config, resourceTracker){
             Util.applyConfig(this, config, ["uid"]);
@@ -9103,6 +9105,26 @@ define('kick/math/Mat3',[], function () {
             out[0] = 1;
             out[4] = 1;
             out[8] = 1;
+            return out;
+        },
+
+        /**
+         * Copies the upper-left 3x3 values into the given mat3.
+         * @method fromMat4
+         * @param {kick.math.Mat3} out the receiving 3x3 matrix
+         * @param {kick.math.Mat4} a   the source 4x4 matrix
+         * @return {kick.math.Mat3} out
+         */
+        fromMat4: function(out, a) {
+            out[0] = a[0];
+            out[1] = a[1];
+            out[2] = a[2];
+            out[3] = a[4];
+            out[4] = a[5];
+            out[5] = a[6];
+            out[6] = a[8];
+            out[7] = a[9];
+            out[8] = a[10];
             return out;
         },
 
@@ -9660,8 +9682,10 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                 _faceCulling = 1029,
                 _zTest = 513,
                 _blend = false,
-                _blendSFactor = 770,
-                _blendDFactor = 771,
+                _blendSFactorRGB = 770,
+                _blendDFactorRGB = 771,
+                _blendSFactorAlpha = 770,
+                _blendDFactorAlpha = 771,
                 _polygonOffsetEnabled = false,
                 _polygonOffsetFactor = 2.5,
                 _polygonOffsetUnits = 10.0,
@@ -9686,7 +9710,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * @private
                  */
                 updateBlendKey = function () {
-                    blendKey = (_blendSFactor + _blendDFactor * 10000) * (_blend ? -1 : 1);
+                    blendKey = (_blendSFactorRGB + (_blendDFactorRGB << 10) + (_blendSFactorAlpha << 20) + (_blendDFactorAlpha << 30)) * (_blend ? -1 : 1);
                 },
                 /**
                  * Calls the listeners registered for this shader
@@ -9762,7 +9786,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                         } else {
                             gl.disable(3042);
                         }
-                        gl.blendFunc(_blendSFactor, _blendDFactor);
+                        gl.blendFuncSeparate(_blendSFactorRGB, _blendDFactorRGB,_blendSFactorAlpha, _blendDFactorAlpha);
                     }
                 },
                 updatePolygonOffset = function () {
@@ -10224,6 +10248,95 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     }
                 },
                 /**
+                 * Specifies the blend source-factor for the RGB channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendSFactorRGB
+                 * @type Number
+                 */
+                blendSFactorRGB:{
+                    get: function(){
+                        return _blendSFactorRGB;
+                    },
+                    set: function(value){
+                        if (ASSERT) {
+                            var c = Constants;
+                            if (value !== 0 &&
+                                value !== 1 &&
+                                value !== 768 &&
+                                value !== 769 &&
+                                value !== 774 &&
+                                value !== 775 &&
+                                value !== 770 &&
+                                value !== 771 &&
+                                value !== 772 &&
+                                value !== 773 &&
+                                value !== 32769 &&
+                                value !== 32770 &&
+                                value !== 32771 &&
+                                value !== 32772 &&
+                                value !== 776) {
+                                Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
+                                    "GL_SRC_ALPHA_SATURATE.");
+                            }
+                        }
+                        _blendSFactorRGB = value;
+                        updateBlendKey();
+                    }
+                },
+                /**
+                 * Specifies the blend source-factor for the alpha channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendSFactorAlpha
+                 * @type Number
+                 */
+                blendSFactorAlpha:{
+                    get: function(){
+                        return _blendSFactorAlpha;
+                    },
+                    set: function(value){
+                        if (ASSERT) {
+                            var c = Constants;
+                            if (value !== 0 &&
+                                value !== 1 &&
+                                value !== 768 &&
+                                value !== 769 &&
+                                value !== 774 &&
+                                value !== 775 &&
+                                value !== 770 &&
+                                value !== 771 &&
+                                value !== 772 &&
+                                value !== 773 &&
+                                value !== 32769 &&
+                                value !== 32770 &&
+                                value !== 32771 &&
+                                value !== 32772 &&
+                                value !== 776) {
+                                Util.fail("Shader.blendSFactorAlpha must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
+                                    "GL_SRC_ALPHA_SATURATE.");
+                            }
+                        }
+                        _blendSFactorAlpha = value;
+                        updateBlendKey();
+                    }
+                },
+                /**
+                 * Short for blendSFactorAlpha and blendSFactorRGB
                  * Specifies the blend s-factor<br>
                  * Initial value GL_SRC_ALPHA
                  * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
@@ -10235,38 +10348,98 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * @type Number
                  */
                 blendSFactor: {
-                    get: function () { return _blendSFactor; },
+                    get: function () { return _blendSFactorRGB; },
                     set: function (value) {
+                        thisObj.blendSFactorAlpha = value;
+                        thisObj.blendSFactorRGB = value;
+                    }
+                },
+                /**
+                 * Specifies the blend d-factor for the RGB channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendDFactorRGB
+                 * @type Number
+                 */
+                blendDFactorRGB: {
+                    get: function(){
+                        return _blendDFactorRGB;
+                    },
+                    set: function(value){
                         if (ASSERT) {
                             var c = Constants;
                             if (value !== 0 &&
-                                    value !== 1 &&
-                                    value !== 768 &&
-                                    value !== 769 &&
-                                    value !== 774 &&
-                                    value !== 775 &&
-                                    value !== 770 &&
-                                    value !== 771 &&
-                                    value !== 772 &&
-                                    value !== 773 &&
-                                    value !== 32769 &&
-                                    value !== 32770 &&
-                                    value !== 32771 &&
-                                    value !== 32772 &&
-                                    value !== 776) {
-                                Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                value !== 1 &&
+                                value !== 768 &&
+                                value !== 769 &&
+                                value !== 774 &&
+                                value !== 775 &&
+                                value !== 770 &&
+                                value !== 771 &&
+                                value !== 772 &&
+                                value !== 773 &&
+                                value !== 32769 &&
+                                value !== 32770 &&
+                                value !== 32771 &&
+                                value !== 32772) {
+                                Util.fail("Shader.blendDFactorRGB must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
                                     "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
                                     "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
-                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and " +
-                                    "GL_SRC_ALPHA_SATURATE.");
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
                             }
                         }
-                        _blendSFactor = value;
+                        _blendDFactorRGB = value;
                         updateBlendKey();
                     }
                 },
                 /**
-                 * Specifies the blend d-factor<br>
+                 * Specifies the blend d-factor for the alpha channel<br>
+                 * Initial value GL_SRC_ALPHA
+                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
+                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
+                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
+                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
+                 * @property blendDFactorAlpha
+                 * @type Number
+                 */
+                blendDFactorAlpha: {
+                    get: function(){
+                        return _blendDFactorAlpha;
+                    },
+                    set: function(value){
+                        if (ASSERT) {
+                            var c = Constants;
+                            if (value !== 0 &&
+                                value !== 1 &&
+                                value !== 768 &&
+                                value !== 769 &&
+                                value !== 774 &&
+                                value !== 775 &&
+                                value !== 770 &&
+                                value !== 771 &&
+                                value !== 772 &&
+                                value !== 773 &&
+                                value !== 32769 &&
+                                value !== 32770 &&
+                                value !== 32771 &&
+                                value !== 32772) {
+                                Util.fail("Shader.blendDFactorAlpha must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
+                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
+                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
+                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
+                            }
+                        }
+                        _blendDFactorAlpha = value;
+                        updateBlendKey();
+                    }
+                },
+                /**
+                 * Short for blendDFactorAlpha and blendDFactorRGB
                  * Initial value GL_SRC_ALPHA
                  * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
                  * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
@@ -10277,32 +10450,10 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * @type Number
                  */
                 blendDFactor: {
-                    get: function () { return _blendDFactor; },
+                    get: function () { return _blendDFactorRGB; },
                     set: function (value) {
-                        if (ASSERT) {
-                            var c = Constants;
-                            if (value !== 0 &&
-                                    value !== 1 &&
-                                    value !== 768 &&
-                                    value !== 769 &&
-                                    value !== 774 &&
-                                    value !== 775 &&
-                                    value !== 770 &&
-                                    value !== 771 &&
-                                    value !== 772 &&
-                                    value !== 773 &&
-                                    value !== 32769 &&
-                                    value !== 32770 &&
-                                    value !== 32771 &&
-                                    value !== 32772) {
-                                Util.fail("Shader.blendSFactor must be a one of GL_ZERO, GL_ONE, GL_SRC_COLOR, " +
-                                    "GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR, GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, " +
-                                    "GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_CONSTANT_COLOR, " +
-                                    "GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, and GL_ONE_MINUS_CONSTANT_ALPHA.");
-                            }
-                        }
-                        _blendDFactor = value;
-                        updateBlendKey();
+                        thisObj.blendDFactorAlpha = value;
+                        thisObj.blendDFactorRGB = value;
                     }
                 },
                 /**
@@ -10743,7 +10894,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
          * @class Texture
          * @namespace kick.texture
          * @constructor
-         * @param {Object} config Optional
+         * @param {Object} [config]
          * @extends kick.core.ProjectAsset
          */
         return function (config) {
@@ -11368,8 +11519,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
             vertexAttrLength = 0,
             meshType,
             meshElements = [],
-            deleteBuffers = function () {
-                var i;
+            deleteBuffersAndVertexArrayObjects = function () {
                 if (meshVertexIndexBuffer){
                     gl.deleteBuffer(meshVertexIndexBuffer);
                     meshVertexIndexBuffer = 0;
@@ -11380,6 +11530,10 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                     meshVertexAttBuffer = null;
                 }
                 meshElements.length = 0;
+                for (var name in vertexArrayObject){
+                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                }
+                vertexArrayObject = {};
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
@@ -11406,8 +11560,8 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                     indexLen,
                     indicesSize = 0,
                     meshVertexIndexBufferConcat;
-                // delete current buffers
-                deleteBuffers();
+                // delete current buffers and VAOs
+                deleteBuffersAndVertexArrayObjects();
 
                 interleavedArrayFormat = _meshData.interleavedArrayFormat;
                 createInterleavedArrayFormatArray();
@@ -11441,6 +11595,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                 contextRestored: function (newGl) {
                     gl = newGl;
                     vertexArrayObject = {};
+                    vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
                     updateData();
                 }
             },
@@ -11649,13 +11804,11 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
          */
         this.destroy = function () {
             if (meshVertexAttBuffer !== null) {
-                deleteBuffers();
+                deleteBuffersAndVertexArrayObjects();
                 engine.removeContextListener(contextListener);
                 engine.project.removeResourceDescriptor(thisObj.uid);
             }
-            for (var name in vertexArrayObject){
-                vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
-            }
+
         };
 
         /**
@@ -12155,6 +12308,14 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                     resourceCache = {},
                     thisObj = this,
                     _maxUID = 0,
+                    verifyMaxUID = function(){
+                        var uid;
+                        for (uid in resourceDescriptorsByUID){
+                            if (_maxUID < uid){
+                                Util.fail("MaxUID invalid");
+                            }
+                        }
+                    },
                     refreshResourceDescriptor = function (uid, filter) {
                         if (resourceDescriptorsByUID[uid] instanceof ResourceDescriptor) {
                             var liveObject = resourceCache[uid];
@@ -12343,6 +12504,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                         },
                         set: function (newValue) {
                             _maxUID = newValue;
+                            if (ASSERT){
+                                verifyMaxUID();
+                            }
                         }
                     },
                     /**
@@ -12414,7 +12578,7 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                  * @method loadProject
                  * @param {object} config
                  * @param {Function} onSuccess
-                 * @param {Function} onFail=null Optional
+                 * @param {Function} [onFail=null]
                  */
                 this.loadProject = function (config, onSuccess, onError) {
                     if (_maxUID > 0) {
@@ -12572,6 +12736,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                             }
                         }
                     }
+                    if (ASSERT){
+                        verifyMaxUID();
+                    }
                     return null;
                 };
 
@@ -12597,6 +12764,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                             config: {name: object.name} // will be generated on serialization
                         });
                     }
+                    if (ASSERT){
+                        verifyMaxUID();
+                    }
                 };
 
                 /**
@@ -12611,6 +12781,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                         if (resourceDescriptorsByUID.hasOwnProperty(uid)) {
                             refreshResourceDescriptor(uid, filter);
                         }
+                    }
+                    if (ASSERT){
+                        verifyMaxUID();
                     }
                 };
 
@@ -13042,7 +13215,7 @@ define('kick/core/ResourceLoader',["./URLResourceProvider", "./BuiltInResourcePr
          * @method getMeshData
          * @param {String} uri
          * @param {kick.mesh.Mesh} meshDestination
-         * @param resourceTracker {ResourceTracker} Optional
+         * @param {ResourceTracker} [resourceTracker]
          */
         this.getMeshData = buildCallbackFunc("getMeshData");
         /**
@@ -14665,7 +14838,7 @@ define('kick/texture/RenderTexture',["kick/core/ProjectAsset", "kick/math/Vec2",
          * @class RenderTexture
          * @namespace kick.texture
          * @constructor
-         * @param {Object} config Optional
+         * @param {Object} [config]
          * @extends kick.core.ProjectAsset
          */
         return function (config) {
@@ -14838,7 +15011,7 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
                 engine = EngineSingleton.engine,
                 thisObj = this,
                 updateRenderOrder = function() {
-                    if (_materials.length > 0 && _renderOrder != _materials[0].renderOrder){
+                    if (_materials.length > 0 && _renderOrder !== _materials[0].renderOrder){
                         _renderOrder = _materials[0].renderOrder;
                         if (thisObj.gameObject) {
                             thisObj.gameObject.notifyComponentUpdated(thisObj);
@@ -14960,7 +15133,7 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
              * This method may not be called (the renderer could make the same calls)
              * @method render
              * @param {kick.scene.EngineUniforms} engineUniforms
-             * @param {kick.material.Material} overwriteMaterial Optional
+             * @param {kick.material.Material} [overwriteMaterial]
              */
             this.render = function (engineUniforms, overwriteMaterial) {
                 var length = _materials.length,
@@ -17526,7 +17699,7 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
 
             /**
              * @method createGameObject
-             * @param {Object} config Optionally configuration passed to the game objects
+             * @param {Object} [config] Optionally configuration passed to the game objects
              * @return {kick.scene.GameObject}
              */
             this.createGameObject = function (config) {
@@ -17581,7 +17754,7 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
 
             /**
              * @method toJSON
-             * @param {Function} filter Optional. Filter with function(object): return boolean, where true means include in export.
+             * @param {Function} [filterFn] Optional. Filter with function(object): return boolean, where true means include in export.
              * @return {Object}
              */
             this.toJSON = function (filterFn) {
@@ -19807,7 +19980,7 @@ define('kick/importer/ColladaImporter',["kick/math", "kick/core/Constants", "kic
         /**
          * @method import
          * @param {XMLDom|String} colladaDOM
-         * @param {kick.scene.Scene} scene=engine.activeScene Optional. If not specified the active scene (from the engine) is used
+         * @param {kick.scene.Scene} [scene=engine.activeScene] If not specified the active scene (from the engine) is used
          * @param {boolean} rotate90x rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties(mesh:[], gameObjects:[], materials:[])
          * @static
@@ -19831,7 +20004,7 @@ define('kick/importer/ColladaImporter',["kick/math", "kick/core/Constants", "kic
                  * Converts a string to an array
                  * @method stringToArray
                  * @param {String} numberString
-                 * @param {Object} type=Array Optional - valid types are Array (default), and typed arrays classes
+                 * @param {Object} [type=Array] valid types are Array (default), and typed arrays classes
                  * @private
                  */
                     stringToArray = function (numberString, type) {
@@ -20278,8 +20451,8 @@ define('kick/importer/ObjImporter',["kick/math", "kick/mesh/MeshData", "kick/mes
         /**
          * @method import
          * @param {String} objFileContent
-         * @param {kick.scene.Scene} scene=engine.activeScene Optional. If not specified the active scene (from the engine) is used
-         * @param {boolean} rotate90x rotate -90 degrees around x axis
+         * @param {kick.scene.Scene} [scene=engine.activeScene] Optional. If not specified the active scene (from the engine) is used
+         * @param {boolean} [rotate90x] rotate -90 degrees around x axis
          * @return {Object} returns container object with the properties (mesh:[], gameObjects:[], materials:[])
          * @static
          */
@@ -20552,7 +20725,7 @@ define('kick/scene/Component',[], function () {
      * Abstract method called every at every rendering of the object. May be undefined.
      * @method render
      * @param {kick.scene.EngineUniforms} engineUniforms
-     * @param {kick.material.Material} overwriteMaterial Optional
+     * @param {kick.material.Material} [overwriteMaterial]
      */
 
     /**
@@ -20623,7 +20796,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
          * @class MovieTexture
          * @namespace kick.texture
          * @constructor
-         * @param {Object} config Optional
+         * @param {Object} [config]
          * @extends kick.core.ProjectAsset
          */
         return function (config) {
