@@ -5,6 +5,7 @@ KickJS Release notes:
 - Remove engine parameter from Shader.getPrecompiledSource()
 - Fix rare bug in MeshData.recomputeNormals()
 - Fix problem with renderOrder (which caused wrong render order)
+- Improve shader editor
 
 0.5.0
 - Now all classes must be loaded using require.js (this replaces the KICK.namespace method).
