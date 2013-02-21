@@ -1,5 +1,5 @@
-define([],
-    function () {
+define(["shader_editor_default"],
+    function (defaultMaterial) {
         "use strict";
         return function(Y, shaderEditor, glslEditorController, editorUI){
             var onFullscreenButton = function () {
