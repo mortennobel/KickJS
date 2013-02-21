@@ -18,5 +18,5 @@ void main(void) {
     vEcPosition = (_mv * v).xyz;
     vUv = uv1;
     // compute light info
-    vNormal= _norm * normal;
+    vNormal= normalize(_norm * normal);
 } 
