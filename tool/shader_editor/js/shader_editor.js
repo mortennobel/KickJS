@@ -25,6 +25,36 @@ requirejs(['kick', 'shader_editor_ui'],
                 isRotating = true,
                 meshsetting,
                 pointMesh,
+                updateShaderFromSettings = function(settings){
+                    var changed = false;
+                    if (shader.faceCulling != settings.faceCulling){
+                        shader.faceCulling = settings.faceCulling;
+                        changed = true;
+                    }
+                    if (shader.blendSFactorRGB != settings.blendSFactorRGB){
+                        shader.blendSFactorRGB = settings.blendSFactorRGB;
+                        changed = true;
+                    }
+                    if (shader.blendSFactorAlpha != settings.blendSFactorAlpha){
+                        shader.blendSFactorAlpha = settings.blendSFactorAlpha;
+                        changed = true;
+                    }
+                    if (shader.blendDFactorRGB != settings.blendDFactorRGB){
+                        shader.blendDFactorRGB = settings.blendDFactorRGB;
+                        changed = true;
+                    }
+                    if (shader.blendDFactorAlpha != settings.blendDFactorAlpha){
+                        shader.blendDFactorAlpha = settings.blendDFactorAlpha;
+                        changed = true;
+                    }
+                    if (shader.zTest != settings.zTest){
+                        shader.zTest = settings.zTest;
+                        changed = true;
+                    }
+                    if (changed){
+                        shader.apply();
+                    }
+                },
                 setPointMesh = function(){
                     if (!pointMesh){
                         var meshData = new KICK.mesh.MeshData(),
@@ -172,6 +202,7 @@ requirejs(['kick', 'shader_editor_ui'],
                 _light.color = settings.lightcolor;
                 _lightTransform.rotationEuler = settings.lightrot;
                 isRotating = settings.rotatemesh === "on";
+                updateShaderFromSettings(settings);
                 var cameraTransform = camera.gameObject.transform;
                 if (settings.projection === "perspective") {
                     camera.fieldOfView = 60;

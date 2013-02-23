@@ -1,5 +1,6 @@
-define([],
-    function () {
+define(["kick"],
+    function (kick) {
+        var Constants = kick.core.Constants;
         "use strict";
         return function(Y, shaderEditor){
             var projection = new Y.ButtonGroup({
@@ -19,7 +20,29 @@ define([],
                     srcNode: '#blending',
                     type: 'radio'
                 }),
+                faceCull = new Y.ButtonGroup({
+                    srcNode: '#faceculling',
+                    type: 'radio'
+                }),
+                zTest = new Y.ButtonGroup({
+                    srcNode: '#zTest',
+                    type: 'radio'
+                }),
+                sourceFactorRGB = document.getElementById("blendSFactorRGB"),
+                sourceFactorAlpha = document.getElementById("blendSFactorAlpha"),
+                destFactorRGB = document.getElementById("blendDFactorRGB"),
+                destFactorAlpha = document.getElementById("blendDFactorAlpha"),
                 thisObj = this,
+                getSelectValue = function(elem){
+                    return elem.options[elem.selectedIndex].value;
+                },
+                setSelectedValue = function(elem,value){
+                    for (var i=0;i<elem.options.length;i++){
+                        if (elem.options[i].value == value){
+                            elem.selectedIndex = i;
+                        }
+                    }
+                },
                 addChildListeners = function (component, listener, listenerNames, tag) {
                     var i, j;
                     for (i = 0; i < component.children.length; i++) {
@@ -133,13 +156,39 @@ define([],
                     } else {
                         blendingoptions.className = "";
                     }
+                },
+                decorateSelector = function(elem){
+                    for (var i=0;i<elem.options.length;i++){
+                        var value = Constants[elem.options[i].text];
+                        elem.options[i].value = value;
+                    }
+                    elem.onchange = updateSettings;
+                },
+                decorateButtonGroupWithConst = function(buttonGroup){
+                    var buttons = buttonGroup.getButtons();
+                    buttons.each(function(button){
+                        var value= button.get("value");
+                        if (typeof value === "string"){
+                            button.set("value", Constants[value]);
+                            console.log("Replace "+value+" with ",button.get("value"));
+                        }
+                    });
                 };
 
+            decorateButtonGroupWithConst(faceCull);
+            decorateButtonGroupWithConst(zTest);
+
+            decorateSelector(sourceFactorRGB);
+            decorateSelector(sourceFactorAlpha);
+            decorateSelector(destFactorRGB);
+            decorateSelector(destFactorAlpha);
 
             projection.render();
             meshsetting.render();
             rotatemesh.render();
             blending.render();
+            faceCull.render();
+            zTest.render();
 
             this.getSettingsData = function () {
                 return {
@@ -147,6 +196,12 @@ define([],
                     projection: getButtonGroupValue(projection),
                     rotatemesh: getButtonGroupValue(rotatemesh),
                     blending: getButtonGroupValue(blending),
+                    zTest: Number(getButtonGroupValue(zTest)),
+                    faceCulling: Number(getButtonGroupValue(faceCull)),
+                    blendSFactorRGB: Number(getSelectValue(sourceFactorRGB)),
+                    blendSFactorAlpha: Number(getSelectValue(sourceFactorAlpha)),
+                    blendDFactorRGB: Number(getSelectValue(destFactorRGB)),
+                    blendDFactorAlpha: Number(getSelectValue(destFactorAlpha)),
                     lightrot: getChildrenValueVector('lightrot'),
                     lightcolor: getChildrenValueVector('lightcolor'),
                     lightAmbient: getChildrenValueVector('ambientLight'),
@@ -159,6 +214,14 @@ define([],
                 setButtonGroupValue(projection,settingsData.projection );
                 setButtonGroupValue(rotatemesh, settingsData.rotatemesh);
                 setButtonGroupValue(blending, settingsData.blending);
+                setButtonGroupValue(faceCull, ""+settingsData.faceCulling);
+                setButtonGroupValue(zTest, ""+settingsData.zTest);
+
+                setSelectedValue(sourceFactorRGB, settingsData.blendSFactorRGB);
+                setSelectedValue(sourceFactorAlpha, settingsData.blendSFactorAlpha);
+                setSelectedValue(destFactorRGB, settingsData.blendDFactorRGB);
+                setSelectedValue(destFactorAlpha, settingsData.blendDFactorAlpha);
+
                 var lightintensity = document.getElementById('lightintensity');
                 setChildrenValueVector('lightrot', settingsData.lightrot);
                 setChildrenValueVector('lightcolor', settingsData.lightcolor);
@@ -170,6 +233,8 @@ define([],
             projection.on("click", updateSettings);
             rotatemesh.on("click", updateSettings);
             blending.on("click", updateSettings);
+            faceCull.on("click", updateSettings);
+            zTest.on("click", updateSettings);
 
             (function addLightListeners() {
                 var lightpos = document.getElementById('lightpos'),

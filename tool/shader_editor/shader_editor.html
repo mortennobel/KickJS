@@ -218,43 +218,111 @@
                     <div id="blendingoptions" style="margin-left: 20px;">
                         <b>Blend options</b><br>
                         <div style="margin-left: 20px;">
-                        Source factor :<br>
-                        <select>
-                            <option>GL_ZERO</option>
-                            <option>GL_ONE</option>
-                            <option>GL_SRC_COLOR</option>
-                            <option>GL_ONE_MINUS_SRC_COLOR</option>
-                            <option>GL_DST_COLOR</option>
-                            <option>GL_ONE_MINUS_DST_COLOR</option>
-                            <option>GL_SRC_ALPHA</option>
-                            <option>GL_ONE_MINUS_SRC_ALPHA</option>
-                            <option>GL_DST_ALPHA</option>
-                            <option>GL_ONE_MINUS_DST_ALPHA</option>
-                            <option>GL_CONSTANT_COLOR</option>
-                            <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
-                            <option>GL_CONSTANT_ALPHA</option>
-                            <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
-                            <option>GL_SRC_ALPHA_SATURATE</option>
-                        </select><br>
-                        Destination factor :<br>
-                        <select>
-                            <option>GL_ZERO</option>
-                            <option>GL_ONE</option>
-                            <option>GL_SRC_COLOR</option>
-                            <option>GL_ONE_MINUS_SRC_COLOR</option>
-                            <option>GL_DST_COLOR</option>
-                            <option>GL_ONE_MINUS_DST_COLOR</option>
-                            <option>GL_SRC_ALPHA</option>
-                            <option>GL_ONE_MINUS_SRC_ALPHA</option>
-                            <option>GL_DST_ALPHA</option>
-                            <option>GL_ONE_MINUS_DST_ALPHA</option>
-                            <option>GL_CONSTANT_COLOR</option>
-                            <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
-                            <option>GL_CONSTANT_ALPHA</option>
-                            <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
-                        </select>
+                        <table>
+                            <tr>
+                                <th>Source factor RGB</th>
+                                <th>Source factor Alpha</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="blendSFactorRGB">
+                                        <option>GL_ZERO</option>
+                                        <option>GL_ONE</option>
+                                        <option>GL_SRC_COLOR</option>
+                                        <option>GL_ONE_MINUS_SRC_COLOR</option>
+                                        <option>GL_DST_COLOR</option>
+                                        <option>GL_ONE_MINUS_DST_COLOR</option>
+                                        <option>GL_SRC_ALPHA</option>
+                                        <option>GL_ONE_MINUS_SRC_ALPHA</option>
+                                        <option>GL_DST_ALPHA</option>
+                                        <option>GL_ONE_MINUS_DST_ALPHA</option>
+                                        <option>GL_CONSTANT_COLOR</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
+                                        <option>GL_CONSTANT_ALPHA</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
+                                        <option>GL_SRC_ALPHA_SATURATE</option>
+                                    </select>
+                                </td>
+                                <td><select id="blendSFactorAlpha">
+                                        <option>GL_ZERO</option>
+                                        <option>GL_ONE</option>
+                                        <option>GL_SRC_COLOR</option>
+                                        <option>GL_ONE_MINUS_SRC_COLOR</option>
+                                        <option>GL_DST_COLOR</option>
+                                        <option>GL_ONE_MINUS_DST_COLOR</option>
+                                        <option>GL_SRC_ALPHA</option>
+                                        <option>GL_ONE_MINUS_SRC_ALPHA</option>
+                                        <option>GL_DST_ALPHA</option>
+                                        <option>GL_ONE_MINUS_DST_ALPHA</option>
+                                        <option>GL_CONSTANT_COLOR</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
+                                        <option>GL_CONSTANT_ALPHA</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
+                                        <option>GL_SRC_ALPHA_SATURATE</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Destination factor RGB</th>
+                                <th>Destination factor Alpha</th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <select id="blendDFactorRGB">
+                                        <option>GL_ZERO</option>
+                                        <option>GL_ONE</option>
+                                        <option>GL_SRC_COLOR</option>
+                                        <option>GL_ONE_MINUS_SRC_COLOR</option>
+                                        <option>GL_DST_COLOR</option>
+                                        <option>GL_ONE_MINUS_DST_COLOR</option>
+                                        <option>GL_SRC_ALPHA</option>
+                                        <option>GL_ONE_MINUS_SRC_ALPHA</option>
+                                        <option>GL_DST_ALPHA</option>
+                                        <option>GL_ONE_MINUS_DST_ALPHA</option>
+                                        <option>GL_CONSTANT_COLOR</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
+                                        <option>GL_CONSTANT_ALPHA</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select id="blendDFactorAlpha">
+                                        <option>GL_ZERO</option>
+                                        <option>GL_ONE</option>
+                                        <option>GL_SRC_COLOR</option>
+                                        <option>GL_ONE_MINUS_SRC_COLOR</option>
+                                        <option>GL_DST_COLOR</option>
+                                        <option>GL_ONE_MINUS_DST_COLOR</option>
+                                        <option>GL_SRC_ALPHA</option>
+                                        <option>GL_ONE_MINUS_SRC_ALPHA</option>
+                                        <option>GL_DST_ALPHA</option>
+                                        <option>GL_ONE_MINUS_DST_ALPHA</option>
+                                        <option>GL_CONSTANT_COLOR</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_COLOR</option>
+                                        <option>GL_CONSTANT_ALPHA</option>
+                                        <option>GL_ONE_MINUS_CONSTANT_ALPHA</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
                         </div>
-
+                    </div>
+                    <h3>Face culling</h3>
+                    <div id="faceculling">
+                        <button class='radio' id="facecullingBack" value="GL_BACK">Back</button>
+                        <button class='radio' id="facecullingFront" value="GL_FRONT">Front</button>
+                        <button class='radio' id="facecullingNone" value="GL_NONE">None</button>
+                    </div>
+                    <h3>Z test</h3>
+                    <div id="zTest">
+                        <button class='radio' id="zTestLess" value="GL_LESS">Less</button>
+                        <button class='radio' id="zTestEqual" value="GL_EQUAL">Equal</button>
+                        <button class='radio' id="zTestLEqual" value="GL_LEQUAL">Less than equal</button>
+                        <button class='radio' id="zTestGreater" value="GL_GREATER">Greater</button>
+                        <button class='radio' id="zTestNotEqual" value="GL_NOTEQUAL">Not equal</button>
+                        <button class='radio' id="zTestGEqual" value="GL_GEQUAL">Greater than equal</button>
+                        <button class='radio' id="zTestAlways" value="GL_ALWAYS">Always</button>
+                        <button class='radio' id="zTestNever" value="GL_NEVER">Never</button>
                     </div>
                     <h3>Directional Light</h3>
                     Rotation (<b title="default pointing towards negative z">Euler</b>):<br>
