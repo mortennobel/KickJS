@@ -905,7 +905,6 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     fragmentShader = compileShader(_fragmentShaderSrc, true, errorLog),
                     compileError = fragmentShader === null || vertexShader === null,
                     i,
-                    c = Constants,
                     numberOfActiveUniforms,
                     activeAttributes,
                     attribute;
@@ -922,7 +921,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 gl.deleteShader(vertexShader);
                 gl.deleteShader(fragmentShader);
 
-                if (!gl.getProgramParameter(_shaderProgramId, c.GL_LINK_STATUS)) {
+                if (!gl.getProgramParameter(_shaderProgramId, Constants.GL_LINK_STATUS)) {
                     errorLog("Could not initialise shaders");
                     return false;
                 }
@@ -931,10 +930,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
 
                 gl.useProgram(_shaderProgramId);
                 glState.boundShader = _shaderProgramId;
-                numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_UNIFORMS);
+                numberOfActiveUniforms = gl.getProgramParameter(_shaderProgramId, Constants.GL_ACTIVE_UNIFORMS);
                 updateActiveUniforms(numberOfActiveUniforms);
 
-                activeAttributes = gl.getProgramParameter(_shaderProgramId, c.GL_ACTIVE_ATTRIBUTES);
+                activeAttributes = gl.getProgramParameter(_shaderProgramId, Constants.GL_ACTIVE_ATTRIBUTES);
                 /**
                  * Array of JSON data with size,type and name
                  * @property activeAttributes
