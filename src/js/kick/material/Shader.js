@@ -527,6 +527,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * Default false
                  * @property polygonOffsetEnabled
                  * @type boolean
+                 * @default false
                  */
                 polygonOffsetEnabled: {
                     get: function () {
@@ -537,9 +538,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     }
                 },
                 /**
-                 * Default 2.5
                  * @property polygonOffsetFactor
                  * @type Number
+                 * @default 2.5
                  */
                 polygonOffsetFactor: {
                     get: function () {
@@ -550,9 +551,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     }
                 },
                 /**
-                 * Default 10.0
                  * @property polygonOffsetUnits
                  * @type Number
+                 * @default 10.0
                  */
                 polygonOffsetUnits: {
                     get: function () {
@@ -569,6 +570,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * faceCulling = GL_NONE means face culling disabled
                  * @property faceCulling
                  * @type Object
+                 * @default Constants.GL_BACK
                  */
                 faceCulling: {
                     get: function () { return _faceCulling; },
@@ -589,6 +591,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * Enable or disable writing into the depth buffer
                  * @property depthMask
                  * @type Boolean
+                 * @default true
                  */
                 depthMask: {
                     get: function () { return _depthMask; },
@@ -613,6 +616,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * kick.core.Constants.GL_ALWAYS
                  * @property zTest
                  * @type Object
+                 * @default Constants.GL_LESS
                  */
                 zTest: {
                     get: function () { return _zTest; },
@@ -665,6 +669,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorRGB
                  * @type Number
+                 * @default Constants.GL_SRC_ALPHA
                  */
                 blendSFactorRGB:{
                     get: function(){
@@ -709,6 +714,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorAlpha
                  * @type Number
+                 * @default Constants.GL_SRC_ALPHA
                  */
                 blendSFactorAlpha:{
                     get: function(){
@@ -772,6 +778,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorRGB
                  * @type Number
+                 * @default Constants.GL_ONE_MINUS_SRC_ALPHA
                  */
                 blendDFactorRGB: {
                     get: function(){
@@ -814,6 +821,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorAlpha
                  * @type Number
+                 * @default Constants.GL_ONE_MINUS_SRC_ALPHA
                  */
                 blendDFactorAlpha: {
                     get: function(){
