@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: 'js',
     paths: {
-        kick: '../../../build/kick-debug'
+        kick: location.search === "?debug" ? '../../../build/kick-debug': '../../../build/kick'
     }
 });
 
@@ -325,7 +325,8 @@ requirejs(['kick', 'shader_editor_ui'],
                 try {
                     _engine = new KICK.core.Engine('canvas', {
                         preserveDrawingBuffer: true,
-                        checkCanvasResizeInterval: 0
+                        checkCanvasResizeInterval: 0,
+                        enableDebugContext: location.search === "?debug" // debug enabled if query == debug
                     });
                     var initEngine = function () {
                         var cameraObject = _engine.activeScene.createGameObject(),

@@ -205,7 +205,8 @@ define(["kick"],
                     lightrot: getChildrenValueVector('lightrot'),
                     lightcolor: getChildrenValueVector('lightcolor'),
                     lightAmbient: getChildrenValueVector('ambientLight'),
-                    lightintensity: Number(document.getElementById('lightintensity').value)
+                    lightintensity: Number(document.getElementById('lightintensity').value),
+                    version: Constants._VERSION
                 };
             };
 
@@ -221,7 +222,6 @@ define(["kick"],
                 setSelectedValue(sourceFactorAlpha, settingsData.blendSFactorAlpha);
                 setSelectedValue(destFactorRGB, settingsData.blendDFactorRGB);
                 setSelectedValue(destFactorAlpha, settingsData.blendDFactorAlpha);
-
                 var lightintensity = document.getElementById('lightintensity');
                 setChildrenValueVector('lightrot', settingsData.lightrot);
                 setChildrenValueVector('lightcolor', settingsData.lightcolor);
