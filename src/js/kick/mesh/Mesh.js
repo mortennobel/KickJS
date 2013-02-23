@@ -108,6 +108,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 meshVertexIndexBuffer = gl.createBuffer();
                 gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
                 gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBufferConcat, c.GL_STATIC_DRAW);
+                glState.meshBuffer = null;
             },
             contextListener = {
                 contextLost: function () {
