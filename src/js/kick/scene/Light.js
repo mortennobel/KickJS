@@ -8,6 +8,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
         /**
          * A light object.<br>
          * Note that each scene can only have one ambient light and one directional light.
+         * The directional light points in (0,0,1) direction (transformed by the GameObject transform)
          * @class Light
          * @namespace kick.scene
          * @extends kick.scene.Component
@@ -95,6 +96,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * Only directional light supports shadows.
                  * @property shadow
                  * @type boolean
+                 * @default false
                  */
                 shadow: {
                     get: function () {
@@ -111,9 +113,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                     enumerable: true
                 },
                 /**
-                 * Shadow strength (between 0.0 and 1.0). Default value is 1.0
+                 * Shadow strength (between 0.0 and 1.0).
                  * @property shadowStrength
                  * @type Number
+                 * @default 1.0
                  */
                 shadowStrength: {
                     get: function () {
@@ -125,9 +128,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                     enumerable: true
                 },
                 /**
-                 * Shadow bias. Default value is 0.05
+                 * Shadow bias.
                  * @property shadowBias
                  * @type Number
+                 * @default 0.05
                  */
                 shadowBias: {
                     get: function () {
@@ -139,9 +143,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                     enumerable: true
                 },
                 /**
-                 * Color intensity of the light (RGB). Default [1,1,1]
+                 * Color intensity of the light (RGB).
                  * @property color
                  * @type kick.math.Vec3
+                 * @default [1,1,1]
                  */
                 color: {
                     get: function () {
@@ -165,10 +170,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * Light.TYPE_POINT <br>
                  * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
                  * component of its gameObject.
-                 * Default type is TYPE_POINT
                  * @property type
                  * @type Enum
                  * @final
+                 * @default Light.TYPE_POINT
                  */
                 type: {
                     get: function () {
@@ -205,9 +210,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * attenuation[0] is constant attenuation,<br>
                  * attenuation[1] is linear attenuation,<br>
                  * attenuation[2] is quadratic attenuation.<br>
-                 * Default value is (1,0,0)
                  * @property attenuation
                  * @type kick.math.Vec3
+                 * @default [1,0,0]
                  */
                 attenuation: {
                     get: function () {
