@@ -858,7 +858,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
 
                 // Calculate handedness
                 // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
-                tangent[a][3] = (Vec3.dot(Vec3.cross(n, t, Vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
+                tangent[a][3] = (Vec3.dot(Vec3.cross(Vec3.create(), n, t), tan2[a]) < 0.0) ? -1.0 : 1.0;
             }
             this.tangent = tangentBuffer;
             return true;
