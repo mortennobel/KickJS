@@ -669,7 +669,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 }
                 thisObj.name = config.name;
                 thisObj.indices = config.indices;
-                thisObj.meshType = config.meshType || Constants.GL_TRIANGLES;
+                thisObj.meshType = Util.hasProperty(config,"meshType") ?  config.meshType : Constants.GL_TRIANGLES;
             }());
         };
 
