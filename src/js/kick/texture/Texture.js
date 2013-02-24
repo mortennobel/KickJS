@@ -302,12 +302,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
              * @method setTemporaryTexture
              */
             this.setTemporaryTexture = function () {
-                var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,
+                var whiteImage = new Uint8Array([255, 255, 255,
                         255, 255, 255,
                         255, 255, 255,
                         255, 255, 255]),
                     oldIntFormat = _intFormat;
-                this.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard, "kickjs://texture/white/");
+                this.internalFormat = Constants.GL_RGB;
+                this.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, whiteImage, "kickjs://texture/white/");
                 _intFormat = oldIntFormat;
             };
 
