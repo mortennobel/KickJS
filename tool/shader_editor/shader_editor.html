@@ -212,8 +212,8 @@
                     </div>
                     <h3>Blending</h3>
                     <div id="blending">
-                        <button class='radio' id="blendingOn" value="on">On</button>
                         <button class='radio' id="blendingOff" value="off">Off</button>
+                        <button class='radio' id="blendingOn" value="on">On</button>
                     </div>
                     <div id="blendingoptions" style="margin-left: 20px;">
                         <b>Blend options</b><br>
@@ -305,6 +305,8 @@
                                 </td>
                             </tr>
                         </table>
+                        <button id="normalBlend" class='yui3-button' title="Set source + destination factor to normal blending">Set normal blend</button>
+                        <button id="additiveBlend" class='yui3-button' title="Set source + destination factor to additive blending">Set additive blend</button>
                         </div>
                     </div>
                     <h3>Face culling</h3>
@@ -324,6 +326,12 @@
                         <button class='radio' id="zTestAlways" value="GL_ALWAYS">Always</button>
                         <button class='radio' id="zTestNever" value="GL_NEVER">Never</button>
                     </div>
+                    <h3>Depth mask</h3>
+                    <div id="depthMask">
+                        <button class='radio' id="depthMaskEnabled" value="true" title="Enable write to depth buffer">Enabled</button>
+                        <button class='radio' id="depthMaskDisabled" value="false" title="Disable write to depth buffer">Disabled</button>
+                    </div>
+
                     <h3>Directional Light</h3>
                     Rotation (<b title="default pointing towards negative z">Euler</b>):<br>
                     <div id="lightrot">

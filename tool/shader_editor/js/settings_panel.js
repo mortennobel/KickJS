@@ -28,6 +28,10 @@ define(["kick"],
                     srcNode: '#zTest',
                     type: 'radio'
                 }),
+                depthMask = new Y.ButtonGroup({
+                    srcNode: '#depthMask',
+                    type: 'radio'
+                }),
                 sourceFactorRGB = document.getElementById("blendSFactorRGB"),
                 sourceFactorAlpha = document.getElementById("blendSFactorAlpha"),
                 destFactorRGB = document.getElementById("blendDFactorRGB"),
@@ -170,7 +174,6 @@ define(["kick"],
                         var value= button.get("value");
                         if (typeof value === "string"){
                             button.set("value", Constants[value]);
-                            console.log("Replace "+value+" with ",button.get("value"));
                         }
                     });
                 };
@@ -189,6 +192,7 @@ define(["kick"],
             blending.render();
             faceCull.render();
             zTest.render();
+            depthMask.render();
 
             this.getSettingsData = function () {
                 return {
@@ -202,6 +206,7 @@ define(["kick"],
                     blendSFactorAlpha: Number(getSelectValue(sourceFactorAlpha)),
                     blendDFactorRGB: Number(getSelectValue(destFactorRGB)),
                     blendDFactorAlpha: Number(getSelectValue(destFactorAlpha)),
+                    depthMask: getButtonGroupValue(depthMask)==="true",
                     lightrot: getChildrenValueVector('lightrot'),
                     lightcolor: getChildrenValueVector('lightcolor'),
                     lightAmbient: getChildrenValueVector('ambientLight'),
@@ -222,6 +227,11 @@ define(["kick"],
                 setSelectedValue(sourceFactorAlpha, settingsData.blendSFactorAlpha);
                 setSelectedValue(destFactorRGB, settingsData.blendDFactorRGB);
                 setSelectedValue(destFactorAlpha, settingsData.blendDFactorAlpha);
+                var depthMaskValue = "true";
+                if (kick.core.Util.hasProperty(settingsData, "depthMask")){
+                    depthMaskValue = settingsData.depthMask ? "true":"false";
+                }
+                setButtonGroupValue(depthMask, depthMaskValue);
                 var lightintensity = document.getElementById('lightintensity');
                 setChildrenValueVector('lightrot', settingsData.lightrot);
                 setChildrenValueVector('lightcolor', settingsData.lightcolor);
@@ -235,6 +245,24 @@ define(["kick"],
             blending.on("click", updateSettings);
             faceCull.on("click", updateSettings);
             zTest.on("click", updateSettings);
+            depthMask.on("click", updateSettings);
+
+            Y.one("#normalBlend").on("click", function(){
+                setSelectedValue(sourceFactorRGB, Constants.GL_SRC_ALPHA);
+                setSelectedValue(sourceFactorAlpha, Constants.GL_SRC_ALPHA);
+                setSelectedValue(destFactorRGB, Constants.GL_ONE_MINUS_SRC_ALPHA);
+                setSelectedValue(destFactorAlpha, Constants.GL_ONE_MINUS_SRC_ALPHA);
+                updateSettings();
+            });
+            Y.one("#additiveBlend").on("click", function(){
+                setSelectedValue(sourceFactorRGB, Constants.GL_SRC_ALPHA);
+                setSelectedValue(sourceFactorAlpha, Constants.GL_SRC_ALPHA);
+                setSelectedValue(destFactorRGB, Constants.GL_ONE);
+                setSelectedValue(destFactorAlpha, Constants.GL_ONE);
+                updateSettings();
+            });
+
+
 
             (function addLightListeners() {
                 var lightpos = document.getElementById('lightpos'),

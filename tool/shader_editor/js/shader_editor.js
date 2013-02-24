@@ -47,6 +47,15 @@ requirejs(['kick', 'shader_editor_ui'],
                         shader.blendDFactorAlpha = settings.blendDFactorAlpha;
                         changed = true;
                     }
+                    if (shader.depthMask != settings.depthMask){
+                        shader.depthMask = settings.depthMask;
+                        changed = true;
+                    }
+                    var blend = settings.blending === "on";
+                    if (shader.blend != blend){
+                        shader.blend = blend;
+                        changed = true;
+                    }
                     if (shader.zTest != settings.zTest){
                         shader.zTest = settings.zTest;
                         changed = true;
