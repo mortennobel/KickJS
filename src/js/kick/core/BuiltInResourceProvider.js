@@ -34,6 +34,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
          * <li><b>Plane</b> Url: kickjs://mesh/plane/<br></li>
          * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
          * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Point</b> Url: kickjs://mesh/point/</li>
          * </ul>
          * @method getMeshData
          * @param {String} url
@@ -63,6 +64,8 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
             } else if (url.indexOf("kickjs://mesh/cube/") === 0) {
                 length = getParameterFloat(url, "length");
                 meshDataObj = MeshDataFactory.createCubeData(length);
+            } else if (url.indexOf("kickjs://mesh/point/") === 0) {
+                meshDataObj = MeshDataFactory.createPointData();
             } else {
                 Util.fail("No meshdata found for " + url);
                 if (resourceTracker && resourceTracker.resourceLoadingStarted){

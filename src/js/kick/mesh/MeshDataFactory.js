@@ -8,7 +8,22 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
      * @static
      */
     return {
-
+        /**
+         * Create a single point (in 0,0,0)
+         * @method createPointData
+         * @static
+         * @return {kick.core.MeshData} point mesh
+         */
+        createPointData: function () {
+            return new MeshData({
+                name: "Point",
+                vertex: [
+                    0, 0, 0
+                ],
+                meshType: Constants.GL_POINTS,
+                indices: [0]
+            });
+        },
         /**
          * Creates a triangle in the XY plane
          * @method createTriangleData

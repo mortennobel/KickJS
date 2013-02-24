@@ -168,7 +168,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                     });
                             }
 
-                        } else if (uid <= Project.ENGINE_MESH_TRIANGLE && uid >= Project.ENGINE_MESH_CUBE) {
+                        } else if (uid <= Project.ENGINE_MESH_TRIANGLE && uid >= Project.ENGINE_MESH_POINT) {
                             switch (uid) {
                             case Project.ENGINE_MESH_TRIANGLE:
                                 url = "kickjs://mesh/triangle/";
@@ -181,6 +181,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 break;
                             case Project.ENGINE_MESH_CUBE:
                                 url = "kickjs://mesh/cube/";
+                                break;
+                            case Project.ENGINE_MESH_POINT:
+                                url = "kickjs://mesh/point/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -791,6 +794,13 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          * @static
          */
         Project.ENGINE_MESH_CUBE = -303;
+
+        /**
+         * @property ENGINE_MESH_CUBE
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_MESH_POINT = -304;
 
         /**
          * Default material is using ENGINE_SHADER_UNLIT and is white
