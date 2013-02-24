@@ -107,7 +107,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 name: getUrlAsResourceName(url),
                                 uid: uid
                             });
-                        } else if (uid <= Project.ENGINE_TEXTURE_BLACK && uid >= Project.ENGINE_TEXTURE_CUBEMAP_WHITE) {
+                        } else if (uid <= Project.ENGINE_TEXTURE_BLACK && uid >= Project.ENGINE_TEXTURE_DEFAULT_NORMAL) {
                             isCubemap = uid === Project.ENGINE_TEXTURE_CUBEMAP_WHITE;
                             switch (uid) {
                             case Project.ENGINE_TEXTURE_BLACK:
@@ -124,6 +124,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 break;
                             case Project.ENGINE_TEXTURE_CUBEMAP_WHITE:
                                 // do nothing
+                                break;
+                            case Project.ENGINE_TEXTURE_DEFAULT_NORMAL:
+                                url = "kickjs://texture/default_normal/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -753,6 +756,13 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          * @static
          */
         Project.ENGINE_TEXTURE_CUBEMAP_WHITE = -204;
+
+        /**
+         * @property ENGINE_TEXTURE_DEFAULT_NORMAL
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_TEXTURE_DEFAULT_NORMAL = -205;
 
         /**
          * @property ENGINE_MESH_TRIANGLE
