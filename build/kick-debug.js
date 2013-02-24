@@ -1,5 +1,5 @@
 /*!
- * KickJS 0.5.0 - New BSD License
+ * KickJS 0.5.1 - New BSD License
  * http://www.kickjs.org/
  * License: https://raw.github.com/mortennobel/KickJS/master/license.txt
  *
@@ -7521,7 +7521,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                 }
                 thisObj.name = config.name;
                 thisObj.indices = config.indices;
-                thisObj.meshType = config.meshType || 4;
+                thisObj.meshType = Util.hasProperty(config,"meshType") ?  config.meshType : 4;
             }());
         };
 
@@ -7710,7 +7710,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
 
                 // Calculate handedness
                 // tangent[a].w = (Dot(Cross(n, t), tan2[a]) < 0.0F) ? -1.0F : 1.0F;
-                tangent[a][3] = (Vec3.dot(Vec3.cross(n, t, Vec3.create()), tan2[a]) < 0.0) ? -1.0 : 1.0;
+                tangent[a][3] = (Vec3.dot(Vec3.cross(Vec3.create(), n, t), tan2[a]) < 0.0) ? -1.0 : 1.0;
             }
             this.tangent = tangentBuffer;
             return true;
@@ -7729,7 +7729,22 @@ define('kick/mesh/MeshDataFactory',["./MeshData", "kick/math/Vec2", "kick/math/V
      * @static
      */
     return {
-
+        /**
+         * Create a single point (in 0,0,0)
+         * @method createPointData
+         * @static
+         * @return {kick.core.MeshData} point mesh
+         */
+        createPointData: function () {
+            return new MeshData({
+                name: "Point",
+                vertex: [
+                    0, 0, 0
+                ],
+                meshType: 0,
+                indices: [0]
+            });
+        },
         /**
          * Creates a triangle in the XY plane
          * @method createTriangleData
@@ -8081,6 +8096,16 @@ define('kick/material/GLSLConstants',[], function () {
 */
 /**
 * GLSL file content
+* @property bumped_specular_fs.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property bumped_specular_vs.glsl
+* @type String
+*/
+/**
+* GLSL file content
 * @property diffuse_fs.glsl
 * @type String
 */
@@ -8092,6 +8117,16 @@ define('kick/material/GLSLConstants',[], function () {
 /**
 * GLSL file content
 * @property light.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property point_sprite_fs.glsl
+* @type String
+*/
+/**
+* GLSL file content
+* @property point_sprite_vs.glsl
 * @type String
 */
 /**
@@ -8159,7 +8194,7 @@ define('kick/material/GLSLConstants',[], function () {
 * @property unlit_vs.glsl
 * @type String
 */
-return {"__error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\ngl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","__error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","__pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\nvoid main(void)\n{\ngl_FragColor = gameObjectUID;\n}","__pick_normal_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec3 vNormal;\nvoid main(void)\n{\ngl_FragColor = vec4(vNormal,0);\n}","__pick_normal_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec3 vNormal;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvNormal = (_norm * normal) / 2.0 + vec3(0.5, 0.5, 0.5);\n}","__pick_uv_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec2 vUV;\nvoid main(void)\n{\ngl_FragColor = vec4(vUV, 0, 0);\n}","__pick_uv_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec2 vUV;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUV = uv1;\n}","__pick_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\nvarying vec4 gameObjectUID;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\ngameObjectUID = _gameObjectUID;\n}","__shadowmap_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\n#pragma include \"shadowmap.glsl\"\nvoid main() {\ngl_FragColor = packDepth( gl_FragCoord.z );\n}\n","__shadowmap_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 directionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 pointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((directionalLight+pointLight)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color, 1.0);\n}\n","diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec4 vShadowMapCoord;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\nvNormal = normalize(_norm * normal);\nvShadowMapCoord = _lightMat * v;\n} ","light.glsl":"vec3 getPointLightDiffuse(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS]){\nvec3 diffuse = vec3(0.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nfloat nDotVP = max(0.0, dot(normal, VP));\ndiffuse += colorIntensity*nDotVP * attenuation;\n}\nreturn diffuse;\n}\nvoid getPointLight(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS],float specularExponent, out vec3 diffuse, out float specular){\ndiffuse = vec3(0.0, 0.0, 0.0);\nspecular = 0.0;\nvec3 eye = vec3(0.0,0.0,1.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nvec3 halfVector = normalize(VP + eye);\nfloat nDotVP = max(0.0, dot(normal, VP));\nfloat nDotHV = max(0.0, dot(normal, halfVector));\nfloat pf;\nif (nDotVP == 0.0){\npf = 0.0;\n} else {\npf = pow(nDotHV, specularExponent);\n}\nbool isLightEnabled = (attenuationVector[0]+attenuationVector[1]+attenuationVector[2])>0.0;\nif (isLightEnabled){\ndiffuse += colorIntensity * nDotVP * attenuation;\nspecular += pf * attenuation;\n}\n}\n}\nvec3 getDirectionalLightDiffuse(vec3 normal, mat3 dLight){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\nreturn (colorIntensity * diffuseContribution);\n}\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nvec3 halfVector = dLight[2];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\n\tfloat specularContribution = max(dot(normal, halfVector), 0.0);\nspecular = pow(specularContribution, specularExponent);\n\tdiffuse = (colorIntensity * diffuseContribution);\n}\nuniform mat3 _dLight;\nuniform vec3 _ambient;\nuniform mat3 _pLights[LIGHTS];\n","shadowmap.glsl":"varying vec4 vShadowMapCoord;\nuniform sampler2D _shadowMapTexture;\nconst float shadowBias = 0.005;\nvec4 packDepth( const in float depth ) {\nconst vec4 bitShift = vec4( 16777216.0, 65536.0, 256.0, 1.0 );\nconst vec4 bitMask = vec4( 0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0 );\nvec4 res = fract( depth * bitShift );\nres -= res.xxyz * bitMask;\nreturn res;\n}\nfloat unpackDepth(const in vec4 rgba_depth)\n{\nconst vec4 bit_shift = vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0);\nfloat depth = dot(rgba_depth, bit_shift);\nreturn depth;\n}\nfloat computeLightVisibility(){\nvec3 shadowCoord = vShadowMapCoord.xyz / vShadowMapCoord.w;\nif (shadowCoord.x >= 0.0 && shadowCoord.x <= 1.0 && shadowCoord.y >= 0.0 && shadowCoord.y <= 1.0){\nvec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);\nbool isMaxDepth = dot(packedShadowDepth, vec4(1.0,1.0,1.0,1.0))==4.0;\nif (!isMaxDepth){\nfloat shadowDepth = unpackDepth(packedShadowDepth);\nif (shadowDepth > shadowCoord.z - shadowBias){\nreturn 1.0;\n}\nreturn 0.0;\n}\n}\nreturn 1.0; // if outside shadow map, then not occcluded\n}","specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((diffuse+diffusePoint)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color.xyz, 1.0)+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvarying vec4 vShadowMapCoord;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvUv = uv1;\nvEcPosition = (_mv * v).xyz;\nvNormal= normalize(_norm * normal);\nvShadowMapCoord = _lightMat * v;\n} ","transparent_diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuseDirectionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 diffusePointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nvec4 color = vec4(max(diffuseDirectionalLight+diffusePointLight,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color;\n}\n","transparent_diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nuniform mat4 _mv;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= normalize(_norm * normal);\n} ","transparent_specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nvec4 color = vec4(max(diffuse+diffusePoint,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","transparent_specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= normalize(_norm * normal);\n} ","transparent_unlit_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz,1.0);\n}\n","unlit_vertex_color_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec4 vColor;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz*vColor.xyz,1.0);\n}\n","unlit_vertex_color_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nattribute vec4 color;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvarying vec4 vColor;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\nvColor = color;\n}","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}"};
+return {"__error_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvoid main(void)\n{\ngl_FragColor = vec4(1.0,0.5, 0.9, 1.0);\n}","__error_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","__pick_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec4 gameObjectUID;\nvoid main(void)\n{\ngl_FragColor = gameObjectUID;\n}","__pick_normal_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec3 vNormal;\nvoid main(void)\n{\ngl_FragColor = vec4(vNormal,0);\n}","__pick_normal_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec3 vNormal;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvNormal = (_norm * normal) / 2.0 + vec3(0.5, 0.5, 0.5);\n}","__pick_uv_fs.glsl":"#ifdef GL_ES\nprecision mediump float;\n#endif\nvarying vec2 vUV;\nvoid main(void)\n{\ngl_FragColor = vec4(vUV, 0, 0);\n}","__pick_uv_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nvarying vec2 vUV;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUV = uv1;\n}","__pick_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nuniform vec4 _gameObjectUID;\nvarying vec4 gameObjectUID;\nvoid main(void) {\n// compute position\ngl_Position = _mvProj * vec4(vertex, 1.0);\ngameObjectUID = _gameObjectUID;\n}","__shadowmap_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\n#pragma include \"shadowmap.glsl\"\nvoid main() {\ngl_FragColor = packDepth( gl_FragCoord.z );\n}\n","__shadowmap_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\n} ","bumped_specular_fs.glsl":"precision mediump float;\nvarying vec2 v_uv;\nvarying vec3 viewVec;\nvarying vec3 lightVec;\nvarying vec3 pointLight[LIGHTS];\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nuniform sampler2D normalMap;\nvoid getDirectionalLight(vec3 normal, vec3 ecLightDir, vec3 reflection, vec3 colorIntensity, float specularExponent, out vec3 diffuse, out float specular){\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\nif ( diffuseContribution > 0.0){\nfloat specularContribution = max(dot(normal, reflection), 0.0);\nspecular = pow(specularContribution, specularExponent);\n} else {\nspecular = 0.0;\n}\ndiffuse = (colorIntensity * diffuseContribution);\n}\nvoid getPointLight(vec3 normal, vec3 ecPosition, vec3 ecLightPos2[LIGHTS], mat3 pLights[LIGHTS],float specularExponent, out vec3 diffuse, out float specular){\ndiffuse = vec3(0.0, 0.0, 0.0);\nspecular = 0.0;\nvec3 eye = vec3(0.0,0.0,1.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = ecLightPos2[i];\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nvec3 halfVector = normalize(VP + eye);\nfloat nDotVP = max(0.0, dot(normal, VP));\nfloat nDotHV = max(0.0, dot(normal, halfVector));\nfloat pf;\nif (nDotVP <= 0.0){\npf = 0.0;\n} else {\npf = pow(nDotHV, specularExponent);\n}\nbool isLightEnabled = (attenuationVector[0]+attenuationVector[1]+attenuationVector[2])>0.0;\nif (isLightEnabled){\ndiffuse += colorIntensity * nDotVP * attenuation;\nspecular += pf * attenuation;\n}\n}\n}\nvoid main()\n{\nvec4 base = texture2D(mainTexture, v_uv);\nvec3 bump = normalize(texture2D(normalMap, v_uv).xyz * 2.0 - vec3(1.0,1.0,1.0));\nvec3 vVec = normalize(viewVec);\nvec3 reflection = reflect(-vVec, bump);\nvec3 lVec = normalize(lightVec);\nvec3 diffuse;\nfloat specular;\nvec3 colorIntensity = _dLight[1];\ngetDirectionalLight(lVec, bump ,reflection, colorIntensity, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(bump,viewVec,pointLight, _pLights,specularExponent,diffusePoint,specularPoint);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((diffuse +diffusePoint)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(base.xyz*color.xyz, 1.0) + vec4((specular +specularPoint)*specularColor.xyz,1.0);\t\n}\n","bumped_specular_vs.glsl":"// Based on\n// http://www.geeks3d.com/20091019/shader-library-bump-mapping-shader-with-multiple-lights-glsl/\nattribute vec4 vertex;\nattribute vec2 uv1;\nattribute vec3 normal;\nattribute vec4 tangent;\nuniform mat3 _norm;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _world2object;\nuniform vec4 _worldCamPos;\nvarying vec2 v_uv;\nvarying vec3 viewVec;\nvarying vec3 lightVec;\n#pragma include \"light.glsl\"\nvarying vec3 pointLight[LIGHTS];\nvoid main()\n{\nvec3 lightVecDir = _dLight[0]; // light direction in eye coordinates\ngl_Position = _mvProj * vertex;\nv_uv = uv1;\n\tvec3 n = normalize(_norm * normal);\nvec3 t = normalize(_norm * tangent.xyz);\nvec3 b = cross(n, t);\nmat3 tbn = mat3(t,b,n);\nvec3 v;\nvec3 vVertex = vec3(_mv * vertex);\nvec3 lVec = lightVecDir;\nlightVec = lVec * tbn;\nvec3 vVec = -vVertex;\nviewVec = vVec * tbn;\nfor (int i=0;i<LIGHTS;i++){\npointLight[i] = _pLights[i][0] * tbn;\n}\n} ","diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 directionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 pointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((directionalLight+pointLight)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color, 1.0);\n}\n","diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec4 vShadowMapCoord;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\nvNormal = normalize(_norm * normal);\nvShadowMapCoord = _lightMat * v;\n} ","light.glsl":"vec3 getPointLightDiffuse(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS]){\nvec3 diffuse = vec3(0.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nfloat nDotVP = max(0.0, dot(normal, VP));\ndiffuse += colorIntensity*nDotVP * attenuation;\n}\nreturn diffuse;\n}\nvoid getPointLight(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS],float specularExponent, out vec3 diffuse, out float specular){\ndiffuse = vec3(0.0, 0.0, 0.0);\nspecular = 0.0;\nvec3 eye = vec3(0.0,0.0,1.0);\nfor (int i=0;i<LIGHTS;i++){\nvec3 ecLightPos = pLights[i][0]; // light position in eye coordinates\nvec3 colorIntensity = pLights[i][1];\nvec3 attenuationVector = pLights[i][2];\n// direction from surface to light position\nvec3 VP = ecLightPos - ecPosition;\n// compute distance between surface and light position\nfloat d = length(VP);\n// normalize the vector from surface to light position\nVP = normalize(VP);\n// compute attenuation\nfloat attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2\nvec3 halfVector = normalize(VP + eye);\nfloat nDotVP = max(0.0, dot(normal, VP));\nfloat nDotHV = max(0.0, dot(normal, halfVector));\nfloat pf;\nif (nDotVP <= 0.0){\npf = 0.0;\n} else {\npf = pow(nDotHV, specularExponent);\n}\nbool isLightEnabled = (attenuationVector[0]+attenuationVector[1]+attenuationVector[2])>0.0;\nif (isLightEnabled){\ndiffuse += colorIntensity * nDotVP * attenuation;\nspecular += pf * attenuation;\n}\n}\n}\nvec3 getDirectionalLightDiffuse(vec3 normal, mat3 dLight){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\nreturn (colorIntensity * diffuseContribution);\n}\n// assumes that normal is normalized\nvoid getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out vec3 diffuse, out float specular){\nvec3 ecLightDir = dLight[0]; // light direction in eye coordinates\nvec3 colorIntensity = dLight[1];\nvec3 halfVector = dLight[2];\nfloat diffuseContribution = max(dot(normal, ecLightDir), 0.0);\nfloat specularContribution = max(dot(normal, halfVector), 0.0);\nspecular = pow(specularContribution, specularExponent);\ndiffuse = (colorIntensity * diffuseContribution);\n}\nuniform mat3 _dLight;\nuniform vec3 _ambient;\nuniform mat3 _pLights[LIGHTS];\n","point_sprite_fs.glsl":"precision mediump float;\nuniform sampler2D mainTexture;\nuniform vec4 mainColor;\nvoid main(void)\n{\n\tgl_FragColor = texture2D(mainTexture,gl_PointCoord)*mainColor;\n}\n","point_sprite_vs.glsl":"attribute vec3 vertex;\nuniform mat4 _mvProj;\nuniform float pointSize;\nvoid main(void) {\n\t// compute position\n\tgl_Position = _mvProj * vec4(vertex, 1.0);\ngl_PointSize = pointSize;\n}","shadowmap.glsl":"varying vec4 vShadowMapCoord;\nuniform sampler2D _shadowMapTexture;\nconst float shadowBias = 0.005;\nvec4 packDepth( const in float depth ) {\nconst vec4 bitShift = vec4( 16777216.0, 65536.0, 256.0, 1.0 );\nconst vec4 bitMask = vec4( 0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0 );\nvec4 res = fract( depth * bitShift );\nres -= res.xxyz * bitMask;\nreturn res;\n}\nfloat unpackDepth(const in vec4 rgba_depth)\n{\nconst vec4 bit_shift = vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0);\nfloat depth = dot(rgba_depth, bit_shift);\nreturn depth;\n}\nfloat computeLightVisibility(){\nvec3 shadowCoord = vShadowMapCoord.xyz / vShadowMapCoord.w;\nif (shadowCoord.x >= 0.0 && shadowCoord.x <= 1.0 && shadowCoord.y >= 0.0 && shadowCoord.y <= 1.0){\nvec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);\nbool isMaxDepth = dot(packedShadowDepth, vec4(1.0,1.0,1.0,1.0))==4.0;\nif (!isMaxDepth){\nfloat shadowDepth = unpackDepth(packedShadowDepth);\nif (shadowDepth > shadowCoord.z - shadowBias){\nreturn 1.0;\n}\nreturn 0.0;\n}\n}\nreturn 1.0; // if outside shadow map, then not occcluded\n}","specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\n#pragma include \"shadowmap.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nfloat visibility;\nif (SHADOWS){\nvisibility = computeLightVisibility();\n} else {\nvisibility = 1.0;\n}\nvec3 color = max((diffuse+diffusePoint)*visibility,_ambient.xyz)*mainColor.xyz;\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*color.xyz, 1.0)+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat4 _lightMat;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvarying vec4 vShadowMapCoord;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\ngl_Position = _mvProj * v;\nvUv = uv1;\nvEcPosition = (_mv * v).xyz;\nvNormal= normalize(_norm * normal);\nvShadowMapCoord = _lightMat * v;\n} ","transparent_diffuse_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuseDirectionalLight = getDirectionalLightDiffuse(normal,_dLight);\nvec3 diffusePointLight = getPointLightDiffuse(normal,vEcPosition, _pLights);\nvec4 color = vec4(max(diffuseDirectionalLight+diffusePointLight,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color;\n}\n","transparent_diffuse_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat3 _norm;\nuniform mat4 _mv;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= normalize(_norm * normal);\n} ","transparent_specular_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nuniform vec4 mainColor;\nuniform float specularExponent;\nuniform vec4 specularColor;\nuniform sampler2D mainTexture;\n#pragma include \"light.glsl\"\nvoid main(void)\n{\nvec3 normal = normalize(vNormal);\nvec3 diffuse;\nfloat specular;\ngetDirectionalLight(normal, _dLight, specularExponent, diffuse, specular);\nvec3 diffusePoint;\nfloat specularPoint;\ngetPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);\nvec4 color = vec4(max(diffuse+diffusePoint,_ambient.xyz),1.0)*mainColor;\ngl_FragColor = texture2D(mainTexture,vUv)*color+vec4((specular+specularPoint)*specularColor.xyz,0.0);\n}\n","transparent_specular_vs.glsl":"attribute vec3 vertex;\nattribute vec3 normal;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nuniform mat4 _mv;\nuniform mat3 _norm;\nvarying vec2 vUv;\nvarying vec3 vNormal;\nvarying vec3 vEcPosition;\nvoid main(void) {\nvec4 v = vec4(vertex, 1.0);\n// compute position\ngl_Position = _mvProj * v;\nvEcPosition = (_mv * v).xyz;\nvUv = uv1;\n// compute light info\nvNormal= normalize(_norm * normal);\n} ","transparent_unlit_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = texture2D(mainTexture,vUv)*mainColor;\n}\n","transparent_unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}","unlit_fs.glsl":"#ifdef GL_ES\nprecision highp float;\n#endif\nvarying vec2 vUv;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz,1.0);\n}\n","unlit_vertex_color_fs.glsl":"precision mediump float;\nvarying vec2 vUv;\nvarying vec4 vColor;\nuniform vec4 mainColor;\nuniform sampler2D mainTexture;\nvoid main(void)\n{\ngl_FragColor = vec4(texture2D(mainTexture,vUv).xyz*mainColor.xyz*vColor.xyz,1.0);\n}\n","unlit_vertex_color_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nattribute vec4 color;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvarying vec4 vColor;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\nvColor = color;\n}","unlit_vs.glsl":"attribute vec3 vertex;\nattribute vec2 uv1;\nuniform mat4 _mvProj;\nvarying vec2 vUv;\nvoid main(void) {\ngl_Position = _mvProj * vec4(vertex, 1.0);\nvUv = uv1;\n}"};
 });
 
 define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", "./Constants"], function (Util, MeshDataFactory, GLSLConstants, Constants) {
@@ -8198,6 +8233,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
          * <li><b>Plane</b> Url: kickjs://mesh/plane/<br></li>
          * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
          * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
+         * <li><b>Point</b> Url: kickjs://mesh/point/</li>
          * </ul>
          * @method getMeshData
          * @param {String} url
@@ -8227,6 +8263,8 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
             } else if (url.indexOf("kickjs://mesh/cube/") === 0) {
                 length = getParameterFloat(url, "length");
                 meshDataObj = MeshDataFactory.createCubeData(length);
+            } else if (url.indexOf("kickjs://mesh/point/") === 0) {
+                meshDataObj = MeshDataFactory.createPointData();
             } else {
                 Util.fail("No meshdata found for " + url);
                 if (resourceTracker && resourceTracker.resourceLoadingStarted){
@@ -8249,6 +8287,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
          *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
          *  <li><b>Diffuse</b> Url: kickjs://shader/diffuse/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
+         *  <li><b>Bumped Specular</b> Url: kickjs://shader/bumped_specular/</li>
          *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent_unlit/</li>
          *  <li><b>Shadowmap</b> Url: kickjs://shader/__shadowmap/</li>
@@ -8279,11 +8318,10 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                             depthMask = false;
                             renderOrder = 2000;
                         }
-                        if (shaderName === "__shadowmap") {
+                        else if (shaderName === "__shadowmap") {
                             polygonOffsetEnabled = true;
                         }
-
-                        if (shaderName === "specular" || shaderName === "transparent_specular") {
+                        else if (shaderName === "specular" || shaderName === "transparent_specular") {
                             defaultUniforms = {
                                 mainColor: [1, 1, 1, 1],
                                 mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
@@ -8291,7 +8329,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                                 specularExponent: 50
                             };
                         }
-                        if (shaderName === "diffuse" ||
+                        else if (shaderName === "diffuse" ||
                                 shaderName === "transparent_diffuse" ||
                                 shaderName === "unlit" ||
                                 shaderName === "unlit_vertex_color" ||
@@ -8301,7 +8339,15 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                                 mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                             };
                         }
-
+                        else if (shaderName === "bumped_specular"){
+                            defaultUniforms = {
+                                mainColor: [1, 1, 1, 1],
+                                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                                normalMap: engine.project.load(engine.project.ENGINE_TEXTURE_DEFAULT_NORMAL),
+                                specularColor: [1, 1, 1, 1],
+                                specularExponent: 50
+                            };
+                        }
                     }
                     return res;
                 },
@@ -8317,6 +8363,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                     "transparent_diffuse",
                     "unlit",
                     "unlit_vertex_color",
+                    "bumped_specular",
                     "transparent_unlit"];
             if (url === "kickjs://shader/default/") {
                 url = "kickjs://shader/diffuse/";
@@ -8354,6 +8401,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
          *  <li><b>Black</b> Url: kickjs://texture/black/</li>
          *  <li><b>White</b> Url: kickjs://texture/white/<br></li>
          *  <li><b>Gray</b>  Url: kickjs://texture/gray/<br></li>
+         *  <li><b>Default normal</b>  Url: kickjs://texture/default_normal/<br></li>
          *  <li><b>Checkerboard</b>  Url: kickjs://texture/checkerboard/<br></li>
          *  <li><b>KickJS logo</b>  Url: kickjs://texture/logo/<br></li>
          *  </ul>
@@ -8384,6 +8432,11 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                     255,   255,   255, 255,
                     255,   255,   255, 255,
                     255,   255,   255, 255]);
+            } else if (uri.indexOf("kickjs://texture/default_normal/") === 0) {
+                data = new Uint8Array([127, 127, 255, 255,
+                    127,   127,   255, 255,
+                    127,   127,   255, 255,
+                    127,   127,   255, 255]);
             } else if (uri.indexOf("kickjs://texture/gray/") === 0) {
                 data = new Uint8Array([127, 127, 127, 255,
                     127,   127,   127, 255,
@@ -10119,6 +10172,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * Default false
                  * @property polygonOffsetEnabled
                  * @type boolean
+                 * @default false
                  */
                 polygonOffsetEnabled: {
                     get: function () {
@@ -10129,9 +10183,9 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     }
                 },
                 /**
-                 * Default 2.5
                  * @property polygonOffsetFactor
                  * @type Number
+                 * @default 2.5
                  */
                 polygonOffsetFactor: {
                     get: function () {
@@ -10142,9 +10196,9 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     }
                 },
                 /**
-                 * Default 10.0
                  * @property polygonOffsetUnits
                  * @type Number
+                 * @default 10.0
                  */
                 polygonOffsetUnits: {
                     get: function () {
@@ -10161,6 +10215,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * faceCulling = GL_NONE means face culling disabled
                  * @property faceCulling
                  * @type Object
+                 * @default 1029
                  */
                 faceCulling: {
                     get: function () { return _faceCulling; },
@@ -10181,6 +10236,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * Enable or disable writing into the depth buffer
                  * @property depthMask
                  * @type Boolean
+                 * @default true
                  */
                 depthMask: {
                     get: function () { return _depthMask; },
@@ -10205,6 +10261,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * 519
                  * @property zTest
                  * @type Object
+                 * @default 513
                  */
                 zTest: {
                     get: function () { return _zTest; },
@@ -10257,6 +10314,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorRGB
                  * @type Number
+                 * @default 770
                  */
                 blendSFactorRGB:{
                     get: function(){
@@ -10301,6 +10359,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorAlpha
                  * @type Number
+                 * @default 770
                  */
                 blendSFactorAlpha:{
                     get: function(){
@@ -10364,6 +10423,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorRGB
                  * @type Number
+                 * @default 771
                  */
                 blendDFactorRGB: {
                     get: function(){
@@ -10406,6 +10466,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorAlpha
                  * @type Number
+                 * @default 771
                  */
                 blendDFactorAlpha: {
                     get: function(){
@@ -10489,7 +10550,6 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     fragmentShader = compileShader(_fragmentShaderSrc, true, errorLog),
                     compileError = fragmentShader === null || vertexShader === null,
                     i,
-                    c = Constants,
                     numberOfActiveUniforms,
                     activeAttributes,
                     attribute;
@@ -11185,12 +11245,13 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
              * @method setTemporaryTexture
              */
             this.setTemporaryTexture = function () {
-                var blackWhiteCheckerboard = new Uint8Array([255, 255, 255,
+                var whiteImage = new Uint8Array([255, 255, 255,
                         255, 255, 255,
                         255, 255, 255,
                         255, 255, 255]),
                     oldIntFormat = _intFormat;
-                this.setImageData(2, 2, 0, 5121, blackWhiteCheckerboard, "kickjs://texture/white/");
+                this.internalFormat = 6407;
+                this.setImageData(2, 2, 0, 5121, whiteImage, "kickjs://texture/white/");
                 _intFormat = oldIntFormat;
             };
 
@@ -11587,6 +11648,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                 meshVertexIndexBuffer = gl.createBuffer();
                 gl.bindBuffer(34963, meshVertexIndexBuffer);
                 gl.bufferData(34963, meshVertexIndexBufferConcat, 35044);
+                glState.meshBuffer = null;
             },
             contextListener = {
                 contextLost: function () {
@@ -12395,7 +12457,7 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                                 name: getUrlAsResourceName(url),
                                 uid: uid
                             });
-                        } else if (uid <= Project.ENGINE_TEXTURE_BLACK && uid >= Project.ENGINE_TEXTURE_CUBEMAP_WHITE) {
+                        } else if (uid <= Project.ENGINE_TEXTURE_BLACK && uid >= Project.ENGINE_TEXTURE_DEFAULT_NORMAL) {
                             isCubemap = uid === Project.ENGINE_TEXTURE_CUBEMAP_WHITE;
                             switch (uid) {
                             case Project.ENGINE_TEXTURE_BLACK:
@@ -12412,6 +12474,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                                 break;
                             case Project.ENGINE_TEXTURE_CUBEMAP_WHITE:
                                 // do nothing
+                                break;
+                            case Project.ENGINE_TEXTURE_DEFAULT_NORMAL:
+                                url = "kickjs://texture/default_normal/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -12453,7 +12518,7 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                                     });
                             }
 
-                        } else if (uid <= Project.ENGINE_MESH_TRIANGLE && uid >= Project.ENGINE_MESH_CUBE) {
+                        } else if (uid <= Project.ENGINE_MESH_TRIANGLE && uid >= Project.ENGINE_MESH_POINT) {
                             switch (uid) {
                             case Project.ENGINE_MESH_TRIANGLE:
                                 url = "kickjs://mesh/triangle/";
@@ -12466,6 +12531,9 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
                                 break;
                             case Project.ENGINE_MESH_CUBE:
                                 url = "kickjs://mesh/cube/";
+                                break;
+                            case Project.ENGINE_MESH_POINT:
+                                url = "kickjs://mesh/point/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -13043,6 +13111,13 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
         Project.ENGINE_TEXTURE_CUBEMAP_WHITE = -204;
 
         /**
+         * @property ENGINE_TEXTURE_DEFAULT_NORMAL
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_TEXTURE_DEFAULT_NORMAL = -205;
+
+        /**
          * @property ENGINE_MESH_TRIANGLE
          * @type Number
          * @static
@@ -13069,6 +13144,13 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
          * @static
          */
         Project.ENGINE_MESH_CUBE = -303;
+
+        /**
+         * @property ENGINE_MESH_CUBE
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_MESH_POINT = -304;
 
         /**
          * Default material is using ENGINE_SHADER_UNLIT and is white
@@ -16341,6 +16423,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
         /**
          * A light object.<br>
          * Note that each scene can only have one ambient light and one directional light.
+         * The directional light points in (0,0,1) direction (transformed by the GameObject transform)
          * @class Light
          * @namespace kick.scene
          * @extends kick.scene.Component
@@ -16428,6 +16511,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                  * Only directional light supports shadows.
                  * @property shadow
                  * @type boolean
+                 * @default false
                  */
                 shadow: {
                     get: function () {
@@ -16444,9 +16528,10 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                     enumerable: true
                 },
                 /**
-                 * Shadow strength (between 0.0 and 1.0). Default value is 1.0
+                 * Shadow strength (between 0.0 and 1.0).
                  * @property shadowStrength
                  * @type Number
+                 * @default 1.0
                  */
                 shadowStrength: {
                     get: function () {
@@ -16458,9 +16543,10 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                     enumerable: true
                 },
                 /**
-                 * Shadow bias. Default value is 0.05
+                 * Shadow bias.
                  * @property shadowBias
                  * @type Number
+                 * @default 0.05
                  */
                 shadowBias: {
                     get: function () {
@@ -16472,9 +16558,10 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                     enumerable: true
                 },
                 /**
-                 * Color intensity of the light (RGB). Default [1,1,1]
+                 * Color intensity of the light (RGB).
                  * @property color
                  * @type kick.math.Vec3
+                 * @default [1,1,1]
                  */
                 color: {
                     get: function () {
@@ -16498,10 +16585,10 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                  * Light.TYPE_POINT <br>
                  * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
                  * component of its gameObject.
-                 * Default type is TYPE_POINT
                  * @property type
                  * @type Enum
                  * @final
+                 * @default Light.TYPE_POINT
                  */
                 type: {
                     get: function () {
@@ -16538,9 +16625,9 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                  * attenuation[0] is constant attenuation,<br>
                  * attenuation[1] is linear attenuation,<br>
                  * attenuation[2] is quadratic attenuation.<br>
-                 * Default value is (1,0,0)
                  * @property attenuation
                  * @type kick.math.Vec3
+                 * @default [1,0,0]
                  */
                 attenuation: {
                     get: function () {
