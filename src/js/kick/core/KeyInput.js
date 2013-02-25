@@ -12,7 +12,7 @@ define(["./Util"], function (Util) {
      *         var keyInput, thisObj = this;
      *         // registers listener (invoked when component is registered)
      *         this.activated = function (){
-     *             var engine = kick.core.EngineSingleton.engine;
+     *             var engine = kick.core.Engine.instance;
      *             keyInput = engine.keyInput;
      *         };
      *         this.update = function(){

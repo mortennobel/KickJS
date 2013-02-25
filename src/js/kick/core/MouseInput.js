@@ -9,7 +9,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
      *         var mouseInput,
      *         thisObj = this;
      *         this.activated = function(){
-     *             mouseInput = kick.core.EngineSingleton.engine.mouseInput;
+     *             mouseInput = kick.core.Engine.instance.mouseInput;
      *         };
      *         this.update = function(){
      *             if (mouseInput.isButtonDown(0)){
