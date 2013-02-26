@@ -402,7 +402,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 color: createGetterSetter(Constants.GL_FLOAT, "color"),
                 /**
                  * Vertex attribute.
-                 * Integer attribute (onw Int32)
+                 * Integer attribute (one Int32)
                  * @property int1
                  * @type Array_Number
                  */
