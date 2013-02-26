@@ -235,7 +235,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
 
             /**
              * Query WebGL for a specific extension. If found, the extension object is returned.
-             * "WEBKIT_", "MOZ_" vendor prefixes are used.
+             * "WEBKIT\_", "MOZ\_" vendor prefixes are used.
              * @method getGLExtension
              * @param {String} extensionName
              * @return Object|null

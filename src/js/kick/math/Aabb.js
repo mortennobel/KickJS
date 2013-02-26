@@ -8,7 +8,7 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
     /**
      * Axis-Aligned Bounding Box. A rectangle or box with the restriction that it's sides or faces are parallel to the
      * axes of the system.
-     * The aabb is represented using an array: [min_x,min_y,min_z,max_x,max_y,max_z]
+     * The aabb is represented using an array: [min\_x,min\_y,min\_z,max\_x,max\_y,max\_z]
      * @class Aabb
      * @namespace kick.math
      */

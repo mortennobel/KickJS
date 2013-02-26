@@ -74,8 +74,8 @@ define(["kick/core/Constants"], function (constants) {
         this.currentMaterial = null;
 
         /**
-         * Represent the state of CULL_FACE (enabled / disabled) and cullFace (). Values must be one of:
-         * GL_FRONT, GL_FRONT_AND_BACK, GL_BACK or GL_NONE. (If none CULL_FACE is disabled otherwise enabled)
+         * Represent the state of CULL\_FACE (enabled / disabled) and cullFace (). Values must be one of:
+         * GL\_FRONT, GL\_FRONT\_AND\_BACK, GL\_BACK or GL\_NONE. (If none CULL\_FACE is disabled otherwise enabled)
          * @property faceCulling
          * @type Number
          */
@@ -83,7 +83,7 @@ define(["kick/core/Constants"], function (constants) {
 
         /**
          * Represents the current depthFunc used. Must be one of the following values:
-         * GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, GL_GEQUAL or GL_ALWAYS.
+         * GL\_NEVER, GL\_LESS, GL\_EQUAL, GL\_LEQUAL, GL\_GREATER, GL\_NOTEQUAL, GL\_GEQUAL or GL\_ALWAYS.
          * @property zTest
          * @type Number
          */
@@ -119,8 +119,8 @@ define(["kick/core/Constants"], function (constants) {
 
         Object.defineProperties(this, {
             /**
-             * The OES_vertex_array_object extension (if available)
-             * See http://www.khronos.org/registry/webgl/extensions/OES_vertex_array_object/
+             * The OES\_vertex\_array\_object extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES\_vertex\_array\_object/
              * @property vertexArrayObjectExtension
              * @type Object
              * @final
@@ -132,8 +132,8 @@ define(["kick/core/Constants"], function (constants) {
                 enumerable:true
             },
             /**
-             * The OES_standard_derivatives extension (if available)
-             * See http://www.khronos.org/registry/webgl/extensions/OES_standard_derivatives/
+             * The OES\_standard\_derivatives extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES\_standard\_derivatives/
              * @property standardDerivativesExtension
              * @type Object
              * @final
@@ -145,8 +145,8 @@ define(["kick/core/Constants"], function (constants) {
                 enumerable:true
             },
             /**
-             * The OES_texture_float extension (if available)
-             * See http://www.khronos.org/registry/webgl/extensions/OES_texture_float/
+             * The OES\_texture\_float extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES\_texture\_float/
              * @property textureFloatExtension
              * @type Object
              * @final
@@ -158,8 +158,8 @@ define(["kick/core/Constants"], function (constants) {
                 enumerable:true
             },
             /**
-             * The OES_texture_half_float extension (if available)
-             * See http://www.khronos.org/registry/webgl/extensions/OES_texture_half_float/
+             * The OES\_texture\_half\_float extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/OES\_texture\_half\_float/
              * @property textureFloatHalfExtension
              * @type Object
              * @final
@@ -171,8 +171,8 @@ define(["kick/core/Constants"], function (constants) {
                 enumerable:true
             },
             /**
-             * The WEBGL_depth_texture extension (if available)
-             * See http://www.khronos.org/registry/webgl/extensions/WEBGL_depth_texture/
+             * The WEBGL\_depth\_texture extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/WEBGL\_depth\_texture/
              * @property depthTextureExtension
              * @type Object
              * @final
@@ -184,8 +184,8 @@ define(["kick/core/Constants"], function (constants) {
                 enumerable:true
             },
             /**
-             * The EXT_texture_filter_anisotropic extension (if available)
-             * See http://www.khronos.org/registry/webgl/extensions/EXT_texture_filter_anisotropic/
+             * The EXT\_texture\_filter\_anisotropic extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/EXT\_texture\_filter\_anisotropic/
              * @property textureFilterAnisotropicExtension
              * @type Object
              * @final

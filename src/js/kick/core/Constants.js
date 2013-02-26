@@ -3,7 +3,7 @@ define(function () {
     /**
      * This class contains references to WebGL constants.<br>
      * Constants will be replace with actual values to increase performance when the file is compile by the postprocessor.<br>
-     * Note that I have intentionally named the WebGL constants with a prefix 'GL_'. This allows use of normal WebGL
+     * Note that I have intentionally named the WebGL constants with a prefix 'GL\_'. This allows use of normal WebGL
      * constants that will not be replaced by the preprocessor.
      * @class Constants
      * @namespace kick.core

@@ -103,9 +103,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     }
                 },
                 /**
-                 * Default value is 0 (update movie texture every frame). 1 skip one frame update, 2 skips two frames etc.
+                 * 0 means update movie texture every frame. 1 skip one frame update, 2 skips two frames etc.
                  * @property skipFrames
                  * @type {Number}
+                 * @default 0
                  */
                 skipFrames: {
                     get: function () {
@@ -130,9 +131,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 /**
                  * Autogenerate mipmap levels<br>
                  * Note that enabling auto mipmap on movie textures uses a lot of resources.
-                 * (Default false)
                  * @property generateMipmaps
                  * @type Boolean
+                 * @default false
                  */
                 generateMipmaps: {
                     get: function () {
@@ -156,10 +157,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     value: _textureId
                 },
                 /**
-                 * Texture.wrapS should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
-                 * Default: GL_REPEAT
+                 * Texture.wrapS should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapS
                  * @type Object
+                 * @default GL\_REPEAT
                  */
                 wrapS: {
                     get: function () {
@@ -175,10 +176,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     }
                 },
                 /**
-                 * Texture.wrapT should be either GL_CLAMP_TO_EDGE or GL_REPEAT<br>
-                 * Default: GL_REPEAT
+                 * Texture.wrapT should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapT
                  * @type Object
+                 * @default GL\_REPEAT
                  */
                 wrapT: {
                     get: function () {
@@ -194,11 +195,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     }
                 },
                 /**
-                 * Texture.minFilter should be either GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST, <br>
-                 * GL_LINEAR_MIPMAP_NEAREST, GL_NEAREST_MIPMAP_LINEAR, GL_LINEAR_MIPMAP_LINEAR<br>
-                 * Default: GL_LINEAR
+                 * Texture.minFilter should be either GL\_NEAREST, GL\_LINEAR, GL\_NEAREST\_MIPMAP\_NEAREST, <br>
+                 * GL\_LINEAR\_MIPMAP\_NEAREST, GL\_NEAREST\_MIPMAP\_LINEAR, GL\_LINEAR\_MIPMAP\_LINEAR<br>
                  * @property minFilter
                  * @type Object
+                 * @default GL\_LINEAR
                  */
                 minFilter: {
                     get: function () {
@@ -219,10 +220,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     }
                 },
                 /**
-                 * Texture.magFilter should be either GL_NEAREST or GL_LINEAR. <br>
-                 * Default: GL_LINEAR
+                 * Texture.magFilter should be either GL\_NEAREST or GL\_LINEAR. <br>
                  * @property magFilter
                  * @type Object
+                 * @default GL\_LINEAR
                  */
                 magFilter: {
                     get: function () {
@@ -239,15 +240,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 },
                 /**
                  * Specifies the internal format of the image (format on GPU)<br>
-                 * Default is GL_RGBA<br>
                  * Must be one of the following:
-                 * GL_ALPHA,
-                 * GL_RGB,
-                 * GL_RGBA,
-                 * GL_LUMINANCE,
-                 * GL_LUMINANCE_ALPHA
+                 * GL\_ALPHA,
+                 * GL\_RGB,
+                 * GL\_RGBA,
+                 * GL\_LUMINANCE,
+                 * GL\_LUMINANCE_ALPHA
                  * @property internalFormat
                  * @type Number
+                 * @default GL\_RGBA
                  */
                 internalFormat: {
                     get: function () {

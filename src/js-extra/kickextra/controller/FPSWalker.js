@@ -8,7 +8,8 @@ define(["kick"], function (kick) {
          * @namespace kickextra.controller
          */
         return function(){
-            var transform,
+            var engine,
+                transform,
                 keyInput,
                 mouseInput,
                 rotateY = 0,
@@ -20,7 +21,8 @@ define(["kick"], function (kick) {
                 backward = "S".charCodeAt(0),
                 strideLeft = "A".charCodeAt(0),
                 strideRight = "D".charCodeAt(0),
-                thisObj = this;
+                thisObj = this,
+                camera;
 
             /**
              * Default behavior is to rotate view whenever mouse in being pressed. The rotation around X axis is clamped
@@ -29,11 +31,12 @@ define(["kick"], function (kick) {
              */
             this.rotateObject = function(){
                 if (mouseInput.isButton(0)){
-                    var deltaMovement = mouseInput.deltaMovement;
+                    var deltaMovement = mouseInput.deltaMovement,
+                        rotationSpeed = 1/ (camera.viewportRect[3])*camera.fieldOfView;
                     if (deltaMovement[0] !== 0 || deltaMovement[1] !== 0){
                         // note horizontal movement rotates around Y axis
-                        rotateY += deltaMovement[0] * thisObj.rotateSpeedY;
-                        rotateX += deltaMovement[1] * thisObj.rotateSpeedX;
+                        rotateY += deltaMovement[0] * thisObj.rotateSpeedY * rotationSpeed;
+                        rotateX += deltaMovement[1] * thisObj.rotateSpeedX * rotationSpeed;
                         rotateX = Math.max(-179, Math.min(179, rotateX));
                         rotationEuler[0] = rotateX;
                         rotationEuler[1] = rotateY;
@@ -102,27 +105,31 @@ define(["kick"], function (kick) {
             /**
              * @property rotateSpeedX
              * @type {number}
-             * @default 0.1
+             * @default 1.0
              */
-            this.rotateSpeedX = 0.10;
+            this.rotateSpeedX = 1.00;
             /**
              * @property rotateSpeedY
              * @type {number}
-             * @default 0.1
+             * @default 1.0
              */
-            this.rotateSpeedY = 0.10;
+            this.rotateSpeedY = 1.00;
 
             /**
              * Registers the object on activation
              * @method activated
              */
             this.activated = function(){
-                var engine = kick.core.Engine.instance;
+                engine = kick.core.Engine.instance;
                 transform = thisObj.gameObject.transform;
                 keyInput = engine.keyInput;
                 mouseInput = engine.mouseInput;
                 time = engine.time;
                 position = transform.position;
+                camera = thisObj.gameObject.getComponentOfType(kick.scene.Camera);
+                if (!camera){
+                    kick.core.Util.fail("Camera not found");
+                }
             };
 
             /**

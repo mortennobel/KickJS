@@ -628,7 +628,7 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
          * @static
          * @method convertToTriangleIndices
          * @param {Array} indices index array
-         * @param {Number} primitiveType such as Constants.GL_TRIANGLES or Constants.GL_TRIANGLE_STRIP
+         * @param {Number} primitiveType such as Constants.GL\_TRIANGLES or Constants.GL\_TRIANGLE\_STRIP
          * @param {Boolean} removeDegenerate remove degenerate triangles
          * @return {Array|null} triangleIndices or null if not possible to convert
          */

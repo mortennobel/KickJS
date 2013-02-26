@@ -165,15 +165,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                 },
                 /**
                  * Color type. Must be either:<br>
-                 * Light.TYPE_AMBIENT,
-                 * Light.TYPE_DIRECTIONAL,
-                 * Light.TYPE_POINT <br>
+                 * Light.TYPE\_AMBIENT,
+                 * Light.TYPE\_DIRECTIONAL,
+                 * Light.TYPE\_POINT <br>
                  * Note that this value is readonly after initialization. To change it create a new Light component and replace the current light
                  * component of its gameObject.
                  * @property type
                  * @type Enum
                  * @final
-                 * @default Light.TYPE_POINT
+                 * @default Light.TYPE\_POINT
                  */
                 type: {
                     get: function () {

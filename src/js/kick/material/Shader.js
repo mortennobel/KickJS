@@ -513,7 +513,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * (From http://www.opengl.org/)<br>
-                 * When GL_POLYGON_OFFSET_FILL, GL_POLYGON_OFFSET_LINE, or GL_POLYGON_OFFSET_POINT is enabled, each
+                 * When GL\_POLYGON\_OFFSET\_FILL, GL\_POLYGON\_OFFSET\_LINE, or GL\_POLYGON\_OFFSET\_POINT is enabled, each
                  * fragment's depth value will be offset after it is interpolated from the depth values of the appropriate
                  * vertices. The value of the offset is factor × DZ + r × units , where DZ is a measurement of the change
                  * in depth relative to the screen area of the polygon, and r is the smallest value that is guaranteed to
@@ -564,13 +564,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     }
                 },
                 /**
-                 * Must be set to kick.core.Constants.GL_FRONT, kick.core.Constants.GL_BACK (default),
-                 * kick.core.Constants.GL_FRONT_AND_BACK, kick.core.Constants.NONE<br>
-                 * Note that in faceCulling = GL_FRONT, GL_BACK or GL_FRONT_AND_BACK with face culling enabled<br>
-                 * faceCulling = GL_NONE means face culling disabled
+                 * Must be set to kick.core.Constants.GL\_FRONT, kick.core.Constants.GL\_BACK (default),
+                 * kick.core.Constants.GL\_FRONT\_AND\_BACK, kick.core.Constants.NONE<br>
+                 * Note that in faceCulling = GL\_FRONT, GL\_BACK or GL\_FRONT\_AND\_BACK with face culling enabled<br>
+                 * faceCulling = GL\_NONE means face culling disabled
                  * @property faceCulling
                  * @type Object
-                 * @default Constants.GL_BACK
+                 * @default Constants.GL\_BACK
                  */
                 faceCulling: {
                     get: function () { return _faceCulling; },
@@ -606,17 +606,17 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * The depth test function. Must be one of
-                 * kick.core.Constants.GL_NEVER,
-                 * kick.core.Constants.GL_LESS,
-                 * kick.core.Constants.GL_EQUAL,
-                 * kick.core.Constants.GL_LEQUAL,
-                 * kick.core.Constants.GL_GREATER,
-                 * kick.core.Constants.GL_NOTEQUAL,
-                 * kick.core.Constants.GL_GEQUAL,
-                 * kick.core.Constants.GL_ALWAYS
+                 * kick.core.Constants.GL\_NEVER,
+                 * kick.core.Constants.GL\_LESS,
+                 * kick.core.Constants.GL\_EQUAL,
+                 * kick.core.Constants.GL\_LEQUAL,
+                 * kick.core.Constants.GL\_GREATER,
+                 * kick.core.Constants.GL\_NOTEQUAL,
+                 * kick.core.Constants.GL\_GEQUAL,
+                 * kick.core.Constants.GL\_ALWAYS
                  * @property zTest
                  * @type Object
-                 * @default Constants.GL_LESS
+                 * @default Constants.GL\_LESS
                  */
                 zTest: {
                     get: function () { return _zTest; },
@@ -661,15 +661,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * Specifies the blend source-factor for the RGB channel<br>
-                 * Initial value GL_SRC_ALPHA
-                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
-                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
-                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
-                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * Initial value GL\_SRC\_ALPHA
+                 * Must be set to one of: GL\_ZERO, GL\_ONE, GL\_SRC\_COLOR, GL\_ONE\_MINUS\_SRC\_COLOR, GL\_DST\_COLOR,
+                 * GL\_ONE\_MINUS\_DST\_COLOR, GL\_SRC\_ALPHA, GL\_ONE\_MINUS\_SRC\_ALPHA, GL\_DST\_ALPHA, GL\_ONE\_MINUS\_DST\_ALPHA,
+                 * GL\_CONSTANT\_COLOR, GL\_ONE\_MINUS\_CONSTANT\_COLOR, GL\_CONSTANT\_ALPHA, GL\_ONE\_MINUS\_CONSTANT\_ALPHA, and
+                 * GL\_SRC\_ALPHA\_SATURATE.<br>
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorRGB
                  * @type Number
-                 * @default Constants.GL_SRC_ALPHA
+                 * @default Constants.GL\_SRC\_ALPHA
                  */
                 blendSFactorRGB:{
                     get: function(){
@@ -706,15 +706,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * Specifies the blend source-factor for the alpha channel<br>
-                 * Initial value GL_SRC_ALPHA
-                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
-                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
-                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
-                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * Initial value GL\_SRC\_ALPHA
+                 * Must be set to one of: GL\_ZERO, GL\_ONE, GL\_SRC\_COLOR, GL\_ONE\_MINUS\_SRC\_COLOR, GL\_DST\_COLOR,
+                 * GL\_ONE\_MINUS\_DST\_COLOR, GL\_SRC\_ALPHA, GL\_ONE\_MINUS\_SRC\_ALPHA, GL\_DST\_ALPHA, GL\_ONE\_MINUS\_DST\_ALPHA,
+                 * GL\_CONSTANT\_COLOR, GL\_ONE\_MINUS\_CONSTANT\_COLOR, GL\_CONSTANT\_ALPHA, GL\_ONE\_MINUS\_CONSTANT\_ALPHA, and
+                 * GL\_SRC\_ALPHA\_SATURATE.<br>
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorAlpha
                  * @type Number
-                 * @default Constants.GL_SRC_ALPHA
+                 * @default Constants.GL\_SRC\_ALPHA
                  */
                 blendSFactorAlpha:{
                     get: function(){
@@ -752,11 +752,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 /**
                  * Short for blendSFactorAlpha and blendSFactorRGB
                  * Specifies the blend s-factor<br>
-                 * Initial value GL_SRC_ALPHA
-                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
-                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
-                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
-                 * GL_SRC_ALPHA_SATURATE.<br>
+                 * Initial value GL\_SRC\_ALPHA
+                 * Must be set to one of: GL\_ZERO, GL\_ONE, GL\_SRC\_COLOR, GL\_ONE\_MINUS\_SRC\_COLOR, GL\_DST\_COLOR,
+                 * GL\_ONE\_MINUS\_DST\_COLOR, GL\_SRC\_ALPHA, GL\_ONE\_MINUS\_SRC\_ALPHA, GL\_DST\_ALPHA, GL\_ONE\_MINUS\_DST\_ALPHA,
+                 * GL\_CONSTANT\_COLOR, GL\_ONE\_MINUS\_CONSTANT\_COLOR, GL\_CONSTANT\_ALPHA, GL\_ONE\_MINUS\_CONSTANT\_ALPHA, and
+                 * GL\_SRC\_ALPHA\_SATURATE.<br>
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactor
                  * @type Number
@@ -770,15 +770,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * Specifies the blend d-factor for the RGB channel<br>
-                 * Initial value GL_SRC_ALPHA
-                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
-                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
-                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
-                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * Initial value GL\_SRC\_ALPHA
+                 * Must be set to one of: GL\_ZERO, GL\_ONE, GL\_SRC\_COLOR, GL\_ONE\_MINUS\_SRC\_COLOR, GL\_DST\_COLOR,
+                 * GL\_ONE\_MINUS\_DST\_COLOR, GL\_SRC\_ALPHA, GL\_ONE\_MINUS\_SRC\_ALPHA, GL\_DST\_ALPHA, GL\_ONE\_MINUS\_DST\_ALPHA,
+                 * GL\_CONSTANT\_COLOR, GL\_ONE\_MINUS\_CONSTANT\_COLOR, GL\_CONSTANT\_ALPHA, GL\_ONE\_MINUS\_CONSTANT\_ALPHA, and
+                 * GL\_ONE\_MINUS\_SRC\_ALPHA.<br>
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorRGB
                  * @type Number
-                 * @default Constants.GL_ONE_MINUS_SRC_ALPHA
+                 * @default Constants.GL\_ONE\_MINUS\_SRC\_ALPHA
                  */
                 blendDFactorRGB: {
                     get: function(){
@@ -813,15 +813,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * Specifies the blend d-factor for the alpha channel<br>
-                 * Initial value GL_SRC_ALPHA
-                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
-                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
-                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
-                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * Initial value GL\_SRC\_ALPHA
+                 * Must be set to one of: GL\_ZERO, GL\_ONE, GL\_SRC\_COLOR, GL\_ONE\_MINUS\_SRC\_COLOR, GL\_DST\_COLOR,
+                 * GL\_ONE\_MINUS\_DST\_COLOR, GL\_SRC\_ALPHA, GL\_ONE\_MINUS\_SRC\_ALPHA, GL\_DST\_ALPHA, GL\_ONE\_MINUS\_DST\_ALPHA,
+                 * GL\_CONSTANT\_COLOR, GL\_ONE\_MINUS\_CONSTANT\_COLOR, GL\_CONSTANT\_ALPHA, GL\_ONE\_MINUS\_CONSTANT\_ALPHA, and
+                 * GL\_ONE\_MINUS\_SRC\_ALPHA.<br>
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorAlpha
                  * @type Number
-                 * @default Constants.GL_ONE_MINUS_SRC_ALPHA
+                 * @default Constants.GL\_ONE\_MINUS\_SRC\_ALPHA
                  */
                 blendDFactorAlpha: {
                     get: function(){
@@ -856,11 +856,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 },
                 /**
                  * Short for blendDFactorAlpha and blendDFactorRGB
-                 * Initial value GL_SRC_ALPHA
-                 * Must be set to one of: GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_DST_COLOR,
-                 * GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA,
-                 * GL_CONSTANT_COLOR, GL_ONE_MINUS_CONSTANT_COLOR, GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA, and
-                 * GL_ONE_MINUS_SRC_ALPHA.<br>
+                 * Initial value GL\_SRC\_ALPHA
+                 * Must be set to one of: GL\_ZERO, GL\_ONE, GL\_SRC\_COLOR, GL\_ONE\_MINUS\_SRC\_COLOR, GL\_DST\_COLOR,
+                 * GL\_ONE\_MINUS\_DST\_COLOR, GL\_SRC\_ALPHA, GL\_ONE\_MINUS\_SRC\_ALPHA, GL\_DST\_ALPHA, GL\_ONE\_MINUS\_DST\_ALPHA,
+                 * GL\_CONSTANT\_COLOR, GL\_ONE\_MINUS\_CONSTANT\_COLOR, GL\_CONSTANT\_ALPHA, GL\_ONE\_MINUS\_CONSTANT\_ALPHA, and
+                 * GL\_ONE\_MINUS\_SRC\_ALPHA.<br>
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactor
                  * @type Number

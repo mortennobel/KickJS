@@ -12,6 +12,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
              *
              * All assets initialized should be registered in the project. This is done by calling Project.registerObject()
              * (Note for built-in kickjs assets, this happens automatically when the objects are constructed).
+             * @example
+             *      // load shader
+             *      var shader = engine.project.load(engine.project.ENGINE\_SHADER\_DIFFUSE);
              * @class Project
              * @namespace kick.core
              * @constructor
@@ -55,7 +58,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                             canvas,
                             shader,
                             ctx;
-                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER___PICK_NORMAL) {
+                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER_TRANSPARENT_POINT_SPRITE) {
                             switch (uid) {
                             case Project.ENGINE_SHADER_DEFAULT:
                                 url = "kickjs://shader/default/";
@@ -95,6 +98,12 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 break;
                             case Project.ENGINE_SHADER___ERROR:
                                 url = "kickjs://shader/__error/";
+                                break;
+                            case Project.ENGINE_SHADER_TRANSPARENT_POINT_SPRITE:
+                                url = "kickjs://shader/transparent_point_sprite/";
+                                break;
+                            case Project.ENGINE_SHADER_BUMPED_SPECULAR:
+                                url = "kickjs://shader/bumped_specular/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -728,6 +737,18 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          */
         Project.ENGINE_SHADER___PICK_NORMAL = -112;
         /**
+         * @property ENGINE_SHADER_TRANSPARENT_POINT_SPRITE
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_SHADER_TRANSPARENT_POINT_SPRITE = -113;
+        /**
+         * @property ENGINE_SHADER_BUMPED_SPECULAR
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_SHADER_BUMPED_SPECULAR = -114;
+        /**
          * @property ENGINE_TEXTURE_BLACK
          * @type Number
          * @static
@@ -803,7 +824,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
         Project.ENGINE_MESH_POINT = -304;
 
         /**
-         * Default material is using ENGINE_SHADER_UNLIT and is white
+         * Default material is using ENGINE\_SHADER\_UNLIT and is white
          * @property ENGINE_MATERIAL_DEFAULT
          * @type {Number}
          * @static

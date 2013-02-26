@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+
+
+</head>
+<body>
+<a href="pointlightTest.html">Next</a><br>
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+  This example test how renderOrder is used.
+  <script src="../../dependencies/require.js"></script>
+  <script type="text/javascript">
+      var req = require.config({
+          baseUrl: 'js/lib',
+          paths: {
+              kick: '../../../../src/js/kick',
+              kickextra: '../../../../src/js-extra/kickextra'
+          }
+      });
+
+      req(['kick', 'kickextra'],
+              function (kick, kickextra) {
+      var engine;
+      var meshRenderer;
+
+      function setMaterial(){
+          var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_POINT_SPRITE );
+          var missingAttributes = meshRenderer.mesh.verify(shader);
+          if (missingAttributes){
+              log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
+              return;
+          }
+
+          meshRenderer.material = new kick.material.Material({
+              name:"Some material",
+              shader:shader,
+              uniformData:{
+                  mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_LOGO),
+                  mainColor:[1,1,1,.5],
+                  pointSize: 500
+
+              }
+          });
+      }
+
+      function addRotatorComponent(gameObject){
+          var time = engine.time,
+                  transform = gameObject.transform,
+                  rotationSpeed = 0.001,
+                  translation = transform.localPosition,
+                  rotVec = transform.localRotationEuler,
+                  radius = 5,
+                  radianToDegree = kick.core.Constants._RADIAN_TO_DEGREE,
+                  res = document.getElementById("res");
+          gameObject.addComponent({
+              update: function(){
+                  var timeTotal = time.time,
+                          rot = timeTotal*rotationSpeed;
+                  translation[0] = Math.sin(rot)*radius;
+                  translation[1] = Math.sin(rot*3);
+                  translation[2] = Math.cos(rot)*radius;
+                  rotVec[1] = rot*radianToDegree;
+                  transform.localPosition = translation;
+
+                  transform.localRotationEuler = rotVec;
+              }
+          });
+      }
+
+      function initKick() {
+          engine = new kick.core.Engine('canvas',{
+              enableDebugContext: true
+          });
+          var cameraObject = engine.activeScene.createGameObject();
+          var camera = new kick.scene.Camera({
+              clearColor: [0,0,0,1],
+              fieldOfView:60
+          });
+          cameraObject.addComponent(camera);
+          cameraObject.addComponent(new kickextra.controller.FPSWalker());
+          cameraObject.transform.position = [0,0,20];
+
+          var createSphereObject = function (position, color){
+              var gameObjectSphere = engine.activeScene.createGameObject();
+              gameObjectSphere.transform.position = position;
+              var meshRendererSphere = new kick.scene.MeshRenderer();
+              meshRendererSphere.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
+              meshRendererSphere.material = new kick.material.Material({
+                  shader:engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT),
+                  uniformData:{
+                      mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                      mainColor:color
+                  }
+              });
+              gameObjectSphere.addComponent(meshRendererSphere);
+          };
+          createSphereObject([1,0,0], [1,0,0,0.8]);
+          createSphereObject([0,0,1.5], [0,1,0,0.8]);
+
+          function createPoint(position, renderOrder){
+              var gameObject = engine.activeScene.createGameObject();
+              gameObject.transform.position = position;
+              meshRenderer = new kick.scene.MeshRenderer();
+              meshRenderer.mesh = new kick.mesh.Mesh({dataURI: "kickjs://mesh/point/"});;
+              setMaterial('vertexShaderColor','fragmentShader',renderOrder);
+              gameObject.addComponent(meshRenderer);
+              return gameObject;
+          }
+          //createCube([-1,0,0],1000);
+          var point = createPoint([0,-1.5,0],1001);
+
+          addRotatorComponent(point);
+      }
+                  initKick();
+              });
+  </script>
+  <div style="display:none;">
+
+</div>
+  <br/>
+</body>
+</html>

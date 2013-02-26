@@ -35,7 +35,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 };
 
             /**
-             * If no materials are assigned, the ENGINE_MATERIAL_DEFAULT is assigned as material.
+             * If no materials are assigned, the ENGINE\_MATERIAL\_DEFAULT is assigned as material.
              * @method activated
              */
             this.activated = function () {

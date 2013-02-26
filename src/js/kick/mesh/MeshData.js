@@ -63,7 +63,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 /**
                  * @method createGetterSetter
                  * @private
-                 * @param {Number} type GL_FLOAT or GL_INT
+                 * @param {Number} type GL\_FLOAT or GL\_INT
                  * @param {string} name
                  */
                 createGetterSetter = function (type, name) {
@@ -474,7 +474,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     }
                 },
                 /**
-                 * Must be GL_TRIANGLES, GL_TRIANGLE_FAN, GL_TRIANGLE_STRIP, GL_POINTS, or GL_LINES
+                 * Must be GL\_TRIANGLES, GL\_TRIANGLE\_FAN, GL\_TRIANGLE\_STRIP, GL\_POINTS, or GL\_LINES
                  * @property meshType
                  * @type Number
                  */
@@ -695,7 +695,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
         /**
          * Recalculate the angle weighted vertex normals based on the triangle mesh
          * @method recalculateNormals
-         * @return {Boolean} false if meshtype is not GL_TRIANGLES or GL_TRIANGLE_STRIP
+         * @return {Boolean} false if meshtype is not GL\_TRIANGLES or GL\_TRIANGLE\_STRIP
          */
         MeshData.prototype.recalculateNormals = function () {
             var vertexCount = this.vertex.length / 3,
