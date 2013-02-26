@@ -7254,7 +7254,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                 color: createGetterSetter(5126, "color"),
                 /**
                  * Vertex attribute.
-                 * Integer attribute (onw Int32)
+                 * Integer attribute (one Int32)
                  * @property int1
                  * @type Array_Number
                  */
@@ -15140,7 +15140,7 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
                 };
 
             /**
-             * If no materials are assigned, the ENGINE_MATERIAL_DEFAULT is assigned as material.
+             * If no materials are assigned, the ENGINE\_MATERIAL\_DEFAULT is assigned as material.
              * @method activated
              */
             this.activated = function () {
@@ -16229,7 +16229,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                 },
                 /**
                  * Only used for orthogonal camera type (!cameraTypePerspective). Default 1
-                 * @property left
+                 * @property right
                  * @type Number
                  */
                 right: {
@@ -19051,7 +19051,7 @@ define('kick/core/WebGLDebugUtils',["./Constants"], function (Constants) {
 
                 canvas.loseContextInNCalls = function(numCalls) {
                     if (contextLost_) {
-                        throw "You can not ask a lost contet to be lost";
+                        throw "You can not ask a lost context to be lost";
                     }
                     numCallsToLoseContext_ = numCalls_ + numCalls;
                 };
