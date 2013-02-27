@@ -15,7 +15,7 @@ define([], function () {
                 window.msRequestAnimationFrame     ||
                 function (/* function */ callback, /* DOMElement */ element) {
                     var fps60 = 16.7;
-                    return window.setTimeout(callback, fps60, new Date().getTime());
+                    return window.setTimeout(callback, fps60, Date.now());
                 };
         })();
     }

@@ -39,7 +39,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
                 webGlContextNames = ["experimental-webgl", "webgl"],
                 thisObj = this,
-                lastTime = new Date().getTime() - 16, // ensures valid delta time in next frame
+                lastTime = Date.now() - 16, // ensures valid delta time in next frame
                 deltaTime = 0,
                 timeObj = new Time(),
                 timeSinceStart = 0,
@@ -217,7 +217,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                                 window.cancelAnimationFrame(animationFrameObj);
                                 animationFrameObj = null;
                             } else {
-                                lastTime = new Date().getTime() - 16; // ensures valid delta time in next frame
+                                lastTime = Date.now() - 16; // ensures valid delta time in next frame
                                 animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                             }
                         }
