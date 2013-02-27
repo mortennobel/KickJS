@@ -129,8 +129,8 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                         if (oReq.readyState === 4) { // /* complete */
                             if (oReq.status === 200) {
                                 result = JSON.parse(oReq.responseText);
-                                glslEditorController.shaderid = id;
-                                glslEditorController.shortUrl = result.shortUrl;
+                                controller.shaderid = id;
+                                controller.shortUrl = result.shortUrl;
                             } else {
                                 console.log("loadShaderFromServer status " + oReq.status);
                             }
@@ -288,7 +288,16 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                             {
                                 id: "http://goo.gl/viDKB",
                                 name: "Normal shader"
+                            },
+                            {
+                                id: "http://goo.gl/HApQB",
+                                name: "Screen space normals"
+                            },
+                            {
+                                id: "http://goo.gl/RxarW",
+                                name: "Particles"
                             }
+
                         ],
                         bodyContent = document.createElement("select"),
                         i,

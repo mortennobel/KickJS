@@ -337,6 +337,10 @@ requirejs(['kick', 'shader_editor_ui'],
                         checkCanvasResizeInterval: 0,
                         enableDebugContext: location.search === "?debug" // debug enabled if query == debug
                     });
+                    if (_engine.glState.standardDerivativesExtension){
+                        var FRAGMENT_SHADER_DERIVATIVE_HINT_OES = 0x8B8B;
+                        _engine.gl.hint(FRAGMENT_SHADER_DERIVATIVE_HINT_OES, _engine.gl.NICEST);
+                    }
                     var initEngine = function () {
                         var cameraObject = _engine.activeScene.createGameObject(),
                             gameObject,
