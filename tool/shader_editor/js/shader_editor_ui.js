@@ -221,7 +221,15 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                     shader = null;
                     if (idParameter) {
                         idParameter = document.location.hash.substring(1);
-                        document.location.hash = "";
+                        var strBrowser = navigator.userAgent.toLowerCase();
+                        if (strBrowser.indexOf('chrome') > 0 || strBrowser.indexOf('safari') > 0) {
+                            if(history.pushState) {
+                                window.history.replaceState(null, window.document.title, '#');
+                            }
+                        } else {
+                            document.location.hash = "";
+                        }
+
                         result = loadShaderSync(idParameter);
                         shader = JSON.parse(result.data);
                     }
@@ -282,10 +290,6 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                                 name: "Sliced geometry"
                             },
                             {
-                                id: "http://goo.gl/Jsne8",
-                                name: "ASCII shader"
-                            },
-                            {
                                 id: "http://goo.gl/viDKB",
                                 name: "Normal shader"
                             },
@@ -296,6 +300,10 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                             {
                                 id: "http://goo.gl/RxarW",
                                 name: "Particles"
+                            },
+                            {
+                                id: "http://goo.gl/grglc",
+                                name: "Bump map"
                             }
 
                         ],
