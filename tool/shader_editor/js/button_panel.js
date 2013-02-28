@@ -113,7 +113,7 @@ define(["shader_editor_default"],
                         window.YUIMessage("Login needed", "To share a shader you need to login and save the shader.");
                         return;
                     }
-                    if (shortUrl === null || shortUrl.length === 0) {
+                    if (glslEditorController.shortUrl === null || glslEditorController.shortUrl.length === 0) {
                         window.YUIMessage("Error", "Shader needs to be saved first");
                         return;
                     }
@@ -122,13 +122,13 @@ define(["shader_editor_default"],
                     input.style.width = "205px";
                     input.style.font = "120% arial,helvetica,clean";
                     input.type = "text";
-                    input.value = shortUrl;
+                    input.value = glslEditorController.shortUrl;
                     div.appendChild(document.createTextNode("Short url:"));
                     div.appendChild(document.createElement("br"));
                     div.appendChild(input);
                     div.appendChild(document.createElement("br"));
                     bottomText = document.createElement("a");
-                    bottomText.href = shortUrl + ".info";
+                    bottomText.href = glslEditorController.shortUrl + ".info";
                     bottomText.target = "_new";
 
                     statsText = document.createTextNode("See stats");
