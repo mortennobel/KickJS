@@ -105,7 +105,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                 radius = 1;
             }
             var j, i,
-                vertexCount = stacks * (slices + 1) * 2 + 2 * (stacks - 1), // degenerate vertex info
+                vertexCount = (stacks+1) * (slices + 1),
                 normalsMemory = {},
                 normals = Vec3.array(vertexCount, normalsMemory),
                 verticesMemory = {},
