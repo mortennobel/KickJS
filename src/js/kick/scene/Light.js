@@ -194,6 +194,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * Light intensity (a multiplier to color)
                  * @property intensity
                  * @type Number
+                 * @default 1
                  */
                 intensity: {
                     get: function () {
