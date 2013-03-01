@@ -7826,7 +7826,7 @@ define('kick/mesh/MeshDataFactory',["./MeshData", "kick/math/Vec2", "kick/math/V
                 radius = 1;
             }
             var j, i,
-                vertexCount = stacks * (slices + 1) * 2 + 2 * (stacks - 1), // degenerate vertex info
+                vertexCount = (stacks+1) * (slices + 1),
                 normalsMemory = {},
                 normals = Vec3.array(vertexCount, normalsMemory),
                 verticesMemory = {},
@@ -19443,7 +19443,7 @@ define('kick/core/Shim',[], function () {
                 window.msRequestAnimationFrame     ||
                 function (/* function */ callback, /* DOMElement */ element) {
                     var fps60 = 16.7;
-                    return window.setTimeout(callback, fps60, new Date().getTime());
+                    return window.setTimeout(callback, fps60, Date.now());
                 };
         })();
     }
@@ -19512,7 +19512,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                 canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
                 webGlContextNames = ["experimental-webgl", "webgl"],
                 thisObj = this,
-                lastTime = new Date().getTime() - 16, // ensures valid delta time in next frame
+                lastTime = Date.now() - 16, // ensures valid delta time in next frame
                 deltaTime = 0,
                 timeObj = new Time(),
                 timeSinceStart = 0,
@@ -19690,7 +19690,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                                 window.cancelAnimationFrame(animationFrameObj);
                                 animationFrameObj = null;
                             } else {
-                                lastTime = new Date().getTime() - 16; // ensures valid delta time in next frame
+                                lastTime = Date.now() - 16; // ensures valid delta time in next frame
                                 animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
                             }
                         }
