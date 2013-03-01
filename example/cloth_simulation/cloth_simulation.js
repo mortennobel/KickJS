@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../../build/kick'
+        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
     }
 });
 
@@ -77,9 +77,9 @@ requirejs(['kick'],
             ballMeshRenderer.material = new kick.material.Material( {
                 shader: shader,
                 uniformData: {
-                    mainColor: [1.0, 0.0, 0.9, 0.5],
+                    mainColor: [1.0, 0.0, 0.9, 1.0],
                     mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                    specularExponent: 80,
+                    specularExponent: 50,
                     specularColor: [1, 1, 1, 1]
                 }
             });

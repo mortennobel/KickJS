@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: './js',
     paths: {
-        kick: '../../../build/kick'
+        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
     }
 });
 

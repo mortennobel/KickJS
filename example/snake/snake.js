@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../../build/kick'
+        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
     }
 });
 
@@ -466,7 +466,7 @@ requirejs(['kick'],
             var camera;
             function initKick() {
                 engine = new kick.core.Engine('canvas',{
-                    enableDebugContext: false
+                    enableDebugContext: location.search === "?debug" // debug enabled if query == debug
                 });
                 initLights();
                 var activeScene = engine.activeScene;
