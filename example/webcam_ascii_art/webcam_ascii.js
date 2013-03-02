@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: '../../build/kick'
+        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
     }
 });
 
@@ -35,7 +35,7 @@ requirejs(['kick'],
             camera;
         function initKick(videoElement) {
             engine = new KICK.core.Engine('canvas', {
-                enableDebugContext: true
+                enableDebugContext: location.search === "?debug" // debug enabled if query == debug
             });
             var activeScene = engine.activeScene,
                 cameraObject = activeScene.createGameObject(),

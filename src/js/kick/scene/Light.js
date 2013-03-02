@@ -9,6 +9,18 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
          * A light object.<br>
          * Note that each scene can only have one ambient light and one directional light.
          * The directional light points in (0,0,1) direction (transformed by the GameObject transform)
+         * @example
+         *            var lightGameObject = engine.activeScene.createGameObject();
+         *            lightGameObject.transform.position = [0,0,10];
+         *
+         *            // add point light
+         *            var lightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_POINT});
+         *            lightGameObject.addComponent(lightComponent);
+         *
+         *            // add ambient light (only one per scene)
+         *            var ambientLightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_AMBIENT, colorIntensity: [0.1,0.1,0.1] });
+         *            lightGameObject.addComponent(ambientLightComponent);
+         *
          * @class Light
          * @namespace kick.scene
          * @extends kick.scene.Component
@@ -194,6 +206,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * Light intensity (a multiplier to color)
                  * @property intensity
                  * @type Number
+                 * @default 1
                  */
                 intensity: {
                     get: function () {
