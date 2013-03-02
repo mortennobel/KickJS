@@ -21,6 +21,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 _interleavedArray,
                 _interleavedArrayFormat,
                 _vertexAttrLength,
+                _usage = Constants.GL_STATIC_DRAW,
                 _meshType,
                 _name,
                 clearInterleavedData = function () {
@@ -184,6 +185,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                 numberOfSubMeshes = subMeshes.length;
                 chunkData.setNumber(4, numberOfSubMeshes);
                 chunkData.setNumber(5, thisObj.vertexAttrLength);
+                chunkData.setNumber(6, thisObj.usage);
                 for (i = 0; i < numberOfSubMeshes; i++) {
                     chunkData.set(10 + i, subMeshes[i]);
                 }
@@ -208,11 +210,13 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     thisObj.name = chunkData.getString(3);
                     numberOfSubMeshes = chunkData.getNumber(4);
                     thisObj.vertexAttrLength = chunkData.getNumber(5);
+                    thisObj.usage = chunkData.getNumber(6) || Constants.GL_STATIC_DRAW;
                     submeshes = [];
                     for (i = 0; i < numberOfSubMeshes; i++) {
                         submeshes[i] = chunkData.get(10 + i);
                     }
                     thisObj.subMeshes = submeshes;
+
                     return true;
                 }
                 return false;
@@ -243,6 +247,25 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                             Aabb.addPoint(aabb, aabb, point);
                         }
                         return aabb;
+                    }
+                },
+                /**
+                 * Must be either GL_STATIC_DRAW or GL_DYNAMIC_DRAW.
+                 * @property usage
+                 * @type Number
+                 * @default GL_STATIC_DRAW
+                 */
+                usage: {
+                    get: function () {
+                        return _usage;
+                    },
+                    set: function (newValue) {
+                        if (ASSERT) {
+                            if (newValue !== Constants.GL_STATIC_DRAW && newValue !== Constants.GL_DYNAMIC_DRAW) {
+                                Util.fail("MeshData.interleavedArray must be an ArrayBuffer");
+                            }
+                        }
+                        _usage = newValue;
                     }
                 },
                 /**
