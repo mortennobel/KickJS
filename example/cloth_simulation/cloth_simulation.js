@@ -68,11 +68,13 @@ requirejs(['kick'],
         function buildBall(scene){
             var ballGO = scene.createGameObject({name: "Ball"});
             var ballMeshRenderer = new kick.scene.MeshRenderer();
+            //new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?slices=10&stacks=5"});
             ballMeshRenderer.mesh = new kick.mesh.Mesh(
                 {
                     dataURI: "kickjs://mesh/uvsphere/?slices=25&stacks=50&radius=" + (ball_radius - 0.2),
                     name: "Default object"
                 });
+
             var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
             ballMeshRenderer.material = new kick.material.Material( {
                 shader: shader,
@@ -316,14 +318,6 @@ requirejs(['kick'],
              * the method is called by Cloth.time_step() many times per frame
              */
             this.satisfyConstraint = function () {
-                /*
-                 Vec3 p1_to_p2 = p2->getPos()-p1->getPos(); // vector from p1 to p2
-                 float current_distance = p1_to_p2.length(); // current distance between p1 and p2
-                 Vec3 correctionVector = p1_to_p2*(1 - rest_distance/current_distance); // The offset vector that could moves p1 into a distance of rest_distance to p2
-                 Vec3 correctionVectorHalf = correctionVector*0.5; // Lets make it half that length, so that we can move BOTH p1 and p2.
-                 p1->offsetPos(correctionVectorHalf); // correctionVectorHalf is pointing from p1 to p2, so the length should move p1 half the length needed to satisfy the constraint.
-                 p2->offsetPos(-correctionVectorHalf); // we must move p2 the negative direction of correctionVectorHalf since it points from p2 to p1, and not p1 to p2.
-                 */
                 vec3.subtract(tempVec3, p2.pos, p1.pos); // vector from p1 to p2
                 var current_distance = vec3.length(tempVec3); // current distance between p1 and p2
                 vec3.scale(tempVec3, tempVec3, 1 - rest_distance / current_distance);  // The offset vector that could moves p1 into a distance of rest_distance to p2
@@ -371,16 +365,6 @@ requirejs(['kick'],
                     var v1 = vec3.create(),
                         v2 = vec3.create();
                     return function (p1, p2, p3,dest) {
-                        /**
-                         Vec3 pos1 = p1->getPos();
-                         Vec3 pos2 = p2->getPos();
-                         Vec3 pos3 = p3->getPos();
-
-                         Vec3 v1 = pos2-pos1;
-                         Vec3 v2 = pos3-pos1;
-
-                         return v1.cross(v2);
-                         */
                         var pos1 = p1.pos,
                             pos2 = p2.pos,
                             pos3 = p3.pos;
@@ -422,7 +406,7 @@ requirejs(['kick'],
                  * @param {Particle} p3
                  * @param {Number} triangleIndex triangle index
                  */
-                    drawTriangle = function (p1, p2, p3,  triangleIndex) {
+                 drawTriangle = function (p1, p2, p3,  triangleIndex) {
                     var set = function (destArray, newValue, idx) {
                         for (var i = 0;i<newValue.length;i++){
                             destArray[idx+i] = newValue[i];
@@ -437,18 +421,6 @@ requirejs(['kick'],
                     set(normals,p3.accumulated_normal,triangleIndex*9+6);
 
 
-                    /*
-                     glColor3fv( (GLfloat*) &color );
-
-                     glNormal3fv((GLfloat *) &(p1->getNormal().normalized() ));
-                     glVertex3fv((GLfloat *) &(p1->getPos() ));
-                     uv
-                     glNormal3fv((GLfloat *) &(p2->getNormal().normalized() ));
-                     glVertex3fv((GLfloat *) &(p2->getPos() ));
-
-                     glNormal3fv((GLfloat *) &(p3->getNormal().normalized() ));
-                     glVertex3fv((GLfloat *) &(p3->getPos() ));
-                     */
                 };
 
             this.scriptPriority = -1; // invoked after ball update
@@ -456,19 +428,7 @@ requirejs(['kick'],
             (function constructor(){
                 particles = new Array(num_particles_width*num_particles_height); //I am essentially using this vector as an array with room for num_particles_width*num_particles_height particles
 
-                /*
-                 // creating particles in a grid of particles from (0,0,0) to (width,-height,0)
-                 for(int x=0; x<num_particles_width; x++)
-                 {
-                 for(int y=0; y<num_particles_height; y++)
-                 {
-                 Vec3 pos = Vec3(width * (x/(float)num_particles_width),
-                 -height * (y/(float)num_particles_height),
-                 0);
-                 particles[y*num_particles_width+x]= Particle(pos); // insert particle in column x at y'th row
-                 }
-                 }
-                 */
+
                 // creating particles in a grid of particles from (0,0,0) to (width,-height,0)
                 for(var x=0; x<num_particles_width; x++)
                 {
@@ -481,19 +441,7 @@ requirejs(['kick'],
                     }
                 }
 
-                /*
-                 // Connecting immediate neighbor particles with constraints (distance 1 and sqrt(2) in the grid)
-                 for(int x=0; x<num_particles_width; x++)
-                 {
-                 for(int y=0; y<num_particles_height; y++)
-                 {
-                 if (x<num_particles_width-1) makeConstraint(getParticle(x,y),getParticle(x+1,y));
-                 if (y<num_particles_height-1) makeConstraint(getParticle(x,y),getParticle(x,y+1));
-                 if (x<num_particles_width-1 && y<num_particles_height-1) makeConstraint(getParticle(x,y),getParticle(x+1,y+1));
-                 if (x<num_particles_width-1 && y<num_particles_height-1) makeConstraint(getParticle(x+1,y),getParticle(x,y+1));
-                 }
-                 }
-                 */
+
                 // Connecting immediate neighbor particles with constraints (distance 1 and sqrt(2) in the grid)
                 for(x=0; x<num_particles_width; x++)
                 {
@@ -506,18 +454,7 @@ requirejs(['kick'],
                     }
                 }
 
-                /*
-                 // Connecting secondary neighbors with constraints (distance 2 and sqrt(4) in the grid)
-                 for(int x=0; x<num_particles_width; x++)
-                 {
-                 for(int y=0; y<num_particles_height; y++)
-                 {
-                 if (x<num_particles_width-2) makeConstraint(getParticle(x,y),getParticle(x+2,y));
-                 if (y<num_particles_height-2) makeConstraint(getParticle(x,y),getParticle(x,y+2));
-                 if (x<num_particles_width-2 && y<num_particles_height-2) makeConstraint(getParticle(x,y),getParticle(x+2,y+2));
-                 if (x<num_particles_width-2 && y<num_particles_height-2) makeConstraint(getParticle(x+2,y),getParticle(x,y+2));			}
-                 }
-                 */
+
                 // Connecting secondary neighbors with constraints (distance 2 and sqrt(4) in the grid)
                 for(x=0; x<num_particles_width; x++)
                 {
@@ -558,24 +495,6 @@ requirejs(['kick'],
                     particles[i].resetNormal();
                 }
 
-                /*
-                 //create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
-                 for(int x = 0; x<num_particles_width-1; x++)
-                 {
-                 for(int y=0; y<num_particles_height-1; y++)
-                 {
-                 Vec3 normal = calcTriangleNormal(getParticle(x+1,y),getParticle(x,y),getParticle(x,y+1));
-                 getParticle(x+1,y)->addToNormal(normal);
-                 getParticle(x,y)->addToNormal(normal);
-                 getParticle(x,y+1)->addToNormal(normal);
-
-                 normal = calcTriangleNormal(getParticle(x+1,y+1),getParticle(x+1,y),getParticle(x,y+1));
-                 getParticle(x+1,y+1)->addToNormal(normal);
-                 getParticle(x+1,y)->addToNormal(normal);
-                 getParticle(x,y+1)->addToNormal(normal);
-                 }
-                 }
-                 */
                 //create smooth per particle normals by adding up all the (hard) triangle normals that each particle is part of
                 for(x = 0; x< num_particles_width - 1; x++)
                 {
@@ -704,6 +623,8 @@ requirejs(['kick'],
                     indices[i] = i;
                 }
                 meshData.indices = indices;
+                meshData.uv1 = thisObj.getUvs();
+
             };
 
             this.update = (function(){
@@ -713,16 +634,15 @@ requirejs(['kick'],
                     thisObj.addForce(gravityForce); // add gravity each frame, pointing down
                     thisObj.windForce(windForce); // generate some wind each frame
                     thisObj.timeStep(); // calculate the particle positions of the next frame
-                    thisObj.ballCollision(localPosition,ball_radius); // resolve collision with the ball
+                    thisObj.ballCollision(localPosition, ball_radius); // resolve collision with the ball
 
                     thisObj.updateMeshData();
                     meshData.vertex = vertices;
                     meshData.normal = normals;
-                    if (!meshData.uv1){
-                        var uvs = thisObj.getUvs();
-                        meshData.uv1 = uvs;
-                    }
-                    meshRenderer.mesh.meshData = meshData;
+                    meshData.usage = kick.core.Constants.GL_STREAM_DRAW;
+
+
+                    meshRenderer.mesh.updateMeshData(meshData, true, false, false);
                 };
             })();
         }
