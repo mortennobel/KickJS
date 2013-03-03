@@ -1,12 +1,13 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
+        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick',
+        text: '../../dependencies/text'
     }
 });
 
-requirejs(['kick'],
-    function (kick) {
+requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_vs.glsl'],
+    function (kick, fs, vs) {
         "use strict";
 // Cloth simulation based on Mosegaards Cloth Simulation Coding Tutorial
 // http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-coding-tutorial/
@@ -36,6 +37,8 @@ requirejs(['kick'],
             buildBackground(scene);
             buildBall(scene);
             buildCloth(scene);
+            var fullWindow = scene.createGameObject({name: "FullWindow"});
+            fullWindow.addComponent(new kick.components.FullWindow());
         }
 
         function buildCamera(scene) {
@@ -54,7 +57,11 @@ requirejs(['kick'],
             var clothGO = scene.createGameObject({name: "Cloth"});
             clothGO.addComponent(new ClothComponent(14, 10, meshResolution, meshResolution));
             var clothMeshRenderer = new kick.scene.MeshRenderer();
-            var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
+            var shader = new kick.material.Shader( {
+                vertexShaderSrc: vs,
+                fragmentShaderSrc: fs,
+                faceCulling:  kick.core.Constants.GL_NONE
+            });
             clothMeshRenderer.material = new kick.material.Material({
                 shader:shader,
                 uniformData:{

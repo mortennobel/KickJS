@@ -1,11 +1,12 @@
-define(["kick"], function (kick) {
+define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
     "use strict";
-        var DEGREE_TO_RADIAN = kick.core.Constants._DEGREE_TO_RADIAN;
+        var DEGREE_TO_RADIAN = core.Constants._DEGREE_TO_RADIAN;
         /**
          * A simple walker class which can be added to a camera to navigate in a scene.
          * @class FPSWalker
          * @constructor
-         * @namespace kickextra.controller
+         * @extends kick.scene.Component
+         * @namespace kick.components
          */
         return function(){
             var engine,
@@ -16,7 +17,7 @@ define(["kick"], function (kick) {
                 rotateX = 0,
                 time,
                 position,
-                rotationEuler = kick.math.Vec3.create(),
+                rotationEuler = math.Vec3.create(),
                 forward = "W".charCodeAt(0),
                 backward = "S".charCodeAt(0),
                 strideLeft = "A".charCodeAt(0),
@@ -120,15 +121,15 @@ define(["kick"], function (kick) {
              * @method activated
              */
             this.activated = function(){
-                engine = kick.core.Engine.instance;
+                engine = core.Engine.instance;
                 transform = thisObj.gameObject.transform;
                 keyInput = engine.keyInput;
                 mouseInput = engine.mouseInput;
                 time = engine.time;
                 position = transform.position;
-                camera = thisObj.gameObject.getComponentOfType(kick.scene.Camera);
+                camera = thisObj.gameObject.getComponentOfType(scene.Camera);
                 if (!camera){
-                    kick.core.Util.fail("Camera not found");
+                    core.Util.fail("Camera not found");
                 }
             };
 

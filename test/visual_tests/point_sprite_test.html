@@ -6,22 +6,22 @@
 
 
 </head>
-<body>
+<body style="margin: 0">
 <a href="pointlightTest.html">Next</a><br>
-  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
-  This example test how renderOrder is used.
+This example test how renderOrder is used.<br>
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
+
   <script src="../../dependencies/require.js"></script>
   <script type="text/javascript">
       var req = require.config({
           baseUrl: 'js/lib',
           paths: {
-              kick: '../../../../src/js/kick',
-              kickextra: '../../../../src/js-extra/kickextra'
+              kick: '../../../../src/js/kick'
           }
       });
 
-      req(['kick', 'kickextra'],
-              function (kick, kickextra) {
+      req(['kick'],
+              function (kick) {
       var engine;
       var meshRenderer;
 
@@ -79,7 +79,8 @@
               fieldOfView:60
           });
           cameraObject.addComponent(camera);
-          cameraObject.addComponent(new kickextra.controller.FPSWalker());
+          cameraObject.addComponent(new kick.components.FPSWalker());
+          cameraObject.addComponent(new kick.components.FullWindow());
           cameraObject.transform.position = [0,0,20];
 
           var createSphereObject = function (position, color){
@@ -116,9 +117,6 @@
                   initKick();
               });
   </script>
-  <div style="display:none;">
 
-</div>
-  <br/>
 </body>
 </html>

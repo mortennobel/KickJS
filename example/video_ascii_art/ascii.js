@@ -1,17 +1,16 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
+        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick',
+        text: '../../dependencies/text'
     }
 });
 
-requirejs(['kick'],
-    function (KICK) {
+requirejs(['kick', 'text!fragmentShaderAscii.glsl', 'text!vertexShaderTex.glsl', 'text!fragmentShaderAscii.glsl', 'text!fragmentShaderTex.glsl'],
+    function (KICK, fragmentShaderAscii, vertexShaderTex, fragmentShaderTex) {
     "use strict";
 
-    function setMaterial(vertexShaderId, fragmentShaderId, meshRenderer, materialUniforms){
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
+    function setMaterial(vs, fs, meshRenderer, materialUniforms){
             var shader = new KICK.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
@@ -45,6 +44,7 @@ requirejs(['kick'],
             far:1
         });
         cameraObject.addComponent(camera);
+        cameraObject.addComponent(new KICK.components.FullWindow());
 
         var gameObject = activeScene.createGameObject();
         var meshRenderer = new KICK.scene.MeshRenderer();
@@ -70,7 +70,7 @@ requirejs(['kick'],
 
         texture.setTemporaryTexture();
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
-        setMaterial('vertexShaderTex','fragmentShaderAscii',meshRenderer, {
+        setMaterial(vertexShaderTex,fragmentShaderAscii,meshRenderer, {
             tex:  texture,
             ascii:  asciiTexture
         });
@@ -80,7 +80,7 @@ requirejs(['kick'],
         meshRenderer = new KICK.scene.MeshRenderer();
         gameObject.addComponent(meshRenderer);
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
-        setMaterial('vertexShaderTex','fragmentShaderTex',meshRenderer, {
+        setMaterial(vertexShaderTex,fragmentShaderTex,meshRenderer, {
                     tex:  texture
                 });
         gameObject.transform.position = [.9,.9,0.1];
@@ -164,16 +164,5 @@ requirejs(['kick'],
         buildLoadVideoDialog();
     });
 
-    function documentResized () {
-        var canvas = document.getElementById('canvas');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - canvas.offsetTop;
-        
-        if (engine) {
-            engine.canvasResized();
-        }
-    }
-    documentResized();
 
-    window.onresize = documentResized;
 });

@@ -1,5 +1,8 @@
 KickJS Release notes:
 
+0.5.2
+- Introduce common components (in kick.components)
+
 0.5.1
 - Updated to gl-matrix 2.1
 - Improved sub mesh rendering

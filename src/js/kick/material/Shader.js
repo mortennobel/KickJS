@@ -570,7 +570,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * faceCulling = GL\_NONE means face culling disabled
                  * @property faceCulling
                  * @type Object
-                 * @default Constants.GL\_BACK
+                 * @default Constants.GL_BACK
                  */
                 faceCulling: {
                     get: function () { return _faceCulling; },
@@ -616,7 +616,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * kick.core.Constants.GL\_ALWAYS
                  * @property zTest
                  * @type Object
-                 * @default Constants.GL\_LESS
+                 * @default Constants.GL_LESS
                  */
                 zTest: {
                     get: function () { return _zTest; },
@@ -669,7 +669,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorRGB
                  * @type Number
-                 * @default Constants.GL\_SRC\_ALPHA
+                 * @default Constants.GL_SRC_ALPHA
                  */
                 blendSFactorRGB:{
                     get: function(){
@@ -714,7 +714,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorAlpha
                  * @type Number
-                 * @default Constants.GL\_SRC\_ALPHA
+                 * @default Constants.GL_SRC_ALPHA
                  */
                 blendSFactorAlpha:{
                     get: function(){
@@ -778,7 +778,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorRGB
                  * @type Number
-                 * @default Constants.GL\_ONE\_MINUS\_SRC\_ALPHA
+                 * @default Constants.GL_ONE_MINUS_SRC_ALPHA
                  */
                 blendDFactorRGB: {
                     get: function(){
@@ -821,7 +821,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorAlpha
                  * @type Number
-                 * @default Constants.GL\_ONE\_MINUS\_SRC\_ALPHA
+                 * @default Constants.GL_ONE_MINUS_SRC_ALPHA
                  */
                 blendDFactorAlpha: {
                     get: function(){

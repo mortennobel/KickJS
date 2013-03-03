@@ -160,7 +160,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                  * Texture.wrapS should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapS
                  * @type Object
-                 * @default GL\_REPEAT
+                 * @default GL_REPEAT
                  */
                 wrapS: {
                     get: function () {
@@ -179,7 +179,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                  * Texture.wrapT should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapT
                  * @type Object
-                 * @default GL\_REPEAT
+                 * @default GL_REPEAT
                  */
                 wrapT: {
                     get: function () {
@@ -199,7 +199,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                  * GL\_LINEAR\_MIPMAP\_NEAREST, GL\_NEAREST\_MIPMAP\_LINEAR, GL\_LINEAR\_MIPMAP\_LINEAR<br>
                  * @property minFilter
                  * @type Object
-                 * @default GL\_LINEAR
+                 * @default GL_LINEAR
                  */
                 minFilter: {
                     get: function () {
@@ -223,7 +223,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                  * Texture.magFilter should be either GL\_NEAREST or GL\_LINEAR. <br>
                  * @property magFilter
                  * @type Object
-                 * @default GL\_LINEAR
+                 * @default GL_LINEAR
                  */
                 magFilter: {
                     get: function () {
@@ -248,7 +248,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                  * GL\_LUMINANCE_ALPHA
                  * @property internalFormat
                  * @type Number
-                 * @default GL\_RGBA
+                 * @default GL_RGBA
                  */
                 internalFormat: {
                     get: function () {

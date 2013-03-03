@@ -3,34 +3,24 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta charset=UTF-8”>
-    <title>Kick.js | Video Ascii Art</title>
+    <title>Kick.js | Particle Editor</title>
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.8.1/build/cssreset/reset-min.css&3.8.1/build/cssfonts/fonts-min.css&3.8.1/build/cssgrids/grids-min.css&3.8.1/build/cssbase/base-min.css&3.8.1/build/cssbutton/cssbutton.css">
+    <script src="http://yui.yahooapis.com/3.8.1/build/yui/yui-min.js"></script>
+    <script src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+
     <style>
         #glslEditor {
-            position: absolute;
-            width: 800px;
-            height: 400px;
+            width: 65%;
+            height: 80%;
         }
-         #glslEditorInfo{
-            position: absolute;
-            left: 830px;
-            height: 400px;
-         }
 
-        #desc {
-            margin-bottom:20px;
-            border-bottom:1px dotted #333;
-        }
-        #desc span {
-            background:#a3350d;
-            padding:2px;
-            color:#f27243;
+        .hiddenPanel {
+            display: none;
         }
 
         .yui3-panel {
             outline:none;
-
         }
 
         .yui3-panel-content .yui3-widget-hd {
@@ -57,33 +47,23 @@
             font-size:100%;
             width:200px;
         }
-    </style>
-    <script src="http://yui.yahooapis.com/3.8.1/build/yui/yui-min.js"></script>
-
-    <link rel="stylesheet" href="reset-min.css">
-    <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
-    <link href='/style.css' rel='stylesheet' type='text/css'>
-    <!-- Google analytics-->
-    <script type="text/javascript" src="../common/common.js"></script>
-    <style>
-        body{
-            overflow: hidden;
+        
+        .yui3-console{
+            top:150px !important;
         }
     </style>
+    <link href='/style.css' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="../common/common.js"></script>
 </head>
-<body class="yui3-skin-sam">
-<header id="kickjs-header">
-</header>
+<body class="yui3-skin-sam" style="background-color: white;">
 <header>
 </header>
-<article>
-    <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
-    <script data-main="ascii.js" type="text/javascript" src="../../dependencies/require.js"></script>
-    <div id="panelContent"></div>
-    <div style="display: none">
-        </div>
-</article>
+
+
+
 <script type="text/javascript" src="/header.js"></script>
-<script data-main="ascii.js" type="text/javascript" src="../../dependencies/require.js"></script>
+<script type="text/javascript" src="../common/dat.gui.min.js"></script>
+<script type="text/javascript" src="../common/dat.color.min.js"></script>
+<script data-main="js/particle_system.js" type="text/javascript" src="../../dependencies/require.js"></script>
 </body>
 </html>

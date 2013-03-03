@@ -5,6 +5,9 @@ yuidoc_bin=$1
 #Location of project
 project=$2
 
+cp -R $project/src/js-extra $project/build/kickextra
+
+
 #Location of Google Clojure Compiler (http://code.google.com/p/closure-compiler/)
 googleClojure=$3
 
@@ -27,7 +30,7 @@ parser_out=$project/API/parser
 generator_out=$project/API/generator
 
 # The version of your project to display within the documentation.
-version=0.5.1
+version=0.5.2
 
 # The version of YUI the project is using.  This effects the output for
 # YUI configuration attributes.  This should start with '2' or '3'.
@@ -56,7 +59,6 @@ $nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/
 echo "Package AMD and compress (debug)"
 
 java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/dependencies/build/r.js -o name=kick out=$project/build/kick-debug.js.tmp baseUrl=$project/build/pre optimize=none
-
 
 ##############################################################################
 echo "Generating documentation (YUI Doc)"
@@ -87,10 +89,13 @@ echo "Package AMD and compress (release)"
 
 java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/dependencies/build/r.js -o name=kick out=$project/build/kick.js.tmp baseUrl=$project/build/pre
 
+
+
 ##############################################################################
 echo "Adding license info compiler"
 cat "$project/dependencies/build/license_min.txt" "$project/build/kick-debug.js.tmp" > "$project/build/kick-debug.js"
 cat "$project/dependencies/build/license_min.txt" "$project/build/kick.js.tmp" > "$project/build/kick.js"
+
 rm "$project/build/kick-debug.js.tmp"
 rm "$project/build/kick.js.tmp"
 

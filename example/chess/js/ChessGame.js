@@ -83,6 +83,7 @@ define(["kick", "GameBoard", "ChessPieceType", "ChessPiece", "ChessCameraMovemen
             cameraGameObject = scene.createGameObject({name:"Camera"});
             cameraGameObject.addComponent(new kick.scene.Camera());
             cameraGameObject.addComponent(new ChessCameraMovementListener());
+            cameraGameObject.addComponent(new kick.components.FullWindow());
 
             // enable shadow on light
             var light = scene.getGameObjectByName("Light");

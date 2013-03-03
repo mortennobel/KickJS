@@ -1,5 +1,5 @@
 /*!
- * KickJS 0.5.1 - New BSD License
+ * KickJS 0.5.2 - New BSD License
  * http://www.kickjs.org/
  * License: https://raw.github.com/mortennobel/KickJS/master/license.txt
  *

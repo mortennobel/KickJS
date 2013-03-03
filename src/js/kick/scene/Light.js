@@ -185,7 +185,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  * @property type
                  * @type Enum
                  * @final
-                 * @default Light.TYPE\_POINT
+                 * @default Light.TYPE_POINT
                  */
                 type: {
                     get: function () {

@@ -392,6 +392,7 @@ requirejs(['kick'],
                 far:100000
             });
             cameraObject.addComponent(camera);
+            cameraObject.addComponent(new kick.components.FullWindow());
 
             cameraObject.addComponent(new RotatorComponent());
 
