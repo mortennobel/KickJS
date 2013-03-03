@@ -23,7 +23,7 @@
         });
 
         req(['kick'],
-                function (KICK) {
+                function (kick) {
         var engine;
         var meshRenderer;
 
@@ -41,7 +41,7 @@
             clearLog();
             var vs = document.getElementById(vertexShaderId).value;
             var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new KICK.material.Shader();
+            var shader = new kick.material.Shader();
             shader.vertexShaderSrc = vs;
             shader.fragmentShaderSrc = fs;
             shader.errorLog = log;
@@ -52,7 +52,7 @@
                 return;
             }
 
-            meshRenderer.material = new KICK.material.Material({
+            meshRenderer.material = new kick.material.Material({
                 name:"Some material",
                 shader:shader
             });
@@ -86,12 +86,12 @@
         }
 
         function initKick() {
-            engine = new KICK.core.Engine('canvas',{
+            engine = new kick.core.Engine('canvas',{
                 enableDebugContext: true
             });
             window.engine = engine;
             var cameraObject = engine.activeScene.createGameObject();
-            var camera = new KICK.scene.Camera({
+            var camera = new kick.scene.Camera({
                 clearColor: [0,0,0,1],
                 perspective: false,
                 near:-1,
@@ -100,12 +100,37 @@
             cameraObject.addComponent(camera);
 
             var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new KICK.scene.MeshRenderer();
+            meshRenderer = new kick.scene.MeshRenderer();
 
-            meshRenderer.mesh = new KICK.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?slices=10&stacks=5"});
+            meshRenderer.mesh = new kick.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?slices=25&stacks=50?radius=1.0"});
 
-            setMaterial('vertexShaderColor','fragmentShader');
+
+            var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
+            meshRenderer.material = new kick.material.Material( {
+                shader: shader,
+                uniformData: {
+                    mainColor: [1.0, 0.0, 0.9, 1.0],
+                    mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
+                    specularExponent: 50,
+                    specularColor: [1, 1, 1, 1]
+                }
+            });
             gameObject.addComponent(meshRenderer);
+
+
+            var lightGameObject = engine.activeScene.createGameObject();
+            lightGameObject.transform.position = [0,0,10];
+
+            // add point light
+            var lightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_POINT});
+            lightGameObject.addComponent(lightComponent);
+
+            // add ambient light (only one per scene)
+            var ambientLightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_AMBIENT, colorIntensity: [0.1,0.1,0.1] });
+            lightGameObject.addComponent(ambientLightComponent);
+
+
+
             addRotatorComponent(gameObject);
         }
                     initKick();
