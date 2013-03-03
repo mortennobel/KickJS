@@ -42,21 +42,24 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             vertexAttrLength = 0,
             meshType,
             meshElements = [],
+            deleteVertexArrayObjects = function () {
+                for (var name in vertexArrayObject){
+                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                }
+                vertexArrayObject = {};
+            },
             deleteBuffersAndVertexArrayObjects = function () {
+                deleteVertexArrayObjects();
                 if (meshVertexIndexBuffer){
                     gl.deleteBuffer(meshVertexIndexBuffer);
                     meshVertexIndexBuffer = 0;
                 }
                 meshVertexBufferOffsetBytes.length = 0;
-                if (typeof meshVertexAttBuffer === "number") {
+                if (meshVertexAttBuffer) {
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
                 meshElements.length = 0;
-                for (var name in vertexArrayObject){
-                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
-                }
-                vertexArrayObject = {};
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
@@ -76,40 +79,64 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
              * Copy data to the vertex buffer object (VBO)
              * @method updateData
              * @private
+             * @param {Boolean} updateVertexData
+             * @param {Boolean} updateIndices
+             * @param {Boolean} updateVertexStructure
              */
-            updateData = function () {
-                var subMeshes = _meshData.subMeshes,
-                    i,
-                    indexLen,
-                    indicesSize = 0,
-                    meshVertexIndexBufferConcat;
-                // delete current buffers and VAOs
-                deleteBuffersAndVertexArrayObjects();
+            updateData = function(){
+                var meshVertexAttBufferLength = -1,
+                    meshVertexIndexBufferLength = -1;
+                return function (updateVertexData, updateIndices, updateVertexStructure) {
+                    var subMeshes = _meshData.subMeshes,
+                        i,
+                        indexLen,
+                        indicesSize = 0,
+                        interleavedData = _meshData.interleavedArray,
+                        meshVertexIndexBufferConcat;
+                    if (updateVertexStructure){
+                        deleteVertexArrayObjects();
+                        interleavedArrayFormat = _meshData.interleavedArrayFormat;
+                        createInterleavedArrayFormatArray();
+                        vertexAttrLength = _meshData.vertexAttrLength;
+                        meshType = _meshData.meshType;
+                        meshVertexBufferOffsetBytes.length = 0;
+                        meshElements.length = 0;
+                        for (i = 0; i < subMeshes.length; i++) {
+                            meshVertexBufferOffsetBytes.push(indicesSize * 2);
+                            indexLen = subMeshes[i].length;
+                            meshElements[i] = indexLen;
+                            indicesSize += indexLen
+                        }
+                    }
+                    if (updateVertexData){
+                        if (interleavedData.length !== meshVertexAttBufferLength || !meshVertexAttBuffer){
+                            if (meshVertexAttBuffer){
+                                gl.deleteBuffer(meshVertexAttBuffer);
+                            }
+                            meshVertexAttBuffer = gl.createBuffer();
+                        }
+                        gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
+                        gl.bufferData(c.GL_ARRAY_BUFFER, interleavedData, _meshData.usage);
+                        meshVertexAttBufferLength = interleavedData.length;
+                    }
 
-                interleavedArrayFormat = _meshData.interleavedArrayFormat;
-                createInterleavedArrayFormatArray();
-                vertexAttrLength = _meshData.vertexAttrLength;
-                meshType = _meshData.meshType;
-
-                meshVertexAttBuffer = gl.createBuffer();
-                gl.bindBuffer(c.GL_ARRAY_BUFFER, meshVertexAttBuffer);
-                gl.bufferData(c.GL_ARRAY_BUFFER, _meshData.interleavedArray, c.GL_STATIC_DRAW);
-
-                for (i = 0; i < subMeshes.length; i++) {
-                    meshVertexBufferOffsetBytes.push(indicesSize * 2);
-                    indexLen = subMeshes[i].length;
-                    meshElements[i] = indexLen;
-                    indicesSize += indexLen
-                }
-                meshVertexIndexBufferConcat = new Uint16Array(indicesSize);
-                for (i = 0; i < subMeshes.length; i++) {
-                    meshVertexIndexBufferConcat.set(subMeshes[i], meshVertexBufferOffsetBytes[i] / 2);
-                }
-                meshVertexIndexBuffer = gl.createBuffer();
-                gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
-                gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBufferConcat, c.GL_STATIC_DRAW);
-                glState.meshBuffer = null;
-            },
+                    if (updateIndices){
+                        meshVertexIndexBufferConcat = new Uint16Array(indicesSize);
+                        for (i = 0; i < subMeshes.length; i++) {
+                            meshVertexIndexBufferConcat.set(subMeshes[i], meshVertexBufferOffsetBytes[i] / 2);
+                        }
+                        if (meshVertexIndexBufferConcat.length !== meshVertexIndexBufferLength || !meshVertexIndexBuffer){
+                            if (meshVertexIndexBuffer){
+                                gl.deleteBuffer(meshVertexIndexBuffer);
+                            }
+                            meshVertexIndexBuffer = gl.createBuffer();
+                        }
+                        gl.bindBuffer(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
+                        gl.bufferData(c.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBufferConcat, _meshData.usage);
+                        meshVertexIndexBufferLength = meshVertexIndexBufferConcat.length;
+                    }
+                    glState.meshBuffer = null;
+                }}(),
             contextListener = {
                 contextLost: function () {
                     meshVertexIndexBuffer = 0;
@@ -120,7 +147,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                     gl = newGl;
                     vertexArrayObject = {};
                     vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
-                    updateData();
+                    updateData(true, true, true);
                 }
             },
             bindBuffers = function(shader){
@@ -218,7 +245,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                     }
                     _meshData = newValue;
                     _aabb = null;
-                    updateData();
+                    updateData(true, true, true);
                 }
             },
             /**
@@ -235,6 +262,29 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 }
             }
         });
+
+        /**
+         * Gives more control over what parts of mesh data is uploaded to the GPU.
+         * @example
+         *      // Usual use case: Only update vertex data when updating an existing mesh
+         *      mesh.setMeshData(meshData, true);
+         * @method updateMeshData
+         * @param {kick.mesh.MeshData} meshData
+         * @param {Boolean} updateVertexData
+         * @param {Boolean} updateIndices
+         * @param {Boolean} updateVertexStructure
+         */
+        this.updateMeshData = function(meshData, updateVertexData, updateIndices, updateVertexStructure){
+            if (ASSERT) {
+                if (!(meshData instanceof MeshData)) {
+                    Util.fail("meshData must be instanceof kick.mesh.MeshData");
+                }
+            }
+            var updateAll = !_meshData; // if no mesh data update all
+            _meshData = meshData;
+            _aabb = null;
+            updateData(updateVertexData || updateAll, updateIndices || updateAll, updateVertexStructure || updateAll);
+        };
 
         /**
          * @method setDataURI
