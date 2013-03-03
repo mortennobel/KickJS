@@ -250,7 +250,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     }
                 },
                 /**
-                 * Must be either GL_STATIC_DRAW or GL_DYNAMIC_DRAW.
+                 * Must be either GL_STATIC_DRAW, GL_DYNAMIC_DRAW or GL_STREAM_DRAW.
                  * @property usage
                  * @type Number
                  * @default GL_STATIC_DRAW
@@ -261,8 +261,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     },
                     set: function (newValue) {
                         if (ASSERT) {
-                            if (newValue !== Constants.GL_STATIC_DRAW && newValue !== Constants.GL_DYNAMIC_DRAW) {
-                                Util.fail("MeshData.interleavedArray must be an ArrayBuffer");
+                            if (newValue !== Constants.GL_STATIC_DRAW && newValue !== Constants.GL_DYNAMIC_DRAW && newValue !== Constants.GL_STREAM_DRAW) {
+                                Util.fail("MeshData.usage Must be either GL_STATIC_DRAW, GL_DYNAMIC_DRAW or GL_STREAM_DRAW");
                             }
                         }
                         _usage = newValue;
