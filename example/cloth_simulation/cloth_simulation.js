@@ -6,8 +6,9 @@ requirejs.config({
     }
 });
 
-requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_vs.glsl'],
-    function (kick, fs, vs) {
+requirejs(['kick', 'text!diffuse_doubleside_vs.glsl', 'text!diffuse_doubleside_fs.glsl', 'text!background_vs.glsl', 'text!background_fs.glsl'],
+    function (kick, vs, fs, vsBackground, fsBackground ) {
+
         "use strict";
 // Cloth simulation based on Mosegaards Cloth Simulation Coding Tutorial
 // http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-coding-tutorial/
@@ -124,21 +125,20 @@ requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_v
             // modify the mesh to add colors in the corners (which will be interpolated as a smooth background)
             var meshData = backgroundMeshRenderer.mesh.meshData;
             var color = new Float32Array((meshData.vertex.length/3)*4);
-            var color1 = [146/255,194/255,136/255,1];
-            var color2 = [79/255,0,1,1];
+            var color1 = [190/255,193/255,248/255,1];
+            var color2 = [108/255,111/255,206/255,1];
             vec4.copy(color.subarray(0,4), color1);
             vec4.copy(color.subarray(4,8), color2);
             vec4.copy(color.subarray(8,12), color1);
             vec4.copy(color.subarray(12,16), color2);
             meshData.color = color;
             backgroundMeshRenderer.mesh.meshData = meshData;
-            var shaderUnlit = engine.project.load(engine.project.ENGINE_SHADER_UNLIT_VERTEX_COLOR);
+            var shaderUnlit = new kick.material.Shader({
+                vertexShaderSrc: vsBackground,
+                fragmentShaderSrc: fsBackground
+            });
             backgroundMeshRenderer.material = new kick.material.Material( {
-                shader: shaderUnlit,
-                uniformData: {
-                    mainColor: [1.0, 1.0, 1.0, 1.0],
-                    mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
-                }
+                shader: shaderUnlit
             });
             backgroundGO.addComponent(backgroundMeshRenderer);
             var transform = backgroundGO.transform;
@@ -270,6 +270,17 @@ requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_v
                 }
             };
 
+            /**
+             * @param {vec3} v
+             */
+            this.offsetPosSubstract = function(v) {
+                if(thisObj.movable) {
+                    // if(movable) pos += v;
+                    vec3.subtract(pos,pos,v);
+                }
+            };
+
+
             this.makeUnmovable = function() {
                 thisObj.movable = false;
             };
@@ -327,11 +338,10 @@ requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_v
             this.satisfyConstraint = function () {
                 vec3.subtract(tempVec3, p2.pos, p1.pos); // vector from p1 to p2
                 var current_distance = vec3.length(tempVec3); // current distance between p1 and p2
-                vec3.scale(tempVec3, tempVec3, 1 - rest_distance / current_distance);  // The offset vector that could moves p1 into a distance of rest_distance to p2
-                vec3.scale(tempVec3, tempVec3, 0.5); // Lets make it half that length, so that we can move BOTH p1 and p2.
+                vec3.scale(tempVec3, tempVec3, (1 - rest_distance / current_distance)   // The offset vector that could moves p1 into a distance of rest_distance to p2
+                                                * 0.5 ); // Lets make it half that length, so that we can move BOTH p1 and p2.
                 p1.offsetPos(tempVec3);
-                vec3.scale(tempVec3, tempVec3, -1.0);
-                p2.offsetPos(tempVec3);
+                p2.offsetPosSubstract(tempVec3);
             };
             Object.freeze(this);
         }
@@ -391,14 +401,6 @@ requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_v
                     var normal = vec3.create(),
                         d = vec3.create();
                     return function (p1, p2, p3, direction) {
-                        /**
-                         * Vec3 normal = calcTriangleNormal(p1,p2,p3);
-                         Vec3 d = normal.normalized();
-                         Vec3 force = normal*(d.dot(direction));
-                         p1->addForce(force);
-                         p2->addForce(force);
-                         p3->addForce(force);
-                         */
                         calcTriangleNormal(p1, p2, p3, normal);
                         vec3.normalize(d, normal);
                         var force = vec3.scale(normal, normal, vec3.dot(d, direction));
@@ -476,10 +478,10 @@ requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_v
                 // making the upper left most three and right most three particles unmovable
                 for(var i=0;i<3; i++)
                 {
-                    getParticle(0+i ,0).offsetPos(vec3.clone([0.5,0.0,0.0])); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
+                    getParticle(0+i ,0).offsetPos([0.5,0.0,0.0]); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
                     getParticle(0+i ,0).makeUnmovable();
 
-                    getParticle(0+i ,0).offsetPos(vec3.clone([-0.5,0.0,0.0])); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
+                    getParticle(0+i ,0).offsetPos([-0.5,0.0,0.0]); // moving the particle a bit towards the center, to make it hang more natural - because I like it ;)
                     getParticle(num_particles_width-1-i ,0).makeUnmovable();
                 }
             })();
@@ -648,8 +650,7 @@ requirejs(['kick', 'text!diffuse_doubleside_fs.glsl', 'text!diffuse_doubleside_v
                     meshData.normal = normals;
                     meshData.usage = kick.core.Constants.GL_STREAM_DRAW;
 
-
-                    meshRenderer.mesh.updateMeshData(meshData, true, false, false);
+                    meshRenderer.mesh.updateMeshData(meshData, true, false, false, false);
                 };
             })();
         }
