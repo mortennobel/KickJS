@@ -85,14 +85,19 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
              */
             updateData = function(){
                 var meshVertexAttBufferLength = -1,
-                    meshVertexIndexBufferLength = -1;
+                    meshVertexIndexBufferLength = -1,
+                    indicesSize = 0;
                 return function (updateVertexData, updateIndices, updateVertexStructure) {
                     var subMeshes = _meshData.subMeshes,
                         i,
                         indexLen,
-                        indicesSize = 0,
                         interleavedData = _meshData.interleavedArray,
-                        meshVertexIndexBufferConcat;
+                        meshVertexIndexBufferConcat,
+                        SIZE_OF_SHORT = 2;
+                    if (vertexArrayObjectExtension) {
+                        vertexArrayObjectExtension.bindVertexArrayOES(null);
+                    }
+
                     if (updateVertexStructure){
                         deleteVertexArrayObjects();
                         interleavedArrayFormat = _meshData.interleavedArrayFormat;
@@ -101,13 +106,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                         meshType = _meshData.meshType;
                         meshVertexBufferOffsetBytes.length = 0;
                         meshElements.length = 0;
+                        indicesSize = 0;
                         for (i = 0; i < subMeshes.length; i++) {
-                            meshVertexBufferOffsetBytes.push(indicesSize * 2);
+                            meshVertexBufferOffsetBytes.push(indicesSize * SIZE_OF_SHORT);
                             indexLen = subMeshes[i].length;
                             meshElements[i] = indexLen;
                             indicesSize += indexLen
                         }
                     }
+
                     if (updateVertexData){
                         if (interleavedData.length !== meshVertexAttBufferLength || !meshVertexAttBuffer){
                             if (meshVertexAttBuffer){
@@ -273,8 +280,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
          * @param {Boolean} updateVertexData
          * @param {Boolean} updateIndices
          * @param {Boolean} updateVertexStructure
+         * @param {Boolean} updateBoundingbox
          */
-        this.updateMeshData = function(meshData, updateVertexData, updateIndices, updateVertexStructure){
+        this.updateMeshData = function(meshData, updateVertexData, updateIndices, updateVertexStructure, updateBoundingbox){
             if (ASSERT) {
                 if (!(meshData instanceof MeshData)) {
                     Util.fail("meshData must be instanceof kick.mesh.MeshData");
@@ -282,7 +290,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             }
             var updateAll = !_meshData; // if no mesh data update all
             _meshData = meshData;
-            _aabb = null;
+            if (updateBoundingbox) {
+                _aabb = null;
+            }
             updateData(updateVertexData || updateAll, updateIndices || updateAll, updateVertexStructure || updateAll);
         };
 
