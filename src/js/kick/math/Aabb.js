@@ -146,6 +146,28 @@ define(["kick/core/Constants", "./Vec3", "./Mat4"], function (constants, vec3, m
             out[5] = Math.max(aabb[5], vpZ);
             return aabb;
         },
+        /**
+         * @method addPointIndexed
+         * @param {kick.math.Aabb} out
+         * @param {kick.math.Aabb} aabb
+         * @param {Array} a array of Numbers
+         * @param {Number} offset
+         * @return {kick.math.Aabb} aabb (same object as input)
+         * @static
+         */
+        addPointIndexed: function (out, aabb, a, offset) {
+            var vpX = a[0+offset],
+                vpY = a[1+offset],
+                vpZ = a[2+offset];
+            out[0] = Math.min(aabb[0], vpX);
+            out[1] = Math.min(aabb[1], vpY);
+            out[2] = Math.min(aabb[2], vpZ);
+            out[3] = Math.max(aabb[3], vpX);
+            out[4] = Math.max(aabb[4], vpY);
+            out[5] = Math.max(aabb[5], vpZ);
+            return aabb;
+        },
+
 
         /**
          * @method center
