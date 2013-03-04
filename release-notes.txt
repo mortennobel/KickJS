@@ -2,6 +2,9 @@ KickJS Release notes:
 
 0.5.2
 - Introduce common components (in kick.components)
+- Fixed problem with vertex array objects (WebGL extension) when updating mesh data
+- Improved performance of interleaving vertex data
+- Improved performance of AABB creation
 
 0.5.1
 - Updated to gl-matrix 2.1

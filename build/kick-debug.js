@@ -1,5 +1,5 @@
 /*!
- * KickJS 0.5.1 - New BSD License
+ * KickJS 0.5.2 - New BSD License
  * http://www.kickjs.org/
  * License: https://raw.github.com/mortennobel/KickJS/master/license.txt
  *
@@ -28,7 +28,7 @@ define('kick/core/Constants',[],function () {
          * @static
          * @final
          */
-        _VERSION: { value: "0.5.1", configurable: true, enumerable: true },
+        _VERSION: { value: "0.5.2", configurable: true, enumerable: true },
 
         /**
          * Allows usage of assertions in the code. The assertions will be set to false in the "compiled" code (this
@@ -6259,6 +6259,28 @@ define('kick/math/Aabb',["kick/core/Constants", "./Vec3", "./Mat4"], function (c
             out[5] = Math.max(aabb[5], vpZ);
             return aabb;
         },
+        /**
+         * @method addPointIndexed
+         * @param {kick.math.Aabb} out
+         * @param {kick.math.Aabb} aabb
+         * @param {Array} a array of Numbers
+         * @param {Number} offset
+         * @return {kick.math.Aabb} aabb (same object as input)
+         * @static
+         */
+        addPointIndexed: function (out, aabb, a, offset) {
+            var vpX = a[0+offset],
+                vpY = a[1+offset],
+                vpZ = a[2+offset];
+            out[0] = Math.min(aabb[0], vpX);
+            out[1] = Math.min(aabb[1], vpY);
+            out[2] = Math.min(aabb[2], vpZ);
+            out[3] = Math.max(aabb[3], vpX);
+            out[4] = Math.max(aabb[4], vpY);
+            out[5] = Math.max(aabb[5], vpZ);
+            return aabb;
+        },
+
 
         /**
          * @method center
@@ -6873,6 +6895,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                 _interleavedArray,
                 _interleavedArrayFormat,
                 _vertexAttrLength,
+                _usage = 35044,
                 _meshType,
                 _name,
                 clearInterleavedData = function () {
@@ -6961,11 +6984,14 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                         k,
                         vertex = thisObj.vertex,
                         vertexLen = vertex ?  vertex.length / 3 : 0,
+                        vertexOffset = 0,
                         description = {},
                         dataArrayBuffer,
-                        vertexOffset,
+                        floatView,
+                        intView,
                         dataSrc,
                         dataSrcLen,
+                        SIZE_OF_FLOAT_OR_INT = 4,
                         addAttributes = function (name, size, type) {
                             var array = thisObj[name];
 
@@ -6997,26 +7023,34 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                     addAttributes("int4", 4, 5124);
 
                     // copy data into array
-                    dataArrayBuffer = new ArrayBuffer(length * vertexLen * 4);
+                    if (_interleavedArray && _interleavedArray.length == length * vertexLen * SIZE_OF_FLOAT_OR_INT){
+                        dataArrayBuffer = _interleavedArray;
+                    } else {
+                        dataArrayBuffer = new ArrayBuffer(length * vertexLen * SIZE_OF_FLOAT_OR_INT);
+                    }
+
+                    floatView = new Float32Array(dataArrayBuffer, 0);
+                    intView = new Int32Array(dataArrayBuffer, 0);
                     for (i = 0; i < vertexLen; i++) {
-                        vertexOffset = i * length * 4;
                         for (j = 0; j < names.length; j++) {
-                            if (types[j] === 5126) {
-                                data = new Float32Array(dataArrayBuffer, vertexOffset);
-                            } else {
-                                data = new Int32Array(dataArrayBuffer, vertexOffset);
-                            }
                             dataSrc = vertexAttributes[j];
                             dataSrcLen = lengthOfVertexAttributes[j];
+
+                            if (types[j] === 5126) {
+                                data = floatView;
+                            } else {
+                                data = intView;
+                            }
+
                             for (k = 0; k < dataSrcLen; k++) {
-                                data[k] = dataSrc[i * dataSrcLen + k];
-                                vertexOffset += 4;
+                                data[vertexOffset] = dataSrc[i * dataSrcLen + k];
+                                vertexOffset += 1;
                             }
                         }
                     }
                     _interleavedArray = dataArrayBuffer;
                     _interleavedArrayFormat = description;
-                    _vertexAttrLength = length * 4;
+                    _vertexAttrLength = length * SIZE_OF_FLOAT_OR_INT;
                 };
 
             /**
@@ -7036,6 +7070,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                 numberOfSubMeshes = subMeshes.length;
                 chunkData.setNumber(4, numberOfSubMeshes);
                 chunkData.setNumber(5, thisObj.vertexAttrLength);
+                chunkData.setNumber(6, thisObj.usage);
                 for (i = 0; i < numberOfSubMeshes; i++) {
                     chunkData.set(10 + i, subMeshes[i]);
                 }
@@ -7060,11 +7095,13 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                     thisObj.name = chunkData.getString(3);
                     numberOfSubMeshes = chunkData.getNumber(4);
                     thisObj.vertexAttrLength = chunkData.getNumber(5);
+                    thisObj.usage = chunkData.getNumber(6) || 35044;
                     submeshes = [];
                     for (i = 0; i < numberOfSubMeshes; i++) {
                         submeshes[i] = chunkData.get(10 + i);
                     }
                     thisObj.subMeshes = submeshes;
+
                     return true;
                 }
                 return false;
@@ -7083,7 +7120,6 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                         var vertexLength,
                             aabb,
                             i,
-                            point,
                             vertex = thisObj.vertex;
                         if (!vertex) {
                             return null;
@@ -7091,10 +7127,28 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                         vertexLength = vertex.length;
                         aabb = Aabb.create();
                         for (i = 0; i < vertexLength; i += 3) {
-                            point = vertex.subarray(i, i + 3);
-                            Aabb.addPoint(aabb, aabb, point);
+                            Aabb.addPointIndexed(aabb, aabb, vertex, i);
                         }
                         return aabb;
+                    }
+                },
+                /**
+                 * Must be either GL_STATIC_DRAW, GL_DYNAMIC_DRAW or GL_STREAM_DRAW.
+                 * @property usage
+                 * @type Number
+                 * @default GL_STATIC_DRAW
+                 */
+                usage: {
+                    get: function () {
+                        return _usage;
+                    },
+                    set: function (newValue) {
+                        if (ASSERT) {
+                            if (newValue !== 35044 && newValue !== 35048 && newValue !== 35040) {
+                                Util.fail("MeshData.usage Must be either GL_STATIC_DRAW, GL_DYNAMIC_DRAW or GL_STREAM_DRAW");
+                            }
+                        }
+                        _usage = newValue;
                     }
                 },
                 /**
@@ -10226,7 +10280,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * faceCulling = GL\_NONE means face culling disabled
                  * @property faceCulling
                  * @type Object
-                 * @default Constants.GL\_BACK
+                 * @default 1029
                  */
                 faceCulling: {
                     get: function () { return _faceCulling; },
@@ -10272,7 +10326,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * kick.core.Constants.GL\_ALWAYS
                  * @property zTest
                  * @type Object
-                 * @default Constants.GL\_LESS
+                 * @default 513
                  */
                 zTest: {
                     get: function () { return _zTest; },
@@ -10325,7 +10379,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorRGB
                  * @type Number
-                 * @default Constants.GL\_SRC\_ALPHA
+                 * @default 770
                  */
                 blendSFactorRGB:{
                     get: function(){
@@ -10370,7 +10424,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendSFactorAlpha
                  * @type Number
-                 * @default Constants.GL\_SRC\_ALPHA
+                 * @default 770
                  */
                 blendSFactorAlpha:{
                     get: function(){
@@ -10434,7 +10488,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorRGB
                  * @type Number
-                 * @default Constants.GL\_ONE\_MINUS\_SRC\_ALPHA
+                 * @default 771
                  */
                 blendDFactorRGB: {
                     get: function(){
@@ -10477,7 +10531,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * See <a href="http://www.opengl.org/sdk/docs/man/xhtml/glBlendFunc.xml">glBlendFunc on opengl.org</a>
                  * @property blendDFactorAlpha
                  * @type Number
-                 * @default Constants.GL\_ONE\_MINUS\_SRC\_ALPHA
+                 * @default 771
                  */
                 blendDFactorAlpha: {
                     get: function(){
@@ -11340,7 +11394,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * Texture.wrapS should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapS
                  * @type Object
-                 * @default GL\_REPEAT
+                 * @default GL_REPEAT
                  */
                 wrapS: {
                     get: function () {
@@ -11359,7 +11413,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * Texture.wrapT should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapT
                  * @type Object
-                 * @default GL\_REPEAT
+                 * @default GL_REPEAT
                  */
                 wrapT: {
                     get: function () {
@@ -11379,7 +11433,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * GL\_LINEAR\_MIPMAP\_NEAREST, GL\_NEAREST\_MIPMAP\_LINEAR, GL\_LINEAR\_MIPMAP\_LINEAR<br>
                  * @property minFilter
                  * @type Object
-                 * @default GL\_LINEAR
+                 * @default GL_LINEAR
                  */
                 minFilter: {
                     get: function () {
@@ -11403,7 +11457,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * Texture.magFilter should be either GL\_NEAREST or GL\_LINEAR. <br>
                  * @property magFilter
                  * @type Object
-                 * @default GL\_LINEAR
+                 * @default GL_LINEAR
                  */
                 magFilter: {
                     get: function () {
@@ -11473,7 +11527,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * GL\_LUMINANCE_ALPHA
                  * @property internalFormat
                  * @type Number
-                 * @default GL\_RGBA
+                 * @default GL_RGBA
                  */
                 internalFormat: {
                     get: function () {
@@ -11498,7 +11552,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                  * GL\_TEXTURE_CUBE_MAP
                  * @property textureType
                  * @type Number
-                 * @default GL\_TEXTURE\_2D
+                 * @default GL_TEXTURE_2D
                  */
                 textureType: {
                     get: function () {
@@ -11595,21 +11649,24 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
             vertexAttrLength = 0,
             meshType,
             meshElements = [],
+            deleteVertexArrayObjects = function () {
+                for (var name in vertexArrayObject){
+                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                }
+                vertexArrayObject = {};
+            },
             deleteBuffersAndVertexArrayObjects = function () {
+                deleteVertexArrayObjects();
                 if (meshVertexIndexBuffer){
                     gl.deleteBuffer(meshVertexIndexBuffer);
                     meshVertexIndexBuffer = 0;
                 }
                 meshVertexBufferOffsetBytes.length = 0;
-                if (typeof meshVertexAttBuffer === "number") {
+                if (meshVertexAttBuffer) {
                     gl.deleteBuffer(meshVertexAttBuffer);
                     meshVertexAttBuffer = null;
                 }
                 meshElements.length = 0;
-                for (var name in vertexArrayObject){
-                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
-                }
-                vertexArrayObject = {};
             },
             createInterleavedArrayFormatArray = function () {
                 var obj,
@@ -11629,40 +11686,71 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
              * Copy data to the vertex buffer object (VBO)
              * @method updateData
              * @private
+             * @param {Boolean} updateVertexData
+             * @param {Boolean} updateIndices
+             * @param {Boolean} updateVertexStructure
              */
-            updateData = function () {
-                var subMeshes = _meshData.subMeshes,
-                    i,
-                    indexLen,
-                    indicesSize = 0,
-                    meshVertexIndexBufferConcat;
-                // delete current buffers and VAOs
-                deleteBuffersAndVertexArrayObjects();
+            updateData = function(){
+                var meshVertexAttBufferLength = -1,
+                    meshVertexIndexBufferLength = -1,
+                    indicesSize = 0;
+                return function (updateVertexData, updateIndices, updateVertexStructure) {
+                    var subMeshes = _meshData.subMeshes,
+                        i,
+                        indexLen,
+                        interleavedData = _meshData.interleavedArray,
+                        meshVertexIndexBufferConcat,
+                        SIZE_OF_SHORT = 2;
+                    if (vertexArrayObjectExtension) {
+                        vertexArrayObjectExtension.bindVertexArrayOES(null);
+                    }
 
-                interleavedArrayFormat = _meshData.interleavedArrayFormat;
-                createInterleavedArrayFormatArray();
-                vertexAttrLength = _meshData.vertexAttrLength;
-                meshType = _meshData.meshType;
+                    if (updateVertexStructure){
+                        deleteVertexArrayObjects();
+                        interleavedArrayFormat = _meshData.interleavedArrayFormat;
+                        createInterleavedArrayFormatArray();
+                        vertexAttrLength = _meshData.vertexAttrLength;
+                        meshType = _meshData.meshType;
+                        meshVertexBufferOffsetBytes.length = 0;
+                        meshElements.length = 0;
+                        indicesSize = 0;
+                        for (i = 0; i < subMeshes.length; i++) {
+                            meshVertexBufferOffsetBytes.push(indicesSize * SIZE_OF_SHORT);
+                            indexLen = subMeshes[i].length;
+                            meshElements[i] = indexLen;
+                            indicesSize += indexLen
+                        }
+                    }
 
-                meshVertexAttBuffer = gl.createBuffer();
-                gl.bindBuffer(34962, meshVertexAttBuffer);
-                gl.bufferData(34962, _meshData.interleavedArray, 35044);
+                    if (updateVertexData){
+                        if (interleavedData.length !== meshVertexAttBufferLength || !meshVertexAttBuffer){
+                            if (meshVertexAttBuffer){
+                                gl.deleteBuffer(meshVertexAttBuffer);
+                            }
+                            meshVertexAttBuffer = gl.createBuffer();
+                        }
+                        gl.bindBuffer(34962, meshVertexAttBuffer);
+                        gl.bufferData(34962, interleavedData, _meshData.usage);
+                        meshVertexAttBufferLength = interleavedData.length;
+                    }
 
-                for (i = 0; i < subMeshes.length; i++) {
-                    meshVertexBufferOffsetBytes.push(indicesSize * 2);
-                    indexLen = subMeshes[i].length;
-                    meshElements[i] = indexLen;
-                    indicesSize += indexLen
-                }
-                meshVertexIndexBufferConcat = new Uint16Array(indicesSize);
-                for (i = 0; i < subMeshes.length; i++) {
-                    meshVertexIndexBufferConcat.set(subMeshes[i], meshVertexBufferOffsetBytes[i] / 2);
-                }
-                meshVertexIndexBuffer = gl.createBuffer();
-                gl.bindBuffer(34963, meshVertexIndexBuffer);
-                gl.bufferData(34963, meshVertexIndexBufferConcat, 35044);
-                glState.meshBuffer = null;
-            },
+                    if (updateIndices){
+                        meshVertexIndexBufferConcat = new Uint16Array(indicesSize);
+                        for (i = 0; i < subMeshes.length; i++) {
+                            meshVertexIndexBufferConcat.set(subMeshes[i], meshVertexBufferOffsetBytes[i] / 2);
+                        }
+                        if (meshVertexIndexBufferConcat.length !== meshVertexIndexBufferLength || !meshVertexIndexBuffer){
+                            if (meshVertexIndexBuffer){
+                                gl.deleteBuffer(meshVertexIndexBuffer);
+                            }
+                            meshVertexIndexBuffer = gl.createBuffer();
+                        }
+                        gl.bindBuffer(34963, meshVertexIndexBuffer);
+                        gl.bufferData(34963, meshVertexIndexBufferConcat, _meshData.usage);
+                        meshVertexIndexBufferLength = meshVertexIndexBufferConcat.length;
+                    }
+                    glState.meshBuffer = null;
+                }}(),
             contextListener = {
                 contextLost: function () {
                     meshVertexIndexBuffer = 0;
@@ -11673,7 +11761,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                     gl = newGl;
                     vertexArrayObject = {};
                     vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
-                    updateData();
+                    updateData(true, true, true);
                 }
             },
             bindBuffers = function(shader){
@@ -11771,7 +11859,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                     }
                     _meshData = newValue;
                     _aabb = null;
-                    updateData();
+                    updateData(true, true, true);
                 }
             },
             /**
@@ -11788,6 +11876,32 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                 }
             }
         });
+
+        /**
+         * Gives more control over what parts of mesh data is uploaded to the GPU.
+         * @example
+         *      // Usual use case: Only update vertex data when updating an existing mesh
+         *      mesh.setMeshData(meshData, true);
+         * @method updateMeshData
+         * @param {kick.mesh.MeshData} meshData
+         * @param {Boolean} updateVertexData
+         * @param {Boolean} updateIndices
+         * @param {Boolean} updateVertexStructure
+         * @param {Boolean} updateBoundingbox
+         */
+        this.updateMeshData = function(meshData, updateVertexData, updateIndices, updateVertexStructure, updateBoundingbox){
+            if (ASSERT) {
+                if (!(meshData instanceof MeshData)) {
+                    Util.fail("meshData must be instanceof kick.mesh.MeshData");
+                }
+            }
+            var updateAll = !_meshData; // if no mesh data update all
+            _meshData = meshData;
+            if (updateBoundingbox) {
+                _aabb = null;
+            }
+            updateData(updateVertexData || updateAll, updateIndices || updateAll, updateVertexStructure || updateAll);
+        };
 
         /**
          * @method setDataURI
@@ -16458,6 +16572,18 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
          * A light object.<br>
          * Note that each scene can only have one ambient light and one directional light.
          * The directional light points in (0,0,1) direction (transformed by the GameObject transform)
+         * @example
+         *            var lightGameObject = engine.activeScene.createGameObject();
+         *            lightGameObject.transform.position = [0,0,10];
+         *
+         *            // add point light
+         *            var lightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_POINT});
+         *            lightGameObject.addComponent(lightComponent);
+         *
+         *            // add ambient light (only one per scene)
+         *            var ambientLightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_AMBIENT, colorIntensity: [0.1,0.1,0.1] });
+         *            lightGameObject.addComponent(ambientLightComponent);
+         *
          * @class Light
          * @namespace kick.scene
          * @extends kick.scene.Component
@@ -16622,7 +16748,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                  * @property type
                  * @type Enum
                  * @final
-                 * @default Light.TYPE\_POINT
+                 * @default Light.TYPE_POINT
                  */
                 type: {
                     get: function () {
@@ -16643,6 +16769,7 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                  * Light intensity (a multiplier to color)
                  * @property intensity
                  * @type Number
+                 * @default 1
                  */
                 intensity: {
                     get: function () {
@@ -19542,7 +19669,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * @final
                  */
                 version: {
-                    value: "0.5.1"
+                    value: "0.5.2"
                 },
                 /**
                  * Resource manager of the engine. Loads and cache resources.
@@ -21068,7 +21195,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                  * Texture.wrapS should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapS
                  * @type Object
-                 * @default GL\_REPEAT
+                 * @default GL_REPEAT
                  */
                 wrapS: {
                     get: function () {
@@ -21087,7 +21214,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                  * Texture.wrapT should be either GL\_CLAMP\_TO\_EDGE or GL\_REPEAT<br>
                  * @property wrapT
                  * @type Object
-                 * @default GL\_REPEAT
+                 * @default GL_REPEAT
                  */
                 wrapT: {
                     get: function () {
@@ -21107,7 +21234,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                  * GL\_LINEAR\_MIPMAP\_NEAREST, GL\_NEAREST\_MIPMAP\_LINEAR, GL\_LINEAR\_MIPMAP\_LINEAR<br>
                  * @property minFilter
                  * @type Object
-                 * @default GL\_LINEAR
+                 * @default GL_LINEAR
                  */
                 minFilter: {
                     get: function () {
@@ -21131,7 +21258,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                  * Texture.magFilter should be either GL\_NEAREST or GL\_LINEAR. <br>
                  * @property magFilter
                  * @type Object
-                 * @default GL\_LINEAR
+                 * @default GL_LINEAR
                  */
                 magFilter: {
                     get: function () {
@@ -21156,7 +21283,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                  * GL\_LUMINANCE_ALPHA
                  * @property internalFormat
                  * @type Number
-                 * @default GL\_RGBA
+                 * @default GL_RGBA
                  */
                 internalFormat: {
                     get: function () {
@@ -21209,11 +21336,211 @@ define('kick/texture',["./texture/MovieTexture", "./texture/RenderTexture", "./t
         };
     });
 
-define('kick',["kick/core", "kick/importer", "kick/material", "kick/math", "kick/mesh", "kick/scene", "kick/texture"],
-    function (core, importer, material, math, mesh, scene, texture) {
+define('kick/components/FullWindow',["kick/core"], function (core) {
+    
+
+        /**
+         * A simple class that adapts the size of the canvas to the containing window.
+         * The canvas need not to be positioned at the top.
+         * Note this works best if the body has a margin of 0
+         * @class FullWindow
+         * @extends kick.scene.Component
+         * @constructor
+         * @namespace kick.components
+         */
+        return function(){
+            var engine = core.Engine.instance,
+                canvas = engine.canvas;
+            function documentResized () {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight - canvas.offsetTop;
+                engine.canvasResized();
+            }
+            documentResized();
+
+            /**
+             * Registers the object on activation
+             * @method activated
+             */
+            this.activated = function(){
+                window.onresize = documentResized;
+            };
+        };
+    }
+);
+
+define('kick/components/FPSWalker',["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
+    
+        var DEGREE_TO_RADIAN = 0.01745329251994;
+        /**
+         * A simple walker class which can be added to a camera to navigate in a scene.
+         * @class FPSWalker
+         * @constructor
+         * @extends kick.scene.Component
+         * @namespace kick.components
+         */
+        return function(){
+            var engine,
+                transform,
+                keyInput,
+                mouseInput,
+                rotateY = 0,
+                rotateX = 0,
+                time,
+                position,
+                rotationEuler = math.Vec3.create(),
+                forward = "W".charCodeAt(0),
+                backward = "S".charCodeAt(0),
+                strideLeft = "A".charCodeAt(0),
+                strideRight = "D".charCodeAt(0),
+                thisObj = this,
+                camera;
+
+            /**
+             * Default behavior is to rotate view whenever mouse in being pressed. The rotation around X axis is clamped
+             * to +/- 179 degrees.
+             * @method rotateObject
+             */
+            this.rotateObject = function(){
+                if (mouseInput.isButton(0)){
+                    var deltaMovement = mouseInput.deltaMovement,
+                        rotationSpeed = 1/ (camera.viewportRect[3])*camera.fieldOfView;
+                    if (deltaMovement[0] !== 0 || deltaMovement[1] !== 0){
+                        // note horizontal movement rotates around Y axis
+                        rotateY += deltaMovement[0] * thisObj.rotateSpeedY * rotationSpeed;
+                        rotateX += deltaMovement[1] * thisObj.rotateSpeedX * rotationSpeed;
+                        rotateX = Math.max(-179, Math.min(179, rotateX));
+                        rotationEuler[0] = rotateX;
+                        rotationEuler[1] = rotateY;
+                        transform.localRotationEuler = rotationEuler;
+                    }
+                }
+            };
+
+            /**
+             * Move object based on movement keys (AWSD as default)
+             * @method moveObject
+             */
+            this.moveObject = function(){
+                var moveDistance = thisObj.movementSpeed * time.deltaTime,
+                    deltaZ = 0,
+                    deltaX = 0;
+                if (keyInput.isKey(forward)){
+                    deltaZ = -moveDistance;
+                } else if (keyInput.isKey(backward)){
+                    deltaZ = moveDistance;
+                }
+
+                if (keyInput.isKey(strideLeft)){
+                    deltaX = -moveDistance;
+                } else if (keyInput.isKey(strideRight)){
+                    deltaX = moveDistance;
+                }
+
+                // move in XZ plane
+                if (deltaX !== 0 || deltaZ !== 0){
+                    var rotateYRadian = -rotateY*DEGREE_TO_RADIAN,
+                        cosY = Math.cos(rotateYRadian),
+                        sinY = Math.sin(rotateYRadian);
+                    // rotate around y
+                    position[0] += deltaX * cosY - deltaZ * sinY;
+                    position[2] += deltaX * sinY + deltaZ * cosY;
+
+                    // adjust height
+                    position[1] = thisObj.getGroundHeight(position[0], position[2]);
+
+                    // update position
+                    transform.position = position;
+                }
+            };
+
+            /**
+             * @method setMovementKeys
+             * @param {Number} forward_
+             * @param {Number} backward_
+             * @param {Number} strideLeft_
+             * @param {Number} strideRight_
+             */
+            this.setMovementKeys = function(forward_, backward_, strideLeft_, strideRight_){
+                forward = forward_;
+                backward = backward_;
+                strideLeft = strideLeft_;
+                strideRight = strideRight_;
+            };
+
+            /**
+             * @property movementSpeed
+             * @type {number}
+             * @default 0.1
+             */
+            this.movementSpeed = 0.10;
+            /**
+             * @property rotateSpeedX
+             * @type {number}
+             * @default 1.0
+             */
+            this.rotateSpeedX = 1.00;
+            /**
+             * @property rotateSpeedY
+             * @type {number}
+             * @default 1.0
+             */
+            this.rotateSpeedY = 1.00;
+
+            /**
+             * Registers the object on activation
+             * @method activated
+             */
+            this.activated = function(){
+                engine = core.Engine.instance;
+                transform = thisObj.gameObject.transform;
+                keyInput = engine.keyInput;
+                mouseInput = engine.mouseInput;
+                time = engine.time;
+                position = transform.position;
+                camera = thisObj.gameObject.getComponentOfType(scene.Camera);
+                if (!camera){
+                    core.Util.fail("Camera not found");
+                }
+            };
+
+            /**
+             * @method update
+             */
+            this.update = function(){
+                this.rotateObject();
+                this.moveObject();
+            };
+
+            /**
+             * Return the height of the ground at position x,z
+             * @method getGroundHeight
+             * @param {Number} x
+             * @param {Number} z
+             * @returns {number}
+             */
+            this.getGroundHeight = function(x,z){
+                return 0;
+            };
+        };
+    }
+);
+
+define('kick/components',["./components/FullWindow", "./components/FPSWalker"], function (FullWindow, FPSWalker) {
+    
+
+    return {
+        FullWindow: FullWindow,
+        FPSWalker: FPSWalker
+    };
+});
+
+define('kick',["kick/core", "kick/importer", "kick/material", "kick/math", "kick/mesh", "kick/scene", "kick/texture", "kick/components"],
+    function (core, importer, material, math, mesh, scene, texture, components) {
         
         return {
             core: core,
+            components: components,
             importer: importer,
             material: material,
             math: math,
