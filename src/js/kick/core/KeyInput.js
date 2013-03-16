@@ -84,6 +84,32 @@ define(["./Util"], function (Util) {
         };
 
         /**
+         * @method isAnyKeyDown
+         * @return {boolean} true if any key is pressed down in this frame
+         */
+        this.isAnyKeyDown = function () {
+            return keyDown.length > 0;
+        };
+
+        /**
+         * @method isAnyKeyUp
+         * @return {boolean} true if any key is release in this frame
+         */
+        this.isAnyKeyUp = function () {
+            return keyUp.length > 0;
+        };
+
+        /**
+         *
+         * @method isAnyKey
+         * @return {boolean} true if any key is down
+         */
+        this.isAnyKey = function () {
+            return key.length > 0;
+        };
+
+
+        /**
          * This method clears key up and key downs each frame (leaving key unmodified)
          * @method update
          * @private
