@@ -1,5 +1,5 @@
-define(["./core/BuiltInResourceProvider", "./core/ChunkData", "./core/Config", "./core/Constants", "./core/Engine", "./core/EventQueue", "./core/GLState", "./core/KeyInput", "./core/MouseInput", "./core/Project", "./core/ProjectAsset", "./core/ResourceDescriptor", "./core/ResourceLoader", "./core/ResourceProvider", "./core/Time", "./core/URLResourceProvider", "./core/Util", "./core/EngineSingleton"],
-    function (BuiltInResourceProvider, ChunkData, Config, Constants, Engine, EventQueue, GLState, KeyInput, MouseInput, Project, ProjectAsset, ResourceDescriptor, ResourceLoader, ResourceProvider, Time, URLResourceProvider, Util, EngineSingleton) {
+define(["./core/BuiltInResourceProvider", "./core/ChunkData", "./core/Config", "./core/Constants", "./core/Engine", "./core/EventQueue", "./core/GLState", "./core/KeyInput", "./core/MouseInput", "./core/Project", "./core/ProjectAsset", "./core/ResourceDescriptor", "./core/ResourceLoader", "./core/ResourceProvider", "./core/Time", "./core/URLResourceProvider", "./core/Util", "./core/EngineSingleton", "./core/Observable"],
+    function (BuiltInResourceProvider, ChunkData, Config, Constants, Engine, EventQueue, GLState, KeyInput, MouseInput, Project, ProjectAsset, ResourceDescriptor, ResourceLoader, ResourceProvider, Time, URLResourceProvider, Util, EngineSingleton, Observable) {
         "use strict";
 
         return {
@@ -13,6 +13,7 @@ define(["./core/BuiltInResourceProvider", "./core/ChunkData", "./core/Config", "
             GLState: GLState,
             KeyInput: KeyInput,
             MouseInput: MouseInput,
+            Observable: Observable,
             Project: Project,
             ProjectAsset: ProjectAsset,
             ResourceDescriptor: ResourceDescriptor,

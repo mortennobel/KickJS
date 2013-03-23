@@ -559,6 +559,20 @@ YUI().use('node', 'console', 'test', function (Y) {
             shader2.renderOrder = 3;
             Y.Assert.areEqual(3, material2.renderOrder, "material2 has renderorder 3");
             Y.Assert.areEqual(3, meshRenderer.renderOrder, "meshrenderer has renderorder 3");
+        },
+        testObservable: function(){
+            var kick = KICK;
+            var observable = new kick.core.Observable();
+            Y.Assert.areEqual(0, observable.getObservers("Unused").length, "Observable must return a empty list on non-registered event names");
+            var fooValue = 0;
+            var eventListener = function(v){fooValue = v;};
+            observable.on("Foo", eventListener);
+            Y.Assert.areEqual(0, fooValue);
+            observable.fireEvent("Foo", 1);
+            Y.Assert.areEqual(1, fooValue);
+            observable.removeObserver("Foo", eventListener);
+            observable.fireEvent("Foo", 2);
+            Y.Assert.areEqual(1, fooValue);
         }
     });
 
