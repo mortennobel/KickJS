@@ -42,6 +42,54 @@
                             camera.pickPoint(objectPicked, mouseInput.mousePosition[0], mouseInput.mousePosition[1]);
                         }
                     };
+                }
+
+                function ShowTexture(){
+
+                    var cameraObject;
+                    var camera;
+                    var meshRenderer;
+                    this.activated = function () {
+                        var gameObject = this.gameObject;
+                        meshRenderer = new kick.scene.MeshRenderer();
+                        gameObject.addComponent(meshRenderer);
+                        meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
+
+                        gameObject.transform.position = [1000,1000,0];
+
+
+
+                        // create a game object in [0,0,0] facing down the -z axis
+                        cameraObject = engine.activeScene.createGameObject();
+                        cameraObject.transform.position = [1000,1000,1];
+                        // create a orthographic camera
+                        camera = new kick.scene.Camera({
+                            perspective: false,
+                                 left:-1,
+                                  right:1,
+                                  top:1,
+                                  bottom:-1,
+                                    cameraIndex:2
+                             });
+
+                    };
+
+                    this.update = function(){
+
+                        if (engine.keyInput.isAnyKeyDown()){
+                            meshRenderer.material = new kick.material.Material(
+                                    {
+                                        shader: engine.project.load(engine.project.ENGINE_SHADER_UNLIT),
+                                        uniformData:{
+                                            mainTexture: window.pickingRenderTarget
+                                        }
+                                    });
+                            cameraObject.addComponent(camera);
+                        }
+                        if (engine.keyInput.isAnyKeyUp()){
+                            cameraObject.removeComponent(camera);
+                        }
+                    };
                 };
 
                 function RotatorComponent(){
@@ -95,6 +143,7 @@
                         var camera = engine.activeScene.findComponentsOfType(kick.scene.Camera)[0];
                         camera.gameObject.addComponent(new RotatorComponent());
                         camera.gameObject.addComponent(new SomeComponent());
+                        engine.activeScene.createGameObject().addComponent(new ShowTexture());
                     }, function(err){
                         console.log(err);
                         debugger;
