@@ -562,8 +562,8 @@ YUI().use('node', 'console', 'test', function (Y) {
         },
         testObservable: function(){
             var kick = KICK;
-            var observable = new kick.core.Observable();
-            Y.Assert.areEqual(0, observable.getObservers("Unused").length, "Observable must return a empty list on non-registered event names");
+            var observable = new kick.core.Observable(["Foo"]);
+            Y.Assert.isUndefined(observable.getObservers("Unused"), "Observable must return a undefined on non-registered event names");
             var fooValue = 0;
             var eventListener = function(v){fooValue = v;};
             observable.on("Foo", eventListener);
@@ -573,6 +573,25 @@ YUI().use('node', 'console', 'test', function (Y) {
             observable.removeObserver("Foo", eventListener);
             observable.fireEvent("Foo", 2);
             Y.Assert.areEqual(1, fooValue);
+
+            observable.Foo = 123;// trigger error
+        },
+        testObservableMixin: function(){
+            var kick = KICK;
+            var observable = {};
+            kick.core.Observable.call(observable,["Foo"]);
+            Y.Assert.isUndefined(observable.getObservers("Unused"), "Observable must return a undefined on non-registered event names");
+            var fooValue = 0;
+            var eventListener = function(v){fooValue = v;};
+            observable.on("Foo", eventListener);
+            Y.Assert.areEqual(0, fooValue);
+            observable.fireEvent("Foo", 1);
+            Y.Assert.areEqual(1, fooValue);
+            observable.removeObserver("Foo", eventListener);
+            observable.fireEvent("Foo", 2);
+            Y.Assert.areEqual(1, fooValue);
+
+            observable.Foo = 123;// trigger error
         }
     });
 
