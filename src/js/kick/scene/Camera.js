@@ -12,6 +12,20 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
 
         /**
          * Creates a game camera
+         * @example
+         *     // create a game object in [0,0,0] facing down the -z axis
+         *     var cameraObject = engine.activeScene.createGameObject();
+         *     cameraObject.transform.position = [0,0,5];
+         *     // create a orthographic camera
+         *     var camera = new kick.scene.Camera({
+         *          perspective: false,
+         *          left:-5,
+         *          right:5,
+         *          top:5,
+         *          bottom:-5
+         *     });
+         *     cameraObject.addComponent(camera);
+         *
          * @class Camera
          * @namespace kick.scene
          * @extends kick.scene.Component
@@ -690,6 +704,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                  * Cameras with lowest number is rendered first.
                  * @property cameraIndex
                  * @type Number
+                 * @default 1
                  */
                 cameraIndex: {
                     get: function () {
