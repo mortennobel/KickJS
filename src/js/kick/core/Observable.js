@@ -3,13 +3,15 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
     var ASSERT = constants._ASSERT;
     /**
      * Mixin class that allows listening for specific events on a class.
-     * Inspired by the observer pattern, where the Observable class has the role of the Subject class from the pattern.
+     * Inspired by the observer pattern ( http://en.wikipedia.org/wiki/Observer_pattern ), where the Observable class
+     * has the role of the Subject class from the pattern.
      * Note that there is no Observer objects - only observer functions (observerFn).
      * The observable creates a fixed number of event listener queues for the class, which can be accessed using the
      * methods on, removeObserver and getObservers. Events can be fired using fireEvent.
      *
      * To use the class as mixin: kick.core.Observable.call(observableObject,["Foo"]);
      * @example
+     *     // 'raw usage'
      *     var observable = new kick.core.Observable(["Foo"]);
      *     var fooValue = 0;
      *     var eventListener = function(v){fooValue = v;};
@@ -20,6 +22,15 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
      *     observable.removeObserver("Foo", eventListener);
      *     observable.fireEvent("Foo", 2);
      *     // foo value is still 1, since the listener has been removed
+     * @example
+     *     // Use observer
+     *     var SomeClass = function(){
+     *         kick.core.Observable.call(this,["Foo"]);
+     *         // [...] rest of class
+     *     };
+     *     var o = new SomeClass();
+     *     o.on("Foo", function(){ console.log("Some foo!"); });
+     *
      * @class Observable
      * @abstract
      * @constructor
@@ -100,9 +111,11 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
         };
 
         /**
+         * Note that fire events should not be called from other classes
          * @method fireEvent
          * @param {String} eventName
          * @param {Object} obj
+         * @protected
          */
         this.fireEvent = function(eventName, obj){
             if (ASSERT){
