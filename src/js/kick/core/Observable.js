@@ -7,7 +7,7 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
      * has the role of the Subject class from the pattern.
      * Note that there is no Observer objects - only observer functions (observerFn).
      * The observable creates a fixed number of event listener queues for the class, which can be accessed using the
-     * methods on, removeObserver and getObservers. Events can be fired using fireEvent.
+     * methods addEventListener, removeEventListener and getObservers. Events can be fired using fireEvent.
      *
      * To use the class as mixin: kick.core.Observable.call(observableObject,["Foo"]);
      * @example
@@ -16,10 +16,10 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
      *     var fooValue = 0;
      *     var eventListener = function(v){fooValue = v;};
      *     // register event listener for event "Foo"
-     *     observable.on("Foo", eventListener);
+     *     observable.addEventListener("Foo", eventListener);
      *     observable.fireEvent("Foo", 1);
      *     // foo value is now 1
-     *     observable.removeObserver("Foo", eventListener);
+     *     observable.removeEventListener("Foo", eventListener);
      *     observable.fireEvent("Foo", 2);
      *     // foo value is still 1, since the listener has been removed
      * @example
@@ -29,7 +29,7 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
      *         // [...] rest of class
      *     };
      *     var o = new SomeClass();
-     *     o.on("Foo", function(){ console.log("Some foo!"); });
+     *     o.addEventListener("Foo", function(){ console.log("Some foo!"); });
      *
      * @class Observable
      * @abstract
@@ -54,12 +54,20 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
             observers[eventNames[i]] = [];
             if (ASSERT){
                 (function(name,obj){
-                    var errorFn = function(){
-                        Util.fail("Event "+name+" must be accessed using the methods on, removeObserver and getObservers");
-                    };
+                    var value;
                     Object.defineProperty(obj, name, {
-                        get:errorFn,
-                        set:errorFn
+                        get: function(){
+                            return value;
+                        },
+                        set: function(newValue){
+                            if (value){
+                                thisObj.removeEventListener(name, value);
+                            }
+                            value = newValue;
+                            if (value){
+                                thisObj.addEventListener(name, value);
+                            }
+                        }
                     });
                 })(eventNames[i], this);
             }
@@ -75,11 +83,11 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
 
         /**
          * Add an observer function
-         * @method on
+         * @method addEventListener
          * @param {String} eventName
          * @param {Function} observerFn
          */
-        this.on = function(eventName, observerFn){
+        this.addEventListener = function(eventName, observerFn){
             if (ASSERT){
                 if (typeof observerFn !== "function"){
                     Util.fail("observerFn must be a function");
@@ -93,11 +101,11 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
         };
 
         /**
-         * @method removeObserver
+         * @method removeEventListener
          * @param {String} eventName
          * @param {Function} observerFn
          */
-        this.removeObserver = function(eventName, observerFn){
+        this.removeEventListener = function(eventName, observerFn){
             if (ASSERT){
                 if (typeof observerFn !== "function"){
                     Util.fail("observerFn must be a function");
