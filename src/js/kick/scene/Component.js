@@ -63,6 +63,14 @@ define([], function () {
      */
 
     /**
+     * Fire events when components are updated.
+     * May be undefined.
+     * Must be defined before adding to gameObject.
+     * @event componentUpdated
+     * @param kick.scene.Component
+     */
+
+    /**
      * Creates a JSON version of the configuration of the class. May be undefined, if so the
      * kick.core.Util.componentToJSON() are used for serializaing of the component.<br>
      * Note that references to assets, gameObjects or other components should be wrapped by the kick.core.Util.getJSONReference() method

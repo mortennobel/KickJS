@@ -1,5 +1,5 @@
-define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constants", "kick/core/Util", "./Camera", "./Light", "./GameObject", "./ComponentChangedListener", "kick/core/EngineSingleton"],
-    function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, ComponentChangedListener, EngineSingleton) {
+define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constants", "kick/core/Util", "./Camera", "./Light", "./GameObject", "./ComponentChangedListener", "kick/core/EngineSingleton", "kick/core/Observable"],
+    function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, ComponentChangedListener, EngineSingleton, Observable) {
         "use strict";
 
         var DEBUG = Constants._DEBUG,
@@ -117,6 +117,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                             } else if (component instanceof Light) {
                                 addLight(component);
                             }
+                            thisObj.fireEvent("componentAdded", component);
                         }
                         for (i = componentListenes.length - 1; i >= 0; i--) {
                             componentListenes[i].componentsAdded(componentsNewCopy);
@@ -154,6 +155,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                             } else if (component instanceof Light) {
                                 removeLight(component);
                             }
+                            thisObj.fireEvent("componentRemoved", component);
                         }
                         for (i = componentListenes.length - 1; i >= 0; i--) {
                             componentListenes[i].componentsRemoved(componentsDeleteCopy);
@@ -183,11 +185,29 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     return gameObject;
                 };
 
+            Observable.call(this, [
+            /**
+             * Fired when a new component is added to scene
+             * @event componentAdded
+             * @param {kick.scene.Component}
+             */
+                "componentAdded",
+            /**
+             * Fired when a new component is removed from scene
+             * @event componentRemoved
+             * @param {kick.scene.Component}
+             */
+                "componentRemoved"
+            ]
+            );
+
             /**
              * @method notifyComponentUpdated
              * @param component {kick.scene.Component}
+             * @deprecated
              */
             this.notifyComponentUpdated = function (component) {
+                Util.fail("Use component.fireEvent('componentUpdated', component) instead");
                 for (i = componentListenes.length - 1; i >= 0; i--) {
                     componentListenes[i].componentUpdated(component);
                 }
@@ -292,7 +312,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             };
 
             /**
-             * Returns a gameobject identified by name
+             * Returns a GameObject identified by name
              * @method getGameObjectByName
              * @param {String} name
              * @return {kick.scene.GameObject} GameObject or undefined if not found

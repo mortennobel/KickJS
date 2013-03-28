@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick/mesh/Mesh", "kick/core/EngineSingleton"],
-    function (Constants, Material, Util, Mesh, EngineSingleton) {
+define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick/mesh/Mesh", "kick/core/EngineSingleton", "kick/core/Observable"],
+    function (Constants, Material, Util, Mesh, EngineSingleton, Observable) {
         "use strict";
 
         var ASSERT = Constants._ASSERT;
@@ -26,13 +26,18 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 updateRenderOrder = function() {
                     if (_materials.length > 0 && _renderOrder !== _materials[0].renderOrder){
                         _renderOrder = _materials[0].renderOrder;
-                        if (thisObj.gameObject) {
-                            thisObj.gameObject.notifyComponentUpdated(thisObj);
-                            return true;
-                        }
+                        thisObj.fireEvent("componentUpdated", this);
                     }
-                    return false;
                 };
+
+            Observable.call(this,
+                /**
+                 * Fired when mesh is updated
+                 * @event contextLost
+                 * @param kick.scene.Component
+                 */
+                ["componentUpdated"]
+            );
 
             /**
              * If no materials are assigned, the ENGINE\_MATERIAL\_DEFAULT is assigned as material.
@@ -87,9 +92,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                         _materials[0] = newValue;
                         _materials[0].addShaderChangeListener(updateRenderOrder);
                         _renderOrder = _materials[0].renderOrder;
-                        if (thisObj.gameObject) {
-                            thisObj.gameObject.notifyComponentUpdated(thisObj);
-                        }
+                        thisObj.fireEvent("componentUpdated", this);
                     }
                 },
                 /**
@@ -116,9 +119,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                             _materials[i] = newValue[i];
                             _materials[i].addShaderChangeListener(updateRenderOrder);
                         }
-                        if (thisObj.gameObject) {
-                            thisObj.gameObject.notifyComponentUpdated(thisObj);
-                        }
+                        thisObj.fireEvent("componentUpdated", this);
                     },
                     enumerable: true
                 },

@@ -378,7 +378,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
              * @deprecated
              */
             this.removeContextListener = function (contextLostListener) {
-                //return Util.removeElementFromArray(contextListeners, contextLostListener);
                 Util.fail("Use removeEventListener('contextLost', fn) / removeEventListener('contextRestored', fn)  instead");
                 thisObj.removeEventListener("contextLost", contextLostListener.contextLost);
                 thisObj.removeEventListener("contextRestored", contextLostListener.contextRestored);

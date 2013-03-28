@@ -596,6 +596,25 @@ YUI().use('node', 'console', 'test', function (Y) {
             observable.Foo = eventListener;
             observable.fireEvent("Foo", 3);
             Y.Assert.areEqual(3, fooValue);
+        },
+        testObservableMeshRenderer: function(){
+            var kick = KICK;
+            var meshRenderer = new kick.scene.MeshRenderer();
+            var value = 1;
+            var updateValue = function(){
+                value = 2;
+            };
+            var project = engine.project;
+            var material = new KICK.material.Material({
+                  shader: project.load(project.ENGINE_SHADER_DIFFUSE),
+                     uniformData:{
+                          mainColor:[1.0,0.0,0.9,0.5],
+                          mainTexture: project.load(project.ENGINE_TEXTURE_WHITE)
+                      }
+                  });
+            meshRenderer.addEventListener("componentUpdated", updateValue);
+            meshRenderer.material = material; // invokes componentUpdated
+            Y.Assert.areEqual(2, value);
         }
     });
 

@@ -169,9 +169,13 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
          * Invoked when component updated (such as material change).
          * @method notifyComponentUpdated
          * @param {kick.scene.Component} component
+         * @deprecated
          */
         this.notifyComponentUpdated = function (component) {
-            scene.notifyComponentUpdated(component);
+            Util.fail("Use component.fireEvent('componentUpdated', component) instead");
+            if (component.hasOwnProperty("componentUpdated")){
+                component.fireEvent("componentUpdated", component);
+            }
         };
 
         /**
