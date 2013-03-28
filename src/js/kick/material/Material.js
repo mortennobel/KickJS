@@ -181,6 +181,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             /**
              * @method removeShaderChangeListener
              * @param {Function} listenerFn
+             * @deprecated
              */
             this.removeShaderChangeListener = function (listenerFn) {
                 if (ASSERT) {
