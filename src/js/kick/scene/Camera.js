@@ -74,13 +74,11 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     currentCameraTransform: null
                 }),
                 isContextListenerRegistered = false,
-                contextListener = {
-                    contextLost: function () {
-                        gl = null;
-                    },
-                    contextRestored: function (newGL) {
-                        gl = newGL;
-                    }
+                contextLost = function () {
+                    gl = null;
+                },
+                contextRestored = function (newGL) {
+                    gl = newGL;
                 },
                 renderableComponentsBackGroundAndGeometry = [],
                 renderableComponentsTransparent = [],
@@ -419,7 +417,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 engineUniforms.currentCameraTransform = gameObject.transform;
                 if (!isContextListenerRegistered) {
                     isContextListenerRegistered = true;
-                    engine.addContextListener(contextListener);
+                    engine.addEventListener('contextLost', contextLost);
+                    engine.addEventListener('contextRestored', contextRestored);
                 }
                 transform = gameObject.transform;
                 gl = engine.gl;
@@ -818,7 +817,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
             this.destroy = function () {
                 if (isContextListenerRegistered) {
                     isContextListenerRegistered = false;
-                    engine.removeContextListener(contextListener);
+                    engine.removeEventListener('contextLost', contextLost);
+                    engine.removeEventListener('contextRestored', contextRestored);
                 }
             };
 

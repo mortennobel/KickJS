@@ -1,5 +1,5 @@
-define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./EngineSingleton", "./Shim"],
-    function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils, EngineSingleton, Shim_NotUsed) {
+define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", "./MouseInput", "./KeyInput", "./Config", "./Util", "./EventQueue", "kick/scene/Scene", "kick/math", "./Time", "./WebGLDebugUtils", "./EngineSingleton", "./Observable", "./Shim"],
+    function (require, GLState, Project, Constants, ResourceLoader, MouseInput, KeyInput, Config, Util, EventQueue, Scene, math, Time, WebGLDebugUtils, EngineSingleton, Observable, Shim_NotUsed) {
         "use strict";
 
         var ASSERT = Constants._ASSERT,
@@ -45,8 +45,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 timeSinceStart = 0,
                 frame = 0,
                 timeScale = 1,
-                contextListeners = [],
-                frameListeners = [],
                 eventQueue,
                 project = new Project(this),
                 mouseInput = null,
@@ -60,6 +58,31 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     }
                     thisObj._gameLoop(time_);
                 };
+
+            Observable.call(this, [
+                /**
+                 * Fired when gl-context is lost
+                 * @event contextLost
+                 */
+                "contextLost",
+                /**
+                 * Fired when gl-context is restored (after context has been lost).
+                 * @event contextRestored
+                 * @param {WebGLRenderingContext}
+                 */
+                "contextRestored",
+                /**
+                 * Fired before script updates methods has been run invoked
+                 * @event preUpdateListener
+                 */
+                "preUpdateListener",
+                /**
+                 * Fired after script updates methods has been run invoked
+                 * @event postUpdateListener
+                 */
+                "postUpdateListener"
+                ]
+            );
 
             Object.defineProperties(this, {
                 /**
@@ -102,7 +125,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 /**
                  * The WebGL context (readonly)
                  * @property gl
-                 * @type WebGLContext
+                 * @type WebGLRenderingContext
                  * @final
                  */
                 gl: {
@@ -146,7 +169,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     get: function () {
                         if (!mouseInput) {
                             mouseInput = new MouseInput(thisObj);
-                            thisObj.addFrameListener(mouseInput);
+                            thisObj.addEventListener('postUpdateListener', mouseInput.frameUpdated);
                         }
                         return mouseInput;
                     }
@@ -160,7 +183,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     get: function () {
                         if (!keyInput) {
                             keyInput = new KeyInput();
-                            thisObj.addFrameListener(keyInput);
+                            thisObj.addEventListener('postUpdateListener', keyInput.frameUpdated);
                         }
                         return keyInput;
                     }
@@ -308,9 +331,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 eventQueue.run();
 
                 activeScene.updateAndRender();
-                for (i = frameListeners.length - 1; i >= 0; i--) {
-                    frameListeners[i].frameUpdated();
-                }
+                thisObj.fireEvent("postUpdateListener");
 
                 if (animationFrameObj !== null) {
                     animationFrameObj = window.requestAnimationFrame(wrapperFunctionToMethodOnObject, thisObj.canvas);
@@ -322,44 +343,45 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
              * Frame listener object must define the method frameUpdated()
              * @method addFrameListener
              * @param {Object} frameListener
+             * @deprecated Use addEventListener("postUpdateListener", frameListener) instead
              */
             this.addFrameListener = function (frameListener) {
-                if (ASSERT) {
-                    if (typeof frameListener.frameUpdated !== "function") {
-                        Util.fail("frameListener must define the method frameUpdated");
-                    }
-                }
-                frameListeners.push(frameListener);
+                Util.fail("Use addEventListener('postUpdateListener', frameListener) instead");
+                thisObj.addEventListener("postUpdateListener", frameListener);
             };
 
             /**
              * @method removeFrameListener
              * @param {Object} frameListener
              * @return {boolean} element removed
+             * @deprecated
              */
             this.removeFrameListener = function (frameListener) {
-                return Util.removeElementFromArray(frameListeners, frameListener);
+                Util.fail("Use removeEventListener('postUpdateListener', frameListener) instead");
+                thisObj.removeEventListener("postUpdateListener", frameListener);
             };
 
             /**
              * @method addContextListener
              * @param {Object} contextLostListener implements contextLost() and contextRestored(gl)
+             * @deprecated
              */
             this.addContextListener = function (contextLostListener) {
-                if (ASSERT) {
-                    if ((typeof contextLostListener.contextLost !== "function") || (typeof contextLostListener.contextRestored !== "function")) {
-                        Util.fail("contextLostListener must define the functions contextLost() and contextRestored(gl)");
-                    }
-                }
-                contextListeners.push(contextLostListener);
+                Util.fail("Use addEventListener('contextLost', fn) / addEventListener('contextRestored', fn)  instead");
+                thisObj.addEventListener("contextLost", contextLostListener.contextLost);
+                thisObj.addEventListener("contextRestored", contextLostListener.contextRestored);
             };
 
             /**
              * @method removeContextListener
              * @param contextLostListener
+             * @deprecated
              */
             this.removeContextListener = function (contextLostListener) {
-                return Util.removeElementFromArray(contextListeners, contextLostListener);
+                //return Util.removeElementFromArray(contextListeners, contextLostListener);
+                Util.fail("Use removeEventListener('contextLost', fn) / removeEventListener('contextRestored', fn)  instead");
+                thisObj.removeEventListener("contextLost", contextLostListener.contextLost);
+                thisObj.removeEventListener("contextRestored", contextLostListener.contextRestored);
             };
 
 
@@ -466,9 +488,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 canvas.addEventListener("webglcontextlost", function (event) {
                     wasPaused = thisObj.paused;
                     thisObj.paused = true;
-                    for (i = 0; i < contextListeners.length; i++) {
-                        contextListeners[i].contextLost();
-                    }
+                    thisObj.fireEvent("contextLost");
                     event.preventDefault();
                     gl = null;
                 }, false);
@@ -476,9 +496,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     glState.clear();
                     thisObj.canvasResized(); // reset viewportSize
                     initGL();
-                    for (i = 0; i < contextListeners.length; i++) {
-                        contextListeners[i].contextRestored(gl);
-                    }
+                    thisObj.fireEvent("contextRestored", gl);
                     // restart rendering loop
                     if (!wasPaused) {
                         thisObj.paused = false;

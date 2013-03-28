@@ -211,10 +211,9 @@ define(["kick/core/Constants"], function (constants) {
             }
         };
 
-        engine.addContextListener({
-            contextLost: clearExtensions,
-            contextRestored: reloadExtensions
-        });
+        engine.addEventListener('contextLost', clearExtensions);
+        engine.addEventListener('contextRestored', reloadExtensions);
+
         reloadExtensions();
         if (ASSERT) {
             Object.preventExtensions(this);

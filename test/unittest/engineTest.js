@@ -566,15 +566,17 @@ YUI().use('node', 'console', 'test', function (Y) {
             Y.Assert.isUndefined(observable.getObservers("Unused"), "Observable must return a undefined on non-registered event names");
             var fooValue = 0;
             var eventListener = function(v){fooValue = v;};
-            observable.on("Foo", eventListener);
+            observable.addEventListener("Foo", eventListener);
             Y.Assert.areEqual(0, fooValue);
             observable.fireEvent("Foo", 1);
             Y.Assert.areEqual(1, fooValue);
-            observable.removeObserver("Foo", eventListener);
+            observable.removeEventListener("Foo", eventListener);
             observable.fireEvent("Foo", 2);
             Y.Assert.areEqual(1, fooValue);
 
-            observable.Foo = 123;// trigger error
+            observable.Foo = eventListener;
+            observable.fireEvent("Foo", 3);
+            Y.Assert.areEqual(3, fooValue);
         },
         testObservableMixin: function(){
             var kick = KICK;
@@ -583,15 +585,17 @@ YUI().use('node', 'console', 'test', function (Y) {
             Y.Assert.isUndefined(observable.getObservers("Unused"), "Observable must return a undefined on non-registered event names");
             var fooValue = 0;
             var eventListener = function(v){fooValue = v;};
-            observable.on("Foo", eventListener);
+            observable.addEventListener("Foo", eventListener);
             Y.Assert.areEqual(0, fooValue);
             observable.fireEvent("Foo", 1);
             Y.Assert.areEqual(1, fooValue);
-            observable.removeObserver("Foo", eventListener);
+            observable.removeEventListener("Foo", eventListener);
             observable.fireEvent("Foo", 2);
             Y.Assert.areEqual(1, fooValue);
 
-            observable.Foo = 123;// trigger error
+            observable.Foo = eventListener;
+            observable.fireEvent("Foo", 3);
+            Y.Assert.areEqual(3, fooValue);
         }
     });
 

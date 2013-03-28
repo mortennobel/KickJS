@@ -39,18 +39,14 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 thisObj = this,
                 gl = engine.gl,
                 _renderOrder = 0,
-                contextListener = {
-                    contextLost: function () {
-                    },
-                    contextRestored: function (newGL) {
-                        gl = newGL;
-                        // force shader update (will re-initialize uniforms)
-                        if (_shader) {
-                            _shader.contextRestored(newGL);
-                            var s = _shader;
-                            _shader = null;
-                            thisObj.shader = s;
-                        }
+                contextRestored= function (newGL) {
+                    gl = newGL;
+                    // force shader update (will re-initialize uniforms)
+                    if (_shader) {
+                        _shader.contextRestored(newGL);
+                        var s = _shader;
+                        _shader = null;
+                        thisObj.shader = s;
                     }
                 },
                 notifyShaderChange = function(){
@@ -304,7 +300,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             this.destroy = function () {
                 thisObj.shader = null;
                 engine.project.removeResourceDescriptor(thisObj.uid);
-                engine.removeContextListener(contextListener);
+                engine.removeEventListener('contextRestored', contextRestored);
             };
 
             /**
@@ -336,7 +332,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         name: conf.name,
                         shader: conf.shader
                     };
-                engine.addContextListener(contextListener);
+                engine.addEventListener('contextRestored', contextRestored);
                 Util.applyConfig(thisObj, configCopy, ["uid"]);
                 if (!_shader || !_shader.isValid()) {
                     if (conf.shader) {

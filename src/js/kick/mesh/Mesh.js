@@ -144,18 +144,16 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                     }
                     glState.meshBuffer = null;
                 }}(),
-            contextListener = {
-                contextLost: function () {
-                    meshVertexIndexBuffer = 0;
-                    meshVertexAttBuffer = null;
-                    gl = null;
-                },
-                contextRestored: function (newGl) {
-                    gl = newGl;
-                    vertexArrayObject = {};
-                    vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
-                    updateData(true, true, true);
-                }
+            contextLost = function () {
+                meshVertexIndexBuffer = 0;
+                meshVertexAttBuffer = null;
+                gl = null;
+            },
+            contextRestored = function (newGl) {
+                gl = newGl;
+                vertexArrayObject = {};
+                vertexArrayObjectExtension = glState.vertexArrayObjectExtension,
+                updateData(true, true, true);
             },
             bindBuffers = function(shader){
                 var i,
@@ -205,7 +203,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                 }
             };
 
-        engine.addContextListener(contextListener);
+        engine.addEventListener('contextLost', contextLost);
+        engine.addEventListener('contextRestored', contextRestored);
 
         Object.defineProperties(this, {
             /**
@@ -389,7 +388,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
         this.destroy = function () {
             if (meshVertexAttBuffer !== null) {
                 deleteBuffersAndVertexArrayObjects();
-                engine.removeContextListener(contextListener);
+                engine.removeEventListener('contextLost', contextLost);
+                engine.removeEventListener('contextRestored', contextRestored);
                 engine.project.removeResourceDescriptor(thisObj.uid);
             }
 

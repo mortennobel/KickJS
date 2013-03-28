@@ -339,7 +339,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 }
             };
 
-            engine.addContextListener(this);
+            engine.addEventListener('contextLost', this.contextLost);
+            engine.addEventListener('contextRestored', this.contextRestored);
 
             Object.defineProperties(this, {
                 /**
@@ -970,7 +971,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
              */
             this.destroy = function () {
                 if (_shaderProgramId !== -1) {
-                    engine.removeContextListener(thisObj);
+                    engine.removeEventListener('contextLost', thisObj.contextLost);
+                    engine.removeEventListener('contextRestored', thisObj.contextRestored);
                     gl.deleteProgram(_shaderProgramId);
                     _shaderProgramId = -1;
                     engine.project.removeResourceDescriptor(thisObj.uid);

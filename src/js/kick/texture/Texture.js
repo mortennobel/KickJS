@@ -61,19 +61,19 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     gl.generateMipmap(_textureType);
                     _isMipMapGenerated = true;
                 },
-                contextListener = {
-                    contextLost: function () {
-                        console.log("_textureId ", _textureId, gl);
-                        gl = null;
-                    },
-                    contextRestored: function (newGl) {
-                        gl = newGl;
-                        _textureId = gl.createTexture();
-                        if (createImageFunction) {
-                            createImageFunction.apply(thisObj, createImageFunctionParameters);
-                        }
+
+                contextLost = function () {
+                    console.log("_textureId ", _textureId, gl);
+                    gl = null;
+                },
+                contextRestored = function (newGl) {
+                    gl = newGl;
+                    _textureId = gl.createTexture();
+                    if (createImageFunction) {
+                        createImageFunction.apply(thisObj, createImageFunctionParameters);
                     }
-                };
+                }
+                ;
 
             /**
              * Trigger getImageData if dataURI is defined
@@ -129,7 +129,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 }
                 createImageFunction = null;
                 createImageFunctionParameters = null;
-                engine.removeContextListener(contextListener);
+                engine.removeEventListener('contextLost', contextLost);
+                engine.removeEventListener('contextRestored', contextRestored);
             };
 
             /**
@@ -591,7 +592,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 }
             };
             this.init(config);
-            engine.addContextListener(contextListener);
+
+            engine.addEventListener('contextLost', contextLost);
+            engine.addEventListener('contextRestored', contextRestored);
         };
 
     }
