@@ -278,7 +278,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
             Observable.call(this, [
             /**
              * Fired when shader is updated
-             * @event contextLost
+             * @event shaderUpdated
              * @param {kick.material.Shader}
              */
                 "shaderUpdated"

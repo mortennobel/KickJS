@@ -87,10 +87,10 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                             }
                         }
                         if (_materials.length > 0){
-                            _materials[0].removeShaderChangeListener(updateRenderOrder);
+                            _materials[0].removeEventListener("shaderChanged", updateRenderOrder);
                         }
                         _materials[0] = newValue;
-                        _materials[0].addShaderChangeListener(updateRenderOrder);
+                        _materials[0].addEventListener("shaderChanged", updateRenderOrder);
                         _renderOrder = _materials[0].renderOrder;
                         thisObj.fireEvent("componentUpdated", this);
                     }
@@ -107,7 +107,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                     set: function (newValue) {
                         var i;
                         for (i = 0;i < _materials.length; i++){
-                            _materials[i].removeShaderChangeListener(updateRenderOrder);
+                            _materials[i].removeEventListener("shaderChanged", updateRenderOrder);
                         }
                         _materials = [];
                         for (i = 0; i < newValue.length; i++) {
@@ -117,7 +117,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                                 }
                             }
                             _materials[i] = newValue[i];
-                            _materials[i].addShaderChangeListener(updateRenderOrder);
+                            _materials[i].addEventListener("shaderChanged", updateRenderOrder);
                         }
                         thisObj.fireEvent("componentUpdated", this);
                     },

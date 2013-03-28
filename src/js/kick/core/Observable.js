@@ -45,6 +45,9 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
                     if (typeof eventName !== "string"){
                         Util.fail("eventName must be a string");
                     }
+                    if (!observers[eventName]){
+                        Util.fail("Event name "+eventName+" not found");
+                    }
                 }
                 return observers[eventName];
             },
@@ -129,6 +132,9 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
             if (ASSERT){
                 if (typeof eventName !== "string"){
                     Util.fail("eventName must be a string");
+                }
+                if (!observers[eventName]){
+                    Util.fail("Event name "+eventName+" not found");
                 }
             }
             var observerList = observers[eventName],

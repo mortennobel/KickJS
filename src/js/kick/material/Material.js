@@ -1,5 +1,5 @@
-define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Shader", "./MaterialUniform", "kick/core/EngineSingleton"],
-    function (ProjectAsset, Util, Constants, Shader, MaterialUniform, EngineSingleton) {
+define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Shader", "./MaterialUniform", "kick/core/EngineSingleton", "kick/core/Observable"],
+    function (ProjectAsset, Util, Constants, Shader, MaterialUniform, EngineSingleton, Observable) {
         "use strict";
 
         /**
@@ -35,7 +35,6 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 _name = "Material",
                 _shader = null,
                 _uniforms = [],
-                shaderChangeListeners = [],
                 thisObj = this,
                 gl = engine.gl,
                 _renderOrder = 0,
@@ -50,10 +49,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                     }
                 },
                 notifyShaderChange = function(){
-                    var i;
-                    for (i = 0; i < shaderChangeListeners.length; i++) {
-                        shaderChangeListeners[i](thisObj);
-                    }
+                    thisObj.fireEvent('shaderChanged', _shader);
                 },
                 /**
                  * Called when a shader is set or changed.
@@ -92,6 +88,16 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         }
                     }
                 };
+
+            Observable.call(this, [
+            /**
+             * Fired when shader is changed (set to a new instance)
+             * @event shaderChanged
+             * @param {kick.material.Shader}
+             */
+                "shaderChanged"
+            ]
+            );
 
             Object.defineProperties(this, {
                 /**
@@ -158,6 +164,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
              * Listener is notified whenever shader is changed
              * @method addShaderChangeListeners
              * @param {Function} listenerFn
+             * @deprecated
              */
             this.addShaderChangeListener = function (listenerFn) {
                 if (ASSERT) {
@@ -165,7 +172,10 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         Util.warn("Material.addShaderChangeListener: listenerFn not function");
                     }
                 }
-                shaderChangeListeners.push(listenerFn);
+
+                Util.fail("Use addEventListener('shaderChanged', listenerFn) instead");
+
+                thisObj.addEventListener("shaderChanged", listenerFn);
             };
 
             /**
@@ -178,7 +188,9 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         Util.warn("Material.removeShaderChangeListener: listenerFn not function");
                     }
                 }
-                Util.removeElementFromArray(shaderChangeListeners, listenerFn, true);
+                Util.fail("Use removeEventListener('shaderChanged', listenerFn) instead");
+
+                thisObj.removeEventListener("shaderChanged", listenerFn);
             };
 
             /**
