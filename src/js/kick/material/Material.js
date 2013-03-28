@@ -123,13 +123,13 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                         }
                         if (_shader !== newValue) {
                             if (_shader) {
-                                _shader.removeListener(decorateUniforms);
+                                _shader.removeEventListener("shaderUpdated", decorateUniforms);
                             }
                             _shader = newValue;
                             if (_shader) {
                                 _renderOrder = _shader.renderOrder;
                                 decorateUniforms();
-                                _shader.addListener(decorateUniforms);
+                                _shader.addEventListener("shaderUpdated", decorateUniforms);
                             }
                         }
                     }
