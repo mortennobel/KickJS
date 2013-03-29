@@ -1,5 +1,5 @@
-define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constants", "kick/core/Util", "./Camera", "./Light", "./GameObject", "./ComponentChangedListener", "kick/core/EngineSingleton", "kick/core/Observable"],
-    function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, ComponentChangedListener, EngineSingleton, Observable) {
+define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constants", "kick/core/Util", "./Camera", "./Light", "./GameObject", "kick/core/EngineSingleton", "kick/core/Observable"],
+    function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, EngineSingleton, Observable) {
         "use strict";
 
         var DEBUG = Constants._DEBUG,
@@ -31,7 +31,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 updateableComponents = [],
                 componentsNew = [],
                 componentsDelete = [],
-                componentListenes = [],
                 componentsAll = [],
                 cameras = [],
                 renderableComponents = [],
@@ -119,9 +118,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                             }
                             thisObj.fireEvent("componentAdded", component);
                         }
-                        for (i = componentListenes.length - 1; i >= 0; i--) {
-                            componentListenes[i].componentsAdded(componentsNewCopy);
-                        }
                     }
                 },/**
                  * Handle deletion of new gameobjects and components. This is done in a separate step to avoid problems
@@ -156,9 +152,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                                 removeLight(component);
                             }
                             thisObj.fireEvent("componentRemoved", component);
-                        }
-                        for (i = componentListenes.length - 1; i >= 0; i--) {
-                            componentListenes[i].componentsRemoved(componentsDeleteCopy);
                         }
                     }
                 },
@@ -202,18 +195,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             );
 
             /**
-             * @method notifyComponentUpdated
-             * @param component {kick.scene.Component}
-             * @deprecated
-             */
-            this.notifyComponentUpdated = function (component) {
-                Util.fail("Use component.fireEvent('componentUpdated', component) instead");
-                for (i = componentListenes.length - 1; i >= 0; i--) {
-                    componentListenes[i].componentUpdated(component);
-                }
-            };
-
-            /**
              * @method destroy
              */
             this.destroy = function () {
@@ -221,30 +202,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 if (thisObj === engine.activeScene) {
                     engine.activeScene = null;
                 }
-            };
-
-            /**
-             * Add a component listener to the scene. A component listener should contain two functions:
-             * {componentsAdded(components) and componentsRemoved(components)}.
-             * Throws an exception if the two required functions does not exist.
-             * @method addComponentListener
-             * @param {kick.scene.ComponentChangedListener} componentListener
-             */
-            this.addComponentListener = function (componentListener) {
-                if (!ComponentChangedListener.isComponentListener(componentListener)) {
-                    Util.fail("Component listener does not have the correct interface. " +
-                        "It should contain the two functions: " +
-                        "componentsAdded(components) and componentsRemoved(components)");
-                }
-                if (!componentListener.componentUpdated) {
-                    componentListener.componentUpdated = function () {};
-                    if (DEBUG) {
-                        Util.warn("componentListener has no componentUpdated method");
-                    }
-                }
-                componentListenes.push(componentListener);
-                // add current components to component listener
-                componentListener.componentsAdded(componentsAll);
             };
 
             /**
@@ -274,12 +231,29 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             };
 
             /**
-             * Removes a component change listener from the scene
-             * @method removeComponentListener
-             * @param {kick.scene.ComponentChangedListener} componentListener
+             * Search the scene for components of the specified type in the scene. Note that this
+             * method is slow - do not run in the the update function.
+             * @method findComponentsWithMethod
+             * @param {string} methodName
+             * @return {Array_kick.scene.Component} components
              */
-            this.removeComponentListener = function (componentListener) {
-                Util.removeElementFromArray(componentListenes, componentListener);
+            this.findComponentsWithMethod = function (methodName) {
+                if (ASSERT) {
+                    if (typeof methodName !== 'string') {
+                        Util.fail("Scene.findComponentsWithMethod expects a string");
+                    }
+                }
+                var res = [],
+                    i,
+                    j,
+                    component;
+                for (i = gameObjects.length - 1; i >= 0; i--) {
+                    component = gameObjects[i].getComponentsWithMethod(methodName);
+                    for (j = 0; j < component.length; j++) {
+                        res.push(component[j]);
+                    }
+                }
+                return res;
             };
 
             /**
