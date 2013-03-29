@@ -1,5 +1,8 @@
 KickJS Release notes:
 
+0.5.3
+- Implemented Observer pattern and refactored classes by introducing events (See kick.core.Observable)
+
 0.5.2
 - Introduce common components (in kick.components)
 - Fixed problem with vertex array objects (WebGL extension) when updating mesh data
