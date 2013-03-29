@@ -58,7 +58,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                             canvas,
                             shader,
                             ctx;
-                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER_TRANSPARENT_POINT_SPRITE) {
+                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER_SKYBOX) {
                             switch (uid) {
                             case Project.ENGINE_SHADER_DEFAULT:
                                 url = "kickjs://shader/default/";
@@ -104,6 +104,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 break;
                             case Project.ENGINE_SHADER_BUMPED_SPECULAR:
                                 url = "kickjs://shader/bumped_specular/";
+                                break;
+                            case Project.ENGINE_SHADER_SKYBOX:
+                                url = "kickjs://shader/skybox/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -748,6 +751,12 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          * @static
          */
         Project.ENGINE_SHADER_BUMPED_SPECULAR = -114;
+        /**
+         * @property ENGINE_SHADER_BUMPED_SPECULAR
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_SHADER_SKYBOX = -115;
         /**
          * @property ENGINE_TEXTURE_BLACK
          * @type Number

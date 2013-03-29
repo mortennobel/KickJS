@@ -1,4 +1,4 @@
-define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Transform, Util, Constants) {
+define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Observable"], function (Transform, Util, Constants, Observable) {
     "use strict";
 
     var ASSERT = Constants._ASSERT;
@@ -114,6 +114,22 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
                 }
             });
 
+        Observable.call(this, [
+        /**
+         * Fired when a new component is added to gameObject
+         * @event componentAdded
+         * @param {kick.scene.Component}
+         */
+            "componentAdded",
+        /**
+         * Fired when a new component is removed from gameObject
+         * @event componentRemoved
+         * @param {kick.scene.Component}
+         */
+            "componentRemoved"
+        ]
+        );
+
         /**
          * Get component by index.
          * @method getComponent
@@ -148,6 +164,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
             component.gameObject = this;
             _components.push(component);
             scene.addComponent(component);
+            thisObj.fireEvent("componentAdded", component);
         };
 
         /**
@@ -161,8 +178,10 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants"], function (Trans
             } catch (e) {
                 // ignore if gameObject cannot be deleted
             }
-            Util.removeElementFromArray(_components, component);
-            scene.removeComponent(component);
+            if (Util.removeElementFromArray(_components, component)){
+                scene.removeComponent(component);
+                thisObj.fireEvent("componentRemoved", component);
+            }
         };
 
         /**

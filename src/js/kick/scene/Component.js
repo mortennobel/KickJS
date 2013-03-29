@@ -50,8 +50,9 @@ define([], function () {
 
     /**
      * Default value is 1000<br>
-     * &lt; 2000 default geometry<br>
-     * 2000 - 2999 transparent geometry (sorted back-to-front when rendered)<br>
+     * &lt; 1999 default geometry<br>
+     * 1999 skybox<br>
+     * 2001 - 2999 transparent geometry (sorted back-to-front when rendered)<br>
      * &gt; 3000 overlay geometry rendered on top
      * @property renderOrder
      * @type Number

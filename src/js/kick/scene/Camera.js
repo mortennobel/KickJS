@@ -273,7 +273,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         }
                         if (!Util.contains(array, component)) {
                             Util.insertSorted(component, array, compareRenderOrder);
-                            component.addEventListener('componentUpdated', componentUpdated);
+                            if (component.componentUpdated){
+                                component.addEventListener('componentUpdated', componentUpdated);
+                            }
                         }
                     }
                 },
@@ -293,7 +295,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         }
                     }
                     if (removed) {
-                        component.removeEventListener('componentUpdated', componentUpdated);
+                        if (component.componentUpdated){
+                            component.removeEventListener('componentUpdated', componentUpdated);
+                        }
                     }
                     return removed;
                 },

@@ -100,12 +100,11 @@
             cameraObject.addComponent(camera);
 
             var gameObject = engine.activeScene.createGameObject();
-            meshRenderer = new kick.scene.MeshRenderer();
-
-            meshRenderer.mesh = new kick.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?slices=25&stacks=50?radius=1.0"});
 
 
             var shader = engine.project.load(engine.project.ENGINE_SHADER_SPECULAR);
+            meshRenderer = new kick.scene.MeshRenderer();
+            meshRenderer.mesh = new kick.mesh.Mesh({dataURI: "kickjs://mesh/uvsphere/?slices=25&stacks=50?radius=1.0"});
             meshRenderer.material = new kick.material.Material( {
                 shader: shader,
                 uniformData: {

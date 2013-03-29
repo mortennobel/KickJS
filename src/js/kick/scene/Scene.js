@@ -519,7 +519,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
          */
         Scene.createDefault = function () {
             var engine = EngineSingleton.engine,
-                newScene = new Scene(engine),
+                newScene = new Scene(),
                 gameObject = newScene.createGameObject();
             gameObject.addComponent(new Camera());
             return newScene;

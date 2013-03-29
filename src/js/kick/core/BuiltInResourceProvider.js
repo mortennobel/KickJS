@@ -92,6 +92,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
          *  <li><b>Transparent Point Unlit</b> Url: kickjs://shader/point\_transparent\_unlit/</li>
          *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent\_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent\_unlit/</li>
+         *  <li><b>Skybox</b> Url: kickjs://shader/skybox/</li>
          *  <li><b>Shadowmap</b> Url: kickjs://shader/\_\_shadowmap/</li>
          *  <li><b>Pick</b> Url: kickjs://shader/\_\_pick/</li>
          *  <li><b>Error</b> Url: kickjs://shader/\_\_error/<br></li>
@@ -107,6 +108,8 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                 blend = false,
                 polygonOffsetEnabled = false,
                 depthMask = true,
+                faceCulling = Constants.GL_BACK,
+                zTest = Constants.GL_LESS,
                 renderOrder = 1000,
                 glslConstants = GLSLConstants,
                 defaultUniforms = {},
@@ -157,6 +160,14 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                                 mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                                 pointSize: [50]
                             };
+                        } else if (shaderName === "skybox"){
+                            defaultUniforms = {
+                                mainColor: [1, 1, 1, 1],
+                                mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE)
+                            };
+                            faceCulling = Constants.GL_FRONT;
+                            zTest = Constants.GL_LEQUAL;
+                            renderOrder = 1999;
                         }
 
                     }
@@ -176,7 +187,8 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                     "unlit_vertex_color",
                     "bumped_specular",
                     "transparent_point_sprite",
-                    "transparent_unlit"];
+                    "transparent_unlit",
+                    "skybox"];
             if (url === "kickjs://shader/default/") {
                 url = "kickjs://shader/diffuse/";
             }
@@ -199,7 +211,9 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                 polygonOffsetEnabled: polygonOffsetEnabled,
                 vertexShaderSrc: vertexShaderSrc,
                 fragmentShaderSrc: fragmentShaderSrc,
-                defaultUniforms: defaultUniforms
+                defaultUniforms: defaultUniforms,
+                faceCulling: faceCulling,
+                zTest: zTest
             };
 
             Util.applyConfig(shaderDestination, config);
