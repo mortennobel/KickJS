@@ -514,12 +514,12 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
         /**
          * Create empty scene with camera
          * @method createDefault
-         * @param {kick.core.Engine} engine
          * @static
          * @return {kick.scene.Scene}
          */
-        Scene.createDefault = function (engine) {
-            var newScene = new Scene(engine),
+        Scene.createDefault = function () {
+            var engine = EngineSingleton.engine,
+                newScene = new Scene(engine),
                 gameObject = newScene.createGameObject();
             gameObject.addComponent(new Camera());
             return newScene;
