@@ -7,7 +7,12 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
 
         /**
          * Create a skybox object. Must be attached to a GameObject with camera component -
-         * otherwise nothing will be rendered.
+         * otherwise nothing will be rendered. The camera must have a near clipping plane less than 1.0 and a far
+         * clipping plane greater than 1.0, otherwise the skybox will be clipped.
+         *
+         * The skybox is rendered with render order 1999, which should be the last rendering of the opaque geometry to
+         * avoid overdraw.
+         *
          * @example
          *     var skyBox = new kick.scene.Skybox();
          *     skyBox.material = new kick.material.Material( {
