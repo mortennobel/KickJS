@@ -23,7 +23,10 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
                 strideLeft = "A".charCodeAt(0),
                 strideRight = "D".charCodeAt(0),
                 thisObj = this,
-                camera;
+                camera,
+                updateCameraObject = function () {
+                    camera = thisObj.gameObject.getComponentOfType(scene.Camera);
+                };
 
             /**
              * Default behavior is to rotate view whenever mouse in being pressed. The rotation around X axis is clamped
@@ -127,18 +130,24 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
                 mouseInput = engine.mouseInput;
                 time = engine.time;
                 position = transform.position;
-                camera = thisObj.gameObject.getComponentOfType(scene.Camera);
-                if (!camera){
-                    core.Util.fail("Camera not found");
-                }
+                updateCameraObject();
+                thisObj.gameObject.addEventListener("componentAdded", updateCameraObject);
+                thisObj.gameObject.addEventListener("componentRemoved", updateCameraObject);
+            };
+
+            this.deactivated = function(){
+                thisObj.gameObject.removeEventListener("componentAdded", updateCameraObject);
+                thisObj.gameObject.removeEventListener("componentRemoved", updateCameraObject);
             };
 
             /**
              * @method update
              */
             this.update = function(){
-                this.rotateObject();
-                this.moveObject();
+                if (camera){
+                    this.rotateObject();
+                    this.moveObject();
+                }
             };
 
             /**
