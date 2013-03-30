@@ -1,14 +1,16 @@
 define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
     "use strict";
-        var DEGREE_TO_RADIAN = core.Constants._DEGREE_TO_RADIAN;
+        var DEGREE_TO_RADIAN = core.Constants._DEGREE_TO_RADIAN,
+            Util = core.Util;
         /**
          * A simple walker class which can be added to a camera to navigate in a scene.
          * @class FPSWalker
          * @constructor
          * @extends kick.scene.Component
          * @namespace kick.components
+         * @param {Object} config
          */
-        return function(){
+        return function(config){
             var engine,
                 transform,
                 keyInput,
@@ -135,6 +137,9 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
                 thisObj.gameObject.addEventListener("componentRemoved", updateCameraObject);
             };
 
+            /**
+             * @method deactivated
+             */
             this.deactivated = function(){
                 thisObj.gameObject.removeEventListener("componentAdded", updateCameraObject);
                 thisObj.gameObject.removeEventListener("componentRemoved", updateCameraObject);
@@ -160,6 +165,16 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
             this.getGroundHeight = function(x,z){
                 return 0;
             };
+
+            /**
+             * @method toJSON
+             * @return {JSON}
+             */
+            this.toJSON = function () {
+                return Util.componentToJSON(this, "kick.components.FPSWalker");
+            };
+
+            Util.applyConfig(this, config);
         };
     }
 );
