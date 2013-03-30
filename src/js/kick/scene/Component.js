@@ -73,7 +73,7 @@ define([], function () {
 
     /**
      * Creates a JSON version of the configuration of the class. May be undefined, if so the
-     * kick.core.Util.componentToJSON() are used for serializaing of the component.<br>
+     * kick.core.Util.componentToJSON() are used for serializing of the component.<br>
      * Note that references to assets, gameObjects or other components should be wrapped by the kick.core.Util.getJSONReference() method
      * @method toJSON
      * @return {Object}

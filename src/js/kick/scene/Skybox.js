@@ -29,7 +29,10 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 transform,
                 thisObj = this,
                 renderOrder = 1999,
-                gl;
+                gl,
+                contextRestoredListener = function(restoredGL){
+                    gl = restoredGL;
+                };
 
             Object.defineProperties(this, {
                 /**
@@ -67,7 +70,12 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     cube = engine.project.load(Project.ENGINE_MESH_CUBE);
                     transform = thisObj.gameObject.transform;
                 }
+                engine.addEventListener("contextRestored", contextRestoredListener);
                 gl = engine.gl;
+            };
+
+            this.deactivated = function(){
+                engine.removeEventListener("contextRestored", contextRestoredListener);
             };
 
             /**
@@ -86,7 +94,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     cube.render(0);
                     gl.depthRange(0,1);
                 }
-            }
+            };
 
             /**
              * @method toJSON
