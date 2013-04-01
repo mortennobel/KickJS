@@ -160,7 +160,7 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
              * @method getGroundHeight
              * @param {Number} x
              * @param {Number} z
-             * @returns {number}
+             * @return {number}
              */
             this.getGroundHeight = function(x,z){
                 return 0;
