@@ -1,7 +1,8 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
+        kick: location.search === "?local" ? "../../src/js/kick" :
+            (location.search === "?debug" ? '../../build/kick-debug' : '../../build/kick')
     }
 });
 
@@ -15,21 +16,21 @@ requirejs(['kick'],
                 constants = kick.core.Constants,
                 gameController;
 
-            function SnakeFood(snakeLevelComponent, snakes){
-                var position = [10,0,10],
+            function SnakeFood(snakeLevelComponent, snakes) {
+                var position = [10, 0, 10],
                     transform,
                     levelSize = snakeLevelComponent.size;
-                this.activated = function (){
+                this.activated = function () {
                     var engine = kick.core.Engine.instance,
                         shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE),
                         material = new kick.material.Material({
-                            shader:shader,
-                            name:"SnakeFood material",
-                            uniformData:{
-                                mainColor: [108/255,93/255,36/255,1]
+                            shader: shader,
+                            name: "SnakeFood material",
+                            uniformData: {
+                                mainColor: [108/255, 93/255, 36/255, 1]
                             }
                         }),
-                        mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE );
+                        mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
                     transform = this.gameObject.transform;
 
                     var meshRenderer = new kick.scene.MeshRenderer();
@@ -498,8 +499,8 @@ requirejs(['kick'],
 
             function documentResized(){
                 var canvas = document.getElementById('canvas');
-                canvas.width = document.width || document.body.clientWidth;
-                canvas.height = Math.max(600,(document.height || document.body.clientHeight)-canvas.offsetTop);
+                canvas.width = window.innerWidth;
+                canvas.height = Math.max(600,(window.innerHeight)-canvas.offsetTop);
                 engine.canvasResized();
             }
             documentResized();
