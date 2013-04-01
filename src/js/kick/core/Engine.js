@@ -68,7 +68,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 /**
                  * Fired when gl-context is restored (after context has been lost).
                  * @event contextRestored
-                 * @param {WebGLRenderingContext} glContext restored
+                 * @param {WebGLRenderingContext} glContext
                  */
                 "contextRestored",
                 /**

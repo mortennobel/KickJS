@@ -280,7 +280,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
             /**
              * Fired when shader is updated
              * @event shaderUpdated
-             * @param {kick.material.Shader} shader instance updated
+             * @param {kick.material.Shader} shaderInstance
              */
                 "shaderUpdated"
             ]
