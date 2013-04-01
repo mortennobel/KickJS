@@ -2,6 +2,7 @@ KickJS Release notes:
 
 0.5.3
 - Implemented Observer pattern and refactored classes by introducing events (See kick.core.Observable)
+- Added Skybox
 
 0.5.2
 - Introduce common components (in kick.components)
