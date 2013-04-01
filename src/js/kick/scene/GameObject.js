@@ -118,13 +118,13 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
         /**
          * Fired when a new component is added to gameObject
          * @event componentAdded
-         * @param {kick.scene.Component}
+         * @param {kick.scene.Component} component
          */
             "componentAdded",
         /**
          * Fired when a new component is removed from gameObject
          * @event componentRemoved
-         * @param {kick.scene.Component}
+         * @param {kick.scene.Component} component
          */
             "componentRemoved"
         ]

@@ -68,7 +68,7 @@ define([], function () {
      * May be undefined.
      * Must be defined before adding to gameObject.
      * @event componentUpdated
-     * @param kick.scene.Component
+     * @param {kick.scene.Component} component
      */
 
     /**

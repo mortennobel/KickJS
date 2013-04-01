@@ -182,13 +182,13 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             /**
              * Fired when a new component is added to scene
              * @event componentAdded
-             * @param {kick.scene.Component}
+             * @param {kick.scene.Component} component
              */
                 "componentAdded",
             /**
              * Fired when a new component is removed from scene
              * @event componentRemoved
-             * @param {kick.scene.Component}
+             * @param {kick.scene.Component} component
              */
                 "componentRemoved"
             ]
