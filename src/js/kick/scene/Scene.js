@@ -36,8 +36,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                 renderableComponents = [],
                 sceneLightObj = new SceneLights(engine.config.maxNumerOfLights),
                 _name = "Scene",
-                gl,
-                i,
                 thisObj = this,
                 addLight = function (light) {
                     if (light.type === Light.TYPE_AMBIENT) {
@@ -155,13 +153,30 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                         }
                     }
                 },
+                insertAndRemoveComponents = function () {
+                    var count = 0;
+                    while (gameObjectsDelete.length ||
+                            componentsDelete.length ||
+                            gameObjectsNew.length ||
+                            componentsNew.length) {
+                        cleanupGameObjects();
+                        addNewGameObjects();
+                        if (ASSERT) {
+                            count++;
+                            if (count > 10) {
+                                Util.fail("Recursion detected in Component.activated or Component.deactivated.");
+                                return;
+                            }
+                        }
+                    }
+                },
                 updateComponents = function () {
-                    cleanupGameObjects();
-                    addNewGameObjects();
+                    insertAndRemoveComponents();
                     var i;
                     for (i = updateableComponents.length - 1; i >= 0; i--) {
                         updateableComponents[i].update();
                     }
+                    insertAndRemoveComponents();
                 },
                 renderComponents = function () {
                     var i;
@@ -170,11 +185,28 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     }
                     engine.gl.flush();
                 },
+                componentAddedListener = function (component) {
+                    Util.insertSorted(component, componentsNew, sortByScriptPriority);
+                    var uid = engine.getUID(component);
+                    if (ASSERT) {
+                        if (objectsById[uid]) {
+                            Util.fail("Component with uid " + uid + " already exist");
+                        }
+                    }
+                    objectsById[uid] = component;
+                },
+                componentRemovedListener = function (component) {
+                    Util.removeElementFromArray(componentsNew, component);
+                    componentsDelete.push(component);
+                    delete objectsById[component.uid];
+                },
                 createGameObjectPrivate = function (config) {
                     var gameObject = new GameObject(thisObj, config);
                     gameObjectsNew.push(gameObject);
                     gameObjects.push(gameObject);
                     objectsById[gameObject.uid] = gameObject;
+                    gameObject.addEventListener("componentAdded", componentAddedListener);
+                    gameObject.addEventListener("componentRemoved", componentRemovedListener);
                     return gameObject;
                 };
 
@@ -257,26 +289,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             };
 
             /**
-             * Should only be called by GameObject when a component is added. If the component is updateable (implements
-             * update method) the components is added to the current list of updateable components after the update loop
-             * (so it will not recieve any update invocations in the current frame).
-             * If the component is renderable (implements), is it added to the renderer's components
-             * @method addComponent
-             * @param {kick.scene.Component} component
-             * @protected
-             */
-            this.addComponent = function (component) {
-                Util.insertSorted(component, componentsNew, sortByScriptPriority);
-                var uid = engine.getUID(component);
-                if (ASSERT) {
-                    if (objectsById[uid]) {
-                        Util.fail("Component with uid " + uid + " already exist");
-                    }
-                }
-                objectsById[uid] = component;
-            };
-
-            /**
              * @method getObjectByUID
              * @param {Number} uid
              * @return {Object} GameObject or component
@@ -300,17 +312,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                         return gameObject;
                     }
                 }
-            };
-
-
-            /**
-             * @method removeComponent
-             * @param {kick.scene} component
-             */
-            this.removeComponent = function (component) {
-                Util.removeElementFromArray(componentsNew, component);
-                componentsDelete.push(component);
-                delete objectsById[component.uid];
             };
 
             Object.defineProperties(this, {

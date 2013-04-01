@@ -18,7 +18,9 @@ define([], function () {
      * Abstract method called when a component is added to scene. May be undefined. <br>
      * This method method works in many cases like a constructor function, where references to other game objects can
      * be looked up (this cannot be done when the actual constructor function is called, since the scene may not be
-     * loaded completely).
+     * loaded completely).<br>
+     * Note that activated are called just after update methods on all components has been called - this makes it easier
+     * to get references to other components.
      * @method activated
      */
 

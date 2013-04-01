@@ -273,7 +273,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         }
                         if (!Util.contains(array, component)) {
                             Util.insertSorted(component, array, compareRenderOrder);
-                            if (component.componentUpdated){
+                            if (component.componentUpdated) {
                                 component.addEventListener('componentUpdated', componentUpdated);
                             }
                         }
@@ -447,7 +447,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 _scene.addEventListener('componentRemoved', componentRemoved);
                 // add current components in scene
                 componentsWithRender = _scene.findComponentsWithMethod("render");
-                for (i=0;i<componentsWithRender.length;i++){
+                for (i = 0; i < componentsWithRender.length; i++) {
                     componentAdded(componentsWithRender[i]);
                 }
 
