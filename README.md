@@ -42,6 +42,7 @@ http://www.kickjs.org/api/
  - Keyboard and mouse input
  - Serialization
  - Context lost handling
+ - Skybox
 
 ## Getting started tutorial
 
