@@ -30,7 +30,7 @@ define([],
                  * @param elementId select element to be modified
                  * @param constants array of GL constants
                  */
-                    addGLConstantToSelect = function (elementId, constants) {
+                addGLConstantToSelect = function (elementId, constants) {
                     var elem = document.getElementById(elementId),
                         options = elem.options,
                         i;
@@ -130,6 +130,8 @@ define([],
                     newOption.value = currentTextures.options.length;
                     currentTextures.add(newOption, null);
                 }
+                document.getElementById('textureDetails').style.display = 'none';
+                document.getElementById('texturePreview').style.display = 'none';
             };
 
             this.getTextureData = function () {
