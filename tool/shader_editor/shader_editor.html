@@ -77,8 +77,8 @@
     </div>
 </article>
 <div class="yui3-g" id="layout" style="padding-left:320px;padding-right: 10px;">
-<div class="yui3-u" id="nav" style="margin-left:-310px; width:300px;">
-    <canvas id="canvas" style="border: none;margin-bottom: -300px;" width="300" height="300"></canvas>
+<div class="yui3-u" id="nav" style="margin-left:-310px; width:320px;">
+    <canvas id="canvas" style="border: none; margin-bottom: -300px; width: 300px; height: 300px;" width="300" height="300"></canvas>
     <div id="logger" style="margin-top:300px;margin-bottom: -600px;"></div>
 </div>
 <div class="yui3-u" id="main" style="width:100%;">
@@ -192,18 +192,18 @@
                         <!--<input type="radio" name="mesh-settings" id="teapot" value="teapot"><label for="teapot"> Teapot</label></option><br>-->
                         <!--<input type="radio" name="mesh-settings" id="head" value="head"><label for="head"> *) 3D head (Lee Perry-Smith)</label> (<a href="http://www.ir-ltd.net/infinite-3d-head-scan-released">Creative Commons Attribution 3.0 Unported License</a>)</option>-->
 
-                        <button class='radio' id="cube" value="cube" title="Cube" style="background-image: url('images/cube.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="sphere" value="sphere" title="Sphere" style="background-image: url('images/sphere.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="plane" value="plane" title="Plane" style="background-image: url('images/plane.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="teapot" value="teapot" title="Teapot" style="background-image: url('images/teapot.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="head" value="head" title="3D head (Lee Perry-Smith)" style="background-image: url('images/head.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="points" value="points" title="Random points (inside the unit cube)" style="background-image: url('images/points.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="cube" value="cube" title="Cube" style="background-image: url('images/cube.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="sphere" value="sphere" title="Sphere" style="background-image: url('images/sphere.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="plane" value="plane" title="Plane" style="background-image: url('images/plane.png');background-position-x: 5px;background-position-y: 5px; background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="teapot" value="teapot" title="Teapot" style="background-image: url('images/teapot.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="head" value="head" title="3D head (Lee Perry-Smith)" style="background-image: url('images/head.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="points" value="points" title="Random points (inside the unit cube)" style="background-image: url('images/points.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                     </div>
 
                     <h3>Camera</h3>
                     <div id="projection">
-                        <button class='radio' id="perspective" value="perspective" title="Perspective camera" style="background-image: url('images/perspective.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="orthogonale" value="orthogonale" title="Orthogonal camera" style="background-image: url('images/orthogonal.png');background-position-x: 5px;background-position-y: 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="perspective" value="perspective" title="Perspective camera" style="background-image: url('images/perspective.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="orthogonale" value="orthogonale" title="Orthogonal camera" style="background-image: url('images/orthogonal.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                     </div>
                     <h3>Mesh movement</h3>
                     <div id="rotatemesh">
