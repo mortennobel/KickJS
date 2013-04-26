@@ -1,12 +1,22 @@
 requirejs.config({
     baseUrl: 'js',
     paths: {
-        kick: location.search === "?debug" ? '../../../build/kick-debug': '../../../build/kick'
+        kick: location.search === "?debug" ? '../../../build/kick-debug': '../../../build/kick',
+        text: '../../../dependencies/text',
+        shaders: '../shaders'
     }
 });
 
-requirejs(['kick', 'shader_editor_ui'],
-    function (KICK, ShaderEditorUI) {
+requirejs(['kick', 'shader_editor_ui',
+    'text!shaders/webgl-noise/noise2D.glsl',
+    'text!shaders/webgl-noise/noise3D.glsl',
+    'text!shaders/webgl-noise/noise4D.glsl',
+    'text!shaders/cellular-noise/cellular2D.glsl',
+    'text!shaders/cellular-noise/cellular2x2.glsl',
+    'text!shaders/cellular-noise/cellular2x2x2.glsl',
+    'text!shaders/cellular-noise/cellular3D.glsl'
+],
+    function (kick, ShaderEditorUI, noise2D, noise3D, noise4D, cellular2D, cellular2x2, cellular2x2x2, cellular3D) {
         "use strict";
 
         var ShaderEditor = function () {
@@ -66,10 +76,10 @@ requirejs(['kick', 'shader_editor_ui'],
                 },
                 setPointMesh = function(){
                     if (!pointMesh){
-                        var meshData = new KICK.mesh.MeshData(),
+                        var meshData = new kick.mesh.MeshData(),
                             numberOfParticles = 1000,
                             positions = new Float32Array(numberOfParticles*3),
-                            wrappedArray = KICK.math.Vec3.wrapArray(positions),
+                            wrappedArray = kick.math.Vec3.wrapArray(positions),
                             indices = new Uint16Array(numberOfParticles),
                             i;
                         for (i=0;i<numberOfParticles;i++){
@@ -80,14 +90,14 @@ requirejs(['kick', 'shader_editor_ui'],
                         }
                         meshData.indices = indices;
                         meshData.vertex = positions;
-                        meshData.meshType = KICK.core.Constants.GL_POINTS;
-                        pointMesh = new KICK.mesh.Mesh({meshData: meshData});
+                        meshData.meshType = kick.core.Constants.GL_POINTS;
+                        pointMesh = new kick.mesh.Mesh({meshData: meshData});
 
                     }
                     _meshRenderer.mesh = pointMesh;
                 },
                 setMesh = function (url) {
-                    var mesh = new KICK.mesh.Mesh({dataURI: url}),
+                    var mesh = new kick.mesh.Mesh({dataURI: url}),
                         meshData = mesh.meshData;
                     meshData.recalculateTangents();
                     mesh.meshData = meshData;
@@ -131,8 +141,8 @@ requirejs(['kick', 'shader_editor_ui'],
                         activeUniforms,
                         materialUniform;
                     shaderData.shader.uid = 0; // set shader uid to 0 (to avoid conflicts)
-                    shader = new KICK.material.Shader(shaderData.shader);
-                    shader.faceCulling = KICK.core.Constants.GL_NONE;
+                    shader = new kick.material.Shader(shaderData.shader);
+                    shader.faceCulling = kick.core.Constants.GL_NONE;
                     missingAttributes = _meshRenderer.mesh.verify(shader);
                     if (missingAttributes) {
                         logFn("Missing mesh vertex attributes.");
@@ -142,7 +152,7 @@ requirejs(['kick', 'shader_editor_ui'],
                     thisObj.textures = [];
                     for (i = 0; i < textures.length; i++) {
                         textureConf = textures[i];
-                        t = new KICK.texture.Texture();
+                        t = new kick.texture.Texture();
                         textureMapping[textureConf.uid] = t;
                         thisObj.updateTexture(t, textureConf);
                         thisObj.textures.push(t);
@@ -153,7 +163,7 @@ requirejs(['kick', 'shader_editor_ui'],
                     activeUniforms = shader.activeUniforms;
                     for (i = 0; i < activeUniforms.length; i++) {
                         uniform = activeUniforms[i];
-                        if (uniform.type === KICK.core.Constants.GL_SAMPLER_2D || uniform.type === KICK.core.Constants.GL_SAMPLER_CUBE) {
+                        if (uniform.type === kick.core.Constants.GL_SAMPLER_2D || uniform.type === kick.core.Constants.GL_SAMPLER_CUBE) {
                             materialUniform = shaderData.material.uniformData[uniform.name];
                             if (materialUniform) {
                                 if (materialUniform.ref) {
@@ -171,7 +181,7 @@ requirejs(['kick', 'shader_editor_ui'],
                         _meshRenderer.material.destroy();
                     }
                     shaderData.material.uid = 0; // remove uid (since that may be in use)
-                    _meshRenderer.material = new KICK.material.Material(shaderData.material);
+                    _meshRenderer.material = new kick.material.Material(shaderData.material);
                     lastValidMaterial = _meshRenderer.material.toJSON();
                 },
                 addRotatorComponent = function (gameObject) {
@@ -332,20 +342,20 @@ requirejs(['kick', 'shader_editor_ui'],
 
             this.initKick = function (onComplete, shader) {
                 try {
-                    _engine = new KICK.core.Engine('canvas', {
+                    _engine = new kick.core.Engine('canvas', {
                         preserveDrawingBuffer: true,
                         checkCanvasResizeInterval: 0,
                         enableDebugContext: location.search === "?debug" // debug enabled if query == debug
                     });
                     if (_engine.glState.standardDerivativesExtension){
-                        _engine.gl.hint(KICK.core.Constants.GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, KICK.core.Constants.GL_NICEST);
+                        _engine.gl.hint(kick.core.Constants.GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, kick.core.Constants.GL_NICEST);
                     }
                     var initEngine = function () {
                         var cameraObject = _engine.activeScene.createGameObject(),
                             gameObject,
                             ambientlightGameObject,
                             lightGameObject;
-                        camera = new KICK.scene.Camera({
+                        camera = new kick.scene.Camera({
                             clearColor: [0, 0, 0, 1],
                             perspective: false,
                             near: -1,
@@ -354,7 +364,7 @@ requirejs(['kick', 'shader_editor_ui'],
                         cameraObject.addComponent(camera);
 
                         gameObject = _engine.activeScene.createGameObject();
-                        _meshRenderer = new KICK.scene.MeshRenderer();
+                        _meshRenderer = new kick.scene.MeshRenderer();
                         setMesh("kickjs://mesh/plane/");
                         if (shader) {
                             // load saved content
@@ -365,12 +375,12 @@ requirejs(['kick', 'shader_editor_ui'],
                         addRotatorComponent(gameObject);
 
                         ambientlightGameObject = _engine.activeScene.createGameObject();
-                        _ambientLight = new KICK.scene.Light({type: KICK.scene.Light.TYPE_AMBIENT});
+                        _ambientLight = new kick.scene.Light({type: kick.scene.Light.TYPE_AMBIENT});
                         _ambientLight.color = [0.1, 0.1, 0.1];
                         ambientlightGameObject.addComponent(_ambientLight);
 
                         lightGameObject = _engine.activeScene.createGameObject();
-                        _light = new KICK.scene.Light({type: KICK.scene.Light.TYPE_DIRECTIONAL});
+                        _light = new kick.scene.Light({type: kick.scene.Light.TYPE_DIRECTIONAL});
                         lightGameObject.addComponent(_light);
                         _lightTransform = lightGameObject.transform;
                         onComplete();
@@ -395,8 +405,8 @@ requirejs(['kick', 'shader_editor_ui'],
                         if (name.substring(0, 1) !== "_" && !material.getUniform(name)) {
                             missingUniform = shader.lookupUniform[name];
                             switch (missingUniform.type) {
-                            case KICK.core.Constants.GL_SAMPLER_2D:
-                            case KICK.core.Constants.GL_SAMPLER_CUBE:
+                            case kick.core.Constants.GL_SAMPLER_2D:
+                            case kick.core.Constants.GL_SAMPLER_CUBE:
                                 for (i = 0; i < thisObj.textures; i++) {
                                     if (thisObj.textures[i].textureType === missingUniform.type) {
                                         defaultUniform = thisObj.textures[i];
@@ -404,7 +414,7 @@ requirejs(['kick', 'shader_editor_ui'],
                                 }
                                 isFound = defaultUniform;
                                 if (!isFound) {
-                                    if (missingUniform.type === KICK.core.Constants.GL_SAMPLER_2D) {
+                                    if (missingUniform.type === kick.core.Constants.GL_SAMPLER_2D) {
                                         texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_WHITE);
                                     } else {
                                         texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
@@ -462,11 +472,24 @@ requirejs(['kick', 'shader_editor_ui'],
                         // restore material
                         delete lastValidMaterial.uid;
                         lastValidMaterial.shader = shader;
-                        _meshRenderer.material = new KICK.material.Material(lastValidMaterial);
+                        _meshRenderer.material = new kick.material.Material(lastValidMaterial);
                     }
                 }
             };
         };
+
+        // allows other shaders to use noise functions when using the
+        // #pragma include "noise2D.glsl"
+        // or
+        // #pragma include "noise3D.glsl"
+        var glslConstants = kick.material.GLSLConstants;
+        glslConstants["noise2D.glsl"] = noise2D;
+        glslConstants["noise3D.glsl"] = noise3D;
+        glslConstants["noise4D.glsl"] = noise4D;
+        glslConstants["cellular2D.glsl"] = cellular2D;
+        glslConstants["cellular2x2.glsl"] = cellular2x2;
+        glslConstants["cellular2x2x2.glsl"] = cellular2x2x2;
+        glslConstants["cellular3D.glsl"] = cellular3D;
 
         var shaderEditor = new ShaderEditor();
         new ShaderEditorUI(shaderEditor);
