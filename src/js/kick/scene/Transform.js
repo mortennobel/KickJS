@@ -248,8 +248,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
          * Changes the rotation of the object to look at input (Transform) object.
          * @method lookAt
          * @param {kick.scene.Transform} transform target object to look at
-         * @param {Object} type the constructor of the wanted component
-         * @return {kick.math.Mat4} local transformation
+         * @param {kick.math.Vec3} up the up-vector used in the lookAt
          */
         this.lookAt = function (transform, up) {
             if (ASSERT) {
