@@ -2,6 +2,7 @@ precision mediump float;
 varying vec2 vUv;
 varying vec3 vNormal;
 varying vec3 vEcPosition;
+varying vec4 vShadowMapCoord;
 
 uniform vec4 mainColor;
 uniform float specularExponent;
@@ -22,7 +23,7 @@ void main(void)
     getPointLight(normal,vEcPosition, _pLights,specularExponent,diffusePoint,specularPoint);
     float visibility;
     if (SHADOWS){
-        visibility = computeLightVisibility();
+        visibility = computeLightVisibility(vShadowMapCoord);
     } else {
         visibility = 1.0;
     }

@@ -12,10 +12,12 @@ uniform mat4 _mvProj;
 uniform mat4 _mv; 
 uniform mat4 _world2object;
 uniform vec4 _worldCamPos;
+uniform mat4 _lightMat;
 
 varying vec2 v_uv;
 varying vec3 viewVec;
 varying vec3 lightVec;
+varying vec4 vShadowMapCoord;
 
 #pragma include "light.glsl"
  
@@ -43,4 +45,5 @@ void main()
     for (int i=0;i<LIGHTS;i++){
         pointLight[i] = _pLights[i][0] * tbn;
     }
+    vShadowMapCoord = _lightMat  * v;
 } 

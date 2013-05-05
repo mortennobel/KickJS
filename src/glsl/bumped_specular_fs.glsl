@@ -3,7 +3,8 @@ precision mediump float;
 varying vec2 v_uv;
 varying vec3 viewVec;
 varying vec3 lightVec;
-varying vec3 pointLight[LIGHTS]; 
+varying vec3 pointLight[LIGHTS];
+varying vec4 vShadowMapCoord;
 
 #pragma include "light.glsl"  
 #pragma include "shadowmap.glsl"
@@ -85,7 +86,7 @@ void main()
 
     float visibility;
     if (SHADOWS){
-        visibility = computeLightVisibility();
+        visibility = computeLightVisibility(vShadowMapCoord);
     } else {
         visibility = 1.0;
     }  

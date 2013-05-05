@@ -1,4 +1,3 @@
-varying vec4 vShadowMapCoord;
 uniform sampler2D _shadowMapTexture;
 
 const float shadowBias = 0.005;
@@ -18,7 +17,7 @@ float unpackDepth(const in vec4 rgba_depth)
     return depth;
 }
 
-float computeLightVisibility(){
+float computeLightVisibility(vec4 vShadowMapCoord){
     vec3 shadowCoord = vShadowMapCoord.xyz / vShadowMapCoord.w;
     if (shadowCoord.x >= 0.0 && shadowCoord.x <= 1.0 && shadowCoord.y >= 0.0 && shadowCoord.y <= 1.0){
         vec4 packedShadowDepth = texture2D(_shadowMapTexture,shadowCoord.xy);
