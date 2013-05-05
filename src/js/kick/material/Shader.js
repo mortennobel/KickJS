@@ -928,7 +928,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 gl.deleteShader(fragmentShader);
 
                 if (!gl.getProgramParameter(_shaderProgramId, Constants.GL_LINK_STATUS)) {
-                    errorLog("Could not initialise shaders");
+                    compileError = gl.getProgramInfoLog(_shaderProgramId);
+                    errorLog(compileError);
                     return false;
                 }
 
