@@ -261,7 +261,11 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 componentAdded = function (component) {
                     var renderOrder,
                         array;
-
+                    if (ASSERT){
+                        if (Array.isArray(component)){
+                            Util.fail("Should be array");
+                        }
+                    }
                     if (typeof (component.render) === "function" && (component.gameObject.layer & _layerMask)) {
                         renderOrder = component.renderOrder || 1000;
                         if (renderOrder < 2000) {
@@ -273,7 +277,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         }
                         if (!Util.contains(array, component)) {
                             Util.insertSorted(component, array, compareRenderOrder);
-                            if (component.componentUpdated) {
+                            if (component.addEventListener) {
                                 component.addEventListener('componentUpdated', componentUpdated);
                             }
                         }
@@ -289,13 +293,18 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 componentRemoved = function (component) {
                     var removed = false,
                         j;
+                    if (ASSERT){
+                        if (Array.isArray(component)){
+                            Util.fail("Should be array");
+                        }
+                    }
                     if (typeof (component.render) === "function") {
                         for (j = renderableComponentsArray.length - 1; j >= 0; j--) {
                             removed |= Util.removeElementFromArray(renderableComponentsArray[j], component);
                         }
                     }
                     if (removed) {
-                        if (component.componentUpdated){
+                        if (component.removeEventListener){
                             component.removeEventListener('componentUpdated', componentUpdated);
                         }
                     }

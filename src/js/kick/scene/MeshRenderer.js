@@ -26,7 +26,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 updateRenderOrder = function() {
                     if (_materials.length > 0 && _renderOrder !== _materials[0].renderOrder){
                         _renderOrder = _materials[0].renderOrder;
-                        thisObj.fireEvent("componentUpdated", this);
+                        thisObj.fireEvent("componentUpdated", thisObj);
                     }
                 };
 
