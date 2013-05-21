@@ -2,7 +2,8 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
     function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, EngineSingleton, Observable) {
         "use strict";
 
-        var DEBUG = Constants._DEBUG,
+        var warn = Util.warn,
+            DEBUG = Constants._DEBUG,
             ASSERT = Constants._ASSERT,
             Scene;
 
@@ -356,8 +357,27 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              * This call will call destroy on the gameObject
              * @method destroyObject
              * @param {kick.scene.GameObject} gameObject
+             * @deprecated
              */
             this.destroyObject = function (gameObject) {
+                var isMarkedForDeletion = Util.contains(gameObjectsDelete, gameObject);
+
+                if (!isMarkedForDeletion) {
+                    gameObjectsDelete.push(gameObject);
+                    delete objectsById[gameObject.uid];
+                }
+                if (!gameObject.destroyed) {
+                    gameObject.destroy();
+                }
+            };
+
+            /**
+             * Destroys the game object and delete it from the scene.
+             * This call will call destroy on the gameObject
+             * @method destroyGameObject
+             * @param {kick.scene.GameObject} gameObject
+             */
+            this.destroyGameObject = function (gameObject) {
                 var isMarkedForDeletion = Util.contains(gameObjectsDelete, gameObject);
                 if (!isMarkedForDeletion) {
                     gameObjectsDelete.push(gameObject);
