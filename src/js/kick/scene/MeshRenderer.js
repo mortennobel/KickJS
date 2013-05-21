@@ -34,7 +34,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                 /**
                  * Fired when mesh is updated
                  * @event contextLost
-                 * @param kick.scene.Component
+                 * @param {kick.scene.Component} component
                  */
                 ["componentUpdated"]
             );

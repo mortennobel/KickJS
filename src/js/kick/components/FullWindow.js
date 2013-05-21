@@ -13,7 +13,7 @@ define(["kick/core"], function (core) {
          * @namespace kick.components
          * @param {Object} config
          */
-        return function(){
+        return function () {
             var engine = core.Engine.instance,
                 canvas = engine.canvas,
                 resizeTimeout,

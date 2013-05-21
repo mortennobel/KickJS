@@ -93,7 +93,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             /**
              * Fired when shader is changed (set to a new instance)
              * @event shaderChanged
-             * @param {kick.material.Shader}
+             * @param {kick.material.Shader} shaderInstance
              */
                 "shaderChanged"
             ]
