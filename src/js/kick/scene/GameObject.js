@@ -198,7 +198,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
         /**
          * Destroys game object after next frame.
          * Removes all components instantly.
-         * This method will call destroyObject on the associated scene.
+         * This method will call destroyGameObject on the associated scene.
          * @method destroy
          */
         this.destroy = function () {
@@ -206,7 +206,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
             for (i = _components.length - 1; i >= 0; i--) {
                 thisObj.removeComponent(_components[i]);
             }
-            scene.destroyObject(thisObj);
+            scene.destroyGameObject(thisObj);
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
