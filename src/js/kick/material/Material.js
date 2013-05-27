@@ -5,7 +5,8 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
         /**
          * @module kick.material
          */
-        var ASSERT = Constants._ASSERT;
+        var ASSERT = Constants._ASSERT,
+            fail = Util.fail;
 
         /**
          * Material configuration. Stores a material configuration and a shader.
@@ -263,6 +264,10 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
             this.setUniform = function (name, value) {
                 if (value === undefined || value === null) {
                     return null;
+                }
+
+                if (ASSERT && typeof value === "number"){
+                    fail("setUniform(name,value) expect a value as a Float32Array|Int32Array|kick.texture.Texture - but was a number.");
                 }
                 var foundElement,
                     i;
