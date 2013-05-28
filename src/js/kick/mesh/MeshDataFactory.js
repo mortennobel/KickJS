@@ -1,4 +1,5 @@
-define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants", "kick/core/Util"], function (MeshData, Vec2, Vec3, Constants, Util) {
+define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants", "kick/core/Util"],
+    function (MeshData, Vec2, Vec3, Constants, Util) {
     "use strict";
 
     /**
@@ -50,6 +51,43 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
                     0, 0, 1
                 ],
                 indices: [0, 1, 2]
+            });
+        },
+        /**
+         * Creates a triangle in the XY plane
+         * @method createDiscData
+         * @param {Number} slices
+         * @static
+         * @return {kick.core.MeshData} triangle mesh
+         */
+        createDiscData : function (slices) {
+            if (!slices){
+                slices = 20;
+            }
+            var vertices = [0,0,0];
+            var uvs = [0.5,0.5];
+            var normals = [0,0,1];
+            var indices = [0];
+
+            for (var i=0;i<=slices;i++){
+                var fraction = 2*Math.PI*i/slices;
+                vertices.push(Math.sin(fraction));
+                vertices.push(-Math.cos(fraction));
+                vertices.push(0);
+                uvs.push(Math.sin(fraction)*0.5 + 0.5);
+                uvs.push(-Math.cos(fraction)*0.5 + 0.5);
+                normals.push(0);
+                normals.push(0);
+                normals.push(1);
+                indices.push(indices.length);
+            }
+            return new MeshData({
+                name: "Triangle",
+                vertex: vertices,
+                uv1: uvs,
+                normal: normals,
+                indices: indices,
+                meshType: Constants.GL_TRIANGLE_FAN
             });
         },
 

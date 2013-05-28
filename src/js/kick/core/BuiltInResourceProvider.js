@@ -32,6 +32,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
          * <ul>
          * <li><b>Triangle</b> Url: kickjs://mesh/triangle/</li>
          * <li><b>Plane</b> Url: kickjs://mesh/plane/<br></li>
+         * <li><b>Disc</b> Url: kickjs://mesh/disc/?slides=20<br></li>
          * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
          * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
          * <li><b>Point</b> Url: kickjs://mesh/point/</li>
@@ -56,6 +57,9 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                 meshDataObj = MeshDataFactory.createTriangleData();
             } else if (url.indexOf("kickjs://mesh/plane/") === 0) {
                 meshDataObj = MeshDataFactory.createPlaneData();
+            } else if (url.indexOf("kickjs://mesh/disc/") === 0) {
+                slices = getParameterInt(url, "slices");
+                meshDataObj = MeshDataFactory.createDiscData(slices);
             } else if (url.indexOf("kickjs://mesh/uvsphere/") === 0) {
                 slices = getParameterInt(url, "slices");
                 stacks = getParameterInt(url, "stacks");
