@@ -635,6 +635,14 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
         convertToTriangleIndices: function (indices, primitiveType, removeDegenerate) {
             if (primitiveType === Constants.GL_TRIANGLES){
                 return indices;
+            } else if (primitiveType === Constants.GL_TRIANGLE_FAN){
+                var res = [indices[0],indices[1],indices[2]];
+                for (var i=3;i<indices.length;i++){
+                    res.push(indices[0]);
+                    res.push(indices[i-1]);
+                    res.push(indices[i]);
+                }
+                return res;
             } else if (primitiveType !== Constants.GL_TRIANGLE_STRIP){
                 return null;
             }
