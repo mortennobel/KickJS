@@ -3181,6 +3181,14 @@ define('kick/core/Util',["require", "./Constants", "./EngineSingleton"], functio
         convertToTriangleIndices: function (indices, primitiveType, removeDegenerate) {
             if (primitiveType === 4){
                 return indices;
+            } else if (primitiveType === 6){
+                var res = [indices[0],indices[1],indices[2]];
+                for (var i=3;i<indices.length;i++){
+                    res.push(indices[0]);
+                    res.push(indices[i-1]);
+                    res.push(indices[i]);
+                }
+                return res;
             } else if (primitiveType !== 5){
                 return null;
             }
@@ -7773,7 +7781,8 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
         return MeshData;
     });
 
-define('kick/mesh/MeshDataFactory',["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants", "kick/core/Util"], function (MeshData, Vec2, Vec3, Constants, Util) {
+define('kick/mesh/MeshDataFactory',["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants", "kick/core/Util"],
+    function (MeshData, Vec2, Vec3, Constants, Util) {
     
 
     /**
@@ -7825,6 +7834,43 @@ define('kick/mesh/MeshDataFactory',["./MeshData", "kick/math/Vec2", "kick/math/V
                     0, 0, 1
                 ],
                 indices: [0, 1, 2]
+            });
+        },
+        /**
+         * Creates a disc in the XY plane
+         * @method createDiscData
+         * @param {Number} slices
+         * @static
+         * @return {kick.core.MeshData} triangle mesh
+         */
+        createDiscData : function (slices) {
+            if (!slices){
+                slices = 20;
+            }
+            var vertices = [0,0,0];
+            var uvs = [0.5,0.5];
+            var normals = [0,0,1];
+            var indices = [0];
+
+            for (var i=0;i<=slices;i++){
+                var fraction = 2*Math.PI*i/slices;
+                vertices.push(Math.sin(fraction));
+                vertices.push(-Math.cos(fraction));
+                vertices.push(0);
+                uvs.push(Math.sin(fraction)*0.5 + 0.5);
+                uvs.push(-Math.cos(fraction)*0.5 + 0.5);
+                normals.push(0);
+                normals.push(0);
+                normals.push(1);
+                indices.push(indices.length);
+            }
+            return new MeshData({
+                name: "Triangle",
+                vertex: vertices,
+                uv1: uvs,
+                normal: normals,
+                indices: indices,
+                meshType: 6
             });
         },
 
@@ -8295,6 +8341,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
          * <ul>
          * <li><b>Triangle</b> Url: kickjs://mesh/triangle/</li>
          * <li><b>Plane</b> Url: kickjs://mesh/plane/<br></li>
+         * <li><b>Disc</b> Url: kickjs://mesh/disc/?slides=20<br></li>
          * <li><b>UVSphere</b> Url: kickjs://mesh/uvsphere/?slides=20&stacks=10&radius=1.0<br>Note that the parameters is optional</li>
          * <li><b>Cube</b> Url: kickjs://mesh/cube/?length=1.0<br>Note that the parameters is optional</li>
          * <li><b>Point</b> Url: kickjs://mesh/point/</li>
@@ -8319,6 +8366,9 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                 meshDataObj = MeshDataFactory.createTriangleData();
             } else if (url.indexOf("kickjs://mesh/plane/") === 0) {
                 meshDataObj = MeshDataFactory.createPlaneData();
+            } else if (url.indexOf("kickjs://mesh/disc/") === 0) {
+                slices = getParameterInt(url, "slices");
+                meshDataObj = MeshDataFactory.createDiscData(slices);
             } else if (url.indexOf("kickjs://mesh/uvsphere/") === 0) {
                 slices = getParameterInt(url, "slices");
                 stacks = getParameterInt(url, "stacks");
@@ -12302,7 +12352,8 @@ define('kick/material/Material',["kick/core/ProjectAsset", "kick/core/Util", "ki
         /**
          * @module kick.material
          */
-        var ASSERT = true;
+        var ASSERT = true,
+            fail = Util.fail;
 
         /**
          * Material configuration. Stores a material configuration and a shader.
@@ -12560,6 +12611,10 @@ define('kick/material/Material',["kick/core/ProjectAsset", "kick/core/Util", "ki
             this.setUniform = function (name, value) {
                 if (value === undefined || value === null) {
                     return null;
+                }
+
+                if (ASSERT && typeof value === "number"){
+                    fail("setUniform(name,value) expect a value as a Float32Array|Int32Array|kick.texture.Texture - but was a number.");
                 }
                 var foundElement,
                     i;
@@ -17718,7 +17773,7 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
         /**
          * Destroys game object after next frame.
          * Removes all components instantly.
-         * This method will call destroyObject on the associated scene.
+         * This method will call destroyGameObject on the associated scene.
          * @method destroy
          */
         this.destroy = function () {
@@ -17726,7 +17781,7 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
             for (i = _components.length - 1; i >= 0; i--) {
                 thisObj.removeComponent(_components[i]);
             }
-            scene.destroyObject(thisObj);
+            scene.destroyGameObject(thisObj);
         };
         /**
          * Get the first component of a specified type. Internally uses instanceof.<br>
@@ -17859,7 +17914,8 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
     function (require, ProjectAsset, SceneLights, Constants, Util, Camera, Light, GameObject, EngineSingleton, Observable) {
         
 
-        var DEBUG = true,
+        var warn = Util.warn,
+            DEBUG = true,
             ASSERT = true,
             Scene;
 
@@ -18213,8 +18269,27 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
              * This call will call destroy on the gameObject
              * @method destroyObject
              * @param {kick.scene.GameObject} gameObject
+             * @deprecated
              */
             this.destroyObject = function (gameObject) {
+                var isMarkedForDeletion = Util.contains(gameObjectsDelete, gameObject);
+
+                if (!isMarkedForDeletion) {
+                    gameObjectsDelete.push(gameObject);
+                    delete objectsById[gameObject.uid];
+                }
+                if (!gameObject.destroyed) {
+                    gameObject.destroy();
+                }
+            };
+
+            /**
+             * Destroys the game object and delete it from the scene.
+             * This call will call destroy on the gameObject
+             * @method destroyGameObject
+             * @param {kick.scene.GameObject} gameObject
+             */
+            this.destroyGameObject = function (gameObject) {
                 var isMarkedForDeletion = Util.contains(gameObjectsDelete, gameObject);
                 if (!isMarkedForDeletion) {
                     gameObjectsDelete.push(gameObject);
@@ -21302,7 +21377,12 @@ define('kick/scene/Skybox',["require", "kick/core/ProjectAsset", "./SceneLights"
 
         /**
          * Create a skybox object. Must be attached to a GameObject with camera component -
-         * otherwise nothing will be rendered.
+         * otherwise nothing will be rendered. The camera must have a near clipping plane less than 1.0 and a far
+         * clipping plane greater than 1.0, otherwise the skybox will be clipped.
+         *
+         * The skybox is rendered with render order 1999, which should be the last rendering of the opaque geometry to
+         * avoid overdraw.
+         *
          * @example
          *     var skyBox = new kick.scene.Skybox();
          *     skyBox.material = new kick.material.Material( {
