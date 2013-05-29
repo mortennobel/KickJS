@@ -192,7 +192,8 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                     "bumped_specular",
                     "transparent_point_sprite",
                     "transparent_unlit",
-                    "skybox"];
+                    "skybox"
+                ];
             if (url === "kickjs://shader/default/") {
                 url = "kickjs://shader/diffuse/";
             }
@@ -241,7 +242,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
          */
         this.getImageData = function (uri, textureDestination, resourceTracker) {
             if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                resourceTracker.resourceLoadingStarted(url, textureDestination);
+                resourceTracker.resourceLoadingStarted(uri, textureDestination);
             }
             var data,
                 resourceLoadingFailed = function(){
