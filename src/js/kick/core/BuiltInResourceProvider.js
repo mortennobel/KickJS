@@ -247,7 +247,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
             var data,
                 resourceLoadingFailed = function(){
                     if (resourceTracker && resourceTracker.resourceLoadingFailed){
-                        resourceTracker.resourceLoadingFailed(url, textureDestination);
+                        resourceTracker.resourceLoadingFailed(uri, textureDestination);
                     }
                 },
                 img,
