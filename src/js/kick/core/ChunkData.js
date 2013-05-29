@@ -223,6 +223,7 @@ define(["./Util", "./Constants"], function (Util, constants) {
 
         /**
          * @method setString
+         * @param {Number} chunkId
          * @param {String} str
          */
         this.setString = function (chunkId, str) {
@@ -233,6 +234,7 @@ define(["./Util", "./Constants"], function (Util, constants) {
         /**
          * Uses a Float32Array for storing the number. Note that potentially precision can get lost.
          * @method setNumber
+         * @param {Number} chunkId
          * @param {Number} num
          */
         this.setNumber = function (chunkId, num) {
@@ -242,7 +244,8 @@ define(["./Util", "./Constants"], function (Util, constants) {
 
         /**
          * @method setArrayBuffer
-         * @param ArrayBuffer arrayBuffer
+         * @param {Number} chunkId
+         * @param {ArrayBuffer} arrayBuffer
          */
         this.setArrayBuffer = function (chunkId, arrayBuffer) {
             thisObj.set(chunkId, new Uint8Array(arrayBuffer));
@@ -252,7 +255,7 @@ define(["./Util", "./Constants"], function (Util, constants) {
          * Note that this method saves a reference to the array (it does not copy data)
          * @method set
          * @param {Number} chunkId
-         * @param {TypedArrayView[Number]} array
+         * @param {TypedArrayView} array
          */
         this.set = function (chunkId, array) {
             thisObj.remove(chunkId);
