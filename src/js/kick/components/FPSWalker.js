@@ -1,5 +1,5 @@
 define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
-    "use strict";
+        "use strict";
         var DEGREE_TO_RADIAN = core.Constants._DEGREE_TO_RADIAN,
             Util = core.Util;
         /**
@@ -58,7 +58,10 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
             this.moveObject = function(){
                 var moveDistance = thisObj.movementSpeed * time.deltaTime,
                     deltaZ = 0,
-                    deltaX = 0;
+                    deltaX = 0,
+                    rotateYRadian,
+                    cosY,
+                    sinY;
                 if (keyInput.isKey(forward)){
                     deltaZ = -moveDistance;
                 } else if (keyInput.isKey(backward)){
@@ -73,9 +76,9 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
 
                 // move in XZ plane
                 if (deltaX !== 0 || deltaZ !== 0){
-                    var rotateYRadian = -rotateY*DEGREE_TO_RADIAN,
-                        cosY = Math.cos(rotateYRadian),
-                        sinY = Math.sin(rotateYRadian);
+                    rotateYRadian = -rotateY*DEGREE_TO_RADIAN;
+                    cosY = Math.cos(rotateYRadian);
+                    sinY = Math.sin(rotateYRadian);
                     // rotate around y
                     position[0] += deltaX * cosY - deltaZ * sinY;
                     position[2] += deltaX * sinY + deltaZ * cosY;

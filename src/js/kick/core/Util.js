@@ -633,11 +633,14 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
          * @return {Array|null} triangleIndices or null if not possible to convert
          */
         convertToTriangleIndices: function (indices, primitiveType, removeDegenerate) {
+            var i,
+                even = 1,
+                trianleIndices = [indices[0], indices[1], indices[2]];
             if (primitiveType === Constants.GL_TRIANGLES){
                 return indices;
             } else if (primitiveType === Constants.GL_TRIANGLE_FAN){
                 var res = [indices[0],indices[1],indices[2]];
-                for (var i=3;i<indices.length;i++){
+                for (i = 3; i  <indices.length; i++) {
                     res.push(indices[0]);
                     res.push(indices[i-1]);
                     res.push(indices[i]);
@@ -646,15 +649,12 @@ define(["require", "./Constants", "./EngineSingleton"], function (require, Const
             } else if (primitiveType !== Constants.GL_TRIANGLE_STRIP){
                 return null;
             }
-            var i,
-                even = 1,
-                trianleIndices = [indices[0], indices[1], indices[2]];
 
-            for (i=3;i<indices.length;i++){
+            for (i = 3; i < indices.length; i++) {
                 if (removeDegenerate){
                     if (indices[i-1] === indices[i] ||
                         indices[i-2] === indices[i] ||
-                        indices[i-1] === indices[i-2]){
+                        indices[i-1] === indices[i-2]) {
                         continue;
                     }
                 }

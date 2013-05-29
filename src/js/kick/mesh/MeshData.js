@@ -149,7 +149,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                     addAttributes("int4", 4, Constants.GL_INT);
 
                     // copy data into array
-                    if (_interleavedArray && _interleavedArray.length == length * vertexLen * SIZE_OF_FLOAT_OR_INT){
+                    if (_interleavedArray && _interleavedArray.length === length * vertexLen * SIZE_OF_FLOAT_OR_INT){
                         dataArrayBuffer = _interleavedArray;
                     } else {
                         dataArrayBuffer = new ArrayBuffer(length * vertexLen * SIZE_OF_FLOAT_OR_INT);
@@ -346,13 +346,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/core/ChunkData", "kick/ma
                                 object;
                             if (newValue !== null) {
                                 for (n in newValue) {
-                                    object = newValue[n];
-                                    if (typeof (object) === "object") {
-                                        if (typeof (object.pointer) !== "number" ||
-                                                typeof (object.size) !== "number" ||
-                                                typeof (object.normalized) !== "boolean" ||
-                                                typeof (object.type) !== "number") {
-                                            Util.fail("Invalid object signature - expected {pointer:,size:,normalized:,type:}");
+                                    if (newValue.hasOwnProperty(n)){
+                                        object = newValue[n];
+                                        if (typeof object === "object") {
+                                            if (typeof (object.pointer) !== "number" ||
+                                                    typeof (object.size) !== "number" ||
+                                                    typeof (object.normalized) !== "boolean" ||
+                                                    typeof (object.type) !== "number") {
+                                                Util.fail("Invalid object signature - expected {pointer:,size:,normalized:,type:}");
+                                            }
                                         }
                                     }
                                 }

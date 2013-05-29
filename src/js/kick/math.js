@@ -1,5 +1,6 @@
 define(["./math/Vec2", "./math/Vec3", "./math/Vec4", "./math/Mat2","./math/Mat2d", "./math/Mat3", "./math/Mat4", "./math/Quat", "./math/Frustum", "./math/Aabb"],
     function (vec2, vec3, vec4, mat2, mat2d, mat3, mat4, quat, frustum, aabb) {
+        "use strict";
         return {
             Vec2: vec2,
             Vec3: vec3,

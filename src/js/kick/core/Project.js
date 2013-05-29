@@ -573,7 +573,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
 
                 /**
                  * @method getResourceDescriptorsByName
-                 * @param {String} type
+                 * @param {String} name
                  * @return {Array_kick.core.ResourceDescriptor}
                  */
                 this.getResourceDescriptorsByName = function (name) {

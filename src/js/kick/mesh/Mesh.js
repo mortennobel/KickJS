@@ -43,8 +43,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
             meshType,
             meshElements = [],
             deleteVertexArrayObjects = function () {
-                for (var name in vertexArrayObject){
-                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                var name;
+                for (name in vertexArrayObject){
+                    if (vertexArrayObject.hasOwnProperty(name)) {
+                        vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                    }
                 }
                 vertexArrayObject = {};
             },
@@ -83,7 +86,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
              * @param {Boolean} updateIndices
              * @param {Boolean} updateVertexStructure
              */
-            updateData = function(){
+            updateData = (function(){
                 var meshVertexAttBufferLength = -1,
                     meshVertexIndexBufferLength = -1,
                     indicesSize = 0;
@@ -111,7 +114,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                             meshVertexBufferOffsetBytes.push(indicesSize * SIZE_OF_SHORT);
                             indexLen = subMeshes[i].length;
                             meshElements[i] = indexLen;
-                            indicesSize += indexLen
+                            indicesSize += indexLen;
                         }
                     }
 
@@ -143,7 +146,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                         meshVertexIndexBufferLength = meshVertexIndexBufferConcat.length;
                     }
                     glState.meshBuffer = null;
-                }}(),
+                }}()),
             contextLost = function () {
                 meshVertexIndexBuffer = 0;
                 meshVertexAttBuffer = null;

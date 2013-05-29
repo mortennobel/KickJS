@@ -266,7 +266,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                             Util.fail("Should be array");
                         }
                     }
-                    if (typeof (component.render) === "function" && (component.gameObject.layer & _layerMask)) {
+                    if (typeof component.render === "function" && (component.gameObject.layer & _layerMask)) {
                         renderOrder = component.renderOrder || 1000;
                         if (renderOrder < 2000) {
                             array = renderableComponentsBackGroundAndGeometry;

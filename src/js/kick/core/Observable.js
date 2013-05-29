@@ -72,7 +72,7 @@ define(["kick/core/Util", "kick/core/Constants"], function (Util, constants) {
                             }
                         }
                     });
-                })(eventNames[i], this);
+                }(eventNames[i], this));
             }
         }
         /**

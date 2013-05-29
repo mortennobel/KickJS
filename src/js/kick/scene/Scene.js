@@ -444,6 +444,9 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
              */
             this.init = function(config){
                 var gameObject,
+                    mappingUidToObject,
+                    newGameObjects,
+                    configs,
                     hasProperty = Util.hasProperty,
                     applyConfig = Util.applyConfig,
                     i,
@@ -462,10 +465,10 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     };
                 if (config) {
                     _name = config.name || "Scene";
-                    var gameObjects = config.gameObjects || [],
-                        mappingUidToObject = {},
-                        newGameObjects = [],
-                        configs = {};
+                    gameObjects = config.gameObjects || [];
+                    mappingUidToObject = {};
+                    newGameObjects = [];
+                    configs = {};
                     // create game objects
                     (function createGameObjects() {
                         for (i = 0; i < gameObjects.length; i++) {

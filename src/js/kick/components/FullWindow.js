@@ -1,5 +1,5 @@
 define(["kick/core"], function (core) {
-    "use strict";
+        "use strict";
 
         var Util = core.Util;
 
@@ -22,7 +22,7 @@ define(["kick/core"], function (core) {
                     canvas.height = window.innerHeight - canvas.offsetTop;
                     engine.canvasResized();
                 },
-                // https://developer.mozilla.org/en-US/docs/DOM/Mozilla_event_reference/resize
+            // https://developer.mozilla.org/en-US/docs/DOM/Mozilla_event_reference/resize
                 resizeThrottler = function () {
                     // ignore resize events as long as an actualResizeHandler execution is in the queue
                     if ( !resizeTimeout ) {

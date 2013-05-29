@@ -62,6 +62,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
             /**
              * @method handlePickRequests
              * @param {kick.scene.SceneLights} sceneLightObj
+             * @param {kick.scene.EngineUniforms} engineUniforms
              */
             this.handlePickRequests = function (sceneLightObj, engineUniforms) {
                 if (pickingQueue.length > 0) {

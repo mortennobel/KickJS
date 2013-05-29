@@ -27,7 +27,7 @@ define(["./Constants"], function (Constants) {
                 currentEngine = newEngine;
             },
             get: function(){
-                if (currentEngine==null && Constants._DEBUG){
+                if (currentEngine === null && Constants._DEBUG){
                     console.log("Engine is not initialized yet.");
                 }
                 return currentEngine;

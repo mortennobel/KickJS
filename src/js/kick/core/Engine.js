@@ -3,7 +3,8 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
         "use strict";
 
         var ASSERT = Constants._ASSERT,
-            engineInstance = null;
+            engineInstance = null,
+            engine;
 
         /**
          * @module kick.core
@@ -33,7 +34,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
          * @param {String|canvas} idOrElement elementid of canvas tag or the canvas element
          * @param {kick.core.Config} config={} Configuration object
          */
-        var engine = function (idOrElement, config) {
+        engine = function (idOrElement, config) {
             var glState,
                 gl = null,
                 canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
@@ -81,7 +82,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * @event postUpdateListener
                  */
                 "postUpdateListener"
-                ]
+            ]
             );
 
             Object.defineProperties(this, {
@@ -153,7 +154,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                         return activeScene;
                     },
                     set: function (value) {
-                        if (value === null || typeof value === "undefined") {
+                        if (value === null || value === undefined) {
                             activeScene = activeSceneNull;
                         } else {
                             activeScene = value;
@@ -353,7 +354,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
             /**
              * @method removeFrameListener
              * @param {Object} frameListener
-             * @return {boolean} element removed
              * @deprecated
              */
             this.removeFrameListener = function (frameListener) {

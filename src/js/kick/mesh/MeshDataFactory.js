@@ -54,7 +54,7 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
             });
         },
         /**
-         * Creates a triangle in the XY plane
+         * Creates a disc in the XY plane
          * @method createDiscData
          * @param {Number} slices
          * @static
@@ -64,18 +64,19 @@ define(["./MeshData", "kick/math/Vec2", "kick/math/Vec3", "kick/core/Constants",
             if (!slices){
                 slices = 20;
             }
-            var vertices = [0,0,0];
-            var uvs = [0.5,0.5];
-            var normals = [0,0,1];
-            var indices = [0];
+            var vertices = [0,0,0],
+                uvs = [0.5,0.5],
+                normals = [0,0,1],
+                indices = [0],
+                i;
 
-            for (var i=0;i<=slices;i++){
-                var fraction = 2*Math.PI*i/slices;
+            for (i = 0; i <= slices; i++) {
+                var fraction = 2 * Math.PI * i / slices;
                 vertices.push(Math.sin(fraction));
                 vertices.push(-Math.cos(fraction));
                 vertices.push(0);
-                uvs.push(Math.sin(fraction)*0.5 + 0.5);
-                uvs.push(-Math.cos(fraction)*0.5 + 0.5);
+                uvs.push(Math.sin(fraction) * 0.5 + 0.5);
+                uvs.push(-Math.cos(fraction) * 0.5 + 0.5);
                 normals.push(0);
                 normals.push(0);
                 normals.push(1);

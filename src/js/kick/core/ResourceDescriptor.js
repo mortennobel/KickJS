@@ -94,7 +94,7 @@ define(["require","./Util", "./Constants", "./EngineSingleton"], function (requi
          */
         this.instantiate = function (onSuccess, onError) {
             if (ASSERT) {
-                if (typeof(onSuccess) !== "function"){
+                if (typeof onSuccess !== "function"){
                     console.log("ResourceDescriptor.onSuccess is not a function");
                 }
                 if (engine === onSuccess){

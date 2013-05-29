@@ -80,6 +80,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
             };
 
             this.deactivated = function(){
+                var engine = EngineSingleton.engine;
                 engine.removeEventListener("contextRestored", contextRestoredListener);
             };
 

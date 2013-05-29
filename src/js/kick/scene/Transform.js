@@ -226,7 +226,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                         Util.fail('Cannot assign parent to self');
                     }
                     if (ASSERT) {
-                        if (typeof newParent === 'undefined') {
+                        if (newParent === undefined) {
                             Util.fail("Cannot set newParent to undefined - should be null");
                         }
                     }

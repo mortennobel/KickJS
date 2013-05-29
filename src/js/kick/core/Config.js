@@ -187,18 +187,22 @@ define(["./Util", "./Constants"], function (Util, Constants) {
         }());
 
         if (Constants._DEBUG) {
-            for (var name in config) {
-                if (! this.hasOwnProperty(name)) {
-                    var supportedProperties = "Supported properties for kick.core.Config are: ";
-                    for (var n2 in this){
-                        if (this.hasOwnProperty(n2) && typeof this[n2] !== "function") {
-                            supportedProperties += "\n - "+n2;
+            (function (t) {
+                var name,
+                    supportedProperties,
+                    n2;
+                for (name in config) {
+                    if (config.hasOwnProperty(name) && !t.hasOwnProperty(name)) {
+                        supportedProperties = "Supported properties for kick.core.Config are: ";
+                        for (n2 in t){
+                            if (t.hasOwnProperty(n2) && typeof t[n2] !== "function") {
+                                supportedProperties += "\n - "+n2;
+                            }
                         }
+                        Util.warn("kick.core.Config does not have any property "+name+"\n"+supportedProperties);
                     }
-                    core.Util.warn("kick.core.Config does not have any property "+name+"\n"+supportedProperties);
-
                 }
-            }
+            }(this));
         }
     };
 

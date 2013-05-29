@@ -289,7 +289,7 @@ define(["kick/core/ProjectAsset", "kick/core/Util", "kick/core/Constants", "./Sh
                 }
                 if (ASSERT) {
                     if (_shader) {
-                        if (typeof (value) === "undefined") {
+                        if (value === undefined) {
                             Util.fail("Type of value is undefined");
                         }
                     }

@@ -316,7 +316,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                         Util.warn("Shader.removeListener: listenerFn not function");
                     }
                 }
-                thisObj.removeEventListener("shaderUpdated", listenerFn)
+                thisObj.removeEventListener("shaderUpdated", listenerFn);
             };
 
             /**
@@ -1106,7 +1106,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
             }
             for (name in GLSLConstants) {
                 if (GLSLConstants.hasOwnProperty(name)) {
-                    if (typeof (name) === "string") {
+                    if (typeof name === "string") {
                         source = GLSLConstants[name];
                         sourcecode = sourcecode.replace("#pragma include \"" + name + "\"", source);
                         sourcecode = sourcecode.replace("#pragma include \'" + name + "\'", source);
