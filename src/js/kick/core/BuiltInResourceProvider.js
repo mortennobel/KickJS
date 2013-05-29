@@ -288,7 +288,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                     textureDestination.minFilter = Constants.GL_LINEAR_MIPMAP_LINEAR;
                     textureDestination.setImage(img, uri);
                     if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                        resourceTracker.resourceLoadingFinished(url, textureDestination);
+                        resourceTracker.resourceLoadingFinished(uri, textureDestination);
                     }
                 };
                 img.onerror = function () {
@@ -303,7 +303,7 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
             }
             textureDestination.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, data, uri);
             if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                resourceTracker.resourceLoadingFinished(url, textureDestination);
+                resourceTracker.resourceLoadingFinished(uri, textureDestination);
             }
         };
     };
