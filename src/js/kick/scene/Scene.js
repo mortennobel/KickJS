@@ -465,16 +465,17 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                     };
                 if (config) {
                     _name = config.name || "Scene";
-                    gameObjects = config.gameObjects || [];
+                    gameObjects = [];
                     mappingUidToObject = {};
-                    newGameObjects = [];
                     configs = {};
                     // create game objects
                     (function createGameObjects() {
-                        for (i = 0; i < gameObjects.length; i++) {
-                            gameObject = config.gameObjects[i];
-                            newGameObjects[i] = createGameObjectPrivate(gameObject);
-                            mappingUidToObject[gameObject.uid] = newGameObjects[i];
+                        if (config && config.gameObjects){
+                            for (i = 0; i < config.gameObjects.length; i++) {
+                                gameObject = config.gameObjects[i];
+                                gameObjects[i] = createGameObjectPrivate(gameObject);
+                                mappingUidToObject[gameObject.uid] = gameObjects[i];
+                            }
                         }
                     }());
 
@@ -483,7 +484,6 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                             componentObj,
                             Type,
                             gameObjectConfig,
-                            gameObjects = config.gameObjects || [],
                             j,
                             i,
                             uid,
@@ -493,7 +493,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
 
                         for (j = 0; j < gameObjects.length; j++) {
                             gameObjectConfig = config.gameObjects[j];
-                            gameObject = newGameObjects[j];
+                            gameObject = gameObjects[j];
                             // build components
                             for (i = 0; gameObjectConfig.components && i < gameObjectConfig.components.length; i++) {
                                 component = gameObjectConfig.components[i];
