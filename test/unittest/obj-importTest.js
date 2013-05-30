@@ -21,7 +21,7 @@ requirejs(['kick'],
             Y.KICK.math.vec3Test = new Y.Test.Case({
 
                 //name of the test case - if not provided, one is auto-generated
-                name : "vec3test",
+                name : "obj-import-test",
 
                 //---------------------------------------------------------------------
                 // setUp and tearDown methods - optional
@@ -80,7 +80,7 @@ requirejs(['kick'],
                             "f 2/1/4 6/2/4 7/3/4 3/4/4\n"+
                             "f 3/1/5 7/2/5 8/3/5 4/4/5\n"+
                             "f 5/1/6 1/2/6 4/3/6 8/4/6";
-                    var obj = KICK.importer.ObjImporter.import(objFile, engine, engine.activeScene);
+                    var obj = KICK.importer.ObjImporter.import(objFile, engine.activeScene);
                     Assert.areEqual(obj.mesh.length, 1);
                     var mesh = obj.mesh[0];
                     var meshData = mesh.meshData;
