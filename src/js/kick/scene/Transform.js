@@ -244,6 +244,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
              *      var transform = gameObject.transform;
              * @property componentType
              * @type String
+             * @final
              */
             componentType: {value:"transform"}
         });

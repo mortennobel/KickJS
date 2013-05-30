@@ -131,6 +131,7 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
                  *      var fpsWalker = gameObject.fpsWalker;
                  * @property componentType
                  * @type String
+                 * @final
                  */
                 componentType: {value:"fpsWalker"}
             });

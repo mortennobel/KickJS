@@ -73,6 +73,7 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                  *      var skybox = gameObject.skybox;
                  * @property componentType
                  * @type String
+                 * @final
                  */
                 componentType: {value:"skybox"}
             });

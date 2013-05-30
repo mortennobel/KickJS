@@ -147,6 +147,7 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                  *      var meshRenderer = gameObject.meshRenderer;
                  * @property componentType
                  * @type String
+                 * @final
                  */
                 componentType: {value:"meshRenderer"}
             });

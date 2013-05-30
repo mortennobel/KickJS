@@ -278,6 +278,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                  *      var light = gameObject.light;
                  * @property componentType
                  * @type String
+                 * @final
                  */
                 componentType: {value:"light"}
             });

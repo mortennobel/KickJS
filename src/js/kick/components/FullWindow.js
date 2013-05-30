@@ -58,6 +58,7 @@ define(["kick/core"], function (core) {
                  *      var fullWindow = gameObject.fullWindow;
                  * @property componentType
                  * @type String
+                 * @final
                  */
                 componentType: {value:"fullWindow"}
             });

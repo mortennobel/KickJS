@@ -835,6 +835,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                  *      var camera = gameObject.camera;
                  * @property componentType
                  * @type String
+                 * @final
                  */
                 componentType: {value:"camera"}
             });

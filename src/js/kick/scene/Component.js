@@ -69,6 +69,7 @@ define([], function () {
      *      var transform = gameObject.transform;
      * @property componentType
      * @type String
+     * @final
      */
 
 
