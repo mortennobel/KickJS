@@ -1078,6 +1078,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 source,
                 version = "#version 100",
                 lineOffset = 1,
+                regExpSearch,
                 indexOfNewline;
             if (Constants._DEBUG) {
                 if (sourcecode === engine){
@@ -1104,15 +1105,23 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                     }
                 }());
             }
+            function escapeRegExp(str) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            }
             for (name in GLSLConstants) {
                 if (GLSLConstants.hasOwnProperty(name)) {
                     if (typeof name === "string") {
                         source = GLSLConstants[name];
-                        sourcecode = sourcecode.replace("#pragma include \"" + name + "\"", source);
-                        sourcecode = sourcecode.replace("#pragma include \'" + name + "\'", source);
+                        regExpSearch = "^\\s*#\\s*pragma\\s+include\\s*"+escapeRegExp("\"" + name + "\"")+".*$";
+                        sourcecode = sourcecode.replace(new RegExp(regExpSearch, "gm"), source);
                     }
                 }
             }
+
+            // remove commented out usages of #pragma include
+            regExpSearch = "//\\s*pragma\\s+include.*$";
+            sourcecode = sourcecode.replace(new RegExp(regExpSearch, "gm"), "");
+
             // if shader already contain version tag, then reuse this version information
             if (sourcecode.indexOf("#version ") === 0) {
                 indexOfNewline = sourcecode.indexOf('\n');
@@ -1192,7 +1201,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          * @param {kick.material.Material} material
          * @param {Object} engineUniforms
          * @param {kick.scene.Transform) transform
-            */
+         */
         Shader.prototype.bindUniform = function (material, engineUniforms, transform) {
             var lookupUniform = this.lookupUniform,
                 gl = this.gl,
