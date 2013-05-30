@@ -828,7 +828,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                         res[3] /= canvasDimension[1];
                         Vec4.copy(_normalizedViewportRect, res);
                     }
-                }
+                },
+                /**
+                 * Name of the component componentType = "camera".
+                 * @example
+                 *      var camera = gameObject.camera;
+                 * @property componentType
+                 * @type String
+                 */
+                componentType: {value:"camera"}
             });
 
             /**

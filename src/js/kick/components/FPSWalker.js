@@ -124,6 +124,17 @@ define(["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
              */
             this.rotateSpeedY = 1.00;
 
+            Object.defineProperties(this, {
+                /**
+                 * Name of the component componentType = "fpsWalker".
+                 * @example
+                 *      var fpsWalker = gameObject.fpsWalker;
+                 * @property componentType
+                 * @type String
+                 */
+                componentType: {value:"fpsWalker"}
+            });
+
             /**
              * Registers the object on activation
              * @method activated

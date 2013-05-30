@@ -140,7 +140,15 @@ define(["kick/core/Constants", "kick/material/Material", "kick/core/Util", "kick
                         _mesh = newValue;
                     },
                     enumerable: true
-                }
+                },
+                /**
+                 * Name of the component type = "meshRenderer".
+                 * @example
+                 *      var meshRenderer = gameObject.meshRenderer;
+                 * @property componentType
+                 * @type String
+                 */
+                componentType: {value:"meshRenderer"}
             });
 
             /**

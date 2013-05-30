@@ -13,7 +13,7 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
      * @class Transform
      * @extends kick.scene.Component
      */
-    Transform = function (gameObject) {
+    Transform = function () {
         var localMatrix = Mat4.create(),
             globalMatrix = Mat4.create(),
             localMatrixInverse = Mat4.create(),
@@ -51,10 +51,6 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
             };
 
         Object.defineProperties(this, {
-            // inherit description from GameObject
-            gameObject: {
-                value: gameObject
-            },
             /**
              * Global position.
              * @property position
@@ -241,7 +237,15 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                         markGlobalDirty();
                     }
                 }
-            }
+            },
+            /**
+             * Name of the component type = "transform".
+             * @example
+             *      var transform = gameObject.transform;
+             * @property componentType
+             * @type String
+             */
+            componentType: {value:"transform"}
         });
 
         /**
@@ -353,6 +357,8 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                 }
             };
         };
+
+
 
         /**
          * @method str

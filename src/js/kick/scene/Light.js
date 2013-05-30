@@ -271,7 +271,15 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Vec3", "kick/texture
                         scriptPriority = value;
                     },
                     enumerable: true
-                }
+                },
+                /**
+                 * Name of the component componentType = "meshRenderer".
+                 * @example
+                 *      var light = gameObject.light;
+                 * @property componentType
+                 * @type String
+                 */
+                componentType: {value:"light"}
             });
 
             this.activated = function () {

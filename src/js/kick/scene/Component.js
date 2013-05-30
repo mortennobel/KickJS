@@ -61,6 +61,18 @@ define([], function () {
      */
 
     /**
+     * Optional name of the component type.
+     * If specified, the component can be accessed directly from the gameObject.
+     * If multiple components with same component type is added to the same gameObject, the access through gameObject is undefined
+     * @example
+     *      // kick.scene.Transform has the type 'transform'
+     *      var transform = gameObject.transform;
+     * @property componentType
+     * @type String
+     */
+
+
+    /**
      * Abstract method called every update. May be undefined.
      * @method update
      */

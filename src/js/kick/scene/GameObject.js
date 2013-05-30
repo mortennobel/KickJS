@@ -13,8 +13,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
      * @param {Object} config configuration for gameObject (components will not be initialized)
      */
     return function (scene, config) {
-        var _transform = new Transform(this),
-            _components = [_transform],
+        var _components = [],
             _layer = 1,
             _name,
             _uid = scene.engine.createUID(),
@@ -48,9 +47,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
                  * @property transform
                  * @type kick.scene.Transform
                  */
-                transform: {
-                    value: _transform
-                },
+                // automatically bound
                 /**
                  * Layer bit flag. The default value is 1.
                  * The layer should have a value of 2^n
@@ -146,12 +143,6 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
          * @param {kick.scene.Component} component
          */
         this.addComponent = function (component) {
-            if (component instanceof Transform) {
-                if (ASSERT) {
-                    Util.fail("Cannot add another Transform to a GameObject");
-                }
-                return;
-            }
             if (component.gameObject) {
                 throw {
                     name: "Error",
@@ -160,6 +151,9 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
             }
             if (!component.scriptPriority) {
                 component.scriptPriority = 0;
+            }
+            if (typeof component.componentType === "string" && thisObj[component.componentType] === undefined){
+                thisObj[component.componentType] = component;
             }
             component.gameObject = this;
             _components.push(component);
@@ -176,6 +170,10 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
                 delete component.gameObject;
             } catch (e) {
                 // ignore if gameObject cannot be deleted
+            }
+            // delete component reference
+            if (typeof component.componentType === "string" && thisObj[component.componentType] === component){
+                delete thisObj[component.componentType];
             }
             if (Util.removeElementFromArray(_components, component)){
                 thisObj.fireEvent("componentRemoved", component);
@@ -330,6 +328,7 @@ define(["./Transform", "kick/core/Util", "kick/core/Constants", "kick/core/Obser
         };
 
         (function init() {
+            thisObj.addComponent(new Transform(thisObj));
             Util.applyConfig(thisObj, config, ["uid"]);
         }());
     };

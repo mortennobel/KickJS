@@ -51,6 +51,17 @@ define(["kick/core"], function (core) {
                 window.removeEventListener("resize", resizeThrottler);
             };
 
+            Object.defineProperties(this, {
+                /**
+                 * Name of the component componentType = "fullWindow".
+                 * @example
+                 *      var fullWindow = gameObject.fullWindow;
+                 * @property componentType
+                 * @type String
+                 */
+                componentType: {value:"fullWindow"}
+            });
+
             /**
              * @method toJSON
              * @return {JSON}

@@ -66,7 +66,15 @@ define(["require", "kick/core/ProjectAsset", "./SceneLights", "kick/core/Constan
                         }
                     },
                     enumerable: true
-                }
+                },
+                /**
+                 * Name of the component type = "skybox".
+                 * @example
+                 *      var skybox = gameObject.skybox;
+                 * @property componentType
+                 * @type String
+                 */
+                componentType: {value:"skybox"}
             });
 
             this.activated = function () {
