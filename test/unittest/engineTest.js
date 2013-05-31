@@ -487,6 +487,34 @@ YUI().use('node', 'console', 'test', function (Y) {
             Assert.isTrue(shader.defaultUniforms.color instanceof Float32Array,"#3");
             Assert.isTrue(shader.defaultUniforms.color.length==4,"#4");
         },
+        testShaderPragmaCommentedOut:function(){
+            var Assert = Y.Assert;
+
+            var shader = new KICK.material.Shader();
+
+            shader.vertexShaderSrc = "attribute vec3 vertex;\n"+
+                "uniform mat4 _mvProj;\n"+
+                "void main(void) {\n"+
+                "   gl_Position = _mvProj * vec4(vertex, 1.0);\n"+
+                "}\n";
+            shader.fragmentShaderSrc = "precision highp float;\n"+
+                "uniform vec4 color;\n"+
+                "//#pragma include \"light.glsl\"\n"+
+                "void main(void){\n"+
+                "   gl_FragColor = color;\n"+
+            	"}\n";
+            shader.errorLog = function(msg){
+                console.log("vertex shader");
+                console.log(KICK.material.Shader.getPrecompiledSource(shader.vertexShaderSrc));
+                console.log("fragment shader");
+                console.log(KICK.material.Shader.getPrecompiledSource(shader.fragmentShaderSrc));
+
+                Assert.fail(msg);
+            };
+            shader.name = "Depth";
+            shader.apply();
+
+        },
         testUniformShaderValue:function(){
             var Assert = Y.Assert;
 
