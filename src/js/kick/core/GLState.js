@@ -20,13 +20,15 @@ define(["kick/core/Constants"], function (constants) {
             textureFloatHalfExt = null,
             depthTextureExt = null,
             textureFilterAnisotropicExt = null,
+            drawBuffersExt = null,
             reloadExtensions = function(){
                 vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
                 standardDerivativesExt = engine.getGLExtension("OES_standard_derivatives");
                 textureFloatExt = engine.getGLExtension("OES_texture_float");
                 textureFloatHalfExt = engine.getGLExtension("OES_texture_half_float");
                 depthTextureExt = engine.getGLExtension("WEBGL_depth_texture");
-                textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic");
+                textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic") || engine.getGLExtension("WEBGL_texture_filter_anisotropic");
+                drawBuffersExt = engine.getGLExtension("EXT_draw_buffers") || engine.getGLExtension("WEBGL_draw_buffers");
             },
             clearExtensions = function(){
                 vertexArrayObjectExt = null;
@@ -35,6 +37,7 @@ define(["kick/core/Constants"], function (constants) {
                 textureFloatHalfExt = null;
                 depthTextureExt = null;
                 textureFilterAnisotropicExt = null;
+                drawBuffersExt = null;
             };
         /**
          * The current clear color
@@ -193,6 +196,19 @@ define(["kick/core/Constants"], function (constants) {
             textureFilterAnisotropicExtension:{
                 get: function(){
                     return textureFilterAnisotropicExt;
+                },
+                enumerable:true
+            },
+            /**
+             * The EXT\_draw\_buffers extension (if available). Also known as multiple render targets.
+             * See http://www.khronos.org/registry/webgl/extensions/WEBGL_draw_buffers/
+             * @property textureFilterAnisotropicExtension
+             * @type Object
+             * @final
+             */
+            drawBuffersExtension:{
+                get: function(){
+                    return drawBuffersExt;
                 },
                 enumerable:true
             }

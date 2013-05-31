@@ -1,5 +1,5 @@
 /*!
- * KickJS 0.5.2 - New BSD License
+ * KickJS 0.5.4 - New BSD License
  * http://www.kickjs.org/
  * License: https://raw.github.com/mortennobel/KickJS/master/license.txt
  *
@@ -2532,7 +2532,7 @@ define('kick/core/EngineSingleton',["./Constants"], function (Constants) {
                 currentEngine = newEngine;
             },
             get: function(){
-                if (currentEngine==null && true){
+                if (currentEngine === null && true){
                     console.log("Engine is not initialized yet.");
                 }
                 return currentEngine;
@@ -3179,11 +3179,14 @@ define('kick/core/Util',["require", "./Constants", "./EngineSingleton"], functio
          * @return {Array|null} triangleIndices or null if not possible to convert
          */
         convertToTriangleIndices: function (indices, primitiveType, removeDegenerate) {
+            var i,
+                even = 1,
+                trianleIndices = [indices[0], indices[1], indices[2]];
             if (primitiveType === 4){
                 return indices;
             } else if (primitiveType === 6){
                 var res = [indices[0],indices[1],indices[2]];
-                for (var i=3;i<indices.length;i++){
+                for (i = 3; i  <indices.length; i++) {
                     res.push(indices[0]);
                     res.push(indices[i-1]);
                     res.push(indices[i]);
@@ -3192,15 +3195,12 @@ define('kick/core/Util',["require", "./Constants", "./EngineSingleton"], functio
             } else if (primitiveType !== 5){
                 return null;
             }
-            var i,
-                even = 1,
-                trianleIndices = [indices[0], indices[1], indices[2]];
 
-            for (i=3;i<indices.length;i++){
+            for (i = 3; i < indices.length; i++) {
                 if (removeDegenerate){
                     if (indices[i-1] === indices[i] ||
                         indices[i-2] === indices[i] ||
-                        indices[i-1] === indices[i-2]){
+                        indices[i-1] === indices[i-2]) {
                         continue;
                     }
                 }
@@ -3464,6 +3464,7 @@ define('kick/core/ChunkData',["./Util", "./Constants"], function (Util, constant
 
         /**
          * @method setString
+         * @param {Number} chunkId
          * @param {String} str
          */
         this.setString = function (chunkId, str) {
@@ -3474,6 +3475,7 @@ define('kick/core/ChunkData',["./Util", "./Constants"], function (Util, constant
         /**
          * Uses a Float32Array for storing the number. Note that potentially precision can get lost.
          * @method setNumber
+         * @param {Number} chunkId
          * @param {Number} num
          */
         this.setNumber = function (chunkId, num) {
@@ -3483,7 +3485,8 @@ define('kick/core/ChunkData',["./Util", "./Constants"], function (Util, constant
 
         /**
          * @method setArrayBuffer
-         * @param ArrayBuffer arrayBuffer
+         * @param {Number} chunkId
+         * @param {ArrayBuffer} arrayBuffer
          */
         this.setArrayBuffer = function (chunkId, arrayBuffer) {
             thisObj.set(chunkId, new Uint8Array(arrayBuffer));
@@ -3493,7 +3496,7 @@ define('kick/core/ChunkData',["./Util", "./Constants"], function (Util, constant
          * Note that this method saves a reference to the array (it does not copy data)
          * @method set
          * @param {Number} chunkId
-         * @param {TypedArrayView[Number]} array
+         * @param {TypedArrayView} array
          */
         this.set = function (chunkId, array) {
             thisObj.remove(chunkId);
@@ -7031,7 +7034,7 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                     addAttributes("int4", 4, 5124);
 
                     // copy data into array
-                    if (_interleavedArray && _interleavedArray.length == length * vertexLen * SIZE_OF_FLOAT_OR_INT){
+                    if (_interleavedArray && _interleavedArray.length === length * vertexLen * SIZE_OF_FLOAT_OR_INT){
                         dataArrayBuffer = _interleavedArray;
                     } else {
                         dataArrayBuffer = new ArrayBuffer(length * vertexLen * SIZE_OF_FLOAT_OR_INT);
@@ -7228,13 +7231,15 @@ define('kick/mesh/MeshData',["kick/core/Constants", "kick/core/Util", "kick/core
                                 object;
                             if (newValue !== null) {
                                 for (n in newValue) {
-                                    object = newValue[n];
-                                    if (typeof (object) === "object") {
-                                        if (typeof (object.pointer) !== "number" ||
-                                                typeof (object.size) !== "number" ||
-                                                typeof (object.normalized) !== "boolean" ||
-                                                typeof (object.type) !== "number") {
-                                            Util.fail("Invalid object signature - expected {pointer:,size:,normalized:,type:}");
+                                    if (newValue.hasOwnProperty(n)){
+                                        object = newValue[n];
+                                        if (typeof object === "object") {
+                                            if (typeof (object.pointer) !== "number" ||
+                                                    typeof (object.size) !== "number" ||
+                                                    typeof (object.normalized) !== "boolean" ||
+                                                    typeof (object.type) !== "number") {
+                                                Util.fail("Invalid object signature - expected {pointer:,size:,normalized:,type:}");
+                                            }
                                         }
                                     }
                                 }
@@ -7847,18 +7852,19 @@ define('kick/mesh/MeshDataFactory',["./MeshData", "kick/math/Vec2", "kick/math/V
             if (!slices){
                 slices = 20;
             }
-            var vertices = [0,0,0];
-            var uvs = [0.5,0.5];
-            var normals = [0,0,1];
-            var indices = [0];
+            var vertices = [0,0,0],
+                uvs = [0.5,0.5],
+                normals = [0,0,1],
+                indices = [0],
+                i;
 
-            for (var i=0;i<=slices;i++){
-                var fraction = 2*Math.PI*i/slices;
+            for (i = 0; i <= slices; i++) {
+                var fraction = 2 * Math.PI * i / slices;
                 vertices.push(Math.sin(fraction));
                 vertices.push(-Math.cos(fraction));
                 vertices.push(0);
-                uvs.push(Math.sin(fraction)*0.5 + 0.5);
-                uvs.push(-Math.cos(fraction)*0.5 + 0.5);
+                uvs.push(Math.sin(fraction) * 0.5 + 0.5);
+                uvs.push(-Math.cos(fraction) * 0.5 + 0.5);
                 normals.push(0);
                 normals.push(0);
                 normals.push(1);
@@ -8501,7 +8507,8 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                     "bumped_specular",
                     "transparent_point_sprite",
                     "transparent_unlit",
-                    "skybox"];
+                    "skybox"
+                ];
             if (url === "kickjs://shader/default/") {
                 url = "kickjs://shader/diffuse/";
             }
@@ -8550,12 +8557,12 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
          */
         this.getImageData = function (uri, textureDestination, resourceTracker) {
             if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                resourceTracker.resourceLoadingStarted(url, textureDestination);
+                resourceTracker.resourceLoadingStarted(uri, textureDestination);
             }
             var data,
                 resourceLoadingFailed = function(){
                     if (resourceTracker && resourceTracker.resourceLoadingFailed){
-                        resourceTracker.resourceLoadingFailed(url, textureDestination);
+                        resourceTracker.resourceLoadingFailed(uri, textureDestination);
                     }
                 },
                 img,
@@ -8596,7 +8603,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
                     textureDestination.minFilter = 9987;
                     textureDestination.setImage(img, uri);
                     if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                        resourceTracker.resourceLoadingFinished(url, textureDestination);
+                        resourceTracker.resourceLoadingFinished(uri, textureDestination);
                     }
                 };
                 img.onerror = function () {
@@ -8611,7 +8618,7 @@ define('kick/core/BuiltInResourceProvider',["./Util", "kick/mesh/MeshDataFactory
             }
             textureDestination.setImageData(2, 2, 0, 5121, data, uri);
             if (resourceTracker && resourceTracker.resourceLoadingStarted){
-                resourceTracker.resourceLoadingFinished(url, textureDestination);
+                resourceTracker.resourceLoadingFinished(uri, textureDestination);
             }
         };
     };
@@ -8806,18 +8813,22 @@ define('kick/core/Config',["./Util", "./Constants"], function (Util, Constants) 
         }());
 
         if (true) {
-            for (var name in config) {
-                if (! this.hasOwnProperty(name)) {
-                    var supportedProperties = "Supported properties for kick.core.Config are: ";
-                    for (var n2 in this){
-                        if (this.hasOwnProperty(n2) && typeof this[n2] !== "function") {
-                            supportedProperties += "\n - "+n2;
+            (function (t) {
+                var name,
+                    supportedProperties,
+                    n2;
+                for (name in config) {
+                    if (config.hasOwnProperty(name) && !t.hasOwnProperty(name)) {
+                        supportedProperties = "Supported properties for kick.core.Config are: ";
+                        for (n2 in t){
+                            if (t.hasOwnProperty(n2) && typeof t[n2] !== "function") {
+                                supportedProperties += "\n - "+n2;
+                            }
                         }
+                        Util.warn("kick.core.Config does not have any property "+name+"\n"+supportedProperties);
                     }
-                    core.Util.warn("kick.core.Config does not have any property "+name+"\n"+supportedProperties);
-
                 }
-            }
+            }(this));
         }
     };
 
@@ -8845,13 +8856,15 @@ define('kick/core/GLState',["kick/core/Constants"], function (constants) {
             textureFloatHalfExt = null,
             depthTextureExt = null,
             textureFilterAnisotropicExt = null,
+            drawBuffersExt = null,
             reloadExtensions = function(){
                 vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
                 standardDerivativesExt = engine.getGLExtension("OES_standard_derivatives");
                 textureFloatExt = engine.getGLExtension("OES_texture_float");
                 textureFloatHalfExt = engine.getGLExtension("OES_texture_half_float");
                 depthTextureExt = engine.getGLExtension("WEBGL_depth_texture");
-                textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic");
+                textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic") || engine.getGLExtension("WEBGL_texture_filter_anisotropic");
+                drawBuffersExt = engine.getGLExtension("EXT_draw_buffers") || engine.getGLExtension("WEBGL_draw_buffers");
             },
             clearExtensions = function(){
                 vertexArrayObjectExt = null;
@@ -8860,6 +8873,7 @@ define('kick/core/GLState',["kick/core/Constants"], function (constants) {
                 textureFloatHalfExt = null;
                 depthTextureExt = null;
                 textureFilterAnisotropicExt = null;
+                drawBuffersExt = null;
             };
         /**
          * The current clear color
@@ -9020,6 +9034,19 @@ define('kick/core/GLState',["kick/core/Constants"], function (constants) {
                     return textureFilterAnisotropicExt;
                 },
                 enumerable:true
+            },
+            /**
+             * The EXT\_draw\_buffers extension (if available)
+             * See http://www.khronos.org/registry/webgl/extensions/WEBGL_draw_buffers/
+             * @property textureFilterAnisotropicExtension
+             * @type Object
+             * @final
+             */
+            drawBuffersExtension:{
+                get: function(){
+                    return drawBuffersExt;
+                },
+                enumerable:true
             }
         });
 
@@ -9142,7 +9169,7 @@ define('kick/core/ResourceDescriptor',["require","./Util", "./Constants", "./Eng
          */
         this.instantiate = function (onSuccess, onError) {
             if (ASSERT) {
-                if (typeof(onSuccess) !== "function"){
+                if (typeof onSuccess !== "function"){
                     console.log("ResourceDescriptor.onSuccess is not a function");
                 }
                 if (engine === onSuccess){
@@ -9855,7 +9882,7 @@ define('kick/core/Observable',["kick/core/Util", "kick/core/Constants"], functio
                             }
                         }
                     });
-                })(eventNames[i], this);
+                }(eventNames[i], this));
             }
         }
         /**
@@ -10247,7 +10274,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                         Util.warn("Shader.removeListener: listenerFn not function");
                     }
                 }
-                thisObj.removeEventListener("shaderUpdated", listenerFn)
+                thisObj.removeEventListener("shaderUpdated", listenerFn);
             };
 
             /**
@@ -11009,6 +11036,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                 source,
                 version = "#version 100",
                 lineOffset = 1,
+                regExpSearch,
                 indexOfNewline;
             if (true) {
                 if (sourcecode === engine){
@@ -11035,15 +11063,23 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
                     }
                 }());
             }
+            function escapeRegExp(str) {
+                return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+            }
             for (name in GLSLConstants) {
                 if (GLSLConstants.hasOwnProperty(name)) {
-                    if (typeof (name) === "string") {
+                    if (typeof name === "string") {
                         source = GLSLConstants[name];
-                        sourcecode = sourcecode.replace("#pragma include \"" + name + "\"", source);
-                        sourcecode = sourcecode.replace("#pragma include \'" + name + "\'", source);
+                        regExpSearch = "^\\s*#\\s*pragma\\s+include\\s*"+escapeRegExp("\"" + name + "\"")+".*$";
+                        sourcecode = sourcecode.replace(new RegExp(regExpSearch, "gm"), source);
                     }
                 }
             }
+
+            // remove commented out usages of #pragma include
+            regExpSearch = "//\\s*pragma\\s+include.*$";
+            sourcecode = sourcecode.replace(new RegExp(regExpSearch, "gm"), "");
+
             // if shader already contain version tag, then reuse this version information
             if (sourcecode.indexOf("#version ") === 0) {
                 indexOfNewline = sourcecode.indexOf('\n');
@@ -11123,7 +11159,7 @@ define('kick/material/Shader',["kick/core/ProjectAsset", "kick/core/Constants", 
          * @param {kick.material.Material} material
          * @param {Object} engineUniforms
          * @param {kick.scene.Transform) transform
-            */
+         */
         Shader.prototype.bindUniform = function (material, engineUniforms, transform) {
             var lookupUniform = this.lookupUniform,
                 gl = this.gl,
@@ -11886,8 +11922,11 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
             meshType,
             meshElements = [],
             deleteVertexArrayObjects = function () {
-                for (var name in vertexArrayObject){
-                    vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                var name;
+                for (name in vertexArrayObject){
+                    if (vertexArrayObject.hasOwnProperty(name)) {
+                        vertexArrayObjectExtension.deleteVertexArrayOES(vertexArrayObject[name]);
+                    }
                 }
                 vertexArrayObject = {};
             },
@@ -11926,7 +11965,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
              * @param {Boolean} updateIndices
              * @param {Boolean} updateVertexStructure
              */
-            updateData = function(){
+            updateData = (function(){
                 var meshVertexAttBufferLength = -1,
                     meshVertexIndexBufferLength = -1,
                     indicesSize = 0;
@@ -11954,7 +11993,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                             meshVertexBufferOffsetBytes.push(indicesSize * SIZE_OF_SHORT);
                             indexLen = subMeshes[i].length;
                             meshElements[i] = indexLen;
-                            indicesSize += indexLen
+                            indicesSize += indexLen;
                         }
                     }
 
@@ -11986,7 +12025,7 @@ define('kick/mesh/Mesh',["kick/core/ProjectAsset", "kick/core/Constants", "kick/
                         meshVertexIndexBufferLength = meshVertexIndexBufferConcat.length;
                     }
                     glState.meshBuffer = null;
-                }}(),
+                }}()),
             contextLost = function () {
                 meshVertexIndexBuffer = 0;
                 meshVertexAttBuffer = null;
@@ -12636,7 +12675,7 @@ define('kick/material/Material',["kick/core/ProjectAsset", "kick/core/Util", "ki
                 }
                 if (ASSERT) {
                     if (_shader) {
-                        if (typeof (value) === "undefined") {
+                        if (value === undefined) {
                             Util.fail("Type of value is undefined");
                         }
                     }
@@ -13300,7 +13339,7 @@ define('kick/core/Project',["./Constants", "./ResourceDescriptor", "kick/materia
 
                 /**
                  * @method getResourceDescriptorsByName
-                 * @param {String} type
+                 * @param {String} name
                  * @return {Array_kick.core.ResourceDescriptor}
                  */
                 this.getResourceDescriptorsByName = function (name) {
@@ -15644,7 +15683,16 @@ define('kick/scene/MeshRenderer',["kick/core/Constants", "kick/material/Material
                         _mesh = newValue;
                     },
                     enumerable: true
-                }
+                },
+                /**
+                 * Name of the component type = "meshRenderer".
+                 * @example
+                 *      var meshRenderer = gameObject.meshRenderer;
+                 * @property componentType
+                 * @type String
+                 * @final
+                 */
+                componentType: {value:"meshRenderer"}
             });
 
             /**
@@ -15930,6 +15978,7 @@ define('kick/scene/CameraPicking',["kick/math/Vec4", "kick/material/Material", "
             /**
              * @method handlePickRequests
              * @param {kick.scene.SceneLights} sceneLightObj
+             * @param {kick.scene.EngineUniforms} engineUniforms
              */
             this.handlePickRequests = function (sceneLightObj, engineUniforms) {
                 if (pickingQueue.length > 0) {
@@ -16256,7 +16305,7 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                             Util.fail("Should be array");
                         }
                     }
-                    if (typeof (component.render) === "function" && (component.gameObject.layer & _layerMask)) {
+                    if (typeof component.render === "function" && (component.gameObject.layer & _layerMask)) {
                         renderOrder = component.renderOrder || 1000;
                         if (renderOrder < 2000) {
                             array = renderableComponentsBackGroundAndGeometry;
@@ -16818,7 +16867,16 @@ define('kick/scene/Camera',["kick/core/Constants", "kick/core/Util", "kick/math/
                         res[3] /= canvasDimension[1];
                         Vec4.copy(_normalizedViewportRect, res);
                     }
-                }
+                },
+                /**
+                 * Name of the component componentType = "camera".
+                 * @example
+                 *      var camera = gameObject.camera;
+                 * @property componentType
+                 * @type String
+                 * @final
+                 */
+                componentType: {value:"camera"}
             });
 
             /**
@@ -17156,7 +17214,16 @@ define('kick/scene/Light',["kick/core/Constants", "kick/core/Util", "kick/math/V
                         scriptPriority = value;
                     },
                     enumerable: true
-                }
+                },
+                /**
+                 * Name of the component componentType = "meshRenderer".
+                 * @example
+                 *      var light = gameObject.light;
+                 * @property componentType
+                 * @type String
+                 * @final
+                 */
+                componentType: {value:"light"}
             });
 
             this.activated = function () {
@@ -17220,7 +17287,7 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
      * @class Transform
      * @extends kick.scene.Component
      */
-    Transform = function (gameObject) {
+    Transform = function () {
         var localMatrix = Mat4.create(),
             globalMatrix = Mat4.create(),
             localMatrixInverse = Mat4.create(),
@@ -17258,10 +17325,6 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
             };
 
         Object.defineProperties(this, {
-            // inherit description from GameObject
-            gameObject: {
-                value: gameObject
-            },
             /**
              * Global position.
              * @property position
@@ -17433,7 +17496,7 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
                         Util.fail('Cannot assign parent to self');
                     }
                     if (ASSERT) {
-                        if (typeof newParent === 'undefined') {
+                        if (newParent === undefined) {
                             Util.fail("Cannot set newParent to undefined - should be null");
                         }
                     }
@@ -17448,7 +17511,16 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
                         markGlobalDirty();
                     }
                 }
-            }
+            },
+            /**
+             * Name of the component type = "transform".
+             * @example
+             *      var transform = gameObject.transform;
+             * @property componentType
+             * @type String
+             * @final
+             */
+            componentType: {value:"transform"}
         });
 
         /**
@@ -17561,6 +17633,8 @@ define('kick/scene/Transform',["kick/math/Mat4", "kick/math/Vec3", "kick/math/Qu
             };
         };
 
+
+
         /**
          * @method str
          * @return {String} stringify JSON
@@ -17588,8 +17662,7 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
      * @param {Object} config configuration for gameObject (components will not be initialized)
      */
     return function (scene, config) {
-        var _transform = new Transform(this),
-            _components = [_transform],
+        var _components = [],
             _layer = 1,
             _name,
             _uid = scene.engine.createUID(),
@@ -17623,9 +17696,7 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
                  * @property transform
                  * @type kick.scene.Transform
                  */
-                transform: {
-                    value: _transform
-                },
+                // automatically bound
                 /**
                  * Layer bit flag. The default value is 1.
                  * The layer should have a value of 2^n
@@ -17721,12 +17792,6 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
          * @param {kick.scene.Component} component
          */
         this.addComponent = function (component) {
-            if (component instanceof Transform) {
-                if (ASSERT) {
-                    Util.fail("Cannot add another Transform to a GameObject");
-                }
-                return;
-            }
             if (component.gameObject) {
                 throw {
                     name: "Error",
@@ -17735,6 +17800,9 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
             }
             if (!component.scriptPriority) {
                 component.scriptPriority = 0;
+            }
+            if (typeof component.componentType === "string" && thisObj[component.componentType] === undefined){
+                thisObj[component.componentType] = component;
             }
             component.gameObject = this;
             _components.push(component);
@@ -17751,6 +17819,10 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
                 delete component.gameObject;
             } catch (e) {
                 // ignore if gameObject cannot be deleted
+            }
+            // delete component reference
+            if (typeof component.componentType === "string" && thisObj[component.componentType] === component){
+                delete thisObj[component.componentType];
             }
             if (Util.removeElementFromArray(_components, component)){
                 thisObj.fireEvent("componentRemoved", component);
@@ -17905,6 +17977,7 @@ define('kick/scene/GameObject',["./Transform", "kick/core/Util", "kick/core/Cons
         };
 
         (function init() {
+            thisObj.addComponent(new Transform(thisObj));
             Util.applyConfig(thisObj, config, ["uid"]);
         }());
     };
@@ -18356,6 +18429,9 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
              */
             this.init = function(config){
                 var gameObject,
+                    mappingUidToObject,
+                    newGameObjects,
+                    configs,
                     hasProperty = Util.hasProperty,
                     applyConfig = Util.applyConfig,
                     i,
@@ -18374,16 +18450,17 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
                     };
                 if (config) {
                     _name = config.name || "Scene";
-                    var gameObjects = config.gameObjects || [],
-                        mappingUidToObject = {},
-                        newGameObjects = [],
-                        configs = {};
+                    gameObjects = [];
+                    mappingUidToObject = {};
+                    configs = {};
                     // create game objects
                     (function createGameObjects() {
-                        for (i = 0; i < gameObjects.length; i++) {
-                            gameObject = config.gameObjects[i];
-                            newGameObjects[i] = createGameObjectPrivate(gameObject);
-                            mappingUidToObject[gameObject.uid] = newGameObjects[i];
+                        if (config && config.gameObjects){
+                            for (i = 0; i < config.gameObjects.length; i++) {
+                                gameObject = config.gameObjects[i];
+                                gameObjects[i] = createGameObjectPrivate(gameObject);
+                                mappingUidToObject[gameObject.uid] = gameObjects[i];
+                            }
                         }
                     }());
 
@@ -18392,7 +18469,6 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
                             componentObj,
                             Type,
                             gameObjectConfig,
-                            gameObjects = config.gameObjects || [],
                             j,
                             i,
                             uid,
@@ -18402,7 +18478,7 @@ define('kick/scene/Scene',["require", "kick/core/ProjectAsset", "./SceneLights",
 
                         for (j = 0; j < gameObjects.length; j++) {
                             gameObjectConfig = config.gameObjects[j];
-                            gameObject = newGameObjects[j];
+                            gameObject = gameObjects[j];
                             // build components
                             for (i = 0; gameObjectConfig.components && i < gameObjectConfig.components.length; i++) {
                                 component = gameObjectConfig.components[i];
@@ -18944,6 +19020,7 @@ define('kick/math/Mat2d',[], function () {
 
 define('kick/math',["./math/Vec2", "./math/Vec3", "./math/Vec4", "./math/Mat2","./math/Mat2d", "./math/Mat3", "./math/Mat4", "./math/Quat", "./math/Frustum", "./math/Aabb"],
     function (vec2, vec3, vec4, mat2, mat2d, mat3, mat4, quat, frustum, aabb) {
+        
         return {
             Vec2: vec2,
             Vec3: vec3,
@@ -19927,7 +20004,8 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
         
 
         var ASSERT = true,
-            engineInstance = null;
+            engineInstance = null,
+            engine;
 
         /**
          * @module kick.core
@@ -19957,7 +20035,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
          * @param {String|canvas} idOrElement elementid of canvas tag or the canvas element
          * @param {kick.core.Config} config={} Configuration object
          */
-        var engine = function (idOrElement, config) {
+        engine = function (idOrElement, config) {
             var glState,
                 gl = null,
                 canvas = typeof idOrElement === 'string' ? document.getElementById(idOrElement) : idOrElement,
@@ -20005,7 +20083,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                  * @event postUpdateListener
                  */
                 "postUpdateListener"
-                ]
+            ]
             );
 
             Object.defineProperties(this, {
@@ -20077,7 +20155,7 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
                         return activeScene;
                     },
                     set: function (value) {
-                        if (value === null || typeof value === "undefined") {
+                        if (value === null || value === undefined) {
                             activeScene = activeSceneNull;
                         } else {
                             activeScene = value;
@@ -20277,7 +20355,6 @@ define('kick/core/Engine',["require", "./GLState", "./Project", "./Constants", "
             /**
              * @method removeFrameListener
              * @param {Object} frameListener
-             * @return {boolean} element removed
              * @deprecated
              */
             this.removeFrameListener = function (frameListener) {
@@ -21346,6 +21423,19 @@ define('kick/scene/Component',[], function () {
      */
 
     /**
+     * Optional name of the component type.
+     * If specified, the component can be accessed directly from the gameObject.
+     * If multiple components with same component type is added to the same gameObject, the access through gameObject is undefined
+     * @example
+     *      // kick.scene.Transform has the type 'transform'
+     *      var transform = gameObject.transform;
+     * @property componentType
+     * @type String
+     * @final
+     */
+
+
+    /**
      * Abstract method called every update. May be undefined.
      * @method update
      */
@@ -21436,7 +21526,16 @@ define('kick/scene/Skybox',["require", "kick/core/ProjectAsset", "./SceneLights"
                         }
                     },
                     enumerable: true
-                }
+                },
+                /**
+                 * Name of the component type = "skybox".
+                 * @example
+                 *      var skybox = gameObject.skybox;
+                 * @property componentType
+                 * @type String
+                 * @final
+                 */
+                componentType: {value:"skybox"}
             });
 
             this.activated = function () {
@@ -21450,6 +21549,7 @@ define('kick/scene/Skybox',["require", "kick/core/ProjectAsset", "./SceneLights"
             };
 
             this.deactivated = function(){
+                var engine = EngineSingleton.engine;
                 engine.removeEventListener("contextRestored", contextRestoredListener);
             };
 
@@ -21805,7 +21905,7 @@ define('kick/texture',["./texture/MovieTexture", "./texture/RenderTexture", "./t
     });
 
 define('kick/components/FullWindow',["kick/core"], function (core) {
-    
+        
 
         var Util = core.Util;
 
@@ -21828,7 +21928,7 @@ define('kick/components/FullWindow',["kick/core"], function (core) {
                     canvas.height = window.innerHeight - canvas.offsetTop;
                     engine.canvasResized();
                 },
-                // https://developer.mozilla.org/en-US/docs/DOM/Mozilla_event_reference/resize
+            // https://developer.mozilla.org/en-US/docs/DOM/Mozilla_event_reference/resize
                 resizeThrottler = function () {
                     // ignore resize events as long as an actualResizeHandler execution is in the queue
                     if ( !resizeTimeout ) {
@@ -21857,6 +21957,18 @@ define('kick/components/FullWindow',["kick/core"], function (core) {
                 window.removeEventListener("resize", resizeThrottler);
             };
 
+            Object.defineProperties(this, {
+                /**
+                 * Name of the component componentType = "fullWindow".
+                 * @example
+                 *      var fullWindow = gameObject.fullWindow;
+                 * @property componentType
+                 * @type String
+                 * @final
+                 */
+                componentType: {value:"fullWindow"}
+            });
+
             /**
              * @method toJSON
              * @return {JSON}
@@ -21870,7 +21982,7 @@ define('kick/components/FullWindow',["kick/core"], function (core) {
 );
 
 define('kick/components/FPSWalker',["kick/core", "kick/math", "kick/scene"], function (core, math, scene) {
-    
+        
         var DEGREE_TO_RADIAN = 0.01745329251994,
             Util = core.Util;
         /**
@@ -21929,7 +22041,10 @@ define('kick/components/FPSWalker',["kick/core", "kick/math", "kick/scene"], fun
             this.moveObject = function(){
                 var moveDistance = thisObj.movementSpeed * time.deltaTime,
                     deltaZ = 0,
-                    deltaX = 0;
+                    deltaX = 0,
+                    rotateYRadian,
+                    cosY,
+                    sinY;
                 if (keyInput.isKey(forward)){
                     deltaZ = -moveDistance;
                 } else if (keyInput.isKey(backward)){
@@ -21944,9 +22059,9 @@ define('kick/components/FPSWalker',["kick/core", "kick/math", "kick/scene"], fun
 
                 // move in XZ plane
                 if (deltaX !== 0 || deltaZ !== 0){
-                    var rotateYRadian = -rotateY*DEGREE_TO_RADIAN,
-                        cosY = Math.cos(rotateYRadian),
-                        sinY = Math.sin(rotateYRadian);
+                    rotateYRadian = -rotateY*DEGREE_TO_RADIAN;
+                    cosY = Math.cos(rotateYRadian);
+                    sinY = Math.sin(rotateYRadian);
                     // rotate around y
                     position[0] += deltaX * cosY - deltaZ * sinY;
                     position[2] += deltaX * sinY + deltaZ * cosY;
@@ -21991,6 +22106,18 @@ define('kick/components/FPSWalker',["kick/core", "kick/math", "kick/scene"], fun
              * @default 1.0
              */
             this.rotateSpeedY = 1.00;
+
+            Object.defineProperties(this, {
+                /**
+                 * Name of the component componentType = "fpsWalker".
+                 * @example
+                 *      var fpsWalker = gameObject.fpsWalker;
+                 * @property componentType
+                 * @type String
+                 * @final
+                 */
+                componentType: {value:"fpsWalker"}
+            });
 
             /**
              * Registers the object on activation
