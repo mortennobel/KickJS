@@ -200,7 +200,7 @@ define(["kick/core/Constants"], function (constants) {
                 enumerable:true
             },
             /**
-             * The EXT\_draw\_buffers extension (if available). Also known as multiple render targets.
+             * The EXT\_draw\_buffers / WEBGL\_draw\_buffers extension (if available). Also known as multiple render targets.
              * See http://www.khronos.org/registry/webgl/extensions/WEBGL_draw_buffers/
              * @property textureFilterAnisotropicExtension
              * @type Object

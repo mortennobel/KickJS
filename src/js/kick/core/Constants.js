@@ -2289,14 +2289,6 @@ define(function () {
         */
         GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_CUBE_MAP_FACE: { value: 36051, enumerable: true},
         /**
-        * Value 36064
-        * @property GL_COLOR_ATTACHMENT0
-        * @type Number
-        * @static
-        * @final
-        */
-        GL_COLOR_ATTACHMENT0: { value: 36064, enumerable: true},
-        /**
         * Value 36096
         * @property GL_DEPTH_ATTACHMENT
         * @type Number
@@ -2487,7 +2479,279 @@ define(function () {
         * @static
         * @final
         */
-        GL_HALF_FLOAT_OES: { value: 36193, enumerable: true}
+        GL_HALF_FLOAT_OES: { value: 36193, enumerable: true},
+        /**
+        * Value 36064
+        * @property GL_COLOR_ATTACHMENT0
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT0: { value: 36064, enumerable: true},
+        /**
+        * Value 36065
+        * @property GL_COLOR_ATTACHMENT1
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT1: { value: 36065, enumerable: true},
+        /**
+        * Value 36066
+        * @property GL_COLOR_ATTACHMENT2
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT2: { value: 36066, enumerable: true},
+        /**
+        * Value 36067
+        * @property GL_COLOR_ATTACHMENT3
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT3: { value: 36067, enumerable: true},
+        /**
+        * Value 36068
+        * @property GL_COLOR_ATTACHMENT4
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT4: { value: 36068, enumerable: true},
+        /**
+        * Value 36069
+        * @property GL_COLOR_ATTACHMENT5
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT5: { value: 36069, enumerable: true},
+        /**
+        * Value 36070
+        * @property GL_COLOR_ATTACHMENT6
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT6: { value: 36070, enumerable: true},
+        /**
+        * Value 36071
+        * @property GL_COLOR_ATTACHMENT7
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT7: { value: 36071, enumerable: true},
+        /**
+        * Value 36072
+        * @property GL_COLOR_ATTACHMENT8
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT8: { value: 36072, enumerable: true},
+        /**
+        * Value 36073
+        * @property GL_COLOR_ATTACHMENT9
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT9: { value: 36073, enumerable: true},
+        /**
+        * Value 36074
+        * @property GL_COLOR_ATTACHMENT10
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT10: { value: 36074, enumerable: true},
+        /**
+        * Value 36075
+        * @property GL_COLOR_ATTACHMENT11
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT11: { value: 36075, enumerable: true},
+        /**
+        * Value 36076
+        * @property GL_COLOR_ATTACHMENT12
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT12: { value: 36076, enumerable: true},
+        /**
+        * Value 36077
+        * @property GL_COLOR_ATTACHMENT13
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT13: { value: 36077, enumerable: true},
+        /**
+        * Value 36078
+        * @property GL_COLOR_ATTACHMENT14
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT14: { value: 36078, enumerable: true},
+        /**
+        * Value 36079
+        * @property GL_COLOR_ATTACHMENT15
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_COLOR_ATTACHMENT15: { value: 36079, enumerable: true},
+        /**
+        * Value 34853
+        * @property GL_DRAW_BUFFER0
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER0: { value: 34853, enumerable: true},
+        /**
+        * Value 34854
+        * @property GL_DRAW_BUFFER1
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER1: { value: 34854, enumerable: true},
+        /**
+        * Value 34855
+        * @property GL_DRAW_BUFFER2
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER2: { value: 34855, enumerable: true},
+        /**
+        * Value 34856
+        * @property GL_DRAW_BUFFER3
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER3: { value: 34856, enumerable: true},
+        /**
+        * Value 34857
+        * @property GL_DRAW_BUFFER4
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER4: { value: 34857, enumerable: true},
+        /**
+        * Value 34858
+        * @property GL_DRAW_BUFFER5
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER5: { value: 34858, enumerable: true},
+        /**
+        * Value 34859
+        * @property GL_DRAW_BUFFER6
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER6: { value: 34859, enumerable: true},
+        /**
+        * Value 34860
+        * @property GL_DRAW_BUFFER7
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER7: { value: 34860, enumerable: true},
+        /**
+        * Value 34861
+        * @property GL_DRAW_BUFFER8
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER8: { value: 34861, enumerable: true},
+        /**
+        * Value 34862
+        * @property GL_DRAW_BUFFER9
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER9: { value: 34862, enumerable: true},
+        /**
+        * Value 34863
+        * @property GL_DRAW_BUFFER10
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER10: { value: 34863, enumerable: true},
+        /**
+        * Value 34864
+        * @property GL_DRAW_BUFFER11
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER11: { value: 34864, enumerable: true},
+        /**
+        * Value 34865
+        * @property GL_DRAW_BUFFER12
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER12: { value: 34865, enumerable: true},
+        /**
+        * Value 34866
+        * @property GL_DRAW_BUFFER13
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER13: { value: 34866, enumerable: true},
+        /**
+        * Value 34867
+        * @property GL_DRAW_BUFFER14
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER14: { value: 34867, enumerable: true},
+        /**
+        * Value 34868
+        * @property GL_DRAW_BUFFER15
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_DRAW_BUFFER15: { value: 34868, enumerable: true},
+        /**
+        * Value 36063
+        * @property GL_MAX_COLOR_ATTACHMENTS
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_MAX_COLOR_ATTACHMENTS: { value: 36063, enumerable: true},
+        /**
+        * Value 34852
+        * @property GL_MAX_DRAW_BUFFERS
+        * @type Number
+        * @static
+        * @final
+        */
+        GL_MAX_DRAW_BUFFERS: { value: 34852, enumerable: true}
     });
 
     return constants;
