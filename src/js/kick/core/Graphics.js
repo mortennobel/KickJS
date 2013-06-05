@@ -1,0 +1,61 @@
+define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kick/scene/EngineUniforms","kick/scene/MeshRenderer", "kick/math/Mat4", "kick/core/EngineSingleton"],
+    function (constants, Camera, Transform, EngineUniforms, MeshRenderer, Mat4, EngineSingleton) {
+    "use strict";
+    var ASSERT = constants._ASSERT;
+    return {
+        /**
+         * @method renderToTexture
+         * @param {kick.texture.RenderTexture} renderTexture
+         * @param {kick.material.Material} material
+         */
+        renderToTexture: (function(){
+            var camera,
+                engine,
+                engineUniforms,
+                meshRenderer;
+            return function(renderTexture, material){
+                if (!camera){
+                    engine = EngineSingleton.engine;
+                    camera = new Camera({
+                        perspective: false,
+                        left:-1,
+                        right:1,
+                        top:1,
+                        bottom:-1,
+                        near:-1,
+                        far:1
+                    });
+                    camera.gameObject = {
+                        transform: new Transform(),
+                        scene: {
+                            addEventListener: function(){},
+                            findComponentsWithMethod: function(){return [];}
+                        }
+                    };
+                    camera.activated();
+
+                    engineUniforms = new EngineUniforms({
+                        viewMatrix:  Mat4.identity(Mat4.create()),
+                        projectionMatrix: Mat4.identity(Mat4.create()),
+                        viewProjectionMatrix: Mat4.identity(Mat4.create()),
+                        lightMatrix: Mat4.identity(Mat4.create()),
+                        currentCamera: camera,
+                        currentCameraTransform: camera.gameObject.transform
+                    });
+                    engineUniforms.sceneLights = {};
+                    meshRenderer = new MeshRenderer({
+                        mesh: engine.project.load(engine.project.ENGINE_MESH_PLANE),
+                        material: material
+                    });
+                    meshRenderer.gameObject = {
+                        transform: new Transform()
+                    };
+                    meshRenderer.activated();
+                }
+                camera.renderTarget = renderTexture;
+                camera.setupCamera();
+                meshRenderer.material = material;
+                meshRenderer.render(engineUniforms);
+            }}())
+    }
+    });
