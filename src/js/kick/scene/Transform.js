@@ -34,6 +34,14 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
             children = [],
             parentTransform = null,
             thisObj = this,
+            isNaNArray = function(array){
+                var i;
+                for (i=0;i<array.length;i++){
+                    if (isNaN(array[i])){
+                        Util.warn("NaN");
+                    }
+                }
+            },
             markGlobalDirty = function () {
                 var i;
                 dirty[GLOBAL] = 1;
@@ -69,6 +77,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return Vec3.clone(globalPosition);
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     var currentPosition;
                     if (parentTransform === null) {
                         thisObj.localPosition = newValue;
@@ -94,6 +105,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return Vec3.clone(localPosition);
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     Vec3.copy(localPosition, newValue);
                     markLocalDirty();
                 }
@@ -110,6 +124,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return vec;
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     Quat.setEuler(localRotationQuat, newValue);
                     markLocalDirty();
                 }
@@ -126,6 +143,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return vec;
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     var tmp = Quat.create();
                     Quat.setEuler(tmp, newValue);
                     this.rotation = tmp;
@@ -155,6 +175,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return globalRotationQuat;
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     if (parentTransform === null) {
                         this.localRotation = newValue;
                         return;
@@ -174,6 +197,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return localRotationQuat;
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     Quat.copy(localRotationQuat, newValue);
                     markLocalDirty();
                 }
@@ -189,6 +215,9 @@ define(["kick/math/Mat4", "kick/math/Vec3", "kick/math/Quat", "kick/core/Constan
                     return Vec3.clone(localScale);
                 },
                 set: function (newValue) {
+                    if (ASSERT){
+                        isNaNArray(newValue);
+                    }
                     var i;
                     Vec3.copy(localScale, newValue);
                     // replace 0 value with epsilon to prevent a singular matrix
