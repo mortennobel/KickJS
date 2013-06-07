@@ -3,6 +3,12 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
     "use strict";
     var ASSERT = constants._ASSERT,
         fail = Util.fail;
+        /**
+         * A helper-class used for rendering.
+         *
+         * @class Graphics
+         * @namespace kick.core
+         */
     return {
         /**
          *
@@ -22,6 +28,7 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
          * @method renderToTexture
          * @param {kick.texture.RenderTexture} renderTexture
          * @param {kick.material.Material} material
+         * @static
          */
         renderToTexture: (function(){
             var camera,
