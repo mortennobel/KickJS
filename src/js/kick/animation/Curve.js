@@ -180,8 +180,8 @@ define(["kick/core/Util", "kick/core/Constants"],
                 u = (time - from.time) / timeDelta;
                 uMinusOne = 1-u;
                 p0 = from.value;
-                p1 = currentEvaluateTangent(from.value,from.outSlope, 1/3);
-                p2 = currentEvaluateTangent(to.value,to.inSlope, -1/3);
+                p1 = currentEvaluateTangent(from.value,from.outSlope, timeDelta/3);
+                p2 = currentEvaluateTangent(to.value,to.inSlope, -timeDelta/3);
                 p3 = to.value;
                 w1 = uMinusOne * uMinusOne * uMinusOne;
                 w2 = 3 * u * uMinusOne * uMinusOne;
