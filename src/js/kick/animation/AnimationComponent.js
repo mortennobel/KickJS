@@ -13,7 +13,8 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
          */
         return function (config) {
             var thisObj = this,
-                animations = [];
+                animations = [],
+                gameObject;
 
             /**
              * @method addAnimation
@@ -21,6 +22,7 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
              */
             this.addAnimation = function(animation){
                 animation.gameObject = this.gameObject;
+                animations.push(animation);
             };
 
             /**
@@ -59,6 +61,18 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                 count: {
                     get:function(){
                         return animations.length;
+                    }
+                },
+                gameObject:{
+                    get:function(){
+                        return gameObject;
+                    },
+                    set:function(newValue){
+                        var i;
+                        gameObject = newValue;
+                        for (i = 0; i < animations.length; i++) {
+                            animations[i].gameObject = gameObject;
+                        }
                     }
                 }
             });

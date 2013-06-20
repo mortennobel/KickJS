@@ -92,10 +92,19 @@ define(["kick/core/Util", "kick/core/Constants"],
                         return resArray;
                     },
                     // eulers angels
-                    function(w1,w2,w3,w4,p1,p2,p3,p4){
-                        resArray[0] = w1 * p1[0] + w2 * p2[0] + w3 * p3[0] + w4 * p4[0];
-                        resArray[1] = w1 * p1[1] + w2 * p2[1] + w3 * p3[1] + w4 * p4[1];
-                        resArray[2] = w1 * p1[2] + w2 * p2[2] + w3 * p3[2] + w4 * p4[2];
+                    function(t,p1,p2,p3,p4){
+                        var tmp1,tmp2,tmp3,tmp4,tmp5;
+
+                        tmp1 = [lerpAngle(p1[0], p2[0], t), lerpAngle(p1[1], p2[1], t), lerpAngle(p1[2], p2[2], t)];
+                        tmp2 = [lerpAngle(p2[0], p3[0], t), lerpAngle(p2[1], p3[1], t), lerpAngle(p2[2], p3[2], t)];
+                        tmp3 = [lerpAngle(p3[0], p4[0], t), lerpAngle(p3[1], p4[1], t), lerpAngle(p3[2], p4[2], t)];
+
+                        tmp4 = [lerpAngle(tmp1[0], tmp2[0], t), lerpAngle(tmp1[1], tmp2[1], t), lerpAngle(tmp1[2], tmp2[2], t)];
+                        tmp5 = [lerpAngle(tmp2[0], tmp3[0], t), lerpAngle(tmp2[1], tmp3[1], t), lerpAngle(tmp2[2], tmp3[2], t)];
+
+                        resArray[0] = lerpAngle(tmp4[0], tmp5[0], t);
+                        resArray[1] = lerpAngle(tmp4[1], tmp5[1], t);
+                        resArray[2] = lerpAngle(tmp4[2], tmp5[2], t);
                         return resArray;
                     }
                 ],
@@ -204,7 +213,7 @@ define(["kick/core/Util", "kick/core/Constants"],
                     return controlPoints[0].time;
                 }
                 // find two end points
-                for (i=1;controlPoints[i].time<time && i < controlPoints.length;i++){
+                for (i=1;i < controlPoints.length && controlPoints[i].time<time;i++){
                     // do nothing
                 }
                 if (i === controlPoints.length) {
@@ -214,11 +223,14 @@ define(["kick/core/Util", "kick/core/Constants"],
                 to = controlPoints[i];
                 timeDelta = to.time - from.time;
                 u = (time - from.time) / timeDelta;
-                uMinusOne = 1-u;
                 p0 = from.value;
                 p1 = currentEvaluateTangent(from.value,from.outSlope, timeDelta/3);
                 p2 = currentEvaluateTangent(to.value,to.inSlope, -timeDelta/3);
                 p3 = to.value;
+                if (curveType === Curve.EULERS_ANGELS){
+                    return currentCurveEvaluation(u, p0, p1, p2, p3);
+                }
+                uMinusOne = 1-u;
                 w1 = uMinusOne * uMinusOne * uMinusOne;
                 w2 = 3 * u * uMinusOne * uMinusOne;
                 w3 = 3 * u * u * uMinusOne;

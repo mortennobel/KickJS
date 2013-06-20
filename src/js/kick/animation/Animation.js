@@ -25,14 +25,13 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/c
                 wrapMode = Animation.LOOP,
                 direction = 1,
                 update = function(){
-                    var name,
-                        curve,
-                        i,
-                        maxTime;
+                    var i,
+                        maxTime = 0;
+
                     for (i = 0; i < componentNames.length; i++) {
-                        maxTime = Math.max(maxTime, curves[i].maxTime);
+                        maxTime = Math.max(maxTime, curves[i].endTime);
                     }
-                    localTime += time.deltaTime*direction;
+                    localTime += time.deltaTime/1000*direction;
                     if (wrapMode === Animation.PINGPONG){
                         if (localTime < 0){
                             localTime *= -1;
@@ -140,11 +139,11 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/c
             };
 
             /**
-             * @method addCurve
+             * @method removeCurve
              * @param {kick.animation.Curve|string} object removes curve by Object or name
              * @return {Boolean}
              */
-            this.addCurve = function(object){
+            this.removeCurve = function(object){
                 var deleted = false,
                     i;
                 for (i  = componentNames.length - 1; i >= 0; i--) {

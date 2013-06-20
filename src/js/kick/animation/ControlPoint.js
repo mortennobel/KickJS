@@ -35,7 +35,8 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                     set:function(newValue){
                         time = newValue;
                         thisObj.fireEvent("changed", thisObj);
-                    }
+                    },
+                    enumerable: true
                 },
                 /**
                  * @property value
@@ -48,7 +49,8 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                     set:function(newValue){
                         value = newValue;
                         thisObj.fireEvent("changed", thisObj);
-                    }
+                    },
+                    enumerable: true
                 },
                 /**
                  * @property inSlope
@@ -61,7 +63,8 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                     set:function(newValue){
                         inSlope = newValue;
                         thisObj.fireEvent("changed", thisObj);
-                    }
+                    },
+                                        enumerable: true
                 },
                 /**
                  * @property outSlope
@@ -74,7 +77,8 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                     set:function(newValue){
                         outSlope = newValue;
                         thisObj.fireEvent("changed", thisObj);
-                    }
+                    },
+                                        enumerable: true
                 }
             });
 
