@@ -1,5 +1,5 @@
-define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/core/EngineSingleton"],
-    function (Util, Constants, Observable, EngineSingleton) {
+define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
+    function (Util, Constants, Observable) {
         "use strict";
 
         var ASSERT = Constants._ASSERT,
@@ -13,64 +13,36 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/c
          * @param {Config} config defines one or more properties
          */
         Animation = function (config) {
-            var engine = EngineSingleton.engine,
-                time = engine.time,
-                eventQueue = engine.eventQueue,
+            var thisObj = this,
                 playing = false,
                 localTime = 0,
-                gameObject,
                 componentNames = [],
                 propertyNames = [],
                 curves = [],
                 wrapMode = Animation.LOOP,
                 direction = 1,
-                update = function(){
-                    var i,
-                        maxTime = 0;
+                speed = 1;
 
-                    for (i = 0; i < componentNames.length; i++) {
-                        maxTime = Math.max(maxTime, curves[i].endTime);
-                    }
-                    localTime += time.deltaTime/1000*direction;
-                    if (wrapMode === Animation.PINGPONG){
-                        if (localTime < 0){
-                            localTime *= -1;
-                            direction = 1;
-                        } else if (localTime > maxTime){
-                            localTime = maxTime - (localTime % maxTime);
-                            direction = -1;
-                        }
-                    }
-                    if (wrapMode === Animation.LOOP){
-                        if (localTime > maxTime){
-                            localTime = localTime % maxTime;
-                        }
-                    }
-                    if (wrapMode === Animation.ONCE){
-                        if (localTime > maxTime){
-                            localTime = maxTime;
-                            this.playing = false;
-                        }
-                    }
-                    for (i = 0; i < componentNames.length; i++) {
-                        gameObject[componentNames[i]][propertyNames[i]] = curves[i].evaluate(localTime);
-                    }
-                },
-                eventObject;
+            /**
+             * Fired when a animation is started
+             * @event started
+             * @param {kick.animation.Animation} animation
+             */
+            /**
+             * Fired when a animation is stopped
+             * @event stopped
+             * @param {kick.animation.Animation} animation
+             */
+            /**
+             * Fired when
+             * @event updateRequested
+             * @param {kick.animation.Animation} animation
+             */
+
+            Observable.call(this,["started", "stopped","updateRequested"]);
+
 
             Object.defineProperties(this, {
-                /**
-                 * @property gameObject
-                 * @type kick.scene.GameObject
-                 */
-                gameObject: {
-                    set: function(newValue){
-                        gameObject = newValue;
-                    },
-                    get: function(){
-                        return gameObject;
-                    }
-                },
                 /**
                  * Used for starting and pausing the animation
                  * @property playing
@@ -91,11 +63,7 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/c
                             }
                         }
                         playing = newValue;
-                        if (playing){
-                            eventObject = eventQueue.add(update, 0, 1e+100);
-                        } else {
-                            eventQueue.cancel(eventObject);
-                        }
+                        thisObj.fireEvent(playing?"started":"stopped", thisObj);
                     }
                 },
                 /**
@@ -116,8 +84,46 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/c
                     get: function(){
                         return wrapMode;
                     }
+                },
+                /**
+                 * Animation speed
+                 * @property speed
+                 * @type Number
+                 * @default 1
+                 */
+                speed: {
+                    set: function(newValue){
+                        speed = newValue;
+                    },
+                    get: function(){
+                        return speed;
+                    }
+                },
+                /**
+                 * Animation time
+                 * @property time
+                 * @type Number
+                 * @readonly
+                 */
+                time:{
+                    get: function(){
+                        return localTime;
+                    }
                 }
             });
+
+            /**
+             * Set animationTime
+             * @method setTime
+             * @param {Number} newTime
+             * @param {Boolean} forceUpdate will instantly update animation
+             */
+            this.setTime = function(newTime, forceUpdate){
+                localTime = newTime;
+                if (forceUpdate){
+                    thisObj.fireEvent("updateRequested", thisObj);
+                }
+            };
 
             /**
              * @method addCurve
@@ -156,6 +162,44 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable", "kick/c
                     }
                 }
                 return deleted;
+            };
+
+            /**
+             * @method _update
+             * @param {Number} timeSeconds
+             * @param {kick.scene.GameObject} gameObject
+             */
+            this._update = function(timeSeconds, gameObject){
+                var i,
+                    maxTime = 0;
+
+                for (i = 0; i < componentNames.length; i++) {
+                    maxTime = Math.max(maxTime, curves[i].endTime);
+                }
+                localTime += timeSeconds*speed*direction;
+                if (wrapMode === Animation.PINGPONG){
+                    if (localTime < 0){
+                        localTime *= -1;
+                        direction = 1;
+                    } else if (localTime > maxTime){
+                        localTime = maxTime - (localTime % maxTime);
+                        direction = -1;
+                    }
+                }
+                if (wrapMode === Animation.LOOP){
+                    if (localTime > maxTime){
+                        localTime = localTime % maxTime;
+                    }
+                }
+                if (wrapMode === Animation.ONCE){
+                    if (localTime > maxTime){
+                        localTime = maxTime;
+                        this.playing = false;
+                    }
+                }
+                for (i = 0; i < componentNames.length; i++) {
+                    gameObject[componentNames[i]][propertyNames[i]] = curves[i].evaluate(localTime);
+                }
             };
 
             /**

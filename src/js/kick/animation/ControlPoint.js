@@ -15,12 +15,12 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                 inSlope,
                 outSlope,
                 thisObj = this;
+
             /**
              * Fired when a control point has been updated
              * @event changed
              * @param {kick.animation.ControlPoint} controlPoint
              */
-
             Observable.call(this,["changed"]);
 
             Object.defineProperties(this, {

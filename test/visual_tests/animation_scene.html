@@ -60,6 +60,37 @@
         }
         gameObject.addComponent(animationComponent);
         animation.playing = true;
+        window.speedx1 = function(){
+            animation.speed = 1;
+        };
+        window.speedx2 = function(){
+            animation.speed = 2;
+        };
+        window.speedx4 = function(){
+            animation.speed = 4;
+        };
+        window.speedx8 = function(){
+            animation.speed = 8;
+        };
+        window.loop = function(){
+            animation.wrapMode = animation.LOOP;
+        };
+        window.pingPong = function(){
+            animation.wrapMode = animation.PINGPONG;
+        };
+        window.once = function(){
+            animation.wrapMode = animation.ONCE;
+        };
+        window.start = function(){
+            animation.playing = true;
+        };
+        window.stop = function(){
+            animation.playing = false;
+        };
+        window.setTime30 = function(){
+            animation.setTime(30, true);
+        };
+
     };
 
     var buildScene = function(){
@@ -127,6 +158,17 @@
                 buildScene();
             });
 </script>
+<button onclick="speedx1();">Speed x1</button>
+<button onclick="speedx2();">Speed x2</button>
+<button onclick="speedx4();">Speed x4</button>
+<button onclick="speedx8();">Speed x8</button><br>
+<button onclick="loop();">Loop</button>
+<button onclick="pingPong();">PingPong</button>
+<button onclick="once();">Once</button><br>
+<button onclick="start();">Start</button>
+<button onclick="stop();">Stop</button><br>
+<button onclick="setTime30();">SetTime30</button>
+
 <br>
 </body>
 </html>

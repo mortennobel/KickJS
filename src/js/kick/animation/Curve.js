@@ -55,7 +55,7 @@ define(["kick/core/Util", "kick/core/Constants"],
                             value[2] + slope[2] * weight,
                             value[3] + slope[3] * weight
                         ];
-                    },
+                    }/*,
                     // euler
                     function(value, slope, weight){
                         return [
@@ -63,7 +63,7 @@ define(["kick/core/Util", "kick/core/Constants"],
                             value[1] + slope[1] * weight,
                             value[2] + slope[2] * weight
                         ];
-                    }
+                    }*/
                 ],
                 evaluateCurves = [
                     // number
@@ -90,9 +90,9 @@ define(["kick/core/Util", "kick/core/Constants"],
                         resArray[2] = w1 * p1[2] + w2 * p2[2] + w3 * p3[2] + w4 * p4[2];
                         resArray[3] = w1 * p1[3] + w2 * p2[3] + w3 * p3[3] + w4 * p4[3];
                         return resArray;
-                    },
+                    }//,
                     // eulers angels
-                    function(t,p1,p2,p3,p4){
+                    /*function(t,p1,p2,p3,p4){
                         var tmp1,tmp2,tmp3,tmp4,tmp5;
 
                         tmp1 = [lerpAngle(p1[0], p2[0], t), lerpAngle(p1[1], p2[1], t), lerpAngle(p1[2], p2[2], t)];
@@ -106,7 +106,7 @@ define(["kick/core/Util", "kick/core/Constants"],
                         resArray[1] = lerpAngle(tmp4[1], tmp5[1], t);
                         resArray[2] = lerpAngle(tmp4[2], tmp5[2], t);
                         return resArray;
-                    }
+                    }*/
                 ],
                 currentCurveEvaluation = evaluateCurves[curveType],
                 currentEvaluateTangent = evaluateTangent[curveType];
@@ -180,8 +180,8 @@ define(["kick/core/Util", "kick/core/Constants"],
              * @param {kick.animation.ControlPoint} controlPoint
              */
             this.addControlPoint = function(controlPoint){
-                var i = 0;
-                for (;i < controlPoints.length; i++) {
+                var i;
+                for (i = 0; i < controlPoints.length; i++) {
                     if (controlPoint.time < controlPoints[i]){
                         break;
                     }
@@ -227,9 +227,6 @@ define(["kick/core/Util", "kick/core/Constants"],
                 p1 = currentEvaluateTangent(from.value,from.outSlope, timeDelta/3);
                 p2 = currentEvaluateTangent(to.value,to.inSlope, -timeDelta/3);
                 p3 = to.value;
-                if (curveType === Curve.EULERS_ANGELS){
-                    return currentCurveEvaluation(u, p0, p1, p2, p3);
-                }
                 uMinusOne = 1-u;
                 w1 = uMinusOne * uMinusOne * uMinusOne;
                 w2 = 3 * u * uMinusOne * uMinusOne;
@@ -241,11 +238,35 @@ define(["kick/core/Util", "kick/core/Constants"],
             Util.copyStaticPropertiesToObject(this, Curve);
         };
 
+        /**
+         * @property NUMBER
+         * @type Number
+         * @readOnly
+         * @static
+         */
         Curve.NUMBER = 0;
+        /**
+         * @property VEC2
+         * @type Number
+         * @readOnly
+         * @static
+         */
         Curve.VEC2 = 1;
+        /**
+         * @property VEC3
+         * @type Number
+         * @readOnly
+         * @static
+         */
         Curve.VEC3 = 2;
+        /**
+         * @property VEC4
+         * @type Number
+         * @readOnly
+         * @static
+         */
         Curve.VEC4 = 3;
-        Curve.EULERS_ANGELS = 4;
+//        Curve.EULERS_ANGELS = 4;
 
         return Curve;
     }
