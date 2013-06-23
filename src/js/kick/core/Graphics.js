@@ -45,7 +45,7 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
                         fail("Graphics.renderToTexture: material must be of type Material");
                     }
                 }
-                normalizedViewportRect  = normalizedViewportRect || [0,0,renderTexture.width,renderTexture.height];
+                normalizedViewportRect  = normalizedViewportRect || [0,0,1,1];
                 if (!camera){
                     engine = EngineSingleton.engine;
                     camera = new Camera({
