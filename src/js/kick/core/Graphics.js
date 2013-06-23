@@ -28,6 +28,7 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
          * @method renderToTexture
          * @param {kick.texture.RenderTexture} renderTexture
          * @param {kick.material.Material} material
+         * @param {kick.math.Vec4} [normalizedViewportRect=[0,0,1,1]]
          * @static
          */
         renderToTexture: (function(){
@@ -35,7 +36,7 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
                 engine,
                 engineUniforms,
                 meshRenderer;
-            return function(renderTexture, material){
+            return function(renderTexture, material, normalizedViewportRect){
                 if (ASSERT){
                     if (!(renderTexture instanceof RenderTexture)){
                         fail("Graphics.renderToTexture: renderTexture must be of type RenderTexture");
@@ -44,6 +45,7 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
                         fail("Graphics.renderToTexture: material must be of type Material");
                     }
                 }
+                normalizedViewportRect  = normalizedViewportRect || [0,0,renderTexture.width,renderTexture.height];
                 if (!camera){
                     engine = EngineSingleton.engine;
                     camera = new Camera({
@@ -82,6 +84,7 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
                     };
                     meshRenderer.activated();
                 }
+                camera.normalizedViewportRect = normalizedViewportRect;
                 camera.renderTarget = renderTexture;
                 camera.setupCamera();
                 meshRenderer.material = material;
