@@ -204,8 +204,7 @@ void main(void)
 
                 function setTextureSubImageData(){
                     texture = new kick.texture.Texture();
-                    var data = new Uint8Array(16);
-                    texture.setImageData(2,2,0,kick.core.Constants.GL_UNSIGNED_BYTE,data);
+                    texture.setImageData(2,2,0,kick.core.Constants.GL_UNSIGNED_BYTE,null);
                     texture.setSubImageData(0, 0, 1, 1, new Uint8Array([255,255,255,255]));
                     texture.setSubImageData(1, 0, 1, 1, new Uint8Array([255,128,0,255]));
                     texture.setSubImageData(0, 1, 1, 1, new Uint8Array([0,255,128,255]));

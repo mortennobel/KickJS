@@ -220,7 +220,12 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             };
 
             /**
+             * Updates a subset of the texture
              * Note the type of pixels is assumed to be the same as in setImageData
+             * @example
+             *     var texture = new kick.texture.Texture();
+             *     texture.setImageData(2,2,0,kick.core.Constants.GL_UNSIGNED_BYTE,null);
+             *     texture.setSubImageData(0, 0, 1, 1, new Uint8Array([255,255,255,255]));
              * @method setSubImageData
              * @param {Number} xoffset
              * @param {Number} yoffset
