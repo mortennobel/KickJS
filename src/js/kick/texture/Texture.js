@@ -41,6 +41,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 _hasDataOnGPU = false,
                 _dataURI =  "memory://void",
                 _flipY =  true,
+                _type,
                 _intFormat = Constants.GL_RGBA,
                 _textureType = Constants.GL_TEXTURE_2D,
                 _boundTextureType = null,
@@ -165,7 +166,6 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     }
                     gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
                     gl.texImage2D(Constants.GL_TEXTURE_2D, 0, _intFormat, _intFormat, Constants.GL_UNSIGNED_BYTE, imageObj);
-
                     Vec2.copy(_dimension, [imageObj.width, imageObj.height]);
                 } else {
                     cubemapOrder = [
@@ -194,6 +194,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     }
                     Vec2.copy(_dimension, [width, height]);
                 }
+                _type = Constants.GL_UNSIGNED_BYTE;
                 thisObj.apply();
                 if (_generateMipmaps) {
                     createMipmaps();
@@ -219,16 +220,68 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             };
 
             /**
+             * Note the type of pixels is assumed to be the same as in setImageData
+             * @method setSubImageData
+             * @param {Number} xoffset
+             * @param {Number} yoffset
+             * @param {Number} width
+             * @param {Number} height
+             * @param {ArrayBufferView} pixels
+             */
+            this.setSubImageData = function (xoffset, yoffset, width, height, pixels) {
+                if (Constants._ASSERT) {
+                    if (!_textureType) {
+                        Util.fail("Texture.textureType not set");
+                        return;
+                    }
+                    if (!_hasDataOnGPU){
+                        Util.fail("Texture.setSubImageData must be called after Texture.setImageData or Texture.setImage");
+                    }
+                    if (width <=0 || height <=0){
+                        Util.fail("Texture.setSubImageData width and height must be larger than 0");
+                    }
+                    if (xoffset + width > _dimension[0]){
+                        Util.fail("Texture.setSubImageData xoffset ("+xoffset+") + width ("+width+") must be less than / equal to texture width ("+_dimension[0]+")");
+                    }
+                    if (yoffset + height > _dimension[1]){
+                        Util.fail("Texture.setSubImageData xoffset ("+yoffset+") + width ("+height+") must be less than / equal to texture width ("+_dimension[1]+")");
+                    }
+                }
+                var i,
+                    textureSides = _textureType === Constants.GL_TEXTURE_2D ?
+                        [Constants.GL_TEXTURE_2D] :
+                        [Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                            Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
+                            Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
+                            Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
+                            Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
+                            Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_Z];
+                thisObj.bind(0); // bind to texture slot 0
+                glState.currentMaterial = null; // for material to rebind
+                gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
+                for (i = 0; i < textureSides.length; i++) {
+                    gl.texSubImage2D(textureSides[i], 0, xoffset, yoffset, width, height, _intFormat, _type, pixels);
+                }
+            };
+
+            /**
              * Set a image using a raw bytearray in a specified format.
              * GL\_FLOAT / GL\_HALF\_FLOAT\_OES should only be used if extension is supported (See GLState.textureFloatExtension / GLState.textureFloatHalfExtension).
              * If only one of GL\_FLOAT/GL\_HALF\_FLOAT\_OES is supported, then the engine will silently use the supported type.
              * If used on cubemap-texture then all 6 sides of the cube is assigned
+             * @example
+             *     texture = new kick.texture.Texture();
+             *     var data = new Uint8Array([
+             *         255,255,255,255, 255,0,0,255,
+             *         0,255,0,255, 0,0,255,255
+             *     ]);
+             *     texture.setImageData(2,2,0,kick.core.Constants.GL_UNSIGNED_BYTE,data);
              * @method setImageData
              * @param {Number} width image width in pixels
              * @param {Number} height image height in pixels
              * @param {Number} border image border in pixels
-             * @param {Object} type GL\_FLOAT, GL\_HALF_FLOAT_OES, GL\_UNSIGNED_BYTE, GL\_UNSIGNED_SHORT\_4\_4\_4\_4, GL\_UNSIGNED\_SHORT\_5\_5\_5\_1 or GL\_UNSIGNED\_SHORT\_5\_6\_5
-             * @param {Array} pixels array of pixels (may be null)
+             * @param {Object} type GL\_FLOAT, GL\_HALF\_FLOAT_OES, GL\_UNSIGNED\_BYTE, GL\_UNSIGNED\_SHORT\_4\_4\_4\_4, GL\_UNSIGNED\_SHORT\_5\_5\_5\_1 or GL\_UNSIGNED\_SHORT\_5\_6\_5
+             * @param {ArrayBufferView} pixels array of pixels (may be null)
              * @param {String} dataURI String representing the image
              */
             this.setImageData = function (width, height, border, type, pixels, dataURI) {
@@ -283,14 +336,15 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 _dataURI = dataURI;
 
                 thisObj.bind(0); // bind to texture slot 0
+                gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
                 for (i = 0; i < textureSides.length; i++) {
-                    gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
                     gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, _intFormat, type, pixels);
                 }
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_WRAP_S, _wrapS);
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_WRAP_T, _wrapT);
+                _type = type;
                 if (_generateMipmaps) {
                     createMipmaps();
                 }

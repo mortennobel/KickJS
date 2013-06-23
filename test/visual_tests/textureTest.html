@@ -12,6 +12,29 @@
 This example shows how textures can be used
 <br>
 <h2>Load texture</h2>
+<textarea style="display: none;" id="vertexShaderUV">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec3 vColor;
+
+void main(void) {
+  gl_Position = _mvProj * vec4(vertex, 1.0);
+  vColor = vec3(uv1.x,uv1.y,0.0);
+}
+</textarea>
+<textarea style="display: none;" id="fragmentShaderUV">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+  gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+</textarea>
 <a href="#" onclick="setTmpTexture(); return false;">TemporaryTexture</a>
 <a href="#" onclick="setGIF(); return false;">Test.jpeg (RGB 25x40)</a>
 <a href="#" onclick="setPNG(); return false;">webgl.png (RGBA 128x128)</a> |
@@ -22,6 +45,10 @@ This example shows how textures can be used
 <a href="#" onclick="setTexture(engine.project.ENGINE_TEXTURE_LOGO); return false;">KickJS_Logo</a> |
 <a href="#" onclick="setTextureConfig('kickjs://texture/logo/'); return false;">KickJS_Logo(2)</a> |
 <a href="#" onclick="loadTextureFromProject('ProjectWhite'); return false;">ProjectWhite</a>
+<a href="#" onclick="renderToTexture(); return false;">RenderToTexture</a>
+<a href="#" onclick="renderToSubTexture(); return false;">RenderToSubTexture</a>
+<a href="#" onclick="setTextureImageData(); return false;">Texture (setImageData)</a>
+<a href="#" onclick="setTextureSubImageData(); return false;">Texture (setSubImageData)</a>
 <script src="../../dependencies/require.js"></script>
 <script type="text/javascript">
     var req = require.config({
@@ -32,7 +59,7 @@ This example shows how textures can be used
     });
 
     req(['kick'],
-            function (KICK) {
+            function (kick) {
                 "use strict";
                 var engine;
                 var meshRenderer;
@@ -71,10 +98,10 @@ This example shows how textures can be used
                         return;
                     }
 
-                    texture = new KICK.texture.Texture();
+                    texture = new kick.texture.Texture();
                     texture.setTemporaryTexture();
 
-                    material = new KICK.material.Material({
+                    material = new kick.material.Material({
                         name:"Some material ",
                         shader:shader,
                         uniformData: {
@@ -100,16 +127,16 @@ This example shows how textures can be used
                 }
 
                 function initKick() {
-                    engine = new KICK.core.Engine('canvas',{
+                    engine = new kick.core.Engine('canvas',{
                         enableDebugContext: true
                     });
                     window.engine = engine;
                     var project = engine.project;
                     project.loadProject(projectData,
                             function onSuccess(){
-                                engine.activeScene = new KICK.scene.Scene();
+                                engine.activeScene = new kick.scene.Scene();
                                 var cameraObject = engine.activeScene.createGameObject();
-                                var camera = new KICK.scene.Camera({
+                                var camera = new kick.scene.Camera({
                                     clearColor: [0.5,1,1,1],
                                     perspective: false,
                                     near:-1,
@@ -118,7 +145,7 @@ This example shows how textures can be used
                                 cameraObject.addComponent(camera);
 
                                 var gameObject = engine.activeScene.createGameObject();
-                                meshRenderer = new KICK.scene.MeshRenderer();
+                                meshRenderer = new kick.scene.MeshRenderer();
                                 meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_PLANE);
                                 initMaterials('vertexShader','fragmentShader');
                                 gameObject.addComponent(meshRenderer);
@@ -158,10 +185,31 @@ This example shows how textures can be used
                 }
 
                 function setTextureConfig(url){
-                    texture = new KICK.texture.Texture({
+                    texture = new kick.texture.Texture({
                         dataURI: url,
                         name: "Some texture"
                     });
+                    material.setUniform("mainTexture", texture);
+                }
+
+                function setTextureImageData(){
+                    texture = new kick.texture.Texture();
+                    var data = new Uint8Array([
+                        255,255,255,255, 255,0,0,255,
+                        0,255,0,255, 0,0,255,255
+                    ]);
+                    texture.setImageData(2,2,0,kick.core.Constants.GL_UNSIGNED_BYTE,data);
+                    material.setUniform("mainTexture", texture);
+                }
+
+                function setTextureSubImageData(){
+                    texture = new kick.texture.Texture();
+                    var data = new Uint8Array(16);
+                    texture.setImageData(2,2,0,kick.core.Constants.GL_UNSIGNED_BYTE,data);
+                    texture.setSubImageData(0, 0, 1, 1, new Uint8Array([255,255,255,255]));
+                    texture.setSubImageData(1, 0, 1, 1, new Uint8Array([255,128,0,255]));
+                    texture.setSubImageData(0, 1, 1, 1, new Uint8Array([0,255,128,255]));
+                    texture.setSubImageData(1, 1, 1, 1, new Uint8Array([0,128,255,255]));
                     material.setUniform("mainTexture", texture);
                 }
 
@@ -170,12 +218,75 @@ This example shows how textures can be used
                     console.log(texture.name);
                     material.setUniform("mainTexture",texture);
                 }
+
+                function renderToTexture(){
+
+                    texture = new kick.texture.Texture();
+                    texture.setImageData(512, 512, 0, kick.core.Constants.GL_UNSIGNED_BYTE, null, "");
+                    var renderTexture = new kick.texture.RenderTexture({dimension:[512,512], colorTexture: texture});
+                    var gl;
+
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+
+//                    var vs = document.getElementById('vertexShaderUV').value;
+//                    var fs = document.getElementById('fragmentShaderUV').value;
+//                    var shader = new kick.material.Shader({
+//                        vertexShaderSrc :vs,
+//                        fragmentShaderSrc :fs
+//                    });
+
+                    var renderMaterial = new kick.material.Material( {
+                        shader:shader,
+                        uniformData: {
+                            mainColor: [1,0,0,1]
+                        }
+                    });
+                    kick.core.Graphics.renderToTexture(renderTexture, renderMaterial);
+                    material.setUniform("mainTexture",texture);
+                }
+
+                function renderToSubTexture(){
+
+                    texture = new kick.texture.Texture();
+                    texture.setImageData(512, 512, 0, kick.core.Constants.GL_UNSIGNED_BYTE, null, "");
+                    var renderTexture = new kick.texture.RenderTexture({dimension:[512,512], colorTexture: texture});
+                    var gl;
+
+                    var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
+
+//                    var vs = document.getElementById('vertexShaderUV').value;
+//                    var fs = document.getElementById('fragmentShaderUV').value;
+//                    var shader = new kick.material.Shader({
+//                        vertexShaderSrc :vs,
+//                        fragmentShaderSrc :fs
+//                    });
+
+                    var renderMaterial = new kick.material.Material( {
+                        shader:shader,
+                        uniformData: {
+                            mainColor: [1,0,0,1]
+                        }
+                    });
+                    kick.core.Graphics.renderToTexture(renderTexture, renderMaterial, [0,0,0.5,.5]);
+                    renderMaterial.setUniform("mainColor", new Float32Array([0,1,0,1]));
+                    kick.core.Graphics.renderToTexture(renderTexture, renderMaterial, [0,.5,.5,.5]);
+                    renderMaterial.setUniform("mainColor", new Float32Array([0,0,1,1]));
+                    kick.core.Graphics.renderToTexture(renderTexture, renderMaterial, [.5,0,.5,.5]);
+                    renderMaterial.setUniform("mainColor", new Float32Array([1,1,1,1]));
+                    kick.core.Graphics.renderToTexture(renderTexture, renderMaterial, [.5,.5,.5,.5]);
+
+                    material.setUniform("mainTexture",texture);
+                }
                 window.loadTextureFromProject = loadTextureFromProject;
                 window.setTextureConfig = setTextureConfig;
                 window.setTexture = setTexture;
                 window.setPNG = setPNG;
                 window.setGIF = setGIF;
                 window.setTmpTexture = setTmpTexture;
+                window.renderToTexture = renderToTexture;
+                window.renderToSubTexture = renderToSubTexture;
+                window.setTextureImageData = setTextureImageData;
+                window.setTextureSubImageData = setTextureSubImageData;
                 initKick();
             });
 </script>
