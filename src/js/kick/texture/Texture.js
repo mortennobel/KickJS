@@ -288,12 +288,12 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
              * @param {Object} type GL\_FLOAT, GL\_HALF\_FLOAT_OES, GL\_UNSIGNED\_BYTE, GL\_UNSIGNED\_SHORT\_4\_4\_4\_4, GL\_UNSIGNED\_SHORT\_5\_5\_5\_1 or GL\_UNSIGNED\_SHORT\_5\_6\_5
              * @param {ArrayBufferView} pixels array of pixels (may be null)
              * @param {String} dataURI String representing the image
+             * @param {Number} [cubemapIndex] The cubemap index (only for cubemaps) [+x,-x,+y,-y,+z,-z]. Default is all cubemaps.
              */
-            this.setImageData = function (width, height, border, type, pixels, dataURI) {
+            this.setImageData = function (width, height, border, type, pixels, dataURI, cubemapIndex) {
                 createImageFunction = thisObj.setImageData;
                 createImageFunctionParameters = arguments;
-                var i,
-                    textureSides = _textureType === Constants.GL_TEXTURE_2D ?
+                var textureSides = _textureType === Constants.GL_TEXTURE_2D ?
                             [Constants.GL_TEXTURE_2D] :
                             [Constants.GL_TEXTURE_CUBE_MAP_POSITIVE_X,
                                 Constants.GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -342,9 +342,14 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
 
                 thisObj.bind(0); // bind to texture slot 0
                 gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
-                for (i = 0; i < textureSides.length; i++) {
-                    gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, _intFormat, type, pixels);
+                if (!Number.isFinite(cubemapIndex) || _textureType === Constants.GL_TEXTURE_2D){
+                    gl.texImage2D(textureSides[cubemapIndex || 0], 0, _intFormat, width, height, border, _intFormat, type, pixels);
+                } else {
+                    for (var i = 0; i < textureSides.length; i++) {
+                        gl.texImage2D(textureSides[i], 0, _intFormat, width, height, border, _intFormat, type, pixels);
+                    }
                 }
+
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
                 gl.texParameteri(_textureType, Constants.GL_TEXTURE_WRAP_S, _wrapS);
@@ -362,12 +367,12 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
              * @method setTemporaryTexture
              */
             this.setTemporaryTexture = function () {
-                var whiteImage = new Uint8Array([255, 255, 255,
-                        255, 255, 255,
-                        255, 255, 255,
-                        255, 255, 255]),
+                var whiteImage = new Uint8Array([255, 255, 255, 255,
+                        255, 255, 255,255,
+                        255, 255, 255,255,
+                        255, 255, 255,255]),
                     oldIntFormat = _intFormat;
-                this.internalFormat = Constants.GL_RGB;
+                this.internalFormat = Constants.GL_RGBA;
                 this.setImageData(2, 2, 0, Constants.GL_UNSIGNED_BYTE, whiteImage, "kickjs://texture/white/");
                 _intFormat = oldIntFormat;
             };
