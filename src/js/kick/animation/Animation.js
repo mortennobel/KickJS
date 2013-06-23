@@ -38,8 +38,12 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
              * @event updateRequested
              * @param {kick.animation.Animation} animation
              */
-
-            Observable.call(this,["started", "stopped","updateRequested"]);
+            /**
+             * Fired when animation is looped or changed direction (in ping pong)
+             * @event animationLoop
+             * @param {kick.animation.Animation} animation
+             */
+            Observable.call(this,["started", "stopped","updateRequested", "animationLoop"]);
 
 
             Object.defineProperties(this, {
@@ -181,14 +185,17 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                     if (localTime < 0){
                         localTime *= -1;
                         direction = 1;
+                        thisObj.fireEvent("animationLoop", thisObj);
                     } else if (localTime > maxTime){
                         localTime = maxTime - (localTime % maxTime);
                         direction = -1;
+                        thisObj.fireEvent("animationRestart", thisObj);
                     }
                 }
                 if (wrapMode === Animation.LOOP){
                     if (localTime > maxTime){
                         localTime = localTime % maxTime;
+                        thisObj.fireEvent("animationLoop", thisObj);
                     }
                 }
                 if (wrapMode === Animation.ONCE){
