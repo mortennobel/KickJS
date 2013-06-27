@@ -1,4 +1,4 @@
-define(["kick/core/Constants"], function (constants) {
+define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
     "use strict";
     var ASSERT = constants._ASSERT;
     /**
@@ -61,8 +61,24 @@ define(["kick/core/Constants"], function (constants) {
          * Represents the current rendertarget state
          * @property renderTarget
          * @type kick.texture.RenderTexture
+         * @deprecated
          */
         this.renderTarget = null;
+        Object.defineProperties(this, {
+            renderTarget:{
+                get:function(){
+                    if (ASSERT){
+                        Util.warn("GLState.renderTarget Deprecated");
+                    }
+                },
+                set:function(){
+                    if (ASSERT){
+                        Util.warn("GLState.renderTarget Deprecated");
+                    }
+                }
+
+            }
+        });
         /**
          * Represents the current shader bound
          * @property boundShader

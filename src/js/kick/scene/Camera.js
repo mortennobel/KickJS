@@ -412,15 +412,6 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     globalMatrixInv;
                 setupViewport(offsetX, offsetY, width, height);
                 glState.currentMaterial = null; // clear current material
-                // setup render target
-                if (glState.renderTarget !== _renderTarget) {
-                    if (_renderTarget) {
-                        _renderTarget.bind();
-                    } else {
-                        gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, null);
-                    }
-                    glState.renderTarget = _renderTarget;
-                }
 
                 setupClearColor(_clearColor);
                 gl.clear(_currentClearFlags);
@@ -503,6 +494,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     glState.currentMaterial = null; // clear current material
                     renderShadowMap(sceneLightObj);
                 }
+                // setup render target
+                if (_renderTarget) {
+                    _renderTarget.bind();
+                }
                 thisObj.setupCamera();
 
                 sceneLightObj.recomputeLight(viewMatrix);
@@ -511,6 +506,9 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 }
                 renderSceneObjects(sceneLightObj, _replacementMaterial);
 
+                if (_renderTarget) {
+                    _renderTarget.unbind();
+                }
                 if (_renderTarget && _renderTarget.colorTexture && _renderTarget.colorTexture.generateMipmaps) {
                     textureId = _renderTarget.colorTexture.textureId;
                     gl.bindTexture(gl.TEXTURE_2D, textureId);

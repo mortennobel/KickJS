@@ -80,12 +80,21 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                 };
 
             /**
+             * Binds the render texture
              * @method bind
              */
             this.bind = function () {
-                glState.renderTarget = thisObj;
                 gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, framebuffer);
             };
+
+            /**
+             * Unbinds the render texture
+             * @method unbind
+             */
+            this.unbind = function () {
+                gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, null);
+            };
+
 
             Object.defineProperties(this, {
                 /**

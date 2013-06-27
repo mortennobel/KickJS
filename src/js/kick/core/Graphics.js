@@ -86,9 +86,11 @@ define(["kick/core/Constants", "kick/scene/Camera", "kick/scene/Transform", "kic
                 }
                 camera.normalizedViewportRect = normalizedViewportRect;
                 camera.renderTarget = renderTexture;
+                renderTexture.bind();
                 camera.setupCamera();
                 meshRenderer.material = material;
                 meshRenderer.render(engineUniforms);
+                renderTexture.unbind();
             }}())
         }
     });
