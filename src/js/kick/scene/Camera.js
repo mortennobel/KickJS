@@ -1,5 +1,5 @@
-define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/EngineSingleton"],
-    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture, EngineSingleton) {
+define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Mat4", "kick/math/Vec4", "kick/math/Vec3", "kick/math/Aabb", "kick/math/Frustum", "./EngineUniforms", "./CameraPicking", "kick/material/Material", "kick/texture/RenderTexture", "kick/core/EngineSingleton", "kick/core/Observable"],
+    function (Constants, Util, Quat, Mat4, Vec4, Vec3, Aabb, Frustum, EngineUniforms, CameraPicking, Material, RenderTexture, EngineSingleton, Observable) {
         "use strict";
 
         /**
@@ -386,6 +386,16 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 });
             };
 
+            Observable.call(this, [
+            /**
+             * Fired every frame when camera render is done
+             * @event postRender
+             * @param {kick.scene.Camera} camera
+             */
+                "postRender"
+            ]
+            );
+
             /**
              * Clear the screen and set the projectionMatrix and modelViewMatrix on the glState object.
              * Called during renderScene
@@ -509,6 +519,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 if (pickingObject) {
                     pickingObject.handlePickRequests(sceneLightObj, engineUniforms);
                 }
+                thisObj.fireEvent("postRender", thisObj);
             };
 
             Object.defineProperties(this, {
