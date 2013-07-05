@@ -189,7 +189,7 @@ define(["kick/core/Util", "kick/core/Constants", "kick/core/Observable"],
                     } else if (localTime > maxTime){
                         localTime = maxTime - (localTime % maxTime);
                         direction = -1;
-                        thisObj.fireEvent("animationRestart", thisObj);
+                        thisObj.fireEvent("animationLoop", thisObj);
                     }
                 }
                 if (wrapMode === Animation.LOOP){
