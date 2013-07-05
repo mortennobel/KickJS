@@ -1,0 +1,473 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Bloom effect</title>
+
+</head>
+<body>
+<a href="cameraRenderTarget.html">Next</a><br>
+  <canvas id="canvas" style="border: none;" width="300" height="300"></canvas> <br>
+
+  <br>
+  <script src="../../dependencies/require.js"></script>
+
+  <div id="example" class="yui3-skin-sam"></div>
+<script src="../../dependencies/require.js"></script>
+<script type="text/javascript">
+    requirejs.config({
+        baseUrl: 'js/lib',
+        paths: {
+            kick: '../../../../src/js/kick'
+        }
+    });
+
+    requirejs(['kick/core/Engine', 'kick/scene/Camera', 'kick/material/Material', 'kick/material/Shader', 'kick/scene/MeshRenderer', 'kick/mesh/Mesh', "kick/core/Constants", "kick/texture/RenderTexture", "kick/texture/Texture", "kick/math", "kick"],
+        function (Engine, Camera, Material, Shader, MeshRenderer, Mesh, Constants, RenderTexture, Texture, math, kick) {
+            "use strict";
+            var engine,
+                meshRenderer,
+                    Observable = kick.core.Observable;
+
+            function CameraRenderToTexture(){
+                var camera,
+                        engine,
+                        thisObj = this,
+                        texture = new Texture(),
+                        material,
+                        renderTexture,
+                        width,
+                        height,
+                        postProcessingEffects = [];
+
+                this.scale = 1.0;
+
+                Observable.call(this, [
+                            /**
+                             * @event screenSizeChanged
+                             * @param {kick.math.Vec2} size
+                             */
+                                "screenSizeChanged"
+                            ]
+                            );
+
+                this.addEffect = function(effect){
+                    postProcessingEffects.push(effect);
+                };
+
+                this.activated = function(){
+                    engine = thisObj.gameObject.scene.engine;
+                    texture.generateMipmaps = false;
+                    texture.minFilter = Constants.GL_NEAREST;
+                    texture.magFilter = Constants.GL_NEAREST;
+                    texture.wrapS = Constants.GL_CLAMP_TO_EDGE;
+                    texture.wrapT = Constants.GL_CLAMP_TO_EDGE;
+                    width = engine.canvasDimension[0];
+                    height = engine.canvasDimension[1];
+                    texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
+                    renderTexture = new RenderTexture({colorTexture: texture});
+                    camera = thisObj.gameObject.camera;
+                    camera.renderTarget = renderTexture;
+                    camera.addEventListener("postRender", function(){
+                        var t = texture;
+                        for (var i=0;i<postProcessingEffects.length;i++){
+                            t = postProcessingEffects[i].renderPostEffect();
+                        }
+                        kick.core.Graphics.drawTexture(t);
+                    });
+                    for (var i=0;i<postProcessingEffects.length;i++){
+                        postProcessingEffects[i].activated(engine);
+                    }
+                    thisObj.fireEvent("screenSizeChanged", [width, height]);
+                };
+
+                Object.defineProperties(this, {
+                    texture: {
+                        get:function(){
+                            return texture;
+                        }
+                    }
+                });
+
+                this.update = function(){
+                    if (width !== engine.canvasDimension[0]*this.scale || height !== engine.canvasDimension[1]*this.scale){
+                        width = engine.canvasDimension[0]*this.scale;
+                        height = engine.canvasDimension[1]*this.scale;
+                        texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
+                        renderTexture.colorTexture = texture;
+                        for (var i=0;i<postProcessingEffects.length;i++){
+                            postProcessingEffects[i].update();
+                        }
+                        thisObj.fireEvent("screenSizeChanged", [width, height]);
+                    }
+                }
+            };
+
+            function PostProcessingEffect(){
+                var camera,
+                        engine,
+                        thisObj = this,
+                        texture = new Texture(),
+                        material,
+                        renderTexture,
+                        width,
+                        height;
+
+                this.scale = 1.0;
+
+                this.activated = function(engine_){
+                    engine = engine_;
+                    texture.generateMipmaps = false;
+                    texture.minFilter = Constants.GL_NEAREST;
+                    texture.magFilter = Constants.GL_NEAREST;
+                    texture.wrapS = Constants.GL_CLAMP_TO_EDGE;
+                    texture.wrapT = Constants.GL_CLAMP_TO_EDGE;
+                    width = engine.canvasDimension[0];
+                    height = engine.canvasDimension[1];
+                    texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
+                    renderTexture = new RenderTexture({colorTexture: texture});
+
+                };
+
+                Object.defineProperties(this, {
+                    texture: {
+                        get:function(){
+                            return texture;
+                        }
+                    },
+                    material:{
+                        get:function(){
+                            return material;
+                        },
+                        set:function(newMaterial){
+                            material = newMaterial;
+                        }
+                    }
+                });
+
+                this.renderPostEffect = function(){
+                    if (material){
+                        kick.core.Graphics.renderToTexture(renderTexture, material);
+                    }
+                    return texture;
+                };
+
+                this.update = function(){
+                    if (width !== engine.canvasDimension[0]*this.scale || height !== engine.canvasDimension[1]*this.scale){
+                        width = engine.canvasDimension[0]*this.scale;
+                        height = engine.canvasDimension[1]*this.scale;
+                        texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
+                        renderTexture.colorTexture = texture;
+                    }
+                }
+            };
+
+            function createMaterial(vertexShaderId, fragmentShaderId,  materialUniforms) {
+                var vs = document.getElementById(vertexShaderId).value,
+                        fs = document.getElementById(fragmentShaderId).value,
+                        shader = new Shader(),
+                        missingAttributes;
+                shader.vertexShaderSrc = vs;
+                shader.fragmentShaderSrc = fs;
+                shader.apply();
+
+                return new Material({
+                    name: "Some material",
+                    shader: shader,
+                    uniformData: materialUniforms
+                });
+            }
+
+            function addRotatorComponent(gameObject) {
+                var time = engine.time,
+                    transform = gameObject.transform,
+                    rotationSpeed = 0.001,
+                    translation = transform.localPosition,
+                    rotVec = transform.localRotationEuler,
+                    radius = 5,
+                    radianToDegree = Constants._RADIAN_TO_DEGREE;
+                gameObject.addComponent({
+                    update: function () {
+                        var timeTotal = time.time,
+                            rot = timeTotal * rotationSpeed;
+                        translation[0] = Math.sin(rot) * radius;
+                        translation[1] = Math.sin(rot * 3);
+                        translation[2] = Math.cos(rot) * radius;
+                        rotVec[1] = rot * radianToDegree;
+                        transform.localPosition = translation;
+                        //new Date().getMilliseconds();
+                        transform.localRotationEuler = rotVec;
+                    }
+                });
+            }
+
+            function initKick() {
+                engine = new Engine('canvas', {
+                    enableDebugContext: true
+                });
+
+                var cameraObject = engine.activeScene.createGameObject(),
+                    cameraObject2 = engine.activeScene.createGameObject(),
+
+                    camera,
+                    camera2,
+                    gameObject,
+                    gameObject2,
+                    meshRenderer2;
+
+                cameraObject2.transform.position = [0, 0, 3];
+
+                camera = new Camera({
+                    clearColor: [0, 0, 0, 1],
+                    fieldOfView: 60,
+                    layerMask: 1
+                });
+                cameraObject.addComponent(camera);
+                cameraObject.addComponent(new kick.components.FullWindow());
+                var ppe = new CameraRenderToTexture();
+                cameraObject.addComponent(ppe);
+                var postEffect = new PostProcessingEffect();
+
+                postEffect.material = createMaterial('bloomExtractHighlightsVert', 'bloomExtractHighlightsFrag', {mainTexture: ppe.texture});
+                ppe.addEffect(postEffect);
+                var postEffectBlur = new PostProcessingEffect();
+                postEffectBlur.material = createMaterial('bloomFirstBlurPassVert', 'bloomFirstBlurPassFrag', {mainTexture: postEffect.texture});
+                ppe.addEffect(postEffectBlur);
+                var postEffectBlur2 = new PostProcessingEffect();
+                postEffectBlur2.material = createMaterial('bloomSecondBlurPassVert', 'bloomSecondBlurPassFrag', {mainTexture: postEffectBlur.texture, originTexture: ppe.texture});
+                ppe.addEffect(postEffectBlur2);
+                ppe.addEventListener("screenSizeChanged",function(dim){
+                    postEffectBlur.material.setUniform("height", new Float32Array([dim[1]]));
+                    postEffectBlur2.material.setUniform("width", new Float32Array([dim[0]]));
+                });
+
+
+                camera2 = new Camera({
+                    clearColor: [0.1, 0.3, 0.6, 1],
+                    fieldOfView: 60,
+                    cameraIndex: 2,
+                    layerMask: 2
+                });
+                //cameraObject2.addComponent(camera2);
+                gameObject = engine.activeScene.createGameObject();
+                meshRenderer = new MeshRenderer();
+                meshRenderer.mesh = new Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
+                meshRenderer.material = createMaterial('vertexShaderColor', 'fragmentShader');
+                gameObject.addComponent(meshRenderer);
+
+                gameObject2 = engine.activeScene.createGameObject();
+                gameObject2.layer = 2;
+                meshRenderer2 = new MeshRenderer();
+                meshRenderer2.mesh = new Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
+                meshRenderer2.material = createMaterial('vertexShaderTex', 'fragmentShaderTex', {
+                //    tex:  texture
+                });
+                gameObject2.addComponent(meshRenderer2);
+
+                addRotatorComponent(cameraObject);
+                addRotatorComponent(cameraObject2);
+            }
+            initKick();
+
+            function UVSphere() {
+                meshRenderer.mesh = new Mesh({dataURI: "kickjs://mesh/uvsphere/"});
+            }
+        });
+</script>
+
+  <div style="display:none;">
+  <textarea style="width:500px;height:150px;" id="vertexShaderColor">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec3 vColor;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    vColor = vec3(uv1.x,uv1.y,1.0);
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShader">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec3 vColor;
+void main(void)
+{
+    gl_FragColor = vec4(vColor.x, vColor.y, vColor.z, 1.0);
+}
+  </textarea>
+      <textarea style="width:500px;height:150px;" id="vertexShaderTex">
+attribute vec3 vertex;
+attribute vec2 uv1;
+
+uniform mat4 _mvProj;
+
+varying vec2 uv;
+
+void main(void) {
+    gl_Position = _mvProj * vec4(vertex, 1.0);
+    uv = uv1;
+}
+  </textarea>
+  <textarea style="width:500px;height:150px;" id="fragmentShaderTex">
+#ifdef GL_ES
+precision highp float;
+#endif
+varying vec2 uv;
+uniform sampler2D tex;
+
+void main(void)
+{
+    gl_FragColor = texture2D(tex,uv);
+}
+  </textarea>
+  <textarea id="bloomExtractHighlightsFrag">
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+      varying vec2 vUv;
+
+      uniform sampler2D mainTexture;
+
+      const float LumThresh = 0.75;
+
+      float luma( vec3 color ) {
+
+          return 0.2126 * color.r + 0.7152 * color.g +0.0722 * color.b;
+      }
+
+      void main(void)
+      {
+        vec4 val = vec4(texture2D(mainTexture,vUv).xyz,1.0);
+        float weight =  clamp( luma(val.rgb) - LumThresh, 0.0, 1.0 ) * (1.0 / (1.0 - LumThresh) );
+
+        gl_FragColor =  val * weight;
+      }
+  </textarea>
+  <textarea id="bloomExtractHighlightsVert">
+      attribute vec3 vertex;
+      attribute vec2 uv1;
+
+      uniform mat4 _mvProj;
+
+      varying vec2 vUv;
+
+      void main(void) {
+          gl_Position = _mvProj * vec4(vertex, 1.0);
+          vUv = uv1;
+      }
+  </textarea>
+<textarea id="bloomFirstBlurPassFrag">
+      #ifdef GL_ES
+      precision highp float;
+      #endif
+      varying vec2 vUv;
+
+      uniform sampler2D mainTexture;
+
+      const float LumThresh = 0.75;
+
+      uniform float height;
+
+      void main(void)
+      {
+        float dy = 1.0 / height;
+        vec4 sum = vec4(0.0);
+
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*9.0)) * 0.016745;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*8.0)) * 0.023526;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*7.0)) * 0.031756;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*6.0)) * 0.041186;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*5.0)) * 0.051320;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*4.0)) * 0.061442;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*3.0)) * 0.070675;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*2.0)) * 0.078108;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,-dy*1.0)) * 0.082937;
+        sum += texture2D(mainTexture, vUv) * 0.084613;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*1.0)) * 0.082937;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*2.0)) * 0.078108;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*3.0)) * 0.070675;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*4.0)) * 0.061442;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*5.0)) * 0.051320;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*6.0)) * 0.041186;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*7.0)) * 0.031756;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*8.0)) * 0.023526;
+        sum += texture2D(mainTexture, vUv + vec2(0.0,dy*9.0)) * 0.016745;
+
+        gl_FragColor = sum;
+      }
+  </textarea>
+  <textarea id="bloomFirstBlurPassVert">
+      attribute vec3 vertex;
+      attribute vec2 uv1;
+
+      uniform mat4 _mvProj;
+
+      varying vec2 vUv;
+
+      void main(void) {
+          gl_Position = _mvProj * vec4(vertex, 1.0);
+          vUv = uv1;
+      }
+  </textarea>
+      <textarea id="bloomSecondBlurPassFrag">
+            #ifdef GL_ES
+            precision highp float;
+            #endif
+            varying vec2 vUv;
+
+            uniform sampler2D mainTexture;
+            uniform sampler2D originTexture;
+
+            const float LumThresh = 0.75;
+
+            uniform float width;
+
+            void main(void)
+            {
+              float dy = 1.0 / width;
+              vec4 sum = vec4(0.0);
+
+              sum += texture2D(mainTexture, vUv + vec2(-dy*9.0,0.0)) * 0.016745;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*8.0,0.0)) * 0.023526;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*7.0,0.0)) * 0.031756;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*6.0,0.0)) * 0.041186;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*5.0,0.0)) * 0.051320;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*4.0,0.0)) * 0.061442;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*3.0,0.0)) * 0.070675;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*2.0,0.0)) * 0.078108;
+              sum += texture2D(mainTexture, vUv + vec2(-dy*1.0,0.0)) * 0.082937;
+              sum += texture2D(mainTexture, vUv) * 0.084613;
+              sum += texture2D(mainTexture, vUv + vec2(dy*1.0,0.0)) * 0.082937;
+              sum += texture2D(mainTexture, vUv + vec2(dy*2.0,0.0)) * 0.078108;
+              sum += texture2D(mainTexture, vUv + vec2(dy*3.0,0.0)) * 0.070675;
+              sum += texture2D(mainTexture, vUv + vec2(dy*4.0,0.0)) * 0.061442;
+              sum += texture2D(mainTexture, vUv + vec2(dy*5.0,0.0)) * 0.051320;
+              sum += texture2D(mainTexture, vUv + vec2(dy*6.0,0.0)) * 0.041186;
+              sum += texture2D(mainTexture, vUv + vec2(dy*7.0,0.0)) * 0.031756;
+              sum += texture2D(mainTexture, vUv + vec2(dy*8.0,0.0)) * 0.023526;
+              sum += texture2D(mainTexture, vUv + vec2(dy*9.0,0.0)) * 0.016745;
+
+              gl_FragColor = sum + texture2D(originTexture, vUv);
+            }
+        </textarea>
+        <textarea id="bloomSecondBlurPassVert">
+            attribute vec3 vertex;
+            attribute vec2 uv1;
+
+            uniform mat4 _mvProj;
+
+            varying vec2 vUv;
+
+            void main(void) {
+                gl_Position = _mvProj * vec4(vertex, 1.0);
+                vUv = uv1;
+            }
+        </textarea>
+</div>
+  <br/>
+</body>
+</html>
