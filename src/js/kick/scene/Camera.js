@@ -250,6 +250,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     Mat4.multiply(lightMatrix, Mat4.multiply(lightMatrix, offsetMatrix, projectionMatrix), viewMatrix);
 
                     renderSceneObjects(sceneLightObj, _shadowmapMaterial);
+                    shadowRenderTexture.unbind();
                 },
 
                 /**
