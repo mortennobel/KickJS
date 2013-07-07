@@ -38,7 +38,14 @@
                         renderTexture,
                         width,
                         height,
-                        postProcessingEffects = [];
+                        postProcessingEffects = [],
+                        onCanvasResized = function(){
+                            width = engine.canvasDimension[0]*thisObj.scale;
+                            height = engine.canvasDimension[1]*thisObj.scale;
+                            texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
+                            renderTexture.colorTexture = texture;
+                            thisObj.fireEvent("screenSizeChanged", [width, height]);
+                        };
 
                 this.scale = 1.0;
 
@@ -79,6 +86,11 @@
                         postProcessingEffects[i].activated(engine);
                     }
                     thisObj.fireEvent("screenSizeChanged", [width, height]);
+                    engine.addEventListener("canvasResized", onCanvasResized);
+                };
+
+                this.deactivated = function(){
+                    engine.removeEventListener("canvasResized", onCanvasResized);
                 };
 
                 Object.defineProperties(this, {
@@ -88,19 +100,6 @@
                         }
                     }
                 });
-
-                this.update = function(){
-                    if (width !== engine.canvasDimension[0]*this.scale || height !== engine.canvasDimension[1]*this.scale){
-                        width = engine.canvasDimension[0]*this.scale;
-                        height = engine.canvasDimension[1]*this.scale;
-                        texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
-                        renderTexture.colorTexture = texture;
-                        for (var i=0;i<postProcessingEffects.length;i++){
-                            postProcessingEffects[i].update();
-                        }
-                        thisObj.fireEvent("screenSizeChanged", [width, height]);
-                    }
-                }
             };
 
             function PostProcessingEffect(){
@@ -111,7 +110,13 @@
                         material,
                         renderTexture,
                         width,
-                        height;
+                        height,
+                        onCanvasResized = function(){
+                            width = engine.canvasDimension[0] * thisObj.scale;
+                            height = engine.canvasDimension[1] * thisObj.scale;
+                            texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
+                            renderTexture.colorTexture = texture;
+                        };
 
                 this.scale = 1.0;
 
@@ -126,7 +131,12 @@
                     height = engine.canvasDimension[1];
                     texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
                     renderTexture = new RenderTexture({colorTexture: texture});
+                    engine.addEventListener("canvasResized", onCanvasResized);
 
+                };
+
+                this.deactivated = function(){
+                    engine.removeEventListener("canvasResized", onCanvasResized);
                 };
 
                 Object.defineProperties(this, {
@@ -151,15 +161,6 @@
                     }
                     return texture;
                 };
-
-                this.update = function(){
-                    if (width !== engine.canvasDimension[0]*this.scale || height !== engine.canvasDimension[1]*this.scale){
-                        width = engine.canvasDimension[0]*this.scale;
-                        height = engine.canvasDimension[1]*this.scale;
-                        texture.setImageData(width, height, 0, Constants.GL_UNSIGNED_BYTE, null, "");
-                        renderTexture.colorTexture = texture;
-                    }
-                }
             };
 
             function createMaterial(vertexShaderId, fragmentShaderId,  materialUniforms) {
@@ -268,10 +269,6 @@
                 addRotatorComponent(cameraObject2);
             }
             initKick();
-
-            function UVSphere() {
-                meshRenderer.mesh = new Mesh({dataURI: "kickjs://mesh/uvsphere/"});
-            }
         });
 </script>
 
