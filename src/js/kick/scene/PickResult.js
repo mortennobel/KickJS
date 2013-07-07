@@ -66,6 +66,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                     }
 
                     engine.gl.readPixels(x, y, 1, 1, Constants.GL_RGBA, Constants.GL_UNSIGNED_BYTE, array);
+                    pickingRenderTarget.unbind();
                     return array;
                 },
                 readNormal = function () {

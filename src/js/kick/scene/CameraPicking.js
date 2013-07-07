@@ -115,6 +115,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                         }());
                     }
                     pickingQueue.length = 0;
+                    pickingRenderTarget.unbind();
                 }
             };
         };

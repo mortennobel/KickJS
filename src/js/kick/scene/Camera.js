@@ -94,10 +94,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 shadowLightProjection,
                 shadowLightOffsetFromCamera,
                 isNumber = function (o) {
-                    return typeof (o) === "number";
+                    return typeof o === "number";
                 },
                 isBoolean = function (o) {
-                    return typeof (o) === "boolean";
+                    return typeof o === "boolean";
                 },
                 computeClearFlag = function () {
                     _currentClearFlags = (_clearFlagColor ? c.GL_COLOR_BUFFER_BIT : 0) | (_clearFlagDepth ? c.GL_DEPTH_BUFFER_BIT : 0);
