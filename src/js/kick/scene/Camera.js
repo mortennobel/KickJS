@@ -860,6 +860,10 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                     engine.removeEventListener('contextLost', contextLost);
                     engine.removeEventListener('contextRestored', contextRestored);
                 }
+                if (pickingObject) {
+                    pickingObject.destroy();
+                    pickingObject = null;
+                }
             };
 
             /**

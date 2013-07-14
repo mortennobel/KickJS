@@ -25,6 +25,10 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                 pickingClearColor = Vec4.create(),
                 glState = engine.glState,
                 i,
+                size = new Float32Array(glState.viewportSize),
+                canvasResizedListener = function(newCanvasDimensions){
+                    size = new Float32Array(newCanvasDimensions);
+                },
                 init = function () {
                     pickingQueue = [];
                     pickingMaterial = new Material(
@@ -34,13 +38,24 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                         }
                     );
                     pickingRenderTarget = new RenderTexture({
-                        dimension: glState.viewportSize
+                        dimension: size
                     });
-
+                    engine.addEventListener("canvasResized",canvasResizedListener);
                     pickingRenderTarget.name = "__pickRenderTexture";
                 };
 
             init();
+
+            /**
+             * @method destroy
+             */
+            this.destroy = function(){
+                engine.removeEventListener("canvasResized",canvasResizedListener);
+                if (pickingRenderTarget){
+                    pickingRenderTarget.destroy();
+                    pickingRenderTarget = null;
+                }
+            };
 
             /**
              * Add an object to the picking queue.
@@ -66,6 +81,10 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
              */
             this.handlePickRequests = function (sceneLightObj, engineUniforms) {
                 if (pickingQueue.length > 0) {
+                    if (pickingRenderTarget.dimension[0] !== size[0] ||
+                        pickingRenderTarget.dimension[1] !== size[1]){
+                        pickingRenderTarget.dimension = size;
+                    }
                     glState.currentMaterial = null; // clear current material
                     pickingRenderTarget.bind();
                     setupClearColor(pickingClearColor);
