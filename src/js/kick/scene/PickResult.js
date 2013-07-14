@@ -64,7 +64,7 @@ define(["./MeshRenderer", "kick/material/Material", "kick/core/Constants", "kick
                     for (i = 0; i < meshRenderers.length; i++) {
                         meshRenderers[i].render(engineUniforms, material);
                     }
-
+                    engine.gl.pixelStorei(Constants.GL_PACK_ALIGNMENT, 1);
                     engine.gl.readPixels(x, y, 1, 1, Constants.GL_RGBA, Constants.GL_UNSIGNED_BYTE, array);
                     pickingRenderTarget.unbind();
                     return array;

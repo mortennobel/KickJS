@@ -35,8 +35,8 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                     );
                     pickingRenderTarget = new RenderTexture({
                         dimension: glState.viewportSize
-
                     });
+
                     pickingRenderTarget.name = "__pickRenderTexture";
                 };
 
@@ -70,6 +70,7 @@ define(["kick/math/Vec4", "kick/material/Material", "kick/texture/RenderTexture"
                     pickingRenderTarget.bind();
                     setupClearColor(pickingClearColor);
                     engine.gl.clear(Constants.GL_COLOR_BUFFER_BIT | Constants.GL_DEPTH_BUFFER_BIT);
+                    engine.gl.pixelStorei(Constants.GL_PACK_ALIGNMENT, 1);
                     renderSceneObjects(sceneLightObj, pickingMaterial);
                     for (i = pickingQueue.length - 1; i >= 0; i--) {
                         // create clojure
