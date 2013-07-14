@@ -20,7 +20,6 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
             }
             var engine = EngineSingleton.engine,
                 gl = engine.gl,
-                glState = engine.glState,
                 _config = config || {},
                 framebuffer = gl.createFramebuffer(),
                 colorTexture = null,

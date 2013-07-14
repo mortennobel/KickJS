@@ -342,7 +342,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
 
                 thisObj.bind(0); // bind to texture slot 0
                 gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
-                if (Number.isFinite(cubemapIndex) || _textureType === Constants.GL_TEXTURE_2D){
+                if (typeof cubemapIndex !== "undefined" || _textureType === Constants.GL_TEXTURE_2D){
                     gl.texImage2D(textureSides[cubemapIndex || 0], 0, _intFormat, width, height, border, _intFormat, type, pixels);
                 } else {
                     for (var i = 0; i < textureSides.length; i++) {
