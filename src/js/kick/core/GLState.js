@@ -134,7 +134,7 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
          * @property viewportSize
          * @type kick.math.Vec2
          */
-        this.viewportSize = null;
+        this.viewportSize = new Float32Array(2);
 
         Object.defineProperties(this, {
             /**
@@ -245,6 +245,10 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
 
         engine.addEventListener('contextLost', clearExtensions);
         engine.addEventListener('contextRestored', reloadExtensions);
+        engine.addEventListener('canvasResized', function(canvasSize){
+            thisObj.viewportSize[0] = canvasSize[0];
+            thisObj.viewportSize[1] = canvasSize[1];
+        });
 
         reloadExtensions();
         if (ASSERT) {

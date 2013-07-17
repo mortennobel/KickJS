@@ -16,9 +16,9 @@ define(["./Util", "./Constants"], function (Util, Constants) {
      *          req(['kick'],
      *                  function (kick) {
      *                      var config = {
-                                enableDebugContext: true,
-                                shadows: true
-                            };
+     *                          enableDebugContext: true,
+     *                          shadows: true
+     *                      };
      *                      var engine = new kick.core.Engine('3dCanvas', config);
      *                      // [...]
      *                  }
@@ -156,9 +156,10 @@ define(["./Util", "./Constants"], function (Util, Constants) {
          * Polling of canvas resize. Default is 0 (meaning not polling)
          * @property checkCanvasResizeInterval
          * @type Number
-         * @default 0
+         * @default 32
+         * @deprecated
          */
-        this.checkCanvasResizeInterval = config.checkCanvasResizeInterval || 0;
+        this.checkCanvasResizeInterval = config.checkCanvasResizeInterval || 32;
 
         /**
          * function (or function name) with the signature function(domElement) called when WebGL cannot be initialized.

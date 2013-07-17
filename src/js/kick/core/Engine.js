@@ -51,6 +51,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 mouseInput = null,
                 keyInput = null,
                 activeScene,
+                canvasSize = new Float32Array(2),
                 activeSceneNull = {updateAndRender: function () {}},
                 animationFrameObj = {},
                 wrapperFunctionToMethodOnObject = function (time_) {
@@ -81,7 +82,13 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  * Fired after script updates methods has been run invoked
                  * @event postUpdateListener
                  */
-                "postUpdateListener"
+                "postUpdateListener",
+                /**
+                 * Fired when canvas is resized.
+                 * @event canvasResized
+                 * @param {kick.math.Vec2} newCanvasDimensions
+                 */
+                "canvasResized"
             ]
             );
 
@@ -206,7 +213,7 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                  */
                 canvasDimension: {
                     get: function () {
-                        return new Float32Array([canvas.width, canvas.height]);
+                        return canvasSize;
                     }
                 },
                 /**
@@ -299,7 +306,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                                     canvas.width = canvas.originalWidth;
                                     canvas.height = canvas.originalHeight;
                                 }
-                                thisObj.canvasResized();
                             };
                             canvas.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
                         } else if (canvas.mozRequestFullScreen) {
@@ -323,7 +329,11 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
              * @private
              */
             this._gameLoop = function (time) {
-                var i;
+                if (canvas.width !== canvasSize[0] || canvas.height !== canvasSize[1]){
+                    canvasSize[0] = canvas.width;
+                    canvasSize[1] = canvas.height;
+                    thisObj.fireEvent("canvasResized",canvasSize);
+                }
                 deltaTime = time - lastTime;
                 lastTime = time;
                 deltaTime *= timeScale;
@@ -412,13 +422,15 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
              * Instead of calling this method explicit, the configuration parameter
              * checkCanvasResizeInterval can also be set to support automatically checks
              * @method canvasResized
+             * @deprecated
              */
-            this.canvasResized = function () {
+            /*this.canvasResized = function () {
+                Util.warn("kick.core.Engine.canvasResized is deprecated");
                 glState.viewportSize = thisObj.canvasDimension;
                 if (mouseInput) {
                     mouseInput.updateCanvasElementPosition();
                 }
-            };
+            };*/
 
             /**
              * @method init
@@ -483,7 +495,9 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     thisObj.config.webglNotFoundFn(canvas);
                     return;
                 }
-                console.log("KickJS "+thisObj.version);
+                if (window.console && window.console.log){
+                    console.log("KickJS "+thisObj.version);
+                }
                 canvas.addEventListener("webglcontextlost", function (event) {
                     wasPaused = thisObj.paused;
                     thisObj.paused = true;
@@ -493,7 +507,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                 }, false);
                 canvas.addEventListener("webglcontextrestored", function (event) {
                     glState.clear();
-                    thisObj.canvasResized(); // reset viewportSize
                     initGL();
                     thisObj.fireEvent("contextRestored", gl);
                     // restart rendering loop
@@ -502,15 +515,6 @@ define(["require", "./GLState", "./Project", "./Constants", "./ResourceLoader", 
                     }
                     event.preventDefault();
                 }, false);
-
-                thisObj.canvasResized();
-                if (thisObj.config.checkCanvasResizeInterval) {
-                    setInterval(function () {
-                        if (canvas.height !== glState.viewportSize[0] || canvas.width !== glState.viewportSize[1]) {
-                            thisObj.canvasResized();
-                        }
-                    }, thisObj.config.checkCanvasResizeInterval);
-                }
 
                 // API documentation of Time is found in kick.core.Time
                 Object.defineProperties(timeObj, {

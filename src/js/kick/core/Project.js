@@ -58,7 +58,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                             canvas,
                             shader,
                             ctx;
-                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER_SKYBOX) {
+                        if (uid <= Project.ENGINE_SHADER_DEFAULT && uid >= Project.ENGINE_SHADER___UNLIT_NO_DEPTH_TEST) {
                             switch (uid) {
                             case Project.ENGINE_SHADER_DEFAULT:
                                 url = "kickjs://shader/default/";
@@ -71,6 +71,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 break;
                             case Project.ENGINE_SHADER_UNLIT:
                                 url = "kickjs://shader/unlit/";
+                                break;
+                            case Project.ENGINE_SHADER___UNLIT_NO_DEPTH_TEST:
+                                url = "kickjs://shader/unlit_no_depth/";
                                 break;
                             case Project.ENGINE_SHADER_UNLIT_VERTEX_COLOR:
                                 url = "kickjs://shader/unlit_vertex_color/";
@@ -107,6 +110,9 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
                                 break;
                             case Project.ENGINE_SHADER_SKYBOX:
                                 url = "kickjs://shader/skybox/";
+                                break;
+                            case Project.ENGINE_SHADER_PARTICLES:
+                                url = "kickjs://shader/particles/";
                                 break;
                             default:
                                 if (ASSERT) {
@@ -707,6 +713,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          * @property ENGINE_SHADER___ERROR
          * @type Number
          * @static
+         * @protected
          */
         Project.ENGINE_SHADER___ERROR = -107;
         /**
@@ -731,12 +738,14 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          * @property ENGINE_SHADER___PICK_UV
          * @type Number
          * @static
+         * @protected
          */
         Project.ENGINE_SHADER___PICK_UV = -111;
         /**
          * @property ENGINE_SHADER___PICK_NORMAL
          * @type Number
          * @static
+         * @protected
          */
         Project.ENGINE_SHADER___PICK_NORMAL = -112;
         /**
@@ -752,11 +761,24 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
          */
         Project.ENGINE_SHADER_BUMPED_SPECULAR = -114;
         /**
-         * @property ENGINE_SHADER_BUMPED_SPECULAR
+         * @property ENGINE_SHADER_SKYBOX
          * @type Number
          * @static
          */
         Project.ENGINE_SHADER_SKYBOX = -115;
+        /**
+         * @property ENGINE_SHADER_PARTICLES
+         * @type Number
+         * @static
+         */
+        Project.ENGINE_SHADER_PARTICLES = -116;
+        /**
+         * @property ENGINE_SHADER___UNLIT_NO_DEPTH_TEST
+         * @type Number
+         * @static
+         * @protected
+         */
+        Project.ENGINE_SHADER___UNLIT_NO_DEPTH_TEST = -117;
         /**
          * @property ENGINE_TEXTURE_BLACK
          * @type Number

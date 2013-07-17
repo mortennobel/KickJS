@@ -92,10 +92,12 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
          *  <li><b>Specular</b> Url: kickjs://shader/specular/</li>
          *  <li><b>Diffuse</b> Url: kickjs://shader/diffuse/</li>
          *  <li><b>Unlit</b> Url: kickjs://shader/unlit/</li>
+         *  <li><b>Unlit_no_depth</b> Url: kickjs://shader/unlit_no_depth/</li>
          *  <li><b>Bumped Specular</b> Url: kickjs://shader/bumped\_specular/</li>
          *  <li><b>Transparent Point Unlit</b> Url: kickjs://shader/point\_transparent\_unlit/</li>
          *  <li><b>Transparent Specular</b> Url: kickjs://shader/transparent\_specular/</li>
          *  <li><b>Transparent Unlit</b> Url: kickjs://shader/transparent\_unlit/</li>
+         *  <li><b>Particles</b> Url: kickjs://shader/particles/</li>
          *  <li><b>Skybox</b> Url: kickjs://shader/skybox/</li>
          *  <li><b>Shadowmap</b> Url: kickjs://shader/\_\_shadowmap/</li>
          *  <li><b>Pick</b> Url: kickjs://shader/\_\_pick/</li>
@@ -164,6 +166,14 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                                 mainTexture: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
                                 pointSize: [50]
                             };
+                        }
+                        else if (shaderName === "particles"){
+                            defaultUniforms = {
+                                pointSize: [50]
+                            };
+                            blend = true;
+                            depthMask = false;
+                            renderOrder = 2000;
                         } else if (shaderName === "skybox"){
                             defaultUniforms = {
                                 mainColor: [1, 1, 1, 1],
@@ -188,14 +198,19 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                     "transparent_specular",
                     "transparent_diffuse",
                     "unlit",
+                    "unlit_no_depth",
                     "unlit_vertex_color",
                     "bumped_specular",
                     "transparent_point_sprite",
                     "transparent_unlit",
+                    "particles",
                     "skybox"
                 ];
             if (url === "kickjs://shader/default/") {
                 url = "kickjs://shader/diffuse/";
+            }
+            if (url ==="unlit_no_depth"){
+                url = "kickjs://shader/unlit/";
             }
             for (i = 0; i < shaderTypes.length; i++) {
                 if (compareAndSetShader(shaderTypes[i])) {
@@ -207,7 +222,6 @@ define(["./Util", "kick/mesh/MeshDataFactory", "kick/material/GLSLConstants", ".
                     Util.fail("Cannot find shader url '" + url + "'");
                 }
             }
-
 
             config = {
                 blend: blend,

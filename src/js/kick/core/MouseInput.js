@@ -71,6 +71,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
                     e.preventDefault();
                     return false;
                 }
+                return true;
             },
             mouseDownHandler = function (e) {
                 var mouseButton = e.button;
@@ -258,7 +259,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
         /**
          * Update the mouseInput with the relative position of the canvas element.
          * This method should be called whenever the canvas element is moved in the document. <br>
-         * This method is automatically called when Engine.canvasResized() is invoked.
+         * This method is automatically on engine.canvasResized events.
          *
          * @method updateCanvasElementPosition
          */
@@ -272,6 +273,7 @@ define(["kick/math/Vec2", "./Util"], function (Vec2, Util) {
             canvas.addEventListener("mousemove", mouseMovementHandler, true);
             canvas.addEventListener("mouseout", mouseOutHandler, true);
             canvas.addEventListener("contextmenu", mouseContextMenuHandler, true);
+            engine.addEventListener("canvasResized", updateCanvasElementPositionPrivate);
             if (isFirefox) {
                 canvas.addEventListener('MozMousePixelScroll', mouseWheelHandler, true); // Firefox
             } else if (isChrome) {

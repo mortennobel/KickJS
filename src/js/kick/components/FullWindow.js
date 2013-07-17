@@ -20,7 +20,6 @@ define(["kick/core"], function (core) {
                 documentResized = function () {
                     canvas.width = window.innerWidth;
                     canvas.height = window.innerHeight - canvas.offsetTop;
-                    engine.canvasResized();
                 },
             // https://developer.mozilla.org/en-US/docs/DOM/Mozilla_event_reference/resize
                 resizeThrottler = function () {
