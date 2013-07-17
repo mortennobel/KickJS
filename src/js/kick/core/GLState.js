@@ -21,6 +21,7 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
             depthTextureExt = null,
             textureFilterAnisotropicExt = null,
             drawBuffersExt = null,
+            elementIndexUIntExt = null,
             reloadExtensions = function(){
                 vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
                 standardDerivativesExt = engine.getGLExtension("OES_standard_derivatives");
@@ -29,6 +30,7 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
                 depthTextureExt = engine.getGLExtension("WEBGL_depth_texture");
                 textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic") || engine.getGLExtension("WEBGL_texture_filter_anisotropic");
                 drawBuffersExt = engine.getGLExtension("EXT_draw_buffers") || engine.getGLExtension("WEBGL_draw_buffers");
+                elementIndexUIntExt = engine.getGLExtension("OES_element_index_uint");
             },
             clearExtensions = function(){
                 vertexArrayObjectExt = null;
@@ -38,6 +40,7 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
                 depthTextureExt = null;
                 textureFilterAnisotropicExt = null;
                 drawBuffersExt = null;
+                elementIndexUIntExt = null;
             };
         /**
          * The current clear color
@@ -225,6 +228,21 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
             drawBuffersExtension:{
                 get: function(){
                     return drawBuffersExt;
+                },
+                enumerable:true
+            },
+            /**
+             * WebGL 1.0 supports drawElements with <type> value of
+             * UNSIGNED_BYTE and UNSIGNED_SHORT.  This extension adds
+             * support for UNSIGNED_INT <type> values.
+             * See http://www.khronos.org/registry/webgl/extensions/OES_element_index_uint/
+             * @property elementIndexUIntExtension
+             * @type Object
+             * @final
+             */
+            elementIndexUIntExtension:{
+                get: function(){
+                    return elementIndexUIntExt;
                 },
                 enumerable:true
             }
