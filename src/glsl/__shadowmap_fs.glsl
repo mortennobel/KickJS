@@ -1,6 +1,4 @@
-#ifdef GL_ES
 precision highp float;
-#endif
 
 #pragma include "shadowmap.glsl"
 

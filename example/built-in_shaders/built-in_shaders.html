@@ -2,7 +2,7 @@
         "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>KickJS cloth simulation</title>
+    <title>KickJS built-in shaders</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.10.1/cssreset/cssreset-min.css&3.10.1/cssfonts/cssfonts-min.css&3.10.1/cssgrids/cssgrids-min.css&3.10.1/cssbase/cssbase-min.css&3.10.1/cssbutton/cssbutton-min.css">
     <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.10.1/yui/yui-min.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Coustard:400,900' rel='stylesheet' type='text/css'>
@@ -11,11 +11,9 @@
 </head>
 <body class="yui3-skin-sam">
 <header></header>
-<h1>KickJS cloth simulation</h1>
-Based on <a href="http://cg.alexandra.dk/2009/06/02/mosegaards-cloth-simulation-coding-tutorial/">Mosegaards Cloth Simulation Coding Tutorial</a><br>
-(And yes it should be optimized to run on fully on the GPU)<br>
 <canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
-<script data-main="cloth_simulation.js" type="text/javascript" src="../../dependencies/require.js"></script>
+<script type="text/javascript" src="../common/dat.gui.min.js"></script>
+<script data-main="built-in_shaders.js" type="text/javascript" src="../../dependencies/require.js"></script>
 <script type="text/javascript" src="/header.js"></script>
 </body>
 </html>

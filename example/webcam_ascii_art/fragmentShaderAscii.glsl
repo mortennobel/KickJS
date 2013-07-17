@@ -1,6 +1,5 @@
-#ifdef GL_ES
 precision highp float;
-#endif
+
 varying vec2 uv;
 uniform vec2 _viewport;
 uniform sampler2D tex;

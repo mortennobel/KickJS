@@ -1,6 +1,5 @@
-#ifdef GL_ES
 precision mediump float;
-#endif
+
 varying vec3 vNormal;
 
 void main(void)

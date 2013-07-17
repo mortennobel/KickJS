@@ -117,7 +117,7 @@ requirejs(['kick', 'text!vertexShaderTex.glsl', 'text!fragmentShaderTex.glsl', '
                         button,
                         img;
                     div.innerHTML = "WebCam ascii art is a real time post processing effect that will transform a WebCam feed into ASCII art. The effect is created in a shader and uses the KickJS engine.<br><br>"+
-                        "Currently only Google Chrome is support for WebRTC (used for capturing video). (Firefox will have support for WEBRTC from version 18)<br><br>";
+                        "Requires a browser with WebRTC support (used for capturing video).<br><br>";
 
                     button = document.createElement("button");
                     button.innerHTML = "Start WebCam";
@@ -135,7 +135,7 @@ requirejs(['kick', 'text!vertexShaderTex.glsl', 'text!fragmentShaderTex.glsl', '
                             document.body.appendChild(video);
 
                             navigator.getUserMedia({audio: false, video: true}, function (stream) {
-                                video.src = window.webkitURL.createObjectURL(stream);
+                                video.src = window.webkitURL ? window.webkitURL.createObjectURL(stream) : window.URL.createObjectURL(stream);
                             }, function (error) {
                                 console.log("Failed to get a stream due to", error);
                                 alert("Failed to get a stream due to" + error);
