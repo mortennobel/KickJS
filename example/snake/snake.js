@@ -477,6 +477,7 @@ requirejs(['kick'],
                     fieldOfView: 90
                 });
                 cameraObject.addComponent(camera);
+                cameraObject.addComponent(new kick.components.FullWindow());
 
                 var cameraTransform = cameraObject.transform;
                 cameraTransform.localPosition = [0,40,0];
@@ -497,13 +498,6 @@ requirejs(['kick'],
             }
             initKick();
 
-            function documentResized(){
-                var canvas = document.getElementById('canvas');
-                canvas.width = window.innerWidth;
-                canvas.height = Math.max(600,(window.innerHeight)-canvas.offsetTop);
-                engine.canvasResized();
-            }
-            documentResized();
 
 
             var playerScores = [
@@ -577,7 +571,7 @@ requirejs(['kick'],
             }
 
             function keyListener(e){
-                if (e.keyCode==80){ // p
+                if (e.keyCode === 80){ // p
                     toogleCamera();
                 }
             }
@@ -590,7 +584,6 @@ requirejs(['kick'],
                 }
             }
 
-            window.onresize = documentResized;
             document.getElementById('playButton').addEventListener('click',playButtonClicked,false);
             document.getElementById('fullscreen').addEventListener('click',toogleFullscreen,false);
             document.addEventListener('keyup',keyListener,true);
