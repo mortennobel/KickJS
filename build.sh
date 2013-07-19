@@ -5,8 +5,6 @@ yuidoc_bin=$1
 #Location of project
 project=$2
 
-cp -R $project/src/js-extra $project/build/kickextra
-
 
 #Location of Google Clojure Compiler (http://code.google.com/p/closure-compiler/)
 googleClojure=$3
@@ -47,6 +45,7 @@ rm -rf $generator_out
 ##############################################################################
 echo "Include GLSL files as constants"
 $nodejs $project/dependencies/build/include_glsl_files $project/src/glsl/ $project/src/js/kick/material/glslconstants.js
+echo $nodejs $project/dependencies/build/include_glsl_files $project/src/glsl/ $project/src/js/kick/material/glslconstants.js
 
 ##############################################################################
 echo "Running Precompiler dev"
@@ -69,6 +68,8 @@ export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:$PATH
 cd $parser_in
 echo $yuidoc_bin $parser_in -o $generator_out
 $yuidoc_bin -c $project/yuidoc.json . -o $generator_out
+
+cp -R $project/API/images $generator_out
 
 ##############################################################################
 echo "Zipping Documentation (YUI Doc)"
