@@ -16,8 +16,6 @@ requirejs.config({
 // Start the main app logic.
 requirejs(['kick'],
     function (kick) {
-
-
         YUI().use('node', 'console', 'test', function (Y) {
             "use strict";
             Y.namespace("KICK.math");

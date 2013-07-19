@@ -10,6 +10,7 @@
 <body>
 <canvas id="canvas" style="border: none;" width="300" height="300"></canvas>
 <br/>
+GL-constants written to console
 <script type="text/javascript">
         var req = require.config({
             baseUrl: 'js/lib',
@@ -48,6 +49,44 @@
                         writeEnum("VERTEX_ARRAY_BINDING_OES", 34229);
                         writeEnum("FRAGMENT_SHADER_DERIVATIVE_HINT_OES", 35723);
                         writeEnum("HALF_FLOAT_OES", 0x8D61);
+
+                        //writeEnum("COLOR_ATTACHMENT0",  0x8CE0);
+                        writeEnum("COLOR_ATTACHMENT1", 0x8CE1);
+                        writeEnum("COLOR_ATTACHMENT2", 0x8CE2);
+                        writeEnum("COLOR_ATTACHMENT3", 0x8CE3);
+                        writeEnum("COLOR_ATTACHMENT4", 0x8CE4);
+                        writeEnum("COLOR_ATTACHMENT5", 0x8CE5);
+                        writeEnum("COLOR_ATTACHMENT6", 0x8CE6);
+                        writeEnum("COLOR_ATTACHMENT7", 0x8CE7);
+                        writeEnum("COLOR_ATTACHMENT8", 0x8CE8);
+                        writeEnum("COLOR_ATTACHMENT9", 0x8CE9);
+                        writeEnum("COLOR_ATTACHMENT10", 0x8CEA);
+                        writeEnum("COLOR_ATTACHMENT11", 0x8CEB);
+                        writeEnum("COLOR_ATTACHMENT12", 0x8CEC);
+                        writeEnum("COLOR_ATTACHMENT13", 0x8CED);
+                        writeEnum("COLOR_ATTACHMENT14", 0x8CEE);
+                        writeEnum("COLOR_ATTACHMENT15", 0x8CEF);
+
+                        writeEnum("DRAW_BUFFER0", 0x8825);
+                        writeEnum("DRAW_BUFFER1", 0x8826);
+                        writeEnum("DRAW_BUFFER2", 0x8827);
+                        writeEnum("DRAW_BUFFER3", 0x8828);
+                        writeEnum("DRAW_BUFFER4", 0x8829);
+                        writeEnum("DRAW_BUFFER5", 0x882A);
+                        writeEnum("DRAW_BUFFER6", 0x882B);
+                        writeEnum("DRAW_BUFFER7", 0x882C);
+                        writeEnum("DRAW_BUFFER8", 0x882D);
+                        writeEnum("DRAW_BUFFER9", 0x882E);
+                        writeEnum("DRAW_BUFFER10", 0x882F);
+                        writeEnum("DRAW_BUFFER11", 0x8830);
+                        writeEnum("DRAW_BUFFER12", 0x8831);
+                        writeEnum("DRAW_BUFFER13", 0x8832);
+                        writeEnum("DRAW_BUFFER14", 0x8833);
+                        writeEnum("DRAW_BUFFER15", 0x8834);
+
+                        writeEnum("MAX_COLOR_ATTACHMENTS", 0x8CDF);
+                        writeEnum("MAX_DRAW_BUFFERS", 0x8824);
+
                     }
 
                     initKick();

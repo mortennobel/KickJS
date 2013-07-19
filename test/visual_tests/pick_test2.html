@@ -34,8 +34,8 @@
 
                     this.update = function () {
                         var objectPicked = function (pickResult) {
-//                            console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance", pickResult.distance, "point", pickResult.point);
-//                            console.log("Distance to origin: "+kick.math.Vec3.length(pickResult.point));
+                            console.log("UV", pickResult.uv, "Normal", pickResult.normal, "distance", pickResult.distance, "point", pickResult.point);
+                            console.log("Distance to origin: "+kick.math.Vec3.length(pickResult.point));
                             console.log(pickResult.gameObject.name);
                         };
                         if (mouseInput.isButtonUp(0)) {
@@ -75,7 +75,6 @@
                     };
 
                     this.update = function(){
-
                         if (engine.keyInput.isAnyKeyDown()){
                             meshRenderer.material = new kick.material.Material(
                                     {
@@ -85,9 +84,6 @@
                                         }
                                     });
                             cameraObject.addComponent(camera);
-                        }
-                        if (engine.keyInput.isAnyKeyUp()){
-                            cameraObject.removeComponent(camera);
                         }
                     };
                 };
@@ -117,7 +113,6 @@
 
                     var localRotate = quat.create();
                     this.update = function(){
-
                         sphericalCoordinates[1] += time.deltaTime*rotationSpeed;
                         sphericalCoordinates[2] = Math.sin(time.time*upDownSpeed)*Math.PI*0.25;
 
@@ -132,8 +127,6 @@
                     };
                 }
 
-
-
                 function initKick() {
                     engine = new kick.core.Engine('canvas',{
                         enableDebugContext: true
@@ -144,6 +137,7 @@
                         camera.gameObject.addComponent(new RotatorComponent());
                         camera.gameObject.addComponent(new SomeComponent());
                         engine.activeScene.createGameObject().addComponent(new ShowTexture());
+                        camera.gameObject.addComponent(new kick.components.FullWindow());
                     }, function(err){
                         console.log(err);
                         debugger;

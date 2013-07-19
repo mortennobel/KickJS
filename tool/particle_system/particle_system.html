@@ -5,9 +5,8 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Particle Editor</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.9.0/build/cssreset/reset-min.css&3.9.0/build/cssfonts/fonts-min.css&3.9.0/build/cssgrids/grids-min.css&3.9.0/build/cssbase/base-min.css&3.9.0/build/cssbutton/cssbutton.css">
-    <script src="http://yui.yahooapis.com/3.9.0/build/yui/yui-min.js"></script>
-    <script src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.11.0/cssreset/cssreset-min.css&3.11.0/cssfonts/cssfonts-min.css&3.11.0/cssgrids/cssgrids-min.css&3.11.0/cssbase/cssbase-min.css&3.11.0/cssbutton/cssbutton-min.css">
+    <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.11.0/yui/yui-min.js"></script>
 
     <style>
         #glslEditor {
@@ -58,12 +57,9 @@
 <body class="yui3-skin-sam" style="background-color: white;">
 <header>
 </header>
-
-
-
+<canvas id="canvas" style="border: none;" width="800" height="800"></canvas>
 <script type="text/javascript" src="/header.js"></script>
-<script type="text/javascript" src="../common/dat.gui.min.js"></script>
-<script type="text/javascript" src="../common/dat.color.min.js"></script>
+<script type="text/javascript" src="../common/dat.gui.js"></script>
 <script data-main="js/particle_system.js" type="text/javascript" src="../../dependencies/require.js"></script>
 </body>
 </html>

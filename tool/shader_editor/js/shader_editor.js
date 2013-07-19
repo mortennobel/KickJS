@@ -337,7 +337,7 @@ requirejs(['kick', 'shader_editor_ui',
             this.loadMaterial = loadMaterial; // expose
 
             this.canvasResized = function () {
-                _engine.canvasResized();
+                //_engine.canvasResized();
             };
 
             this.initKick = function (onComplete, shader) {

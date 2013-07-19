@@ -1,6 +1,5 @@
-#ifdef GL_ES
 precision highp float;
-#endif
+
 varying vec3 n;
 varying vec2 uv;
 

@@ -5,7 +5,17 @@ define([],
             var gui = new dat.GUI();
 
             gui.remember(obj);
-            gui.add(obj, 'textureUrl');
+            // gui.add(obj, 'textureUrl');
+            gui.add(obj, 'enabled');
+            gui.add(obj, 'numberOfParticles');
+            gui.add(obj, 'pointSize').min(5).max(500);
+            gui.add(obj, 'maxAge').min(0.1).max(20);
+            var pos = gui.addFolder('Position');
+            pos.add(obj, 'positionX').min(-10).max(10);
+            pos.add(obj, 'positionY').min(-10).max(10);
+            pos.add(obj, 'positionZ').min(-10).max(10);
+
+            /*
             var colorFolder = gui.addFolder('Color');
             colorFolder.addColor(obj, 'color0');
             colorFolder.addColor(obj, 'color1');
@@ -35,8 +45,9 @@ define([],
             var lifespanFolder = gui.addFolder('Lifespan');
             lifespanFolder.add(obj.lifespan, 'time', 0, 100);
             lifespanFolder.add(obj.lifespan, 'variance', 0, 100);
-
+            */
             gui.add(obj, 'apply');
+
         };
     }
 );
