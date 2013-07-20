@@ -38,7 +38,21 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 _generateMipmaps = false,
                 timer = engine.time,
                 thisObj = this,
-                lastGrappedFrame = -1;
+                lastGrappedFrame = -1,
+                setTextureProperties = function(){
+                    gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+                    gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+                    gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_S, _wrapS);
+                    gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_T, _wrapT);
+                },
+                contextLost = function () {
+                    gl = null;
+                },
+                contextRestored = function (newGl) {
+                    gl = newGl;
+                    _textureId = gl.createTexture();
+                    setTextureProperties();
+                };
 
             /**
              * Bind the current texture
@@ -70,6 +84,8 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     gl.deleteTexture(_textureId);
                     _textureId = null;
                     engine.project.removeResourceDescriptor(thisObj.uid);
+                    engine.removeEventListener("contextLost", contextLost);
+                    engine.removeEventListener("contextRestored", contextRestored);
                 }
             };
 
@@ -82,10 +98,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 thisObj.bind(0); // bind to texture slot 0
                 gl.pixelStorei(Constants.GL_UNPACK_ALIGNMENT, 1);
                 gl.texImage2D(Constants.GL_TEXTURE_2D, 0, Constants.GL_RGB, 2, 2, 0, Constants.GL_RGB, Constants.GL_UNSIGNED_BYTE, blackWhiteCheckerboard);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_S, _wrapS);
-                gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_T, _wrapT);
+                setTextureProperties();
                 glState.currentMaterial = null; // for material to rebind
             };
 
@@ -173,6 +186,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                             }
                         }
                         _wrapS = value;
+                        gl.bindTexture(Constants.GL_TEXTURE_2D, _textureId);
+                        gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_S, _wrapS);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -192,6 +208,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                             }
                         }
                         _wrapT = value;
+                        gl.bindTexture(Constants.GL_TEXTURE_2D, _textureId);
+                        gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_WRAP_T, _wrapT);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -217,6 +236,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                             }
                         }
                         _minFilter = value;
+                        gl.bindTexture(Constants.GL_TEXTURE_2D, _textureId);
+                        gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MIN_FILTER, _minFilter);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -236,6 +258,9 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                             }
                         }
                         _magFilter = value;
+                        gl.bindTexture(Constants.GL_TEXTURE_2D, _textureId);
+                        gl.texParameteri(Constants.GL_TEXTURE_2D, Constants.GL_TEXTURE_MAG_FILTER, _magFilter);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -249,6 +274,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                  * @property internalFormat
                  * @type Number
                  * @default GL_RGBA
+                 * @deprecated
                  */
                 internalFormat: {
                     get: function () {
@@ -281,11 +307,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     wrapT: _wrapT,
                     minFilter: _minFilter,
                     name: _name,
-                    magFilter: _magFilter,
-                    internalFormat: _intFormat
+                    magFilter: _magFilter
                 };
             };
 
+            // Invoke init in project asset
             this.init(config);
+            engine.addEventListener("contextLost", contextLost);
+            engine.addEventListener("contextRestored", contextRestored);
         };
     });

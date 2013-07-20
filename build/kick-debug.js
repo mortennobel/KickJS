@@ -11658,7 +11658,6 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                 },
 
                 contextLost = function () {
-                    console.log("_textureId ", _textureId, gl);
                     gl = null;
                 },
                 contextRestored = function (newGl) {
@@ -11667,8 +11666,7 @@ define('kick/texture/Texture',["kick/core/ProjectAsset", "kick/core/Constants", 
                     if (createImageFunction) {
                         createImageFunction.apply(thisObj, createImageFunctionParameters);
                     }
-                }
-                ;
+                };
 
             /**
              * Trigger getImageData if dataURI is defined
@@ -15868,6 +15866,14 @@ define('kick/texture/RenderTexture',["kick/core/ProjectAsset", "kick/math/Vec2",
                         }
                     }
                     gl.bindFramebuffer(36160, null);
+                },
+                contextLost = function () {
+                    gl = null;
+                },
+                contextRestored = function (newGl) {
+                    gl = newGl;
+                    framebuffer = gl.createFramebuffer();
+                    initFBO();
                 };
 
             /**
@@ -15935,6 +15941,8 @@ define('kick/texture/RenderTexture',["kick/core/ProjectAsset", "kick/math/Vec2",
                     gl.deleteFramebuffer(framebuffer);
                     framebuffer = null;
                     engine.project.removeResourceDescriptor(thisObj.uid);
+                    engine.removeEventListener("contextLost", contextLost);
+                    engine.removeEventListener("contextRestored", contextRestored);
                 }
             };
 
@@ -15950,6 +15958,8 @@ define('kick/texture/RenderTexture',["kick/core/ProjectAsset", "kick/math/Vec2",
             };
 
             this.init(config);
+            engine.addEventListener('contextLost', contextLost);
+            engine.addEventListener('contextRestored', contextRestored);
         };
 
     });
@@ -22342,7 +22352,21 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                 _generateMipmaps = false,
                 timer = engine.time,
                 thisObj = this,
-                lastGrappedFrame = -1;
+                lastGrappedFrame = -1,
+                setTextureProperties = function(){
+                    gl.texParameteri(3553, 10240, _magFilter);
+                    gl.texParameteri(3553, 10241, _minFilter);
+                    gl.texParameteri(3553, 10242, _wrapS);
+                    gl.texParameteri(3553, 10243, _wrapT);
+                },
+                contextLost = function () {
+                    gl = null;
+                },
+                contextRestored = function (newGl) {
+                    gl = newGl;
+                    _textureId = gl.createTexture();
+                    setTextureProperties();
+                };
 
             /**
              * Bind the current texture
@@ -22374,6 +22398,8 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                     gl.deleteTexture(_textureId);
                     _textureId = null;
                     engine.project.removeResourceDescriptor(thisObj.uid);
+                    engine.removeEventListener("contextLost", contextLost);
+                    engine.removeEventListener("contextRestored", contextRestored);
                 }
             };
 
@@ -22386,10 +22412,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                 thisObj.bind(0); // bind to texture slot 0
                 gl.pixelStorei(3317, 1);
                 gl.texImage2D(3553, 0, 6407, 2, 2, 0, 6407, 5121, blackWhiteCheckerboard);
-                gl.texParameteri(3553, 10240, _magFilter);
-                gl.texParameteri(3553, 10241, _minFilter);
-                gl.texParameteri(3553, 10242, _wrapS);
-                gl.texParameteri(3553, 10243, _wrapT);
+                setTextureProperties();
                 glState.currentMaterial = null; // for material to rebind
             };
 
@@ -22477,6 +22500,9 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                             }
                         }
                         _wrapS = value;
+                        gl.bindTexture(3553, _textureId);
+                        gl.texParameteri(3553, 10242, _wrapS);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -22496,6 +22522,9 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                             }
                         }
                         _wrapT = value;
+                        gl.bindTexture(3553, _textureId);
+                        gl.texParameteri(3553, 10243, _wrapT);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -22521,6 +22550,9 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                             }
                         }
                         _minFilter = value;
+                        gl.bindTexture(3553, _textureId);
+                        gl.texParameteri(3553, 10241, _minFilter);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -22540,6 +22572,9 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                             }
                         }
                         _magFilter = value;
+                        gl.bindTexture(3553, _textureId);
+                        gl.texParameteri(3553, 10240, _magFilter);
+                        glState.currentMaterial = null; // for material to rebind
                     }
                 },
                 /**
@@ -22553,6 +22588,7 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                  * @property internalFormat
                  * @type Number
                  * @default GL_RGBA
+                 * @deprecated
                  */
                 internalFormat: {
                     get: function () {
@@ -22585,12 +22621,14 @@ define('kick/texture/MovieTexture',["kick/core/ProjectAsset", "kick/core/Constan
                     wrapT: _wrapT,
                     minFilter: _minFilter,
                     name: _name,
-                    magFilter: _magFilter,
-                    internalFormat: _intFormat
+                    magFilter: _magFilter
                 };
             };
 
+            // Invoke init in project asset
             this.init(config);
+            engine.addEventListener("contextLost", contextLost);
+            engine.addEventListener("contextRestored", contextRestored);
         };
     });
 

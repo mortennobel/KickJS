@@ -76,6 +76,14 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                         }
                     }
                     gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, null);
+                },
+                contextLost = function () {
+                    gl = null;
+                },
+                contextRestored = function (newGl) {
+                    gl = newGl;
+                    framebuffer = gl.createFramebuffer();
+                    initFBO();
                 };
 
             /**
@@ -143,6 +151,8 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                     gl.deleteFramebuffer(framebuffer);
                     framebuffer = null;
                     engine.project.removeResourceDescriptor(thisObj.uid);
+                    engine.removeEventListener("contextLost", contextLost);
+                    engine.removeEventListener("contextRestored", contextRestored);
                 }
             };
 
@@ -158,6 +168,8 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
             };
 
             this.init(config);
+            engine.addEventListener('contextLost', contextLost);
+            engine.addEventListener('contextRestored', contextRestored);
         };
 
     });

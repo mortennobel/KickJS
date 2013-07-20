@@ -64,7 +64,6 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 },
 
                 contextLost = function () {
-                    console.log("_textureId ", _textureId, gl);
                     gl = null;
                 },
                 contextRestored = function (newGl) {
@@ -73,8 +72,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     if (createImageFunction) {
                         createImageFunction.apply(thisObj, createImageFunctionParameters);
                     }
-                }
-                ;
+                };
 
             /**
              * Trigger getImageData if dataURI is defined
