@@ -1,5 +1,13 @@
 KickJS Release notes:
 
+0.5.4
+- Added componentType to component, which let you easily access components from their gameObject by their type.
+- Added animation system
+- Added canvasResized event to Engine (old canvas resize behavior is removed - note this change potential break code).
+- Improved context lost on textures
+- Fix picking bug
+- Add Graphics.RenderToTexture
+
 0.5.3
 - Implemented Observer pattern and refactored classes by introducing events (See kick.core.Observable)
 - Added Skybox
