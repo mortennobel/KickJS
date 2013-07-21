@@ -1,7 +1,7 @@
 {
     "name": "KickJS",
     "description": "A WebGL game engine for modern web-browsers.",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "url": "http://www.kickjs.org/",
     "logo":"/images/kickjs_doc.png",
     "options": {

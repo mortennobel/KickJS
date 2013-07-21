@@ -1,5 +1,8 @@
 KickJS Release notes:
 
+0.5.5
+-
+
 0.5.4
 - Added componentType to component, which let you easily access components from their gameObject by their type.
 - Added animation system
