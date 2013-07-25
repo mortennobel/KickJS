@@ -1,5 +1,5 @@
-define(["kick/core", "kick/importer", "kick/material", "kick/math", "kick/mesh", "kick/scene", "kick/texture", "kick/components", "kick/animation"],
-    function (core, importer, material, math, mesh, scene, texture, components, animation) {
+define(["kick/core", "kick/importer", "kick/material", "kick/math", "kick/mesh", "kick/scene", "kick/texture", "kick/components", "kick/animation", "kick/postfx"],
+    function (core, importer, material, math, mesh, scene, texture, components, animation, postfx) {
         "use strict";
         return {
             core: core,
@@ -10,6 +10,7 @@ define(["kick/core", "kick/importer", "kick/material", "kick/math", "kick/mesh",
             mesh: mesh,
             scene: scene,
             texture: texture,
-            animation: animation
+            animation: animation,
+            postfx: postfx
         };
     });
