@@ -14,25 +14,59 @@ define(["kick/core/Constants", "kick/core/Observable", "kick/texture/Texture", "
                 engine,
                 thisObj = this,
                 texture = new Texture(),
-                material,
                 renderTexture,
                 width,
                 height,
-                postProcessingEffects = [];
+                scale = 1.0,
+                postProcessingEffects = [],
+                postRender = function(){
+                    var t = texture,
+                        i;
+                    for (i=0;i<postProcessingEffects.length;i++){
+                        t = postProcessingEffects[i].renderPostEffect();
+                    }
+                    Graphics.drawTexture(t);
+                };
 
-            this.scale = 1.0;
+            Object.defineProperties(this, {
+                scale: {
+                    get:function(){
+                        return scale;
+                    },
+                    set:function(newValue){
+                        scale = newValue;
+                    }
+                },
+                texture: {
+                    get:function(){
+                        return texture;
+                    }
+                }
+            });
 
             Observable.call(this, [
-            /**
-             * @event screenSizeChanged
-             * @param {kick.math.Vec2} size
-             */
+                /**
+                 * @event screenSizeChanged
+                 * @param {kick.math.Vec2} size
+                 */
                 "screenSizeChanged"
             ]
             );
 
+            /**
+             * @method addEffect
+             * @param {kick.postfx.PostProcessingEffect} effect
+             */
             this.addEffect = function(effect){
                 postProcessingEffects.push(effect);
+            };
+
+            /**
+             * Clear the effects queue
+             * @method clearEffects
+             */
+            this.clearEffects = function(){
+                postProcessingEffects.length = 0;
             };
 
             this.activated = function(){
@@ -43,44 +77,32 @@ define(["kick/core/Constants", "kick/core/Observable", "kick/texture/Texture", "
                 texture.magFilter = Constants.GL_NEAREST;
                 texture.wrapS = Constants.GL_CLAMP_TO_EDGE;
                 texture.wrapT = Constants.GL_CLAMP_TO_EDGE;
-                texture.float = Constants.GL_CLAMP_TO_EDGE;
                 width = engine.canvasDimension[0];
                 height = engine.canvasDimension[1];
                 texture.setImageData(width, height, 0, Constants.GL_FLOAT, null, "");
                 renderTexture = new RenderTexture({colorTexture: texture});
                 camera = thisObj.gameObject.camera;
                 camera.renderTarget = renderTexture;
-                camera.addEventListener("postRender", function(){
-                    var t = texture,
-                        i;
-                    for (i=0;i<postProcessingEffects.length;i++){
-                        t = postProcessingEffects[i].renderPostEffect();
-                    }
-                    Graphics.drawTexture(t);
-                });
+                camera.addEventListener("postRender", postRender);
                 for (i=0;i<postProcessingEffects.length;i++){
                     postProcessingEffects[i].activated(engine);
                 }
                 thisObj.fireEvent("screenSizeChanged", [width, height]);
             };
 
-            Object.defineProperties(this, {
-                texture: {
-                    get:function(){
-                        return texture;
-                    }
-                }
-            });
+            this.deactivated = function(){
+                camera.removeEventListener("postRender", postRender);
+            };
 
             this.update = function(){
                 var i;
-                if (width !== engine.canvasDimension[0]*this.scale || height !== engine.canvasDimension[1]*this.scale){
-                    width = engine.canvasDimension[0]*this.scale;
-                    height = engine.canvasDimension[1]*this.scale;
+                if (width !== engine.canvasDimension[0]*scale || height !== engine.canvasDimension[1]*scale){
+                    width = engine.canvasDimension[0]*scale;
+                    height = engine.canvasDimension[1]*scale;
                     texture.setImageData(width, height, 0, Constants.GL_FLOAT, null, "");
                     renderTexture.colorTexture = texture;
                     for (i=0;i<postProcessingEffects.length;i++){
-                        postProcessingEffects[i].update();
+            //            postProcessingEffects[i].update();
                     }
                     thisObj.fireEvent("screenSizeChanged", [width, height]);
                 }

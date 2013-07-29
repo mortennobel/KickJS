@@ -14,6 +14,7 @@
 
   <div id="example" class="yui3-skin-sam"></div>
 <script src="../../dependencies/require.js"></script>
+<script src="../../tool/common/dat.gui.js"></script>
 <script type="text/javascript">
     requirejs.config({
         baseUrl: 'js/lib',
@@ -26,15 +27,13 @@
         function (CameraRenderToTexture, PostProcessingEffect, Engine, Camera, Material, Shader, MeshRenderer, Mesh, Constants, RenderTexture, Texture, math, kick) {
             "use strict";
             var engine,
-                meshRenderer,
-                    Observable = kick.core.Observable;
+                meshRenderer;
 
 
             function createMaterial(vertexShaderId, fragmentShaderId,  materialUniforms) {
                 var vs = document.getElementById(vertexShaderId).value,
                         fs = document.getElementById(fragmentShaderId).value,
-                        shader = new Shader(),
-                        missingAttributes;
+                        shader = new Shader();
                 shader.vertexShaderSrc = vs;
                 shader.fragmentShaderSrc = fs;
                 shader.apply();
@@ -76,12 +75,8 @@
 
                 var cameraObject = engine.activeScene.createGameObject(),
                     cameraObject2 = engine.activeScene.createGameObject(),
-
                     camera,
-                    camera2,
-                    gameObject,
-                    gameObject2,
-                    meshRenderer2;
+                    gameObject;
 
                 cameraObject2.transform.position = [0, 0, 3];
 
@@ -95,7 +90,6 @@
                 var ppe = new CameraRenderToTexture();
                 cameraObject.addComponent(ppe);
                 var postEffect = new PostProcessingEffect();
-
                 postEffect.material = createMaterial('bloomExtractHighlightsVert', 'bloomExtractHighlightsFrag', {mainTexture: ppe.texture});
                 ppe.addEffect(postEffect);
                 var postEffectBlur = new PostProcessingEffect();
@@ -108,32 +102,50 @@
                     postEffectBlur.material.setUniform("height", new Float32Array([dim[1]]));
                     postEffectBlur2.material.setUniform("width", new Float32Array([dim[0]]));
                 });
+                postEffect.material.setUniform("LumThresh",new Float32Array([0.75]));
 
-
-                camera2 = new Camera({
-                    clearColor: [0.1, 0.3, 0.6, 1],
-                    fieldOfView: 60,
-                    cameraIndex: 2,
-                    layerMask: 2
-                });
-                //cameraObject2.addComponent(camera2);
                 gameObject = engine.activeScene.createGameObject();
                 meshRenderer = new MeshRenderer();
                 meshRenderer.mesh = new Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
                 meshRenderer.material = createMaterial('vertexShaderColor', 'fragmentShader');
                 gameObject.addComponent(meshRenderer);
 
-                gameObject2 = engine.activeScene.createGameObject();
-                gameObject2.layer = 2;
-                meshRenderer2 = new MeshRenderer();
-                meshRenderer2.mesh = new Mesh({dataURI: "kickjs://mesh/cube/?length=0.5"});
-                meshRenderer2.material = createMaterial('vertexShaderTex', 'fragmentShaderTex', {
-                //    tex:  texture
-                });
-                gameObject2.addComponent(meshRenderer2);
-
                 addRotatorComponent(cameraObject);
                 addRotatorComponent(cameraObject2);
+
+                var gui = new dat.GUI();
+
+                var scaleObject = {};
+                var scale = 1.0;
+                var lumenThreshold = 0.75;
+                Object.defineProperties(scaleObject, {
+                    scale:{
+                        get:function(){
+                            return scale;
+                        },
+                        set:function(newVal){
+                            scale = newVal;
+                            postEffect.scale = newVal;
+                            postEffectBlur.scale = newVal;
+                            postEffectBlur.material.setUniform("height", new Float32Array([engine.canvasDimension[1]*newVal]));
+                            postEffectBlur2.material.setUniform("width", new Float32Array([engine.canvasDimension[0]*newVal]));
+
+                        }
+                    },
+                    lumenThreshold:{
+                        get:function(){
+                            return lumenThreshold;
+                        },
+                        set:function(newVal){
+                            lumenThreshold = newVal;
+                            postEffect.material.setUniform("LumThresh",new Float32Array([lumenThreshold ]));
+
+                        }
+                    }
+                });
+
+                gui.add(scaleObject,'scale', 0.01,1.0);
+                gui.add(scaleObject,'lumenThreshold', 0.00,1.0);
             }
             initKick();
         });
@@ -196,7 +208,7 @@ void main(void)
 
       uniform sampler2D mainTexture;
 
-      const float LumThresh = 0.75;
+      uniform float LumThresh;
 
       float luma( vec3 color ) {
 
