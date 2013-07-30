@@ -148,7 +148,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
 
                 }
                 if (_generateMipmaps && (_type===Constants.GL_FLOAT || _type=== Constants.GL_HALF_FLOAT_OES)){
-                    return "Mipmaps is supported for ";
+                    return "Mipmaps not supported for floating point textures";
                 }
 
                 return null;
