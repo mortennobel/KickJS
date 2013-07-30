@@ -37,6 +37,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 _minFilter = Constants.GL_LINEAR,
                 _magFilter = Constants.GL_LINEAR,
                 _generateMipmaps = true,
+                _autoRescale = true,
                 _isMipMapGenerated = false,
                 _hasDataOnGPU = false,
                 _dataURI =  "memory://void",
@@ -133,6 +134,27 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             };
 
             /**
+             * Verifies the current texture configuration and returns the texture error (if any)
+             * @method getTextureError
+             * @return {String|null}
+             */
+            this.getTextureError = function(){
+                var isPowerOfTwo = Util.isPowerOfTwo(_dimension[0]) &&
+                    Util.isPowerOfTwo(_dimension[1]);
+                if (!_autoRescale){
+                    if (_generateMipmaps && !isPowerOfTwo){
+                        return "Mipmaps is only suported by power of two textures";
+                    }
+
+                }
+                if (_generateMipmaps && (_type===Constants.GL_FLOAT || _type=== Constants.GL_HALF_FLOAT_OES)){
+                    return "Mipmaps is supported for ";
+                }
+
+                return null;
+            };
+
+            /**
              * Set texture image based on a image object.<br>
              * The image is automatically resized nearest power of two<br>
              * When a textureType == TEXTURE\_CUBE\_MAP the image needs to be in the following format:
@@ -152,10 +174,12 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                 recreateTextureIfDifferentType();
                 thisObj.bind(0); // bind to texture slot 0
                 if (_textureType === Constants.GL_TEXTURE_2D) {
-                    if (!Util.isPowerOfTwo(imageObj.width) || !Util.isPowerOfTwo(imageObj.height)) {
-                        width = Util.nextHighestPowerOfTwo(imageObj.width);
-                        height = Util.nextHighestPowerOfTwo(imageObj.height);
-                        imageObj = Util.scaleImage(imageObj, width, height);
+                    if (_autoRescale){
+                        if (!Util.isPowerOfTwo(imageObj.width) || !Util.isPowerOfTwo(imageObj.height)) {
+                            width = Util.nextHighestPowerOfTwo(imageObj.width);
+                            height = Util.nextHighestPowerOfTwo(imageObj.height);
+                            imageObj = Util.scaleImage(imageObj, width, height);
+                        }
                     }
                     if (_flipY) {
                         gl.pixelStorei(Constants.GL_UNPACK_FLIP_Y_WEBGL, true);
@@ -177,6 +201,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     srcWidth = imageObj.width / 6;
                     srcHeight = imageObj.height;
                     height = Util.nextHighestPowerOfTwo(imageObj.height);
+                    //noinspection JSSuspiciousNameCombination
                     width = height;
                     canvas = document.createElement("canvas");
                     canvas.width = width;
@@ -599,6 +624,14 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                         _intFormat = value;
                     }
                 },
+                autoRescale: {
+                    get: function(){
+                        return _autoRescale;
+                    },
+                    set: function(newValue){
+                        _autoRescale = newValue;
+                    }
+                },
                 /**
                  * Specifies the texture type<br>
                  * Default is GL\_TEXTURE_2D<br>
@@ -636,6 +669,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
                     wrapT: _wrapT,
                     minFilter: _minFilter,
                     magFilter: _magFilter,
+                    autoRescale: _autoRescale,
                     name: _name,
                     generateMipmaps: _generateMipmaps,
                     flipY: _flipY,
