@@ -22,6 +22,8 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
             textureFilterAnisotropicExt = null,
             drawBuffersExt = null,
             elementIndexUIntExt = null,
+            colorBufferFloatExt = null,
+            colorBufferHalfFloatExt = null,
             reloadExtensions = function(){
                 vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
                 standardDerivativesExt = engine.getGLExtension("OES_standard_derivatives");
@@ -31,6 +33,8 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
                 textureFilterAnisotropicExt = engine.getGLExtension("EXT_texture_filter_anisotropic") || engine.getGLExtension("WEBGL_texture_filter_anisotropic");
                 drawBuffersExt = engine.getGLExtension("EXT_draw_buffers") || engine.getGLExtension("WEBGL_draw_buffers");
                 elementIndexUIntExt = engine.getGLExtension("OES_element_index_uint");
+                colorBufferFloatExt = engine.getGLExtension("WEBGL_color_buffer_float") || engine.getGLExtension("EXT_color_buffer_float");
+                colorBufferHalfFloatExt = engine.getGLExtension("EXT_color_buffer_half_float");
             },
             clearExtensions = function(){
                 vertexArrayObjectExt = null;
@@ -41,6 +45,8 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
                 textureFilterAnisotropicExt = null;
                 drawBuffersExt = null;
                 elementIndexUIntExt = null;
+                colorBufferFloatExt = null;
+                colorBufferHalfFloatExt = null;
             };
         /**
          * The current clear color
@@ -243,6 +249,32 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
             elementIndexUIntExtension:{
                 get: function(){
                     return elementIndexUIntExt;
+                },
+                enumerable:true
+            },
+            /**
+             * Adds support for rendering to 32-bit floating-point color buffers.
+             * See http://www.khronos.org/registry/webgl/extensions/WEBGL_color_buffer_float/
+             * @property colorBufferFloatExtension
+             * @type Object
+             * @final
+             */
+            colorBufferFloatExtension:{
+                get: function(){
+                    return colorBufferFloatExt;
+                },
+                enumerable:true
+            },
+            /**
+             * This extension exposes the EXT_color_buffer_half_float functionality to WebGL.
+             * See http://www.khronos.org/registry/webgl/extensions/EXT_color_buffer_half_float/
+             * @property colorBufferHalfFloatExtension
+             * @type Object
+             * @final
+             */
+            colorBufferHalfFloatExtension:{
+                get: function(){
+                    return colorBufferHalfFloatExt;
                 },
                 enumerable:true
             }

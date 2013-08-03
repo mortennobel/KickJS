@@ -54,7 +54,16 @@ requirejs(['kick'],
                     return "Max color attachments: " + engine.gl.getParameter(constants.GL_MAX_COLOR_ATTACHMENTS)+"<br>"+
                         "Max draw buffers: "+engine.gl.getParameter(constants.GL_MAX_DRAW_BUFFERS);
                 }
+            },
+            colorBufferFloatExtension: {
+                name:"WEBGL_color_buffer_float",
+                link:"http://www.khronos.org/registry/webgl/extensions/WEBGL_color_buffer_float/"
+            },
+            colorBufferHalfFloatExtension:{
+                name: "EXT_color_buffer_half_float",
+                link: "http://www.khronos.org/registry/webgl/extensions/EXT_color_buffer_half_float/"
             }
+
         };
 
         var data = [];
