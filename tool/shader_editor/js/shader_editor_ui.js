@@ -214,6 +214,28 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                         idParameter,
                         shader,
                         result;
+                    shaderEditor.addEventListener("shaderLogClear", function(){
+                        glslEditor.clearAnnotations();
+                    });
+                    shaderEditor.addEventListener("shaderError", function(array){
+                        var annotations = [[],[]];
+                        for (var j=0;j<2;j++){
+                            if (array[j]){
+                                var lines = array[j].split('\n');
+                                for(var i=0; i<lines.length; i++){
+                                    var match = lines[i].match(/ERROR: (\d+):(\d+): (.*)/);
+                                    if(match){
+                                        var fileno = parseInt(match[1], 10)-1;
+                                        var lineno = parseInt(match[2], 10)-1;
+                                        var message = match[3];
+                                        annotations[j].push({row: lineno+1, column: 1,text: message});
+                                    }
+                                }
+                            }
+                        }
+                        glslEditor.addAnnotations(annotations[0],annotations[1]);
+                    });
+
                     controller = new GLSLEditorController(glslEditor, texturePanel, uniformPanel, settingsPanel, descriptionPanel, tabview);
                     topButtonPanel = new ButtonPanel(Y, shaderEditor, controller, shaderEditorUI);
                     window.controller = controller; // debug - expose controller

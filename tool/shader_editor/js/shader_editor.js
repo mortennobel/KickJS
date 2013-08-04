@@ -18,11 +18,11 @@ requirejs(['kick', 'shader_editor_ui',
 ],
     function (kick, ShaderEditorUI, noise2D, noise3D, noise4D, cellular2D, cellular2x2, cellular2x2x2, cellular3D) {
         "use strict";
-
         var ShaderEditor = function () {
             "use strict";
 
             var _engine,
+                Observable = kick.core.Observable,
                 _meshRenderer,
                 previousShaderError = false,
                 _light,
@@ -30,43 +30,52 @@ requirejs(['kick', 'shader_editor_ui',
                 _ambientLight,
                 camera,
                 _lightTransform,
+                vError,
+                fError,
+                lError,
                 shader = null,
                 thisObj = this,
                 isRotating = true,
                 meshsetting,
                 pointMesh,
+                clearErrors = function(){
+                    vError = null;
+                    fError = null;
+                    lError = null;
+                    thisObj.fireEvent('shaderLogClear');
+                },
                 updateShaderFromSettings = function(settings){
                     var changed = false;
-                    if (shader.faceCulling != settings.faceCulling){
+                    if (shader.faceCulling !== settings.faceCulling){
                         shader.faceCulling = settings.faceCulling;
                         changed = true;
                     }
-                    if (shader.blendSFactorRGB != settings.blendSFactorRGB){
+                    if (shader.blendSFactorRGB !== settings.blendSFactorRGB){
                         shader.blendSFactorRGB = settings.blendSFactorRGB;
                         changed = true;
                     }
-                    if (shader.blendSFactorAlpha != settings.blendSFactorAlpha){
+                    if (shader.blendSFactorAlpha !== settings.blendSFactorAlpha){
                         shader.blendSFactorAlpha = settings.blendSFactorAlpha;
                         changed = true;
                     }
-                    if (shader.blendDFactorRGB != settings.blendDFactorRGB){
+                    if (shader.blendDFactorRGB !== settings.blendDFactorRGB){
                         shader.blendDFactorRGB = settings.blendDFactorRGB;
                         changed = true;
                     }
-                    if (shader.blendDFactorAlpha != settings.blendDFactorAlpha){
+                    if (shader.blendDFactorAlpha !== settings.blendDFactorAlpha){
                         shader.blendDFactorAlpha = settings.blendDFactorAlpha;
                         changed = true;
                     }
-                    if (shader.depthMask != settings.depthMask){
+                    if (shader.depthMask !== settings.depthMask){
                         shader.depthMask = settings.depthMask;
                         changed = true;
                     }
                     var blend = settings.blending === "on";
-                    if (shader.blend != blend){
+                    if (shader.blend !== blend){
                         shader.blend = blend;
                         changed = true;
                     }
-                    if (shader.zTest != settings.zTest){
+                    if (shader.zTest !== settings.zTest){
                         shader.zTest = settings.zTest;
                         changed = true;
                     }
@@ -140,9 +149,16 @@ requirejs(['kick', 'shader_editor_ui',
                         t,
                         activeUniforms,
                         materialUniform;
+                    if (shader){
+                        shader.destroy();
+                    }
                     shaderData.shader.uid = 0; // set shader uid to 0 (to avoid conflicts)
                     shader = new kick.material.Shader(shaderData.shader);
                     shader.faceCulling = kick.core.Constants.GL_NONE;
+                    shader.addEventListener("vertexShaderError",function(e){ vError = e;});
+                    shader.addEventListener("fragmentShaderError",function(e){ fError = e; });
+                    shader.addEventListener("linkerError",function(e){ lError = e; });
+
                     missingAttributes = _meshRenderer.mesh.verify(shader);
                     if (missingAttributes) {
                         logFn("Missing mesh vertex attributes.");
@@ -434,6 +450,21 @@ requirejs(['kick', 'shader_editor_ui',
                 }
             }
 
+            Observable.call(this, [
+                        /**
+                         * Fired when shader is updated
+                         * @event shaderLogClear
+                         */
+                            "shaderLogClear",
+                        /**
+                         * Fired when vertex shader has errors
+                         * @event shaderError
+                         * @param {Array} vertex, fragment, link error
+                         */
+                            "shaderError"
+                        ]
+                        );
+
             this.apply = function (vs, fs) {
                 if (!previousShaderError) {
                     lastValidMaterial = _meshRenderer.material.toJSON();
@@ -444,13 +475,14 @@ requirejs(['kick', 'shader_editor_ui',
                 shader.vertexShaderSrc = vs;
                 shader.fragmentShaderSrc = fs;
                 shader.errorLog = logFn;
+                clearErrors();
                 var missingAttributes,
                     shaderCompiledSuccessfully = shader.apply(),
                     onError = function () {
                         previousShaderError = true;
                         document.body.style.backgroundColor = 'pink';
+                        thisObj.fireEvent('shaderError', [vError, fError, lError]);
                     };
-
 
                 if (!shaderCompiledSuccessfully) {
                     onError();

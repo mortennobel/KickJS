@@ -3,9 +3,20 @@ define([],
         "use strict";
         return function(Y, id, shaderEditor){
             var editor,
+                thisObj = this,
                 EditSession,
                 vertexShaderSession,
-                fragmentShaderSession;
+                fragmentShaderSession,
+                vAnnotations = [],
+                fAnnotations = [],
+                currentShader = 0,
+                reloadAnnotations = function(){
+                    editor.getSession().clearAnnotations();
+                    var annotations = [vAnnotations, fAnnotations];
+                    if (annotations[currentShader].length>0){
+                        editor.getSession().setAnnotations(annotations[currentShader]);
+                    }
+                };
             editor = ace.edit(id);
 
             editor.setTheme("ace/theme/twilight");
@@ -44,6 +55,10 @@ define([],
                 // clear undo manager
                 var UndoManager = ace.require("ace/undomanager").UndoManager;
                 editor.getSession().setUndoManager(new UndoManager());
+                editor.getSession().setUseSoftTabs(false);
+                editor.resize();
+                currentShader = 0;
+                reloadAnnotations();
             };
 
             this.showFragmentShader = function () {
@@ -52,10 +67,34 @@ define([],
                 // clear undo manager
                 var UndoManager = ace.require("ace/undomanager").UndoManager;
                 editor.getSession().setUndoManager(new UndoManager());
+                editor.getSession().setUseSoftTabs(false);
+                editor.resize();
+                currentShader = 1;
+                reloadAnnotations();
             };
 
             this.hideEditor = function () {
                 document.getElementById('glslEditorPanel').style.display = "none";
+            };
+
+            this.addAnnotations = function(vertexShaderAnnotations, fragmentShaderAnnotations){
+                var i;
+
+                for (i=0;i<vertexShaderAnnotations.length;i++){
+                    vAnnotations.push(vertexShaderAnnotations[i]);
+                    console.log("VError ", vertexShaderAnnotations[i]);
+                }
+                for (i=0;i<fragmentShaderAnnotations.length;i++){
+                    fAnnotations.push(fragmentShaderAnnotations[i]);
+                    console.log("FError ", fragmentShaderAnnotations[i]);
+                }
+                reloadAnnotations();
+            };
+
+            this.clearAnnotations = function(){
+                vAnnotations.length = 0;
+                fAnnotations.length = 0;
+                reloadAnnotations();
             };
         };
     }
