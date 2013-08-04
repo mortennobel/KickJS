@@ -146,6 +146,11 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                         if (typeof _errorLog === "function") {
                             _errorLog(infoLog);
                         }
+                        if (isFragmentShader) {
+                            thisObj.fireEvent('fragmentShaderError', infoLog);
+                        } else {
+                            thisObj.fireEvent('vertexShaderError', infoLog);
+                        }
                         return null;
                     }
 
@@ -282,7 +287,25 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
              * @event shaderUpdated
              * @param {kick.material.Shader} shaderInstance
              */
-                "shaderUpdated"
+                "shaderUpdated",
+            /**
+             * Fired when vertex shader is unable to compile
+             * @event vertexShaderError
+             * @param {string} errorMessage
+             */
+                "vertexShaderError",
+            /**
+             * Fired when fragment shader is unable to compile
+             * @event vertexShaderError
+             * @param {string} errorMessage
+             */
+                "fragmentShaderError",
+            /**
+             * Fired when shader is unable to link
+             * @event vertexShaderError
+             * @param {string} errorMessage
+             */
+                "linkerError"
             ]
             );
 
@@ -930,6 +953,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 if (!gl.getProgramParameter(_shaderProgramId, Constants.GL_LINK_STATUS)) {
                     compileError = gl.getProgramInfoLog(_shaderProgramId);
                     errorLog(compileError);
+                    thisObj.fireEvent('linkerError', compileError);
                     return false;
                 }
 
@@ -1200,7 +1224,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          * @method bindUniform
          * @param {kick.material.Material} material
          * @param {Object} engineUniforms
-         * @param {kick.scene.Transform) transform
+         * @param {kick.scene.Transform} transform
          */
         Shader.prototype.bindUniform = function (material, engineUniforms, transform) {
             var lookupUniform = this.lookupUniform,
