@@ -82,11 +82,9 @@ define([],
 
                 for (i=0;i<vertexShaderAnnotations.length;i++){
                     vAnnotations.push(vertexShaderAnnotations[i]);
-                    console.log("VError ", vertexShaderAnnotations[i]);
                 }
                 for (i=0;i<fragmentShaderAnnotations.length;i++){
                     fAnnotations.push(fragmentShaderAnnotations[i]);
-                    console.log("FError ", fragmentShaderAnnotations[i]);
                 }
                 reloadAnnotations();
             };

@@ -228,7 +228,7 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                                         var fileno = parseInt(match[1], 10)-1;
                                         var lineno = parseInt(match[2], 10)-1;
                                         var message = match[3];
-                                        annotations[j].push({row: lineno+1, column: 1,text: message});
+                                        annotations[j].push({row: lineno, column: 1,text: message});
                                     }
                                 }
                             }
