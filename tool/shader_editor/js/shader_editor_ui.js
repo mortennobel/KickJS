@@ -216,6 +216,7 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                         result;
                     shaderEditor.addEventListener("shaderLogClear", function(){
                         glslEditor.clearAnnotations();
+                        r.clearConsole();
                     });
                     shaderEditor.addEventListener("shaderError", function(array){
                         var annotations = [[],[]];
