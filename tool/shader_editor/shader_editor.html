@@ -7,12 +7,13 @@
 
     <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.11.0/cssreset/cssreset-min.css&3.11.0/cssfonts/cssfonts-min.css&3.11.0/cssgrids/cssgrids-min.css&3.11.0/cssbase/cssbase-min.css&3.11.0/cssbutton/cssbutton-min.css">
     <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.11.0/yui/yui-min.js"></script>
-    <script src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-
     <style>
         #glslEditor {
-            width: 65%;
-            height: 80%;
+            width: 100%;
+            height: 400px;
+            position: relative !important;
+            border: 1px solid lightgray;
+            margin: auto;
         }
 
         .hiddenPanel {
@@ -47,7 +48,7 @@
             font-size:100%;
             width:200px;
         }
-        
+
         .yui3-console{
             top:150px !important;
         }
@@ -407,5 +408,11 @@
 </div>
 <script type="text/javascript" src="/header.js"></script>
 <script data-main="js/shader_editor.js" type="text/javascript" src="../../dependencies/require.js"></script>
+<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/mode-glsl.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+<!--<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>-->
+<!--<script src="ace/mode-glsl.js" type="text/javascript" charset="utf-8"></script>-->
+<!--<script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>-->
 </body>
 </html>

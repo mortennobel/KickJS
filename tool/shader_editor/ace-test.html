@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title></title>
+    <!--<script src="http://cdnjs.cloudflare.com/ajax/libs/ace/0.2.0/ace.js" type="text/javascript" charset="utf-8"></script>-->
+    <!--<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/ace.js" type="text/javascript" charset="utf-8"></script>-->
+    <!--<script src="../common/ace/mode-glsl.js" type="text/javascript" charset="utf-8"></script>-->
+    <!--<script src="../common/ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>-->
+    <script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace/mode-glsl.js" type="text/javascript" charset="utf-8"></script>
+    <script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+
+<div id="glslEditorTest" style="width: 500px;height: 500px;">
+    void helloWorld(){
+        Foo test;
+        Test;
+    }
+
+</div>
+
+
+<script>
+    editor = ace.edit("glslEditorTest");
+    editor.getSession().setUseSoftTabs(false);
+    editor.getSession().setTabSize(4);
+
+    editor.setValue("the new text here\nHellow\n\nworls");
+    var annotations = [
+        {row: 1, column: 1,text: "Hello"},
+        {row: 2, column: 1,text: "World"}
+    ];
+    editor.getSession().setAnnotations(annotations);
+</script>
+
+</body>
+</html>
