@@ -296,13 +296,13 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                 "vertexShaderError",
             /**
              * Fired when fragment shader is unable to compile
-             * @event vertexShaderError
+             * @event fragmentShaderError
              * @param {string} errorMessage
              */
                 "fragmentShaderError",
             /**
              * Fired when shader is unable to link
-             * @event vertexShaderError
+             * @event linkerError
              * @param {string} errorMessage
              */
                 "linkerError"
