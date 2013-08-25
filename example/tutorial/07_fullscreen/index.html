@@ -19,7 +19,7 @@ This example demonstrate how to use fullscreen support (if available).<br><br>
     });
 
     reqOne(['kick'],
-            function (KICK) {
+            function (kick) {
                 var RotatorComponent = function(config){
                     var rotationEuler = [0,0,0],
                             thisObj = this;
@@ -37,13 +37,13 @@ This example demonstrate how to use fullscreen support (if available).<br><br>
                 };
 
                 // init engine (create 3d context)
-                var engine = new KICK.core.Engine('canvas');
+                var engine = new kick.core.Engine('canvas');
 
                 // create a game object in [0,0,0] facing down the -z axis
                 var cameraObject = engine.activeScene.createGameObject();
                 cameraObject.transform.position = [0,0,5];
                 // create a orthographic camera
-                var camera = new KICK.scene.Camera({
+                var camera = new kick.scene.Camera({
                     perspective: false,
                     left:-5,
                     right:5,
@@ -54,7 +54,7 @@ This example demonstrate how to use fullscreen support (if available).<br><br>
 
                 // create material
                 var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-                var material = new KICK.material.Material({
+                var material = new kick.material.Material({
                     shader: shader
                 });
 
@@ -63,7 +63,7 @@ This example demonstrate how to use fullscreen support (if available).<br><br>
                 for (var i=0;i<meshes.length;i++){
                     var gameObject = engine.activeScene.createGameObject();
                     gameObject.transform.position = [-2.0+4*i,0,0];
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     meshRenderer.mesh = engine.project.load(meshes[i]);
                     meshRenderer.material = material;
                     gameObject.addComponent(meshRenderer);

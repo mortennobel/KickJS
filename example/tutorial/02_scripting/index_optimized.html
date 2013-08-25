@@ -18,7 +18,7 @@ This example demonstrate how to script update that runs in every frame (slightly
     });
 
     reqOne(['kick'],
-        function (KICK) {
+        function (kick) {
     var RotatorComponent = function(config){
         var transform,
                 time,
@@ -40,13 +40,13 @@ This example demonstrate how to script update that runs in every frame (slightly
     };
 
     // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas');
+    var engine = new kick.core.Engine('canvas');
 
     // create a game object in [0,0,0] facing down the -z axis
     var cameraObject = engine.activeScene.createGameObject();
     cameraObject.transform.position = [0,0,5];
     // create a orthographic camera
-    var camera = new KICK.scene.Camera({
+    var camera = new kick.scene.Camera({
         perspective: false,
         left:-5,
         right:5,
@@ -57,7 +57,7 @@ This example demonstrate how to script update that runs in every frame (slightly
 
     // create material
         var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-        var material = new KICK.material.Material({
+        var material = new kick.material.Material({
             shader: shader,
             uniformData:{
                 mainColor: [1,1,1,1]
@@ -69,7 +69,7 @@ This example demonstrate how to script update that runs in every frame (slightly
         for (var i=0;i<meshes.length;i++){
             var gameObject = engine.activeScene.createGameObject();
             gameObject.transform.position = [-2.0+4*i,0,0];
-            var meshRenderer = new KICK.scene.MeshRenderer();
+            var meshRenderer = new kick.scene.MeshRenderer();
             meshRenderer.mesh = engine.project.load(meshes[i]);
             meshRenderer.material = material;
             gameObject.addComponent(meshRenderer);

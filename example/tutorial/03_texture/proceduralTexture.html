@@ -19,15 +19,15 @@ This example shows how to create a texture from JavaScript.<br>
         });
 
         reqOne(['kick'],
-            function (KICK) {
+            function (kick) {
     // init engine (create 3d context)
-    var engine = new KICK.core.Engine('canvas');
+    var engine = new kick.core.Engine('canvas');
 
     // create a game object in [0,0,0] facing down the -z axis
     var cameraObject = engine.activeScene.createGameObject();
     cameraObject.transform.position = [0,0,5];
     // create a orthographic camera
-    var camera = new KICK.scene.Camera({
+    var camera = new kick.scene.Camera({
         perspective: false,
         left:-5,
         right:5,
@@ -37,7 +37,7 @@ This example shows how to create a texture from JavaScript.<br>
     cameraObject.addComponent(camera);
 
     // create texture
-    var texture = new KICK.texture.Texture();
+    var texture = new kick.texture.Texture();
     var checkerboardWidth = 128;
     var checkerboardHeight = 128;
     var checkerboard = new Uint8Array(checkerboardWidth*checkerboardWidth*3); // width * height * 3 color channels (RGB)

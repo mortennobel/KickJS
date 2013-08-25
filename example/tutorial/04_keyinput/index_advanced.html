@@ -21,7 +21,7 @@ The key down event and key up event will change the color of the objects.<br><br
     });
 
     reqOne(['kick'],
-            function (KICK) {    var RotatorComponent = function(config){
+            function (kick) {    var RotatorComponent = function(config){
                 var rotationEuler = [0,0,0],
                         thisObj = this,
                         keyInput,
@@ -40,7 +40,7 @@ The key down event and key up event will change the color of the objects.<br><br
                     time = engine.time;
                     transform = gameObject.transform;
                     keyInput = engine.keyInput;
-                    material = gameObject.getComponentOfType(KICK.scene.MeshRenderer).material;
+                    material = gameObject.getComponentOfType(kick.scene.MeshRenderer).material;
                 };
 
                 this.update = function(){
@@ -65,13 +65,13 @@ The key down event and key up event will change the color of the objects.<br><br
             };
 
                 // init engine (create 3d context)
-                var engine = new KICK.core.Engine('canvas');
+                var engine = new kick.core.Engine('canvas');
 
                 // create a game object in [0,0,0] facing down the -z axis
                 var cameraObject = engine.activeScene.createGameObject();
                 cameraObject.transform.position = [0,0,5];
                 // create a orthographic camera
-                var camera = new KICK.scene.Camera({
+                var camera = new kick.scene.Camera({
                     perspective: false,
                     left:-5,
                     right:5,
@@ -82,16 +82,16 @@ The key down event and key up event will change the color of the objects.<br><br
 
                 function createMaterial(){
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-                    return new KICK.material.Material({
+                    return new kick.material.Material({
                         shader: shader,
                         uniforms:{
                             mainColor: {
                                 value: [1,1,1,1],
-                                type: KICK.core.Constants.GL_FLOAT_VEC4
+                                type: kick.core.Constants.GL_FLOAT_VEC4
                             },
                             mainTexture: {
                                 value: engine.project.load(engine.project.ENGINE_TEXTURE_WHITE),
-                                type: KICK.core.Constants.GL_SAMPLER_2D
+                                type: kick.core.Constants.GL_SAMPLER_2D
                             }
                         }
                     });
@@ -106,7 +106,7 @@ The key down event and key up event will change the color of the objects.<br><br
                 for (var i=0;i<meshes.length;i++){
                     var gameObject = engine.activeScene.createGameObject();
                     gameObject.transform.position = [-2.0+4*i,0,0];
-                    var meshRenderer = new KICK.scene.MeshRenderer();
+                    var meshRenderer = new kick.scene.MeshRenderer();
                     meshRenderer.mesh = engine.project.load(meshes[i]);
                     meshRenderer.material = createMaterial();
                     gameObject.addComponent(meshRenderer);
