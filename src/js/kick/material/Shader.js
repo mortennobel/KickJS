@@ -185,10 +185,10 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
                         glState.blendKey = blendKey;
                         if (_blend) {
                             gl.enable(Constants.GL_BLEND);
+                            gl.blendFuncSeparate(_blendSFactorRGB, _blendDFactorRGB,_blendSFactorAlpha, _blendDFactorAlpha);
                         } else {
                             gl.disable(Constants.GL_BLEND);
                         }
-                        gl.blendFuncSeparate(_blendSFactorRGB, _blendDFactorRGB,_blendSFactorAlpha, _blendDFactorAlpha);
                     }
                 },
                 updatePolygonOffset = function () {
