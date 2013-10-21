@@ -1,7 +1,7 @@
 requirejs.config({
     baseUrl: '.',
     paths: {
-        kick: location.search === "?debug" ? '../../build/kick-debug': '../../build/kick'
+        kick: location.search === "?debug" ? '../../src/js/kick': '../../build/kick'
     }
 });
 
@@ -62,6 +62,10 @@ requirejs(['kick'],
             colorBufferHalfFloatExtension:{
                 name: "EXT_color_buffer_half_float",
                 link: "http://www.khronos.org/registry/webgl/extensions/EXT_color_buffer_half_float/"
+            },
+            instancedArraysExtension:{
+                name: "ANGLE_instanced_arrays",
+                link: "http://www.khronos.org/registry/webgl/extensions/ANGLE_instanced_arrays/"
             }
 
         };
