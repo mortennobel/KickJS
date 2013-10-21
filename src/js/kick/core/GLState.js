@@ -25,6 +25,8 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
             colorBufferFloatExt = null,
             colorBufferHalfFloatExt = null,
             instancedArraysExt = null,
+            textureFloatLinearExt = null,
+            textureHalfFloatLinearExt = null,
             reloadExtensions = function(){
                 vertexArrayObjectExt = engine.getGLExtension("OES_vertex_array_object");
                 standardDerivativesExt = engine.getGLExtension("OES_standard_derivatives");
@@ -37,6 +39,8 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
                 colorBufferFloatExt = engine.getGLExtension("WEBGL_color_buffer_float") || engine.getGLExtension("EXT_color_buffer_float");
                 colorBufferHalfFloatExt = engine.getGLExtension("EXT_color_buffer_half_float");
                 instancedArraysExt = engine.getGLExtension("ANGLE_instanced_arrays");
+                textureFloatLinearExt = engine.getGLExtension("OES_texture_float_linear");
+                textureHalfFloatLinearExt = engine.getGLExtension("OES_texture_half_float_linear");
             },
             clearExtensions = function(){
                 vertexArrayObjectExt = null;
@@ -50,6 +54,8 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
                 colorBufferFloatExt = null;
                 colorBufferHalfFloatExt = null;
                 instancedArraysExt = null;
+                textureFloatLinearExt = null;
+                textureHalfFloatLinearExt = null;
             };
         /**
          * The current clear color
@@ -291,6 +297,32 @@ define(["kick/core/Constants", "kick/core/Util"], function (constants, Util) {
             colorBufferHalfFloatExtension:{
                 get: function(){
                     return colorBufferHalfFloatExt;
+                },
+                enumerable:true
+            },
+            /**
+             * This extension exposes the OES_texture_float_linear functionality to WebGL.
+             * See http://www.khronos.org/registry/webgl/extensions/OES_texture_float_linear/
+             * @property textureFloatLinearExtension
+             * @type Object
+             * @final
+             */
+            textureFloatLinearExtension:{
+                get: function(){
+                    return textureFloatLinearExt;
+                },
+                enumerable:true
+            },
+            /**
+             * This extension exposes the OES_texture_half_float_linear functionality to WebGL.
+             * See http://www.khronos.org/registry/webgl/extensions/OES_texture_half_float_linear/
+             * @property textureFloatLinearExtension
+             * @type Object
+             * @final
+             */
+            textureHalfFloatLinearExtension:{
+                get: function(){
+                    return textureHalfFloatLinearExt;
                 },
                 enumerable:true
             }

@@ -66,8 +66,15 @@ requirejs(['kick'],
             instancedArraysExtension:{
                 name: "ANGLE_instanced_arrays",
                 link: "http://www.khronos.org/registry/webgl/extensions/ANGLE_instanced_arrays/"
+            },
+            textureFloatLinearExtension:{
+                name: "OES_texture_float_linear",
+                link: "http://www.khronos.org/registry/webgl/extensions/OES_texture_float_linear/"
+            },
+            textureHalfFloatLinearExtension:{
+                name: "OES_texture_half_float_linear",
+                link: "http://www.khronos.org/registry/webgl/extensions/OES_texture_half_float_linear/"
             }
-
         };
 
         var data = [];
