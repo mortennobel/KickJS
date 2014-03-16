@@ -1,8 +1,10 @@
-define(["./postfx/CameraRenderToTexture", "./postfx/PostProcessingEffect"], function (CameraRenderToTexture, PostProcessingEffect) {
+define(["./postfx/CameraRenderToTexture", "./postfx/PostProcessingEffect", "./postfx/BloomPostFX"],
+    function (CameraRenderToTexture, PostProcessingEffect, BloomPostFX) {
     "use strict";
 
     return {
         CameraRenderToTexture: CameraRenderToTexture,
-        PostProcessingEffect: PostProcessingEffect
+        PostProcessingEffect: PostProcessingEffect,
+        BloomPostFX: BloomPostFX
     };
 });
