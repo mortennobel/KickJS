@@ -111,6 +111,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "kick
             /**
              * Bind the current texture
              * @method bind
+             * @param {Number} textureSlot
              */
             this.bind = function (textureSlot) {
                 gl.activeTexture(texture0 + textureSlot);
