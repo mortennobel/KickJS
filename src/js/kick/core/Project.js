@@ -14,7 +14,7 @@ define(["./Constants", "./ResourceDescriptor", "kick/material/Shader", "./Util",
              * (Note for built-in kickjs assets, this happens automatically when the objects are constructed).
              * @example
              *      // load shader
-             *      var shader = engine.project.load(engine.project.ENGINE\_SHADER\_DIFFUSE);
+             *      var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
              * @class Project
              * @namespace kick.core
              * @constructor
