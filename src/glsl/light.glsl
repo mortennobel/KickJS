@@ -18,8 +18,10 @@ vec3 getPointLightDiffuse(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS]){
         float attenuation = 1.0 / dot(vec3(1.0,d,d*d),attenuationVector); // short for constA + liniearA * d + quadraticA * d^2
 
         float nDotVP = max(0.0, dot(normal, VP));
-
-        diffuse += colorIntensity*nDotVP * attenuation;
+        bool isLightEnabled = (attenuationVector[0]+attenuationVector[1]+attenuationVector[2])>0.0;
+        if (isLightEnabled){
+            diffuse += colorIntensity*nDotVP * attenuation;
+        }
     }
     return diffuse;
 }
