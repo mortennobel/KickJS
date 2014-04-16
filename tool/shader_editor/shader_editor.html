@@ -5,8 +5,8 @@
     <meta charset=UTF-8”>
     <title>Kick.js | Shader Editor</title>
 
-    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.11.0/cssreset/cssreset-min.css&3.11.0/cssfonts/cssfonts-min.css&3.11.0/cssgrids/cssgrids-min.css&3.11.0/cssbase/cssbase-min.css&3.11.0/cssbutton/cssbutton-min.css">
-    <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.11.0/yui/yui-min.js"></script>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/combo?3.16.0/cssnormalize-context/cssnormalize-context-min.css&3.16.0/cssfonts/cssfonts-min.css&3.16.0/cssgrids/cssgrids-min.css&3.16.0/cssbase/cssbase-min.css&3.16.0/cssbutton/cssbutton-min.css">
+    <script type="text/javascript" src="http://yui.yahooapis.com/combo?3.16.0/yui/yui-min.js"></script>
     <style>
         #glslEditor {
             width: 100%;
@@ -193,9 +193,9 @@
                         <!--<input type="radio" name="mesh-settings" id="teapot" value="teapot"><label for="teapot"> Teapot</label></option><br>-->
                         <!--<input type="radio" name="mesh-settings" id="head" value="head"><label for="head"> *) 3D head (Lee Perry-Smith)</label> (<a href="http://www.ir-ltd.net/infinite-3d-head-scan-released">Creative Commons Attribution 3.0 Unported License</a>)</option>-->
 
-                        <button class='radio' id="cube" value="cube" title="Cube" style="background-image: url('images/cube.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="sphere" value="sphere" title="Sphere" style="background-image: url('images/sphere.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="plane" value="plane" title="Plane" style="background-image: url('images/plane.png');background-position-x: 5px;background-position-y: 5px; background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="cube" value="cube" title="Cube between (-.5,-.5,-.5) and (.5,..5,.5)" style="background-image: url('images/cube.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="sphere" value="sphere" title="UV Sphere with center in (0,0,0) and radius is 1.0." style="background-image: url('images/sphere.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="plane" value="plane" title="Plane where Z=0. From (-1,-1) to (1,1)" style="background-image: url('images/plane.png');background-position-x: 5px;background-position-y: 5px; background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                         <button class='radio' id="teapot" value="teapot" title="Teapot" style="background-image: url('images/teapot.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                         <button class='radio' id="head" value="head" title="3D head (Lee Perry-Smith)" style="background-image: url('images/head.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                         <button class='radio' id="points" value="points" title="Random points (inside the unit cube)" style="background-image: url('images/points.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px; width: 42px;height: 42px;background-repeat: no-repeat;"></button>
@@ -203,13 +203,13 @@
 
                     <h3>Camera</h3>
                     <div id="projection">
-                        <button class='radio' id="perspective" value="perspective" title="Perspective camera" style="background-image: url('images/perspective.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
-                        <button class='radio' id="orthogonale" value="orthogonale" title="Orthogonal camera" style="background-image: url('images/orthogonal.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="perspective" value="perspective" title="Perspective camera. Camera positioned at [0,0,2]. FOV: 60. Near: 0.1. Far 10.0." style="background-image: url('images/perspective.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
+                        <button class='radio' id="orthogonale" value="orthogonale" title="Orthogonal camera. Camera positioned at [0,0,2]. Near: -1.0. Far: 1.0." style="background-image: url('images/orthogonal.png');background-position-x: 5px;background-position-y: 5px;background-position: 5px 5px;width: 42px;height: 42px;background-repeat: no-repeat;"></button>
                     </div>
                     <h3>Mesh movement</h3>
                     <div id="rotatemesh">
-                        <button class='radio' id="rotateOn" value="on">Rotation</button>
-                        <button class='radio' id="rotateOff" value="off">Static</button>
+                        <button class='radio' id="rotateOn" value="on" title="Rotates the model (model-matrix) around the origin around the Y axis">Rotation</button>
+                        <button class='radio' id="rotateOff" value="off" title="No rotation. Model matrix is identity matrix.">Static</button>
                     </div>
                     <h3>Blending</h3>
                     <div id="blending">
@@ -408,9 +408,9 @@
 </div>
 <script type="text/javascript" src="/header.js"></script>
 <script data-main="js/shader_editor.js" type="text/javascript" src="../../dependencies/require.js"></script>
-<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/mode-glsl.js" type="text/javascript" charset="utf-8"></script>
-<script src="http://cdn.jsdelivr.net/ace/1.1.01/min/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://cdn.jsdelivr.net/ace/1.1.3/min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://cdn.jsdelivr.net/ace/1.1.3/min/mode-glsl.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://cdn.jsdelivr.net/ace/1.1.3/min/theme-twilight.js" type="text/javascript" charset="utf-8"></script>
 <!--<script src="ace/ace.js" type="text/javascript" charset="utf-8"></script>-->
 <!--<script src="ace/mode-glsl.js" type="text/javascript" charset="utf-8"></script>-->
 <!--<script src="ace/theme-twilight.js" type="text/javascript" charset="utf-8"></script>-->

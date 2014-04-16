@@ -84,6 +84,7 @@ echo "Running Precompiler release"
 mkdir $project/build
 rm -rf $project/build/pre
 mkdir $project/build/pre
+echo "$nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/pre false false"
 $nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/pre false false
 
 echo "Package AMD and compress (release)"
