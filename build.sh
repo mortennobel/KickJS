@@ -72,14 +72,6 @@ $yuidoc_bin -c $project/yuidoc.json . -o $generator_out
 cp -R $project/API/images $generator_out
 
 ##############################################################################
-echo "Zipping Documentation (YUI Doc)"
-cd $project/API
-mv generator API_
-rm $project/KickJS-doc.zip
-zip -r ../KickJS-doc.zip API_
-mv API_ generator
-
-##############################################################################
 echo "Running Precompiler release"
 mkdir $project/build
 rm -rf $project/build/pre
