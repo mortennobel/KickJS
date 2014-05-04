@@ -37,7 +37,6 @@ define([], function () {
     }
     if (typeof window.console.log === "undefined") {
         window.console.log = function (v) {
-            alert (v);
         };
     }
 });
