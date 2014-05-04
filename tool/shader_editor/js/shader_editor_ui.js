@@ -213,22 +213,30 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                     var glslEditor = new GLSLEditorPanel(Y, 'glslEditor', shaderEditor),
                         idParameter,
                         shader,
-                        result;
+                        result,
+                        strBrowser;
                     shaderEditor.addEventListener("shaderLogClear", function(){
                         glslEditor.clearAnnotations();
                         r.clearConsole();
                     });
                     shaderEditor.addEventListener("shaderError", function(array){
-                        var annotations = [[],[]];
-                        for (var j=0;j<2;j++){
+                        var annotations = [[],[]],
+                            j,
+                            i,
+                            match,
+                            fileno,
+                            lineno,
+                            message,
+                            lines;
+                        for (j=0;j<2;j++){
                             if (array[j]){
-                                var lines = array[j].split('\n');
-                                for(var i=0; i<lines.length; i++){
-                                    var match = lines[i].match(/ERROR: (\d+):(\d+): (.*)/);
+                                lines = array[j].split('\n');
+                                for(i=0; i<lines.length; i++){
+                                    match = lines[i].match(/ERROR: (\d+):(\d+): (.*)/);
                                     if(match){
-                                        var fileno = parseInt(match[1], 10)-1;
-                                        var lineno = parseInt(match[2], 10)-1;
-                                        var message = match[3];
+                                        fileno = parseInt(match[1], 10)-1;
+                                        lineno = parseInt(match[2], 10)-1;
+                                        message = match[3];
                                         annotations[j].push({row: lineno, column: 1,text: message, type: "error"});
                                     }
                                 }
@@ -244,7 +252,7 @@ define(["kick", "shader_editor_default", "settings_panel", "button_panel", "glsl
                     shader = null;
                     if (idParameter) {
                         idParameter = document.location.hash.substring(1);
-                        var strBrowser = navigator.userAgent.toLowerCase();
+                        strBrowser = navigator.userAgent.toLowerCase();
                         if (strBrowser.indexOf('chrome') > 0 || strBrowser.indexOf('safari') > 0) {
                             if(history.pushState) {
                                 window.history.replaceState(null, window.document.title, '#');

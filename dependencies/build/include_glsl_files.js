@@ -1,5 +1,9 @@
 var fs = require('fs');
 
+String.prototype.endsWith = function(suffix) {
+    return this.indexOf(suffix, this.length - suffix.length) !== -1;
+};
+
 if (process.argv.length !== 4){
     console.error("Usage node include_glsl_files [glsl_directory] [sourcefile]");
 }
@@ -11,8 +15,10 @@ var filesInDirectory = fs.readdirSync(glslDirectory);
 var content = {};
 for (var i=0;i<filesInDirectory.length;i++){
     var filename = filesInDirectory[i];
-    var filecontent = fs.readFileSync(glslDirectory+"/"+filename, "UTF-8");
-    content[filename] = filecontent;
+    if (filename.endsWith(".glsl")){
+        var filecontent = fs.readFileSync(glslDirectory+"/"+filename, "UTF-8");
+        content[filename] = filecontent;
+    }
 }
 
 var srcFileContent = fs.readFileSync(sourcefile, "UTF-8");
