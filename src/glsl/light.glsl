@@ -68,7 +68,7 @@ void getPointLight(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS],float spec
 vec3 getDirectionalLightDiffuse(vec3 normal, mat3 dLight){
     vec3 ecLightDir = dLight[0]; // light direction in eye coordinates
     vec3 colorIntensity = dLight[1];
-    float diffuseContribution = max(dot(normal, ecLightDir), 0.0);
+    float diffuseContribution = max(dot(normal, -ecLightDir), 0.0);
     return (colorIntensity * diffuseContribution);
 }
 
@@ -77,8 +77,8 @@ void getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out v
     vec3 ecLightDir = dLight[0]; // light direction in eye coordinates
     vec3 colorIntensity = dLight[1];
     vec3 halfVector = dLight[2];
-    float diffuseContribution = max(dot(normal, ecLightDir), 0.0);
-    float specularContribution = max(dot(normal, halfVector), 0.0);
+    float diffuseContribution = max(dot(normal, -ecLightDir), 0.0);
+    float specularContribution = max(dot(normal, -halfVector), 0.0);
     specular =  pow(specularContribution, specularExponent);
     diffuse = (colorIntensity * diffuseContribution);
 }
