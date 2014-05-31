@@ -36,25 +36,11 @@ requirejs(['kick'],
             });
         }
 
-        function recalculateNormals(){
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
-        }
-
-
-        function addRotatorComponent(gameObject){
+        function addRotatorComponent(gameObject, target){
             var time = engine.time,
                 transform = gameObject.transform,
                 rotationSpeed = 0.001,
                 translation = transform.localPosition,
-                rotVec = transform.localRotationEuler,
                 radius = 5,
                 radianToDegree = KICK.core.Constants._RADIAN_TO_DEGREE,
                 res = document.getElementById("res");
@@ -65,12 +51,9 @@ requirejs(['kick'],
                     translation[0] = Math.sin(rot)*radius;
                     translation[1] = Math.sin(rot*3);
                     translation[2] = Math.cos(rot)*radius;
-                    rotVec[1] = rot*radianToDegree;
                     transform.localPosition = translation;
 
-                    //new Date().getMilliseconds();
-                    transform.localRotationEuler = rotVec;
-                    res.innerHTML = KICK.math.Mat4.strPretty(transform.getGlobalMatrix())+"\nRotation euler:"+KICK.math.Vec3.str(rotVec);
+                    transform.lookAt(target, [0,1,0]);
                 }
             });
         }
@@ -105,7 +88,7 @@ requirejs(['kick'],
             setMaterial('vertexShaderColor','fragmentShader');
             gameObject.addComponent(meshRenderer);
 
-            addRotatorComponent(cameraObject);
+            addRotatorComponent(cameraObject,gameObject.transform);
         }
 
         window.setDefaultCubemap = function(){

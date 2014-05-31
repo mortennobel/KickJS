@@ -52,8 +52,7 @@
                     var camera = new kick.scene.Camera({});
                     cameraObject.addComponent(camera);
                     var transform = cameraObject.transform;
-                    transform.localPosition = [0,0,-3];
-                    transform.localRotation = quat.lookAt(quat.create(),[0,0,-3],[0,0,0],[0,1,0]);
+                    transform.localPosition = [0,0,3];
 
                     addLightComponent();
                 }
@@ -156,7 +155,7 @@
                                 specularColor:[1,1,1,1]
                             }
                         });
-                        var position = [-1+(i/5)*3,0,0];
+                        var position = [-1.5+(i/4)*3,0,0];
                         addSphere(material, position,[0.25,0.25,0.25]);
                     }
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_DIFFUSE);
@@ -168,7 +167,7 @@
                                 mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                             }
                         });
-                        var position = [-1+(i/5)*3,.75,0];
+                        var position = [-1.5+(i/4)*3,.75,0];
                         addSphere(material, position,[0.25,0.25,0.25]);
                     }
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
@@ -180,7 +179,7 @@
                                 mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                             }
                         });
-                        var position = [-1+(i/5)*3,-.75,0];
+                        var position = [-1.5+(i/4)*3,-.75,0];
                         addSphere(material, position,[0.25,0.25,0.25]);
                     }
                     var shader = engine.project.load(engine.project.ENGINE_SHADER_TRANSPARENT_UNLIT);
@@ -192,7 +191,7 @@
                                 mainTexture:engine.project.load(engine.project.ENGINE_TEXTURE_WHITE)
                             }
                         });
-                        var position = [-1+(i/5)*3,-1.5,0];
+                        var position = [-1.5+(i/4)*3,-1.5,0];
                         addSphere(material, position,[0.25,0.25,0.25]);
                     }
 
