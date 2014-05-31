@@ -108,8 +108,9 @@ requirejs(['kick'],
             addRotatorComponent(cameraObject);
         }
 
-        function setDefaultCubemap(){
-            meshRenderer.material.uniforms.skybox.value = engine.project.load(engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
+        window.setDefaultCubemap = function(){
+            meshRenderer.material.setUniform("skybox",engine.project.load(engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE));
+
         }
 
         initKick();
