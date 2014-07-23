@@ -361,6 +361,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "kick/core/Util", "./Me
                     } else {
                         vertexArrayObjectExtension.bindVertexArrayOES(vao);
                     }
+                    gl.bindBuffer(Constants.GL_ELEMENT_ARRAY_BUFFER, meshVertexIndexBuffer);
                 }
             }:
             function bindDefault(shader) {
