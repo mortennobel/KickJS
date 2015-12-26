@@ -30,6 +30,8 @@ define([],
             //                    fragmentShaderSession.setMode("ace/mode/glsl_es");
             fragmentShaderSession.setMode("ace/mode/glsl");
 
+            var scheduledUpdate;
+
             this.shaderChangeListener = function (force) {
                 var shader,
                     vsNew,
@@ -38,9 +40,15 @@ define([],
                     shader = shaderEditor.material.shader;
                     vsNew = vertexShaderSession.getValue();
                     fsNew = fragmentShaderSession.getValue();
-                    if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force) {
-                        shaderEditor.apply(vsNew, fsNew);
+                    if (scheduledUpdate){
+                        clearTimeout(scheduledUpdate);
                     }
+                    scheduledUpdate = setTimeout(function(){
+                        if (vsNew !== shader.vertexShaderSrc || fsNew !== shader.fragmentShaderSrc || force) {
+                            shaderEditor.apply(vsNew, fsNew);
+                        }
+                        scheduledUpdate = null;
+                    }, 1000);
                 }
             };
 

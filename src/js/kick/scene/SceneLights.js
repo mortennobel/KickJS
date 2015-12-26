@@ -15,7 +15,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
             var ambientLight = null,
                 directionalLight = null,
                 directionalLightData = new Float32Array(9), // column matrix with the columns lightDirection,colorIntensity,halfVector
-                directionalLightDirection = directionalLightData.subarray(0, 3),
+                directionalLightEyeSpace = directionalLightData.subarray(0, 3),
                 directionalLightColorIntensity = directionalLightData.subarray(3, 6),
                 directionalHalfVector = directionalLightData.subarray(6, 9),
                 directionalLightDirectionWorld = Vec3.clone([1, 0, 0]),
@@ -23,7 +23,8 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                 pointLightData = new Float32Array(9 * maxNumerOfLights), // mat3*maxNumerOfLights
                 pointLightDataVec3 = Vec3.wrapArray(pointLightData),
                 pointLights = [],
-                lightDirection = [0, 0, 1],
+                lightDirection = [0, 0, -1],
+                viewDirection = lightDirection,
                 /**
                  * Set the point light to have not contribution this means setting the position 1,1,1, the color to 0,0,0
                  * and attenuation to 1,0,0.<br>
@@ -162,11 +163,11 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Mat3", "kick/math/Ma
                     Quat.multiplyVec3(directionalLightDirectionWorld, directionalLightTransform.rotation, lightDirection);
 
                     // transform to eye space
-                    Mat4.multiplyVec3Vector(directionalLightDirection, viewMatrix, directionalLightDirectionWorld);
-                    Vec3.normalize(directionalLightDirection, directionalLightDirection);
+                    Mat4.multiplyVec3Vector(directionalLightEyeSpace, viewMatrix, directionalLightDirectionWorld);
+                    Vec3.normalize(directionalLightEyeSpace, directionalLightEyeSpace);
 
                     // compute half vector
-                    Vec3.add(directionalHalfVector, lightDirection, directionalLightDirection);
+                    Vec3.add(directionalHalfVector, viewDirection, directionalLightEyeSpace);
                     Vec3.normalize(directionalHalfVector, directionalHalfVector);
 
                     Vec3.copy(directionalLightColorIntensity, directionalLight.colorIntensity);

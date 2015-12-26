@@ -418,7 +418,7 @@ define(["kick/core/Constants", "kick/core/Util", "kick/math/Quat", "kick/math/Ma
                 gl.clear(_currentClearFlags);
 
                 if (_perspective) {
-                    Mat4.perspective(projectionMatrix, _fieldOfView, glState.viewportSize[0] / glState.viewportSize[1],
+                    Mat4.perspective(projectionMatrix, _fieldOfView, width / height,
                         _near, _far);
                 } else {
                     Mat4.ortho(projectionMatrix, _left, _right, _bottom, _top,

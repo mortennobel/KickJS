@@ -12,12 +12,8 @@
   This example shows how a cube is rotated.
   <br>
   <script data-main="cubemap_camera.js" src="../../dependencies/require.js"></script>
-  <h2>Output</h2>
-  <div id="output" style="color: red;">
   </div>
 
-  <textarea style="width: 500px;height:100px" id="res">
-  </textarea>
   <div id="example" class="yui3-skin-sam"></div>
 
   <div style="display:none;">
@@ -29,12 +25,10 @@ attribute vec3 normal;
 uniform mat4 _mvProj;
 uniform mat3 _norm;
 
-varying vec3 vColor;
 varying vec3 n;
 
 void main(void) {
     gl_Position = _mvProj * vec4(vertex, 1.0);
-    vColor = vec3(uv1.x,uv1.y,0.0);
     n = normal;
 
 }
@@ -44,7 +38,6 @@ void main(void) {
 precision highp float;
 #endif
 uniform samplerCube skybox;
-varying vec3 vColor;
 varying vec3 n;
 
 void main(void)

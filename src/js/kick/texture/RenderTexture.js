@@ -40,6 +40,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                     cleanUpRenderBuffers();
                     gl.bindFramebuffer(Constants.GL_FRAMEBUFFER, framebuffer);
 
+                    // bind color attachments
                     if (colorTexture) {
                         gl.framebufferTexture2D(Constants.GL_FRAMEBUFFER, Constants.GL_COLOR_ATTACHMENT0, Constants.GL_TEXTURE_2D, colorTexture.textureId, 0);
                     } else {
@@ -50,6 +51,7 @@ define(["kick/core/ProjectAsset", "kick/math/Vec2", "kick/core/Constants", "kick
                         renderBuffers.push(renderbuffer);
                     }
 
+                    // bind depth attachments
                     renderbuffer = gl.createRenderbuffer();
                     gl.bindRenderbuffer(Constants.GL_RENDERBUFFER, renderbuffer);
                     gl.renderbufferStorage(Constants.GL_RENDERBUFFER, Constants.GL_DEPTH_COMPONENT16, _dimension[0], _dimension[1]);

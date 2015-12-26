@@ -37,41 +37,6 @@
             element.innerHTML = "";
         };
 
-        function setMaterial(vertexShaderId, fragmentShaderId){
-            clearLog();
-            var vs = document.getElementById(vertexShaderId).value;
-            var fs = document.getElementById(fragmentShaderId).value;
-            var shader = new kick.material.Shader();
-            shader.vertexShaderSrc = vs;
-            shader.fragmentShaderSrc = fs;
-            shader.errorLog = log;
-            shader.apply();
-            var missingAttributes = meshRenderer.mesh.verify(shader);
-            if (missingAttributes){
-                log("Missing attributes in mesh "+JSON.stringify(missingAttributes));
-                return;
-            }
-
-            meshRenderer.material = new kick.material.Material({
-                name:"Some material",
-                shader:shader
-            });
-        }
-
-        function recalculateNormals(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateNormals();
-            mesh.updateData();
-        }
-
-        function recalculateTangents(){
-            clearLog();
-            var mesh = meshRenderer.mesh;
-            mesh.recalculateTangents();
-            mesh.updateData();
-        }
-
         function addRotatorComponent(gameObject){
             var time = engine.time,
                     transform = gameObject.transform,
@@ -121,7 +86,7 @@
             lightGameObject.transform.position = [0,0,10];
 
             // add point light
-            var lightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_POINT});
+            var lightComponent = new kick.scene.Light({type:kick.scene.Light.TYPE_DIRECTIONAL});
             lightGameObject.addComponent(lightComponent);
 
             // add ambient light (only one per scene)

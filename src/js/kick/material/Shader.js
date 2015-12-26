@@ -36,6 +36,7 @@ define(["kick/core/ProjectAsset", "kick/core/Constants", "./GLSLConstants", "kic
          *          <li><code>_norm</code> (mat3) Normal matrix (the inverse transpose of the upper 3x3 model view matrix - needed when scaling is scaling is non-uniform)</li>
          *          <li><code>_time</code> (float) Run time of engine</li>
          *          <li><code>_ambient</code> (vec3) Ambient light</li>
+         *          <li><code>_viewport</code> (vec2) Viewport size</li>
          *          <li><code>_dLight</code> (mat3) Directional light matrix. </li>
          *          <li><code>_dLight[0]</code> (vec3) Directional light direction in eye coordinates.</li>
          *          <li><code>_dLight[1]</code> (vec3) Directional light color intensity</li>

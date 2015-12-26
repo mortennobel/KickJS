@@ -28,7 +28,7 @@ parser_out=$project/API/parser
 generator_out=$project/API/generator
 
 # The version of your project to display within the documentation.
-version=0.5.5
+version=0.5.6
 
 # The version of YUI the project is using.  This effects the output for
 # YUI configuration attributes.  This should start with '2' or '3'.
