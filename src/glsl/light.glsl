@@ -52,12 +52,7 @@ void getPointLight(vec3 normal, vec3 ecPosition, mat3 pLights[LIGHTS],float spec
 
             float nDotVP = max(0.0, dot(normal, VP));
             float nDotHV = max(0.0, dot(normal, halfVector));
-            float pf;
-            if (nDotVP <= 0.0){
-                pf = 0.0;
-            } else {
-                pf = pow(nDotHV, specularExponent);
-            }
+            float pf = nDotVP * pow(nDotHV, specularExponent);
 
             diffuse += colorIntensity * nDotVP * attenuation;
             specular += pf * attenuation;
@@ -79,7 +74,7 @@ void getDirectionalLight(vec3 normal, mat3 dLight, float specularExponent, out v
     vec3 halfVector = dLight[2];
     float diffuseContribution = max(dot(normal, -ecLightDir), 0.0);
     float specularContribution = max(dot(normal, -halfVector), 0.0);
-    specular =  pow(specularContribution, specularExponent);
+    specular =  diffuseContribution * pow(specularContribution, specularExponent);
     diffuse = (colorIntensity * diffuseContribution);
 }
 

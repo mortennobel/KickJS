@@ -408,6 +408,42 @@ requirejs(['kick', 'shader_editor_ui',
                 }
             };
 
+            function createDefaultTexture(isCubemap){
+                var res;
+                if (isCubemap) {
+                    res = new Texture(
+                        {
+                            name: "cubemap_white",
+                            minFilter: constants.GL_NEAREST,
+                            magFilter: constants.GL_NEAREST,
+                            generateMipmaps: false,
+                            textureType: constants.GL_TEXTURE_CUBE_MAP
+                        });
+
+                    // create white image
+                    canvas = document.createElement("canvas");
+                    canvas.width = 12;
+                    canvas.height = 2;
+                    ctx = canvas.getContext("2d");
+
+                    ctx.fillStyle = "rgb(255,255,255)";
+                    ctx.fillRect(0, 0, 12, 2);
+                    res.setImage(canvas, "memory://cubemap_white/");
+
+                } else {
+                    res = new Texture(
+                        {
+                            name: getUrlAsResourceName(url),
+                            minFilter: constants.GL_NEAREST,
+                            magFilter: constants.GL_NEAREST,
+                            generateMipmaps: false,
+                            textureType: constants.GL_TEXTURE_2D,
+                            dataURI: "kickjs://texture/white/"
+                        });
+                }
+                return res;
+            }
+
             function addMissingUniforms() {
                 var material = _meshRenderer.material,
                     name,
@@ -418,22 +454,23 @@ requirejs(['kick', 'shader_editor_ui',
                     texture;
                 for (name in shader.lookupUniform) {
                     if (shader.lookupUniform.hasOwnProperty(name)) {
-                        if (name.substring(0, 1) !== "_" && !material.getUniform(name)) {
+                        if (name.substring(0, 1) !== "_" && (!material.getUniform(name) || material.getUniform(name).uid < 0) ) {
                             missingUniform = shader.lookupUniform[name];
                             switch (missingUniform.type) {
                             case kick.core.Constants.GL_SAMPLER_2D:
                             case kick.core.Constants.GL_SAMPLER_CUBE:
-                                for (i = 0; i < thisObj.textures; i++) {
-                                    if (thisObj.textures[i].textureType === missingUniform.type) {
+                                var cubemap = (missingUniform.type == kick.core.Constants.GL_SAMPLER_CUBE);
+                                for (i = 0; i < thisObj.textures.length; i++) {
+                                    if (thisObj.textures[i].textureType === (cubemap? kick.core.Constants.GL_TEXTURE_CUBE_MAP : kick.core.Constants.GL_TEXTURE_2D)) {
                                         defaultUniform = thisObj.textures[i];
                                     }
                                 }
                                 isFound = defaultUniform;
                                 if (!isFound) {
                                     if (missingUniform.type === kick.core.Constants.GL_SAMPLER_2D) {
-                                        texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_WHITE);
+                                        texture = createDefaultTexture(false);
                                     } else {
-                                        texture = _engine.project.load(_engine.project.ENGINE_TEXTURE_CUBEMAP_WHITE);
+                                        texture = createDefaultTexture(true);
                                     }
                                     if (thisObj.textures.indexOf(texture) < 0) {
                                         thisObj.textures.push(texture);

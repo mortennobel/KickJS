@@ -88,7 +88,7 @@
         meshRenderer.material = material;
     }
 
-    function addRotatorComponent(gameObject){
+    function addBounceComponent(gameObject){
         var time = engine.time,
                 transform = gameObject.transform,
                 rotationSpeed = 0.05,
@@ -118,12 +118,12 @@
         cameraObject.addComponent(new CameraMover());
 
         // visualize the camera
-        var meshRenderer = new kick.scene.MeshRenderer();
+        /*var meshRenderer = new kick.scene.MeshRenderer();
 
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
         setMaterial(meshRenderer, [.7,.9,.5,1]);
         cameraObject.addComponent(meshRenderer);
-
+*/
         return cameraObject;
     }
 
@@ -135,7 +135,7 @@
         meshRenderer.mesh = engine.project.load(engine.project.ENGINE_MESH_UVSPHERE);
         setMaterial(meshRenderer, [.7,.9,.5,1]);
         gameObject.addComponent(meshRenderer);
-        addRotatorComponent(gameObject);
+        addBounceComponent(gameObject);
     }
 
     function addWorld(){
