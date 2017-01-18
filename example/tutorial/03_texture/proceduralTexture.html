@@ -60,13 +60,13 @@ This example shows how to create a texture from JavaScript.<br>
             checkerboard[position+2] = b;
         }
     }
-    texture.internalFormat = KICK.core.Constants.GL_RGB;
+    texture.internalFormat = kick.core.Constants.GL_RGB;
 
-    texture.setImageData( checkerboardWidth, checkerboardWidth, 0, KICK.core.Constants.GL_UNSIGNED_BYTE,checkerboard);
+    texture.setImageData( checkerboardWidth, checkerboardWidth, 0, kick.core.Constants.GL_UNSIGNED_BYTE,checkerboard);
 
     // create material
     var shader = engine.project.load(engine.project.ENGINE_SHADER_UNLIT);
-    var material = new KICK.material.Material({
+    var material = new kick.material.Material({
         shader: shader,
         uniformData:{
             mainTexture: texture
@@ -78,7 +78,7 @@ This example shows how to create a texture from JavaScript.<br>
     for (var i=0;i<meshes.length;i++){
         var gameObject = engine.activeScene.createGameObject();
         gameObject.transform.position = [-2.0+4*i,0,0];
-        var meshRenderer = new KICK.scene.MeshRenderer();
+        var meshRenderer = new kick.scene.MeshRenderer();
         meshRenderer.mesh =  engine.project.load(meshes[i]);
         meshRenderer.material = material;
         gameObject.addComponent(meshRenderer);

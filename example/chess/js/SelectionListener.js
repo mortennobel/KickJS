@@ -6,7 +6,7 @@ define(["kick", "ChessPiece", "ChessField"], function (kick, ChessPiece, ChessFi
             mouseInput,
             camera,
             canvas = engine.canvas,
-            gameObjectsPicked = function (gameObject) {
+            gameObjectsPicked = function (gameObject, hitcount) {
                 var chessPiece = gameObject.getComponentOfType(ChessPiece),
                     location;
                 if (chessPiece) {
@@ -21,7 +21,7 @@ define(["kick", "ChessPiece", "ChessField"], function (kick, ChessPiece, ChessFi
                     chessGame.locationSelected(location);
                 }
             },
-            gameObjectsHighlight = function (gameObject) {
+            gameObjectsHighlight = function (gameObject, hitcount) {
                 var chessPiece = gameObject.getComponentOfType(ChessPiece),
                     location,
                     chessField;

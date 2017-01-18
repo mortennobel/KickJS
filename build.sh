@@ -5,8 +5,7 @@ yuidoc_bin=$1
 #Location of project
 project=$2
 
-
-#Location of Google Clojure Compiler (http://code.google.com/p/closure-compiler/)
+#Location of Google Clojure Compiler (https://github.com/google/closure-compiler)
 googleClojure=$3
 
 #Location of Node.js
@@ -57,7 +56,9 @@ $nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/
 
 echo "Package AMD and compress (debug)"
 
-java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/dependencies/build/r.js -o name=kick out=$project/build/kick-debug.js.tmp baseUrl=$project/build/pre optimize=none
+echo java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main -opt -1 $project/dependencies/build/r.js -o name=kick out=$project/build/kick-debug.js.tmp baseUrl=$project/build/pre optimize=none
+
+java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main -opt -1 $project/dependencies/build/r.js -o name=kick out=$project/build/kick-debug.js.tmp baseUrl=$project/build/pre optimize=none
 
 ##############################################################################
 echo "Generating documentation (YUI Doc)"
@@ -81,9 +82,7 @@ $nodejs $project/dependencies/build/preprocessor $project/src/js $project/build/
 
 echo "Package AMD and compress (release)"
 
-java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main $project/dependencies/build/r.js -o name=kick out=$project/build/kick.js.tmp baseUrl=$project/build/pre
-
-
+java -classpath $rhino:$googleClojure org.mozilla.javascript.tools.shell.Main -opt -1 $project/dependencies/build/r.js -o name=kick out=$project/build/kick.js.tmp baseUrl=$project/build/pre
 
 ##############################################################################
 echo "Adding license info compiler"
